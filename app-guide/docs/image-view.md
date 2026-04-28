@@ -3,28 +3,33 @@ id: image-view
 title: "image-view"
 sidebar_label: "image-view"
 ---
-# Overview
+## Overview
 
-`ImageView` is a specialized UI component used to display static image resources like PNG, JPEG, and SVG files within your application layout. It provides a robust interface for [rendering](./rendering.md) image content while managing memory, layout, and visual fidelity through various configuration properties.
-
-# Loading and Resource Management
-
-Configuring how [images](./images.md) are fetched, cached, and released is essential for optimizing application memory and performance. You can define the resource location using the `SetResourceUrl(const Dali::String &)`. To improve user experience during initial loading, it is recommended to provide a fallback image via `SetPlaceholderUrl(const Dali::String &)`.
-
-The timing of image loading is controlled by the load policy, which can be set to either `LoadPolicy::IMMEDIATE` to load upon [object](./object.md) creation, or `LoadPolicy::ATTACHED` to delay loading until the view is attached to the [scene](./scene.md). Additionally, you may define when the image is evicted from the cache using policies such as `ReleasePolicy::DESTROYED`, `ReleasePolicy::DETACHED`, or `ReleasePolicy::NEVER`. For scenarios requiring high-responsiveness, you can enable `SetSynchronousLoading(bool)` or `SetFastTrackUpload(bool)` to minimize latency.
+`ImageView` is a UI component used to display static image resources like PNG, JPEG, and SVG within a Dali-based application. It provides a robust set of properties to manage how [images](./images.md) are retrieved, sized, and rendered, serving as the standard container for static visual assets.
 
 ```cpp
 ImageView imageView = ImageView::New();
 imageView.SetResourceUrl("image.png");
-imageView.SetPlaceholderUrl("placeholder.png");
-imageView.SetLoadPolicy(LoadPolicy::ATTACHED);
 ```
 
-# Display and Visual Configuration
+## Resource Management and Loading
 
-The visual output of the image can be finely tuned to match the application's aesthetic requirements. You can apply a color tint to the image using the `SetImageColor(const UiColor &)`. If you only need to display a specific segment of the source image, the `SetPixelArea(const Vector4 &)` allows you to define a rectangular sub-region for rendering.
+Configure source URLs, loading policies, and synchronous vs. asynchronous behavior to optimize how images are fetched and managed in memory. The primary resource is defined using the `SetResourceUrl(const Dali::String &)`, while a temporary fallback can be defined via the `SetPlaceholderUrl(const Dali::String &)`.
 
-When images are processed for display, you may enable `SetOrientationCorrection(bool)` to automatically respect EXIF rotation metadata embedded in the source file. For advanced transparency handling, the `SetPreMultipliedAlpha(bool)` can be used to toggle whether the source colors are pre-multiplied by their alpha channel.
+The timing of the fetch is determined by the `SetLoadPolicy(LoadPolicy::Type)`. You can choose to initiate loading immediately upon creation using the `LoadPolicy::IMMEDIATE` or wait until the view is attached to the scene using the `LoadPolicy::ATTACHED`. Furthermore, the lifetime of the image in memory is governed by the `SetReleasePolicy(ReleasePolicy::Type)`, which allows resources to be freed when the view is detached, destroyed, or persisted in the cache using the `ReleasePolicy::DETACHED, ReleasePolicy::DESTROYED, ReleasePolicy::NEVER`. For debugging or immediate processing, you may force synchronous behavior using the `SetSynchronousLoading(bool)`.
+
+```cpp
+ImageView imageView = ImageView::New();
+imageView.SetLoadPolicy(LoadPolicy::IMMEDIATE);
+imageView.SetReleasePolicy(ReleasePolicy::DESTROYED);
+imageView.SetSynchronousLoading(true);
+```
+
+## Visual Configuration and Styling
+
+Apply color tints, coordinate alpha blending, and manage image orientation to ensure visual consistency across your application. The overall appearance of the image can be modified using the `SetImageColor(const UiColor &)`, which acts as a color multiplier applied to the rendered output. 
+
+When handling semi-transparent assets, it is important to specify whether the source data uses pre-multiplied alpha via the `SetPreMultipliedAlpha(bool)`. Additionally, if you are working with images that contain EXIF orientation metadata, the `SetOrientationCorrection(bool)` ensures that the image is rotated automatically to match its intended orientation.
 
 ```cpp
 ImageView imageView = ImageView::New();
@@ -32,24 +37,23 @@ imageView.SetImageColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
 imageView.SetOrientationCorrection(true);
 ```
 
-# Layout and Sizing
+## Layout, Scaling, and Cropping
 
-Ensuring an image fits correctly within its container is handled through sizing hints and fitting behaviors. You can provide rasterization hints to the loader by setting the width and height with the `SetDesiredWidth(int)` and `SetDesiredHeight(int)`. These hints help optimize memory usage by allowing the loader to decode the image at an appropriate resolution.
+Control how images fit into the UI container using sampling modes, desired dimensions, and pixel-area clipping. When an image's natural size differs from the container size, the `SetFittingMode(FittingMode::Type)` determines the scaling behavior, such as using the `FittingMode::FIT_KEEP_ASPECT_RATIO` to maintain proportions. 
 
-To determine how an image scales relative to its assigned view dimensions, use the `SetFittingMode(FittingMode::Type)` with values such as `FittingMode::FIT_KEEP_ASPECT_RATIO` or `FittingMode::FILL`. If you want the image to match the container's size automatically during loading, you can invoke the `SetImageLoadWithViewSize(bool)`.
+For finer control over resolution, you can suggest specific dimensions to the loader using the `SetDesiredWidth(int)` and `SetDesiredHeight(int)`. If you wish to display only a portion of the source image, the `SetPixelArea(const Vector4 &)` accepts a vector defining the normalized sub-region. You can also influence the interpolation quality during scaling by utilizing the `SetSamplingMode(SamplingMode::Type)`.
 
 ```cpp
 ImageView imageView = ImageView::New();
-imageView.SetDesiredWidth(200);
-imageView.SetDesiredHeight(200);
-imageView.SetFittingMode(FittingMode::FILL);
+imageView.SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO);
+imageView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 ```
 
-# Masking and Specialized Rendering
+## Masking and N-Patch Support
 
-ImageView supports complex rendering techniques such as alpha masking and N-Patch scaling for dynamic UI components. An alpha mask can be applied via the `SetAlphaMaskUrl(const Dali::String &)`, which enables masking modes like `MaskingType::MASKING_ON_RENDERING` or `MaskingType::MASKING_ON_LOADING`. The `SetCropToMask(bool)` provides control over whether the rendered result respects the mask bounds.
+Implement specialized visual effects using alpha masks or handle scalable UI assets with N-patch border definitions. An alpha mask can be applied via the `SetAlphaMaskUrl(const Dali::String &)`, and you can further refine this effect by toggling the `SetCropToMask(bool)`. The timing of this operation is managed by the `SetMaskingMode(MaskingType::Type)`, which supports either the `MaskingType::MASKING_ON_LOADING` or the `MaskingType::MASKING_ON_RENDERING`.
 
-For flexible UI elements that must scale without distorting borders, you can configure the N-patch behavior using the `SetNPatchBorder(const Vector4 &)`. Additionally, the `SetNPatchBorderOnly(bool)` allows for rendering only the border regions of an N-patch resource.
+For UI elements that must stretch without distorting their corners, you can define an N-patch border using the `SetNPatchBorder(const Vector4 &)`. If you only intend to render the border regions without the center content, use the `SetNPatchBorderOnly(bool)`.
 
 ```cpp
 ImageView imageView = ImageView::New();
@@ -58,18 +62,35 @@ imageView.SetNPatchBorder(Vector4(10.0f, 10.0f, 10.0f, 10.0f));
 imageView.SetNPatchBorderOnly(true);
 ```
 
-# Handling Image Readiness
+## Handling Image Readiness
 
-Monitoring the lifecycle of an image is crucial for triggering UI updates once content is available. You can query the current state using the `GetLoadingStatus()`, which returns statuses like `Visual::ResourceStatus::READY` or `Visual::ResourceStatus::FAILED`. For asynchronous workflows, connect to the `ResourceReadySignal()` to execute logic immediately upon successful image loading.
+Monitor the loading state of your assets using signals to trigger UI updates once the image resource is fully prepared for display. The `ResourceReadySignal()` allows you to connect a handler that triggers when the loading operation completes. You can also poll the current state of the resource at any time using the `GetLoadingStatus()`, which returns values such as `Visual::ResourceStatus::READY` or `Visual::ResourceStatus::FAILED`.
+
+```cpp
+class MyHandler
+{
+public:
+  void OnReady(ImageView& view) { }
+};
+
+MyHandler handler;
+ImageView imageView = ImageView::New();
+imageView.ResourceReadySignal().Connect(&handler, &MyHandler::OnReady);
+```
+
+## Performance Optimization
+
+Utilize advanced settings like FastTrack upload and view-size-aware loading to maintain high frame rates and efficient memory usage. Enabling `SetImageLoadWithViewSize(bool)` instructs the system to load the image at a resolution optimized for the current view size, reducing memory overhead for high-resolution assets. For scenarios where rapid texture updates are required, use the `SetFastTrackUpload(bool)` to prioritize the upload process to the GPU.
 
 ```cpp
 ImageView imageView = ImageView::New();
-imageView.ResourceReadySignal().Connect(this, &MyHandler::OnResourceReady);
+imageView.SetImageLoadWithViewSize(true);
+imageView.SetFastTrackUpload(true);
 ```
 
 ## Related Sub-Components
 
-*   `[image-view-properties](./image-view-properties.md)`: Provides the detailed indices and descriptions for all properties configurable on the view. → See: [[image-view-properties](./image-view-properties.md)]
+*   **[image-view-properties](./image-view-properties.md)**: Contains the specific property indices and definitions used for configuring ImageView via property-based accessors. → See: [[image-view-properties](./image-view-properties.md)]
 
 ---
 

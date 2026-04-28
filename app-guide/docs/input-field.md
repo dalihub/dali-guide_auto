@@ -5,87 +5,94 @@ sidebar_label: "input-field"
 ---
 ## Overview
 
-The InputField component provides a high-performance, customizable [text](./text.md) entry interface designed to handle user character input and editing within DALi applications. It serves as a specialized view for single-line [text](./text.md) input, offering a robust set of properties to manage styling, cursor behavior, and input validation.
+The InputField component provides a high-performance, customizable [text](./text.md) entry interface designed for seamless user interaction and [text](./text.md) manipulation within DALi applications. It serves as a specialized view for capturing single-line user input, offering extensive control over styling, cursor behavior, and validation logic.
 
 ## Initialization and Basic Configuration
 
-To begin using the component, you instantiate it through the provided factory method. Once created, you can configure the initial content and basic editing permissions for the user.
+To begin using the component, developers instantiate it using the factory method. Fundamental properties such as character limits and the editability state are managed to ensure the component behaves as expected within a given application flow.
 
 ```cpp
 InputField inputField = InputField::New();
-inputField.SetText("Hello World").SetEditable(true);
+inputField.SetMaximumLength(100).SetEditable(true);
 ```
 
-The state of the field can be retrieved at any time to process user input. You can restrict the length of the string to ensure the input fits within application-defined boundaries.`GetText()`. You can verify if the user is currently permitted to interact with the field by checking the status.`IsEditable()`. The character limit can be defined to prevent excessive data entry.`SetMaximumLength(int)`.
+The component can be toggled between editable and read-only states. By default, an input field is interactive, but it can be restricted when the application logic dictates that user input should be disabled.`SetEditable(bool)` The maximum number of characters allowed for entry can be strictly enforced.`SetMaximumLength(int)` 
 
-## Typography and Visual Styling
+Applications can restrict the type of characters allowed by applying a custom filter. If specific input requirements are necessary, the filter mechanism prevents invalid data entry.`SetInputFilter(const Text::InputFilter &)` When an invalid character or sequence is provided, the input field can clear the filter as needed.`ClearInputFilter()`
 
-You have full control over the visual presentation of the text to ensure it matches the application design. This includes standard properties like typeface and size, as well as specialized decorative features.
+## Styling and Typography
+
+The visual appearance of text within the field is highly configurable, allowing developers to match the component to the overall application design language. You can set the specific font family, size, and weight to ensure clarity and aesthetic consistency.`SetFontFamily(const String &)` `SetFontSize(float)` `SetFontWeight(Text::FontWeight)`
+
+Beyond basic typography, the component supports advanced stylistic overlays. You can apply decorations such as underlines, shadows, and custom outlines to emphasize the text or improve readability against complex backgrounds.`SetUnderline(const Text::Underline &)` `SetShadow(const Text::Shadow &)` `SetOutline(const Text::Outline &)` `SetLineThrough(const Text::LineThrough &)` If these decorations are no longer required, they can be removed using the corresponding clear methods.`ClearUnderline()` `ClearShadow()` `ClearOutline()` `ClearLineThrough()`
+
+Text colors and background colors are handled through color objects, which can be defined using specific RGB values or system-standard presets.`SetTextColor(const UiColor &)` `SetTextBackgroundColor(const UiColor &)`
+
+## Placeholder Management
+
+Placeholder text provides context to the user when the field is empty, guiding the intended input type. You can set the placeholder string to display instructions or examples.`SetPlaceholder(const String &)`
+
+The color of this text is distinct from the primary input color, ensuring that users can differentiate between placeholder content and actual input.`SetPlaceholderColor(const UiColor &)` You can also configure the component to decide whether this placeholder should persist even when the input field has gained focus.`SetShowPlaceholderOnFocus(bool)`
 
 ```cpp
 InputField inputField = InputField::New();
-inputField.SetFontFamily("Arial")
-          .SetFontSize(24.0f)
-          .SetFontWeight(Text::FontWeight::BOLD)
-          .SetFontSlant(Text::FontSlant::ITALIC)
-          .SetTextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+inputField.SetPlaceholder("Enter text here...");
+inputField.SetPlaceholderColor(UiColor(0.7f, 0.7f, 0.7f, 1.0f));
+inputField.SetShowPlaceholderOnFocus(true);
 ```
 
-The framework supports advanced text decorations to emphasize content. You can apply visual enhancements such as underlines, shadows, outlines, or strikethrough effects.`SetUnderline(Text::Underline)`. These can be removed at any time to revert to plain text.`ClearUnderline()`. Additionally, font size scaling allows the UI to adapt to accessibility settings or dynamic layout requirements.`SetFontSizeScale(float)`. Font variations can be applied to support variable fonts.`SetFontVariation(const Dali::String &)`.
+## Cursor and Selection Controls
+
+The cursor provides the primary visual feedback for the user during interaction. Its width and color can be customized to suit different UI designs.`SetCursorWidth(int)` `SetCursorColor(const UiColor &)` 
+
+Blinking behavior is enabled by default to draw the user's attention. Developers can control whether the cursor blinks and define the interval at which it switches between visible and hidden states.`SetCursorBlinkEnabled(bool)` `SetCursorBlinkInterval(float)`
+
+Text selection allows users to highlight and manipulate ranges of input. When selection is enabled, users can select specific portions of the text.`SetSelectionEnabled(bool)` The highlight color for selected text can be explicitly set.`SetSelectionColor(const UiColor &)` 
+
+```cpp
+InputField inputField = InputField::New();
+inputField.SetCursorWidth(2);
+inputField.SetCursorColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+inputField.SetSelectionEnabled(true);
+inputField.SetSelectionColor(UiColor(0.0f, 0.5f, 1.0f, 0.5f));
+```
 
 ## Layout and Alignment
 
-The layout engine ensures that text is positioned correctly within the bounds of the component, regardless of the reading direction or alignment requirements.
+The spatial arrangement of the text is controlled via alignment properties, allowing the content to be positioned according to the design requirements of the container. Horizontal alignment options include placing text at the start, center, or end of the field.`SetHorizontalTextAlignment(Text::Alignment)` Similarly, the vertical alignment of the text can be adjusted to ensure optimal visual placement within the field's bounds.`SetVerticalTextAlignment(Text::Alignment)`
+
+When the input content exceeds the available width, the overflow mode determines how the content is handled. You can choose to clip the content or display an ellipsis to indicate hidden text.`SetOverflowMode(Text::OverflowMode)` The layout direction can also be explicitly set, which is crucial for supporting localized content.`SetLayoutDirectionMode(Text::LayoutDirectionMode)`
+
+## Responsive Font Scaling
+
+To ensure accessibility and readability, the component supports dynamic font scaling. This allows the text to adjust to different device resolutions or system preferences. You can define the base scaling factor, as well as strict minimum and maximum limits for the font size.`SetFontSizeScale(float)` `SetMinimumFontSizeScale(float)` `SetMaximumFontSizeScale(float)`
+
+Integration with system-level font scaling settings can be enabled or disabled depending on whether the application should respect user-defined accessibility preferences.`SetSystemFontSizeScaleEnabled(bool)` 
+
+## Event Handling and Signals
+
+The input field emits signals that allow the application to respond to user interactions in real time. Developers can monitor changes to the text content, which is useful for validation or updating other UI elements.`TextChangedSignal()`
+
+When the input reaches the configured maximum length, a signal is triggered, allowing for immediate feedback or logic branching.`MaximumLengthReachedSignal()` If input is rejected due to a filter violation, the reason for the rejection can be handled via the input rejection signal.`InputRejectedSignal()`
+
+Additional signals are provided to track cursor movement, the initiation of a selection, changes to the selection range, and the clearing of a selection.`CursorPositionChangedSignal()` `SelectionStartedSignal()` `SelectionChangedSignal()` `SelectionClearedSignal()`
 
 ```cpp
-InputField inputField = InputField::New();
-inputField.SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          .SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+class MyHandler
+{
+public:
+  void OnTextChanged(View view)
+  {
+    InputField inputField = InputField::DownCast(view);
+    if (inputField)
+    {
+      String text = inputField.GetText();
+    }
+  }
+};
+MyHandler handler;
+inputField.TextChangedSignal().Connect(&handler, &MyHandler::OnTextChanged);
 ```
-
-Text alignment defines how characters sit within the available space. You can align content to the start, center, or end of the container.`SetHorizontalTextAlignment(Text::Alignment)`. If the text exceeds the container width, the overflow mode determines whether it is clipped or truncated with an ellipsis.`SetOverflowMode(Text::OverflowMode)`. Furthermore, the layout direction can be explicitly configured to support different language requirements.`SetLayoutDirectionMode(Text::LayoutDirectionMode)`.
-
-## Cursor and Selection Management
-
-Interaction and navigation within the text are handled by the cursor, which provides visual feedback to the user. You can customize its appearance and manage how text is selected programmatically.
-
-```cpp
-InputField inputField = InputField::New();
-inputField.SetCursorWidth(2)
-          .SetCursorBlinkEnabled(true)
-          .SelectText(0, 5);
-```
-
-The cursor's width and color are fully configurable to ensure visibility against various backgrounds.`SetCursorWidth(int)`. You can toggle the blinking animation or adjust the interval to suit specific user preferences.`SetCursorBlinkEnabled(bool)`. When text selection is enabled, you can provide a unique highlight color.`SetSelectionColor(const UiColor &)`. You can also programmatically manipulate the selection range or clear it entirely when an action is complete.`SelectText(uint32_t, uint32_t)`.
-
-## Input Interaction and Placeholders
-
-Placeholder text provides context to the user before any input is provided. Coupled with input filters, you can ensure that only valid characters are accepted during the editing process.
-
-```cpp
-InputField inputField = InputField::New();
-inputField.SetPlaceholder("Enter username...");
-inputField.SetPlaceholderColor(UiColor(0.7f, 0.7f, 0.7f, 1.0f));
-
-Text::InputFilter filter;
-inputField.SetInputFilter(filter);
-```
-
-The placeholder text appears when the input field is empty and disappears when the user begins typing. You can configure whether this placeholder remains visible when the field gains focus.`SetShowPlaceholderOnFocus(bool)`. Input filters allow you to restrict the types of characters accepted, such as numeric-only or specific character sets.`SetInputFilter(const Text::InputFilter &)`. Filters can be cleared when the input constraints are no longer required.`ClearInputFilter()`.
-
-## Responding to User Events
-
-The InputField component emits signals to notify the application of significant changes, such as text updates, cursor movement, or input restrictions.
-
-```cpp
-InputField inputField = InputField::New();
-inputField.TextChangedSignal().Connect([](View view) {
-    // Handle text change
-});
-```
-
-You can track user progress by monitoring the text content as it is modified.`TextChangedSignal()`. Applications can perform specific logic when a user hits the input length ceiling.`MaximumLengthReachedSignal()`. When an input filter rejects a character, the application is notified with a reason.`InputRejectedSignal()`. Additionally, changes to the selection or cursor position can be used to update secondary UI elements in real-time.`CursorPositionChangedSignal()`.
 
 ---
 

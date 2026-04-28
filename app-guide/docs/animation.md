@@ -3,86 +3,100 @@ id: animation
 title: "animation"
 sidebar_label: "animation"
 ---
-# Overview
+## Overview
 
-The [animation](./animation.md) module provides a high-level framework for defining temporal changes in UI state, allowing developers to create fluid, performant transitions for Dali::Ui::View components. By leveraging this system, you can manipulate view properties like position, scale, opacity, and color over defined periods to produce complex motion graphics.
+The Animation module provides a robust framework for choreographing dynamic UI changes in `View` components, enabling smooth transitions, property interpolations, and physics-based motion. It centers around the `Animation` class, which allows developers to define sequences of property changes that the DALi runtime executes asynchronously, ensuring high performance and visual fluidity.
 
-# Declarative View Animations
+## Declarative View Animations
 
-The framework enables a declarative approach to [animation](./animation.md) via specification objects, which are designed to decouple the definition of an [animation](./animation.md) from the execution on a target UI element. The `ViewAnimationSpec` allows you to configure a set of property transitions that can be applied to a view later. You can create a new specification by calling the `New()` on the class. Once defined, these transitions are enacted on a specific view using the `ApplyTo(Animation, View)`, which requires an active [animation](./animation.md) instance and the target view.
+The framework simplifies common UI transition tasks through the use of `ViewAnimationBridge` and `ViewAnimationSpec`. These classes allow for a fluent, chainable API that targets common visual properties, reducing the boilerplate required for standard UI movements and state changes.
 
 ```cpp
-ViewAnimationSpec animationSpec = ViewAnimationSpec::New();
-animationSpec.PositionX(100.0f, Duration(1.0f));
-animationSpec.Opacity(0.5f, Duration(1.0f));
-
+View myView = View::New();
+ViewAnimationSpec spec;
+spec.PositionX(100.0f, Duration(1.0f));
+spec.Opacity(0.5f, Duration(1.0f));
 Animation animation = Animation::New(1.0f);
-animationSpec.ApplyTo(animation, myView);
+spec.ApplyTo(animation, myView);
 animation.Play();
 ```
 
-# Animating Sequences and Keyframes
+The `ViewAnimationSpec` allows you to encapsulate a series of property animations into a reusable object. Methods like `PositionX`, `Opacity`, and `SizeWidth` can be chained to build a complex state transition. Once defined, the `ApplyTo` method is used to execute these stored animations on a specific `View` instance. For immediate, one-off interactions, the `ViewAnimationBridge` offers a similar functional interface that pairs an animation directly with a target view.
 
-For non-linear transitions or complex motion paths, you can orchestrate multi-point updates over time. The `KeyFrames` acts as a container for individual property states, where each state is associated with a specific progress point between zero and one. You can populate this container using the `Add(float, Property::Value)`. Once the keyframes are configured, you animate the property by passing the keyframe object to the `AnimateBetween(Property, KeyFrames)` of an animation instance.
+## Advanced Keyframe Choreography
+
+For complex animations that cannot be represented by simple start-to-end transitions, developers should use the `KeyFrames` class. This allows you to define a property's value at specific progress points (0.0 to 1.0) along the duration of the animation.
 
 ```cpp
-KeyFrames scaleKeyFrames = KeyFrames::New();
-scaleKeyFrames.Add(0.0f, Vector3(1.0f, 1.0f, 1.0f));
-scaleKeyFrames.Add(0.5f, Vector3(2.0f, 2.0f, 2.0f));
-scaleKeyFrames.Add(1.0f, Vector3(1.0f, 1.0f, 1.0f));
-
+KeyFrames keyFrames = KeyFrames::New();
+keyFrames.Add(0.0f, 0.0f);
+keyFrames.Add(0.5f, 50.0f, AlphaFunction::BuiltinFunction::BOUNCE);
+keyFrames.Add(1.0f, 100.0f);
 Animation animation = Animation::New(2.0f);
-animation.AnimateBetween(Actor::Property::SCALE, scaleKeyFrames);
+animation.AnimateBetween(Actor::Property::POSITION_X, keyFrames);
 animation.Play();
 ```
 
-# Temporal Control and Timing
+Once a set of keyframes is populated using the `Add` method, you can pass them to an `Animation` object using the `AnimateBetween` method. This provides granular control over the interpolation curve between stages. When adding keyframes, you can optionally provide an `AlphaFunction` for each segment to control the easing behavior individually between specific points.
 
-Effective animation requires precise control over how values evolve and how long they persist. You define the duration of an animation using the `Duration`, which can be initialized in seconds. The feel of the motion is dictated by the `AlphaFunction`, which maps the linear progress of time to a non-linear curve. You can select from built-in patterns or define custom bezier curves using the `AlphaFunction(BuiltinFunction)` that accepts two control points. Furthermore, the `TimePeriod` allows you to specify a delay and a duration for a sub-segment of an animation, providing granular control over when specific changes begin and end.
+## Path-Based Movement
+
+Motion along non-linear trajectories is achieved using the `Path` class. This class represents a 3D parametric curve defined by interpolation points and control points, which a <!-- View --> can follow during an animation sequence.
 
 ```cpp
-Duration duration = Duration(2.5f);
-AlphaFunction alpha = AlphaFunction(AlphaFunction::EASE_IN_OUT);
-TimePeriod period = TimePeriod(0.5f, 2.5f);
-
-Animation animation = Animation::New(3.0f);
-animation.AnimateTo(Actor::Property::OPACITY, 0.0f, alpha, period);
+Path path = Path::New();
+path.AddPoint(Vector3(0.0f, 0.0f, 0.0f));
+path.AddPoint(Vector3(100.0f, 100.0f, 0.0f));
+path.GenerateControlPoints(0.5f);
+Animation animation = Animation::New(2.0f);
+View myView = View::New();
+animation.Animate(myView, path, Vector3(0.0f, 0.0f, 1.0f));
 animation.Play();
 ```
 
-# Constraint-Based Motion
+To create a motion path, use `AddPoint` to define the primary waypoints. The system can automatically calculate smooth curves between these points using the `GenerateControlPoints` method. Once the path is defined, the `Animate` method on an `Animation` object accepts the `View` and the `Path` to synchronize the component's position and orientation with the trajectory.
 
-Constraints allow for reactive UI behavior where a property value is derived automatically from the state of other properties. The `Constraint` establishes these relationships by linking a target property to one or more sources. You can define the source of the data using the `ConstraintSource`, which can represent local properties, parent properties, or arbitrary object properties. Relationships are applied by providing a functor or a function pointer to the `New(Handle, Property::Index, const T &)` of the constraint, which performs the calculation on each frame.
+## Dynamic Constraints and Physics
+
+Constraints provide a powerful mechanism for reactive UI, where a property's value is automatically calculated based on one or more source properties. By using the `Constraint` class, you can establish permanent dependencies between different components.
 
 ```cpp
-Constraint constraint = Constraint::New(myView, Actor::Property::POSITION_X, RelativeToConstraint(0.5f));
-constraint.AddSource(ConstraintSource(ParentSource(Actor::Property::SIZE)));
+View targetView = View::New();
+View sourceView = View::New();
+Constraint constraint = Constraint::New<Vector3>(targetView, Actor::Property::POSITION, EqualToConstraint());
+constraint.AddSource(ConstraintSource(Source(sourceView, Actor::Property::POSITION)));
 constraint.Apply();
 ```
 
-# Advanced Motion Dynamics
+You can construct constraints by passing a callback function or a functor—such as `EqualToConstraint` or `RelativeToConstraint`—that processes input properties and updates the target. For physics-based feel, the `SpringData` class allows you to define stiffness, damping, and mass. This data can be incorporated into an `AlphaFunction` constructor to create animations that naturally overshoot and settle, mimicking physical objects.
 
-To achieve realistic, physics-based movement, the framework supports spring dynamics. You can define custom spring behavior using the `SpringData`, which exposes the stiffness, damping, and mass properties of the motion. These parameters can be passed into an `AlphaFunction(const SpringData &)` to create a spring-based easing curve. For mapping one range of values linearly to another, the `LinearConstrainer` provides a high-level interface to establish a proportional link between two properties.
+## Easing and Temporal Control
+
+The timing and pacing of animations are governed by the `AlphaFunction` and `TimePeriod` classes. An `AlphaFunction` determines how the animated value changes over time, supporting everything from simple linear movement to complex custom easing curves.
 
 ```cpp
-SpringData springData(100.0f, 10.0f, 1.0f);
-AlphaFunction springAlpha(springData);
-
 Animation animation = Animation::New(1.0f);
-animation.AnimateTo(Actor::Property::POSITION_X, 200.0f, springAlpha);
+AlphaFunction alpha(AlphaFunction::BuiltinFunction::EASE_IN_OUT);
+TimePeriod period(0.5f, 1.0f);
+View myView = View::New();
+animation.AnimateTo(Actor::Property::OPACITY, 1.0f, alpha, period);
 animation.Play();
 ```
 
-# UI-Specific Animation Bridges
+You can construct an `AlphaFunction` using predefined constants from `AlphaFunction::BuiltinFunction` or by providing bezier control points. To manage the pacing of multiple sequences, the `TimePeriod` structure allows you to define explicit delays and durations. This is particularly useful when chaining operations or orchestrating groups of animations that must trigger at staggered intervals.
 
-For common UI elements, the framework provides specialized bridges that simplify the syntax for applying animations to complex components. The `ViewAnimationBridge` and the `LabelAnimationBridge` provide chainable methods for animating specific properties like `BackgroundColor(const UiColor &, Duration, AlphaFunction, Duration)`, `CornerRadius(const Vector4 &, Duration, AlphaFunction, Duration)`, or `TextColor(const UiColor &, Duration, AlphaFunction, Duration)`. These bridges significantly reduce the boilerplate required for property-by-property animation definition by wrapping the underlying animation logic in a fluent interface.
+## Text Animation Patterns
+
+The framework provides specialized support for animating text-based UI components through the `LabelAnimationBridge` and `LabelAnimationSpec` classes. These behave similarly to the general view equivalents but are optimized for properties specific to text, such as text color and borderline attributes.
 
 ```cpp
-LabelAnimationBridge bridge = LabelAnimationBridge(animation, myLabel);
-bridge.BackgroundColor(UiColor::PRIMARY, Duration(0.5f))
-      .Opacity(0.8f, Duration(0.5f))
-      .BorderlineWidth(2.0f, Duration(0.5f));
+Label myLabel = Label::New();
+LabelAnimationBridge bridge(Animation::New(1.0f), myLabel);
+bridge.TextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f), Duration(1.0f));
+bridge.BorderlineColor(UiColor::PRIMARY, Duration(1.0f));
 ```
+
+By using the `TextColor` or `TextColorBy` methods, you can seamlessly transition [text](./text.md) colors as part of an [animation](./animation.md) sequence. These bridges maintain the same chainable syntax as other [animation](./animation.md) specs, ensuring that [text](./text.md) elements integrate smoothly into your overall application choreography.
 
 ---
 
