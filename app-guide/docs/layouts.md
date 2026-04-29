@@ -5,106 +5,110 @@ sidebar_label: "layouts"
 ---
 ## Overview
 
-The Layouts module provides a declarative system for positioning and sizing `View` components using constraint-based containers that automate complex UI orchestration. By separating layout logic from individual component properties, this module enables responsive design and simplifies the maintenance of dynamic user interfaces.
+The Layouts module provides a declarative system for positioning and sizing `View` elements within an application interface using automated layout managers. These managers abstract away the manual calculation of coordinates, allowing developers to define structural relationships that react gracefully to container resizing or device orientation changes.
 
 ## Applying Layouts to Views
 
-The foundation of the layout system involves assigning specific layout strategies to container views. Once a layout instance is created, it is applied to a view, which then governs the geometric arrangement of all its child elements.
+The standard workflow for implementing automated positioning involves creating a layout manager instance and assigning it to the desired container using the `SetLayoutParams(const LayoutParams &)` method. This process informs the container how to organize its children, ensuring that the layout logic is decoupled from the individual child element definitions.
 
-To apply a layout strategy to a specific view, developers use the `SetLayoutParams(const LayoutParams &)` method. This mechanism allows for fine-grained control over how individual children behave within the parent's coordinate space.
+```cpp
+View parentView = View::New();
+AbsoluteLayout layout = AbsoluteLayout::New();
+AbsoluteLayoutParams params = AbsoluteLayoutParams::New();
+parentView.SetLayoutParams(params);
+```
+
+When a layout is applied to a parent `View`, the parent's size and internal structure dictate the final geometry of its children based on the rules defined by that specific layout manager. Developers should trigger layout recalculations when child properties change by interacting with the associated layout system.
+
+## Stack-Based Arrangements
+
+The `StackLayout` class organizes child elements in a strictly defined linear sequence, either vertically or horizontally. This manager is ideal for simple lists, toolbars, or any UI component that requires a uniform flow of items along a single axis.
+
+By utilizing the `SetOrientation(StackOrientation)` method, developers can toggle between row-based and column-based arrangements. Spacing between child elements is handled globally for the stack via the `SetSpacing(float)` method.
 
 ```cpp
 View container = View::New();
-FlexLayout layout = FlexLayout::New();
-container.SetLayoutParams(layout);
+StackLayout stackLayout = StackLayout::New(StackOrientation::HORIZONTAL);
+stackLayout.SetOrientation(StackOrientation::HORIZONTAL);
+container.SetLayoutParams(stackLayout);
 ```
 
-## Flex Layout Configuration
+Within a stack, individual child behavior can be influenced using `StackLayoutParams`. This allows for fine-grained control over how much space a specific item consumes relative to its siblings. Using the `SetWeight(float)` method, developers can create flexible, proportional distributions where items grow to occupy remaining space based on their defined weight values.
 
-The `FlexLayout` class facilitates complex, responsive designs by arranging children based on the industry-standard CSS Flexbox algorithm. This container automatically distributes available space and handles alignment adjustments according to defined directions and growth factors.
+## Flexible Responsive Design
 
-To configure the layout's global behavior, developers can adjust the direction of the flow using `SetDirection(FlexDirection)`, specify wrapping behavior with `SetWrap(FlexWrap)`, and control how content is distributed through `SetJustifyContent(FlexJustify)`. Alignment of items along the cross-axis is handled by `SetAlignItems(FlexAlign)` and `SetAlignContent(FlexAlign)`.
+For interfaces that require complex, reactive behavior across varying screen sizes, the `FlexLayout` class provides a robust engine inspired by the web-based CSS Flexbox model. This manager allows for sophisticated control over content flow, alignment, and wrapping without requiring explicit pixel coordinates.
 
-Individual children within a flex container can be configured using `FlexLayoutParams`. This allows specific items to define their own growth behavior via `SetFlexGrow(float)`, their shrinkage priority with `SetFlexShrink(float)`, and their initial size basis using `SetFlexBasis(float)`. An individual item may also override the parent's alignment policy by calling `SetAlignSelf(FlexAlign)`.
+The behavior of the layout is governed by properties such as `SetDirection(FlexDirection)`, `SetWrap(FlexWrap)`, and `SetJustifyContent(FlexJustify)`. These settings collectively determine how the container handles the distribution of its children across the main and cross axes.
 
 ```cpp
-View child = View::New();
-FlexLayoutParams params = FlexLayoutParams::New();
-params.SetFlexGrow(1.0f);
-params.SetAlignSelf(FlexAlign::CENTER);
-child.SetLayoutParams(params);
+FlexLayout flexLayout = FlexLayout::New();
+flexLayout.SetJustifyContent(FlexJustify::CENTER);
+flexLayout.SetWrap(FlexWrap::WRAP);
+View container = View::New();
+container.SetLayoutParams(flexLayout);
 ```
 
-## Grid Layout Strategies
+Children within a flex container utilize `FlexLayoutParams` to define their growth and shrinkage characteristics. Properties like `SetFlexGrow(float)` and `SetFlexShrink(float)` determine if an element should expand or contract when the container size changes, providing a powerful mechanism for responsive UI scaling.
 
-The `GridLayout` container is designed for structured, 2D tabular arrangements of user interface elements. It relies on row and column definitions to divide the parent area into manageable cells.
+## Grid and Tabular Structures
 
-Row and column definitions are established using `AddRowDefinition(GridLength)` and `AddColumnDefinition(GridLength)`, or via bulk assignment with `SetRowDefinitions(const Vector< GridLength > &)` and `SetColumnDefinitions(const Vector< GridLength > &)`. These definitions accept `GridLength` objects, which can represent absolute pixel values, star-based proportional ratios, or auto-sizing logic. For precise control, row and column spacing can be adjusted using `SetRowSpacing(float)` and `SetColumnSpacing(float)`.
+The `GridLayout` enables the construction of precise, matrix-based interfaces where child components are placed into defined cells. This system is perfect for dashboards, form layouts, or complex grid-based content displays.
 
-Children are positioned within the grid using `GridLayoutParams`. Developers specify the target cell location using `SetRow(uint32_t)` and `SetColumn(uint32_t)`, and can extend a child across multiple cells with `SetRowSpan(uint32_t)` and `SetColumnSpan(uint32_t)`. Internal alignment within a designated grid cell is managed by `SetHorizontalAlignment(LayoutAlignment)` and `SetVerticalAlignment(LayoutAlignment)`.
+Rows and columns are defined by providing a vector of `GridLength` objects, which specify whether a dimension should be fixed, automatic, or proportional (star-sized). These are registered via `SetRowDefinitions(const Dali::Vector<GridLength> &)` and `SetColumnDefinitions(const Dali::Vector<GridLength> &)`.
 
 ```cpp
-GridLayout grid = GridLayout::New();
-grid.AddRowDefinition(GridLength::Star(1.0f));
-grid.AddRowDefinition(GridLength::Absolute(100.0f));
-
-View child = View::New();
-GridLayoutParams params = GridLayoutParams::New();
-params.SetRow(0);
-params.SetColumn(0);
-params.SetHorizontalAlignment(LayoutAlignment::CENTER);
-child.SetLayoutParams(params);
+GridLayout gridLayout = GridLayout::New();
+Dali::Vector<GridLength> columns;
+columns.PushBack(GridLength::Star(1.0f));
+columns.PushBack(GridLength::Star(2.0f));
+gridLayout.SetColumnDefinitions(columns);
+View child1 = View::New();
+GridLayoutParams params1 = GridLayoutParams::New();
+params1.SetRow(0);
+params1.SetColumn(0);
+child1.SetLayoutParams(params1);
 ```
 
-## Stack Layout Patterns
-
-The `StackLayout` provides a straightforward approach to arranging UI elements in a single dimension, either linearly horizontal or vertical. This layout is ideal for lists, button bars, or simple vertical forms.
-
-The orientation of the stack is determined by the `StackOrientation` enumeration passed to the `New` factory method or the `SetOrientation(StackOrientation)` method. The space between items can be managed by `SetSpacing(float)`.
-
-When using `StackLayoutParams` for individual children, developers can influence the distribution of available space using `SetWeight(float)`. The alignment of a child relative to the cross-axis of the stack is configured with `SetAlignment(LayoutAlignment)`.
-
-```cpp
-StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
-layout.SetSpacing(10.0f);
-
-View child = View::New();
-StackLayoutParams params = StackLayoutParams::New();
-params.SetWeight(1.0f);
-child.SetLayoutParams(params);
-```
+Each child element within the grid is managed using `GridLayoutParams`. This class allows developers to pin an element to a specific coordinate using `SetRow(uint32_t)` and `SetColumn(uint32_t)`, while also supporting multi-cell occupancy through the `SetRowSpan(uint32_t)` and `SetColumnSpan(uint32_t)` methods.
 
 ## Absolute Positioning
 
-When precise, coordinate-based placement is required, the `AbsoluteLayout` offers an alternative to flow-based containers. It ignores automatic distribution rules in favor of fixed locations and dimensions.
+When strict, pixel-perfect control is required that bypasses automated flow logic, the `AbsoluteLayout` provides a mechanism for direct coordinate placement. This is particularly useful for overlay elements, decorative graphics, or specific design requirements where content cannot be reflowed.
 
-Children within an absolute container are positioned using `AbsoluteLayoutParams`. Developers set the geometry by applying a `LayoutRect` using `SetBounds(const LayoutRect &)`, or by individual coordinate methods like `SetX(float)`, `SetY(float)`, `SetWidth(float)`, and `SetHeight(float)`. Proportional sizing and positioning behaviors can be enabled via `SetFlags(AbsoluteLayoutFlags)`, allowing elements to scale relative to the parent's dimensions using the `AbsoluteLayoutFlags` bitmask.
+The layout uses the `AbsoluteLayoutParams` class to associate a specific rectangle with each child. This rectangle is defined by the `SetBounds(const LayoutRect &)` method, or individually via the `SetX(float)`, `SetY(float)`, `SetWidth(float)`, and `SetHeight(float)` methods.
 
 ```cpp
+View container = View::New();
+AbsoluteLayout layout = AbsoluteLayout::New();
+container.SetLayoutParams(layout);
 View child = View::New();
 AbsoluteLayoutParams params = AbsoluteLayoutParams::New();
-params.SetX(0.5f);
-params.SetY(0.5f);
-params.SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
+params.SetX(100.0f);
+params.SetY(200.0f);
 child.SetLayoutParams(params);
+container.Add(child);
 ```
 
-## Measuring and Sizing
+The `SetFlags(AbsoluteLayoutFlags)` method allows for advanced behavior, such as specifying that a component’s position or size should be calculated as a proportion of the parent's total size rather than as an absolute pixel value.
 
-Effective layout requires that the framework can calculate the size of every view. The `MeasuredSize` class acts as the standardized container for conveying width and height results during the layout pass.
+## Customizing Layout Constraints
 
-While container layouts handle the bulk of this logic, custom layout implementations may need to interact with sizing metrics directly. Developers can convert these metrics to a standard `Vector2` using `ToVector2()` for use in underlying engine operations.
+Layout parameters act as the configuration bridge between a child `View` and its parent's layout manager. Every layout system provides a specialized class derived from `LayoutParams` to facilitate these settings.
 
-## Managing Layout Lifecycle
+Whether adjusting the alignment of a grid item using `SetHorizontalAlignment(LayoutAlignment)` or specifying the flex basis of an item in a flex container, these parameters are essential for fine-tuning UI composition. By using the chainable nature of these setter methods, developers can concisely define the layout behavior of a component during its creation.
 
-The lifecycle of a layout is orchestrated by the `LayoutController`. This singleton-like service manages the invalidation and processing of all view hierarchies that require re-calculation.
+## Managing Layout Complexity
 
-When a view's layout properties change in a way that affects its geometric size or position, the system triggers a request. Developers can manually ensure a view is updated by calling `RequestLayout(ViewImpl *)` on the instance obtained via `Get(Window)`. For complex scenarios, calling `ProcessLayouts()` will force the synchronization of pending layout states across the active window. In scenarios where a view is removed or the window state changes, the controller handles the necessary cleanup and updates via `UnregisterView(ViewImpl *)` and `OnWindowResize(int32_t, int32_t)` respectively.
+The `LayoutController` serves as the central orchestration point for layout processing, ensuring that geometry updates are batched and executed efficiently. In most scenarios, the framework handles the registration of views automatically, but manual intervention is possible for custom integration scenarios.
+
+If a view requires a manual layout refresh, the `RequestLayout(ViewImpl *)` method schedules that view for the next processing pass. For developers working with complex custom components, the `ProcessLayouts()` method can be invoked to force an immediate calculation of all pending layout requests within the context of a specific window.
 
 ```cpp
-// Assuming containerView is an existing View instance
-ViewImpl& impl = GetImpl(containerView);
-LayoutController::Get(window).RequestLayout(&impl);
+// Assuming view is a View* (ViewImpl*) and window is a Window
+LayoutController& layoutController = LayoutController::Get(window);
+layoutController.RequestLayout(view);
+layoutController.ProcessLayouts();
 ```
 
 ---

@@ -5,140 +5,106 @@ sidebar_label: "View (Base UI Object)"
 ---
 ## Overview
 
-Dali::Ui::View is the fundamental building block for constructing modern, declarative UIs in DALi, providing a structured way to manage visual composition, layout constraints, and component interactions. By serving as a robust wrapper for UI logic, it enables developers to create complex interfaces with a clean, readable, and highly maintainable hierarchy.
+The View module provides the foundational building block for constructing modern, reactive UI hierarchies within the DALi framework. As the primary component for UI development, the View class handles spatial positioning, layout measurement, [rendering](./rendering.md) configuration, and event propagation.
 
-## Fluent API and Declarative Construction
+## Declarative UI and Fluent Chaining
 
-The framework utilizes a fluent interface to simplify the creation and configuration of UI trees, allowing developers to chain setters and structure components in a single expression. This declarative style replaces traditional, imperative multi-line setup code with a concise syntax.
+The View framework supports a declarative programming style through a fluent API pattern, allowing developers to construct complex UI trees with high readability. Most setter methods are chainable, returning a reference to the View [object](./object.md) to allow successive configuration in a single statement.
 
-### Hierarchical Tree Construction
-
-To define the parent-child relationships within an interface, use the `Children(std::initializer_list<View>)` to define an initializer list of child components. The `As(View&)` allows you to capture a reference to a specific view created deep within a declarative tree, which is useful when you need to access that component later for dynamic updates.
+The framework provides specific methods to manage hierarchical structure and inline configuration. Use the `Children(std::initializer_list<View>)` to define a nested tree of views within a single initialization block. The `As(View&)` allows you to capture a reference to a specific view instance that is being constructed declaratively, while the `With(F&&)` provides a flexible mechanism to execute custom operations on a view during the construction process.
 
 ```cpp
-View parent = View::New();
-View child1 = View::New();
-View child2 = View::New();
-
-parent.Children({child1, child2});
-child1.As(child1);
-```
-
-### Custom Actions and Traits
-
-The `With(F&&)` provides an extension point to execute custom logic or complex configuration blocks on a view during its initialization. Additionally, traits like `AsInteractive(F&&)` and `AsSelectable(F&&)` can be applied to extend the functionality of a standard view, enabling interaction and selection capabilities through simple method calls.
-
-```cpp
-View view = View::New().With([](View& v) {
-  v.SetBackgroundColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
-}).AsInteractive([](InteractiveTrait& t) {
-  t.SetClickable(true);
+View container = View::New().Children({
+  View::New().SetRequestedWidth(100.0f).SetRequestedHeight(100.0f),
+  View::New().SetRequestedWidth(50.0f).SetRequestedHeight(50.0f)
 });
 ```
 
 ## Layout and Sizing Mechanics
 
-Views calculate their spatial footprint through a multi-pass process involving measurement and arrangement, ensuring that content remains responsive to dynamic changes. You can control this behavior by defining size constraints and alignment properties.
+Views rely on a measurement and arrangement cycle to determine their spatial presence on the screen. You can control the layout behavior by specifying constraints such as width, height, and various margins.
 
-### Size and Layout Configuration
+The measurement process is triggered by the `Measure(float, float)`, which informs the view of available constraints, followed by the `Arrange(const LayoutRect&)` to finalize the layout position and dimensions. If you need to force a re-layout due to external property changes, use `InvalidateMeasure()` and `InvalidateArrange()`. For advanced use cases, custom logic can be injected via the `SetMeasureCallback(MeasureCallback)` and the `SetArrangeCallback(ArrangeCallback)`. You may also configure the behavior of a view within its parent using the `SetLayoutMode(LayoutMode)`.
 
-To influence the size of a view, use methods like `SetRequestedWidth(float)` and `SetRequestedHeight(float)`, which inform the parent of the preferred dimensions. More specific constraints are handled through `SetMinimumWidth(float)`, `SetMinimumHeight(float)`, `SetMaximumWidth(float)`, and `SetMaximumHeight(float)`. For fine-grained control over spacing within and around a component, use `SetMargin(Extents)` and `SetPadding(Extents)`.
 
-```cpp
-View myView = View::New()
-  .SetRequestedWidth(100.0f)
-  .SetRequestedHeight(100.0f)
-  .SetMinimumWidth(50.0f)
-  .SetMinimumHeight(50.0f)
-  .SetMaximumWidth(200.0f)
-  .SetMaximumHeight(200.0f)
-  .SetMargin(Extents(10, 10, 10, 10))
-  .SetPadding(Extents(5, 5, 5, 5));
-```
 
-### Layout Control
+## Visual Configuration and Styling
 
-The `SetLayoutMode(LayoutMode)` dictates how a view participates in its parent's layout, while `SetLayoutDirection(Dali::LayoutDirection::Type)` allows you to explicitly define whether content flows in a standard or reverse direction. You can trigger re-layout cycles manually if necessary using `InvalidateMeasure()` and `InvalidateArrange()`.
+Visual attributes determine the aesthetic presentation of the View, including its background, borders, and corner geometry. The framework provides robust support for rounded corners, which can be configured using the `SetCornerRadius(float)` and the `SetCornerRadiusPolicy(CornerRadiusPolicy)`.
 
-## Visual Styling and Effects
-
-Visual customization in DALi is handled through a variety of property setters that modify the rendering of the view. You can create rounded corners, apply borders, or specify unique background appearances to achieve the desired aesthetic.
-
-### Corner and Border Styling
-
-The corner geometry is controlled via `SetCornerRadius(float)` and `SetCornerSquareness(float)`. You can toggle between absolute and relative corner scaling using `SetCornerRadiusPolicy(CornerRadiusPolicy)` or the convenience helper `SetCornerRadiusPolicyRelative()`. Border aesthetics, including width, color, and positioning, are configured using `SetBorderlineWidth(float)`, `SetBorderlineColor(UiColor)`, and `SetBorderlineOffset(float)`.
+You can customize the borderline appearance by using the `SetBorderlineWidth(float)`, `SetBorderlineColor(const UiColor&)`, and `SetBorderlineOffset(float)`. Additionally, background colors are managed via the `SetBackgroundColor(const UiColor&)`, while the global visibility and transparency of the element are controlled by the `SetVisibility(bool)` and the `SetOpacity(float)`.
 
 ```cpp
-View myView = View::New()
-  .SetCornerRadius(15.0f)
-  .SetCornerRadiusPolicyRelative()
+View styledView = View::New()
+  .SetCornerRadius(10.0f)
+  .SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE)
   .SetBorderlineWidth(2.0f)
   .SetBorderlineColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f))
   .SetBorderlineOffset(1.0f);
 ```
 
-## Interactive and Selectable Traits
+## Adding Interactivity and Selection
 
-Interactive and selectable traits empower views to participate in the application's user experience. By attaching these traits, views become capable of responding to clicks, long-press gestures, and maintaining selection states.
+Static views can be enhanced with reactive behaviors using traits. The `AsInteractive()` attaches an interaction trait to the view, which enables click and gesture handling. Similarly, the `AsSelectable()` attaches a selection trait, allowing the view to maintain a persistent state of being selected or deselected.
 
-### Interaction and State
-
-Views with an interaction trait can have their click behavior managed via `SetClickable(bool)` and `SetKeyClickPolicy(KeyClickPolicy)`. The selectable trait provides state management, where `SetSelected(bool)` and `EnableToggleByClick(bool)` allow for rich UI states like radio buttons or checkboxes.
+Once a trait is attached, you can manage the state directly, for instance by using the `SetSelected(bool)` for selectable components or `SetClickable(bool)` for interactive ones. The framework also supports a pseudo-disabled state, managed via the `SetPseudoDisabled(bool)`, which allows the view to remain interactive for guidance purposes while appearing visually inactive.
 
 ```cpp
-View view = View::New();
-InteractiveTrait interactive = view.EnsureInteractiveTrait();
-interactive.SetClickable(true);
+View myView = View::New();
 
-SelectableTrait selectable = view.EnsureSelectableTrait();
-selectable.EnableToggleByClick(true);
+myView.AsInteractive([](InteractiveTrait interactive) {
+  interactive.SetClickable(true);
+});
+
+myView.AsSelectable([](SelectableTrait selectable) {
+  selectable.SetSelected(true);
+  selectable.EnableToggleByClick(true);
+});
 ```
 
 ## Event Handling and Signal Management
 
-Signal-slot connections are the primary mechanism for responding to user events and internal view transitions. This architecture ensures that your application logic remains decoupled from the specific visual implementation of the views.
+The View module uses a signal-based mechanism to communicate user input and state changes. You can respond to user interaction by connecting to specific signals, such as the `ClickedSignal()` for single taps or the `LongPressedSignal()` for extended interaction.
 
-### Monitoring Changes
-
-You can connect to events like `ClickedSignal()`, `PressedChangedSignal()`, or `StateChangedSignal()` to perform actions when a user engages with the UI. For input handling, the `KeyEventSignal()` provides a robust way to intercept hardware key presses.
+State changes are communicated through dedicated signals, such as the `StateChangedSignal()` and the `SelectionChangedSignal()`. Key navigation events are captured via the `KeyEventSignal()`, ensuring that the application can respond appropriately to non-touch input.
 
 ```cpp
-View myView = View::New();
-myView.EnsureInteractiveTrait().ConnectClickedSignal(this, &MyHandler::OnClicked);
-myView.StateChangedSignal().Connect(this, &MyHandler::OnStateChanged);
+void MyHandler(View view, const InputEvent& event) { /* ... */ }
+
+View view = View::New();
+view.AsInteractive().ConnectClickedSignal(&view, &MyHandler);
+view.StateChangedSignal().Connect(&view, &MyHandler);
 ```
 
 ## Focus and Navigation Control
 
-Keyboard and directional navigation are managed by assigning focus targets and defining the focus group behavior. This ensures that users can traverse the interface seamlessly without mouse or touch input.
+To support accessible and keyboard-driven interfaces, views participate in a structured focus management system. You can determine if a view is eligible for focus by using the `SetFocusable(bool)` or the `SetTouchFocusable(bool)`.
 
-### Navigation Configuration
-
-To control the focus order, use directional methods such as `SetLeftFocusableView(View)`, `SetRightFocusableView(View)`, `SetUpFocusableView(View)`, and `SetDownFocusableView(View)`. Additionally, `SetClockwiseFocusableView(View)` and `SetCounterClockwiseFocusableView(View)` offer circular navigation paths. Enable focus support on any view by using `SetFocusable(bool)` or `SetKeyNavigationSupport(bool)`.
+The movement of focus is defined by explicitly linking neighbors using methods such as `SetLeftFocusableView(View)`, `SetRightFocusableView(View)`, `SetUpFocusableView(View)`, and `SetDownFocusableView(View)`. This ensures that users can navigate through the UI hierarchy using standard directional keys or focus traversal paths.
 
 ```cpp
-View parent = View::New();
-View left = View::New();
-View right = View::New();
+View buttonA = View::New();
+View buttonB = View::New();
 
-parent.SetFocusable(true);
-parent.SetKeyNavigationSupport(true);
-parent.SetLeftFocusableView(left);
-parent.SetRightFocusableView(right);
+buttonA.SetRightFocusableView(buttonB);
+buttonB.SetLeftFocusableView(buttonA);
 ```
 
-## Lifecycle and Scene Awareness
+## View Hierarchy and Z-Order
 
-Views provide signals to track their progress through the scene graph, from resource loading to final render completion. Understanding these states is crucial for performance optimization, such as delaying animations until assets are fully loaded.
+Managing the composition and stacking order of views is essential for complex UI design. The View class provides methods to add, remove, and query children, such as the `Insert(uint32_t, View)` and the `RemoveAllChildren()`.
 
-### Resource and Scene Status
+The visual stacking order—often referred to as Z-order—is manipulated through methods that adjust the relative layering of siblings. You can use `Raise(LayoutOrderPolicy)` and `Lower(LayoutOrderPolicy)` to shift a view's position, or use `RaiseToTop(LayoutOrderPolicy)` and `LowerToBottom(LayoutOrderPolicy)` for extreme adjustments. Precise ordering relative to another component is achieved using the `RaiseAbove(View, LayoutOrderPolicy)` or the `LowerBelow(View, LayoutOrderPolicy)`.
 
-The `IsResourceReady()` and the associated `ResourceReadySignal()` allow you to check or react to the loading status of required assets. The `IsOnScene()` identifies if the view is currently live in the display hierarchy. For more advanced use cases, the `OffScreenRenderingFinishedSignal()` indicates when offscreen operations for a view have successfully completed.
+
 
 ## Related Sub-Components
 
-- **[view-impl](./view-impl.md)**: Provides the internal implementation details and custom actor bridge logic for complex, custom view components. → See: [[view-impl](./view-impl.md)]
-- **[view-state](./view-state.md)**: Manages the state machine and conditional property sets for dynamic view behaviors. → See: [[view-state](./view-state.md)]
+- `[view-impl](./view-impl.md)`: Provides the internal implementation details required for extending View capabilities. → See: [view-impl]
+- `[view-state](./view-state.md)`: Manages the current state transitions and representation for UI components. → See: [view-state]
+- `[view-types](./view-types.md)`: Defines the common types and helper structures used throughout the View module. → See: [view-types]
+- `[view-accessibility-enums](./view-accessibility-enums.md)`: Contains enumerations for defining accessibility roles and states. → See: [view-accessibility-enums]
+- `[view-focus-enums](./view-focus-enums.md)`: Provides specific enumerations for controlling focus navigation behaviors. → See: [[view-focus-enums](./view-focus-enums.md)]
 
 ---
 

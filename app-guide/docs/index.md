@@ -8,7 +8,7 @@ sidebar_label: "Index"
 
 > Auto-generated documentation index. Tree structure reflects the class hierarchy determined by Taxonomy.
 
-*Last updated: 2026-04-28 07:30*
+*Last updated: 2026-04-28 08:58*
 
 ---
 
@@ -18,22 +18,20 @@ Complete list of all documented features:
 
 - **accessibility-highlight-overlay** *(not yet generated)*
 - **adaptor-framework** *(not yet generated)*
-  - Accessibility *(not yet generated)*
-  - Application Management *(not yet generated)*
+  - Accessibility Services *(not yet generated)*
+  - Core Adaptor *(not yet generated)*
+  - Application Lifecycle *(not yet generated)*
   - Canvas Renderer *(not yet generated)*
-  - Clipboard *(not yet generated)*
-  - Device Status *(not yet generated)*
-  - Drag and Drop *(not yet generated)*
-  - File and Data Management *(not yet generated)*
-  - Graphics and Rendering *(not yet generated)*
-  - Input Method Framework *(not yet generated)*
-  - Media Playback (Video/Camera/Sound) *(not yet generated)*
+  - Input Method Context *(not yet generated)*
   - Native Image Handling *(not yet generated)*
   - Web Engine *(not yet generated)*
+  - Window Management *(not yet generated)*
+  - Device Status *(not yet generated)*
+  - Graphics Backend *(not yet generated)*
+  - Media and Players *(not yet generated)*
   - Widget Framework *(not yet generated)*
-  - Window System *(not yet generated)*
-- **addon-manager** *(not yet generated)*
 - **addons** *(not yet generated)*
+  - addon-manager *(not yet generated)*
 - **[animated-image-view](animated-image-view.md)**
   - animated-image-view-impl *(not yet generated)*
   - animated-image-view-types *(not yet generated)*
@@ -149,11 +147,11 @@ Complete list of all documented features:
   - view-impl *(not yet generated)*
   - view-accessible *(not yet generated)*
   - view-state *(not yet generated)*
-- **view-accessibility-enums** *(not yet generated)*
-- **view-depth-index-ranges** *(not yet generated)*
-- **view-focus-enums** *(not yet generated)*
-- **view-integ** *(not yet generated)*
-- **view-types** *(not yet generated)*
+  - view-types *(not yet generated)*
+  - view-accessibility-enums *(not yet generated)*
+  - view-focus-enums *(not yet generated)*
+  - view-depth-index-ranges *(not yet generated)*
+  - view-integ *(not yet generated)*
 - **visual-factory** *(not yet generated)*
 - **visuals** *(not yet generated)*
 - **web-view** *(not yet generated)*

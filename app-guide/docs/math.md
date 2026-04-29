@@ -5,78 +5,92 @@ sidebar_label: "math"
 ---
 ## Overview
 
-The DALi [math](./math.md) module provides a robust set of geometric primitives and linear algebra utilities designed to handle coordinate transformations, spatial calculations, and visual sizing for UI elements. These tools ensure that developers can perform complex calculations with consistency and precision across various UI components.
+The DALi [math](./math.md) module provides a robust suite of geometric and linear algebra primitives designed to handle the coordinate, transformation, and spatial requirements of high-performance UI applications. These tools serve as the foundation for positioning, animating, and [rendering](./rendering.md) graphical components within the 3D [scene](./scene.md) graph.
 
-## Coordinate and Spatial Representation
+## Working with 2D and 3D Vectors
 
-The framework utilizes vector classes to define dimensions, positions, and color data. The `Vector2` provides a two-dimensional coordinate system, while the `Vector3` and `Vector4` extend this to three and four dimensions respectively. These vectors support standard arithmetic operations, including addition, subtraction, multiplication, and division, allowing for seamless manipulation of spatial data.
+The framework utilizes specialized vector structures to manage positional, directional, and color data in application [layouts](./layouts.md). The classes `Vector2`, `Vector3`, and `Vector4` support standard arithmetic operations and geometric utilities like length calculations and normalization.
 
-The `Vector2` is primarily used for two-dimensional points and sizes, offering methods such as `Length()` and `Normalize()` for spatial analysis. Similarly, the `Vector3` allows for 3D coordinate management and includes cross-product capabilities through the `Cross(const Vector3 &)`. For applications requiring RGBA color channels or homogeneous coordinates, the `Vector4` provides advanced functionality like the `Dot3(const Vector4 &)` and `Dot4(const Vector4 &)` to perform partial or full dot product calculations.
+Vectors can be initialized with individual scalar components or via conversion constructors that support resizing between dimensions. Common operations such as dot products and cross products are available for calculating intersections, alignment, and directional surface properties. For clamping values within a defined boundary, the `Clamp(const Vector2 &, const Vector2 &)` allows restricting vector components to specific minimum and maximum ranges.
 
 ```cpp
 Vector3 myVector(1.0f, 2.0f, 2.0f);
 myVector.Normalize();
 ```
 
-In addition to floating-point vectors, the framework provides integer-based pairs for scenarios requiring discrete grid or pixel values. The `IntPair` and `Uint16Pair` facilitate the handling of integer dimensions, ensuring that integer-based layout properties remain accurate.
+## Geometric Transformations and Matrices
 
-## Transformation and Matrix Operations
+To manipulate UI elements within a 3D coordinate system, the module provides the `Matrix` and `Matrix3`. These classes facilitate complex operations such as scaling, rotation, translation, and coordinate system inversions.
 
-Transformations, including scaling, translation, and rotation, are handled by the `Matrix` and the `Matrix3`. These classes serve as the backbone for calculating the final visual state of components within the application.
-
-The `Matrix` supports full 4x4 matrix operations, which are essential for rendering pipelines and complex coordinate system transformations. Developers can define transformations using the `SetTransformComponents(const Vector3 &, const Quaternion &, const Vector3 &)`, which encapsulates position, scale, and rotation data into a single matrix. Conversely, the `GetTransformComponents(Vector3 &, Quaternion &, Vector3 &)` allows for the extraction of these properties from an existing matrix. For scenarios requiring non-invertible or simpler 3x3 transformations, the `Matrix3` offers a more lightweight alternative.
+A transformation matrix can be configured using specialized component methods. The `SetTransformComponents(const Vector3 &, const Quaternion &, const Vector3 &)` updates the matrix to represent a specific combination of scale, rotation, and translation. Conversely, developers can extract these values from an existing transform using `GetTransformComponents(Vector3 &, Quaternion &, Vector3 &)`. For cases requiring inverse transformations, the `InvertTransform(Matrix &)` or `SetInverseTransformComponents(const Vector3 &, const Quaternion &, const Vector3 &)` ensures that spatial operations remain accurate during complex hierarchy updates.
 
 ```cpp
 Matrix myMatrix;
-Vector3 scale(1.0f, 1.0f, 1.0f);
-Quaternion rotation(Radian(0.0f), Vector3(0.0f, 0.0f, 1.0f));
-Vector3 translation(10.0f, 20.0f, 0.0f);
-myMatrix.SetTransformComponents(scale, rotation, translation);
+myMatrix.SetTransformComponents(Vector3(1.0f, 1.0f, 1.0f), Quaternion(), Vector3(0.0f, 0.0f, 0.0f));
+Matrix inverseMatrix;
+myMatrix.InvertTransform(inverseMatrix);
 ```
 
-## Rotation and Orientation Handling
+## Rotations and Orientations
 
-Managing orientation is simplified through the use of quaternions, which provide a stable and artifact-free method for representing rotations in 3D space. The `Quaternion` prevents issues like gimbal lock, which can occur with Euler angle representations.
+Smooth, gimbal-lock-free rotations are achieved using the `Quaternion`. This class supports representation through Euler angles, axis-angle pairs, or direct matrix conversion, making it the preferred method for animating 3D object orientations.
 
-The framework allows for the creation of quaternions from various sources, including axis-angle pairs through the `AngleAxis`, individual Euler angles, or existing matrices. Smooth animations between two orientations are achieved using the `Slerp(const Quaternion &, const Quaternion &, float)`, which performs spherical linear interpolation, or the `Squad(const Quaternion &, const Quaternion &, const Quaternion &, const Quaternion &, float)` for more complex, cubic-based interpolation paths. The `Rotate(const Vector3 &)` allows for the transformation of vectors based on a given rotation.
+Interpolation between orientations is handled through several key methods. Linear interpolation is provided by `Lerp(const Quaternion &, const Quaternion &, float)`, while spherical linear interpolation is performed by `Slerp(const Quaternion &, const Quaternion &, float)` to maintain constant rotational velocity. For complex animation paths, the `Squad(const Quaternion &, const Quaternion &, const Quaternion &, const Quaternion &, float)` enables spherical cubic interpolation across control points. If the shortest rotational distance between two orientations is required, the `AngleBetween(const Quaternion &, const Quaternion &)` calculates this value in radians.
 
 ```cpp
-Quaternion myRotation(Radian(0.5f), Vector3(0.0f, 1.0f, 0.0f));
-Vector3 myVector(1.0f, 0.0f, 0.0f);
-Vector3 result = myRotation.Rotate(myVector);
+Quaternion q1 = Quaternion(Radian(0.0f), Vector3::XAXIS);
+Quaternion q2 = Quaternion(Radian(1.57f), Vector3::XAXIS);
+Quaternion result = Slerp(q1, q2, 0.5f);
 ```
 
-## Layout Geometry and Bounding Boxes
+## Defining Spatial Areas and Bounds
 
-The `Rect` is a templated structure used to manage rectangular areas within the UI. It provides essential methods for geometric logic, such as determining if a specific point or area lies within another using the `Contains(const Rect< T > &)` or evaluating spatial overlap via the `Intersects(const Rect< T > &)`.
+Spatial management for screen regions and hit-testing is performed using the `Rect`. This template-based structure stores coordinate and dimension data, providing utility methods to assess the state of rectangular boundaries.
 
-To modify layout constraints dynamically, the `Inset(T, T)` allows developers to shift the boundaries of a rectangle inward or outward. When combining layout elements, the `Merge(const Rect< T > &)` combines two rectangles, ensuring the resulting area encapsulates both original shapes.
+Developers can determine the validity of a region using the `IsValid()` or check if it is empty via the `IsEmpty()`. Geometric interactions such as determining if two areas overlap are supported by the `Intersects(const Rect< T > &)` and `Intersect(const Rect< T > &)`. Furthermore, modifying the size of a rectangle without affecting its center position is made simple with the `Inset(T, T)`.
 
 ```cpp
-Rect<int> rectA(0, 0, 100, 100);
-Rect<int> rectB(50, 50, 100, 100);
-bool isIntersecting = rectA.Intersects(rectB);
+Rect<float> rect1(0.0f, 0.0f, 100.0f, 100.0f);
+Rect<float> rect2(50.0f, 50.0f, 100.0f, 100.0f);
+if(rect1.Intersects(rect2))
+{
+  rect1.Inset(10.0f, 10.0f);
+}
 ```
 
-## Angle and Unit Conversion
+## Angle and Precision Utilities
 
-Geometry calculations require consistent angular units, which are managed by the `Radian` and the `Degree`. These structures provide explicit types for angular measurements, preventing ambiguity in function signatures.
+To maintain consistent mathematical operations across the framework, dedicated wrappers are provided for angle units, specifically `Degree` and `Radian`. These allow for type-safe conversion between units, preventing errors in rotation calculations.
 
-The `Radian` serves as the standard unit for most mathematical functions, while the `Degree` is available for developer-friendly input. Conversions between these types are handled directly by the constructors and assignment operators, facilitating easy transitions between human-readable degrees and machine-ready radians.
+Floating-point precision issues are addressed using the `Epsilon`. This compile-time template utility allows developers to identify the machine epsilon, which is essential for implementing safe comparisons in logical checks involving floating-point numbers.
 
 ```cpp
 Degree myDegree(90.0f);
 Radian myRadian(myDegree);
+bool isEqual = (myRadian < (Radian(1.57f) + Epsilon<1>::value));
 ```
 
-## Utility and Randomized Values
+## Data Packing and Pair Structures
 
-The math module includes static utilities to assist with common computational needs, such as precision-based comparison and stochastic value generation. The `Epsilon` provides template-based access to machine epsilon values, enabling reliable floating-point comparisons.
+Efficient memory handling and grid-based layout calculations are supported by specialized pair structures. The `IntPair`, `Int32Pair`, and `Uint16Pair` provide compact storage for two-dimensional integer data.
 
-For generating varied UI behavior, the `Random` offers the `Range(float, float)`, which returns a float within specified bounds. Additionally, the `Random::Axis()` can be used to generate a normalized vector in a random direction, which is particularly useful for physics-based effects or particle system initialization.
+These structures are particularly useful for managing dimensions, screen coordinates, or grid indices. They include methods for setting and retrieving individual components, such as `SetWidth(tIntType)`, `GetWidth()`, `SetHeight(tIntType)`, and `GetHeight()`. For dynamic layouts, values can be derived from existing floating-point data through methods like `FromFloatVec2(const FLOAT_VECTOR_N_TYPE &)`.
 
 ```cpp
-float randomValue = Random::Range(0.0f, 100.0f);
+Vector2 vector(100.0f, 200.0f);
+Uint16Pair pair = Uint16Pair::FromFloatVec2(vector);
+uint32_t width = pair.width;
+```
+
+## Procedural Math Helpers
+
+The module includes utility namespaces for generating procedural values and performing advanced logarithmic calculations. The `Random` offers tools such as the `Range(float, float)`, which returns a random number within a specified interval, and the `Axis()`, which generates a normalized random direction vector.
+
+For performance-critical code requiring compile-time evaluation, the `Log` and `Power` provide template-based logarithmic and exponential calculations. These utilities allow developers to bake constant values into their applications to reduce runtime computation.
+
+```cpp
+float val = Random::Range(0.0f, 1.0f);
+Vector4 axis = Random::Axis();
 ```
 
 ---

@@ -5,82 +5,114 @@ sidebar_label: "label"
 ---
 ## Overview
 
-The Label component is a high-performance [text](./text.md) [rendering](./rendering.md) node used to display static or dynamic content in your UI, offering extensive support for styling, layout control, and interactive [text](./text.md) behaviors. It acts as an optimized container for [text](./text.md), providing a robust set of methods to handle visual presentation and layout behavior within the application hierarchy.
+The Label component is a high-performance [text](./text.md) [rendering](./rendering.md) engine designed to display static and dynamic [text](./text.md) strings within your application's UI hierarchy. It serves as a non-editable container for [text](./text.md), providing developers with extensive control over typography, layout, and visual presentation.
+
+```cpp
+Label label = Label::New().SetText("Hello DALi");
+```
 
 ## Text Content and Markup
 
-The primary function of a [label](./label.md) is to render [text](./text.md), which is managed via character string setters. When rich formatting is required within a single [label](./label.md), markup parsing can be toggled to interpret embedded tags.
+The core content of a label is defined by the text string it displays. Developers can toggle rich-text capabilities to enable or disable markup processing, which allows for formatted text rendering within the same label.
 
-The [text](./text.md) content is updated using the `SetText(const Dali::String &)`, while the current string can be retrieved via `GetText()`. To allow the interpretation of rich [text](./text.md) formatting, the `SetMarkupEnabled(bool)` should be used. The status of this feature can be verified by calling `IsMarkupEnabled()`.
+The text content is managed through the `SetText(const Dali::String &)` and the `GetText()`. To enable advanced formatting, use the `SetMarkupEnabled(bool)`, which informs the engine whether to parse markup tags within the string. When using markup, developers can designate specific text segments as interactive anchors. The visual behavior of these anchors is controlled by the `SetAnchorColor(const UiColor &)` for the default state and the `SetAnchorClickedColor(const UiColor &)` for when a user interacts with the element.
 
 ```cpp
-Label label = Label::New().SetMarkupEnabled(true).SetText("<b>Bold Text</b>");
+Label label = Label::New();
+label.SetMarkupEnabled(true);
+label.SetAnchorColor(UiColor(0.0f, 0.0f, 1.0f, 1.0f));
+label.SetAnchorClickedColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
 ```
 
 ## Typography and Font Styling
 
-The visual representation of text is determined by font properties, which include family, size, weight, width, and slant. Advanced font rendering is supported through the use of OpenType font variations for dynamic typeface adjustments.
+Text appearance is highly configurable, allowing for precise control over font attributes. These settings ensure that the text aligns with the overall design language of the application.
 
-Font attributes are managed through specific setters: `SetFontFamily(const Dali::String &)`, `SetFontSize(float)`, `SetFontWeight(Text::FontWeight)`, `SetFontWidth(Text::FontWidth)`, and `SetFontSlant(Text::FontSlant)`. Corresponding getter methods such as `GetFontFamily()` and `GetFontSize()` allow for state verification. For specialized fonts that support OpenType axes, custom adjustments can be applied using `SetFontVariation(const Dali::String &)` or cleared with `ClearFontVariation()`.
+Developers can specify the font family using the `SetFontFamily(const Dali::String &)` and adjust the size using the `SetFontSize(float)`. Further refinements can be applied through weights, widths, and slants via the `SetFontWeight(Text::FontWeight)`, `SetFontWidth(Text::FontWidth)`, and `SetFontSlant(Text::FontSlant)` respectively. For modern typography, advanced font features are supported through font variations, which can be configured using the `SetFontVariation(const Dali::Vector< Text::FontVariationAxis > &)` and cleared when necessary with the `ClearFontVariation()`.
 
 ```cpp
 Label label = Label::New();
-label.SetFontFamily("Arial").SetFontSize(24.0f).SetFontWeight(Text::FontWeight::BOLD);
+label.SetFontFamily("SamsungSans");
+label.SetFontSize(24.0f);
+label.SetFontWeight(Text::FontWeight::BOLD);
+Dali::Vector<Text::FontVariationAxis> axes;
+label.SetFontVariation(axes);
 ```
 
-## Layout, Alignment, and Sizing
+## Layout and Sizing
 
-Text layout is governed by multi-line settings, wrap modes, and alignment constraints. The framework determines how text fills the available container space by analyzing these parameters during the layout phase.
+The framework provides robust mechanisms to handle how text flows within a container, especially when the text length varies or exceeds the allocated screen real estate.
 
-To enable text to span multiple rows, use `SetMultiLine(bool)` and verify with `IsMultiLine()`. Control over word breaks is provided by `SetLineWrapMode(Text::LineWrapMode)` using various options like `Text::LineWrapMode::WORD` or `Text::LineWrapMode::CHARACTER`. Horizontal and vertical positioning is adjusted via `SetHorizontalTextAlignment(Text::Alignment)` and `SetVerticalTextAlignment(Text::Alignment)` respectively, using alignments such as `Text::Alignment::CENTER`. Line density can be finely tuned using `SetLineHeight(float)` in combination with `SetLineHeightMode(Text::LineHeightMode)`, where the mode can be defined as `Text::LineHeightMode::RELATIVE` or `Text::LineHeightMode::ABSOLUTE`.
+Whether text wraps to multiple lines is controlled by the `SetMultiLine(bool)`. When multi-line support is active, the wrapping logic is determined by the `SetLineWrapMode(Text::LineWrapMode)`, which supports modes such as word, character, and hyphenation wrapping. Alignment within the assigned bounds is handled by the `SetHorizontalTextAlignment(Text::Alignment)` and `SetVerticalTextAlignment(Text::Alignment)`. Additionally, the spacing between lines can be adjusted using the `SetLineHeight(float)`, with the interpretation mode set by the `SetLineHeightMode(Text::LineHeightMode)`. If content exceeds the bounds, the `SetOverflowMode(Text::OverflowMode)` dictates whether the text clips or uses an ellipsis.
 
 ```cpp
 Label label = Label::New();
 label.SetMultiLine(true);
+label.SetLineWrapMode(Text::LineWrapMode::WORD);
 label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+label.SetVerticalTextAlignment(Text::Alignment::CENTER);
 label.SetLineHeight(1.5f);
 label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
 ```
 
-## Advanced Visual Effects
+## Adaptive Text and Scaling
 
-Beyond basic font styling, the Label module supports decorative effects that enhance legibility or provide specific artistic designs, such as backgrounds, shadows, and strokes.
+Responsive applications require text to scale gracefully across different device resolutions and user-defined accessibility settings. 
 
-The text background color is defined by `SetTextBackgroundColor(const UiColor &)` and can be removed with `ClearTextBackgroundColor()`. Decorative strokes and depth are managed through `SetShadow(const Text::Shadow &)`, `SetOutline(const Text::Outline &)`, `SetUnderline(const Text::Underline &)`, `SetLineThrough(const Text::LineThrough &)`, and `SetBevel(const Text::Bevel &)`. Each of these has a corresponding clear method, such as `ClearShadow()` or `ClearOutline()`, to revert the visual state.
+The baseline scale for text can be set using the `SetFontSizeScale(float)`. To ensure text remains readable, developers can enforce constraints using the `SetMinimumFontSizeScale(float)` and the `SetMaximumFontSizeScale(float)`. Integration with system-wide text settings is enabled via the `SetSystemFontSizeScaleEnabled(bool)`, which allows the label to respect user preferences automatically.
 
 ```cpp
 Label label = Label::New();
-label.SetShadow(Text::Shadow());
-label.SetUnderline(Text::Underline());
+label.SetSystemFontSizeScaleEnabled(true);
+label.SetMinimumFontSizeScale(0.8f);
+label.SetMaximumFontSizeScale(1.2f);
 ```
 
-## Dynamic Text and Marquee Behavior
+## Visual Effects and Decoration
 
-The Label component supports automatic scaling and marquee-style scrolling for content that exceeds its layout bounds. These features ensure that text remains accessible even when space is constrained.
+Visual enhancements improve the aesthetic quality and legibility of the displayed text. These decorations are applied as stylistic layers on the base text.
 
-Marquee behavior is configured using parameters like `SetMarqueeSpeed(int)`, `SetMarqueeLoopCount(int)`, and `SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy)`. The animation can be initiated using `StartMarquee()` and terminated via `StopMarquee()`. For font scaling, the framework allows developers to enable system-level scaling with `SetSystemFontSizeScaleEnabled(bool)`, or enforce boundaries using `SetMinimumFontSizeScale(float)` and `SetMaximumFontSizeScale(float)`.
+Stylistic additions such as shadows, underlines, and outlines are managed through dedicated setter methods including `SetShadow(const Text::Shadow &)`, `SetUnderline(const Text::Underline &)`, and `SetOutline(const Text::Outline &)`. The framework also supports strike-through text via the `SetLineThrough(const Text::LineThrough &)` and text bevels via the `SetBevel(const Text::Bevel &)`. Background coloring for specific text regions can be applied using the `SetTextBackgroundColor(const UiColor &)`. Each of these styles has a corresponding clearing method, such as `ClearShadow()` or `ClearUnderline()`, to revert to default styling.
 
 ```cpp
 Label label = Label::New();
-label.SetMarqueeSpeed(50);
+Text::Shadow shadow;
+label.SetShadow(shadow);
+Text::Underline underline;
+label.SetUnderline(underline);
+```
+
+## Marquee and Motion
+
+For strings that are too long to fit within their container, a marquee animation provides an automated scrolling mechanism to reveal the full content.
+
+The behavior of the marquee is governed by the `SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy)`, which determines if the animation starts manually or automatically upon overflow. Once triggered, the speed and loop behavior are defined by the `SetMarqueeSpeed(int)`, `SetMarqueeLoopCount(int)`, and `SetMarqueeLoopDelay(float)`. The animation can be further customized by setting the gap between scrolls with the `SetMarqueeGap(int)`, the orientation with the `SetMarqueeOrientation(Text::MarqueeOrientation)`, and the stop behavior with the `SetMarqueeStopMode(Text::MarqueeStopMode)`. The marquee cycle is initiated by calling `StartMarquee()` and can be halted using `StopMarquee()`.
+
+```cpp
+Label label = Label::New();
 label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+label.SetMarqueeSpeed(50);
+label.SetMarqueeLoopCount(3);
 label.StartMarquee();
 ```
 
-## Interactivity and Signaling
+## Signal Handling and State
 
-Interactivity within a label primarily involves monitoring text events or layout completion. This allows the application to respond to user input or asynchronous processing updates.
+The Label component notifies the application of critical lifecycle and interaction events, enabling real-time UI synchronization and event-driven logic.
 
-Click events on text anchors are monitored via the `AnchorClickedSignal()`. When performing asynchronous rendering or size calculations, the framework emits signals such as `AsyncRenderFinishedSignal()`, `AsyncNaturalSizeComputedSignal()`, or `AsyncHeightForWidthComputedSignal()` upon completion. To interact with specific anchor colors, use `SetAnchorColor(const UiColor &)` and `SetAnchorClickedColor(const UiColor &)`.
+Interactive feedback is captured via the `AnchorClickedSignal()`, which fires when a user taps a defined anchor. Performance-sensitive applications may utilize asynchronous rendering to prevent UI thread blocking; status updates regarding these processes are provided by the `AsyncRenderFinishedSignal()`, `AsyncNaturalSizeComputedSignal()`, and `AsyncHeightForWidthComputedSignal()`. Monitoring these signals allows the application to react to changes in text geometry or rendering readiness dynamically.
 
 ```cpp
 class MyHandler {
 public:
-  void OnAnchorClicked(View view, const String &anchorId) {}
+  void OnAnchorClicked(View view, const Dali::String& anchorId) {
+    // Handle link click
+  }
 };
-MyHandler handler;
-Label label = Label::New();
-label.AnchorClickedSignal().Connect(&handler, &MyHandler::OnAnchorClicked);
+
+// Inside initialization:
+MyHandler* handler = new MyHandler();
+label.AnchorClickedSignal().Connect(handler, &MyHandler::OnAnchorClicked);
 ```
 
 ---
