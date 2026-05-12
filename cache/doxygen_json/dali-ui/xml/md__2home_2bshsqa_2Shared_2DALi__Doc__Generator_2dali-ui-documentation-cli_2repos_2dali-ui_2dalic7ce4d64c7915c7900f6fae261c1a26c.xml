@@ -1,0 +1,1512 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_214-performance-and-quality-plan_8ko</compoundname>
+    <title>TextVisualizer 성능 및 품질 개선 계획</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md540"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md541">
+<title>목적</title>
+<para>이 문서는 현재 동작 중인 <computeroutput>TextVisualizer</computeroutput> 구현을 기준으로, 이후 작업을 “성능 최적화”와 “텍스트 품질 개선”으로 분리해 정리한 계획 문서이다.</para>
+<para>핵심 목표는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>moving bounds가 많은 상황에서 relayout / rerender 비용이 어디서 커지는지 분해한다.</para>
+</listitem><listitem><para>line height / baseline / font size 처리 품질이 왜 낮은지 현재 코드 기준으로 정리한다.</para>
+</listitem><listitem><para>이후 작업을 작은 커밋 단위로 나눌 수 있도록 우선순위와 금지 사항을 고정한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이 문서는 구현 제안 문서이며, 실제 코드를 변경하지 않는다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md542">
+<title>1. 현재 성능 경로 요약</title>
+<para>현재 performance demo sample에서 moving bounds가 움직일 때 발생하는 흐름은 아래와 같다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Timer<sp/>Tick]<sp/>--&gt;<sp/>B[bound<sp/>positions<sp/>update]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[SetExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[MarkLayoutDirty<sp/>+<sp/>MarkRenderDirty]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[RelayoutRequest]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[LayoutGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[UpdateRenderData]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[output<sp/>actor<sp/>/<sp/>mesh<sp/>update]</highlight></codeline>
+</programlisting></para>
+<para>현재 코드 기준 단계별 비용 후보:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Timer Tick</computeroutput><itemizedlist>
+<listitem><para>sample은 <computeroutput>Timer::New(16)</computeroutput>을 사용한다.</para>
+</listitem><listitem><para>실제 render frame과 tick이 동기화되어 있지 않으므로, update 요청 수와 실제 draw cadence가 어긋날 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>bound positions update</computeroutput><itemizedlist>
+<listitem><para>active bound count만큼 매 tick 위치/속도/bounce 계산을 수행한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions</computeroutput><itemizedlist>
+<listitem><para>기존 <computeroutput>mExclusionRegions</computeroutput>와 새 region 벡터를 전체 비교한 뒤 복사한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>MarkLayoutDirty + MarkRenderDirty</computeroutput><itemizedlist>
+<listitem><para>이후 relayout/render 경로를 모두 다시 열어 둔다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs</computeroutput><itemizedlist>
+<listitem><para>현재 glyph advance 기반 전체 배치를 다시 수행한다.</para>
+</listitem><listitem><para>line별 exclusion interval 계산도 다시 한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData</computeroutput><itemizedlist>
+<listitem><para>adapter glyph placements를 render data로 다시 변환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Renderer::Render</computeroutput><itemizedlist>
+<listitem><para>attached 상태여도 현재는 다시 호출된다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>output actor / mesh update</computeroutput><itemizedlist>
+<listitem><para>output actor 재사용 여부와 관계없이 renderer 내부 geometry/update 비용이 다시 들어갈 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md543">
+<title>2. 현재 성능 병목 후보</title>
+<para><table rows="11" cols="5"><row>
+<entry thead="yes"><para>병목 후보   </para>
+</entry><entry thead="yes"><para>현재 동작   </para>
+</entry><entry thead="yes"><para>비용   </para>
+</entry><entry thead="yes"><para>개선 방향   </para>
+</entry><entry thead="yes"><para>우선순위    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>SetExclusionRegions()</computeroutput>마다 full vector compare/copy   </para>
+</entry><entry thead="no"><para>core API는 exact compare 정책을 유지하고, performance sample에는 exclusion update threshold를 추가했다   </para>
+</entry><entry thead="no"><para>bounds 수가 많아질수록 tick마다 O(N) 비교 + 복사 비용이 있었고, sample threshold로 일부 redundant call을 줄인다   </para>
+</entry><entry thead="no"><para>core epsilon 정책은 별도 검토   </para>
+</entry><entry thead="no"><para>sample 1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>매 tick full <computeroutput>LayoutGlyphs()</computeroutput>   </para>
+</entry><entry thead="no"><para>bounds 이동 시 전체 glyph를 처음부터 다시 배치한다   </para>
+</entry><entry thead="no"><para>glyph 수가 길수록 O(glyph count * line count) 성격으로 커진다   </para>
+</entry><entry thead="no"><para>partial relayout 또는 unchanged layout skip   </para>
+</entry><entry thead="no"><para>높음    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>매 tick full <computeroutput>Renderer::Render()</computeroutput>   </para>
+</entry><entry thead="no"><para>layout signature가 마지막 render와 같으면 placement-only dirty에서 render를 skip한다   </para>
+</entry><entry thead="no"><para>relayout 뒤 geometry/update 비용이 누적될 수 있었고, 동일 layout에서는 <computeroutput>UpdateRenderData()</computeroutput> / <computeroutput>Renderer::Render()</computeroutput> 호출을 줄인다   </para>
+</entry><entry thead="no"><para>signature cost와 epsilon 적절성 관찰   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>output actor/mesh regeneration   </para>
+</entry><entry thead="no"><para>output actor 재사용 여부와 별개로 내부 child mesh actor/renderer update가 발생할 수 있다   </para>
+</entry><entry thead="no"><para>actor/renderer 구조가 커질수록 비용 증가 가능   </para>
+</entry><entry thead="no"><para>output actor/mesh actor 재사용 정책 조사   </para>
+</entry><entry thead="no"><para>중간    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GetLineBaselineOffset()</computeroutput>의 same-line scan   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasViewAdapter::GetRendererGlyphPosition()</computeroutput>가 glyph마다 같은 line의 glyph placements를 다시 훑는다   </para>
+</entry><entry thead="no"><para>렌더 직전 좌표 보정에서 line당 반복 scan이 발생한다   </para>
+</entry><entry thead="no"><para>line baseline cache 추가   </para>
+</entry><entry thead="no"><para>높음    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>exclusion interval 계산 시 line마다 모든 bounds scan   </para>
+</entry><entry thead="no"><para>기존에는 <computeroutput>BuildAvailableIntervals()</computeroutput>가 line마다 모든 exclusion region을 확인했다. 현재는 layout pass 시작 시 y축 기준 sorted cache를 만들고 line band와 겹칠 수 있는 후보만 검사한다   </para>
+</entry><entry thead="no"><para>bounds 수와 line 수가 모두 커질수록 비용이 커졌고, 1차 최적화 후에는 per-line 후보 scan 비용이 줄었다   </para>
+</entry><entry thead="no"><para>더 큰 bounds 수에서는 spatial index / partial relayout 검토   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>Dali::Vector</computeroutput> / <computeroutput>std::vector</computeroutput> 재할당   </para>
+</entry><entry thead="no"><para>기존에는 layout 결과와 render data가 <computeroutput>Clear()</computeroutput> 후 반복 push-back 됐다. 현재는 glyph / cluster / renderable glyph count 기반 reserve를 적용했다   </para>
+</entry><entry thead="no"><para>긴 텍스트에서 allocation/reallocation이 잦을 수 있었고, reserve 적용 후 반복 relayout/update에서 capacity 재사용 여지가 생겼다   </para>
+</entry><entry thead="no"><para>더 큰 효과가 필요하면 <computeroutput>LayoutResult</computeroutput> object reuse / renderer internal allocation 조사   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>logging / diagnostics overhead   </para>
+</entry><entry thead="no"><para>현재 <computeroutput>DALI_LOG_ERROR</computeroutput>와 diagnostics getter가 살아 있다   </para>
+</entry><entry thead="no"><para>sample/benchmark 시 관측값을 왜곡할 수 있다   </para>
+</entry><entry thead="no"><para>debug level 또는 compile-time flag로 낮춤   </para>
+</entry><entry thead="no"><para>높음    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>render dirty</computeroutput> 미해제 구조   </para>
+</entry><entry thead="no"><para>성공적인 render update 후 엄격한 조건을 만족하면 clear한다   </para>
+</entry><entry thead="no"><para>동일 상태에서 render path 반복 진입을 줄인다   </para>
+</entry><entry thead="no"><para>dirty 재설정 경로와 장기 안정성 관찰   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>sample timer tick과 actual render frame mismatch   </para>
+</entry><entry thead="no"><para>16ms timer가 draw frame과 항상 맞지 않는다   </para>
+</entry><entry thead="no"><para>update 요청 수와 실제 frame rate 체감이 달라질 수 있다   </para>
+</entry><entry thead="no"><para>frame callback 또는 throttled status update 검토   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry></row>
+</table>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md544">
+<title>3. 빠른 최적화 후보</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md545">
+<title>A. diagnostics / log cleanup</title>
+<para><itemizedlist>
+<listitem><para>현재 <computeroutput>TextVisualizerImpl::LogRenderDiagnostics()</computeroutput>는 <computeroutput>DALI_LOG_ERROR</computeroutput>를 사용한다.</para>
+</listitem><listitem><para>runtime diagnostics counter도 bridge / view interface 쪽에 다수 남아 있다.</para>
+</listitem><listitem><para>동작 확인이 끝난 상태에서는 release path 영향이 가장 적은 형태로 내려야 한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>권장 방향:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>DALI_LOG_ERROR</computeroutput>를 debug level 또는 compile-time guard로 낮춘다.</para>
+</listitem><listitem><para>diagnostics counter는 유지하되 기본 실행 경로에서 문자열 formatting 비용이 생기지 않게 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md546">
+<title>B. render dirty clear 실험</title>
+<para><itemizedlist>
+<listitem><para>현재는 render 성공 후에도 <computeroutput>mRenderDirty</computeroutput>를 clear하지 않는다.</para>
+</listitem><listitem><para>성능 관점에서는 이 상태가 불필요한 render path 재실행 비용을 키운다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>IsRenderReady()</computeroutput>만으로 clear하면 안 된다.</para>
+</listitem><listitem><para>최소 조건은 아래 수준이 필요하다.<itemizedlist>
+<listitem><para><computeroutput>UpdateRenderData()</computeroutput> 성공</para>
+</listitem><listitem><para><computeroutput>Renderer::Render()</computeroutput> 성공</para>
+</listitem><listitem><para>output actor attach/parent 상태 일관성 확보</para>
+</listitem><listitem><para>glyph count / returned glyph count 일관성 확인</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md547">
+<title>C. redundant &lt;tt&gt;SetExclusionRegions()&lt;/tt&gt; 회피</title>
+<para><itemizedlist>
+<listitem><para>bounds 값이 실질적으로 거의 같다면 <computeroutput>SetExclusionRegions()</computeroutput> 자체를 skip할 수 있다.</para>
+</listitem><listitem><para>core <computeroutput>TextVisualizer</computeroutput>는 여전히 <computeroutput>Rect&lt;float&gt;</computeroutput> exact compare만 사용한다.</para>
+</listitem><listitem><para>performance sample은 sample-local threshold를 사용해 움직임이 아주 작을 때 <computeroutput>SetExclusionRegions()</computeroutput> 호출 자체를 skip한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>검토 포인트:</para>
+<para><itemizedlist>
+<listitem><para>core epsilon compare를 도입할지</para>
+</listitem><listitem><para>sample threshold가 visual fidelity와 성능 사이에서 적절한지</para>
+</listitem><listitem><para>실서비스에서는 unchanged region update를 upstream에서 줄일지</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md548">
+<title>D. layout unchanged 시 &lt;tt&gt;Render()&lt;/tt&gt; skip</title>
+<para><itemizedlist>
+<listitem><para>현재는 layout dirty가 해소되면 바로 <computeroutput>UpdateRenderData()</computeroutput>와 <computeroutput>Render()</computeroutput>로 간다.</para>
+</listitem><listitem><para><computeroutput>LayoutResult</computeroutput>가 이전과 사실상 같다면 render를 생략할 여지가 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보:</para>
+<para><itemizedlist>
+<listitem><para>1차 구현은 완료됐다.</para>
+</listitem><listitem><para><computeroutput>LayoutResult::CalculateSignature()</computeroutput>가 count / size / placement 좌표를 0.01px epsilon으로 quantize해 signature를 만든다.</para>
+</listitem><listitem><para>placement-only dirty에서 signature가 마지막 render와 같으면 render path를 skip한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md549">
+<title>E. &lt;tt&gt;LayoutResult&lt;/tt&gt; / render data reserve</title>
+<para><itemizedlist>
+<listitem><para>1차 최적화는 완료됐다.</para>
+</listitem><listitem><para><computeroutput>LayoutResult</computeroutput> 내부 <computeroutput>Dali::Vector</computeroutput>는 line / glyph placement / cluster placement count를 미리 reserve한다.</para>
+</listitem><listitem><para><computeroutput>TextLine.fragments</computeroutput>는 line별 available interval count를 기준으로 reserve한다.</para>
+</listitem><listitem><para><computeroutput>AtlasRendererBridge::Impl::mRenderData</computeroutput>는 renderable glyph count를 기준으로 reserve한다.</para>
+</listitem><listitem><para>결과 정책은 바꾸지 않고 반복 allocation/reallocation 비용만 줄이는 방향이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md550">
+<title>F. line baseline cache</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetRendererGlyphPosition()</computeroutput>는 glyph마다 <computeroutput>GetLineBaselineOffset()</computeroutput>를 호출한다.</para>
+</listitem><listitem><para>현재 <computeroutput>GetLineBaselineOffset()</computeroutput>는 같은 line의 placements를 다시 scan한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>빠른 개선 방향:</para>
+<para><itemizedlist>
+<listitem><para>line별 baseline offset cache를 <computeroutput>LayoutResult</computeroutput> 또는 adapter 내부에 저장</para>
+</listitem><listitem><para>renderer 좌표 계산 시 O(1) 조회로 변경</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md551">
+<title>G. interval optimization</title>
+<para><itemizedlist>
+<listitem><para>1차 최적화는 완료됐다.</para>
+</listitem><listitem><para>layout pass 시작 시 exclusion region을 y 기준으로 정렬한 cache를 만든다.</para>
+</listitem><listitem><para>각 line에서는 <computeroutput>top / bottom</computeroutput> 기준으로 현재 line band와 겹칠 가능성이 있는 region만 검사한다.</para>
+</listitem><listitem><para>blocked interval 생성 이후의 x sort / merge / available interval 생성 정책은 유지한다.</para>
+</listitem><listitem><para>남은 과제는 더 큰 bounds 수에서 spatial index나 affected-line partial relayout이 필요한지 확인하는 것이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md552">
+<title>4. 중기 최적화 후보</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Renderer::Render()</computeroutput> 전체 재호출 대신 geometry만 update 가능한지 조사</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput>에 direct update API를 추가하는 것이 타당한지 검토</para>
+</listitem><listitem><para>output actor / mesh actor 재사용 정책 확립</para>
+</listitem><listitem><para>moving bounds가 작게 움직일 때 partial layout 가능한지 검토</para>
+</listitem><listitem><para>dirty region / affected lines만 relayout</para>
+</listitem><listitem><para>layout result와 render data double buffering</para>
+</listitem><listitem><para>timer tick과 render frame sync 또는 throttling</para>
+</listitem></itemizedlist>
+</para>
+<para>이 항목들은 공수가 커질 수 있으므로, 빠른 최적화와 분리해서 다뤄야 한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md553">
+<title>5. 현재 품질 문제 요약</title>
+<para>현재 품질 문제는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>pixel size 계산이 부정확해 보인다.</para>
+</listitem><listitem><para><computeroutput>fontSize</computeroutput>가 point size처럼 처리되는지 pixel size처럼 처리되는지 혼재 가능성이 있다.</para>
+</listitem><listitem><para>line height가 너무 빡빡하다.</para>
+</listitem><listitem><para>baseline offset이 <computeroutput>max(yBearing)</computeroutput> 기반 임시 규칙이다.</para>
+</listitem><listitem><para>ascender / descender / line gap 기반 line metrics가 없다.</para>
+</listitem><listitem><para>glyph advance만으로 line 배치가 결정된다.</para>
+</listitem><listitem><para>emoji / fallback font가 섞이면 line height와 baseline이 더 어긋날 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 코드 기준 근거:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextPreparer::GetDefaultPointSize()</computeroutput>는 <computeroutput>fontSize * GetNumberOfPointsPerOneUnitOfPointSize()</computeroutput>를 사용한다.</para>
+</listitem><listitem><para><computeroutput>LayoutEngine::UpdateLayout()</computeroutput> 경로는 현재 <computeroutput>lineHeight = 0.0f</computeroutput>를 넘기고, 실제 line height는 <computeroutput>GetPlaceholderLineHeight()</computeroutput>로 대체된다.</para>
+</listitem><listitem><para><computeroutput>GetPlaceholderLineHeight()</computeroutput>는 사실상 <computeroutput>fontSize * 1.2f</computeroutput> 기반 임시값이다.</para>
+</listitem><listitem><para>renderer 좌표 보정은 <computeroutput>same line max(yBearing)</computeroutput>을 baseline처럼 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md554">
+<title>6. font size / pixel size 문제 조사 계획</title>
+<para>현재 <computeroutput>TextPreparer::Prepare()</computeroutput>에서 font size는 아래처럼 point size로 들어간다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>fontSize &gt; 0</computeroutput>이면 그 값을 그대로 사용</para>
+</listitem><listitem><para><computeroutput>FONT_SIZE_SCALE = 1.0f</computeroutput></para>
+</listitem><listitem><para><computeroutput>fontClient.GetNumberOfPointsPerOneUnitOfPointSize()</computeroutput>를 곱해 <computeroutput>PointSize26Dot6</computeroutput>로 변환</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 확인할 항목:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> public <computeroutput>FontSize</computeroutput>는 pixel인지 point인지</para>
+</listitem><listitem><para>기존 <computeroutput>Label</computeroutput>의 <computeroutput>FontSize</computeroutput>는 어떤 단위 해석을 따르는지</para>
+</listitem><listitem><para><computeroutput>GetNumberOfPointsPerOneUnitOfPointSize()</computeroutput> 적용이 현재 경로에서 맞는지</para>
+</listitem><listitem><para>DPI / font size scale / system scale 반영이 빠져 있는지</para>
+</listitem><listitem><para>sample에서 <computeroutput>30</computeroutput>으로 넣은 font size가 실제 glyph pixel height와 어느 정도 차이가 나는지</para>
+</listitem></itemizedlist>
+</para>
+<para>가능한 결론 후보:</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md555">
+<title>A. &lt;tt&gt;TextVisualizer::FontSize&lt;/tt&gt;를 pixel로 정의</title>
+<para><itemizedlist>
+<listitem><para>내부에서 기존 text system point size 변환을 명시적으로 관리한다.</para>
+</listitem><listitem><para>장점:<itemizedlist>
+<listitem><para>sample과 visual intuition이 맞기 쉽다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>단점:<itemizedlist>
+<listitem><para>기존 <computeroutput>Label</computeroutput>과 단위가 어긋날 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md556">
+<title>B. 기존 &lt;tt&gt;Label&lt;/tt&gt;과 같은 단위를 따른다</title>
+<para><itemizedlist>
+<listitem><para>가장 일관적인 정책이다.</para>
+</listitem><listitem><para>장점:<itemizedlist>
+<listitem><para>기존 text property semantics와 맞춘다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>단점:<itemizedlist>
+<listitem><para>sample에서 기대한 pixel 높이와 다를 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md557">
+<title>C. 정식 정책 확정 전까지 sample에서 보정값 사용</title>
+<para><itemizedlist>
+<listitem><para>임시 대응으로는 가능하다.</para>
+</listitem><listitem><para>다만 core semantics를 미루는 것이므로 장기 해법은 아니다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 추천:</para>
+<para><itemizedlist>
+<listitem><para>먼저 기존 <computeroutput>Label</computeroutput> 단위를 확인해 <computeroutput>TextVisualizer</computeroutput>도 같은 단위를 따르도록 정리하는 것이 안전하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md558">
+<title>7. line height / baseline 개선 계획</title>
+<para>현재 구조에서는 <computeroutput>PreparedText</computeroutput>가 shaping/glyph metric까지만 보유하고, line metrics는 사실상 없다.</para>
+<para>개선 방향:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText</computeroutput> 또는 line-metrics cache 구조에 아래를 저장<itemizedlist>
+<listitem><para>ascender</para>
+</listitem><listitem><para>descender</para>
+</listitem><listitem><para>lineGap</para>
+</listitem><listitem><para>naturalLineHeight</para>
+</listitem><listitem><para>baselineOffset</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>LayoutEngine::LayoutGlyphs()</computeroutput>에서<itemizedlist>
+<listitem><para>line height를 font metrics 기반으로 계산</para>
+</listitem><listitem><para>glyph advance만이 아니라 line metrics를 반영해 line y progression 결정</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter::GetRendererGlyphPosition()</computeroutput>에서<itemizedlist>
+<listitem><para>line별 baseline offset cache를 사용</para>
+</listitem><listitem><para>fallback font / emoji가 섞인 line이면 해당 line glyph들의 max ascender / descender를 반영</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>권장 구현 순서:</para>
+<para><orderedlist>
+<listitem><para>line metrics cache 추가</para>
+</listitem><listitem><para>layout line height 계산 교체</para>
+</listitem><listitem><para>renderer glyph position baseline cache 적용</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md559">
+<title>8. 품질 개선 커밋 분해</title>
+<para>추천 순서는 다음과 같다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md560">
+<title>Commit A. Clean up temporary diagnostics/logging</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>DALI_LOG_ERROR</computeroutput>와 임시 runtime diagnostics를 정리</para>
+</listitem><listitem><para>release path overhead를 낮춤</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>이 커밋에서 baseline/line break 로직까지 건드리지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md561">
+<title>Commit B. Add line metrics cache for TextVisualizer</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>ascender / descender / baseline 관련 cache 구조 추가</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>public API 추가 금지</para>
+</listitem><listitem><para>line break 정책 변경 금지</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md562">
+<title>Commit C. Use line metrics for glyph layout height and baseline</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>fontSize * 1.2</computeroutput> placeholder line height와 <computeroutput>max(yBearing)</computeroutput> baseline 규칙을 metrics 기반으로 대체</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>word/cluster line break와 섞지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md563">
+<title>Commit D. Clarify FontSize unit and conversion</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>FontSize</computeroutput> 단위 정책을 기존 text system과 맞춰 문서/코드에서 명확히 고정</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>sample-only 보정으로 끝내지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md564">
+<title>Commit E. Improve word/cluster line break</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>glyph advance 순차 배치 대신 break candidate 기반 줄바꿈 품질 개선</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>bidi/RTL까지 같이 넣지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md565">
+<title>Commit F. Add render dirty clear condition</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>render 성공 후 clear 가능한 조건을 도입</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>IsRenderReady()</computeroutput>만으로 clear하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md566">
+<title>Commit G. Optimize exclusion interval scanning</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>line마다 모든 bounds를 scan하는 비용을 줄임</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>partial relayout까지 한 번에 넣지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md567">
+<title>Commit H. Optimize baseline offset calculation</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>line baseline cache를 적용해 renderer 좌표 계산의 repeated scan 제거</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>glyph quality 정책 변경과 섞지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md568">
+<title>Commit I. Add performance counters to sample</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>sample에 더 의미 있는 relayout / render / glyph count 관찰 지표 추가</para>
+</listitem></itemizedlist>
+</para>
+<para>금지 사항:</para>
+<para><itemizedlist>
+<listitem><para>core instrumentation과 섞지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md569">
+<title>9. 다음 바로 할 작업 추천</title>
+<para>현재 가장 추천하는 다음 커밋은 다음이다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Commit A: Clean up temporary diagnostics/logging</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>지금은 동작은 확인됐지만, <computeroutput>DALI_LOG_ERROR</computeroutput>와 runtime diagnostics log가 성능 관찰을 왜곡할 수 있다.</para>
+</listitem><listitem><para>성능을 재보려면 먼저 debug overhead를 줄여야 한다.</para>
+</listitem><listitem><para>그 다음으로 line metrics cache / baseline 개선으로 넘어가는 것이 순서상 자연스럽다.</para>
+</listitem></itemizedlist>
+</para>
+<para>그 다음 추천 순서:</para>
+<para><orderedlist>
+<listitem><para>diagnostics/log cleanup</para>
+</listitem><listitem><para>line metrics cache</para>
+</listitem><listitem><para>baseline / line height 개선</para>
+</listitem><listitem><para>font size 단위 정리</para>
+</listitem><listitem><para>line break 품질 개선</para>
+</listitem><listitem><para>render dirty clear 조건 도입</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md570">
+<title>10. 금지 사항</title>
+<para>다음 원칙은 계속 유지한다.</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>TextController</computeroutput> 수정 금지</para>
+</listitem><listitem><para>기존 <computeroutput>TextView</computeroutput> 수정 금지</para>
+</listitem><listitem><para><computeroutput>text-atlas-renderer.*</computeroutput> 수정은 아직 신중히</para>
+</listitem><listitem><para>public API 추가는 신중히</para>
+</listitem><listitem><para><computeroutput>render dirty clear</computeroutput>는 별도 커밋에서만</para>
+</listitem><listitem><para>성능 최적화와 품질 개선을 한 커밋에 섞지 않기</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md571">
+<title>11. mermaid 구조도</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md572">
+<title>성능 경로</title>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Timer<sp/>Tick]<sp/>--&gt;<sp/>B[SetExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[LayoutDirty<sp/>/<sp/>RenderDirty]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[LayoutGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[UpdateRenderData]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[Output<sp/>Actor]</highlight></codeline>
+</programlisting></para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md573">
+<title>품질 경로</title>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[FontSize]<sp/>--&gt;<sp/>B[PointSize<sp/>/<sp/>Pixel<sp/>conversion]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[GlyphMetrics]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[LineMetrics]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[LayoutGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[RendererGlyphPosition]</highlight></codeline>
+</programlisting></para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md574">
+<title>12. 정리</title>
+<para>현재 <computeroutput>TextVisualizer</computeroutput>는 기능적으로는 “보이고, exclusion을 피하고, moving bounds를 따라 재배치되는” 단계까지 왔다.</para>
+<para>이후의 핵심은 두 갈래다.</para>
+<para><itemizedlist>
+<listitem><para>성능:<itemizedlist>
+<listitem><para>불필요한 full layout / full render / logging 비용을 줄이는 것</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>품질:<itemizedlist>
+<listitem><para>font size, line metrics, baseline, line break 품질을 기존 text system 기대치에 가깝게 끌어올리는 것</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>즉 다음 단계는 “동작 여부 확인”이 아니라 “비용과 품질을 다듬는 단계”다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md575">
+<title>진행: temporary diagnostics cleanup</title>
+<para>진행 내용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>OnMeasure()</computeroutput>에 남아 있던 임시 <computeroutput>DALI_LOG_ERROR</computeroutput>를 제거했다.</para>
+</listitem><listitem><para><computeroutput>LogRenderDiagnostics()</computeroutput>는 기본적으로 꺼진 compile-time 상수 guard 뒤로 이동했다.</para>
+</listitem><listitem><para>diagnostics getter / counter 자체는 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 정책:</para>
+<para><itemizedlist>
+<listitem><para>기본 빌드에서는 render diagnostics log가 출력되지 않는다.</para>
+</listitem><listitem><para>필요 시 guard만 켜서 기존 bridge / view interface diagnostics를 다시 활용할 수 있다.</para>
+</listitem><listitem><para>즉, future debugging용 관찰 지점은 유지하되 일반 실행 path의 log overhead는 줄인 상태다.</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>performance sample 측정 전에 logging overhead를 먼저 낮췄다.</para>
+</listitem><listitem><para>다음 단계의 성능 측정은 이 상태를 baseline으로 삼는 것이 적절하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md576">
+<title>진행: line metrics cache</title>
+<para>추가 내용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText</computeroutput>에 <computeroutput>LineMetrics</computeroutput> cache를 저장할 수 있도록 구조를 추가했다.</para>
+</listitem><listitem><para>현재 cache 항목:<itemizedlist>
+<listitem><para><computeroutput>ascender</computeroutput></para>
+</listitem><listitem><para><computeroutput>descender</computeroutput></para>
+</listitem><listitem><para><computeroutput>lineGap</computeroutput></para>
+</listitem><listitem><para><computeroutput>naturalLineHeight</computeroutput></para>
+</listitem><listitem><para><computeroutput>baselineOffset</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 계산 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextPreparer</computeroutput>가 glyph metrics를 얻은 뒤 fallback line metrics를 계산한다.</para>
+</listitem><listitem><para>1차 계산은 glyph metrics 기반이다.<itemizedlist>
+<listitem><para><computeroutput>ascender = max(yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>descender = max(height - yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>lineGap = fontSize * 0.2f</computeroutput> fallback</para>
+</listitem><listitem><para><computeroutput>naturalLineHeight = ascender + descender + lineGap</computeroutput></para>
+</listitem><listitem><para><computeroutput>baselineOffset = ascender</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>glyph가 없으면 line metrics cache는 비어 있는 상태로 둔다.</para>
+</listitem></itemizedlist>
+</para>
+<para>중요:</para>
+<para><itemizedlist>
+<listitem><para>이번 단계에서는 line metrics를 저장만 하고, 아직 layout line height나 renderer baseline 계산에는 사용하지 않는다.</para>
+</listitem><listitem><para>즉 기존 <computeroutput>LayoutEngine::GetPlaceholderLineHeight()</computeroutput>와 <computeroutput>GetLineBaselineOffset()</computeroutput> 동작은 그대로 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 계획:</para>
+<para><itemizedlist>
+<listitem><para>다음 커밋에서 이 cache를 line height / baseline 계산에 실제로 연결한다.</para>
+</listitem><listitem><para>현재 계산은 glyph metrics 기반 fallback이며, 향후에는 <computeroutput>FontClient</computeroutput>의 ascender / descender / line gap API를 조사해 더 정확한 font metrics 기반으로 개선해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md577">
+<title>진행: use line metrics for layout and baseline</title>
+<para>진행 내용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutGlyphs()</computeroutput>와 <computeroutput>LayoutPlaceholder()</computeroutput>가 line height를 결정할 때 <computeroutput>PreparedText::LineMetrics.naturalLineHeight</computeroutput>를 우선 사용하도록 연결했다.</para>
+</listitem><listitem><para>단, caller가 explicit <computeroutput>lineHeight</computeroutput>를 넘기면 그 값이 여전히 우선한다.</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter::GetRendererGlyphPosition()</computeroutput>는 일반 경로에서 <computeroutput>PreparedText::LineMetrics.baselineOffset</computeroutput>을 먼저 사용한다.</para>
+</listitem><listitem><para>line metrics가 없을 때는 기존 <computeroutput>GetLineBaselineOffset()</computeroutput> fallback scan을 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 의미:</para>
+<para><itemizedlist>
+<listitem><para>기본 line height가 더 이상 무조건 <computeroutput>fontSize * 1.2f</computeroutput>는 아니다.</para>
+</listitem><listitem><para>glyph metrics 기반 fallback line height가 line 간격에 반영되므로 줄 간격이 조금 더 자연스러워진다.</para>
+</listitem><listitem><para>renderer glyph position도 일반 경로에서는 <computeroutput>same line max(yBearing)</computeroutput> repeated scan을 줄이고, baseline 정책을 <computeroutput>PreparedText</computeroutput> cache 쪽으로 모은다.</para>
+</listitem></itemizedlist>
+</para>
+<para>제한:</para>
+<para><itemizedlist>
+<listitem><para>현재는 <computeroutput>PreparedText</computeroutput> level metrics 하나만 사용하므로 line별 fallback font / emoji 혼합 정확도는 제한적이다.</para>
+</listitem><listitem><para>즉 line별 metrics cache가 따로 필요한 상황은 아직 남아 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>line별 metrics cache 필요 여부</para>
+</listitem><listitem><para>fallback font / emoji가 섞인 line의 ascender / descender 계산</para>
+</listitem><listitem><para><computeroutput>FontClient</computeroutput>에서 font ascender / descender / lineGap을 직접 얻는 방법</para>
+</listitem><listitem><para><computeroutput>FontSize</computeroutput> 단위와 line metrics 관계</para>
+</listitem><listitem><para>현재 <computeroutput>lineGap = fontSize * 0.2f</computeroutput>가 적절한지</para>
+</listitem><listitem><para>sample에서 visual line height가 충분한지</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md578">
+<title>진행: pixel font size and relative line height</title>
+<para>이번 단계에서는 <computeroutput>TextVisualizer</computeroutput>의 <computeroutput>FontSize</computeroutput> 의미와 <computeroutput>LineHeight</computeroutput> 정책을 명시적으로 고정했다.</para>
+<para>핵심 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer::FontSize</computeroutput>는 pixel size로 정의한다.</para>
+</listitem><listitem><para><computeroutput>LineHeight</computeroutput>는 relative multiplier만 지원한다.</para>
+</listitem><listitem><para>absolute line height는 제공하지 않는다.</para>
+</listitem><listitem><para><computeroutput>lineHeight == -1.0f</computeroutput>이면 auto / natural line height를 사용한다.</para>
+</listitem><listitem><para><computeroutput>lineHeight &gt; 0.0f</computeroutput>이면 아래 공식을 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">CalculatedLineHeight(px)<sp/>=<sp/>FontSize(px)<sp/>*<sp/>lineHeight</highlight></codeline>
+</programlisting></para>
+<para>현재 구현 의미:</para>
+<para><itemizedlist>
+<listitem><para>public API에는 <computeroutput>SetLineHeight()</computeroutput>, <computeroutput>GetLineHeight()</computeroutput>, <computeroutput>ClearLineHeight()</computeroutput>가 추가된다.</para>
+</listitem><listitem><para>property <computeroutput>&quot;lineHeight&quot;</computeroutput>가 추가되며 초기값은 <computeroutput>-1.0f</computeroutput>다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl</computeroutput>은 relative line height를 직접 pixel line height로 계산해서 <computeroutput>LayoutEngine</computeroutput>에 넘긴다.</para>
+</listitem><listitem><para><computeroutput>lineHeight == -1.0f</computeroutput>이면 <computeroutput>LayoutEngine</computeroutput>이 기존처럼 <computeroutput>PreparedText::LineMetrics.naturalLineHeight</computeroutput>를 우선 사용한다.</para>
+</listitem><listitem><para><computeroutput>lineHeight</computeroutput> 변경은 prepare dirty가 아니라 layout dirty + render dirty만 발생시킨다.</para>
+</listitem></itemizedlist>
+</para>
+<para>기존 <computeroutput>Label</computeroutput>과의 관계:</para>
+<para><itemizedlist>
+<listitem><para>개념적으로는 <computeroutput>Label</computeroutput>의 <computeroutput>LineHeightMode::RELATIVE</computeroutput> 공식과 같은 의미를 따른다.</para>
+</listitem><listitem><para>단, <computeroutput>TextVisualizer</computeroutput>는 아직 <computeroutput>LineHeightMode</computeroutput> public API를 제공하지 않는다.</para>
+</listitem><listitem><para>absolute mode도 이번 범위에 포함하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>FontSize</computeroutput> pixel 정의와 기존 <computeroutput>Label</computeroutput> 단위가 완전히 같은지</para>
+</listitem><listitem><para>DPI / font scale / system scale 반영 위치</para>
+</listitem><listitem><para><computeroutput>FontClient</computeroutput> point-size conversion의 정확한 의미</para>
+</listitem><listitem><para><computeroutput>lineHeight &lt;= 0.0f</computeroutput> invalid 값 정책을 계속 auto fallback으로 둘지</para>
+</listitem><listitem><para>이후 absolute line height를 추가할 필요가 있는지</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md579">
+<title>현재 관찰 결과</title>
+<para><itemizedlist>
+<listitem><para>line metrics 적용 후 line height가 더 자연스러워졌다.</para>
+</listitem><listitem><para>텍스트가 이전보다 덜 빡빡하게 보인다.</para>
+</listitem><listitem><para>같은 영역에 들어가는 visible line 수가 줄어든 것으로 보인다.</para>
+</listitem><listitem><para>moving bounds가 움직일 때 relayout 체감 성능도 함께 개선됐다.</para>
+</listitem><listitem><para>즉, 이번 변경은 line height 품질 개선이면서 동시에 layout 성능에도 긍정적으로 작용한 사례다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md580">
+<title>line metrics가 성능에도 영향을 준 이유</title>
+<para>이번 개선의 성능 효과는 아래 흐름으로 설명할 수 있다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[line<sp/>height<sp/>증가]<sp/>--&gt;<sp/>B[visible<sp/>line<sp/>count<sp/>감소]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[per-line<sp/>BuildAvailableIntervals<sp/>호출<sp/>감소]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[exclusion<sp/>region<sp/>scan<sp/>감소]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[LayoutGlyphs<sp/>loop<sp/>감소]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[render/update<sp/>data<sp/>크기<sp/>감소<sp/>가능]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[FPS<sp/>개선]</highlight></codeline>
+</programlisting></para>
+<para>정리하면:</para>
+<para><itemizedlist>
+<listitem><para>line height가 커지면 같은 높이에 들어가는 line 수가 줄어든다.</para>
+</listitem><listitem><para>line 수가 줄면 <computeroutput>BuildAvailableIntervals()</computeroutput>가 호출되는 횟수도 줄어든다.</para>
+</listitem><listitem><para>각 line에서 모든 exclusion bounds를 훑는 현재 구조상, line 수 감소는 곧 exclusion scan 감소로 이어진다.</para>
+</listitem><listitem><para>그 결과 <computeroutput>LayoutGlyphs()</computeroutput> 전체 loop 양도 줄고, relayout 뒤 render/update 경로의 입력 크기도 완화될 수 있다.</para>
+</listitem><listitem><para>즉 이번 line metrics 적용은 “품질 개선”으로 시작했지만, 현재 구조에서는 자연스럽게 성능 개선 효과도 낳는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md581">
+<title>현재 line metrics 정책</title>
+<para>현재 정책은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText::LineMetrics</computeroutput>를 사용한다.</para>
+</listitem><listitem><para><computeroutput>naturalLineHeight</computeroutput>가 있으면 layout line height에서 우선 사용한다.</para>
+</listitem><listitem><para>explicit <computeroutput>lineHeight</computeroutput>가 전달되면 그 값이 override한다.</para>
+</listitem><listitem><para>renderer glyph position 계산에서는 <computeroutput>baselineOffset</computeroutput>을 우선 사용한다.</para>
+</listitem><listitem><para>line metrics가 없으면 기존 fallback을 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 의미:</para>
+<para><itemizedlist>
+<listitem><para>기본 line height는 더 이상 무조건 <computeroutput>fontSize * 1.2f</computeroutput>가 아니다.</para>
+</listitem><listitem><para>baseline도 일반 경로에서는 <computeroutput>PreparedText</computeroutput>에 저장된 정책을 먼저 따른다.</para>
+</listitem><listitem><para>fallback path는 남겨 두었기 때문에 metrics가 없는 경우 기존 동작은 깨지지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md582">
+<title>남은 제한</title>
+<para>아직 남아 있는 제한은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText</computeroutput> level metrics 하나만 사용 중이다.</para>
+</listitem><listitem><para>line별 fallback font / emoji 혼합 정확도는 아직 제한적이다.</para>
+</listitem><listitem><para><computeroutput>lineGap = fontSize * 0.2f</computeroutput>는 임시 fallback이다.</para>
+</listitem><listitem><para><computeroutput>FontSize</computeroutput> 단위 / pixel size 해석은 아직 정리되지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, 이번 단계는 “placeholder 규칙보다 낫다” 수준의 개선이지, font-system 수준의 최종 정답은 아니다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md583">
+<title>진행: exclusion interval scanning optimization</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>47cb3d725372757294d15e1f03a40e31aa07a9c9</computeroutput></para>
+</listitem><listitem><para><computeroutput>Optimize TextVisualizer exclusion interval scanning</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>기존 문제:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>BuildAvailableIntervals()</computeroutput>가 line마다 전체 exclusion region을 scan했다.</para>
+</listitem><listitem><para>moving bounds가 많고 visible line 수가 많을수록 <computeroutput>line count x bounds count</computeroutput> 비용이 커졌다.</para>
+</listitem><listitem><para>각 line은 전체 bounds scan 이후 vertical overlap region만 <computeroutput>blockedIntervals</computeroutput>에 넣고, 그 다음 x 방향 sort / merge를 수행했다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutPlaceholder()</computeroutput>와 <computeroutput>LayoutGlyphs()</computeroutput>가 layout pass 시작 시 exclusion region을 y축 기준으로 한 번 정렬한다.</para>
+</listitem><listitem><para>각 line에서는 sorted cache를 순회하면서:<itemizedlist>
+<listitem><para><computeroutput>region.bottom &lt;= lineTop</computeroutput>이면 이미 지난 region이므로 skip한다.</para>
+</listitem><listitem><para><computeroutput>region.top &gt;= lineBottom</computeroutput>이면 이후 region은 현재 line과 겹칠 수 없으므로 scan을 중단한다.</para>
+</listitem><listitem><para>그 외 region만 기존 vertical overlap 검사와 blocked interval 후보 생성에 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>blocked interval 생성 이후의 x 방향 sort / merge / available interval 생성 정책은 기존과 동일하게 유지한다.</para>
+</listitem><listitem><para>public <computeroutput>LayoutEngine::BuildAvailableIntervals()</computeroutput> API는 그대로 유지하며, 내부에서 sorted cache helper를 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>적용 범위:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutPlaceholder()</computeroutput></para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput></para>
+</listitem><listitem><para>public <computeroutput>BuildAvailableIntervals()</computeroutput> compatibility path</para>
+</listitem></itemizedlist>
+</para>
+<para>기대 효과:</para>
+<para><itemizedlist>
+<listitem><para>moving bounds가 많을 때 line별 exclusion scan 후보 수가 줄어든다.</para>
+</listitem><listitem><para>visible line count가 많을수록 전체 relayout 비용 감소 효과가 커질 수 있다.</para>
+</listitem><listitem><para>layout 결과 정책은 유지하면서 검사 대상만 줄이는 최적화다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para>bounds가 매 tick 움직이면 sorted cache는 layout pass마다 다시 생성된다.</para>
+</listitem><listitem><para>bounds 수가 매우 많아지면 단순 y-sort보다 더 고급 spatial index가 필요할 수 있다.</para>
+</listitem><listitem><para>affected line만 다시 계산하는 partial relayout은 아직 도입하지 않았다.</para>
+</listitem><listitem><para>render 호출 횟수나 renderer geometry update 비용은 이번 변경의 범위가 아니다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 성능 최적화 후보:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>render dirty</computeroutput> clear 조건 도입</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> epsilon compare 또는 upstream unchanged skip 정책</para>
+</listitem><listitem><para>layout unchanged 시 render skip</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md584">
+<title>진행: layout/render buffer reserve</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Reserve TextVisualizer layout and render buffers</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>기존 문제:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutResult</computeroutput>의 <computeroutput>lines</computeroutput>, <computeroutput>glyphPlacements</computeroutput>, <computeroutput>clusterPlacements</computeroutput>는 <computeroutput>Clear()</computeroutput> 이후 반복 <computeroutput>PushBack()</computeroutput>으로 채워졌다.</para>
+</listitem><listitem><para>각 <computeroutput>TextLine</computeroutput>의 <computeroutput>fragments</computeroutput>도 line마다 available interval 결과에 따라 반복 <computeroutput>PushBack()</computeroutput>으로 채워졌다.</para>
+</listitem><listitem><para><computeroutput>AtlasRendererBridge::Impl::mRenderData</computeroutput>도 매 render data update마다 clear 후 glyph별 <computeroutput>push_back()</computeroutput>으로 채워졌다.</para>
+</listitem><listitem><para>긴 텍스트와 moving bounds relayout 상황에서는 같은 규모의 layout/render data를 반복 생성하므로 allocation/reallocation 비용이 누적될 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutResult::Reserve()</computeroutput> helper를 추가해 line / glyph placement / cluster placement vector capacity를 미리 확보한다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 glyph count와 estimated line count를 기준으로 <computeroutput>glyphPlacements</computeroutput>와 <computeroutput>lines</computeroutput>를 reserve한다.</para>
+</listitem><listitem><para><computeroutput>LayoutPlaceholder()</computeroutput>는 cluster count와 estimated line count를 기준으로 <computeroutput>clusterPlacements</computeroutput>와 <computeroutput>lines</computeroutput>를 reserve한다.</para>
+</listitem><listitem><para>각 line의 <computeroutput>TextLine.fragments</computeroutput>는 <computeroutput>availableIntervals.Count()</computeroutput>를 기준으로 reserve한다.</para>
+</listitem><listitem><para><computeroutput>AtlasRendererBridge::UpdateRenderData()</computeroutput>는 renderable glyph count를 기준으로 <computeroutput>mRenderData.reserve()</computeroutput>를 호출한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para>glyph placement / cluster placement 결과는 바꾸지 않는다.</para>
+</listitem><listitem><para>line break policy는 바꾸지 않는다.</para>
+</listitem><listitem><para>line height / font size semantics는 바꾸지 않는다.</para>
+</listitem><listitem><para>exclusion interval algorithm은 바꾸지 않는다.</para>
+</listitem><listitem><para><computeroutput>Renderer::Render()</computeroutput> 호출 정책과 <computeroutput>render dirty</computeroutput> 정책은 바꾸지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>기대 효과:</para>
+<para><itemizedlist>
+<listitem><para>같은 <computeroutput>LayoutResult</computeroutput> 객체를 반복 재사용하는 relayout path에서 <computeroutput>Dali::Vector</computeroutput> capacity 재사용 가능성이 생긴다.</para>
+</listitem><listitem><para>bridge render data는 <computeroutput>std::vector::clear()</computeroutput>가 capacity를 유지하므로 moving bounds update 중 repeated allocation을 줄일 수 있다.</para>
+</listitem><listitem><para>효과는 glyph count / line count / renderable glyph count가 클수록 커질 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계 / 확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Dali::Vector::Clear()</computeroutput> 이후 capacity 유지 정책은 현재 사용 패턴상 reserve API를 믿고 사용하지만, 장기적으로 정확한 retention 정책 확인이 필요하다.</para>
+</listitem><listitem><para><computeroutput>TextLine.fragments</computeroutput> reserve는 line-local copy/move 과정의 실제 효과를 더 확인해야 한다.</para>
+</listitem><listitem><para>render data vector capacity가 long-running moving bounds 상황에서 기대대로 유지되는지 sample/profiler 관찰이 필요하다.</para>
+</listitem><listitem><para>renderer 내부 mesh / actor / atlas allocation은 이번 변경 범위 밖에 남아 있다.</para>
+</listitem><listitem><para>더 큰 최적화가 필요하면 <computeroutput>LayoutResult</computeroutput> object reuse 방식, partial relayout, geometry-only update를 별도로 검토해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md585">
+<title>진행: render dirty clear condition</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Add TextVisualizer render dirty clear condition</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>기존 문제:</para>
+<para><itemizedlist>
+<listitem><para>render 성공 후에도 <computeroutput>mRenderDirty</computeroutput>를 clear하지 않아, 동일 상태에서 <computeroutput>OnRelayout()</computeroutput>이 다시 들어오면 render path가 계속 열린 상태로 남을 수 있었다.</para>
+</listitem><listitem><para>특히 attached 상태에서도 <computeroutput>AttachRendererToHost()</computeroutput>가 <computeroutput>Renderer::Render()</computeroutput>를 다시 호출하는 현재 정책에서는 불필요한 full render 재호출 가능성을 줄일 필요가 있었다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerImpl::ClearRenderDirty()</computeroutput> helper를 추가했다.</para>
+</listitem><listitem><para><computeroutput>OnRelayout()</computeroutput>의 render path에서 render update가 성공한 경우에만 <computeroutput>ClearRenderDirty()</computeroutput>를 호출한다.</para>
+</listitem><listitem><para>clear 판단은 <computeroutput>IsRenderReady()</computeroutput> 하나만 보지 않고, render data update / attach 결과 / glyph diagnostics / output actor parent 상태를 함께 확인한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>clear 필수 조건:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mRenderDirty == true</computeroutput></para>
+</listitem><listitem><para><computeroutput>mAtlasRendererBridge.HasRenderableGlyphs() == true</computeroutput></para>
+</listitem><listitem><para><computeroutput>UpdateRenderData() == true</computeroutput></para>
+</listitem><listitem><para><computeroutput>AttachRendererToHost() == true</computeroutput></para>
+</listitem><listitem><para><computeroutput>mAtlasRendererBridge.IsRenderReady() == true</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLastReturnedGlyphCount() &gt; 0</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLastReturnedGlyphCount() &lt;= GetLastRequestedGlyphCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetRendererOutput()</computeroutput> valid</para>
+</listitem><listitem><para><computeroutput>IsRendererOutputParentedToHost() == true</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>clear하지 않는 경우:</para>
+<para><itemizedlist>
+<listitem><para>renderable glyph가 없는 경우</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData()</computeroutput>가 실패한 경우</para>
+</listitem><listitem><para><computeroutput>AttachRendererToHost()</computeroutput>가 실패한 경우</para>
+</listitem><listitem><para>renderer output actor가 없거나 host에 parented 되지 않은 경우</para>
+</listitem><listitem><para>renderer diagnostics에서 returned glyph count가 0이거나 requested count를 초과하는 경우</para>
+</listitem></itemizedlist>
+</para>
+<para>dirty가 다시 set되는 경로:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetText()</computeroutput> / <computeroutput>SetFontFamily()</computeroutput> / <computeroutput>SetFontSize()</computeroutput>는 <computeroutput>MarkPrepareDirty()</computeroutput>를 통해 prepare + layout + render dirty를 다시 set한다.</para>
+</listitem><listitem><para><computeroutput>SetLineHeight()</computeroutput>는 layout dirty + render dirty를 다시 set한다.</para>
+</listitem><listitem><para><computeroutput>SetTextColor()</computeroutput>는 render dirty를 다시 set한다.</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> / <computeroutput>ClearExclusionRegions()</computeroutput>는 layout dirty + render dirty를 다시 set한다.</para>
+</listitem><listitem><para>layout size 변경은 <computeroutput>OnRelayout()</computeroutput>에서 layout dirty + render dirty를 다시 set한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>기대 효과:</para>
+<para><itemizedlist>
+<listitem><para>동일 상태에서 <computeroutput>UpdateRenderData()</computeroutput> / <computeroutput>Renderer::Render()</computeroutput> 반복 호출을 줄인다.</para>
+</listitem><listitem><para>moving bounds처럼 exclusion region이 실제로 바뀌는 경우에는 기존처럼 dirty가 다시 set되어 render update가 발생한다.</para>
+</listitem><listitem><para>textColor만 변경되는 경우에도 render dirty가 다시 set되므로 color-only render update 경로는 유지된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetRendererOutputTotalRendererCount()</computeroutput>를 clear 조건에 포함할지 여부</para>
+</listitem><listitem><para>output actor 재생성 / 교체가 발생하는 경우 clear 조건의 장기 안정성</para>
+</listitem><listitem><para>render dirty false 상태에서 actor / renderer가 외부 요인으로 invalid 되는 경우</para>
+</listitem><listitem><para>future async render와 dirty clear 관계</para>
+</listitem><listitem><para>performance sample에서 FPS 개선 폭</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md586">
+<title>진행: performance sample exclusion update threshold</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Add TextVisualizer performance sample exclusion update threshold</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>core <computeroutput>TextVisualizer::SetExclusionRegions()</computeroutput> 정책은 변경하지 않는다.</para>
+</listitem><listitem><para>performance sample에서 moving bounds 변화가 매우 작을 때 redundant <computeroutput>SetExclusionRegions()</computeroutput> 호출을 줄이는 실험을 한다.</para>
+</listitem><listitem><para>threshold 효과를 sample status에서 바로 관찰할 수 있게 한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경된 구조:</para>
+<para><itemizedlist>
+<listitem><para>sample이 마지막으로 적용한 exclusion regions를 <computeroutput>mLastAppliedExclusionRegions</computeroutput>에 저장한다.</para>
+</listitem><listitem><para>새로 계산한 regions와 마지막 적용 regions의 rect <computeroutput>x / y / width / height</computeroutput> 차이가 모두 threshold 이하이면 <computeroutput>SetExclusionRegions()</computeroutput> 호출을 skip한다.</para>
+</listitem><listitem><para>region count가 다르거나 threshold가 <computeroutput>0.0f</computeroutput> 이하이면 close로 보지 않는다.</para>
+</listitem><listitem><para>exclusion disabled 상태에서는 이미 적용된 regions가 있을 때만 <computeroutput>ClearExclusionRegions()</computeroutput>를 호출하고 cache를 비운다.</para>
+</listitem></itemizedlist>
+</para>
+<para>sample 조작:</para>
+<para><itemizedlist>
+<listitem><para>기본 threshold는 <computeroutput>0.5px</computeroutput>다.</para>
+</listitem><listitem><para><computeroutput>7</computeroutput>: threshold 감소</para>
+</listitem><listitem><para><computeroutput>8</computeroutput>: threshold 증가</para>
+</listitem><listitem><para><computeroutput>9</computeroutput>: threshold reset</para>
+</listitem></itemizedlist>
+</para>
+<para>status 표시:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>APPLIED</computeroutput>: 실제 <computeroutput>SetExclusionRegions()</computeroutput> 또는 clear가 적용된 횟수</para>
+</listitem><listitem><para><computeroutput>SKIPPED</computeroutput>: threshold 때문에 <computeroutput>SetExclusionRegions()</computeroutput> 호출을 생략한 횟수</para>
+</listitem><listitem><para><computeroutput>THRESH</computeroutput>: 현재 threshold pixel 값</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>threshold가 너무 크면 moving bounds와 text reflow 사이에 시각적인 지연이 생겨 visual fidelity가 떨어질 수 있다.</para>
+</listitem><listitem><para>이번 변경은 sample-level upstream skip 실험이며, core API epsilon compare 정책을 의미하지 않는다.</para>
+</listitem><listitem><para>partial relayout은 아직 도입하지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md587">
+<title>진행: layout unchanged render skip</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Skip TextVisualizer render when layout is unchanged</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>exclusion region이나 size 변경 때문에 layout dirty / render dirty가 열렸더라도, 최종 <computeroutput>LayoutResult</computeroutput>가 마지막 render에 사용한 결과와 같으면 <computeroutput>UpdateRenderData()</computeroutput> / <computeroutput>Renderer::Render()</computeroutput> 호출을 생략한다.</para>
+</listitem><listitem><para>public API, line break policy, layout placement policy, renderer 구현은 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>추가된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutResult::CalculateSignature(float epsilon = 0.01f)</computeroutput>를 추가했다.</para>
+</listitem><listitem><para>signature에는 다음 항목을 포함한다.<itemizedlist>
+<listitem><para><computeroutput>lines.Count()</computeroutput></para>
+</listitem><listitem><para><computeroutput>clusterPlacements.Count()</computeroutput></para>
+</listitem><listitem><para><computeroutput>glyphPlacements.Count()</computeroutput></para>
+</listitem><listitem><para>layout <computeroutput>width / height</computeroutput></para>
+</listitem><listitem><para>line <computeroutput>y / height / fragment count</computeroutput></para>
+</listitem><listitem><para>cluster placement <computeroutput>clusterIndex / x / y / width</computeroutput></para>
+</listitem><listitem><para>glyph placement <computeroutput>glyphIndex / x / y / width / height / advance</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>float 값은 <computeroutput>round(value / epsilon)</computeroutput> 방식으로 quantize한다.</para>
+</listitem><listitem><para>기본 epsilon은 <computeroutput>0.01px</computeroutput>다.</para>
+</listitem></itemizedlist>
+</para>
+<para>render skip 조건:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mRenderDirty == true</computeroutput></para>
+</listitem><listitem><para>dirty reason이 force-render가 아니라 placement-only dirty다.</para>
+</listitem><listitem><para>현재 layout이 empty가 아니다.</para>
+</listitem><listitem><para>마지막 성공 render의 layout signature가 존재한다.</para>
+</listitem><listitem><para>현재 layout signature가 마지막 render signature와 같다.</para>
+</listitem><listitem><para>renderer bridge가 render-ready 상태다.</para>
+</listitem><listitem><para>기존 renderer output actor가 valid하고 render host에 parented 되어 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>force render dirty 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetText()</computeroutput> / <computeroutput>SetFontFamily()</computeroutput> / <computeroutput>SetFontSize()</computeroutput>는 prepare dirty를 통해 force render로 처리한다.</para>
+</listitem><listitem><para><computeroutput>SetTextColor()</computeroutput>는 layout이 같아도 render가 필요하므로 force render로 처리한다.</para>
+</listitem><listitem><para>prepare 후 첫 render도 force render로 처리한다.</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> / <computeroutput>ClearExclusionRegions()</computeroutput> / size change / <computeroutput>SetLineHeight()</computeroutput>는 placement-only dirty로 처리한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>render 성공 후:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>IsRenderUpdateSuccessful()</computeroutput> 조건을 만족하면 현재 layout signature를 마지막 render signature로 저장한다.</para>
+</listitem><listitem><para>그 뒤 render dirty를 clear한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>기대 효과:</para>
+<para><itemizedlist>
+<listitem><para>moving bounds가 바뀌어도 최종 glyph placement가 같으면 render data 재생성과 <computeroutput>Renderer::Render()</computeroutput> 호출을 생략한다.</para>
+</listitem><listitem><para>performance sample threshold가 놓치는 경우에도 core 쪽에서 layout 결과 동일성을 기준으로 한 번 더 비용을 줄일 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>0.01px</computeroutput> epsilon이 너무 민감하거나 둔감하지 않은지 확인</para>
+</listitem><listitem><para>very large glyph count에서 signature 계산 비용이 render skip 이득보다 커지는지 확인</para>
+</listitem><listitem><para>color / style 변화가 계속 force render로 확실히 분리되는지 확인</para>
+</listitem><listitem><para>future per-glyph color / style 도입 시 signature에 포함할 항목 재검토</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md588">
+<title>진행: line-level metrics cache</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Add TextVisualizer line-level metrics cache</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText</computeroutput> 전체 단위 metrics 하나만 쓰는 한계를 줄인다.</para>
+</listitem><listitem><para>fallback font / emoji / mixed script가 특정 line에만 섞이는 경우, renderer glyph position 보정에서 line별 baseline 후보를 우선 사용할 수 있게 한다.</para>
+</listitem><listitem><para>line break policy, line height progression, public API는 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>추가된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextLineMetrics</computeroutput> 구조를 추가했다.<itemizedlist>
+<listitem><para><computeroutput>ascender</computeroutput></para>
+</listitem><listitem><para><computeroutput>descender</computeroutput></para>
+</listitem><listitem><para><computeroutput>baselineOffset</computeroutput></para>
+</listitem><listitem><para><computeroutput>naturalLineHeight</computeroutput></para>
+</listitem><listitem><para><computeroutput>valid</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter</computeroutput>가 <computeroutput>LayoutResult::lines</computeroutput>와 <computeroutput>PreparedText::glyphs</computeroutput>를 바탕으로 line-level metrics cache를 만든다.</para>
+</listitem><listitem><para>cache key는 현재 line의 <computeroutput>lineTop</computeroutput> 값이며, lookup은 <computeroutput>0.001f</computeroutput> tolerance를 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>cache build 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetPreparedText()</computeroutput> 또는 <computeroutput>SetLayoutResult()</computeroutput> 호출 시 cache를 다시 만든다.</para>
+</listitem><listitem><para>각 <computeroutput>TextLine</computeroutput>의 fragment가 가리키는 glyph 범위를 scan한다.</para>
+</listitem><listitem><para>line별 계산은 glyph metrics 기반이다.<itemizedlist>
+<listitem><para><computeroutput>ascender = max(yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>descender = max(height - yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>baselineOffset = ascender</computeroutput></para>
+</listitem><listitem><para><computeroutput>naturalLineHeight = ascender + descender + PreparedText::LineMetrics.lineGap</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>line에 유효한 glyph metric이 없으면 <computeroutput>PreparedText::LineMetrics</computeroutput> fallback을 사용할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>renderer position 우선순위:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>AtlasViewAdapter</computeroutput> line-level metrics cache</para>
+</listitem><listitem><para><computeroutput>PreparedText::LineMetrics.baselineOffset</computeroutput></para>
+</listitem><listitem><para>기존 same-line scan fallback</para>
+</listitem><listitem><para><computeroutput>0.0f</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>renderer 좌표 계산은 이제 line별 glyph metrics를 우선 반영할 수 있다.</para>
+</listitem><listitem><para>fallback font / emoji가 일부 line에만 섞인 경우 baseline 품질 개선의 기반이 생겼다.</para>
+</listitem><listitem><para>이번 커밋은 line별 <computeroutput>naturalLineHeight</computeroutput>를 layout y progression에 반영하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>line-level <computeroutput>naturalLineHeight</computeroutput>를 <computeroutput>LayoutGlyphs()</computeroutput> y progression에도 반영할지 여부</para>
+</listitem><listitem><para>line마다 높이가 달라지는 variable line height 정책을 지원할지 여부</para>
+</listitem><listitem><para>fallback font / emoji가 많은 line에서 실제 visual improvement 확인</para>
+</listitem><listitem><para>cache build cost와 repeated scan 제거 이득의 균형</para>
+</listitem><listitem><para>line metrics cache가 장기적으로 adapter에 남아야 할지, <computeroutput>LayoutResult</computeroutput>로 이동해야 할지</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md589">
+<title>진행: TextLine metrics cache</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Add TextVisualizer TextLine metrics cache</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>line-level natural line height를 layout y progression에 직접 적용하기 전에, <computeroutput>LayoutResult</computeroutput>가 line별 metrics를 보유할 수 있는 기반을 만든다.</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter</computeroutput>에서만 line metrics를 재계산하던 구조를 <computeroutput>TextLine</computeroutput> 중심으로 한 단계 앞으로 옮긴다.</para>
+</listitem><listitem><para>public API, line break policy, <computeroutput>FontSize</computeroutput> / <computeroutput>LineHeight</computeroutput> semantics는 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>추가된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextLine</computeroutput>에 <computeroutput>TextLineMetrics metrics</computeroutput>를 추가했다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 line placement를 완료한 뒤 해당 line fragment의 glyph range를 scan해 metrics를 채운다.<itemizedlist>
+<listitem><para><computeroutput>ascender = max(yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>descender = max(height - yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>baselineOffset = ascender</computeroutput></para>
+</listitem><listitem><para><computeroutput>naturalLineHeight = ascender + descender + PreparedText::LineMetrics.lineGap</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>LayoutPlaceholder()</computeroutput>는 glyph metrics가 없으므로 <computeroutput>TextLine.metrics.valid == false</computeroutput> 상태를 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>renderer baseline 우선순위:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>TextLine.metrics</computeroutput></para>
+</listitem><listitem><para>adapter-local recalculation fallback</para>
+</listitem><listitem><para><computeroutput>PreparedText::LineMetrics.baselineOffset</computeroutput></para>
+</listitem><listitem><para>기존 same-line scan fallback</para>
+</listitem><listitem><para><computeroutput>0.0f</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>중요한 비적용 범위:</para>
+<para><itemizedlist>
+<listitem><para>이번 커밋은 variable line height를 도입하지 않는다.</para>
+</listitem><listitem><para><computeroutput>TextLine.metrics.naturalLineHeight</computeroutput>를 <computeroutput>TextLine.height</computeroutput>나 다음 line y progression에 반영하지 않는다.</para>
+</listitem><listitem><para>explicit line height가 있으면 기존처럼 <computeroutput>TextLine.height</computeroutput>는 explicit 값으로 유지된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>variable line height를 아직 적용하지 않는 이유:</para>
+<para><itemizedlist>
+<listitem><para>현재 <computeroutput>LayoutGlyphs()</computeroutput>는 line 시작 전에 <computeroutput>lineHeight</computeroutput>로 exclusion interval vertical band를 계산한다.</para>
+</listitem><listitem><para>line별 natural height는 line placement가 끝난 뒤에 알 수 있다.</para>
+</listitem><listitem><para>이를 y progression에 반영하려면 현재 line의 exclusion overlap 계산, 다음 line y 이동, max line guard 정책을 함께 다시 설계해야 한다.</para>
+</listitem><listitem><para>따라서 이번 단계는 <computeroutput>TextLine.metrics</computeroutput> 저장과 renderer baseline 품질 개선 기반까지만 진행한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextLine.metrics</computeroutput>를 <computeroutput>LayoutResult</computeroutput>에 유지하는 것이 장기적으로 맞는지</para>
+</listitem><listitem><para>adapter cache와 <computeroutput>TextLine.metrics</computeroutput>의 역할 중복 정리</para>
+</listitem><listitem><para>variable line height 지원 여부</para>
+</listitem><listitem><para>line-level <computeroutput>naturalLineHeight</computeroutput>를 y progression에 적용하는 방식</para>
+</listitem><listitem><para>exclusion vertical band와 variable line height 관계</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>에서 line metrics를 계산하는 비용</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md590">
+<title>진행: performance sample label removal</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Replace performance sample labels with TextVisualizer</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>performance sample에서 <computeroutput>TextVisualizer</computeroutput> 본문 성능을 볼 때, 주변 <computeroutput>Label</computeroutput>들의 measure / arrange / relayout 비용이 관찰값을 왜곡할 가능성을 줄인다.</para>
+</listitem><listitem><para>sample의 주요 text UI를 가능한 한 <computeroutput>TextVisualizer</computeroutput>로 통일한다.</para>
+</listitem><listitem><para>core <computeroutput>TextVisualizer</computeroutput> 구현이나 public API는 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경 내용:</para>
+<para><itemizedlist>
+<listitem><para>title text를 <computeroutput>Label</computeroutput>에서 <computeroutput>TextVisualizer</computeroutput>로 교체했다.</para>
+</listitem><listitem><para>status text를 <computeroutput>Label</computeroutput>에서 <computeroutput>TextVisualizer</computeroutput>로 교체했다.</para>
+</listitem><listitem><para>quote block text를 <computeroutput>Label</computeroutput>에서 <computeroutput>TextVisualizer</computeroutput>로 교체했다.</para>
+</listitem><listitem><para>quote exclusion rect는 text actor의 current property를 읽지 않고, 기존 quote block의 <computeroutput>position / size</computeroutput> 영역을 기준으로 계산한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단순화한 스타일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>가 아직 제공하지 않는 italic, async rendering, horizontal / vertical alignment, padding API는 sample에서 사용하지 않는다.</para>
+</listitem><listitem><para>quote padding은 <computeroutput>TextVisualizer</computeroutput>의 position / size를 직접 보정하는 방식으로 처리한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>sample이 <computeroutput>Label</computeroutput> 성능 영향보다 <computeroutput>TextVisualizer</computeroutput> layout / render 경로를 더 직접적으로 관찰하는 쪽에 가까워졌다.</para>
+</listitem><listitem><para>status text는 여전히 <computeroutput>SetText()</computeroutput>를 통해 prepare 비용을 만들 수 있으므로 기존 <computeroutput>STATUS_INTERVAL</computeroutput>과 <computeroutput>0</computeroutput> key status update toggle을 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>title / quote의 visual fidelity가 sample 목적에 충분한지 확인</para>
+</listitem><listitem><para>status <computeroutput>TextVisualizer</computeroutput> 업데이트 비용이 FPS 관찰에 주는 영향</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> 자체 alignment / padding / style API가 필요한지 여부</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md591">
+<title>진행: pixel font size conversion</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Use pixel font size conversion for TextVisualizer</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> public <computeroutput>FontSize</computeroutput>를 pixel size로 명확히 취급한다.</para>
+</listitem><listitem><para>shaping / font validation으로 넘기는 내부 size는 기존 text stack과 같은 pixel-to-point 변환을 거친다.</para>
+</listitem><listitem><para><computeroutput>LineHeight</computeroutput> relative 공식은 계속 public pixel font size 기준으로 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>기존 <computeroutput>Label</computeroutput> / <computeroutput>Controller</computeroutput> 조사 결과:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LabelImpl::SetFontSize()</computeroutput>와 <computeroutput>InputFieldImpl::SetFontSize()</computeroutput>는 public 값을 <computeroutput>Text::Controller::PIXEL_SIZE</computeroutput>로 <computeroutput>Controller::SetDefaultFontSize()</computeroutput>에 전달한다.</para>
+</listitem><listitem><para><computeroutput>Controller::SetDefaultFontSize(fontSize, PIXEL_SIZE)</computeroutput>는 <computeroutput>ConvertPixelToPoint(fontSize)</computeroutput>를 통해 point 단위로 저장한다.</para>
+</listitem><listitem><para>변환 공식은 <computeroutput>point = pixel * 72 / DPI</computeroutput>이다.</para>
+</listitem><listitem><para>model update 단계에서는 저장된 point size에 <computeroutput>GetAdjustedFontSizeScale()</computeroutput>과 <computeroutput>FontClient::GetNumberOfPointsPerOneUnitOfPointSize()</computeroutput>를 곱해 shaping용 <computeroutput>PointSize26Dot6</computeroutput> 값을 만든다.</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput> 적용 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextPreparer</computeroutput>는 <computeroutput>fontSize &gt; 0.0f</computeroutput>인 경우 public pixel value를 <computeroutput>pixel * 72 / DPI</computeroutput>로 point size로 변환한 뒤 <computeroutput>PointSize26Dot6</computeroutput>로 확장한다.</para>
+</listitem><listitem><para><computeroutput>fontSize &lt;= 0.0f</computeroutput> fallback은 <computeroutput>TextAbstraction::FontClient::DEFAULT_POINT_SIZE</computeroutput>를 사용한다.</para>
+</listitem><listitem><para><computeroutput>DEFAULT_POINT_SIZE</computeroutput>는 이미 26.6 point-size 값이므로 다시 <computeroutput>GetNumberOfPointsPerOneUnitOfPointSize()</computeroutput>를 곱하지 않는다.</para>
+</listitem><listitem><para><computeroutput>PreparedText::SetFontSize()</computeroutput>에 저장되는 값은 public pixel font size 그대로 유지한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl::CalculateEffectiveLineHeight()</computeroutput>의 relative 계산은 그대로 <computeroutput>FontSize(px) * lineHeight</computeroutput>를 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경하지 않은 범위:</para>
+<para><itemizedlist>
+<listitem><para>public API는 추가하지 않는다.</para>
+</listitem><listitem><para><computeroutput>LineHeight</computeroutput> relative / auto semantics는 변경하지 않는다.</para>
+</listitem><listitem><para>line break / layout policy는 변경하지 않는다.</para>
+</listitem><listitem><para>기존 <computeroutput>TextController</computeroutput>, <computeroutput>TextView</computeroutput>, <computeroutput>Label</computeroutput>, <computeroutput>InputField</computeroutput>, <computeroutput>AtlasRenderer</computeroutput> 구현은 수정하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>의 default font size fallback이 <computeroutput>Label</computeroutput>의 default configuration과 완전히 같은지 확인</para>
+</listitem><listitem><para>system / user font size scale을 <computeroutput>TextVisualizer</computeroutput>에 반영할지 여부</para>
+</listitem><listitem><para>DPI 변경 시 cached DPI를 갱신할 필요가 있는지 여부</para>
+</listitem><listitem><para>font variation / fallback font가 pixel conversion과 결합될 때의 visual consistency</para>
+</listitem><listitem><para>sample에서 font size 12 / 24 / 36 비교 시 기대한 visual scale이 나오는지 확인</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md592">
+<title>진행: performance sample visual quality update</title>
+<para>최근 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Improve TextVisualizer performance sample visual quality</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>performance sample의 visual fidelity를 높이되, core <computeroutput>TextVisualizer</computeroutput> 구현은 변경하지 않는다.</para>
+</listitem><listitem><para>사용자가 조정한 font size, line height, content 위치 / 높이, min / max font size 값은 유지한다.</para>
+</listitem><listitem><para><computeroutput>Label</computeroutput>로 되돌아가지 않고 <computeroutput>TextVisualizer</computeroutput> 중심 sample 구조를 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경 내용:</para>
+<para><itemizedlist>
+<listitem><para>moving orb exclusion을 기존 coarse band 방식에서 ellipse 기반 horizontal band 방식으로 바꿨다.</para>
+</listitem><listitem><para>orb 하나당 <computeroutput>11</computeroutput>개의 exclusion band를 생성한다.</para>
+</listitem><listitem><para>각 band는 band center의 normalized y 값을 기준으로 <computeroutput>sqrt(1 - y^2)</computeroutput>를 계산해 ellipse 폭을 구한다.</para>
+</listitem><listitem><para>기존 orb padding은 유지해 overlay View와 exclusion region이 너무 붙지 않게 한다.</para>
+</listitem><listitem><para>title은 parent <computeroutput>View</computeroutput> 안에 넣고, 내부 <computeroutput>TextVisualizer</computeroutput>는 local <computeroutput>(0, 0)</computeroutput>에서 <computeroutput>MATCH_PARENT</computeroutput> 크기를 사용한다.</para>
+</listitem><listitem><para>quote block도 parent container <computeroutput>View</computeroutput>를 갖고, accent와 quote <computeroutput>TextVisualizer</computeroutput>는 container local 좌표를 사용한다.</para>
+</listitem><listitem><para>quote exclusion rect는 actor current property 대신 저장된 <computeroutput>position / size</computeroutput> 기준의 전체 quote container 영역을 사용한다.</para>
+</listitem><listitem><para>body <computeroutput>TextVisualizer</computeroutput> surface는 title origin에서 시작해 status 영역 위까지 확장한다.</para>
+</listitem><listitem><para>title은 하나의 큰 rectangle이 아니라 word-level rectangle exclusion으로 body text가 글자 형상에 더 가깝게 회피하도록 한다.</para>
+</listitem><listitem><para>moving orb의 clamp 영역도 확장된 body surface 기준으로 바꿔 title 영역까지 이동할 수 있게 한다.</para>
+</listitem><listitem><para>quote와 orb의 초기 화면 위치는 기존 composition에 가깝게 유지하되, 이동 가능 영역만 title까지 확장한다.</para>
+</listitem><listitem><para>body sample text는 title exclusion과 확장된 surface에서도 충분히 채워지도록 문단을 추가했다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TITLE_FONT_SIZE</computeroutput>, <computeroutput>BODY_FONT_SIZE</computeroutput>, <computeroutput>QUOTE_FONT_SIZE</computeroutput>는 변경하지 않는다.</para>
+</listitem><listitem><para><computeroutput>BODY_LINE_HEIGHT</computeroutput>, <computeroutput>QUOTE_LINE_HEIGHT</computeroutput>는 변경하지 않는다.</para>
+</listitem><listitem><para><computeroutput>CONTENT_TOP</computeroutput>, <computeroutput>CONTENT_HEIGHT</computeroutput>, <computeroutput>MIN_FONT_SIZE</computeroutput>, <computeroutput>MAX_FONT_SIZE</computeroutput>는 변경하지 않는다.</para>
+</listitem><listitem><para>italic / alignment / async rendering 등 <computeroutput>TextVisualizer</computeroutput> 미지원 style은 계속 무시한다.</para>
+</listitem><listitem><para>public API, render dirty clear, line break / layout algorithm은 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>orb band count <computeroutput>11</computeroutput>이 visual quality와 sample performance 사이에서 적절한지 확인</para>
+</listitem><listitem><para>title / quote multiline이 실제 device와 test shell에서 안정적으로 보이는지 확인</para>
+</listitem><listitem><para>quote container clipping이 의도한 범위에서 text를 자르는지 확인</para>
+</listitem><listitem><para>status update toggle을 끈 상태에서 visual-only FPS 확인</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md593">
+<title>진행: basic word wrap</title>
+<para>이번 단계는 복잡한 line break engine을 새로 만들지 않고, <computeroutput>PreparedText</computeroutput>에 이미 저장된 <computeroutput>lineBreakInfo</computeroutput>를 <computeroutput>LayoutGlyphs()</computeroutput>가 사용하는 1차 품질 개선이다.</para>
+<para>기존 한계:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 glyph advance를 순차 누적하다가 interval overflow가 나면 즉시 다음 interval / line으로 넘어갔다.</para>
+</listitem><listitem><para>따라서 space 기반 word boundary가 있어도 line 끝이 glyph 단위로 잘릴 수 있었다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경된 구조:</para>
+<para><itemizedlist>
+<listitem><para>interval에 실제 placement를 push하기 전에, 먼저 해당 interval에 들어갈 glyph range를 계산한다.</para>
+</listitem><listitem><para>range 계산 중 <computeroutput>PreparedText::GetGlyphToCharacterMap()</computeroutput>, <computeroutput>GetCharactersPerGlyph()</computeroutput>, <computeroutput>GetLineBreakInfo()</computeroutput>를 사용해 현재 glyph 뒤의 character boundary가 break 가능한지 확인한다.</para>
+</listitem><listitem><para>overflow가 발생하면 현재 interval 안의 마지막 <computeroutput>LINE_ALLOW_BREAK</computeroutput> 또는 <computeroutput>LINE_MUST_BREAK</computeroutput> 후보를 우선 사용한다.</para>
+</listitem><listitem><para>break 후보가 없으면 기존처럼 glyph 단위 fallback을 사용한다.</para>
+</listitem><listitem><para>단어가 interval보다 길면 최소 glyph 단위로 계속 배치해 layout이 멈추지 않게 한다.</para>
+</listitem><listitem><para><computeroutput>LINE_MUST_BREAK</computeroutput>는 현재 range를 배치한 뒤 line을 종료하는 기본 hard break 후보로 취급한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>exclusion interval 정책:</para>
+<para><itemizedlist>
+<listitem><para>한 line에 여러 available interval이 있으면 각 interval마다 같은 word wrap range 계산을 수행한다.</para>
+</listitem><listitem><para>break 후보가 interval 안에 있으면 그 지점에서 끊고 다음 interval 또는 다음 line으로 이어간다.</para>
+</listitem><listitem><para>blocked interval x sort / merge, line height, baseline, render dirty 정책은 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이번 커밋에서 제외한 것:</para>
+<para><itemizedlist>
+<listitem><para>ICU line break 추가 사용</para>
+</listitem><listitem><para>hyphenation</para>
+</listitem><listitem><para>ellipsis</para>
+</listitem><listitem><para>bidi / RTL 전용 처리</para>
+</listitem><listitem><para>justification</para>
+</listitem><listitem><para>cluster-perfect advanced wrapping</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>mandatory newline glyph가 shaping 결과에서 어떤 glyph range로 나타나는지 추가 fixture 확인</para>
+</listitem><listitem><para>emoji ZWJ sequence와 complex script에서 cluster 단위 절단 방지 강화</para>
+</listitem><listitem><para>interval 사이에서 단어를 같은 line의 다음 fragment로 보낼지, 다음 line으로 보낼지 장기 정책</para>
+</listitem><listitem><para>Thai / Korean / Japanese word break 품질</para>
+</listitem><listitem><para>bidi / RTL text에서 line break 후보와 visual order 연결</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md594">
+<title>진행: word wrap lookup optimization</title>
+<para>basic word wrap 도입 후 performance sample에서 layout 비용이 증가하는 현상이 관찰됐다. 원인은 interval range 계산 중 glyph마다 <computeroutput>glyphToCharacterMap</computeroutput>, <computeroutput>charactersPerGlyph</computeroutput>, <computeroutput>lineBreakInfo</computeroutput>를 반복 조회하고, advance 누적도 매 interval에서 다시 계산하는 데 있다.</para>
+<para>변경된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutGlyphs()</computeroutput> 시작 시 layout pass-local <computeroutput>GlyphLayoutCache</computeroutput>를 만든다.</para>
+</listitem><listitem><para>cache는 glyph count 기준으로 한 번만 준비한다.</para>
+</listitem><listitem><para>glyph별 placement advance와 placement width를 저장한다.</para>
+</listitem><listitem><para><computeroutput>prefixAdvances[glyphIndex + 1]</computeroutput>에 누적 advance를 저장해 interval range 계산에서 cursor x를 빠르게 얻는다.</para>
+</listitem><listitem><para>glyph 뒤 character boundary의 <computeroutput>LINE_ALLOW_BREAK</computeroutput> / <computeroutput>LINE_MUST_BREAK</computeroutput> 여부를 <computeroutput>breakAllowedAfterGlyph</computeroutput>, <computeroutput>breakMandatoryAfterGlyph</computeroutput>로 저장한다.</para>
+</listitem><listitem><para>fragment의 character start / end도 cache에서 가져와 반복 mapping lookup을 줄인다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para>word wrap policy는 바꾸지 않는다.</para>
+</listitem><listitem><para>overflow 시 마지막 allowed break 후보를 우선 사용한다.</para>
+</listitem><listitem><para>break 후보가 없으면 glyph 단위 fallback을 유지한다.</para>
+</listitem><listitem><para>oversized first glyph fallback을 유지한다.</para>
+</listitem><listitem><para>line height, baseline, exclusion interval merge, render dirty clear 조건은 변경하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para>interval마다 glyph range scan 자체는 남아 있다.</para>
+</listitem><listitem><para>very long text에서 더 큰 효과를 내려면 cluster range cache나 affected-line partial layout이 필요할 수 있다.</para>
+</listitem><listitem><para>complex cluster / ICU / bidi / hyphenation / ellipsis는 여전히 제외다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md595">
+<title>다음 권장 작업 재정렬</title>
+<para>현재 기준 추천 순서는 다음과 같다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md596">
+<title>A. Core redundant exclusion region update policy</title>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>performance sample threshold는 upstream skip 실험으로 들어갔다.</para>
+</listitem><listitem><para>core <computeroutput>TextVisualizer</computeroutput>에 epsilon compare를 넣을지는 correctness 정책을 따로 세워야 한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>core API에 epsilon compare를 바로 넣으면 layout correctness 정책이 흐려질 수 있다.</para>
+</listitem><listitem><para>public behavior를 바꾸지 않는 방향으로 별도 검토한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md597">
+<title>B. Line-level line height 검토</title>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>line-level baseline cache는 들어갔지만 layout y progression은 여전히 <computeroutput>PreparedText</computeroutput> level line height를 사용한다.</para>
+</listitem><listitem><para>다음 단계는 line-level <computeroutput>naturalLineHeight</computeroutput>를 실제 layout height에 반영할지 검토하는 것이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md598">
+<title>C. Verify FontSize visual scale</title>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>public API 의미와 internal point-size conversion은 기존 <computeroutput>Label</computeroutput> / <computeroutput>Controller</computeroutput> pixel path에 맞췄다.</para>
+</listitem><listitem><para>다음 단계는 sample에서 font size 12 / 24 / 36 정도의 visual scale이 기대와 맞는지 확인하는 것이다.</para>
+</listitem><listitem><para>system / user font size scale 반영 여부는 별도 정책 판단이 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md599">
+<title>D. Improve word/cluster line break</title>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>기본 word wrap은 들어갔지만 아직 glyph / character map 기반의 1차 구현이다.</para>
+</listitem><listitem><para>cluster-perfect wrapping, bidi / RTL, emoji ZWJ, hyphenation, ellipsis는 여전히 별도 품질 과제다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 우선순위 재정렬의 핵심은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>line height 품질은 이제 한 단계 올라왔다.</para>
+</listitem><listitem><para><computeroutput>FontSize</computeroutput> pixel size와 relative line height 정책은 고정됐다.</para>
+</listitem><listitem><para>exclusion interval scanning의 1차 최적화는 완료됐다.</para>
+</listitem><listitem><para>layout/render buffer reserve의 1차 최적화는 완료됐다.</para>
+</listitem><listitem><para>render dirty clear의 1차 조건은 도입됐다.</para>
+</listitem><listitem><para>performance sample에는 exclusion update threshold가 도입됐다.</para>
+</listitem><listitem><para>performance sample의 title / status / quote text는 <computeroutput>Label</computeroutput> 대신 <computeroutput>TextVisualizer</computeroutput>를 사용한다.</para>
+</listitem><listitem><para>layout unchanged render skip의 1차 조건은 도입됐다.</para>
+</listitem><listitem><para>line-level metrics cache의 1차 적용은 완료됐다.</para>
+</listitem><listitem><para><computeroutput>TextLine.metrics</computeroutput> 저장 기반은 추가됐지만 variable line height는 아직 적용하지 않았다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> public <computeroutput>FontSize</computeroutput>는 기존 <computeroutput>Label</computeroutput> / <computeroutput>Controller</computeroutput>와 같은 pixel-to-point conversion을 거쳐 shaping에 사용된다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 <computeroutput>PreparedText::LineBreakInfo</computeroutput>를 사용해 기본 word wrap을 수행한다.</para>
+</listitem><listitem><para>다음 성능 후보는 core redundant update policy, partial relayout, geometry-only update처럼 더 큰 정책 판단이 필요한 작업이다.</para>
+</listitem><listitem><para>품질 후보는 line-level metrics 필요성 확인, visual font scale 확인, word / cluster line break 개선을 계속 분리해서 다룬다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalic7ce4d64c7915c7900f6fae261c1a26c_1autotoc_md600">
+<title>금지 사항</title>
+<para>다음 원칙은 계속 유지한다.</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>TextController</computeroutput> 수정 금지</para>
+</listitem><listitem><para>기존 <computeroutput>TextView</computeroutput> 수정 금지</para>
+</listitem><listitem><para><computeroutput>text-atlas-renderer.*</computeroutput> 수정 금지</para>
+</listitem><listitem><para><computeroutput>render dirty clear</computeroutput>는 별도 커밋에서만</para>
+</listitem><listitem><para><computeroutput>FontSize</computeroutput> 단위 정리와 line break 개선을 한 커밋에 섞지 않기 </para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/14-performance-and-quality-plan.ko.md"/>
+  </compounddef>
+</doxygen>

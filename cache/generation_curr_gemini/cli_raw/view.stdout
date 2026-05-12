@@ -1,0 +1,592 @@
+```markdown
+---
+title: View (Base UI Object)
+sidebar_label: View (Base UI Object)
+category: views-components
+---
+
+# View (Base UI Object)
+
+`Dali::Ui::View` is the fundamental building block for all user interface elements in dali-ui applications. It provides a common set of properties for layout, appearance, and interaction, serving as the base for more specialized UI components.
+
+## Table of Contents
+- [Creating and Managing Views](#creating-and-managing-views)
+- [View Properties](#view-properties)
+  - [Background and Border](#background-and-border)
+  - [Corner Radius](#corner-radius)
+- [Handling User Interaction](#handling-user-interaction)
+- [Managing Selection State](#managing-selection-state)
+- [Animating Views](#animating-views)
+
+## Creating and Managing Views
+
+A `Dali::Ui::View` is created using its `New()` static method. Views can be arranged into a hierarchical structure, where parent views contain child views.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Color
+
+// Assuming 'window' is an existing Dali::Window object
+Dali::Window window;
+
+// Create a new View
+Dali::Ui::View myView = Dali::Ui::View::New();
+
+// Set basic properties
+myView.SetBackgroundColor(Dali::Color::RED);
+myView.SetRequestedWidth(200.0f);
+myView.SetRequestedHeight(100.0f);
+
+// Add the view to the window's content (e.g., a root layout)
+// For demonstration, let's assume a root view already added to the window.
+// In a real application, you would add this to your main layout view.
+Dali::Ui::View rootView = Dali::Ui::View::New();
+rootView.SetBackgroundColor(Dali::Color::WHITE);
+rootView.SetRequestedWidth(Dali::Window::Get().GetSize().width);
+rootView.SetRequestedHeight(Dali::Window::Get().GetSize().height);
+window.Add(rootView);
+
+// Add myView as a child of rootView
+rootView.Add(myView);
+
+// Create another view and add it as a child to myView
+Dali::Ui::View childView = Dali::Ui::View::New();
+childView.SetBackgroundColor(Dali::Color::BLUE);
+childView.SetRequestedWidth(50.0f);
+childView.SetRequestedHeight(50.0f);
+myView.Add(childView);
+
+// Get the number of children
+uint32_t childCount = myView.GetChildCount(); // childCount will be 1
+```
+
+## View Properties
+
+`Dali::Ui::View` exposes a wide range of properties to control its appearance and behavior. These properties can be accessed and modified using `Set` and `Get` methods, or directly via `Dali::Ui::View::Property` enums for more generic property manipulation.
+
+### Background and Border
+
+You can customize the background color, and add a border to a `View`.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Color
+
+Dali::Ui::View view = Dali::Ui::View::New();
+
+// Set background color using a direct method
+view.SetBackgroundColor(Dali::Color::CYAN);
+
+// Set border properties using specific methods
+view.SetBorderlineWidth(2.0f);
+view.SetBorderlineColor(Dali::Color::MAGENTA);
+view.SetBorderlineOffset(1.0f);
+
+// Alternatively, set properties using the Dali::Ui::View::Property enum
+view.SetProperty(Dali::Ui::View::Property::BACKGROUND, Dali::Color::GREEN);
+view.SetProperty(Dali::Ui::View::Property::BORDERLINE_WIDTH, 3.0f);
+```
+
+### Corner Radius
+
+Views can have rounded corners, which can be configured with a radius and squareness.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Vector4
+
+Dali::Ui::View view = Dali::Ui::View::New();
+
+// Set a uniform corner radius
+view.SetCornerRadius(Dali::Vector4(10.0f, 10.0f, 10.0f, 10.0f));
+
+// Set corner squareness (0.0f for fully rounded, 1.0f for sharp corners)
+view.SetCornerSquareness(Dali::Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+
+// You can also use Dali::Ui::View::Property
+view.SetProperty(Dali::Ui::View::Property::CORNER_RADIUS, Dali::Vector4(5.0f, 5.0f, 5.0f, 5.0f));
+```
+
+## Handling User Interaction
+
+To make a `View` interactive, you obtain its `Dali::Ui::InteractiveTrait`. This trait allows you to connect to signals for various input events like clicks, presses, and long presses.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For InputEvent
+
+class MyInteractiveView : public Dali::ConnectionTracker
+{
+public:
+  MyInteractiveView()
+  {
+    mView = Dali::Ui::View::New();
+    mView.SetBackgroundColor(Dali::Color::YELLOW);
+    mView.SetRequestedWidth(150.0f);
+    mView.SetRequestedHeight(50.0f);
+
+    // Get the InteractiveTrait from the View
+    Dali::Ui::InteractiveTrait interactiveTrait = mView.AsInteractive();
+
+    // Connect to the ClickedSignal
+    interactiveTrait.ConnectClickedSignal(this, &MyInteractiveView::OnViewClicked);
+
+    // Enable clickability
+    interactiveTrait.SetClickable(true);
+  }
+
+  Dali::Ui::View GetView() { return mView; }
+
+private:
+  bool OnViewClicked(Dali::Ui::View view, const Dali::InputEvent& event)
+  {
+    // Handle the click event
+    // For example, change the background color
+    view.SetBackgroundColor(Dali::Color::GREEN);
+    return true; // Indicate that the event was consumed
+  }
+
+  Dali::Ui::View mView;
+};
+```
+
+You can also connect to `PressedChangedSignal` to detect when a view is pressed or released, and `LongPressedSignal` for long press gestures.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For InputEvent
+
+class MyPressableView : public Dali::ConnectionTracker
+{
+public:
+  MyPressableView()
+  {
+    mView = Dali::Ui::View::New();
+    mView.SetBackgroundColor(Dali::Color::ORANGE);
+    mView.SetRequestedWidth(150.0f);
+    mView.SetRequestedHeight(50.0f);
+
+    Dali::Ui::InteractiveTrait interactiveTrait = mView.AsInteractive();
+    interactiveTrait.SetClickable(true); // Must be clickable for pressed state changes
+
+    // Connect to the PressedChangedSignal
+    interactiveTrait.ConnectPressedChangedSignal(this, &MyPressableView::OnPressedChanged);
+
+    // Connect to the LongPressedSignal
+    interactiveTrait.ConnectLongPressedSignal(this, &MyPressableView::OnLongPressed);
+  }
+
+  Dali::Ui::View GetView() { return mView; }
+
+private:
+  void OnPressedChanged(Dali::Ui::View view, bool pressed, const Dali::InputEvent& event)
+  {
+    if (pressed)
+    {
+      view.SetBackgroundColor(Dali::Color::RED); // Pressed state
+    }
+    else
+    {
+      view.SetBackgroundColor(Dali::Color::ORANGE); // Released state
+    }
+  }
+
+  bool OnLongPressed(Dali::Ui::View view, const Dali::InputEvent& event)
+  {
+    view.SetBackgroundColor(Dali::Color::BLUE); // Long pressed state
+    return true;
+  }
+
+  Dali::Ui::View mView;
+};
+```
+
+## Managing Selection State
+
+The `Dali::Ui::SelectableTrait` allows a `View` to manage a selection state, often used for toggling or multi-selection UI elements.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For InputEvent
+
+class MySelectableToggleView : public Dali::ConnectionTracker
+{
+public:
+  MySelectableToggleView()
+  {
+    mView = Dali::Ui::View::New();
+    mView.SetBackgroundColor(Dali::Color::LIGHT_GRAY);
+    mView.SetRequestedWidth(100.0f);
+    mView.SetRequestedHeight(50.0f);
+
+    // Get the SelectableTrait from the View
+    Dali::Ui::SelectableTrait selectableTrait = mView.AsSelectable();
+
+    // Enable toggling selection by click
+    selectableTrait.EnableToggleByClick(true);
+
+    // Connect to the SelectionChangedSignal
+    selectableTrait.SelectionChangedSignal().Connect(this, &MySelectableToggleView::OnSelectionChanged);
+  }
+
+  Dali::Ui::View GetView() { return mView; }
+
+private:
+  void OnSelectionChanged(Dali::Ui::View view, bool selected, const Dali::InputEvent& event)
+  {
+    if (selected)
+    {
+      view.SetBackgroundColor(Dali::Color::DARK_GRAY); // Selected state
+    }
+    else
+    {
+      view.SetBackgroundColor(Dali::Color::LIGHT_GRAY); // Deselected state
+    }
+  }
+
+  Dali::Ui::View mView;
+};
+```
+
+You can also programmatically set the selection state using `SetSelected()` and query it with `IsSelected()`.
+
+```cpp
+// ... inside a method of MySelectableToggleView or similar context
+Dali::Ui::SelectableTrait selectableTrait = mView.AsSelectable();
+
+// Programmatically select the view
+selectableTrait.SetSelected(true);
+
+// Check if the view is selected
+bool isCurrentlySelected = selectableTrait.IsSelected();
+```
+
+## Animating Views
+
+`Dali::Ui::View` provides an `Animate` method for performing animations on its properties. This leverages `Dali::Ui::ViewAnimationSpec` to define animation parameters. `Dali::Actor::Property` enums are used for animatable properties like position, opacity, and scale.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Vector2, Property::Type
+
+Dali::Ui::View viewToAnimate = Dali::Ui::View::New();
+viewToAnimate.SetBackgroundColor(Dali::Color::BLUE);
+viewToAnimate.SetRequestedWidth(100.0f);
+viewToAnimate.SetRequestedHeight(100.0f);
+viewToAnimate.SetCurrentPosition(Dali::Vector2(50.0f, 50.0f)); // Initial position
+
+// Create an animation specification
+Dali::Ui::ViewAnimationSpec animSpec = Dali::Ui::View::NewAnimationSpec();
+animSpec.SetDuration(0.5f); // 0.5 seconds
+animSpec.SetDelay(0.1f);    // 0.1 second delay
+
+// Animate the View's position
+viewToAnimate.Animate(Dali::Actor::Property::POSITION,
+                      Dali::Vector2(200.0f, 200.0f), // Target position
+                      animSpec);
+
+// Animate the View's opacity (e.g., fade out)
+viewToAnimate.Animate(Dali::Actor::Property::OPACITY,
+                      0.0f, // Target opacity
+                      animSpec);
+```
+---
+title: View (Base UI Object)
+sidebar_label: View (Base UI Object)
+category: views-components
+---
+
+# View (Base UI Object)
+
+`Dali::Ui::View` is the fundamental building block for all user interface elements in dali-ui applications. It provides a common set of properties for layout```markdown
+---
+title: View (Base UI Object)
+sidebar_label: View (Base UI Object)
+category: views-components
+---
+
+# View (Base UI Object)
+
+`Dali::Ui::View` is the fundamental building block for all user interface elements in dali-ui applications. It provides a common set of properties for layout, appearance, and interaction, serving as the base for more specialized UI components.
+
+## Table of Contents
+- [Creating and Managing Views](#creating-and-managing-views)
+- [View Properties](#view-properties)
+  - [Background and Border](#background-and-border)
+  - [Corner Radius](#corner-radius)
+- [Handling User Interaction](#handling-user-interaction)
+- [Managing Selection State](#managing-selection-state)
+- [Animating Views](#animating-views)
+
+## Creating and Managing Views
+
+A `Dali::Ui::View` is created using its `New()` static method. Views can be arranged into a hierarchical structure, where parent views contain child views.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Color
+
+// Assuming 'window' is an existing Dali::Window object
+Dali::Window window;
+
+// Create a new View
+Dali::Ui::View myView = Dali::Ui::View::New();
+
+// Set basic properties
+myView.SetBackgroundColor(Dali::Color::RED);
+myView.SetRequestedWidth(200.0f);
+myView.SetRequestedHeight(100.0f);
+
+// Add the view to the window's content (e.g., a root layout)
+// For demonstration, let's assume a root view already added to the window.
+// In a real application, you would add this to your main layout view.
+Dali::Ui::View rootView = Dali::Ui::View::New();
+rootView.SetBackgroundColor(Dali::Color::WHITE);
+rootView.SetRequestedWidth(Dali::Window::Get().GetSize().width);
+rootView.SetRequestedHeight(Dali::Window::Get().GetSize().height);
+window.Add(rootView);
+
+// Add myView as a child of rootView
+rootView.Add(myView);
+
+// Create another view and add it as a child to myView
+Dali::Ui::View childView = Dali::Ui::View::New();
+childView.SetBackgroundColor(Dali::Color::BLUE);
+childView.SetRequestedWidth(50.0f);
+childView.SetRequestedHeight(50.0f);
+myView.Add(childView);
+
+// Get the number of children
+uint32_t childCount = myView.GetChildCount(); // childCount will be 1
+```
+
+## View Properties
+
+`Dali::Ui::View` exposes a wide range of properties to control its appearance and behavior. These properties can be accessed and modified using `Set` and `Get` methods, or directly via `Dali::Ui::View::Property` enums for more generic property manipulation.
+
+### Background and Border
+
+You can customize the background color, and add a border to a `View`.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Color
+
+Dali::Ui::View view = Dali::Ui::View::New();
+
+// Set background color using a direct method
+view.SetBackgroundColor(Dali::Color::CYAN);
+
+// Set border properties using specific methods
+view.SetBorderlineWidth(2.0f);
+view.SetBorderlineColor(Dali::Color::MAGENTA);
+view.SetBorderlineOffset(1.0f);
+
+// Alternatively, set properties using the Dali::Ui::View::Property enum
+view.SetProperty(Dali::Ui::View::Property::BACKGROUND, Dali::Color::GREEN);
+view.SetProperty(Dali::Ui::View::Property::BORDERLINE_WIDTH, 3.0f);
+```
+
+### Corner Radius
+
+Views can have rounded corners, which can be configured with a radius and squareness.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Vector4
+
+Dali::Ui::View view = Dali::Ui::View::New();
+
+// Set a uniform corner radius
+view.SetCornerRadius(Dali::Vector4(10.0f, 10.0f, 10.0f, 10.0f));
+
+// Set corner squareness (0.0f for fully rounded, 1.0f for sharp corners)
+view.SetCornerSquareness(Dali::Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+
+// You can also use Dali::Ui::View::Property
+view.SetProperty(Dali::Ui::View::Property::CORNER_RADIUS, Dali::Vector4(5.0f, 5.0f, 5.0f, 5.0f));
+```
+
+## Handling User Interaction
+
+To make a `View` interactive, you obtain its `Dali::Ui::InteractiveTrait`. This trait allows you to connect to signals for various input events like clicks, presses, and long presses.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For InputEvent
+
+class MyInteractiveView : public Dali::ConnectionTracker
+{
+public:
+  MyInteractiveView()
+  {
+    mView = Dali::Ui::View::New();
+    mView.SetBackgroundColor(Dali::Color::YELLOW);
+    mView.SetRequestedWidth(150.0f);
+    mView.SetRequestedHeight(50.0f);
+
+    // Get the InteractiveTrait from the View
+    Dali::Ui::InteractiveTrait interactiveTrait = mView.AsInteractive();
+
+    // Connect to the ClickedSignal
+    interactiveTrait.ConnectClickedSignal(this, &MyInteractiveView::OnViewClicked);
+
+    // Enable clickability
+    interactiveTrait.SetClickable(true);
+  }
+
+  Dali::Ui::View GetView() { return mView; }
+
+private:
+  bool OnViewClicked(Dali::Ui::View view, const Dali::InputEvent& event)
+  {
+    // Handle the click event
+    // For example, change the background color
+    view.SetBackgroundColor(Dali::Color::GREEN);
+    return true; // Indicate that the event was consumed
+  }
+
+  Dali::Ui::View mView;
+};
+```
+
+You can also connect to `PressedChangedSignal` to detect when a view is pressed or released, and `LongPressedSignal` for long press gestures.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For InputEvent
+
+class MyPressableView : public Dali::ConnectionTracker
+{
+public:
+  MyPressableView()
+  {
+    mView = Dali::Ui::View::New();
+    mView.SetBackgroundColor(Dali::Color::ORANGE);
+    mView.SetRequestedWidth(150.0f);
+    mView.SetRequestedHeight(50.0f);
+
+    Dali::Ui::InteractiveTrait interactiveTrait = mView.AsInteractive();
+    interactiveTrait.SetClickable(true); // Must be clickable for pressed state changes
+
+    // Connect to the PressedChangedSignal
+    interactiveTrait.ConnectPressedChangedSignal(this, &MyPressableView::OnPressedChanged);
+
+    // Connect to the LongPressedSignal
+    interactiveTrait.ConnectLongPressedSignal(this, &MyPressableView::OnLongPressed);
+  }
+
+  Dali::Ui::View GetView() { return mView; }
+
+private:
+  void OnPressedChanged(Dali::Ui::View view, bool pressed, const Dali::InputEvent& event)
+  {
+    if (pressed)
+    {
+      view.SetBackgroundColor(Dali::Color::RED); // Pressed state
+    }
+    else
+    {
+      view.SetBackgroundColor(Dali::Color::ORANGE); // Released state
+    }
+  }
+
+  bool OnLongPressed(Dali::Ui::View view, const Dali::InputEvent& event)
+  {
+    view.SetBackgroundColor(Dali::Color::BLUE); // Long pressed state
+    return true;
+  }
+
+  Dali::Ui::View mView;
+};
+```
+
+## Managing Selection State
+
+The `Dali::Ui::SelectableTrait` allows a `View` to manage a selection state, often used for toggling or multi-selection UI elements.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For InputEvent
+
+class MySelectableToggleView : public Dali::ConnectionTracker
+{
+public:
+  MySelectableToggleView()
+  {
+    mView = Dali::Ui::View::New();
+    mView.SetBackgroundColor(Dali::Color::LIGHT_GRAY);
+    mView.SetRequestedWidth(100.0f);
+    mView.SetRequestedHeight(50.0f);
+
+    // Get the SelectableTrait from the View
+    Dali::Ui::SelectableTrait selectableTrait = mView.AsSelectable();
+
+    // Enable toggling selection by click
+    selectableTrait.EnableToggleByClick(true);
+
+    // Connect to the SelectionChangedSignal
+    selectableTrait.SelectionChangedSignal().Connect(this, &MySelectableToggleView::OnSelectionChanged);
+  }
+
+  Dali::Ui::View GetView() { return mView; }
+
+private:
+  void OnSelectionChanged(Dali::Ui::View view, bool selected, const Dali::InputEvent& event)
+  {
+    if (selected)
+    {
+      view.SetBackgroundColor(Dali::Color::DARK_GRAY); // Selected state
+    }
+    else
+    {
+      view.SetBackgroundColor(Dali::Color::LIGHT_GRAY); // Deselected state
+    }
+  }
+
+  Dali::Ui::View mView;
+};
+```
+
+You can also programmatically set the selection state using `SetSelected()` and query it with `IsSelected()`.
+
+```cpp
+// ... inside a method of MySelectableToggleView or similar context
+Dali::Ui::SelectableTrait selectableTrait = mView.AsSelectable();
+
+// Programmatically select the view
+selectableTrait.SetSelected(true);
+
+// Check if the view is selected
+bool isCurrentlySelected = selectableTrait.IsSelected();
+```
+
+## Animating Views
+
+`Dali::Ui::View` provides an `Animate` method for performing animations on its properties. This leverages `Dali::Ui::ViewAnimationSpec` to define animation parameters. `Dali::Actor::Property` enums are used for animatable properties like position, opacity, and scale.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+#include <dali-toolkit/dali-toolkit.h> // For Vector2, Property::Type
+
+Dali::Ui::View viewToAnimate = Dali::Ui::View::New();
+viewToAnimate.SetBackgroundColor(Dali::Color::BLUE);
+viewToAnimate.SetRequestedWidth(100.0f);
+viewToAnimate.SetRequestedHeight(100.0f);
+viewToAnimate.SetCurrentPosition(Dali::Vector2(50.0f, 50.0f)); // Initial position
+
+// Create an animation specification
+Dali::Ui::ViewAnimationSpec animSpec = Dali::Ui::View::NewAnimationSpec();
+animSpec.SetDuration(0.5f); // 0.5 seconds
+animSpec.SetDelay(0.1f);    // 0.1 second delay
+
+// Animate the View's position
+viewToAnimate.Animate(Dali::Actor::Property::POSITION,
+                      Dali::Vector2(200.0f, 200.0f), // Target position
+                      animSpec);
+
+// Animate the View's opacity (e.g., fade out)
+viewToAnimate.Animate(Dali::Actor::Property::OPACITY,
+                      0.0f, // Target opacity
+                      animSpec);
+```

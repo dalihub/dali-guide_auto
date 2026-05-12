@@ -1,0 +1,2585 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e173c-044b-7c61-be32-b20985553373
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: View (Base UI Object) (view)
+- Category: views-components
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 180
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::InteractiveTrait | scope=primary
+- Dali::Ui::SelectableTrait | scope=primary
+- Dali::Ui::Trait | scope=primary
+- Dali::Ui::View | scope=primary
+- Dali::Ui::View::Property | scope=primary
+- Dali::Ui::InteractiveTrait::ClickedSignal | Signal< void(View, InputEvent)> & ClickedSignal() | scope=primary_member
+- Dali::Ui::InteractiveTrait::ConnectClickedSignal | void ConnectClickedSignal(T *obj, Func func) | scope=primary_member
+- Dali::Ui::InteractiveTrait::ConnectLongPressedSignal | void ConnectLongPressedSignal(T *obj, Func func) | scope=primary_member
+- Dali::Ui::InteractiveTrait::ConnectPressedChangedSignal | void ConnectPressedChangedSignal(T *obj, Func func) | scope=primary_member
+- Dali::Ui::InteractiveTrait::DownCast | InteractiveTrait DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::InteractiveTrait::GetKeyClickPolicy | KeyClickPolicy GetKeyClickPolicy() const | scope=primary_member
+- Dali::Ui::InteractiveTrait::InteractiveTrait | InteractiveTrait(Integration::InteractiveTraitImpl *implementation) | scope=primary_member
+- Dali::Ui::InteractiveTrait::IsClickable | bool IsClickable() const | scope=primary_member
+- Dali::Ui::InteractiveTrait::IsPressed | bool IsPressed() const | scope=primary_member
+- Dali::Ui::InteractiveTrait::IsPseudoDisabled | bool IsPseudoDisabled() const | scope=primary_member
+- Dali::Ui::InteractiveTrait::LongPressedSignal | Signal< bool(View, InputEvent)> & LongPressedSignal() | scope=primary_member
+- Dali::Ui::InteractiveTrait::New | InteractiveTrait New() | scope=primary_member
+- Dali::Ui::InteractiveTrait::PressedChangedSignal | Signal< void(View, bool, InputEvent)> & PressedChangedSignal() | scope=primary_member
+- Dali::Ui::InteractiveTrait::PseudoDisabledChangedSignal | Signal< void(View, bool)> & PseudoDisabledChangedSignal() | scope=primary_member
+- Dali::Ui::InteractiveTrait::SetClickable | void SetClickable(bool clickable) | scope=primary_member
+- Dali::Ui::InteractiveTrait::SetKeyClickPolicy | void SetKeyClickPolicy(KeyClickPolicy policy) | scope=primary_member
+- Dali::Ui::InteractiveTrait::SetPseudoDisabled | void SetPseudoDisabled(bool pseudoDisabled) | scope=primary_member
+- Dali::Ui::InteractiveTrait::~InteractiveTrait | ~InteractiveTrait() | scope=primary_member
+- Dali::Ui::SelectableTrait::DownCast | SelectableTrait DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::SelectableTrait::EnableToggleByClick | void EnableToggleByClick(bool enabled=true) | scope=primary_member
+- Dali::Ui::SelectableTrait::IsSelected | bool IsSelected() const | scope=primary_member
+- Dali::Ui::SelectableTrait::IsToggleByClickEnabled | bool IsToggleByClickEnabled() const | scope=primary_member
+- Dali::Ui::SelectableTrait::New | SelectableTrait New() | scope=primary_member
+- Dali::Ui::SelectableTrait::SelectableTrait | SelectableTrait() | scope=primary_member
+- Dali::Ui::SelectableTrait::SelectionChangedSignal | Signal< void(View, bool, InputEvent)> & SelectionChangedSignal() | scope=primary_member
+- Dali::Ui::SelectableTrait::SetSelected | void SetSelected(bool selected) | scope=primary_member
+- Dali::Ui::SelectableTrait::~SelectableTrait | ~SelectableTrait() | scope=primary_member
+- Dali::Ui::Trait::DownCast | Trait DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::Trait::Trait | Trait(Trait &&rhs) noexcept=default | scope=primary_member
+- Dali::Ui::Trait::operator= | Trait & operator=(Trait &&rhs) noexcept=default | scope=primary_member
+- Dali::Ui::Trait::~Trait | ~Trait()=default | scope=primary_member
+- Dali::Ui::View::GetBackgroundColor | UiColor GetBackgroundColor() | scope=primary_member
+- Dali::Ui::View::GetBorderlineColor | UiColor GetBorderlineColor() | scope=primary_member
+- Dali::Ui::View::GetBorderlineOffset | float GetBorderlineOffset() const | scope=primary_member
+- Dali::Ui::View::GetBorderlineWidth | float GetBorderlineWidth() const | scope=primary_member
+- Dali::Ui::View::GetChildAt | View GetChildAt(uint32_t index) const | scope=primary_member
+- Dali::Ui::View::GetChildCount | uint32_t GetChildCount() const | scope=primary_member
+- Dali::Ui::View::GetColor | UiColor GetColor() const | scope=primary_member
+- Dali::Ui::View::GetCornerRadius | Vector4 GetCornerRadius() const | scope=primary_member
+- Dali::Ui::View::GetCornerRadiusPolicy | CornerRadiusPolicy GetCornerRadiusPolicy() const | scope=primary_member
+- Dali::Ui::View::GetCornerSquareness | Vector4 GetCornerSquareness() const | scope=primary_member
+- Dali::Ui::View::GetCurrentColor | UiColor GetCurrentColor() const | scope=primary_member
+- Dali::Ui::View::GetCurrentPosition | Vector2 GetCurrentPosition() const | scope=primary_member
+- Dali::Ui::View::GetCurrentScale | Vector2 GetCurrentScale() const | scope=primary_member
+- Dali::Ui::View::GetCurrentScaleX | float GetCurrentScaleX() const | scope=primary_member
+- Dali::Ui::View::GetCurrentScaleY | float GetCurrentScaleY() const | scope=primary_member
+- Dali::Ui::View::GetCurrentSize | MeasuredSize GetCurrentSize() const | scope=primary_member
+- Dali::Ui::View::GetEffectiveLayoutDirection | Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const | scope=primary_member
+- Dali::Ui::View::GetLayoutMode | LayoutMode GetLayoutMode() const | scope=primary_member
+- Dali::Ui::View::GetLayoutParams | T GetLayoutParams() const | scope=primary_member
+- Dali::Ui::View::GetMargin | Extents GetMargin() const | scope=primary_member
+- Dali::Ui::View::GetMaximumHeight | float GetMaximumHeight() const | scope=primary_member
+- Dali::Ui::View::GetMaximumWidth | float GetMaximumWidth() const | scope=primary_member
+- Dali::Ui::View::GetMeasuredSize | MeasuredSize GetMeasuredSize() const | scope=primary_member
+- Dali::Ui::View::GetMinimumHeight | float GetMinimumHeight() const | scope=primary_member
+- Dali::Ui::View::GetMinimumWidth | float GetMinimumWidth() const | scope=primary_member
+- Dali::Ui::View::GetName | Dali::String GetName() const | scope=primary_member
+- Dali::Ui::View::GetOpacity | float GetOpacity() const | scope=primary_member
+- Dali::Ui::View::New | View New() | scope=primary_member
+- Dali::Ui::View::NewAnimationSpec | ViewAnimationSpec NewAnimationSpec() | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_ATTRIBUTES | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_DESCRIPTION | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_HIDDEN | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_IS_MODAL | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_NAME | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_ROLE | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_SCROLLABLE | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_STATES | scope=primary_member
+- Dali::Ui::View::Property::ACCESSIBILITY_VALUE | scope=primary_member
+- Dali::Ui::View::Property::AUTOMATION_ID | scope=primary_member
+- Dali::Ui::View::Property::BACKGROUND | scope=primary_member
+- Dali::Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID | scope=primary_member
+- Dali::Ui::View::Property::BORDERLINE | scope=primary_member
+- Dali::Ui::View::Property::BORDERLINE_COLOR | scope=primary_member
+- Dali::Ui::View::Property::BORDERLINE_OFFSET | scope=primary_member
+- Dali::Ui::View::Property::BORDERLINE_WIDTH | scope=primary_member
+- Dali::Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID | scope=primary_member
+- Dali::Ui::View::Property::CORNER_RADIUS | scope=primary_member
+- Dali::Ui::View::Property::CORNER_RADIUS_POLICY | scope=primary_member
+- Dali::Ui::View::Property::CORNER_SQUARENESS | scope=primary_member
+- Dali::Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID | scope=primary_member
+- Dali::Ui::View::Property::DISPATCH_KEY_EVENTS | scope=primary_member
+- Dali::Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID | scope=primary_member
+- Dali::Ui::View::Property::FOCUS_GROUP | scope=primary_member
+
+Property owner table:
+- Dali::Actor::Property: CLIPPING_MODE, COLOR, COLOR_ALPHA, COLOR_BLUE, COLOR_GREEN, COLOR_MODE, COLOR_RED, CONNECTED_TO_SCENE, CULLED, DRAW_MODE, HEIGHT_FOR_WIDTH, HEIGHT_RESIZE_POLICY, HIERARCHY_DEPTH, ID, INHERIT_LAYOUT_DIRECTION, INHERIT_ORIENTATION, INHERIT_POSITION, INHERIT_SCALE, IS_LAYER, IS_ROOT, KEYBOARD_FOCUSABLE, LAYOUT_DIRECTION, LEAVE_REQUIRED, MAXIMUM_SIZE, MINIMUM_SIZE, NAME, OPACITY, ORIENTATION, PADDING, PARENT_ORIGIN, PARENT_ORIGIN_X, PARENT_ORIGIN_Y, PARENT_ORIGIN_Z, PIVOT, PIVOT_X, PIVOT_Y, PIVOT_Z, POSITION, POSITION_USES_PIVOT, POSITION_X
+- Dali::CameraActor::Property: ASPECT_RATIO, BOTTOM_PLANE_DISTANCE, FAR_PLANE_DISTANCE, FIELD_OF_VIEW, INVERT_Y_AXIS, LEFT_PLANE_DISTANCE, NEAR_PLANE_DISTANCE, PROJECTION_MATRIX, PROJECTION_MODE, RIGHT_PLANE_DISTANCE, TARGET_POSITION, TOP_PLANE_DISTANCE, TYPE, VIEW_MATRIX
+- Dali::Layer::Property: BEHAVIOR, CONSUMES_HOVER, CONSUMES_TOUCH, DEPTH, DEPTH_TEST, NOT_IN_USE_1, NOT_IN_USE_2
+- Dali::Ui::View::Property: ACCESSIBILITY_ATTRIBUTES, ACCESSIBILITY_DESCRIPTION, ACCESSIBILITY_HIDDEN, ACCESSIBILITY_HIGHLIGHTABLE, ACCESSIBILITY_IS_MODAL, ACCESSIBILITY_NAME, ACCESSIBILITY_ROLE, ACCESSIBILITY_SCROLLABLE, ACCESSIBILITY_STATES, ACCESSIBILITY_VALUE, AUTOMATION_ID, BACKGROUND, BACKWARD_FOCUSABLE_VIEW_ID, BORDERLINE, BORDERLINE_COLOR, BORDERLINE_OFFSET, BORDERLINE_WIDTH, CLOCKWISE_FOCUSABLE_VIEW_ID, CORNER_RADIUS, CORNER_RADIUS_POLICY, CORNER_SQUARENESS, COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, DISPATCH_KEY_EVENTS, DOWN_FOCUSABLE_VIEW_ID, FOCUS_GROUP, FORWARD_FOCUSABLE_VIEW_ID, INNER_SHADOW, LAYOUT_MODE, LEFT_FOCUSABLE_VIEW_ID, MARGIN, MAXIMUM_HEIGHT, MAXIMUM_WIDTH, MINIMUM_HEIGHT, MINIMUM_WIDTH, OFFSCREEN_RENDERING, PADDING, REQUESTED_HEIGHT, REQUESTED_WIDTH, RIGHT_FOCUSABLE_VIEW_ID, SHADOW
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "view_interaction",
+    "intent": "Make a View respond to input through the interactive trait.",
+    "preferred_symbols": [
+      "Dali::Ui::View::AsInteractive",
+      "Dali::Ui::InteractiveTrait::ConnectClickedSignal",
+      "Dali::Ui::InteractiveTrait::ConnectPressedChangedSignal"
+    ],
+    "property_values": [],
+    "source": "generation_config",
+    "usage_note": "Obtain the trait from View, then connect signals on the trait. Do not pass trait objects to unrelated effect APIs."
+  },
+  {
+    "avoid_symbols": [],
+    "id": "view_animation",
+    "intent": "Animate a View using the dali-ui app-facing animation API.",
+    "preferred_symbols": [
+      "Dali::Ui::View::Animate"
+    ],
+    "property_values": [
+      "Dali::Actor::Property::OPACITY",
+      "Dali::Actor::Property::POSITION",
+      "Dali::Actor::Property::SCALE"
+    ],
+    "source": "generation_config",
+    "usage_note": "Use View as the object being animated. Inherited transform property enums are owned by Dali::Actor::Property."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp:23 (sample, score=1.0)
+```cpp
+*
+ * Children are placed at explicit (x, y) coordinates with explicit sizes.
+ * - Red box at top-left (20, 20)
+ * - Green box at center area (150, 200)
+ * - Blue box at bottom-right area (280, 400)
+ *
+ * Press Escape or Back to quit.
+ */
+class AbsoluteLayoutController : public ConnectionTracker
+{
+public:
+  AbsoluteLayoutController(Application& application)
+    : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AbsoluteLayoutController::Create);
+  }
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Root: AbsoluteLayout filling the window
+    AbsoluteLayout root = AbsoluteLayout::New()
+```
+
+- repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:24 (sample, score=1.0)
+```cpp
+* Same content as absolutelayout-example. A 100x50 yellow standalone
+ * child at the top-left toggles the root view's LayoutDirection between
+ * LEFT_TO_RIGHT and RIGHT_TO_LEFT on click. RTL flips direct children
+ * horizontally; the standalone toggle button is excluded from mirroring
+ * and stays at the top-left.
+ *
+ * Press Escape or Back to quit.
+ */
+class AbsoluteLayoutDirectionController : public ConnectionTracker
+{
+public:
+  AbsoluteLayoutDirectionController(Application& application)
+    : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AbsoluteLayoutDirectionController::Create);
+  }
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Root: AbsoluteLayout filling the window
+    mRoot = AbsoluteLayout::New()
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutParams",
+      "SetRequestedHeight",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 95,
+    "snippet_start_line": 23
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "ConnectClickedSignal",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "InputEvent",
+      "InteractiveView",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutDirection",
+      "SetLayoutMode",
+      "SetLayoutParams",
+      "SetRequestedHeight",
+      "SetRequestedPositionX",
+      "SetRequestedPositionY",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 103,
+    "snippet_start_line": 24
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutParams",
+      "SetMargin",
+      "SetPadding",
+      "SetRequestedHeight",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-margin-padding-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 108,
+    "snippet_start_line": 29
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutParams",
+      "SetRequestedHeight",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-overlap-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 107,
+    "snippet_start_line": 28
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutParams",
+      "SetRequestedHeight",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-per-axis-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 111,
+    "snippet_start_line": 32
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutParams",
+      "SetRequestedHeight",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 104,
+    "snippet_start_line": 29
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Arrange",
+      "ConnectionTracker",
+      "DOWN",
+      "GetState",
+      "New",
+      "OnKeyEvent",
+      "SetBackgroundColor",
+      "SetLayoutParams",
+      "SetMinimumWidth",
+      "SetRequestedHeight",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-wrapcontent-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 109,
+    "snippet_start_line": 30
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Animate",
+      "Application",
+      "ConnectClickedSignal",
+      "ConnectionTracker",
+      "InputEvent",
+      "InteractiveView",
+      "New",
+      "NewAnimationSpec",
+      "SetBackgroundColor",
+      "SetOpacity",
+      "SetRequestedHeight",
+      "SetRequestedPositionX",
+      "SetRequestedWidth",
+      "View",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/animation/animation-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 91,
+    "snippet_start_line": 12
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[]
+exec
+/bin/bash -lc "rg --files repos/dali-ui/dali-ui | rg 'view|trait|interactive|selectable|animation'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc 'rg -n "class InteractiveTrait|ClickedSignal|PressedChangedSignal|class SelectableTrait|SelectionChangedSignal|SetSelected|EnableToggleByClick" repos/dali-ui/dali-ui' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 1 in 0ms:
+rg: repos/dali-ui/dali-ui: IO error for operation on repos/dali-ui/dali-ui: No such file or directory (os error 2)
+
+ exited 2 in 0ms:
+rg: repos/dali-ui/dali-ui: IO error for operation on repos/dali-ui/dali-ui: No such file or directory (os error 2)
+
+exec
+/bin/bash -lc "rg -n \"class View|struct View|AsInteractive|Animate\\(|NewAnimationSpec|SetBackgroundColor|SetRequestedWidth|SetOpacity|SetName|Add\\(\" repos/dali-ui/dali-ui repos/dali-ui/samples/animation/animation-example.cpp repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+rg: repos/dali-ui/dali-ui: No such file or directory (os error 2)
+repos/dali-ui/samples/animation/animation-example.cpp:42:    window.SetBackgroundColor(Color::WHITE);
+repos/dali-ui/samples/animation/animation-example.cpp:45:    mFadeInSpec = View::NewAnimationSpec()
+repos/dali-ui/samples/animation/animation-example.cpp:48:    window.Add(Layout::New()
+repos/dali-ui/samples/animation/animation-example.cpp:51:          .SetBackgroundColor(UiColor(0xFF0000))
+repos/dali-ui/samples/animation/animation-example.cpp:52:          .SetRequestedWidth(200_spx)
+repos/dali-ui/samples/animation/animation-example.cpp:57:          .SetBackgroundColor(UiColor(0x0000FF))
+repos/dali-ui/samples/animation/animation-example.cpp:58:          .SetOpacity(0.3f)
+repos/dali-ui/samples/animation/animation-example.cpp:59:          .SetRequestedWidth(200_spx)
+repos/dali-ui/samples/animation/animation-example.cpp:71:    view.Animate(anim)
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:44:    window.SetBackgroundColor(Color::WHITE);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:48:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:52:    redBox.SetBackgroundColor(Color::RED);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:55:    mRoot.Add(redBox);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:59:    greenBox.SetBackgroundColor(Color::GREEN);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:62:    mRoot.Add(greenBox);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:66:    blueBox.SetBackgroundColor(Color::BLUE);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:69:    mRoot.Add(blueBox);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:74:    toggleBtn.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.5f));
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:75:    toggleBtn.SetRequestedWidth(200.0f);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:81:    toggleBtn.Add(Label::New("Change LayoutDirection")
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:83:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:92:    mRoot.Add(toggleBtn);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:94:    window.Add(mRoot);
+
+exec
+/bin/bash -lc "rg --files | rg 'view|trait|interactive|selectable|animation-example|absolutelayout-layout-direction'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+docs/generated/view.md
+docs/generated/image-view.md
+docs/generated/evaluations/image-view_evaluation.md
+docs/generated/evaluations/view_evaluation.md
+docs/generated_/view.md
+docs/generated_/image-view.md
+docs/generated_/evaluations/image-view_evaluation.md
+docs/generated_/evaluations/view_evaluation.md
+src/01_preprocess/legacy/taxonomy_reviewer.py
+
+exec
+/bin/bash -lc "find . -maxdepth 4 -type d -name '*dali-ui*' -o -name dali-ui" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+./repos/dali-ui
+./repos/dali-ui/dali-ui-components
+./repos/dali-ui/dali-ui-foundation
+./repos/dali-ui/manual-tests/dali-ui-foundation
+./cache/doxygen_json/dali-ui
+
+exec
+/bin/bash -lc "rg -n \"class View|struct View|AsInteractive|Animate\\(|NewAnimationSpec|SetBackgroundColor|SetRequestedWidth|SetOpacity|SetName|Add\\(\" repos/dali-ui/dali-ui-components repos/dali-ui/dali-ui-foundation repos/dali-ui/samples/animation/animation-example.cpp repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:44:    window.SetBackgroundColor(Color::WHITE);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:48:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:52:    redBox.SetBackgroundColor(Color::RED);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:55:    mRoot.Add(redBox);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:59:    greenBox.SetBackgroundColor(Color::GREEN);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:62:    mRoot.Add(greenBox);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:66:    blueBox.SetBackgroundColor(Color::BLUE);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:69:    mRoot.Add(blueBox);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:74:    toggleBtn.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.5f));
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:75:    toggleBtn.SetRequestedWidth(200.0f);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:81:    toggleBtn.Add(Label::New("Change LayoutDirection")
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:83:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:92:    mRoot.Add(toggleBtn);
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:94:    window.Add(mRoot);
+repos/dali-ui/samples/animation/animation-example.cpp:42:    window.SetBackgroundColor(Color::WHITE);
+repos/dali-ui/samples/animation/animation-example.cpp:45:    mFadeInSpec = View::NewAnimationSpec()
+repos/dali-ui/samples/animation/animation-example.cpp:48:    window.Add(Layout::New()
+repos/dali-ui/samples/animation/animation-example.cpp:51:          .SetBackgroundColor(UiColor(0xFF0000))
+repos/dali-ui/samples/animation/animation-example.cpp:52:          .SetRequestedWidth(200_spx)
+repos/dali-ui/samples/animation/animation-example.cpp:57:          .SetBackgroundColor(UiColor(0x0000FF))
+repos/dali-ui/samples/animation/animation-example.cpp:58:          .SetOpacity(0.3f)
+repos/dali-ui/samples/animation/animation-example.cpp:59:          .SetRequestedWidth(200_spx)
+repos/dali-ui/samples/animation/animation-example.cpp:71:    view.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:674:LabelAnimationBridge Label::Animate(Animation animation)
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:679:LabelAnimationSpec Label::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:106:  * @brief Sets the default interaction effect applied to views when AsInteractive() is called. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:37:class View;
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:548:   * @brief Sets the default interaction effect applied to views when AsInteractive() is called.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:50: *   view.SetBackgroundColor(UiColor::PRIMARY);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:209:View& View::SetOpacity(float opacity)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:211:  GetImpl(*this).SetOpacity(opacity);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:284:View& View::SetRequestedWidth(float width)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:286:  GetImpl(*this).SetRequestedWidth(width);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:483:View& View::SetBackgroundColor(const UiColor& color)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:485:  GetImpl(*this).SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:646:View& View::SetName(const Dali::String& name)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:648:  GetImpl(*this).SetName(name);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:830:ViewAnimationBridge View::Animate(Animation animation)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:835:ViewAnimationSpec View::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:56:class ViewAccessible;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:60:class ViewDataImpl;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:63:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:277:   * @copydoc Ui::View::SetOpacity()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:279:  void SetOpacity(float opacity);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:377:   * @copydoc Ui::View::SetBackgroundColor()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:379:  void SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:462:   * @copydoc Ui::View::SetName()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:464:  void SetName(const Dali::String& name);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:570:   * @copydoc Ui::View::SetRequestedWidth()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:572:  void SetRequestedWidth(float width);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:890:   * @copydoc Dali::CustomActorImpl::OnChildAdd()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:892:  void OnChildAdd(Actor& child) override;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:1068:  void SetBackgroundColorInternal(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:10:  ChildClass& SetName(const Dali::String& name) { VisualBase::SetName(name); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.h:50:class ViewAnimationBridge;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:51:class ViewAnimationSpec;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:60:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:342:  View& SetOpacity(float opacity);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:348:   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
+repos/dali-ui/dali-ui-foundation/public-api/view.h:468:  View& SetRequestedWidth(float width);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:751:  View& SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:945:  View& SetName(const Dali::String& name);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1012:  View& AsInteractive()
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1026:  View& AsInteractive(F&& configure)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1133:      Add(child);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1360:   * The effect is applied when the view becomes interactive (via AsInteractive()).
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1366:   * If this method is called before AsInteractive(), the explicitly set effect
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1939:   *   view.Animate(anim).Opacity(0.5f, 300_ms);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1946:  ViewAnimationBridge Animate(Animation animation);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1952:   *   auto spec = View::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1959:  static ViewAnimationSpec NewAnimationSpec();
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:244:   *                      Property::Map().Add( ... ) // Properties to set up visual
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:245:   *                                     .Add( Visual::Property::TRANSFORM,
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:246:   *                                           Property::Array().Add(
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:247:   * Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2( Policy::ABSOLUTE, Policy::RELATIVE ) ) ) .Add(
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:36:class View;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.cpp:89:VisualBase& VisualBase::SetName(const Dali::String& name)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.cpp:91:  GetImplementation(*this).SetName(name);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:164:      viewImpl.SetBackgroundColor(Color::TRANSPARENT);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:484:      container.Add(child, newChildSize);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:498:        container.Add(highlightFrame, size);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:578:void ViewImpl::SetOpacity(float opacity)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:677:void ViewImpl::SetBackgroundColor(const UiColor& color)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:679:  SetColorBinding("BackgroundColor", color, this, &ViewImpl::SetBackgroundColorInternal);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:782:void ViewImpl::SetName(const Dali::String& name)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1199:void ViewImpl::SetRequestedWidth(float width)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1354:  Self().Add(child);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1632:void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1922:void ViewImpl::OnChildAdd(Actor& child)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:2223:  // exceptions from view.Add()), and stays correct under nesting.
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:2241:  view.Add(actor);
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:46:class View;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:223:  VisualBase& SetName(const Dali::String& name);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:36:class View;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:40:class ViewAnimationSpecImpl;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:47: *   auto spec = View::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-controller.h:34:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:37: * Typically created via Label::Animate():
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:40: *   label.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:42: * Typically created via View::Animate():
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:45: *   view.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:322:  friend class View;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:34:class View;
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:37:  ChildClass& SetOpacity(float opacity) { View::SetOpacity(opacity); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:81:  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:233:  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:331:  ChildClass& SetName(const Dali::String& name) { View::SetName(name); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:347:  ChildClass& AsInteractive() { View::AsInteractive(); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:355:  ChildClass& AsInteractive(F&& configure) { View::AsInteractive(configure); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.h:40: * parent.Add(view);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:411:   * @brief Sets the default interaction effect applied to views when AsInteractive() is called.
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:43: *   auto spec = Label::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/shader-generator/shader-generator.cpp:189:  void Add(string&& variableName, const std::string& headerFilename)
+repos/dali-ui/dali-ui-foundation/shader-generator/shader-generator.cpp:297:            generator.Add(std::move(shaderVariableName), outFilePath.filename().string());
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1116:   *   label.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1125:  LabelAnimationBridge Animate(Animation animation);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1131:   *   auto spec = Label::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1139:  static LabelAnimationSpec NewAnimationSpec();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-interface.h:29:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:582:    mController->SetBackgroundColor(Color::TRANSPARENT);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:906:  Self().Add(view);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1168:  propertyMap.Add(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1338:    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1339:      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1341:      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1342:      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1344:      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1345:      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:2226:    mController->SetBackgroundColorWithCutout(backgroundColor);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:2245:      mController->SetBackgroundColorWithCutout(backgroundColor);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:2413:    mController->SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:29:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:30:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:34:class ViewDataImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:71:void SetNamedStateHandler(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:73:  GetViewImplData(viewImpl).SetNamedStateHandler(id, tracker, callback);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:93:void SetNamedStateHandler(Ui::View view, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:95:  GetViewImplData(GetImpl(view)).SetNamedStateHandler(id, tracker, callback);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.h:75:class ViewDataImpl::VisualData : public Visual::EventObserver, public Visual::ConstraintObserver
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.h:110:  bool IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const override;
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:40:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:122:DALI_UI_API void SetNamedStateHandler(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:145:    SetNamedStateHandler(viewImpl, id, obj, MakeCallback(obj, func));
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:161:    SetNamedStateHandler(viewImpl, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:191:DALI_UI_API void SetNamedStateHandler(Ui::View view, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:205:    SetNamedStateHandler(view, id, obj, MakeCallback(obj, func));
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:221:    SetNamedStateHandler(view, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+repos/dali-ui/dali-ui-foundation/integration-api/view-accessible.cpp:573:  self.Add(highlight);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:31:class ViewDataImpl::AccessibilityData : public ConnectionTracker
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:749:    mController->SetBackgroundColor(Color::TRANSPARENT);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:1859:      mStencil.Add(mCursorLayer);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:1990:    mController->SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:99:  SetRequestedWidth(MATCH_PARENT);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:220:    mVerticalBar.SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:224:    mHorizontalBar.SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:549:  mVerticalBar.SetBackgroundColor(mBarColor);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:550:  mVerticalBar.SetOpacity(0.0f);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:564:  Self().Add(mVerticalBar);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:606:  mHorizontalBar.SetBackgroundColor(mBarColor);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:607:  mHorizontalBar.SetOpacity(0.0f);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:621:  Self().Add(mHorizontalBar);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:262:      view.Add(GetFocusIndicatorView());
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:683:        currentFocusView.Add(indicator);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:700:                            .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:901:        focusedView.Add(GetFocusIndicatorView());
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:1018:        currentFocusedView.Add(GetFocusIndicatorView());
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:157:      stateVisualsToChange.Add(visualName, *toMap);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:414:bool ViewDataImpl::VisualData::IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:467:      instancedProperties.Add((*iter)->visual.GetName(), instanceMap);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:587:      visual.SetName(visualName);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1223:                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius));
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1231:                .Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1233:                .Add(Ui::DevelVisual::Property::CORNER_SQUARENESS,
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1263:                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY, cornerRadiusPolicy));
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1293:                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_SQUARENESS, cornerSquareness));
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1301:                .Add(Ui::DevelVisual::Property::CORNER_RADIUS,
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1303:                .Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1349:                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS, Vector4::ZERO));
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1355:                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS,
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:1383:                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS,
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:125:  Self().Add(mScrollBar);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:172:    Self().Add(mContent);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-event-receiver-interface.h:29:class View;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:700:void ViewDataImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:1014:            visual.SetName("background");
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:1043:          viewImpl.SetBackgroundColor(UiColor(color));
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:2015:    visual.SetName("shadow");
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:2043:    visual.SetName("innerShadow");
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:2113:    visual.SetName("borderline");
+repos/dali-ui/dali-ui-foundation/integration-api/accessibility-highlight-overlay.cpp:174:    overlayLayer.Add(highlightActor);
+repos/dali-ui/dali-ui-foundation/integration-api/accessibility-highlight-overlay.cpp:175:    sceneView.GetParent().Add(overlayLayer);
+repos/dali-ui/dali-ui-foundation/integration-api/accessibility-highlight-overlay.cpp:188:    highlightOverlayActor.Add(highlightActor);
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:34:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:53:class ViewStateManager
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:449:  transformMap.Add(Visual::Transform::Property::OFFSET, finalOffset)
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:450:    .Add(Visual::Transform::Property::SIZE, finalSize)
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:451:    .Add(Visual::Transform::Property::OFFSET_POLICY,
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:453:    .Add(Visual::Transform::Property::SIZE_POLICY,
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:455:    .Add(Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:456:    .Add(Visual::Transform::Property::PIVOT, Align::TOP_BEGIN);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:67:class ViewDataImpl : public ConnectionTracker, public Dali::Integration::Processor
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:157:  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+repos/dali-ui/dali-ui-foundation/devel-api/ui-foundation-pre-initialize.cpp:46:    [[maybe_unused]] auto view      = View::New().SetBackgroundColor(UiColor(0xFFFFFF));
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-manager.h:32:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-manager.h:33:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-impl.cpp:388:        toActor.Add(actor);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-impl.cpp:1017:          parent.Add(actor);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-impl.cpp:1215:        mStyles.Add(styleName, style); // shallow copy
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-impl.cpp:1273:          style->subStates.Add(stateName, subState);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-impl.cpp:1298:              style->visuals.Add(visual.first, *map);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-impl.cpp:1322:          style->properties.Add(index, value);
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:163:  struct ViewBinding
+repos/dali-ui/dali-ui-foundation/internal/builder/dictionary.h:104:  bool Add(std::string name, EntryType entry)
+repos/dali-ui/dali-ui-foundation/internal/builder/dictionary.h:120:  bool Add(const char* name, EntryType entry)
+repos/dali-ui/dali-ui-foundation/internal/builder/dictionary.h:124:      return Add(std::string(name), std::move(entry));
+repos/dali-ui/dali-ui-foundation/internal/text/text-view.h:39:class View : public ViewInterface
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-animations.cpp:282:          keyframes.Add(*kfProgress, propValue);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-animations.cpp:313:              animation.Animate(actor, path, forward, alphaFunction, timePeriod);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-animations.cpp:317:              animation.Animate(actor, path, forward, alphaFunction);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:249:  keyFrames.Add(0.0f, fromValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:250:  keyFrames.Add(1.0f, toValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:279:  keyFrames.Add(0.0f, fromValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:280:  keyFrames.Add(1.0f, toValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:304:    mInternalRoot.Add(mHorizontalBlurActor);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:315:    mInternalRoot.Add(mVerticalBlurActor);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:354:    mInternalRoot.Add(mCamera);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:365:    mInternalRoot.Add(mRenderDownsampledCamera);
+repos/dali-ui/dali-ui-foundation/internal/builder/tree-node-manipulator.h:107:  void SetName(const char* name);
+repos/dali-ui/dali-ui-foundation/internal/builder/json-parser-state.cpp:269:  modifyNew.SetName(name);
+repos/dali-ui/dali-ui-foundation/internal/builder/json-parser-state.cpp:320:      modify.SetName(name);
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-cache-manager.cpp:464:  return mTextureIdConverter.Add(static_cast<uint32_t>(textureCacheIndex.indexValue));
+repos/dali-ui/dali-ui-foundation/internal/text/text-effects-style.cpp:1103:            controller->SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/internal/drag-drop-detector/drag-and-drop-detector-impl.cpp:150:    mShadowView.SetBackgroundColor(UiColor(0.3f, 0.3f, 0.3f, 0.7f));
+repos/dali-ui/dali-ui-foundation/internal/drag-drop-detector/drag-and-drop-detector-impl.cpp:155:    view.GetParent().Add(mShadowView);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:252:  keyFrames.Add(0.0f, fromValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:253:  keyFrames.Add(1.0f, toValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:282:  keyFrames.Add(0.0f, fromValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:283:  keyFrames.Add(1.0f, toValue);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:307:    mInternalRoot.Add(mHorizontalBlurActor);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:318:    mInternalRoot.Add(mVerticalBlurActor);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:357:    mInternalRoot.Add(mCamera);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:368:    mInternalRoot.Add(mRenderDownsampledCamera);
+repos/dali-ui/dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp:113:      parent.Add(anchorActor);
+repos/dali-ui/dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp:189:        self.Add(child);
+repos/dali-ui/dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp:226:        renderableActor.Add(backgroundActor);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-view-impl.h:61:   * is always available without an explicit AsInteractive() call.
+repos/dali-ui/dali-ui-foundation/internal/builder/tree-node-manipulator.cpp:304:void TreeNodeManipulator::SetName(const char* name)
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:290:        mPrimaryCursor.SetRequestedWidth(mCursorWidth);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:296:        container.Add(mPrimaryCursor, Size(mCursorWidth, cursor.cursorHeight));
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:310:        mSecondaryCursor.SetRequestedWidth(mCursorWidth);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:316:        container.Add(mSecondaryCursor, Size(mCursorWidth, cursor.cursorHeight));
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:441:        container.Add(mHighlightActor, mHighlightSize);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:492:    //   mActiveLayer.Add(mCopyPastePopup.actor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:679:    cursor.SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:714:          mCursorLayer.Add(mPrimaryCursor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:730:          mCursorLayer.Add(mSecondaryCursor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:818:      handle.markerActor.SetRequestedWidth(0.0f);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:861:        mActiveLayer.Add(grabHandle.actor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:867:      mActiveLayer.Add(grabHandle.actor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:879:      handle.actor.Add(handle.markerActor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:946:      mActiveLayer.Add(primary.actor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:997:      mActiveLayer.Add(secondary.actor);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:2153:    mImpl->mPrimaryCursor.SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:2157:    mImpl->mSecondaryCursor.SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:2233:    mImpl->mPrimaryCursor.SetRequestedWidth(mImpl->mCursorWidth);
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:2238:    mImpl->mSecondaryCursor.SetRequestedWidth(mImpl->mCursorWidth);
+repos/dali-ui/dali-ui-foundation/internal/text/text-view.cpp:395:struct View::Impl
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/12-current-status-after-render-ready.ko.md:779:  - output actor를 `mRenderHost.Add(output)`로 실제 attach할 때만 증가한다.
+repos/dali-ui/dali-ui-foundation/internal/text/text-view-interface.h:52:class ViewInterface
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/20-lightweight-renderer-dependency-analysis.ko.md:66:- `AtlasGlyphManager::Add(glyph, style, bitmap, slot)`
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/20-lightweight-renderer-dependency-analysis.ko.md:86:- `AtlasGlyphManager::Add()` 호출
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/20-lightweight-renderer-dependency-analysis.ko.md:96:| atlas add | `AtlasGlyphManager::Add()` | 가능 | bitmap 생성 후 직접 호출 가능 |
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/11-render-call-status.ko.md:105:- 그래서 현재 bridge가 parent가 없는 output actor를 `mRenderHost.Add(output)`으로 직접 attach한다.
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/text-typesetter-impl.h:41:class ViewModel;
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/15-current-optimization-status.ko.md:131:- cache miss handling / `FontClient::CreateBitmap()` / `AtlasGlyphManager::Add()`는 아직 하지 않는다.
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/15-current-optimization-status.ko.md:870:- `FontClient::CreateBitmap()` / compressed bitmap / atlas growth / `AtlasGlyphManager::Add()` 정책은 기존 renderer와 공유하는 편이 long-term production path에 안전하다.
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-factory.h:204:   *   imageShader["shaderOption"] = Property::Map().Add("YUV_AND_RGB", true);
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-factory.h:211:   *                                       .Add("MULTI_COLOR", true)
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-factory.h:212:   *                                       .Add("OVERLAY", true);
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-factory.h:217:   *                                   .Add("CUTOUT", true)
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-factory.h:218:   *                                   .Add("BORDERLINE", true);
+repos/dali-ui/dali-ui-foundation/internal/text/visual-model-impl.h:448:  void SetBackgroundColor(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/internal/text/visual-model-impl.h:700:  void SetBackgroundColorWithCutout(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/view-model.h:41:class ViewModel : public ModelInterface
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/24-shared-glyph-cache-helper-design.ko.md:22:- `AtlasGlyphManager::Add()`
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/24-shared-glyph-cache-helper-design.ko.md:51:| atlas add | `AtlasGlyphManager::Add(glyph, style, bitmap, slot)` | miss path의 initial reference count가 됨 |
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/24-shared-glyph-cache-helper-design.ko.md:56:- cache miss: `AtlasGlyphManager::Add()`가 새 glyph record를 만들고 initial count를 만든다.
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/24-shared-glyph-cache-helper-design.ko.md:121:- `AtlasGlyphManager::Add()`와 ref count rollback 순서 drift
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/24-shared-glyph-cache-helper-design.ko.md:311:- cache miss이면 helper가 `AtlasGlyphManager::Add()`를 성공시키고 initial reference를 caller ownership으로 간주한다.
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-base.h:122:  void SetName(const std::string& name);
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/text-typesetter.h:39:class ViewModel;
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:90:| atlas add | `AtlasGlyphManager::SetNewAtlasSize()` 후 `AtlasGlyphManager::Add()` |
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:91:| initial ref count | `AtlasGlyphManager::Add()`는 glyph record를 만들고 count를 `1`로 설정 |
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:93:즉 cache hit은 explicit `+1`, cache miss는 `Add()`가 initial count `1`을 만든다.
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:246:- 새 renderer가 `FontClient::CreateBitmap()`, `PixelData`, `AtlasGlyphManager::Add()`를 직접 사용한다.
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:544:- `AtlasGlyphManager::Add()`
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:672:- `FontClient::CreateBitmap()`과 `AtlasGlyphManager::Add()`는 여전히 사용하지 않는다.
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md:1018:- `FontClient::CreateBitmap()` / `AtlasGlyphManager::Add()` equivalent는 구현하지 않았다.
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-base.cpp:52:void Visual::Base::SetName(const std::string& name)
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/visual-base.cpp:54:  GetImplementation(*this).SetName(name);
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/13-working-render-pipeline-status.ko.md:155:  - 실제 `Add(output)` 횟수다.
+repos/dali-ui/dali-ui-foundation/internal/text/async-text/async-text-loader-impl.cpp:315:    mTextModel->mVisualModel->SetBackgroundColor(parameters.textBackgroundColor);
+repos/dali-ui/dali-ui-foundation/internal/text/async-text/async-text-loader-impl.cpp:340:  mTextModel->mVisualModel->SetBackgroundColorWithCutout(parameters.backgroundColorWithCutout);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-data-impl.h:142:      if(observer->IsAnyPropertyAnimate(mRelativeProperties))
+repos/dali-ui/dali-ui-foundation/devel-api/builder/builder.h:314:   *   mActor.Add( Actor::DownCast(builder.Create( "defaultText")) );
+repos/dali-ui/dali-ui-foundation/devel-api/builder/builder.h:331:   *   mActor.Add( Actor::DownCast(builder.Create( "defaultImage",  map) ) );
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual.cpp:922:    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, layoutSize)
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual.cpp:923:      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual.cpp:925:      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual.cpp:926:      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual.cpp:928:      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual.cpp:929:      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl.h:283:    mNumberOfCharactersToAdd(0u),
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-properties-devel.h:157:   * be, transformMap.Add( Transform::Property::SIZE, Vector2( 2.0f, 2.0f ) ) .Add( Transform::Property::SIZE_POLICY,
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-properties-devel.h:158:   * Vector2( Transform::Policy::Relative, Transform::Policy::Relative ) ) .Add( Transform::Property::EXTRA_SIZE,
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.cpp:325:void VisualBaseImpl::SetName(const Dali::String& name)
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.cpp:328:  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) SetName (Visual::Base[%p])\n", this, GetName().CStr(), mVisual.GetObjectPtr());
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.cpp:1317:void Controller::SetBackgroundColor(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.cpp:1319:  mImpl->mModel->mVisualModel->SetBackgroundColor(color);
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.cpp:1941:void Controller::SetBackgroundColorWithCutout(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.cpp:1943:  mImpl->mModel->mVisualModel->SetBackgroundColorWithCutout(color);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.h:81:   * @copydoc Ui::Visual::Base::SetName
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.h:83:  void SetName(const std::string& name);
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-background-actor.h:31:class View;
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:113:   * @copydoc Dali::Ui::VisualBase::SetName()
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:115:  void SetName(const Dali::String& name);
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:201:  Add(animator);
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:215:      Add(animator);
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:345:void TransitionData::Add(Animator* animator)
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:394:      animateMap.Add(TOKEN_ALPHA_FUNCTION,
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:401:      animateMap.Add(TOKEN_ALPHA_FUNCTION, controlPoints);
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:403:    animateMap.Add(
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.cpp:405:      Property::Map().Add(TOKEN_DELAY, animator->timePeriodDelay).Add(TOKEN_DURATION, animator->timePeriodDuration));
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:168:  map.Add(Ui::Visual::Transform::Property::OFFSET, mOffset)
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:169:    .Add(Ui::Visual::Transform::Property::SIZE, mSize)
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:170:    .Add(Ui::Visual::Transform::Property::ORIGIN, mOrigin)
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:171:    .Add(Ui::Visual::Transform::Property::PIVOT, mPivot)
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:172:    .Add(Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2(mOffsetSizeMode.x, mOffsetSizeMode.y))
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:173:    .Add(Ui::Visual::Transform::Property::SIZE_POLICY, Vector2(mOffsetSizeMode.z, mOffsetSizeMode.w))
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-transform.cpp:174:    .Add(Ui::DevelVisual::Transform::Property::EXTRA_SIZE, mExtraSize);
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.h:47:class View;
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.h:1504:  void SetBackgroundColor(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.h:1874:  void SetBackgroundColorWithCutout(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.h:132:  void Add(Animator* animator);
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/rendering/text-visualizer-glyph-renderer.cpp:267:    mRenderHost.Add(mOutputActor);
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/rendering/text-visualizer-glyph-renderer.cpp:1047:    mOutputActor.Add(meshActor);
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:39:class View;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:44:class ViewAnimationSpecImpl;
+repos/dali-ui/dali-ui-foundation/internal/text/visual-model-impl.cpp:424:void VisualModel::SetBackgroundColor(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/internal/text/visual-model-impl.cpp:681:void VisualModel::SetBackgroundColorWithCutout(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/atlas-renderer-bridge.cpp:593:    mRenderHost.Add(output);
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-image/animated-image-visual.cpp:546:      urls.Add(ToPropertyValue((*mImageUrls)[i].mUrl.GetUrl()));
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.cpp:370:          array.Add(ToPropertyValue(markerName));
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.cpp:69:void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const GlyphStyle& style, const PixelData& bitmap,
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.cpp:72:  GetImplementation(*this).Add(glyph, style, bitmap, slot);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visuals-container-impl.cpp:281:        propertyId = mVisualIndexConverter.Add(static_cast<uint32_t>(Property::INVALID_INDEX));
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-constraint-observer.h:46:  virtual bool IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const = 0;
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-manager.cpp:56:bool AtlasManager::Add(const PixelData& image, AtlasManager::AtlasSlot& slot, AtlasManager::AtlasId atlas)
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-manager.cpp:58:  return GetImplementation(*this).Add(image, slot, atlas);
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-manager-impl.h:98:  bool Add(const PixelData& image, Ui::AtlasManager::AtlasSlot& slot, Ui::AtlasManager::AtlasId atlas);
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp:277:          mGlyphManager.Add(glyph, style, bitmap, slot); // slot will be 0 is glyph not added
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp:380:        mActor.Add(shadowActor);
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp:385:        mActor.Add(actor);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:586:void Visual::Base::SetName(const std::string& name)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1072:        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1073:          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1091:        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, originalOffset)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1092:          .Add(Ui::Visual::Transform::Property::SIZE, availableVisualSize);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1108:        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1109:          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1115:        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1116:          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1122:      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1124:      .Add(Ui::Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1125:      .Add(Ui::Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1126:      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1132:    transformMap.Add(Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1133:      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1135:      .Add(Ui::Visual::Transform::Property::SIZE, Vector2::ONE)
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-impl.cpp:1136:      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager-impl.cpp:44:void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphManager::GlyphStyle& style,
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager-impl.cpp:51:  if(mAtlasManager.Add(bitmap, slot))
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-manager.h:162:  bool Add(const PixelData& image, AtlasSlot& slot, AtlasId atlas = 0);
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h:99:  void Add(const Text::GlyphInfo& glyph, const GlyphStyle& style, const PixelData& bitmap,
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager-impl.h:69:  void Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphManager::GlyphStyle& style, const PixelData& bitmap,
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/atlas/atlas-manager-impl.cpp:134:bool AtlasManager::Add(const PixelData& image, Ui::AtlasManager::AtlasSlot& slot, Ui::AtlasManager::AtlasId atlas)
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/text-renderer.h:35:class ViewInterface;
+
+exec
+/bin/bash -lc 'rg -n "class InteractiveTrait|ClickedSignal|PressedChangedSignal|class SelectableTrait|SelectionChangedSignal|SetSelected|EnableToggleByClick|AsSelectable" repos/dali-ui/dali-ui-components repos/dali-ui/dali-ui-foundation' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:654:Signal<void(View, const Dali::String&)>& Label::AnchorClickedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:656:  return GetImpl(*this).AnchorClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:73:Signal<void(View, bool, InputEvent)>& InteractiveView::PressedChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:75:  return GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:83:Signal<void(View, InputEvent)>& InteractiveView::ClickedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:85:  return GetImpl(*this).GetInteractiveTrait().ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:119:   * @see InteractiveTrait::PressedChangedSignal
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:121:  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:135:   * @see InteractiveTrait::ClickedSignal
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:137:  Signal<void(View, InputEvent)>& ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:209:   * @brief Connects a handler to ClickedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:217:   * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:218:   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:226:  InteractiveView& ConnectClickedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:228:    ClickedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:234:   * @brief Connects a handler to PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:245:  InteractiveView& ConnectPressedChangedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:247:    PressedChangedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:257:   * Press release is reported separately via PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:42:class InteractiveTraitImpl;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:106:  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:129:  Signal<void(View, InputEvent)>& ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:199:   * @brief Connects a handler to ClickedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:207:   * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:208:   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:216:  void ConnectClickedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:218:    ClickedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:223:   * @brief Connects a handler to PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:234:  void ConnectPressedChangedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:236:    PressedChangedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:245:   * Press release is reported separately via PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.cpp:60:Signal<void(View, bool, InputEvent)>& SelectableTrait::SelectionChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.cpp:62:  return GetImpl(*this).SelectionChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.cpp:70:void SelectableTrait::SetSelected(bool selected)
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.cpp:72:  GetImpl(*this).SetSelected(selected);
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.cpp:80:void SelectableTrait::EnableToggleByClick(bool enabled)
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.cpp:82:  GetImpl(*this).EnableToggleByClick(enabled);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:28:  * @brief Connects a handler to ClickedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:36:  * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked); \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:37:  * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... }); \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:45:  ChildClass& ConnectClickedSignal(T* obj, Func func) { InteractiveView::ConnectClickedSignal(obj, func); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:47:  * @brief Connects a handler to PressedChangedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:58:  ChildClass& ConnectPressedChangedSignal(T* obj, Func func) { InteractiveView::ConnectPressedChangedSignal(obj, func); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:64:  * Press release is reported separately via PressedChangedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1041:   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1045:  View& AsSelectable()
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1056:   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1063:  View& AsSelectable(F&& configure)
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:41:class SelectableTraitImpl;
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:107:   * programmatically via SetSelected() or through toggle-by-click interaction.
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:113:  Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:126:   * If the new state differs from the current state, the SelectionChangedSignal
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:132:  void SetSelected(bool selected);
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:146:   * When enabled, the SelectableTrait listens to the owner View's ClickedSignal
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:152:  void EnableToggleByClick(bool enabled = true);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:1228:  Signal<void(View, uint32_t, uint32_t)>& SelectionChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/input-field.cpp:775:Signal<void(View, uint32_t, uint32_t)>& InputField::SelectionChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/input-field.cpp:777:  return GetImpl(*this).SelectionChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:60:Signal<void(View, bool, InputEvent)>& InteractiveTrait::PressedChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:62:  return GetImpl(*this).PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:70:Signal<void(View, InputEvent)>& InteractiveTrait::ClickedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:72:  return GetImpl(*this).ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1046:  Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:360:  * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused. \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:364:  ChildClass& AsSelectable() { View::AsSelectable(); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:369:  * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:376:  ChildClass& AsSelectable(F&& configure) { View::AsSelectable(configure); return *this; } \
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:67:   * @copydoc Dali::Ui::InteractiveTrait::PressedChangedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:69:  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:77:   * @copydoc Dali::Ui::InteractiveTrait::ClickedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:79:  Signal<void(View, InputEvent)>& ClickedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:227:  Signal<void(View, bool, InputEvent)> mPressedChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:229:  Signal<void(View, InputEvent)>       mClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:618:   * @copydoc Dali::Ui::Label::AnchorClickedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:620:  Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:1009:  Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1118:Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1120:  return mAnchorClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1587:  mAnchorClickedSignal.Emit(handle, ToDaliString(href));
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:37:  mPressedChangedSignal(),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:71:Signal<void(View, bool, InputEvent)>& InteractiveTraitImpl::PressedChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:73:  return mPressedChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:81:Signal<void(View, InputEvent)>& InteractiveTraitImpl::ClickedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:83:  return mClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:328:  mPressedChangedSignal.Emit(view, mPressed, inputEvent);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:337:  mClickedSignal.Emit(view, inputEvent);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:1066:Signal<void(View, uint32_t, uint32_t)>& InputFieldImpl::SelectionChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:1068:  return mSelectionChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:1922:  mSelectionChangedSignal.Emit(handle, range.first, range.second);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:58:   * @copydoc Dali::Ui::SelectableTrait::SelectionChangedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:60:  Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:69:   * @copydoc Dali::Ui::SelectableTrait::SetSelected
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:71:  void SetSelected(bool selected);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:79:   * @copydoc Dali::Ui::SelectableTrait::EnableToggleByClick
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:81:  void EnableToggleByClick(bool enabled);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:129:  void SetSelectedInternal(bool selected, InputEvent event);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:134:  Signal<void(View, bool, InputEvent)> mSelectionChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:666:   * @copydoc Dali::Ui::InputField::SelectionChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:668:  Signal<void(View, uint32_t, uint32_t)>& SelectionChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:1059:  Signal<void(View, uint32_t, uint32_t)>              mSelectionChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:1087:  bool               mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:34:  mSelectionChangedSignal(),
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:45:Signal<void(View, bool, InputEvent)>& SelectableTraitImpl::SelectionChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:47:  return mSelectionChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:55:void SelectableTraitImpl::SetSelected(bool selected)
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:57:  SetSelectedInternal(selected, InputEvent::None());
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:60:void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:82:  mSelectionChangedSignal.Emit(owner, mSelected, event);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:90:void SelectableTraitImpl::EnableToggleByClick(bool enabled)
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:161:    clickable.ClickedSignal().Connect(this, &SelectableTraitImpl::OnClickedForToggle);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:176:    clickable.ClickedSignal().Disconnect(this, &SelectableTraitImpl::OnClickedForToggle);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:182:  SetSelectedInternal(!mSelected, event);
+
+exec
+/bin/bash -lc "sed -n '1,140p' repos/dali-ui/samples/animation/animation-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using Dali::Ui::View;
+
+/**
+ * Demonstrates the typed animation API with both Bridge and Spec patterns.
+ *
+ * - Tap the red box: fade out using View-first Bridge pattern
+ * - Tap the blue box: fade in using Spec-first pattern
+ */
+class AnimationExample : public ConnectionTracker
+{
+public:
+  AnimationExample(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AnimationExample::Create);
+  }
+
+  ~AnimationExample() = default;
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Build a reusable fade-in spec
+    mFadeInSpec = View::NewAnimationSpec()
+      .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
+
+    window.Add(Layout::New()
+      .Children({
+        InteractiveView::New()
+          .SetBackgroundColor(UiColor(0xFF0000))
+          .SetRequestedWidth(200_spx)
+          .SetRequestedHeight(200_spx)
+          .ConnectClickedSignal(this, &AnimationExample::OnRedClicked)
+          .As(mRedBox),
+        InteractiveView::New()
+          .SetBackgroundColor(UiColor(0x0000FF))
+          .SetOpacity(0.3f)
+          .SetRequestedWidth(200_spx)
+          .SetRequestedHeight(200_spx)
+          .SetRequestedPositionX(220_spx)
+          .ConnectClickedSignal(this, &AnimationExample::OnBlueClicked)
+          .As(mBlueBox),
+      }));
+  }
+
+  void OnRedClicked(View view, InputEvent e)
+  {
+    // View-first: Bridge pattern (stack-allocated, zero heap)
+    auto anim = Animation::New();
+    view.Animate(anim)
+      .BackgroundColor(UiColor::PRIMARY, 500_ms)
+      .PositionY(50.0f, 300_ms, AlphaFunction::EASE_OUT);
+
+    anim.Play();
+  }
+
+  void OnBlueClicked(View view, InputEvent e)
+  {
+    // Spec-first: reusable spec applied to Animation
+    auto anim = Animation::New();
+    mFadeInSpec.ApplyTo(anim, view);
+    anim.Play();
+  }
+
+private:
+  Application&       mApplication;
+  View               mRedBox;
+  View               mBlueBox;
+  ViewAnimationSpec  mFadeInSpec;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  AnimationExample example(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "sed -n '300,520p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   *
+   * @param[in] scaleX The X scale factor to set
+   * @param[in] scaleY The Y scale factor to set
+   */
+  View& SetScale(float scaleX, float scaleY);
+
+  /**
+   * @brief Gets the current scale factor applied to the view.
+   *
+   * @return The current scale factor
+   */
+  Vector2 GetCurrentScale() const;
+
+  /**
+   * @brief Checks if the view is visible.
+   *
+   * @return True if the view is visible, false otherwise
+   */
+  bool IsVisible() const;
+
+  /**
+   * @brief Sets the visibility of the view.
+   *
+   * @param[in] visibility True to make the view visible, false to hide it
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetVisibility(bool visibility);
+
+  /**
+   * @brief Gets the opacity of the view.
+   *
+   * @return The opacity value (0.0 to 1.0)
+   */
+  float GetOpacity() const;
+
+  // @ANIMATABLE(Actor::Property::OPACITY, float)
+  /**
+   * @brief Sets the opacity of the view.
+   *
+   * @param[in] opacity The opacity value to set (0.0 to 1.0)
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetOpacity(float opacity);
+
+  /**
+   * @brief Gets the actual rendered size of this View after layout.
+   *
+   * This is a read-only result of the layout system's Measure/Arrange passes.
+   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
+   *
+   * @return The actual size (width, height) as set by the layout system
+   */
+  MeasuredSize GetSize() const;
+
+  /**
+   * @brief Gets the current rendered size of this View.
+   *
+   * @return The current rendered size (width, height)
+   */
+  MeasuredSize GetCurrentSize() const;
+
+  /**
+   * @brief Sets the X position requested by the user.
+   *
+   * This value is the layout input. The parent's Arrange pass uses it
+   * (offset by the parent's left padding and this view's left margin) to
+   * compute the final rendered position. The Actor::Property::POSITION_X
+   * property is updated only by the next Arrange.
+   *
+   * To drive the rendered position without affecting the layout request
+   * (e.g. for scrolling or animation that should not feed back into
+   * layout), set Actor::Property::POSITION_X via SetProperty directly.
+   *
+   * @param[in] x The requested X position
+   */
+  View& SetRequestedPositionX(float x);
+
+  /**
+   * @brief Returns the user-requested X position.
+   *
+   * Independent of layout passes; returns the last value set via
+   * SetRequestedPositionX. To read the current rendered X position
+   * (Actor::Property::POSITION_X) instead, use GetPositionX().
+   *
+   * @return The requested X position
+   */
+  float GetRequestedPositionX() const;
+
+  /**
+   * @brief Sets the Y position requested by the user.
+   *
+   * @param[in] y The requested Y position
+   * @see SetRequestedPositionX
+   */
+  View& SetRequestedPositionY(float y);
+
+  /**
+   * @brief Returns the user-requested Y position.
+   *
+   * @return The requested Y position
+   * @see GetRequestedPositionX
+   */
+  float GetRequestedPositionY() const;
+
+  /**
+   * @brief Returns the current rendered X position (Actor::Property::POSITION_X).
+   *
+   * After a layout pass, this is the requested X plus the parent's left
+   * padding plus this view's left margin. Direct property writes (e.g.
+   * scroll offset animations) may also modify it.
+   *
+   * @return The current rendered X position
+   */
+  float GetPositionX() const;
+
+  /**
+   * @brief Returns the current rendered Y position (Actor::Property::POSITION_Y).
+   *
+   * @return The current rendered Y position
+   * @see GetPositionX
+   */
+  float GetPositionY() const;
+
+  /**
+   * @brief Returns the current rendered position (Actor::Property::POSITION).
+   *
+   * @return The current rendered position
+   * @see GetPositionX, GetPositionY
+   */
+  Vector2 GetCurrentPosition() const;
+
+  /**
+   * @brief Sets the parent origin of the View.
+   *
+   * @param[in] point The parent origin to set
+   */
+  View& SetParentOrigin(const Vector3& point);
+
+  /**
+   * @brief Gets the parent origin of the View.
+   *
+   * @return The parent origin of the View
+   */
+  Vector3 GetParentOrigin() const;
+
+  /**
+   * @brief Sets the pivot of the View.
+   *
+   * @param[in] point The pivot to set
+   */
+  View& SetPivot(const Vector3& point);
+
+  /**
+   * @brief Gets the pivot of the View.
+   *
+   * @return The pivot of the View
+   */
+  Vector3 GetPivot() const;
+
+  /**
+   * @brief Sets the requested width.
+   *
+   * A positive value sets a fixed width.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] width The requested width
+   */
+  View& SetRequestedWidth(float width);
+
+  /**
+   * @brief Gets the requested width.
+   *
+   * @return The requested width
+   */
+  float GetRequestedWidth() const;
+
+  /**
+   * @brief Sets the requested height.
+   *
+   * A positive value sets a fixed height.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] height The requested height
+   */
+  View& SetRequestedHeight(float height);
+
+  /**
+   * @brief Gets the requested height.
+   *
+   * @return The requested height
+   */
+  float GetRequestedHeight() const;
+
+  /**
+   * @brief Sets the minimum width.
+   *
+   * @param[in] width The minimum width
+   */
+  View& SetMinimumWidth(float width);
+
+  /**
+   * @brief Gets the minimum width.
+   *
+   * @return The minimum width
+   */
+  float GetMinimumWidth() const;
+
+  /**
+   * @brief Sets the minimum height.
+   *
+   * @param[in] height The minimum height
+   */
+  View& SetMinimumHeight(float height);
+
+  /**
+   * @brief Gets the minimum height.
+   *
+   * @return The minimum height
+   */
+
+exec
+/bin/bash -lc "sed -n '720,1085p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  View& SetBackwardFocusableView(View view);
+
+  /**
+   * @brief Sets a callback for focus navigation within this view's children.
+   *
+   * When set, this callback is invoked by the focus manager to determine the next
+   * focusable view. It takes priority over the OnFocusNavigationRequested() virtual method.
+   *
+   * @param[in] callback The focus navigation callback (move-only, ownership transferred)
+   */
+  void SetFocusNavigationCallback(FocusNavigationCallback callback);
+
+  /**
+   * @brief Gets the background color.
+   *
+   * @return The background color
+   */
+  UiColor GetBackgroundColor();
+
+  /**
+   * @brief Sets the background color.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * If the UiColor has direct RGBA values, it is applied immediately
+   * and any previous ID-based binding for this property is removed.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBackgroundColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color.
+   *
+   * @return The color
+   */
+  UiColor GetColor() const;
+
+  /**
+   * @brief Sets the color.
+   *
+   * @param[in] color The color to set
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetColor(const UiColor& color);
+
+  /**
+   * @brief Gets the current color.
+   *
+   * @return The current color
+   */
+  UiColor GetCurrentColor() const;
+
+  /**
+   * @brief Checks if the view is enabled.
+   *
+   * @return True if the view is enabled (default), false if disabled
+   */
+  bool IsEnabled() const;
+
+  /**
+   * @brief Sets whether the view is enabled.
+   *
+   * A disabled view does not receive user interaction. Setting this to false
+   * adds the Disabled state and emits StateChangedSignal.
+   *
+   * @param[in] enabled True to enable, false to disable
+   */
+  View& SetEnabled(bool enabled);
+
+  /**
+   * @brief Gets the corner radius of the view.
+   *
+   * @return The corner radius as Vector4 (topLeft, topRight, bottomRight, bottomLeft)
+   */
+  Vector4 GetCornerRadius() const;
+
+  /**
+   * @brief Sets a uniform corner radius for all four corners.
+   *
+   * @param[in] radius The corner radius to apply to all corners
+   */
+  View& SetCornerRadius(float radius);
+
+  /**
+   * @brief Sets individual corner radii for all four corners.
+   *
+   * @param[in] topLeft     The radius for the top-left corner
+   * @param[in] topRight    The radius for the top-right corner
+   * @param[in] bottomRight The radius for the bottom-right corner
+   * @param[in] bottomLeft  The radius for the bottom-left corner
+   */
+  View& SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
+
+  // @ANIMATABLE(View::Property::CORNER_RADIUS, Vector4)
+  /**
+   * @brief Sets corner radii from a Vector4.
+   *
+   * @param[in] radius Corner radii as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
+   */
+  View& SetCornerRadius(const Vector4& radius);
+
+  /**
+   * @brief Gets the corner radius policy.
+   *
+   * @return The corner radius policy
+   */
+  CornerRadiusPolicy GetCornerRadiusPolicy() const;
+
+  /**
+   * @brief Sets the corner radius policy.
+   *
+   * @param[in] policy ABSOLUTE for world-unit values (default), RELATIVE for percentage [0.0, 0.5] of the shorter side
+   */
+  View& SetCornerRadiusPolicy(CornerRadiusPolicy policy);
+
+  /**
+   * @brief Shortcut to set the corner radius policy to RELATIVE.
+   *
+   * Equivalent to SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE).
+   */
+  View& SetCornerRadiusPolicyRelative();
+
+  /**
+   * @brief Returns true if the corner radius policy is RELATIVE.
+   *
+   * @return True if the policy is RELATIVE, false if ABSOLUTE
+   */
+  bool IsCornerRadiusPolicyRelative() const;
+
+  /**
+   * @brief Gets the corner squareness of the view.
+   *
+   * @return The corner squareness as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
+   */
+  Vector4 GetCornerSquareness() const;
+
+  /**
+   * @brief Sets a uniform corner squareness for all four corners.
+   *
+   * @param[in] squareness The squareness value to apply to all corners
+   */
+  View& SetCornerSquareness(float squareness);
+
+  /**
+   * @brief Sets individual corner squareness values for all four corners.
+   *
+   * @param[in] topLeft     The squareness for the top-left corner
+   * @param[in] topRight    The squareness for the top-right corner
+   * @param[in] bottomRight The squareness for the bottom-right corner
+   * @param[in] bottomLeft  The squareness for the bottom-left corner
+   */
+  View& SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
+
+  // @ANIMATABLE(View::Property::CORNER_SQUARENESS, Vector4)
+  /**
+   * @brief Sets corner squareness from a Vector4.
+   *
+   * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
+   */
+  View& SetCornerSquareness(const Vector4& squareness);
+
+  /**
+   * @brief Gets the borderline width of the view.
+   *
+   * @return The borderline width
+   */
+  float GetBorderlineWidth() const;
+
+  // @ANIMATABLE(View::Property::BORDERLINE_WIDTH, float)
+  /**
+   * @brief Sets the borderline width of the view.
+   *
+   * @param[in] width The borderline width to set
+   */
+  View& SetBorderlineWidth(float width);
+
+  /**
+   * @brief Gets the borderline color of the view.
+   *
+   * @return The borderline color
+   */
+  UiColor GetBorderlineColor();
+
+  // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor)
+  /**
+   * @brief Sets the borderline color of the view.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBorderlineColor(const UiColor& color);
+
+  /**
+   * @brief Gets the borderline offset of the view.
+   *
+   * @return The borderline offset
+   */
+  float GetBorderlineOffset() const;
+
+  // @ANIMATABLE(View::Property::BORDERLINE_OFFSET, float)
+  /**
+   * @brief Sets the borderline offset of the view.
+   *
+   * @param[in] offset The borderline offset to set
+   */
+  View& SetBorderlineOffset(float offset);
+
+  /**
+   * @brief Gets the name of the view.
+   *
+   * @return The name
+   */
+  Dali::String GetName() const;
+
+  /**
+   * @brief Sets the name of this view.
+   *
+   * @param[in] name The name to set
+   */
+  View& SetName(const Dali::String& name);
+
+  /**
+   * @brief Sets the layout direction of this view explicitly.
+   *
+   * Overrides inherited direction from the parent. To revert to inheritance,
+   * use ClearLayoutDirection().
+   *
+   * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT)
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetLayoutDirection(Dali::LayoutDirection::Type direction);
+
+  /**
+   * @brief Clears the explicitly set layout direction.
+   *
+   * After calling this, the view inherits its layout direction from the parent.
+   */
+  void ClearLayoutDirection();
+
+  /**
+   * @brief Returns true if this view is inheriting layout direction from its parent.
+   *
+   * This is true by default. It becomes false only when SetLayoutDirection() has been
+   * called to set an explicit direction, and is restored to true by ClearLayoutDirection().
+   *
+   * @return True if inheriting, false if an explicit direction has been set
+   */
+  bool IsLayoutDirectionInherited() const;
+
+  /**
+   * @brief Returns the effective layout direction applied to this view.
+   *
+   * Always returns the resolved direction (LEFT_TO_RIGHT or RIGHT_TO_LEFT),
+   * taking inheritance into account.
+   *
+   * @return The effective layout direction
+   */
+  Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
+
+  /**
+   * @brief Returns true if this view and all its View ancestors are enabled.
+   *
+   * Unlike IsEnabled(), which only reflects the view's own state, this method
+   * walks up the scene hierarchy and returns false if any ancestor View carries
+   * ViewState::DISABLED.
+   *
+   * @return True if neither the view nor any ancestor is disabled
+   */
+  bool IsEffectivelyEnabled() const;
+
+  /**
+   * @brief Returns true if this view or any of its View ancestors is focused.
+   *
+   * Unlike the Focused bit in GetState(), this method walks up the scene
+   * hierarchy and returns true if any ancestor View carries ViewState::FOCUSED.
+   *
+   * @return True if the view itself or at least one ancestor is focused
+   */
+  bool IsEffectivelyFocused() const;
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the interaction trait to this View.
+   *
+   * @return Reference to this View for fluent chaining
+   */
+  View& AsInteractive()
+  {
+    EnsureInteractiveTrait();
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the interaction trait to this View and configures it.
+   *
+   * @param[in] configure Callable with signature void(InteractiveTrait&)
+   * @return Reference to this View for fluent chaining
+   */
+  template<typename F>
+  View& AsInteractive(F&& configure)
+  {
+    InteractiveTrait trait = EnsureInteractiveTrait();
+    if(trait)
+    {
+      configure(trait);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the selectable trait to this View.
+   *
+   * A View can have at most one selectable trait. If the View already has a
+   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
+   *
+   * @return Reference to this View for fluent chaining
+   */
+  View& AsSelectable()
+  {
+    EnsureSelectableTrait();
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the selectable trait to this View and configures it.
+   *
+   * A View can have at most one selectable trait. If the View already has a
+   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is
+   * used and the configure callback is invoked with it.
+   *
+   * @param[in] configure Callable with signature void(SelectableTrait&)
+   * @return Reference to this View for fluent chaining
+   */
+  template<typename F>
+  View& AsSelectable(F&& configure)
+  {
+    SelectableTrait trait = EnsureSelectableTrait();
+    if(trait)
+    {
+      configure(trait);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Assigns this View instance to a target variable.
+   * This method is useful for capturing a reference to a View created within
+   * a declarative UI tree for later use.
+   */
+  View& As(View& self)
+  {
+    self = static_cast<View&>(*this);
+    return *this;
+  }
+
+  // @CHAIN_MANUAL_SELF
+
+exec
+/bin/bash -lc "sed -n '1,270p' repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/key-click-policy.h>
+#include <dali-ui-foundation/public-api/trait.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+// Forward declaration (view.h provides full definition when needed)
+class View;
+
+// Forward declarations
+namespace Integration
+{
+class InteractiveTraitImpl;
+}
+
+/**
+ * @brief InteractiveTrait is an interaction trait that provides clickable behavior to a View.
+ *
+ * InteractiveTrait provides click, long-press, and pressed-state handling
+ * functionality. It can be attached to any View to make it interactive.
+ *
+ */
+class DALI_UI_API InteractiveTrait : public Trait
+{
+public:
+  // Typedefs
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized Trait handle.
+   */
+  InteractiveTrait();
+
+  /**
+   * @brief Creates an initialized Trait.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static InteractiveTrait New();
+
+  /**
+   * @brief Downcasts a handle to InteractiveTrait handle.
+   *
+   * If the handle refers to a InteractiveTrait (e.g. a trait from GetTrait),
+   * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
+   *
+   * @param[in] handle Handle to an object (e.g. Trait from View's interaction trait)
+   * @return A handle to InteractiveTrait or an uninitialized handle
+   */
+  static InteractiveTrait DownCast(BaseHandle handle);
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Creates another handle that points to the same real object.
+   * @param[in] interactiveTrait Handle to copy
+   */
+  InteractiveTrait(const InteractiveTrait& interactiveTrait);
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~InteractiveTrait();
+
+public: // Signals
+  /**
+   * @brief Emitted when the pressed state changes.
+   *
+   * This signal is emitted when the view's pressed state changes due to touch or keyboard input.
+   * The pressed state is true when the user is interacting with the view (e.g., pressing down),
+   * and false when the interaction ends (e.g., releasing the touch or key).
+   *
+   * @return The pressed changed signal
+   */
+  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+
+  /**
+   * @brief Emitted when the pseudo disabled state changes.
+   *
+   * This signal is emitted when the pseudo disabled state is changed via SetPseudoDisabled().
+   * The view is visually presented as disabled when in pseudo disabled state, but it still
+   * accepts user interaction to provide guidance or an alternative flow.
+   *
+   * @return The pseudo disabled changed signal
+   */
+  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
+
+  /**
+   * @brief Emitted when the view is clicked.
+   *
+   * This signal is emitted when the view receives a tap gesture, indicating a click action.
+   * The click action is triggered when the user taps on the view.
+   *
+   * @note This signal may not be emitted if the one of LongPressed signal handler consumes the event (returns true).
+   *
+   * @return The clicked signal
+   */
+  Signal<void(View, InputEvent)>& ClickedSignal();
+
+  /**
+   * @brief Emitted when the view receives a long press gesture.
+   *
+   * This signal is emitted when the user performs a long press on the view.
+   * A long press is detected when the user presses and holds on the view for a specified duration.
+   *
+   * @note If the handler returns true to consume the event, the Clicked signal will not be emitted.
+   * @note This signal is not emitted when ClickedKeyType is set to PRESS.
+   *
+   * @return The long pressed signal
+   */
+  Signal<bool(View, InputEvent)>& LongPressedSignal();
+
+public: // API
+  /**
+   * @brief The boolean flag for pressed state.
+   *
+   * @return True if the object is pressed
+   */
+  bool IsPressed() const;
+
+  /**
+   * @brief Checks if the view is pseudo disabled state.
+   * The view is visually presented as disabled, but it still accepts user interaction in order to provide guidance or
+   * an alternative flow.
+   *
+   * @return True if the object is pseudo disabled
+   */
+  bool IsPseudoDisabled() const;
+
+  /**
+   * @brief Sets the pseudo disabled state to the view.
+   * The view is visually presented as disabled, but it still accepts user interaction in order to provide guidance or
+   * an alternative flow.
+   *
+   * @param[in] pseudoDisabled True if the object is pseudo disabled
+   */
+  void SetPseudoDisabled(bool pseudoDisabled);
+
+  /**
+   * @brief Checks if clicking is currently allowed (not blocked).
+   *
+   * @return True if clicking is allowed, false if clicking is blocked
+   */
+  bool IsClickable() const;
+
+  /**
+   * @brief Sets whether clicking is allowed.
+   *
+   * @param[in] clickable True to allow clicking, false to block clicking
+   */
+  void SetClickable(bool clickable);
+
+  /**
+   * @brief Retrieves the current key click policy.
+   *
+   * @return The active KeyClickPolicy for this button.
+   */
+  KeyClickPolicy GetKeyClickPolicy() const;
+
+  /**
+   * @brief Configures the trigger timing for key-driven click events.
+   *
+   * @param policy The KeyClickPolicy to be applied (OnRelease, OnPress, or Disabled).
+   */
+  void SetKeyClickPolicy(KeyClickPolicy policy);
+
+  /**
+   * @brief Connects a handler to ClickedSignal.
+   *
+   * Multiple calls accumulate — each call adds an additional handler.
+   * If @p obj implements ConnectionTrackerInterface (e.g. inherits ConnectionTracker),
+   * the connection is automatically removed when @p obj is destroyed.
+   *
+   * Supports member functions and stateless lambdas:
+   * @code
+   * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
+   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
+   * @endcode
+   *
+   * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
+   * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
+   * @return Reference to this for method chaining
+   */
+  template<typename T, typename Func>
+  void ConnectClickedSignal(T* obj, Func func)
+  {
+    ClickedSignal().Connect(obj, func);
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Connects a handler to PressedChangedSignal.
+   *
+   * Multiple calls accumulate — each call adds an additional handler.
+   * The handler is called with @c pressed=true on press-down and @c pressed=false on release.
+   * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
+   *
+   * @param[in] obj  The object to connect to
+   * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
+   * @return Reference to this for method chaining
+   */
+  template<typename T, typename Func>
+  void ConnectPressedChangedSignal(T* obj, Func func)
+  {
+    PressedChangedSignal().Connect(obj, func);
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Connects a handler to LongPressedSignal.
+   *
+   * Multiple calls accumulate — each call adds an additional handler.
+   * Long press fires once when the gesture is detected (on press-down after the time threshold).
+   * Press release is reported separately via PressedChangedSignal.
+   *
+   * The handler must return bool: return @c true to suppress the subsequent click event,
+   * or @c false to allow it.
+   *
+   * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
+   *
+   * @param[in] obj  The object to connect to
+   * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
+   * @return Reference to this for method chaining
+   */
+  template<typename T, typename Func>
+  void ConnectLongPressedSignal(T* obj, Func func)
+  {
+    LongPressedSignal().Connect(obj, func);
+  }
+
+public: // Not intended for application developers
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The implementation
+   */
+  explicit InteractiveTrait(Integration::InteractiveTraitImpl* implementation);
+};
+
+
+exec
+/bin/bash -lc "sed -n '1,210p' repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/trait.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+// Forward declaration (view.h provides full definition when needed)
+class View;
+
+// Forward declarations
+namespace Integration
+{
+class SelectableTraitImpl;
+}
+
+/**
+ * @brief SelectableTrait is a state trait that provides selection behavior to a View.
+ *
+ * SelectableTrait manages a boolean selected state and emits a signal when
+ * the state changes. It can optionally toggle the selected state on click
+ * by leveraging the owner View's InteractiveTrait.
+ *
+ * Unlike InteractiveTrait, SelectableTrait does not handle key events or focus
+ * directly. It uses a separate reserved trait slot (SELECTABLE_TRAIT) and can
+ * coexist with InteractiveTrait on the same View.
+ *
+ * @note When toggle-by-click is enabled and the owner View does not have a
+ * InteractiveTrait, one is automatically created and attached.
+ */
+class DALI_UI_API SelectableTrait : public Trait
+{
+public:
+  // Typedefs
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized Trait handle.
+   */
+  SelectableTrait();
+
+  /**
+   * @brief Creates an initialized SelectableTrait.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static SelectableTrait New();
+
+  /**
+   * @brief Downcasts a handle to SelectableTrait handle.
+   *
+   * If the handle refers to a SelectableTrait (e.g. a trait from GetTrait),
+   * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
+   *
+   * @param[in] handle Handle to an object (e.g. Trait from View's selectable trait)
+   * @return A handle to SelectableTrait or an uninitialized handle
+   */
+  static SelectableTrait DownCast(BaseHandle handle);
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Creates another handle that points to the same real object.
+   * @param[in] selectableTrait Handle to copy
+   */
+  SelectableTrait(const SelectableTrait& selectableTrait);
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~SelectableTrait();
+
+public: // Signals
+  /**
+   * @brief Emitted when the selection state changes.
+   *
+   * This signal is emitted when the View's selected state changes, either
+   * programmatically via SetSelected() or through toggle-by-click interaction.
+   *
+   * The callback signature is: void YourCallbackName(View view, bool selected)
+   *
+   * @return The selection changed signal
+   */
+  Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
+
+public: // API
+  /**
+   * @brief Returns whether this View is currently selected.
+   *
+   * @return True if the View is selected
+   */
+  bool IsSelected() const;
+
+  /**
+   * @brief Sets the selection state of this View.
+   *
+   * If the new state differs from the current state, the SelectionChangedSignal
+   * is emitted. Subclass implementations (e.g. GroupSelectable) may veto or
+   * modify the state change.
+   *
+   * @param[in] selected True to select, false to deselect
+   */
+  void SetSelected(bool selected);
+
+  /**
+   * @brief Returns whether toggle-by-click is enabled.
+   *
+   * When enabled, clicking the owner View toggles the selected state.
+   *
+   * @return True if toggle-by-click is enabled
+   */
+  bool IsToggleByClickEnabled() const;
+
+  /**
+   * @brief Enables or disables toggle-by-click.
+   *
+   * When enabled, the SelectableTrait listens to the owner View's ClickedSignal
+   * and toggles the selected state on each click. If the owner View does not
+   * already have a InteractiveTrait, one is automatically created and attached.
+   *
+   * @param[in] enabled True to enable toggle-by-click, false to disable
+   */
+  void EnableToggleByClick(bool enabled = true);
+
+public: // Not intended for application developers
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The implementation
+   */
+  explicit SelectableTrait(Integration::SelectableTraitImpl* implementation);
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+codex
+---
+title: View
+sidebar_label: View
+category: views-components
+---
+
+# View
+
+`Dali::Ui::View` is the base app-facing UI object in dali-ui. Use it to build view trees, read layout/render state, and attach interaction or selection behavior without working directly with raw `Dali::Actor`.
+
+## Table of Contents
+
+- [Creating a View](#creating-a-view)
+- [Reading View State](#reading-view-state)
+- [Working with Child Views](#working-with-child-views)
+- [Making a View Interactive](#making-a-view-interactive)
+- [Selection State](#selection-state)
+- [Animating a View](#animating-a-view)
+- [View Property Constants](#view-property-constants)
+
+## Creating a View
+
+Create a base UI object with `Dali::Ui::View::New()`. In dali-ui application code, keep the object model at the `Dali::Ui::View` level and pass `View` handles through your own UI code.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateBaseView()
+{
+  View view = View::New();
+  return view;
+}
+```
+
+`Dali::Ui::View` is a handle type, so it is cheap to pass by value. A copied `View` handle refers to the same underlying UI object.
+
+```cpp
+void CacheView(View source)
+{
+  View sameObject = source;
+
+  Dali::String name = sameObject.GetName();
+  float opacity = sameObject.GetOpacity();
+}
+```
+
+## Reading View State
+
+Use typed `View` getters to inspect the state that application code commonly needs after configuration, layout, or animation. For example, `GetCurrentPosition()`, `GetCurrentScale()`, and `GetCurrentSize()` read current rendered values, while `GetMeasuredSize()` reads the measured layout result.
+
+```cpp
+void InspectView(View view)
+{
+  Vector2      position = view.GetCurrentPosition();
+  Vector2      scale = view.GetCurrentScale();
+  MeasuredSize currentSize = view.GetCurrentSize();
+  MeasuredSize measuredSize = view.GetMeasuredSize();
+
+  float opacity = view.GetOpacity();
+  UiColor color = view.GetColor();
+  UiColor currentColor = view.GetCurrentColor();
+}
+```
+
+For visual decoration, `View` exposes typed accessors for its own view-level properties. These keep application code readable and avoid raw property access for common view styling state.
+
+```cpp
+void InspectDecoration(View view)
+{
+  UiColor background = view.GetBackgroundColor();
+
+  Vector4 cornerRadius = view.GetCornerRadius();
+  Vector4 cornerSquareness = view.GetCornerSquareness();
+
+  float borderlineWidth = view.GetBorderlineWidth();
+  UiColor borderlineColor = view.GetBorderlineColor();
+  float borderlineOffset = view.GetBorderlineOffset();
+}
+```
+
+Layout-related getters are also owned by `Dali::Ui::View`. Use them when a component needs to react to the view’s resolved or constrained layout state.
+
+```cpp
+void InspectLayoutState(View view)
+{
+  float minimumWidth = view.GetMinimumWidth();
+  float minimumHeight = view.GetMinimumHeight();
+  float maximumWidth = view.GetMaximumWidth();
+  float maximumHeight = view.GetMaximumHeight();
+
+  Extents margin = view.GetMargin();
+  Dali::LayoutDirection::Type direction = view.GetEffectiveLayoutDirection();
+}
+```
+
+## Working with Child Views
+
+A `View` can be used as the app-facing node in a view tree. When you need to inspect children that are already attached, use `GetChildCount()` and `GetChildAt()` and continue working with `Dali::Ui::View` handles.
+
+```cpp
+void VisitChildren(View parent)
+{
+  const uint32_t childCount = parent.GetChildCount();
+
+  for(uint32_t index = 0u; index < childCount; ++index)
+  {
+    View child = parent.GetChildAt(index);
+
+    Dali::String childName = child.GetName();
+    MeasuredSize childSize = child.GetCurrentSize();
+  }
+}
+```
+
+This keeps traversal code aligned with dali-ui’s object model. The child returned by `GetChildAt()` is a `Dali::Ui::View`, so downstream code can use the same typed getters and traits.
+
+```cpp
+View FindFirstVisibleSizedChild(View parent)
+{
+  for(uint32_t index = 0u; index < parent.GetChildCount(); ++index)
+  {
+    View child = parent.GetChildAt(index);
+
+    MeasuredSize size = child.GetCurrentSize();
+    if(size.width > 0.0f && size.height > 0.0f)
+    {
+      return child;
+    }
+  }
+
+  return View();
+}
+```
+
+## Making a View Interactive
+
+Attach interaction behavior to a `View` through `View::AsInteractive()`, then configure the provided `Dali::Ui::InteractiveTrait`. The trait owns click, long-press, pressed-state, clickable, pseudo-disabled, and key-click policy behavior.
+
+```cpp
+class Controller
+{
+public:
+  View CreateClickableView()
+  {
+    View view = View::New();
+
+    view.AsInteractive([this](InteractiveTrait& trait)
+    {
+      trait.SetClickable(true);
+      trait.ConnectClickedSignal(this, &Controller::OnClicked);
+      trait.ConnectPressedChangedSignal(this, &Controller::OnPressedChanged);
+    });
+
+    return view;
+  }
+
+  void OnClicked(View view, InputEvent event)
+  {
+    UiColor color = view.GetCurrentColor();
+  }
+
+  void OnPressedChanged(View view, bool pressed, InputEvent event)
+  {
+    float opacity = view.GetOpacity();
+  }
+};
+```
+
+Use `InteractiveTrait::ClickedSignal()` when the view should perform an action on tap. Use `InteractiveTrait::PressedChangedSignal()` when the view needs separate press-down and release handling.
+
+```cpp
+class PressController
+{
+public:
+  void Configure(View view)
+  {
+    view.AsInteractive([this](InteractiveTrait& trait)
+    {
+      trait.ConnectPressedChangedSignal(this, &PressController::OnPressedChanged);
+    });
+  }
+
+  void OnPressedChanged(View view, bool pressed, InputEvent event)
+  {
+    if(pressed)
+    {
+      Vector2 position = view.GetCurrentPosition();
+    }
+    else
+    {
+      MeasuredSize size = view.GetCurrentSize();
+    }
+  }
+};
+```
+
+Long press handlers use `InteractiveTrait::ConnectLongPressedSignal()` and return `bool`. Returning `true` consumes the long press and suppresses the later click emission.
+
+```cpp
+class LongPressController
+{
+public:
+  void Configure(View view)
+  {
+    view.AsInteractive([this](InteractiveTrait& trait)
+    {
+      trait.ConnectLongPressedSignal(this, &LongPressController::OnLongPressed);
+      trait.ConnectClickedSignal(this, &LongPressController::OnClicked);
+    });
+  }
+
+  bool OnLongPressed(View view, InputEvent event)
+  {
+    return true;
+  }
+
+  void OnClicked(View view, InputEvent event)
+  {
+  }
+};
+```
+
+`InteractiveTrait` also lets you query and adjust interaction state.
+
+```cpp
+void UpdateInteractionState(InteractiveTrait trait)
+{
+  bool clickable = trait.IsClickable();
+  bool pressed = trait.IsPressed();
+  bool pseudoDisabled = trait.IsPseudoDisabled();
+
+  trait.SetClickable(!pressed);
+  trait.SetPseudoDisabled(pseudoDisabled);
+}
+```
+
+## Selection State
+
+Use `Dali::Ui::SelectableTrait` for boolean selection state. It owns `SetSelected()`, `IsSelected()`, `SelectionChangedSignal()`, and optional toggle-by-click behavior.
+
+```cpp
+class SelectionController
+{
+public:
+  void Configure(View view)
+  {
+    view.AsSelectable([this](SelectableTrait& trait)
+    {
+      trait.SetSelected(false);
+      trait.EnableToggleByClick(true);
+      trait.SelectionChangedSignal().Connect(this, &SelectionController::OnSelectionChanged);
+    });
+  }
+
+  void OnSelectionChanged(View view, bool selected, InputEvent event)
+  {
+    UiColor currentColor = view.GetCurrentColor();
+  }
+};
+```
+
+`SelectableTrait::EnableToggleByClick()` makes click input toggle the selected state. If you need to inspect state without changing it, use `IsSelected()` and `IsToggleByClickEnabled()`.
+
+```cpp
+void SyncSelectionState(SelectableTrait trait)
+{
+  bool selected = trait.IsSelected();
+  bool togglesByClick = trait.IsToggleByClickEnabled();
+
+  if(!selected && togglesByClick)
+  {
+    trait.SetSelected(true);
+  }
+}
+```
+
+## Animating a View
+
+Animate the `View` itself with the dali-ui app-facing animation API. `View::Animate()` creates a view animation bridge for one target view, and `View::NewAnimationSpec()` creates a reusable animation spec.
+
+```cpp
+class FadeController
+{
+public:
+  void FadeOut(View view)
+  {
+    Animation animation = Animation::New();
+
+    view.Animate(animation)
+      .Opacity(0.0f, 300_ms);
+
+    animation.Play();
+  }
+};
+```
+
+For reusable animations, build a `ViewAnimationSpec` from `View::NewAnimationSpec()` and apply it to a target `View`.
+
+```cpp
+class FadeInController
+{
+public:
+  FadeInController()
+  : mFadeInSpec(View::NewAnimationSpec()
+      .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT))
+  {
+  }
+
+  void FadeIn(View view)
+  {
+    Animation animation = Animation::New();
+
+    mFadeInSpec.ApplyTo(animation, view);
+
+    animation.Play();
+  }
+
+private:
+  ViewAnimationSpec mFadeInSpec;
+};
+```
+
+When referring to inherited transform or opacity property constants for animation-related metadata, use the owning DALi property owner. For example, opacity, position, and scale constants are owned by `Dali::Actor::Property`, while view-specific decoration constants are owned by `Dali::Ui::View::Property`.
+
+## View Property Constants
+
+Use `Dali::Ui::View::Property` for view-owned property constants. These constants identify view-level state such as accessibility metadata, automation identity, focus routing, background, borderline, corner radius, layout mode, margin, requested size, shadow, and offscreen rendering.
+
+```cpp
+Property::Index backgroundProperty = View::Property::BACKGROUND;
+Property::Index borderlineColorProperty = View::Property::BORDERLINE_COLOR;
+Property::Index cornerRadiusProperty = View::Property::CORNER_RADIUS;
+Property::Index focusGroupProperty = View::Property::FOCUS_GROUP;
+Property::Index automationIdProperty = View::Property::AUTOMATION_ID;
+```
+
+Accessibility-related constants are also owned by `Dali::Ui::View::Property`.
+
+```cpp
+Property::Index accessibilityName = View::Property::ACCESSIBILITY_NAME;
+Property::Index accessibilityDescription = View::Property::ACCESSIBILITY_DESCRIPTION;
+Property::Index accessibilityRole = View::Property::ACCESSIBILITY_ROLE;
+Property::Index accessibilityHidden = View::Property::ACCESSIBILITY_HIDDEN;
+Property::Index accessibilityStates = View::Property::ACCESSIBILITY_STATES;
+```
+
+For inherited actor-level constants, use the owner shown by the API. For example, `Dali::Actor::Property::OPACITY`, `Dali::Actor::Property::POSITION`, and `Dali::Actor::Property::SCALE` are actor property constants even when they are relevant to a `View` animation.
+tokens used
+47,708

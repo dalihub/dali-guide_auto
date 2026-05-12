@@ -1,0 +1,863 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e1768-40ff-7b03-a9af-6b1eb5a3ca06
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Image Loader (image-loader)
+- Category: images-visuals
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 17
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::AsyncImageLoader | scope=primary
+- Dali::Ui::ImageUrl | scope=primary
+- Dali::Ui::AsyncImageLoader::AsyncImageLoader | AsyncImageLoader(AsyncImageLoader &&rhs) noexcept | scope=primary_member
+- Dali::Ui::AsyncImageLoader::Cancel | bool Cancel(uint32_t loadingTaskId) | scope=primary_member
+- Dali::Ui::AsyncImageLoader::CancelAll | void CancelAll() | scope=primary_member
+- Dali::Ui::AsyncImageLoader::DownCast | AsyncImageLoader DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::AsyncImageLoader::ImageLoadedSignal | ImageLoadedSignalType & ImageLoadedSignal() | scope=primary_member
+- Dali::Ui::AsyncImageLoader::Load | uint32_t Load(const Dali::String &url, ImageDimensions dimensions) | scope=primary_member
+- Dali::Ui::AsyncImageLoader::New | AsyncImageLoader New() | scope=primary_member
+- Dali::Ui::AsyncImageLoader::operator= | AsyncImageLoader & operator=(AsyncImageLoader &&rhs) noexcept | scope=primary_member
+- Dali::Ui::AsyncImageLoader::~AsyncImageLoader | ~AsyncImageLoader() | scope=primary_member
+- Dali::Ui::ImageUrl::DownCast | ImageUrl DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::ImageUrl::GetUrl | const Dali::String & GetUrl() const | scope=primary_member
+- Dali::Ui::ImageUrl::ImageUrl | ImageUrl(ImageUrl &&rhs) noexcept | scope=primary_member
+- Dali::Ui::ImageUrl::New | ImageUrl New(const EncodedImageBuffer &encodedImageBuffer) | scope=primary_member
+- Dali::Ui::ImageUrl::operator= | ImageUrl & operator=(const ImageUrl &url) | scope=primary_member
+- Dali::Ui::ImageUrl::~ImageUrl | ~ImageUrl() | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "image-loader_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::AsyncImageLoader::New",
+      "Dali::Ui::ImageUrl::New"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "id": "image-loader_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::Ui::AsyncImageLoader::ImageLoadedSignal"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- (none)
+
+Optional source files to inspect if needed:
+[]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_examples",
+    "message": "No sample or UTC paths were available as example candidates."
+  }
+]
+exec
+/bin/bash -lc 'rg "class AsyncImageLoader|AsyncImageLoader|class ImageUrl|ImageLoadedSignalType|typedef.*ImageLoaded|using.*ImageLoaded" -n .' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 1 in 0ms:
+exec
+/bin/bash -lc 'rg --files' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+pipeline.py
+docs/Result_Analysis_2_3_3.md
+docs/Phase_1_3_Feature_Spec_Contract.md
+docs/Phase_1_Preprocess_DevNote.md
+docs/Phase_1_1_Preprocess_Hardening.md
+docs/TODO.md
+docs/Phase_1_Preprocess.md
+docs/Result_Analysis_2_3_1.md
+docs/Phase_1_5_LLM_Category_And_Ownership.md
+docs/Phase_1_6_Preprocess_Trace_And_Config_Completion.md
+docs/design.md
+docs/Repair_2_2_and_2_3.md
+docs/Result_Analysis_2_3_2.md
+docs/Phase_2_1_Generation_Config_And_Contract.md
+docs/Phase_1_4_Preprocess_Validation_Run_State.md
+docs/scenarios.md
+docs/Phase_2_3_CLI_Draft_Generator.md
+docs/Phase_1_8_Planner_Heuristic_Config_Cleanup.md
+docs/Phase_2_4_Markdown_Validation_And_Publish.md
+docs/Result_Analysis_2_4_1.md
+docs/Phase_1_7_Context_Feature_Extractor.md
+docs/Phase_1_2_Document_Planning.md
+docs/Phase_2_2_Context_Pack_Builder.md
+docs/generated/addon-manager.md
+docs/generated/view.md
+docs/generated/image.md
+docs/generated/animation.md
+docs/generated/image-view.md
+docs/generated/animated-image-view.md
+docs/generated/generation_report.md
+docs/generated/generation_report.json
+docs/generated/accessibility-highlight-overlay.md
+docs/generated/adaptor-framework.md
+docs/generated/focus-manager.md
+docs/generated/i-scroll-bar.md
+docs/generated/evaluations/image-view_evaluation.md
+docs/generated/evaluations/adaptor-framework_evaluation.md
+docs/generated/evaluations/addon-manager_evaluation.md
+docs/generated/evaluations/image_evaluation.md
+docs/generated/evaluations/focus-manager_evaluation.md
+docs/generated/evaluations/accessibility-highlight-overlay_evaluation.md
+docs/generated/evaluations/view_evaluation.md
+docs/generated/evaluations/animated-image-view_evaluation.md
+docs/generated/evaluations/i-scroll-bar_evaluation.md
+docs/generated/evaluations/animation_evaluation.md
+docs/generated_/view.md
+docs/generated_/image-view.md
+docs/generated_/generation_report.md
+docs/generated_/generation_report.json
+docs/generated_/evaluations/image-view_evaluation.md
+docs/generated_/evaluations/view_evaluation.md
+docs/Devnote_Phase_1.md
+docs/Category_Proposal.md
+docs/Repair_2_4_1_Source_Grounded_Validation.md
+requirements.txt
+README.md
+config/doc_config.yaml
+config/repo_config.yaml
+config/generation_config.yaml
+src/config.py
+src/logger.py
+src/check_runtime.py
+src/01_preprocess/feature_spec_builder.py
+src/01_preprocess/doxygen_runner.py
+src/01_preprocess/run_state.py
+src/01_preprocess/api_index_builder.py
+src/01_preprocess/diff_detector.py
+src/01_preprocess/doxygen_parser.py
+src/01_preprocess/repo_manager.py
+src/01_preprocess/feature_clusterer.py
+src/01_preprocess/document_feature_planner.py
+src/01_preprocess/llm_client.py
+src/01_preprocess/legacy/taxonomy_reviewer.py
+src/01_preprocess/legacy/stage_a_classifier.py
+src/01_preprocess/preprocess_reporter.py
+src/01_preprocess/preprocess_validator.py
+src/01_preprocess/context_feature_extractor.py
+src/02_generate/draft_generator.py
+src/02_generate/context_pack_builder.py
+src/02_generate/markdown_validator.py
+src/02_generate/document_generator.py
+AGENTS.md
+
+exec
+/bin/bash -lc "sed -n '1,220p' docs/generated/image-view.md" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,220p' docs/generated/image.md" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+---
+title: Image
+sidebar_label: Image
+category: images-visuals
+---
+
+# Image
+
+`Dali::Ui::View` 기반 dali-ui 앱에서 이미지 관련 뷰를 배치하고, 애니메이션 이미지 이벤트와 Lottie 이미지의 동적 속성 입력을 다룹니다.
+
+## Table of Contents
+
+- [dali-ui 이미지 뷰 모델](#dali-ui-이미지-뷰-모델)
+- [애니메이션 이미지 뷰를 앱 구조에 보관하기](#애니메이션-이미지-뷰를-앱-구조에-보관하기)
+- [이미지 영역을 레이아웃에 맞추기](#이미지-영역을-레이아웃에-맞추기)
+- [이미지 이벤트 연결 수명 관리](#이미지-이벤트-연결-수명-관리)
+- [Lottie 이미지의 동적 속성 정보 구성](#lottie-이미지의-동적-속성-정보-구성)
+
+## dali-ui 이미지 뷰 모델
+
+dali-ui 앱에서는 이미지도 화면 트리의 한 항목으로 취급합니다. 앱 코드는 raw actor 중심으로 작성하지 말고, app-facing handle을 `Dali::Ui::View` 계층으로 보관하는 방식이 자연스럽습니다. `Dali::Ui::AnimatedImageView`는 그 계층에서 애니메이션 이미지 리소스를 표시하는 이미지 전용 view입니다.
+
+```cpp
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+Dali::Ui::AnimatedImageView KeepImageHandle(Dali::Ui::AnimatedImageView source)
+{
+  Dali::Ui::AnimatedImageView image(std::move(source));
+  return image;
+}
+```
+
+위 예시는 `Dali::Ui::AnimatedImageView::AnimatedImageView` move constructor를 사용해 이미지 view handle을 앱 내부 상태로 넘기는 형태입니다. 실제 화면 구성에서는 이 handle을 `Dali::Ui::View` 기반 트리에 배치하고, 이미지 전용 제어는 `Dali::Ui::AnimatedImageView` handle에서 수행합니다.
+
+## 애니메이션 이미지 뷰를 앱 구조에 보관하기
+
+이미지 화면을 담당하는 controller는 이미지 view handle과 신호 연결 수명을 함께 소유하는 편이 좋습니다. `Dali::ConnectionTracker`는 signal 연결을 controller 생명주기에 묶을 때 사용하는 기본 구성 요소입니다.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+class ImageScreen : public Dali::ConnectionTracker
+{
+public:
+  ImageScreen()
+  : Dali::ConnectionTracker()
+  {
+  }
+
+  void SetImage(Dali::Ui::AnimatedImageView image)
+  {
+    mImage = Dali::Ui::AnimatedImageView(std::move(image));
+  }
+
+private:
+  Dali::Ui::AnimatedImageView mImage;
+};
+```
+
+`Dali::ConnectionTracker::ConnectionTracker`는 controller를 signal owner로 사용할 준비를 합니다. 이미지 뷰 자체는 `Dali::Ui::AnimatedImageView` handle로 보관하되, 앱의 나머지 화면 구성과 상호작용할 때는 `Dali::Ui::View` 기반 흐름 안에서 다루는 것이 dali-ui 앱 모델과 맞습니다.
+
+## 이미지 영역을 레이아웃에 맞추기
+
+이미지 콘텐츠는 보통 다른 controls와 함께 stack layout에 들어갑니다. 이때 per-child layout 정보는 `Dali::Ui::StackLayoutParams`로 복사하거나 재사용할 수 있습니다. 이미지 view를 직접 actor property로 조정하는 대신, view에 붙는 layout parameter를 별도 handle로 관리합니다.
+
+```cpp
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+
+Dali::Ui::StackLayoutParams CopyImageLayoutParams(Dali::Ui::StackLayoutParams source)
+{
+  Dali::Ui::StackLayoutParams params(source);
+  return params;
+}
+```
+
+`Dali::Ui::StackLayoutParams::StackLayoutParams` copy constructor는 이미 구성된 per-child layout handle을 복사해 같은 이미지 화면 안의 다른 image slot에 적용할 때 유용합니다. 이렇게 하면 이미지 뷰의 리소스 제어와 레이아웃 제어를 분리해서 유지할 수 있습니다.
+
+## 이미지 이벤트 연결 수명 관리
+
+이미지 리소스 준비, 애니메이션 완료 같은 이벤트는 public signal을 통해 처리합니다. 앱 controller는 `Dali::ConnectionTracker`를 상속해 연결 수명을 controller와 함께 정리되도록 구성합니다.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+class AnimatedImageEvents : public Dali::ConnectionTracker
+{
+public:
+  AnimatedImageEvents()
+  : Dali::ConnectionTracker()
+  {
+  }
+
+  void Track(Dali::Ui::AnimatedImageView image)
+  {
+    mImage = Dali::Ui::AnimatedImageView(std::move(image));
+  }
+
+private:
+  Dali::Ui::AnimatedImageView mImage;
+};
+```
+
+이 구조에서 `Dali::ConnectionTracker`는 signal connection owner 역할을 하고, `Dali::Ui::AnimatedImageView`는 이미지 view handle 역할을 합니다. signal 연결 API는 해당 signal을 소유한 view나 trait에서 호출해야 하며, 연결된 callback은 view 기반 이벤트 흐름 안에서 처리합니다.
+
+## Lottie 이미지의 동적 속성 정보 구성
+
+Lottie 기반 이미지에서는 특정 layer 또는 element path에 대해 per-frame 값을 공급해야 할 수 있습니다. 이때 `Dali::Ui::LottieAnimation::DynamicPropertyInfo`가 동적 속성 입력을 담는 owned data 구조입니다.
+
+`Dali::Ui::LottieAnimation::DynamicPropertyInfo::id`는 callback으로 전달될 식별자이고, `Dali::Ui::LottieAnimation::DynamicPropertyInfo::keyPath`는 대상 layer 또는 element path입니다. `Dali::Ui::LottieAnimation::DynamicPropertyInfo::property`는 동적으로 갱신할 Lottie vector property를 지정하며, `Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback`은 frame마다 값을 계산하는 callback 포인터입니다.
+
+```cpp
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+
+Dali::Ui::LottieAnimation::DynamicPropertyInfo MakeLottieDynamicPropertyInfo()
+{
+  Dali::Ui::LottieAnimation::DynamicPropertyInfo info{};
+
+  info.id       = 1001;
+  info.keyPath  = "**";
+  info.callback = nullptr;
+
+  return info;
+}
+```
+
+`Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback`의 ownership은 동적 속성 적용 후 visual 쪽으로 넘어가는 형태로 정의되어 있습니다. callback은 worker thread에서 호출될 수 있으므로, callback 내부에서 DALi object model을 직접 조작하는 방식은 피하고 계산 결과만 반환하도록 설계합니다.
+
+ succeeded in 0ms:
+---
+title: Image View
+sidebar_label: Image View
+category: views-components
+---
+
+# Image View
+
+`Dali::Ui::ImageView` displays a static image resource in a dali-ui `View` tree and provides image-specific controls for fitting, loading, masking, tinting, sub-regions, and N-patch rendering.
+
+## Table of Contents
+
+- [Create and Load an Image](#create-and-load-an-image)
+- [Fit, Decode Size, and Sampling](#fit-decode-size-and-sampling)
+- [Tint and Display a Sub-Region](#tint-and-display-a-sub-region)
+- [Loading Completion](#loading-completion)
+- [Mask an Image](#mask-an-image)
+- [Control Loading and Resource Lifetime](#control-loading-and-resource-lifetime)
+- [Use N-Patch Images](#use-n-patch-images)
+- [ImageView Properties](#imageview-properties)
+
+## Create and Load an Image
+
+Use `Dali::Ui::ImageView::New` to create the view, then set the image URL with `Dali::Ui::ImageView::SetResourceUrl`. The dali-ui app-facing object is still a `Dali::Ui::View`, so application code can keep generic view references and downcast only when it needs image-specific APIs.
+
+```cpp
+#include <dali-ui-foundation/public-api/image-view.h>
+
+Dali::Ui::ImageView CreateThumbnail()
+{
+  return Dali::Ui::ImageView::New()
+    .SetResourceUrl("images/photo.jpg")
+    .SetFittingMode(Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+}
+```
+
+`Dali::Ui::ImageView::New` also has a URL overload for the common case where the resource is known at construction time.
+
+```cpp
+Dali::Ui::ImageView image =
+  Dali::Ui::ImageView::New("images/profile.png")
+    .SetFittingMode(Dali::Ui::Image::FittingMode::FILL);
+```
+
+When a handler receives a generic `Dali::Ui::View`, use `Dali::Ui::ImageView::DownCast` before calling image-specific methods such as `Dali::Ui::ImageView::GetResourceUrl` or `Dali::Ui::ImageView::Reload`.
+
+```cpp
+void RefreshImage(Dali::Ui::View view)
+{
+  Dali::Ui::ImageView image = Dali::Ui::ImageView::DownCast(view);
+  if(image)
+  {
+    image.Reload();
+  }
+}
+```
+
+## Fit, Decode Size, and Sampling
+
+`Dali::Ui::ImageView::SetFittingMode` controls how the image is placed inside the view bounds. Use `Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO` when the full image should remain visible, `Dali::Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO` when cropping is acceptable, and `Dali::Ui::Image::FittingMode::FILL` when stretching to the view bounds is desired.
+
+```cpp
+Dali::Ui::ImageView preview =
+  Dali::Ui::ImageView::New("images/wide-banner.jpg")
+    .SetFittingMode(Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+
+Dali::Ui::Image::FittingMode mode = preview.GetFittingMode();
+```
+
+Use `Dali::Ui::ImageView::SetDesiredWidth` and `Dali::Ui::ImageView::SetDesiredHeight` as decode-size hints in pixels. Pair them with `Dali::Ui::ImageView::SetSamplingMode` when the image will be displayed at a smaller or fixed raster size.
+
+```cpp
+Dali::Ui::ImageView icon =
+  Dali::Ui::ImageView::New("images/icon-large.png")
+    .SetDesiredWidth(64)
+    .SetDesiredHeight(64)
+    .SetSamplingMode(Dali::Ui::Image::SamplingMode::BOX_THEN_LINEAR)
+    .SetFittingMode(Dali::Ui::Image::FittingMode::FILL);
+
+int desiredWidth  = icon.GetDesiredWidth();
+int desiredHeight = icon.GetDesiredHeight();
+Dali::Ui::Image::SamplingMode sampling = icon.GetSamplingMode();
+```
+
+For responsive layouts where the view size should drive the image load size, enable `Dali::Ui::ImageView::SetImageLoadWithViewSize`. This makes the resolved view size the image load-size input.
+
+```cpp
+Dali::Ui::ImageView cardImage =
+  Dali::Ui::ImageView::New("images/card-photo.jpg")
+    .SetImageLoadWithViewSize(true)
+    .SetFittingMode(Dali::Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+
+bool usesViewSize = cardImage.IsImageLoadWithViewSizeEnabled();
+```
+
+## Tint and Display a Sub-Region
+
+`Dali::Ui::ImageView::SetImageColor` applies a `Dali::Ui::UiColor` multiplier to the image. This is useful for disabled states, selection states, or monochrome icon tinting.
+
+```cpp
+Dali::Ui::ImageView tinted =
+  Dali::Ui::ImageView::New("images/status-icon.png")
+    .SetImageColor(Dali::Ui::UiColor(0x66CCFFFF));
+
+Dali::Ui::UiColor currentTint = tinted.GetImageColor();
+```
+
+`Dali::Ui::ImageView::SetPixelArea` displays a normalized sub-region of the image as `(x, y, width, height)`. For example, `(0.0f, 0.0f, 0.5f, 0.5f)` selects the upper-left quarter of the source image.
+
+```cpp
+Dali::Ui::ImageView sprite =
+  Dali::Ui::ImageView::New("images/spritesheet.png")
+    .SetFittingMode(Dali::Ui::Image::FittingMode::FILL)
+    .SetPixelArea(Dali::Vector4(0.0f, 0.0f, 0.5f, 0.5f));
+
+Dali::Vector4 area = sprite.GetPixelArea();
+
+sprite.SetPixelArea(Dali::Vector4(0.5f, 0.0f, 0.5f, 0.5f));
+```
+
+If the source image contains alpha data that is already pre-multiplied, set `Dali::Ui::ImageView::SetPreMultipliedAlpha`.
+
+```cpp
+Dali::Ui::ImageView premultiplied =
+  Dali::Ui::ImageView::New("images/premultiplied.png")
+    .SetPreMultipliedAlpha(true);
+
+bool enabled = premultiplied.IsPreMultipliedAlpha();
+```
+
+## Loading Completion
+
+Use `Dali::Ui::ImageView::ResourceReadySignal` to run code after the image resource is ready.
+
+```cpp
+class GalleryController : public Dali::ConnectionTracker
+{
+public:
+  Dali::Ui::ImageView CreateImage()
+  {
+    Dali::Ui::ImageView image =
+      Dali::Ui::ImageView::New()
+        .SetFittingMode(Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+
+    image.ResourceReadySignal().Connect(this, &GalleryController::OnImageReady);
+    image.SetResourceUrl("images/gallery-large.jpg");
+    return image;
+  }
+
+private:
+  void OnImageReady(Dali::Ui::View view)
+  {
+    Dali::Ui::ImageView image = Dali::Ui::ImageView::DownCast(view);
+    if(image)
+    {
+      Dali::Ui::Visual::ResourceStatus status = image.GetLoadingStatus();
+      Dali::String url = image.GetResourceUrl();
+    }
+  }
+};
+```
+
+`Dali::Ui::ImageView::Reload` reloads the currently assigned URL. This is useful when the URL string is unchanged but the backing resource may have changed.
+
+```cpp
+void ReloadIfReady(Dali::Ui::ImageView image)
+{
+  if(image.GetResourceUrl() != "")
+  {
+    image.Reload();
+  }
+}
+```
+
+## Mask an Image
+
+Use `Dali::Ui::ImageView::SetAlphaMaskUrl` to apply the alpha channel of another image as a mask. `Dali::Ui::ImageView::SetCropToMask` controls whether the result is cropped to the mask bounds, and `Dali::Ui::ImageView::SetMaskingMode` selects when masking is applied.
+
+```cpp
+Dali::Ui::ImageView avatar =
+  Dali::Ui::ImageView::New("images/profile-photo.jpg")
+    .SetFittingMode(Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
+    .SetAlphaMaskUrl("images/circle-mask.png")
+    .SetCropToMask(true)
+    .SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_RENDERING);
+
+Dali::String maskUrl = avatar.GetAlphaMaskUrl();
+bool cropToMask = avatar.IsCropToMask();
+Dali::Ui::Image::MaskingType maskingMode = avatar.GetMaskingMode();
+```
+
+Use `Dali::Ui::Image::MaskingType::MASKING_ON_RENDERING` when the mask should be applied during rendering. Use `Dali::Ui::Image::MaskingType::MASKING_ON_LOADING` when the masked result should be prepared during loading.
+
+```cpp
+avatar
+  .SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_LOADING)
+  .Reload();
+```
+
+## Control Loading and Resource Lifetime
+
+`Dali::Ui::ImageView::SetLoadPolicy` controls when loading starts. `Dali::Ui::Image::LoadPolicy::IMMEDIATE` loads when the `Dali::Ui::ImageView` is created, while `Dali::Ui::Image::LoadPolicy::ATTACHED` defers loading until the view is attached to the scene.
+
+```cpp
+Dali::Ui::ImageView deferred =
+  Dali::Ui::ImageView::New("images/large-photo.jpg")
+    .SetLoadPolicy(Dali::Ui::Image::LoadPolicy::ATTACHED);
+
+Dali::Ui::Image::LoadPolicy loadPolicy = deferred.GetLoadPolicy();
+```
+
+`Dali::Ui::ImageView::SetReleasePolicy` controls when the image texture can be released. `Dali::Ui::Image::ReleasePolicy::DETACHED` releases when detached, `Dali::Ui::Image::ReleasePolicy::DESTROYED` releases when the visual is destroyed, and `Dali::Ui::Image::ReleasePolicy::NEVER` keeps the resource cached.
+
+```cpp
+Dali::Ui::ImageView cached =
+  Dali::Ui::ImageView::New("images/reused-thumbnail.jpg")
+    .SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::NEVER);
+
+Dali::Ui::Image::ReleasePolicy releasePolicy = cached.GetReleasePolicy();
+```
+
+web search: 
+web search: Dali::Ui::AsyncImageLoader ImageLoadedSignalType
+web search: 
+web search: "namespace Dali" "namespace Ui" "AsyncImageLoader" "ImageLoadedSignalType"
+codex
+---
+title: Image Loader
+sidebar_label: Image Loader
+category: images-visuals
+---
+
+# Image Loader
+
+`Dali::Ui::AsyncImageLoader` loads image data asynchronously for dali-ui apps, while `Dali::Ui::ImageUrl` turns an encoded image buffer into a URL-style handle that can be passed through image-oriented code.
+
+## Table of Contents
+
+- [Load Images Without Blocking the View Flow](#load-images-without-blocking-the-view-flow)
+- [Track and Cancel Loading Tasks](#track-and-cancel-loading-tasks)
+- [React to Image Loading Completion](#react-to-image-loading-completion)
+- [Use ImageUrl for Encoded Image Buffers](#use-imageurl-for-encoded-image-buffers)
+- [Keep Loader Handles in App State](#keep-loader-handles-in-app-state)
+
+## Load Images Without Blocking the View Flow
+
+In a dali-ui application, screen code should keep the app-facing model in terms of `Dali::Ui::View`. `Dali::Ui::AsyncImageLoader` is not itself a view; it is a helper object used by view controllers or image-related services when image decoding should run asynchronously.
+
+Create the loader with `Dali::Ui::AsyncImageLoader::New`, then call `Dali::Ui::AsyncImageLoader::Load` with a URL and requested `ImageDimensions`. The returned task id identifies that single load request.
+
+```cpp
+class GalleryImageLoader
+{
+public:
+  GalleryImageLoader()
+  : mLoader(Dali::Ui::AsyncImageLoader::New())
+  {
+  }
+
+  uint32_t RequestImage(const Dali::String& url, ImageDimensions dimensions)
+  {
+    return mLoader.Load(url, dimensions);
+  }
+
+private:
+  Dali::Ui::AsyncImageLoader mLoader;
+};
+```
+
+Use this pattern when a `Dali::Ui::View`-based screen needs decoded image data before updating an image view, cache, or model object. The view tree remains owned by your screen code; `Dali::Ui::AsyncImageLoader` only owns the asynchronous loading work.
+
+## Track and Cancel Loading Tasks
+
+Each call to `Dali::Ui::AsyncImageLoader::Load` returns a `uint32_t` loading task id. Store that id when the result is still relevant to the current screen state. If the user navigates away, changes the requested image, or closes the image panel, cancel the stale request with `Dali::Ui::AsyncImageLoader::Cancel`.
+
+```cpp
+class PreviewLoader
+{
+public:
+  PreviewLoader()
+  : mLoader(Dali::Ui::AsyncImageLoader::New()),
+    mLoadingTaskId(0u)
+  {
+  }
+
+  void LoadPreview(const Dali::String& url, ImageDimensions dimensions)
+  {
+    if(mLoadingTaskId != 0u)
+    {
+      mLoader.Cancel(mLoadingTaskId);
+      mLoadingTaskId = 0u;
+    }
+
+    mLoadingTaskId = mLoader.Load(url, dimensions);
+  }
+
+  bool CancelPreview()
+  {
+    if(mLoadingTaskId == 0u)
+    {
+      return false;
+    }
+
+    bool cancelled = mLoader.Cancel(mLoadingTaskId);
+    mLoadingTaskId = 0u;
+    return cancelled;
+  }
+
+private:
+  Dali::Ui::AsyncImageLoader mLoader;
+  uint32_t                   mLoadingTaskId;
+};
+```
+
+Use `Dali::Ui::AsyncImageLoader::CancelAll` when the controller is discarding every pending request it owns.
+
+```cpp
+class ImageSearchSession
+{
+public:
+  ImageSearchSession()
+  : mLoader(Dali::Ui::AsyncImageLoader::New())
+  {
+  }
+
+  uint32_t QueueResultImage(const Dali::String& url, ImageDimensions dimensions)
+  {
+    return mLoader.Load(url, dimensions);
+  }
+
+  void ClearPendingResults()
+  {
+    mLoader.CancelAll();
+  }
+
+private:
+  Dali::Ui::AsyncImageLoader mLoader;
+};
+```
+
+`Dali::Ui::AsyncImageLoader::Cancel` is task-specific and returns whether that cancellation request was accepted. `Dali::Ui::AsyncImageLoader::CancelAll` is broader and is useful for screen teardown or replacing an entire result set.
+
+## React to Image Loading Completion
+
+Use `Dali::Ui::AsyncImageLoader::ImageLoadedSignal` as the event source for completed asynchronous loads. Connect the signal on the `Dali::Ui::AsyncImageLoader` instance that owns the tasks, and keep the connection lifetime with the same controller that owns the relevant `Dali::Ui::View` state.
+
+```cpp
+class AsyncImageController
+{
+public:
+  AsyncImageController()
+  : mLoader(Dali::Ui::AsyncImageLoader::New())
+  {
+  }
+
+  Dali::Ui::AsyncImageLoader::ImageLoadedSignalType& LoadingFinished()
+  {
+    return mLoader.ImageLoadedSignal();
+  }
+
+  uint32_t LoadForView(const Dali::String& url, ImageDimensions dimensions)
+  {
+    return mLoader.Load(url, dimensions);
+  }
+
+private:
+  Dali::Ui::AsyncImageLoader mLoader;
+};
+```
+
+This keeps event ownership explicit: the controller exposes or connects to `Dali::Ui::AsyncImageLoader::ImageLoadedSignal`, while the visual update still happens through the app's `Dali::Ui::View`-based screen objects.
+
+## Use ImageUrl for Encoded Image Buffers
+
+`Dali::Ui::ImageUrl` is the dali-ui handle for an image URL generated from an `EncodedImageBuffer`. Create it with `Dali::Ui::ImageUrl::New`, then read the URL string with `Dali::Ui::ImageUrl::GetUrl`.
+
+```cpp
+Dali::Ui::ImageUrl CreateBufferedImageUrl(const EncodedImageBuffer& encodedImageBuffer)
+{
+  return Dali::Ui::ImageUrl::New(encodedImageBuffer);
+}
+
+const Dali::String& ResolveBufferedImageUrl(Dali::Ui::ImageUrl imageUrl)
+{
+  return imageUrl.GetUrl();
+}
+```
+
+This is useful when image bytes are already available in memory and the rest of the image path expects URL-style input. The `Dali::Ui::ImageUrl` handle owns that conversion point; app code can pass the returned URL string into image-loading code without introducing raw actor property updates.
+
+You can also store or replace `Dali::Ui::ImageUrl` handles in ordinary application objects.
+
+```cpp
+class BufferedImageReference
+{
+public:
+  void SetImageUrl(const Dali::Ui::ImageUrl& imageUrl)
+  {
+    mImageUrl = imageUrl;
+  }
+
+  const Dali::String& GetUrl() const
+  {
+    return mImageUrl.GetUrl();
+  }
+
+private:
+  Dali::Ui::ImageUrl mImageUrl;
+};
+```
+
+## Keep Loader Handles in App State
+
+Both `Dali::Ui::AsyncImageLoader` and `Dali::Ui::ImageUrl` are handle types. Move them when transferring ownership between services or controllers, and keep them near the `Dali::Ui::View` state that depends on their results.
+
+```cpp
+Dali::Ui::AsyncImageLoader CreateLoader()
+{
+  return Dali::Ui::AsyncImageLoader::New();
+}
+
+class ImageLoaderOwner
+{
+public:
+  void SetLoader(Dali::Ui::AsyncImageLoader loader)
+  {
+    mLoader = std::move(loader);
+  }
+
+  uint32_t Load(const Dali::String& url, ImageDimensions dimensions)
+  {
+    return mLoader.Load(url, dimensions);
+  }
+
+private:
+  Dali::Ui::AsyncImageLoader mLoader;
+};
+```
+
+Use `Dali::Ui::AsyncImageLoader::DownCast` and `Dali::Ui::ImageUrl::DownCast` only when your app receives a generic `BaseHandle` and needs to recover the typed dali-ui handle.
+
+```cpp
+Dali::Ui::AsyncImageLoader AsAsyncImageLoader(BaseHandle handle)
+{
+  return Dali::Ui::AsyncImageLoader::DownCast(handle);
+}
+
+Dali::Ui::ImageUrl AsImageUrl(BaseHandle handle)
+{
+  return Dali::Ui::ImageUrl::DownCast(handle);
+}
+```
+
+The image loader should remain a supporting service around your `Dali::Ui::View` screens. Keep loading, cancellation, and signal handling in the controller layer, then apply completed image results through the dali-ui view objects that make up the visible application.
+tokens used
+19,594

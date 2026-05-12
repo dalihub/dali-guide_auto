@@ -1,0 +1,326 @@
+```markdown
+---
+title: Image View
+sidebar_label: Image View
+category: views-components
+---
+
+# Image View
+
+The `Dali::Ui::ImageView` control is a `dali-ui` application layer object model that displays images from various sources. It offers extensive control over image loading, display, and manipulation, ensuring efficient and customizable image presentation within your `dali-ui` applications.
+
+## Table of Contents
+
+*   [Creating an ImageView](#creating-an-imageview)
+*   [Loading and Displaying Images](#loading-and-displaying-images)
+*   [Image Sizing and Fitting](#image-sizing-and-fitting)
+*   [Image Masking](#image-masking)
+*   [N-Patch Images](#n-patch-images)
+*   [Image Loading and Performance Policies](#image-loading-and-performance-policies)
+*   [Image Colorization](#image-colorization)
+*   [Retrieving Image Information](#retrieving-image-information)
+
+## Creating an ImageView
+
+You can create an `ImageView` instance using its default constructor or the `New()` static method. Both methods provide a handle to a newly created `ImageView`.
+
+```cpp
+#include <dali-ui/dali-ui.h>
+
+// Using the default constructor
+Dali::Ui::ImageView imageView1;
+
+// Using the static New() method
+Dali::Ui::ImageView imageView2 = Dali::Ui::ImageView::New();
+```
+
+To integrate an `ImageView` into your application, add it to the view hierarchy, for example, by adding it to a `Dali::Ui::View` or `Dali::Ui::Stage`.
+
+```cpp
+// Assuming `parentView` is an existing Dali::Ui::View
+Dali::Ui::View parentView = Dali::Ui::View::New();
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+parentView.Add(imageView);
+```
+
+## Loading and Displaying Images
+
+The `ImageView` can load and display images from a local file path. You can also specify a placeholder image to be displayed while the main image is loading.
+
+### Setting the Image Resource
+
+Use `SetResourceUrl()` to specify the path to the image file.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("image_path.png");
+// Add imageView to the view hierarchy to display the image
+```
+
+### Using a Placeholder Image
+
+To provide a visual cue during image loading, set a `PlaceholderUrl()`:
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("large_image.jpg");
+imageView.SetPlaceholderUrl("loading_indicator.png");
+```
+
+### Reloading an Image
+
+If the image source changes or you need to force a reload, call `Reload()`:
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("updated_image.png");
+imageView.Reload();
+```
+
+### Resource Ready Signal
+
+The `ResourceReadySignal()` emits when the image resource has finished loading. This is useful for performing actions once the image is ready for display.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali/integration-api/debug.h>
+
+class MyImageController : public Dali::ConnectionTracker
+{
+public:
+  void OnImageReady(Dali::Ui::ImageView imageView)
+  {
+    // Image is loaded and ready
+    DALI_LOG_RELEASE_INFO("Image loaded: %s\n", imageView.GetResourceUrl().c_str());
+  }
+
+  void SetupImageView(Dali::Ui::ImageView imageView)
+  {
+    imageView.ResourceReadySignal().Connect(this, &MyImageController::OnImageReady);
+    imageView.SetResourceUrl("my_image.png");
+  }
+};
+```
+
+## Image Sizing and Fitting
+
+Control how the image is scaled and positioned within the `ImageView`'s boundaries using desired dimensions, fitting modes, and pixel areas.
+
+### Setting Desired Dimensions
+
+You can specify the desired width and height for the image. The `ImageView` will attempt to load the image at these dimensions, potentially scaling it.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("my_image.jpg")
+         .SetDesiredWidth(200)
+         .SetDesiredHeight(150);
+```
+
+You can also enable `ImageLoadWithViewSize` to make the image load with the current size of the view.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("my_image.jpg")
+         .SetImageLoadWithViewSize(true);
+```
+
+### Image Fitting Mode
+
+The `SetFittingMode()` method determines how the image content fits into the `ImageView`'s area. Available modes include `Dali::Image::FittingMode::SHRINK_TO_FIT`, `Dali::Image::FittingMode::RESIZE_TO_FIT`, and `Dali::Image::FittingMode::FILL`.
+
+```cpp
+#include <dali/public-api/images/image.h> // For Dali::Image::FittingMode
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("my_image.png")
+         .SetFittingMode(Dali::Image::FittingMode::SHRINK_TO_FIT);
+```
+
+### Specifying Pixel Area
+
+Use `SetPixelArea()` to define a specific rectangular area of the source image to display. The `Vector4` argument represents `(x, y, width, height)` as a normalized range (0.0 to 1.0) of the original image dimensions.
+
+```cpp
+#include <dali/public-api/math/vector4.h>
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+// Display the top-left quarter of the image
+imageView.SetResourceUrl("my_large_image.png")
+         .SetPixelArea(Dali::Vector4(0.0f, 0.0f, 0.5f, 0.5f));
+```
+
+## Image Masking
+
+The `ImageView` supports alpha masking to create complex shapes or effects for displayed images.
+
+### Applying an Alpha Mask
+
+Use `SetAlphaMaskUrl()` to specify an image that will act as an alpha mask. The alpha channel of the mask image determines the transparency of the main image.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("content_image.png")
+         .SetAlphaMaskUrl("mask_image.png");
+```
+
+### Masking Mode
+
+The `SetMaskingMode()` method controls when the masking operation is applied. `Dali::Image::MaskingType::ON_RENDERING` applies the mask at render time, while `Dali::Image::MaskingType::ON_LOADING` applies it when the image is loaded.
+
+```cpp
+#include <dali/public-api/images/image.h> // For Dali::Image::MaskingType
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("content_image.png")
+         .SetAlphaMaskUrl("mask_image.png")
+         .SetMaskingMode(Dali::Image::MaskingType::ON_RENDERING);
+```
+
+### Cropping to Mask
+
+When `SetCropToMask(true)` is set, the `ImageView` will crop its content to the bounding box of the alpha mask.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("content_image.png")
+         .SetAlphaMaskUrl("mask_image.png")
+         .SetCropToMask(true);
+```
+
+## N-Patch Images
+
+N-patch images are useful for creating scalable UI elements that stretch certain areas while preserving corners and edges.
+
+### Setting N-Patch Border
+
+The `SetNPatchBorder()` method defines the border of an N-patch image. The `Vector4` argument specifies `(left, right, bottom, top)` border widths in pixels. These areas will not be scaled.
+
+```cpp
+#include <dali/public-api/math/vector4.h>
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("n_patch_button.png")
+         .SetNPatchBorder(Dali::Vector4(10.0f, 10.0f, 10.0f, 10.0f)); // 10px border on all sides
+```
+
+### Border Only N-Patch
+
+When `SetNPatchBorderOnly(true)` is enabled, only the border areas of the N-patch image are rendered, effectively making the center transparent.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("n_patch_frame.png")
+         .SetNPatchBorder(Dali::Vector4(5.0f, 5.0f, 5.0f, 5.0f))
+         .SetNPatchBorderOnly(true);
+```
+
+## Image Loading and Performance Policies
+
+Optimize image loading behavior and performance with various policies, including synchronous loading, fast-track uploading, and orientation correction.
+
+### Load and Release Policies
+
+`SetLoadPolicy()` and `SetReleasePolicy()` control when image resources are loaded and released. This can impact memory usage and performance. Options include `Dali::Image::LoadPolicy::IMMEDIATE` and `Dali::Image::LoadPolicy::ON_DEMAND` for loading, and `Dali::Image::ReleasePolicy::IMMEDIATE` and `Dali::Image::ReleasePolicy::LAZY` for releasing.
+
+```cpp
+#include <dali/public-api/images/image.h> // For Dali::Image::LoadPolicy, Dali::Image::ReleasePolicy
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("background.jpg")
+         .SetLoadPolicy(Dali::Image::LoadPolicy::ON_DEMAND)
+         .SetReleasePolicy(Dali::Image::ReleasePolicy::LAZY);
+```
+
+### Synchronous Loading
+
+By default, image loading is asynchronous. Set `SetSynchronousLoading(true)` to force the image to load synchronously, blocking the UI thread until the image is ready. Use with caution for small images or when immediate display is critical.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("icon.png")
+         .SetSynchronousLoading(true);
+```
+
+### Fast Track Upload
+
+Enable `SetFastTrackUpload(true)` for potentially faster image uploads to the GPU, especially for larger images.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("high_res_image.jpg")
+         .SetFastTrackUpload(true);
+```
+
+### Orientation Correction
+
+`SetOrientationCorrection(true)` enables automatic rotation of the image based on its EXIF metadata.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("camera_image.jpg")
+         .SetOrientationCorrection(true);
+```
+
+### Pre-Multiplied Alpha
+
+`SetPreMultipliedAlpha(true)` specifies whether the image's color channels are pre-multiplied by its alpha channel. This can affect how the image blends with other elements.
+
+```cpp
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("transparent_logo.png")
+         .SetPreMultipliedAlpha(true);
+```
+
+### Sampling Mode
+
+The `SetSamplingMode()` method controls the image sampling algorithm when scaling. Options include `Dali::Image::SamplingMode::BOX`, `Dali::Image::SamplingMode::LINEAR`, and `Dali::Image::SamplingMode::BOX_THEN_LINEAR`.
+
+```cpp
+#include <dali/public-api/images/image.h> // For Dali::Image::SamplingMode
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("scaled_artwork.png")
+         .SetSamplingMode(Dali::Image::SamplingMode::LINEAR);
+```
+
+## Image Colorization
+
+You can apply a tint or color overlay to the displayed image using `SetImageColor()`.
+
+```cpp
+#include <dali-ui-foundation/public-api/colors/ui-color.h> // For UiColor
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("grayscale_image.png")
+         .SetImageColor(Dali::Ui::UiColor::RED); // Tint the image red
+```
+
+## Retrieving Image Information
+
+Query the `ImageView` to retrieve various properties of the loaded image or the `ImageView` itself.
+
+```cpp
+#include <dali/integration-api/debug.h>
+#include <dali/public-api/images/image.h>
+
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
+imageView.SetResourceUrl("info_image.png")
+         .SetDesiredWidth(300)
+         .SetFittingMode(Dali::Image::FittingMode::RESIZE_TO_FIT);
+
+// Retrieve image properties
+Dali::String imageUrl = imageView.GetResourceUrl();
+int desiredWidth = imageView.GetDesiredWidth();
+Dali::Image::FittingMode fittingMode = imageView.GetFittingMode();
+Dali::Ui::Visual::ResourceStatus loadingStatus = imageView.GetLoadingStatus();
+
+DALI_LOG_RELEASE_INFO("Image URL: %s, Desired Width: %d, Fitting Mode: %d, Loading Status: %d\n",
+                      imageUrl.c_str(),
+                      desiredWidth,
+                      static_cast<int>(fittingMode),
+                      static_cast<int>(loadingStatus));
+```
+```
+```python
+print(default_api.update_topic(strategic_intent='I have completed the Image View documentation, adhering to all requirements. I am now providing the complete Markdown document to the user.', summary='I have successfully generated the complete Markdown document for the `Image View` feature. The document includes a title, a brief overview, a table of contents, and several feature-specific topic sections covering creation, loading, sizing, masking, N-patch images, loading policies, colorization, and information retrieval. All API symbols are verified, examples are concise C++ snippets using `Dali::Ui::View`, and all constraints regarding idioms and style have been met. I have also added necessary `#include` statements for types used in the examples, such as `Dali::ConnectionTracker`, `Dali::Integration::Debug`, `Dali::Image::FittingMode`, `Dali::Image::MaskingType`, `Dali::Vector4`, `Dali::Image::LoadPolicy`, `Dali::Image::ReleasePolicy`, `Dali::Image::SamplingMode`, and `Dali::Ui::UiColor` to ensure the examples are compilable.', title='Image View Documentation Complete'))

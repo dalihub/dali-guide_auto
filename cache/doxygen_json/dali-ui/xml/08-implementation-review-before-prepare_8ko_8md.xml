@@ -1,0 +1,669 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="08-implementation-review-before-prepare_8ko_8md" kind="file" language="Markdown">
+    <compoundname>08-implementation-review-before-prepare.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>구현<sp/>리뷰:<sp/>Prepare<sp/>단계<sp/>직전</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>`Commit<sp/>1<sp/>~<sp/>Commit<sp/>3`까지<sp/>구현된<sp/>`Dali::Ui::TextVisualizer`의<sp/>현재<sp/>상태를<sp/>리뷰하고,<sp/>다음<sp/>단계인<sp/>`Commit<sp/>4:<sp/>PreparedText<sp/>/<sp/>TextPreparer`<sp/>구현<sp/>범위를<sp/>명확히<sp/>고정하기<sp/>위한<sp/>기준<sp/>문서이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서의<sp/>초점은<sp/>아래와<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>구현이<sp/>기존<sp/>설계<sp/>문서와<sp/>얼마나<sp/>일치하는지<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API<sp/>naming이<sp/>Dali<sp/>UI<sp/>스타일과<sp/>맞는지<sp/>점검</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`prepare<sp/>/<sp/>layout<sp/>/<sp/>render<sp/>dirty`<sp/>분리가<sp/>현재<sp/>수준에서<sp/>적절한지<sp/>평가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4에서<sp/>실제로<sp/>재사용할<sp/>기존<sp/>text<sp/>모듈<sp/>파일과<sp/>함수<sp/>후보를<sp/>구체적으로<sp/>식별</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4에서<sp/>건드리면<sp/>범위가<sp/>커지거나<sp/>edit<sp/>오버헤드가<sp/>유입되는<sp/>파일을<sp/>분리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">애매하거나<sp/>아직<sp/>코드<sp/>확인이<sp/>부족한<sp/>항목은<sp/>추측하지<sp/>않고<sp/>`확인<sp/>필요`로<sp/>표시한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>1.<sp/>현재<sp/>구현<sp/>요약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>구현된<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-properties.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-property-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-property-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>구현된<sp/>수준:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`TextVisualizer`<sp/>public<sp/>handle<sp/>skeleton이<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`TEXT`,<sp/>`FONT_FAMILY`,<sp/>`FONT_SIZE`,<sp/>`TEXT_COLOR`<sp/>property가<sp/>연결되어<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>internal<sp/>impl에<sp/>기본<sp/>state<sp/>storage가<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`Prepare()`<sp/>public/internal<sp/>API가<sp/>존재하지만<sp/>아직<sp/>stub이다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>`prepare<sp/>/<sp/>layout<sp/>/<sp/>render<sp/>dirty`<sp/>bool이<sp/>impl<sp/>내부에<sp/>분리되어<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>exclusion<sp/>region<sp/>storage와<sp/>API가<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>실제<sp/>`PreparedText`,<sp/>shaping<sp/>cache,<sp/>layout<sp/>engine,<sp/>atlas<sp/>renderer<sp/>연결은<sp/>아직<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">실제<sp/>구현<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer::New()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer::Prepare()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::Prepare()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:134`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::SetText()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:78`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::SetFontFamily()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:92`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::SetFontSize()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:106`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::SetTextColor()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:120`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::SetExclusionRegions()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:141`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::ClearExclusionRegions()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:156`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>dirty<sp/>helper:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkPrepareDirty()`<sp/>`:222`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkLayoutDirty()`<sp/>`:229`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkRenderDirty()`<sp/>`:234`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`ClearPrepareDirty()`<sp/>`:239`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>2.<sp/>설계<sp/>문서와<sp/>일치하는<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.1<sp/>public/internal<sp/>구조</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`InputField`<sp/>스타일을<sp/>따라<sp/>`View`<sp/>기반<sp/>public<sp/>handle<sp/>+<sp/>`ViewImpl`<sp/>기반<sp/>internal<sp/>impl<sp/>구조를<sp/>잡은<sp/>점은<sp/>설계와<sp/>일치한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>handle:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>impl:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.2<sp/>property와<sp/>method의<sp/>역할<sp/>분리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">설계<sp/>문서<sp/>`06-api-design.ko.md`의<sp/>방향대로<sp/>다음<sp/>분리가<sp/>지켜졌다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>property/state:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TEXT`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`FONT_FAMILY`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`FONT_SIZE`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TEXT_COLOR`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>command/method:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Prepare()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`SetExclusionRegions()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`ClearExclusionRegions()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>점은<sp/>Dali<sp/>UI<sp/>스타일과도<sp/>잘<sp/>맞는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.3<sp/>`Prepare`와<sp/>`Layout`의<sp/>분리<sp/>방향</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`Prepare()`는<sp/>stub이지만,<sp/>적어도<sp/>public/internal<sp/>API<sp/>레벨에서<sp/>`Prepare`를<sp/>별도<sp/>command로<sp/>분리했다.<sp/>이는<sp/>설계<sp/>문서의<sp/>핵심<sp/>방향과<sp/>일치한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.4<sp/>exclusion<sp/>region을<sp/>property가<sp/>아닌<sp/>method로<sp/>처리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`SetExclusionRegions(const<sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;&amp;<sp/>regions)`와<sp/>`ClearExclusionRegions()`를<sp/>method로<sp/>둔<sp/>점은<sp/>설계<sp/>문서와<sp/>일치한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.5<sp/>dirty<sp/>flag를<sp/>단계별로<sp/>분리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">설계<sp/>문서의<sp/>의도대로<sp/>다음<sp/>3개가<sp/>분리되었다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mPrepareDirty`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mLayoutDirty`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderDirty`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">또한<sp/>변경<sp/>전파도<sp/>방향상<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text/font/fontSize<sp/>변경<sp/>-&gt;<sp/>prepare/layout/render<sp/>dirty</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>textColor<sp/>변경<sp/>-&gt;<sp/>render<sp/>dirty</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>변경<sp/>-&gt;<sp/>layout/render<sp/>dirty</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>3.<sp/>설계<sp/>문서와<sp/>달라진<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.1<sp/>exclusion<sp/>getter<sp/>형태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`06-api-design.ko.md`의<sp/>초안<sp/>코드<sp/>블록<sp/>일부에서는<sp/>`GetExclusionRegionCount()`가<sp/>보였지만,<sp/>현재<sp/>구현은<sp/>다음으로<sp/>정리되었다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions(const<sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;&amp;<sp/>regions)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Dali::Vector&lt;Rect&lt;float&gt;&gt;<sp/>GetExclusionRegions()<sp/>const`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`void<sp/>ClearExclusionRegions()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>차이는<sp/>큰<sp/>문제는<sp/>아니다.<sp/>현재<sp/>구현은<sp/>“설정한<sp/>컬렉션을<sp/>그대로<sp/>되돌려<sp/>받는다”는<sp/>점에서<sp/>test<sp/>작성과<sp/>debugging에는<sp/>더<sp/>편하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.2<sp/>`Prepare()`의<sp/>실제<sp/>의미는<sp/>아직<sp/>약하다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">설계<sp/>문서에서<sp/>`Prepare()`는<sp/>expensive<sp/>text<sp/>processing을<sp/>수행하는<sp/>entry<sp/>point로<sp/>정의되어<sp/>있다.<sp/>현재<sp/>구현에서는<sp/>아래만<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mPrepareDirty<sp/>=<sp/>false`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mLayoutDirty<sp/>=<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderDirty<sp/>=<sp/>true`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>API<sp/>이름은<sp/>설계와<sp/>같지만<sp/>실제<sp/>동작은<sp/>아직<sp/>“prepare<sp/>cache<sp/>생성”이<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이것은<sp/>Commit<sp/>3<sp/>범위로는<sp/>허용되지만,<sp/>Commit<sp/>4에서<sp/>반드시<sp/>보완되어야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.3<sp/>lifecycle과<sp/>dirty<sp/>소비<sp/>경로가<sp/>아직<sp/>연결되지<sp/>않았다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">설계<sp/>문서에서는<sp/>장기적으로<sp/>`OnRelayout()`에서<sp/>layout이<sp/>자동<sp/>수행되는<sp/>방향을<sp/>전제로<sp/>한다.<sp/>현재<sp/>구현은<sp/>아래<sp/>수준이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::OnRelayout()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:171`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>현재는<sp/>`ViewImpl::OnRelayout()`<sp/>호출만<sp/>수행</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl::OnMeasure()`:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp:176`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>현재는<sp/>`ViewImpl::OnMeasure()`<sp/>위임만<sp/>수행</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>dirty<sp/>flag는<sp/>존재하지만<sp/>아직<sp/>소비되지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.4<sp/>`PreparedText`<sp/>존재<sp/>여부와<sp/>`mPrepareDirty`<sp/>의미가<sp/>분리되어<sp/>있지<sp/>않다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재는<sp/>`mPrepareDirty<sp/>==<sp/>false`가<sp/>되어도<sp/>실제<sp/>prepared<sp/>cache가<sp/>존재하지<sp/>않는다.<sp/>따라서<sp/>Commit<sp/>4에서<sp/>아래<sp/>둘을<sp/>명확히<sp/>분리해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>prepared<sp/>cache<sp/>존재<sp/>여부</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>prepared<sp/>cache가<sp/>현재<sp/>state와<sp/>동기화되어<sp/>있는지<sp/>여부</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>점을<sp/>분리하지<sp/>않으면<sp/>Commit<sp/>4<sp/>이후<sp/>`Prepare()`<sp/>skip<sp/>조건이<sp/>잘못될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>4.<sp/>API<sp/>naming<sp/>검토</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.1<sp/>`Prepare()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`PrepareText()`보다<sp/>generic<sp/>command<sp/>스타일에<sp/>맞다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RunPrepare()`나<sp/>`DoPrepare()`보다<sp/>Dali<sp/>public<sp/>API<sp/>톤과<sp/>잘<sp/>맞는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Layout()`을<sp/>public에<sp/>노출하지<sp/>않는<sp/>현재<sp/>방향과도<sp/>조화롭다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4<sp/>이후에는<sp/>“무엇이<sp/>prepare<sp/>완료<sp/>상태인지”<sp/>구현<sp/>의미를<sp/>실제로<sp/>맞춰야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.2<sp/>`SetExclusionRegions()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionBounds()`보다<sp/>collection<sp/>성격이<sp/>분명하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>설계<sp/>문서의<sp/>최종<sp/>naming<sp/>방향과<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.3<sp/>`GetExclusionRegions()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>naming<sp/>자체는<sp/>자연스럽다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다만<sp/>검토<sp/>포인트:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Dali::Vector&lt;Rect&lt;float&gt;&gt;`를<sp/>값으로<sp/>반환하므로<sp/>copy<sp/>cost가<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>단계에서는<sp/>region<sp/>수가<sp/>작고<sp/>API<sp/>단순성이<sp/>더<sp/>중요하므로<sp/>허용<sp/>가능하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.4<sp/>`GetTextColor()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>시그니처는<sp/>아래와<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`UiColor<sp/>GetTextColor();`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>형태는<sp/>`Label`<sp/>/<sp/>`InputField`의<sp/>기존<sp/>패턴과<sp/>맞는다.<sp/>따라서<sp/>Dali<sp/>UI<sp/>스타일<sp/>측면에서는<sp/>문제가<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.5<sp/>`SetText`,<sp/>`SetFontFamily`,<sp/>`SetFontSize`,<sp/>`SetTextColor`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">모두<sp/>Dali<sp/>UI의<sp/>chaining<sp/>setter<sp/>패턴과<sp/>일치한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">결론:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>public<sp/>API<sp/>naming은<sp/>전반적으로<sp/>적절하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4<sp/>전에<sp/>public<sp/>naming을<sp/>다시<sp/>바꿔야<sp/>할<sp/>이유는<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>5.<sp/>dirty<sp/>flag<sp/>정책<sp/>검토</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>5.1<sp/>현재<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>구현<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`SetText()`<sp/>/<sp/>`SetFontFamily()`<sp/>/<sp/>`SetFontSize()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkPrepareDirty()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>결과적으로<sp/>`prepare/layout/render`<sp/>모두<sp/>dirty</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetTextColor()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkRenderDirty()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions()`<sp/>/<sp/>`ClearExclusionRegions()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkLayoutDirty()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkRenderDirty()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`ClearPrepareDirty()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkLayoutDirty()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkRenderDirty()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>5.2<sp/>좋은<sp/>점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>invalidation<sp/>전파<sp/>방향이<sp/>직관적이다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>text/font/fontSize와<sp/>textColor를<sp/>구분한<sp/>점이<sp/>설계<sp/>의도와<sp/>맞다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>exclusion<sp/>변경이<sp/>prepare를<sp/>건드리지<sp/>않는<sp/>점이<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>5.3<sp/>보완이<sp/>필요한<sp/>점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>`layout/render<sp/>clear`<sp/>경로가<sp/>아직<sp/>없다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재는<sp/>set<sp/>쪽<sp/>helper만<sp/>있고<sp/>clear<sp/>helper가<sp/>없다.<sp/>Commit<sp/>4에서<sp/>최소한<sp/>아래<sp/>정책을<sp/>정해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>성공<sp/>시:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`mPrepareDirty<sp/>=<sp/>false`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>미수행이므로:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`mLayoutDirty<sp/>=<sp/>true`<sp/>유지<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>미수행이므로:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`mRenderDirty<sp/>=<sp/>true`<sp/>유지<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>Commit<sp/>4<sp/>시점에는<sp/>`prepare<sp/>clear`만<sp/>실제로<sp/>의미가<sp/>있고,<sp/>`layout/render<sp/>clear`는<sp/>Commit<sp/>5~6까지<sp/>미뤄도<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>`Prepare()`가<sp/>항상<sp/>layout/render<sp/>dirty를<sp/>올린다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재는<sp/>`Prepare()`<sp/>호출만<sp/>해도<sp/>layout/render<sp/>dirty를<sp/>다시<sp/>세팅한다.<sp/>stub<sp/>단계에서는<sp/>허용<sp/>가능하지만<sp/>Commit<sp/>4<sp/>이후에는<sp/>아래를<sp/>검토해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>prepared<sp/>결과가<sp/>바뀐<sp/>경우에만<sp/>layout<sp/>dirty를<sp/>유지할지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>결과가<sp/>동일해도<sp/>explicit<sp/>`Prepare()`는<sp/>layout<sp/>dirty를<sp/>강제로<sp/>세팅할지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재로서는<sp/>“explicit<sp/>eager<sp/>prepare<sp/>이후<sp/>layout은<sp/>다시<sp/>계산해도<sp/>된다”는<sp/>보수적<sp/>정책이라<sp/>크게<sp/>문제는<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>`OnRelayout()`와<sp/>연계되지<sp/>않는다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>dirty<sp/>flag는<sp/>상태만<sp/>저장한다.<sp/>Commit<sp/>4에서는<sp/>여전히<sp/>layout<sp/>미구현이므로<sp/>괜찮지만,<sp/>Commit<sp/>5부터는<sp/>`OnRelayout()`<sp/>또는<sp/>내부<sp/>layout<sp/>trigger와<sp/>연결되어야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>5.4<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>dirty<sp/>policy는<sp/>Commit<sp/>3<sp/>목표에는<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다만<sp/>Commit<sp/>4에서<sp/>반드시<sp/>추가해야<sp/>할<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>cache<sp/>포인터<sp/>또는<sp/>value</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>cache<sp/>존재<sp/>여부<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>성공<sp/>시점의<sp/>clear<sp/>규칙</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>6.<sp/>Commit<sp/>4에서<sp/>재사용할<sp/>기존<sp/>text-controller/model/layout<sp/>함수<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Commit<sp/>4의<sp/>목표는<sp/>“기존<sp/>controller를<sp/>그대로<sp/>재사용”이<sp/>아니라,<sp/>기존<sp/>text<sp/>pipeline에서<sp/>prepare에<sp/>해당하는<sp/>helper를<sp/>선별적으로<sp/>재사용하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>원칙:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ControllerImplModelUpdater::Update()`<sp/>전체를<sp/>호출하는<sp/>방식은<sp/>피한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>그<sp/>안에서<sp/>prepare<sp/>단계에<sp/>해당하는<sp/>helper만<sp/>분리<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>edit<sp/>/<sp/>preedit<sp/>/<sp/>color<sp/>run<sp/>/<sp/>decorator<sp/>/<sp/>relayout<sp/>연계는<sp/>가져오지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.1<sp/>UTF-8<sp/>-&gt;<sp/>UTF-32<sp/>변환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/character-set-conversion.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/character-set-conversion.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Utf8ToUtf32()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-text-updater.cpp:141`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Dali::String`<sp/>또는<sp/>UTF-8<sp/>source를<sp/>`PreparedText`의<sp/>logical<sp/>character<sp/>buffer로<sp/>변환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.2<sp/>line<sp/>break<sp/>candidate<sp/>생성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/segmentation.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/segmentation.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::SetLineBreakInfo()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/segmentation.cpp:46`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:183`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cluster/line-break<sp/>candidate<sp/>계산의<sp/>입력이<sp/>되는<sp/>line<sp/>break<sp/>info<sp/>생성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::MultilanguageSupport::IsICULineBreakNeeded()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::MultilanguageSupport::UpdateICULineBreak()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>controller는<sp/>ICU<sp/>기반<sp/>line<sp/>break<sp/>보정<sp/>경로를<sp/>조건부로<sp/>호출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4에서도<sp/>locale-dependent<sp/>break<sp/>동작을<sp/>유지하려면<sp/>이<sp/>경로를<sp/>검토해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.3<sp/>paragraph<sp/>정보<sp/>생성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/logical-model-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/logical-model-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LogicalModel::CreateParagraphInfo()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/logical-model-impl.cpp:487`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:232`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>paragraph<sp/>경계<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>향후<sp/>cluster<sp/>/<sp/>line<sp/>band<sp/>단위<sp/>계산의<sp/>보조<sp/>정보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.4<sp/>script<sp/>분석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::MultilanguageSupport::SetScripts()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.cpp:55`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support-impl.cpp:378`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:251`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shaping<sp/>이전<sp/>script<sp/>run<sp/>계산</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.5<sp/>font<sp/>fallback<sp/>/<sp/>font<sp/>validation</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-helper-functions.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::MultilanguageSupport::ValidateFonts()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>참고<sp/>helper:<sp/>`MergeFontDescriptions()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.cpp:61`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support-impl.cpp:611`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:301`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>font<sp/>+<sp/>explicit<sp/>font<sp/>description<sp/>+<sp/>fallback을<sp/>합쳐<sp/>character<sp/>단위<sp/>valid<sp/>font<sp/>run<sp/>생성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4에서는<sp/>`InputField`/placeholder<sp/>전용<sp/>font<sp/>branch를<sp/>그대로<sp/>가져오지<sp/>말고,<sp/>`TextVisualizer`의<sp/>단순한<sp/>default<sp/>font<sp/>family<sp/>/<sp/>size<sp/>조건만<sp/>연결해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.6<sp/>shaping</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/shaper.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/shaper.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::ShapeText()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/shaper.cpp:52`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:373`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>validated<sp/>font<sp/>run<sp/>+<sp/>script<sp/>run<sp/>+<sp/>line<sp/>break<sp/>info를<sp/>기반으로<sp/>glyph<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphs`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphToCharacterMap`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`charactersPerGlyph`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`newParagraphGlyphs`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.7<sp/>glyph/character<sp/>mapping<sp/>생성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/visual-model-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/visual-model-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`VisualModel::CreateGlyphsPerCharacterTable()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VisualModel::CreateCharacterToGlyphTable()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/visual-model-impl.cpp:35`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/visual-model-impl.cpp:112`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:378`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:380`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`에<sp/>필요한:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>glyph<sp/>-&gt;<sp/>character</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>character<sp/>-&gt;<sp/>glyph</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>character<sp/>-&gt;<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>cluster<sp/>derivation용<sp/>기초<sp/>매핑</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.8<sp/>glyph<sp/>metrics<sp/>확보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/metrics.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Metrics::GetGlyphMetrics()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/metrics.h:90`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:398`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">용도:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shaped<sp/>glyph에<sp/>width<sp/>/<sp/>advance<sp/>/<sp/>bearing<sp/>/<sp/>ascender<sp/>관련<sp/>metric<sp/>채우기</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.9<sp/>cluster<sp/>관련<sp/>참고용<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/characters-helper-functions.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/characters-helper-functions.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`RetrieveClusteredCharactersOfCharacterIndex()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">참고<sp/>위치:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/characters-helper-functions.cpp:13`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">판단:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4의<sp/>직접<sp/>재사용<sp/>함수라기보다<sp/>“현재<sp/>엔진이<sp/>cluster를<sp/>어떻게<sp/>해석하는지<sp/>보는<sp/>참고용”에<sp/>가깝다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>emoji/cursor<sp/>편의<sp/>함수<sp/>성격이<sp/>강하므로<sp/>`PreparedCluster`<sp/>생성의<sp/>직접<sp/>기반으로<sp/>삼기에는<sp/>부족하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.10<sp/>Commit<sp/>4에서<sp/>직접<sp/>수정<sp/>대상이<sp/>되어서는<sp/>안<sp/>되는<sp/>기존<sp/>monolith</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>함수는<sp/>“읽고<sp/>참고”는<sp/>가능하지만,<sp/>Commit<sp/>4에서<sp/>직접<sp/>수정<sp/>대상으로<sp/>삼는<sp/>것은<sp/>권장하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ControllerImplModelUpdater::Update()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp:74`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>외의<sp/>color/preedit/markup<sp/>연계까지<sp/>뒤섞여<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>여기서<sp/>직접<sp/>분기<sp/>추가를<sp/>시작하면<sp/>`TextVisualizer`<sp/>전용<sp/>경량<sp/>경로가<sp/>아니라<sp/>기존<sp/>controller<sp/>변형<sp/>작업이<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>7.<sp/>Commit<sp/>4에서<sp/>절대<sp/>건드리지<sp/>말아야<sp/>할<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>7.1<sp/>editing<sp/>/<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>IME<sp/>경로</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-event-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-event-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-input-font-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-input-font-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-input-properties.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-input-properties.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/decorator/text-decorator.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/decorator/text-decorator.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-selection-handle-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-selection-handle-controller.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/cursor-helper-functions.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/cursor-helper-functions.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>1차<sp/>범위에서<sp/>제외한<sp/>기능이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4의<sp/>목적은<sp/>prepare<sp/>cache<sp/>생성이지<sp/>interactive<sp/>text<sp/>control<sp/>확장이<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>7.2<sp/>기존<sp/>controller의<sp/>text<sp/>mutation<sp/>경로</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-text-updater.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-text-updater.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>여기에는<sp/>insert/remove/preedit/cursor<sp/>reset<sp/>path가<sp/>섞여<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-8<sp/>변환<sp/>reference<sp/>정도로만<sp/>보고,<sp/>실제<sp/>구현은<sp/>`TextVisualizer`<sp/>전용<sp/>`text-preparer.cpp`로<sp/>분리하는<sp/>것이<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>7.3<sp/>relayout<sp/>/<sp/>layout<sp/>monolith</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-relayouter.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-relayouter.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/layouts/layout-engine.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/layouts/layout-engine.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4<sp/>범위는<sp/>prepare<sp/>단계다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout은<sp/>Commit<sp/>5<sp/>이후<sp/>separate<sp/>engine으로<sp/>구현하는<sp/>것이<sp/>설계<sp/>기준이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>7.4<sp/>renderer<sp/>/<sp/>atlas<sp/>경로</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/text-renderer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/text-renderer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Commit<sp/>4는<sp/>prepare<sp/>cache<sp/>생성<sp/>단계다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>adapter<sp/>연결은<sp/>Commit<sp/>6<sp/>이후<sp/>범위다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>8.<sp/>확인<sp/>필요<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`PreparedText`가<sp/>`LogicalModel`<sp/>/<sp/>`VisualModel`<sp/>전체를<sp/>멤버로<sp/>가져야<sp/>하는지,<sp/>아니면<sp/>필요한<sp/>vector만<sp/>복사/소유해야<sp/>하는지<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>현재<sp/>설계<sp/>의도상으로는<sp/>“필요<sp/>최소<sp/>vector만<sp/>소유”가<sp/>더<sp/>맞다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>ICU<sp/>line<sp/>break<sp/>보정<sp/>경로를<sp/>Commit<sp/>4에서<sp/>바로<sp/>포함할지<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>기존<sp/>controller는<sp/>`IsICULineBreakNeeded()`<sp/>/<sp/>`UpdateICULineBreak()`를<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`PreparedCluster`를<sp/>만드는<sp/>canonical<sp/>규칙을<sp/>무엇으로<sp/>둘지<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>`charactersPerGlyph`<sp/>기반<sp/>역추적만으로<sp/>충분한지</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>추가<sp/>cluster<sp/>table이<sp/>필요한지</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`Prepare()`<sp/>성공<sp/>조건을<sp/>무엇으로<sp/>볼지<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>empty<sp/>text도<sp/>“prepared<sp/>success”로<sp/>볼지</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>invalid<sp/>font<sp/>fallback<sp/>상황에서도<sp/>빈<sp/>prepared<sp/>cache를<sp/>성공으로<sp/>볼지</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>Commit<sp/>4에서<sp/>`PreparedText`<sp/>존재<sp/>여부를<sp/>impl에<sp/>어떤<sp/>형태로<sp/>저장할지<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>raw<sp/>member</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>`std::unique_ptr`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>intrusive/shared<sp/>style</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>9.<sp/>최종<sp/>권장<sp/>Commit<sp/>4<sp/>작업<sp/>범위</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Commit<sp/>4는<sp/>아래<sp/>범위로<sp/>제한하는<sp/>것을<sp/>권장한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>9.1<sp/>새<sp/>파일<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/prepared-text.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/prepared-text.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/text-preparer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/text-preparer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>9.2<sp/>수정<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>9.3<sp/>Commit<sp/>4에서<sp/>구현할<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`Prepare()`<sp/>호출<sp/>시:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>UTF-8<sp/>-&gt;<sp/>UTF-32<sp/>변환</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>line<sp/>break<sp/>info<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>script<sp/>run<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>font<sp/>validation<sp/>/<sp/>fallback</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>shaping</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>glyph<sp/>metrics<sp/>확보</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>glyph/character<sp/>mapping<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>결과를<sp/>`PreparedText`에<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>성공<sp/>시<sp/>`mPrepareDirty`<sp/>clear</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`mLayoutDirty`,<sp/>`mRenderDirty`<sp/>유지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>9.4<sp/>Commit<sp/>4에서<sp/>구현하지<sp/>말<sp/>것</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>exclusion<sp/>region<sp/>기반<sp/>실제<sp/>layout</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>line<sp/>fragment<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Layout::Engine`<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`AtlasRenderer`<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>`Text::Controller`<sp/>수정</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>edit<sp/>/<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>decorator<sp/>경로<sp/>유입</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>9.5<sp/>권장<sp/>구현<sp/>방식</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가장<sp/>권장되는<sp/>방식은<sp/>아래다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>기존<sp/>`ControllerImplModelUpdater::Update()`를<sp/>읽어<sp/>prepare<sp/>단계<sp/>helper<sp/>호출<sp/>순서를<sp/>복제한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>실제<sp/>구현은<sp/>`TextVisualizer`<sp/>전용<sp/>`TextPreparer`로<sp/>새로<sp/>작성한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>helper<sp/>재사용은<sp/>아래<sp/>순서로<sp/>제한한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Utf8ToUtf32()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetLineBreakInfo()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`MultilanguageSupport::SetScripts()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`MultilanguageSupport::ValidateFonts()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LogicalModel::CreateParagraphInfo()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ShapeText()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VisualModel::CreateGlyphsPerCharacterTable()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VisualModel::CreateCharacterToGlyphTable()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Metrics::GetGlyphMetrics()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>9.6<sp/>TextVisualizer<sp/>설계에<sp/>주는<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>Commit<sp/>1~3<sp/>구현은<sp/>skeleton,<sp/>property/state,<sp/>dirty<sp/>separation<sp/>관점에서<sp/>대체로<sp/>설계와<sp/>잘<sp/>맞는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>Commit<sp/>4의<sp/>핵심은<sp/>기존<sp/>`Text::Controller`를<sp/>더<sp/>건드리는<sp/>것이<sp/>아니라,<sp/>기존<sp/>text<sp/>pipeline에서<sp/>prepare<sp/>단계<sp/>helper만<sp/>분리<sp/>채택해<sp/>`TextVisualizer`<sp/>전용<sp/>`PreparedText`<sp/>캐시를<sp/>만드는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>다음<sp/>단계는<sp/>“controller<sp/>reuse”가<sp/>아니라<sp/>“controller<sp/>pipeline<sp/>extraction”으로<sp/>접근하는<sp/>것이<sp/>맞다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/08-implementation-review-before-prepare.ko.md"/>
+  </compounddef>
+</doxygen>

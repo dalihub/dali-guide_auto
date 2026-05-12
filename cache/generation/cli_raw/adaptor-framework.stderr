@@ -1,0 +1,3651 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e175a-3696-7072-8e32-50264ff17afe
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Adaptor Framework (adaptor-framework)
+- Category: application-framework
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-adaptor": 180
+  }
+}
+
+Allowed symbols for code examples:
+- ApplicationLauncher | scope=primary
+- Dali::Accessibility::ActionInfo | scope=primary
+- Dali::Accessibility::ActorAccessible | scope=primary
+- Dali::Accessibility::Address | scope=primary
+- Dali::Accessibility::BitSet | scope=primary
+- Dali::Accessibility::Bridge | scope=primary
+- Dali::Accessibility::Bridge::Data | scope=primary
+- Dali::Accessibility::EnumBitSet | scope=primary
+- Dali::Accessibility::GestureInfo | scope=primary
+- Dali::Accessibility::Internal::AtspiInterfaceTypeHelper | scope=primary
+- Dali::Accessibility::Internal::BitReference | scope=primary
+- Dali::Accessibility::Point | scope=primary
+- Dali::Accessibility::ProxyAccessible | scope=primary
+- Dali::Accessibility::Range | scope=primary
+- Dali::Accessibility::Relation | scope=primary
+- Dali::Accessibility::Size | scope=primary
+- Dali::Adaptor | scope=primary
+- Dali::AnimatedImageLoading | scope=primary
+- Dali::Application | scope=primary
+- Dali::ApplicationController | scope=primary
+- Dali::AsyncTask | scope=primary
+- Dali::AsyncTaskManager | scope=primary
+- Dali::CameraPlayer | scope=primary
+- Dali::CameraPlayerPlugin | scope=primary
+- Dali::CanvasRenderer | scope=primary
+- Dali::CanvasRenderer::ColorStop | scope=primary
+- Dali::CanvasRenderer::PathCommands | scope=primary
+- Dali::Capture | scope=primary
+- Dali::Clipboard | scope=primary
+- Dali::Clipboard::ClipData | scope=primary
+- Dali::ComponentApplication | scope=primary
+- Dali::Devel::PixelBuffer | scope=primary
+- Dali::Devel::TextureUploadManager | scope=primary
+- Dali::DevelWindow::MouseInOutEvent | scope=primary
+- Dali::DevelWindow::MouseRelativeEvent | scope=primary
+- Dali::DevelWindow::PointerConstraintsEvent | scope=primary
+- Dali::DeviceStatus::Battery | scope=primary
+- Dali::DeviceStatus::Memory | scope=primary
+- Dali::DeviceStatus::Orientation | scope=primary
+- Dali::DragAndDrop | scope=primary
+- Dali::DragAndDrop::DragData | scope=primary
+- Dali::DragAndDrop::DragEvent | scope=primary
+- Dali::EglInterface | scope=primary
+- Dali::EnableBitMaskOperators< WebEngineHitTest::HitTestMode > | scope=primary
+- Dali::EnableBitMaskOperators< WebEngineHitTest::ResultContext > | scope=primary
+- Dali::EnableBitMaskOperators< WebEnginePlugin::FindOption > | scope=primary
+- Dali::EncodedImageBuffer | scope=primary
+- Dali::EventThreadCallback | scope=primary
+- Dali::EventThreadCallback::Impl | scope=primary
+- Dali::FeedbackPlayer | scope=primary
+- Dali::FeedbackPlugin | scope=primary
+- Dali::FileDownloadPlugin | scope=primary
+- Dali::FileDownloadPluginProxy | scope=primary
+- Dali::FileDownloadPluginProxy::EventThreadCallbackObserver | scope=primary
+- Dali::FileStream | scope=primary
+- Dali::GlWindow | scope=primary
+- Dali::ImageLoader::BitmapLoader | scope=primary
+- Dali::ImageLoader::Input | scope=primary
+- Dali::ImageLoader::ScalingParameters | scope=primary
+- Dali::ImageLoaderPlugin | scope=primary
+- Dali::InputMethodContext | scope=primary
+- Dali::InputMethodContext::CallbackData | scope=primary
+- Dali::InputMethodContext::EventData | scope=primary
+- Dali::InputMethodContext::PreeditAttributeData | scope=primary
+- Dali::InputMethodOptions | scope=primary
+- Dali::InputMethodOptions::Impl | scope=primary
+- Dali::Integration::AndroidFramework | scope=primary
+- Dali::Integration::RenderSurface | scope=primary
+- Dali::Integration::RenderSurfaceInterface | scope=primary
+- Dali::Integration::SceneHolder | scope=primary
+- Dali::Internal::Adaptor::SceneHolder | scope=primary
+- Dali::Internal::Adaptor::SceneHolder::SceneHolderLifeCycleObserver | scope=primary
+- Dali::Internal::Adaptor::Widget | scope=primary
+- Dali::KeyExtensionPlugin | scope=primary
+- Dali::KeyExtensionPlugin::KeyLookup | scope=primary
+- Dali::LifecycleController | scope=primary
+- Dali::LogFactoryInterface | scope=primary
+- Dali::NativeImage | scope=primary
+- Dali::NativeImageQueue | scope=primary
+- Dali::NativeImageSurface | scope=primary
+- Dali::NativeRenderSurface | scope=primary
+- Dali::OffscreenApplication | scope=primary
+- Dali::OffscreenWindow | scope=primary
+- Dali::Orientation | scope=primary
+- Dali::PerformanceLogger | scope=primary
+- Dali::PhysicalKeyboard | scope=primary
+- Dali::RoundRobinContainerView | scope=primary
+- Dali::ScreenInformation | scope=primary
+- Dali::ShaderPreCompiler | scope=primary
+- Dali::ShaderPreCompiler::RawShaderData | scope=primary
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp:1 (sample, score=1.0)
+```cpp
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample: absolute pixel positioning.
+ *
+ * Children are placed at explicit (x, y) coordinates with explicit sizes.
+```
+
+- repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:1 (sample, score=1.0)
+```cpp
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample with a clickable LayoutDirection toggle.
+ *
+ * Same content as absolutelayout-example. A 100x50 yellow standalone
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "content",
+      "file",
+      "label"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "content",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-margin-padding-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-overlap-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-per-axis-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file",
+      "height",
+      "width"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-wrapcontent-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Bridge",
+      "Create",
+      "GetWindow",
+      "InitSignal",
+      "MainLoop",
+      "New",
+      "Play",
+      "SetBackgroundColor",
+      "SetOpacity",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/animation/animation-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample: absolute pixel positioning.
+ *
+ * Children are placed at explicit (x, y) coordinates with explicit sizes.
+ * - Red box at top-left (20, 20)
+ * - Green box at center area (150, 200)
+ * - Blue box at bottom-right area (280, 400)
+ *
+ * Press Escape or Back to quit.
+ */
+class AbsoluteLayoutController : public ConnectionTracker
+{
+public:
+  AbsoluteLayoutController(Application& application)
+    : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AbsoluteLayoutController::Create);
+  }
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Root: AbsoluteLayout filling the window
+    AbsoluteLayout root = AbsoluteLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT);
+    // Red box: top-left corner, absolute position and size
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    redBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
+    root.Add(redBox);
+
+    // Green box: center area
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
+    root.Add(greenBox);
+
+    // Blue box: lower-right area
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
+    root.Add(blueBox);
+
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &AbsoluteLayoutController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  AbsoluteLayoutController controller(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "rg -n \"class Application|Application::New|InitSignal|MainLoop|GetWindow|Quit\\(\" repos/dali-ui repos/dali-adaptor 2>/dev/null | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/build/doc/source/index.md:24:  application.GetWindow().Add(
+repos/dali-adaptor/build/tizen/linker-test.cpp:39:    app.InitSignal().Connect(this, &LinkerApp::Create);
+repos/dali-adaptor/build/tizen/linker-test.cpp:54:    Application app = Application::New(&argc, &argv);
+repos/dali-adaptor/build/tizen/linker-test.cpp:57:    app.MainLoop();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:59:    mApplication.InitSignal().Connect(this, &ManualTestLauncher::OnCreate);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:69:    Window window = application.GetWindow();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:248:          mApplication.Quit();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:253:        mApplication.Quit();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:270:  Application application = Application::New(&argc, &argv);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:273:  application.MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:43:class Application;
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:67: *     mApplication.InitSignal().Connect( this, &ExampleController::Create );
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:81: *   Application app = Application::New(&argc, &argv);
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:83: *   app.MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:107: * Dali::Application::New(int *argc, char **argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData)
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:220:  void MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:232:  void Quit();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:260:  Window GetWindow();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:291:   * @note This will only be a valid handle after the InitSignal has been emitted.
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:304:  AppSignalType& InitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:412:  AppSignalType& TaskInitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:34:Application Application::New(int* argc, char** argv[], Dali::StringView stylesheet)
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:38:  Internal::Adaptor::ApplicationPtr internal = Internal::Adaptor::Application::New(argc, argv, ToStdString(stylesheet), Internal::Adaptor::Framework::NORMAL, false, windowData);
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:42:Application Application::New(int* argc, char** argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData)
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:44:  Internal::Adaptor::ApplicationPtr internal = Internal::Adaptor::Application::New(argc, argv, ToStdString(stylesheet), Internal::Adaptor::Framework::NORMAL, useUiThread, windowData);
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:64:void Application::MainLoop()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:66:  Internal::Adaptor::GetImplementation(*this).MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:74:void Application::Quit()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:76:  Internal::Adaptor::GetImplementation(*this).Quit();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:84:Window Application::GetWindow()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:86:  return Internal::Adaptor::GetImplementation(*this).GetWindow();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:109:Application::AppSignalType& Application::InitSignal()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:111:  return Internal::Adaptor::GetImplementation(*this).InitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:164:Application::AppSignalType& Application::TaskInitSignal()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:166:  return Internal::Adaptor::GetImplementation(*this).TaskInitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.h:186:  Dali::Window GetWindow() const;
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h:69: *     mApplication.InitSignal().Connect( this, &ExampleController::Create );
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h:89: *   WidgetApplication app = WidgetApplication::New(&argc, &argv);
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h:91: *   app.MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.cpp:31:WidgetApplication WidgetApplication::New(int* argc, char** argv[], Dali::StringView stylesheet)
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.cpp:34:  Internal::Adaptor::WidgetApplicationPtr internal = Internal::Adaptor::WidgetApplication::New(argc, argv, ToStdString(stylesheet), windowData);
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.cpp:126:Dali::Window Widget::GetWindow() const
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.cpp:130:    return mImpl->GetWindow();
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:61: * You can get a valid Window handle by calling Dali::Application::GetWindow().
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:103:   * This can be initialized using Dali::Application::GetWindow() or
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:726:   * @brief This constructor is used by Dali::Application::GetWindow().
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:47: * Ime window type is special type. It can only set by one Application::New function.
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.h:104:  WindowType GetWindowType() const;
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.cpp:72:WindowType WindowData::GetWindowType() const
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder-impl.cpp:653:    sceneHolderImpl                           = adaptor.GetWindow(actor);
+repos/dali-adaptor/dali/integration-api/adaptor-framework/application-controller.h:36:class ApplicationController;
+repos/dali-adaptor/dali/integration-api/adaptor-framework/application-controller.h:103:   * the window and adaptor. It must be called before GetWindow().
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/application-launcher.h:48:  DevelApplication::DownCast(ApplicationLauncher::applicationObject).MainLoop();
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/application-launcher.h:87:  Application         application = Application::New(nullptr, nullptr); \
+repos/dali-adaptor/dali/integration-api/adaptor-framework/adaptor.h:103: *   MyPlatform.StartMainLoop();
+repos/dali-adaptor/dali/integration-api/adaptor-framework/adaptor.h:472:  Dali::WindowContainer GetWindows() const;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-WindowData.cpp:28:  DALI_TEST_CHECK(windowData.GetWindowType() == WindowType::NORMAL);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-WindowData.cpp:51:  // Test SetWindowType and GetWindowType
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-WindowData.cpp:55:  DALI_TEST_CHECK(windowData.GetWindowType() == WindowType::UTILITY);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewLayoutBoundary.cpp:577:  Window            window = application.GetWindow();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:47:    application.InitSignal().Connect(this, &MyTestApp::Create);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:55:  void Quit()
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:57:    application.Quit();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:89:  Application application = Application::New(nullptr, nullptr);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:104:  Application application = Application::New(&argc, &argv);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:119:  Application application = Application::New(&argc, &argv, "stylesheet");
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:137:  Application application = Application::New(&argc, &argv, "stylesheet", false, windowData);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:155:  Application application = Application::New(&argc, &argv, "stylesheet", true, windowData);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:173:  Application application = Application::New(&argc, &argv, "stylesheet", false, windowData);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:189:  Application application = Application::New(&argc, &argv, "stylesheet", false, windowData);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:200:  Application application = Application::New(nullptr, nullptr);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:214:  Application application = Application::New(nullptr, nullptr);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:228:  Application application = Application::New(nullptr, nullptr);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:241:int UtcDaliApplicationMainLoop01N(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:247:    application.MainLoop();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:281:    application.Quit();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:310:int UtcDaliApplicationGetWindowN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:316:    (void)application.GetWindow();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:327:int UtcDaliApplicationInitSignalP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:329:  Application application = Application::New(nullptr, nullptr);
+
+exec
+/bin/bash -lc "rg --files repos/dali-adaptor repos/dali-ui | rg 'application.*\\.h"'$|adaptor.*'"\\.h"'$|window.*'"\\.h"'$|dali-ui-foundation.h$'"'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/plugins/feedback/dali-feedback.h
+repos/dali-adaptor/plugins/file-download/file-download-curl.h
+repos/dali-adaptor/third-party/macos-platform/sys/prctl.h
+repos/dali-adaptor/third-party/macos-platform/extern-definitions.h
+repos/dali-adaptor/dali/dali.h
+repos/dali-adaptor/third-party/windows-platform/netinet/in.h
+repos/dali-adaptor/dali/public-api/dali-adaptor-common.h
+repos/dali-adaptor/third-party/windows-platform/sys/prctl.h
+repos/dali-adaptor/third-party/windows-platform/sys/socket.h
+repos/dali-adaptor/third-party/windows-platform/sys/time.h
+repos/dali-adaptor/third-party/windows-platform/sys/mman.h
+repos/dali-adaptor/third-party/windows-platform/dirent.h
+repos/dali-adaptor/third-party/windows-platform/extern-definitions.h
+repos/dali-adaptor/third-party/windows-platform/unistd.h
+repos/dali-adaptor/third-party/windows-platform/dlfcn.h
+repos/dali-adaptor/third-party/windows-platform/preprocessor-definitions.h
+repos/dali-adaptor/third-party/glyphy/glyphy.h
+repos/dali-adaptor/third-party/windows-platform/Win32File/CustomFile.h
+repos/dali-adaptor/third-party/glyphy/vector-font-cache.h
+repos/dali-adaptor/third-party/glyphy/glyphy-freetype.h
+repos/dali-adaptor/dali/public-api/dali-adaptor-version.h
+repos/dali-adaptor/third-party/resampler/resampler.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/style-change.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/timer.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/capture.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/input-method.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/encoded-image-buffer.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/device-status.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/native-image.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/key-grab.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/ui-context.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.h
+repos/dali-adaptor/third-party/SPIRV-Reflect/common/output_stream.h
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h
+repos/dali-adaptor/dali/internal/clipboard/common/clipboard-impl.h
+repos/dali-adaptor/third-party/libunibreak/linebreak.h
+repos/dali-adaptor/third-party/libunibreak/linebreakdef.h
+repos/dali-adaptor/third-party/libunibreak/wordbreak.h
+repos/dali-adaptor/third-party/libunibreak/unibreakdef.h
+repos/dali-adaptor/third-party/libunibreak/unibreakbase.h
+repos/dali-adaptor/third-party/libunibreak/wordbreakdef.h
+repos/dali-adaptor/third-party/nanosvg/nanosvgrast.h
+repos/dali-adaptor/third-party/nanosvg/nanosvg.h
+repos/dali-adaptor/third-party/SPIRV-Reflect/spirv_reflect.h
+repos/dali-adaptor/third-party/SPIRV-Reflect/include/spirv/unified1/spirv.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/log-factory-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/egl-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder-impl.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/trigger-event-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/shader-precompiler.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-image-surface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/thread-synchronization-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/round-robin-container-view.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/application-controller.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/android-framework.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/application-launcher.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-render-surface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/adaptor.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-render-surface-factory.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/trace-factory-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/trigger-event-factory.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/render-surface-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/icu-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/hyphenation-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/font-client-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/shaping-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/segmentation-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/cairo-renderer.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/font-file-manager-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/text-renderer-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/bidirectional-support-impl.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/application.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/hyperlink.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/editable-text.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/action.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/text.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/value.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/component.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/socket.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/selection.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/accessible.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/hypertext.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/accessibility-feature.h
+repos/dali-adaptor/dali/devel-api/atspi-interfaces/collection.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/bitmap-font-cache-item.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-face-manager.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-client-plugin-cache-handler.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/pixel-buffer-cache-item.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-face-cache-item.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-client-utils.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/harfbuzz-proxy-font.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/embedded-item.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-cache-item-interface.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-face-glyph-cache-manager.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/font-client-plugin-impl.h
+repos/dali-adaptor/dali/internal/text/text-abstraction/plugin/lru-cache-container.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/font-list.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/text-abstraction.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/defined-characters.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/hyphenation.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/script.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/emoji-character-properties.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/font-client.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/segmentation.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/bitmap-font.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/font-metrics.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/font-file-manager.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/text-renderer-layout-helper.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/glyph-buffer-data.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/shaping.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/icu-plugin.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/text-renderer.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/glyph-info.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/emoji-helper.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/text-abstraction-definitions.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/bidirectional-support.h
+repos/dali-adaptor/dali/devel-api/text-abstraction/icu.h
+repos/dali-adaptor/dali/internal/network/common/socket-factory.h
+repos/dali-adaptor/dali/internal/network/common/socket-interface.h
+repos/dali-adaptor/dali/internal/network/common/client-send-data-interface.h
+repos/dali-adaptor/dali/internal/network/common/network-performance-server.h
+repos/dali-adaptor/dali/internal/network/common/automation.h
+repos/dali-adaptor/dali/internal/network/common/trace-interface.h
+repos/dali-adaptor/dali/internal/network/common/network-performance-client.h
+repos/dali-adaptor/dali/internal/network/common/network-performance-protocol.h
+repos/dali-adaptor/dali/internal/network/common/network-service-impl.h
+repos/dali-adaptor/dali/internal/network/common/socket-factory-interface.h
+repos/dali-adaptor/dali/internal/network/common/socket-impl.h
+repos/dali-adaptor/dali/internal/thread/common/thread-settings-impl.h
+repos/dali-adaptor/dali/internal/offscreen/egl/offscreen-render-surface-egl.h
+repos/dali-adaptor/dali/internal/offscreen/common/offscreen-window-impl.h
+repos/dali-adaptor/dali/internal/offscreen/common/offscreen-application-impl.h
+repos/dali-adaptor/dali/internal/offscreen/common/offscreen-render-surface.h
+repos/dali-adaptor/dali/internal/offscreen/vulkan/offscreen-render-surface-vulkan.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/screen-information.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-animation-renderer-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/virtual-keyboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/animated-image-loading.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-blur-info.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/environment-variable.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/thread-settings.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-window.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/event-thread-callback.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-factory-interface.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-backend-impl.h
+repos/dali-adaptor/dali/internal/graphics/common/egl-include.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-library.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-library-handle.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-library-open-mode.h
+repos/dali-adaptor/dali/internal/graphics/common/egl-image-extensions.h
+repos/dali-adaptor/dali/internal/graphics/common/shader-parser.h
+repos/dali-adaptor/dali/internal/graphics/common/surface-factory.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-interface-enum.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-interface.h
+repos/dali-adaptor/dali/internal/graphics/common/graphics-factory.h
+repos/dali-adaptor/dali/internal/system/tizen/widget-controller-tizen.h
+repos/dali-adaptor/dali/internal/system/tizen/widget-application-impl-tizen.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-context.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-hit-test.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-device-list-get.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-console-message.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-policy-decision.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-settings.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-security-origin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list-item.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-file-chooser-request.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-context-menu-item.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-certificate.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-user-media-permission-request.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-load-error.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-form-repost-decision.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-http-auth-handler.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-request-interceptor.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-context-menu.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-frame.h
+repos/dali-adaptor/dali/internal/system/ubuntu-x11/widget-application-impl-x.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/gl-window.h
+repos/dali-adaptor/dali/internal/system/ubuntu-x11/widget-controller-x.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/style-monitor.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-stream.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/component-application.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/actor-accessible.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-image-renderer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loader-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/bitmap-saver.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/drag-and-drop.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/key-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-application.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/tts-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/atspi-accessibility.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/physical-keyboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/capture-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/application-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/performance-logger.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/input-method-context.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/proxy-accessible.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/tilt-sensor.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-loader.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/graphics-backend.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-player-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/camera-player-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-animation-renderer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loading.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-system-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility-bitset.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/event-feeder.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-queue.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/clipboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loader-input.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/mouse-relative-event.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/key-extension-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/mouse-in-out-event.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-download-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-source-queue.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/input-method-options.h
+repos/dali-adaptor/dali/internal/sensor/tizen/tilt-sensor-impl-tizen.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-radial-gradient.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-gradient.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-picture.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable-group.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/graphics-capabilities.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/async-task-manager.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility-bridge.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/keyboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/lifecycle-controller.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/pointer-constraints-event.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/orientation.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/pixel-buffer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-sync-mode.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/sound-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/camera-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/texture-upload-manager.h
+repos/dali-adaptor/dali/internal/sensor/ubuntu/tilt-sensor-impl-ubuntu.h
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-adaptor-impl.h
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-test-application.h
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window-impl.h
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-application.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-resource-transfer-request.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-command-pool-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-utils.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-command-buffer.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-pipeline.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-framebuffer-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-resource-transfer.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-sampler-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-sampler.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-reflection.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-buffer-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-features.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-queue-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-render-target.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-program.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-spirv.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-command-buffer-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-command-buffer-executor.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-fence-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-graphics-controller.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-texture-dependency-checker.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-image-view-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-swapchain-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-buffer.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-render-pass-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-texture-array.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-memory.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-render-pass.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-native-image-handler.h
+repos/dali-adaptor/dali/internal/sensor/common/tilt-sensor-factory.h
+repos/dali-adaptor/dali/internal/sensor/common/tilt-sensor-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-image-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-program-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-pipeline-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-graphics-resource.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-memory-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-discard-queue.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-shader.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-framebuffer-attachment.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-surface-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-shader-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-pipeline-cache-manager.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-texture.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-handle.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-framebuffer.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-graphics-controller-debug.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-stored-command-buffer.h
+repos/dali-adaptor/dali/internal/graphics/vulkan-impl/vulkan-types.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/wayland/vk-surface-wayland.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/vulkan-hpp-wrapper.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/x11/vk-surface-xcb.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/x11/vk-surface-xlib.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/x11/vk-surface-xlib2xcb.h
+repos/dali-adaptor/dali/internal/system/common/widget-controller.h
+repos/dali-adaptor/dali/internal/system/common/frame-time-stamp.h
+repos/dali-adaptor/dali/internal/system/common/widget-application-impl.h
+repos/dali-adaptor/dali/internal/system/common/logging.h
+repos/dali-adaptor/dali/internal/system/common/performance-logger-impl.h
+repos/dali-adaptor/dali/internal/system/common/performance-interface-factory.h
+repos/dali-adaptor/dali/internal/system/common/callback-manager.h
+repos/dali-adaptor/dali/internal/system/common/atomics.h
+repos/dali-adaptor/dali/internal/system/common/environment-options.h
+repos/dali-adaptor/dali/internal/system/common/file-descriptor-monitor.h
+repos/dali-adaptor/dali/internal/system/common/time-service.h
+repos/dali-adaptor/dali/internal/system/common/environment-variables.h
+repos/dali-adaptor/dali/internal/system/common/performance-interface.h
+repos/dali-adaptor/dali/internal/system/common/performance-marker.h
+repos/dali-adaptor/dali/internal/system/common/system-factory.h
+repos/dali-adaptor/dali/internal/system/common/object-profiler.h
+repos/dali-adaptor/dali/internal/system/common/fps-tracker.h
+repos/dali-adaptor/dali/internal/system/common/stat-context-log-interface.h
+repos/dali-adaptor/dali/internal/system/common/system-trace.h
+repos/dali-adaptor/dali/internal/system/common/performance-server.h
+repos/dali-adaptor/dali/internal/system/common/core-event-interface.h
+repos/dali-adaptor/dali/internal/system/common/unified-trigger-event-manager.h
+repos/dali-adaptor/dali/internal/system/common/capture-impl.h
+repos/dali-adaptor/dali/internal/system/common/event-loop.h
+repos/dali-adaptor/dali/internal/system/common/timer-interface.h
+repos/dali-adaptor/dali/internal/system/common/texture-upload-manager-impl.h
+repos/dali-adaptor/dali/internal/system/common/command-line-options.h
+repos/dali-adaptor/dali/internal/system/common/file-reader.h
+repos/dali-adaptor/dali/internal/system/common/file-writer.h
+repos/dali-adaptor/dali/internal/system/common/configuration-manager.h
+repos/dali-adaptor/dali/internal/system/common/system-error-print.h
+repos/dali-adaptor/dali/internal/system/common/sound-player-impl.h
+repos/dali-adaptor/dali/internal/system/common/kernel-trace.h
+repos/dali-adaptor/dali/internal/system/common/stat-context.h
+repos/dali-adaptor/dali/internal/system/common/async-task-manager-impl.h
+repos/dali-adaptor/dali/internal/system/common/timer-impl.h
+repos/dali-adaptor/dali/internal/system/common/locale-utils.h
+repos/dali-adaptor/dali/internal/system/common/update-status-logger.h
+repos/dali-adaptor/dali/internal/system/common/thread-controller.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/android/vk-surface-android.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/vulkan-graphics-impl.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/vulkan-memory-allocation.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/vulkan-graphics-factory.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/vulkan-surface-factory.h
+repos/dali-adaptor/dali/internal/graphics/vulkan/vulkan-device.h
+repos/dali-adaptor/dali/internal/system/common/file-closer.h
+repos/dali-adaptor/dali/internal/system/common/system-settings.h
+repos/dali-adaptor/dali/internal/system/common/abort-handler.h
+repos/dali-adaptor/dali/internal/system/common/shared-file.h
+repos/dali-adaptor/dali/internal/system/common/trigger-event.h
+repos/dali-adaptor/dali/internal/system/common/stat-context-manager.h
+repos/dali-adaptor/dali/internal/system/common/unified-trigger-event-manager-impl.h
+repos/dali-adaptor/dali/internal/system/common/frame-time-stats.h
+repos/dali-adaptor/dali/internal/window-system/tizen/native-image-surface-impl-tizen-egl.h
+repos/dali-adaptor/dali/internal/imaging/tizen/tbm-surface-counter.h
+repos/dali-adaptor/dali/internal/imaging/tizen/native-image-impl-tizen-vulkan.h
+repos/dali-adaptor/dali/internal/imaging/tizen/native-image-queue-impl-tizen-vulkan.h
+repos/dali-adaptor/dali/internal/imaging/tizen/native-image-factory-tizen.h
+repos/dali-adaptor/dali/internal/imaging/tizen/native-image-impl-tizen.h
+repos/dali-adaptor/dali/internal/imaging/tizen/native-image-queue-impl-tizen.h
+repos/dali-adaptor/dali/internal/imaging/tizen/native-image-factory-tizen-vulkan.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/egl-sync-object.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-context-state-cache.h
+repos/dali-adaptor/dali/internal/system/libuv/callback-manager-libuv.h
+repos/dali-adaptor/dali/internal/system/libuv/timer-impl-libuv.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/egl-graphics-controller-debug.h
+repos/dali-adaptor/dali/internal/system/libuv/system-factory-libuv.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-texture-dependency-checker.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-render-target.h
+repos/dali-adaptor/dali/internal/system/libuv/file-descriptor-monitor-libuv.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-shader.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-program.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-command-buffer.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-sync-object.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-pipeline.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-framebuffer-state-cache.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-sync-pool.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-resource.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-framebuffer.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-blend-state-cache.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-sampler.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-types.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-reflection.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles3-graphics-memory.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles2-graphics-memory.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/egl-graphics-controller.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-context.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-debug.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-buffer.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-texture.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-pipeline-cache.h
+repos/dali-adaptor/dali/internal/graphics/gles-impl/gles-graphics-render-pass.h
+repos/dali-adaptor/dali/internal/window-system/tizen/ecore/window-factory-ecore-wl2.h
+repos/dali-adaptor/dali/internal/window-system/tizen/ecore/display-connection-factory-ecore-wl.h
+repos/dali-adaptor/dali/internal/window-system/tizen/ecore/display-connection-impl-ecore-wl.h
+repos/dali-adaptor/dali/internal/window-system/tizen/ecore/window-base-ecore-wl2.h
+repos/dali-adaptor/dali/internal/window-system/tizen/native-render-surface-tizen-egl.h
+repos/dali-adaptor/dali/internal/window-system/tizen/display-connection-native-types.h
+repos/dali-adaptor/dali/internal/window-system/tizen/render-surface-factory-tizen.h
+repos/dali-adaptor/dali/internal/imaging/ubuntu-x11/native-image-queue-impl-x.h
+repos/dali-adaptor/dali/internal/imaging/ubuntu-x11/native-image-factory-x.h
+repos/dali-adaptor/dali/internal/imaging/ubuntu-x11/native-image-impl-x.h
+repos/dali-adaptor/dali/internal/legacy/tizen/data-compression.h
+repos/dali-adaptor/dali/internal/legacy/tizen/platform-capabilities.h
+repos/dali-adaptor/dali/internal/legacy/tizen/image-encoder.h
+repos/dali-adaptor/dali/internal/system/linux/ecore/timer-impl-ecore.h
+repos/dali-adaptor/dali/internal/graphics/gles/gles-abstraction.h
+repos/dali-adaptor/dali/internal/graphics/gles/egl-debug.h
+repos/dali-adaptor/dali/internal/system/linux/ecore/callback-manager-ecore.h
+repos/dali-adaptor/dali/internal/graphics/gles/gl-proxy-implementation.h
+repos/dali-adaptor/dali/internal/graphics/gles/gl-extensions-support.h
+repos/dali-adaptor/dali/internal/graphics/gles/egl-graphics.h
+repos/dali-adaptor/dali/internal/legacy/common/tizen-platform-abstraction.h
+repos/dali-adaptor/dali/internal/system/linux/ecore/system-factory-ecore.h
+repos/dali-adaptor/dali/internal/graphics/gles/egl-implementation.h
+repos/dali-adaptor/dali/internal/system/linux/ecore/file-descriptor-monitor-ecore.h
+repos/dali-adaptor/dali/internal/graphics/gles/gles2-implementation.h
+repos/dali-adaptor/dali/internal/system/linux/ecore/event-loop-ecore.h
+repos/dali-adaptor/dali/internal/graphics/gles/gl-implementation.h
+repos/dali-adaptor/dali/internal/graphics/gles/egl-sync-implementation.h
+repos/dali-adaptor/dali/internal/graphics/gles/egl-factory-interface.h
+repos/dali-adaptor/dali/internal/graphics/gles/egl-graphics-factory.h
+repos/dali-adaptor/dali/internal/graphics/gles/gl-extensions.h
+repos/dali-adaptor/dali/internal/graphics/gles/gles3-implementation.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/pixmap-render-surface-ecore-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/ecore-x-types.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/display-connection-factory-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/window-interface-ecore-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/window-base-ecore-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/display-connection-impl-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/native-image-surface-impl-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/display-connection-native-types.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/render-surface-factory-ecore-x.h
+repos/dali-adaptor/dali/internal/window-system/ubuntu-x11/window-factory-ecore-x.h
+repos/dali-adaptor/dali/internal/accessibility/tizen/tts-player-impl-tizen.h
+repos/dali-ui/dali-ui-foundation/dali-ui-foundation.h
+repos/dali-adaptor/dali/internal/system/android/callback-manager-android.h
+repos/dali-adaptor/dali/internal/system/android/timer-impl-android.h
+repos/dali-adaptor/dali/internal/system/android/system-factory-android.h
+repos/dali-adaptor/dali/internal/system/android/file-descriptor-monitor-android.h
+repos/dali-adaptor/dali/internal/system/android/widget-application-impl-android.h
+repos/dali-adaptor/dali/internal/imaging/common/native-image-factory.h
+repos/dali-adaptor/dali/internal/imaging/common/native-image-queue-impl.h
+repos/dali-adaptor/dali/internal/imaging/common/image-loader-plugin-proxy.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-ktx.h
+repos/dali-adaptor/dali/internal/imaging/common/pixel-manipulation.h
+repos/dali-adaptor/dali/internal/imaging/common/encoded-image-buffer-impl.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-bmp.h
+repos/dali-adaptor/dali/internal/imaging/common/animated-image-loading-impl.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-pkm.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-webp.h
+repos/dali-adaptor/dali/internal/imaging/common/native-image-impl.h
+repos/dali-adaptor/dali/internal/imaging/common/image-operations.h
+repos/dali-adaptor/dali/internal/imaging/common/gif-loading.h
+repos/dali-adaptor/dali/internal/imaging/common/image-loader.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-ico.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-png.h
+repos/dali-adaptor/dali/internal/imaging/common/http-utils.h
+repos/dali-adaptor/dali/internal/imaging/common/pixel-buffer-impl.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-wbmp.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-gif.h
+repos/dali-adaptor/dali/internal/imaging/common/gaussian-blur.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-jpeg.h
+repos/dali-adaptor/dali/internal/imaging/common/alpha-mask.h
+repos/dali-adaptor/dali/internal/imaging/common/file-download.h
+repos/dali-adaptor/dali/internal/imaging/common/resource-types.h
+repos/dali-adaptor/dali/internal/imaging/common/loader-astc.h
+repos/dali-adaptor/dali/internal/imaging/common/webp-loading.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-controller.h
+repos/dali-adaptor/dali/internal/imaging/common/native-bitmap-buffer-impl.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-native-image.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-egl-application.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-gl-abstraction.h
+repos/dali-adaptor/dali/internal/accessibility/common/tts-player-factory.h
+repos/dali-adaptor/dali/internal/accessibility/common/tts-player-impl.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-vk-application.h
+repos/dali-adaptor/dali/internal/styling/common/style-monitor-impl.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-sync-object.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-test-application.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-sampler.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-compare-types.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-reflection.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-trace-call-stack.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-render-surface.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-render-pass.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-command-buffer.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-intrusive-ptr.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-pipeline.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-program.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-vk-abstraction.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-render-controller.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-test-adaptor-impl.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/dali-test-img-utils.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-sync-impl.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/mesh-builder.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/dali-test-suite-utils.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-platform-abstraction.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-texture.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-framebuffer.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-gesture-generator.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-actor-utils.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-environment-variable.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-render-target.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-harness.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-application.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-shader.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-buffer.h
+repos/dali-adaptor/dali/internal/window-system/common/native-image-surface-impl.h
+repos/dali-adaptor/dali/internal/window-system/common/orientation-impl.h
+repos/dali-adaptor/dali/internal/window-system/common/display-connection-factory.h
+repos/dali-adaptor/dali/internal/window-system/common/damage-observer.h
+repos/dali-adaptor/dali/internal/window-system/common/display-connection-impl.h
+repos/dali-adaptor/dali/internal/window-system/common/window-factory.h
+repos/dali-adaptor/dali/internal/window-system/common/native-image-surface-factory.h
+repos/dali-adaptor/dali/internal/window-system/common/pixmap-render-surface.h
+repos/dali-adaptor/dali/internal/window-system/common/window-base.h
+repos/dali-adaptor/dali/internal/window-system/common/window-render-surface.h
+repos/dali-adaptor/dali/internal/window-system/common/render-surface-factory.h
+repos/dali-adaptor/dali/internal/window-system/common/window-event-interface.h
+repos/dali-adaptor/dali/internal/window-system/common/window-impl.h
+repos/dali-adaptor/dali/internal/window-system/common/window-system.h
+repos/dali-adaptor/dali/internal/window-system/common/display-connection.h
+repos/dali-adaptor/dali/internal/window-system/common/event-handler.h
+repos/dali-adaptor/dali/internal/window-system/common/rotation-event.h
+repos/dali-adaptor/dali/internal/window-system/common/window-visibility-observer.h
+repos/dali-adaptor/dali/internal/window-system/common/display-utils.h
+repos/dali-adaptor/dali/internal/system/glib/callback-manager-glib.h
+repos/dali-adaptor/dali/internal/system/glib/timer-impl-glib.h
+repos/dali-adaptor/dali/internal/system/glib/file-descriptor-monitor-glib.h
+repos/dali-adaptor/dali/internal/system/glib/system-factory-glib.h
+repos/dali-adaptor/dali/internal/imaging/x11/native-image-queue-impl-x.h
+repos/dali-adaptor/dali/internal/imaging/x11/native-image-factory-x.h
+repos/dali-adaptor/dali/internal/imaging/x11/native-image-impl-x.h
+repos/dali-adaptor/dali/internal/accessibility/generic/tts-player-impl-generic.h
+repos/dali-adaptor/automated-tests/src/common/testcase.h
+repos/dali-adaptor/dali/internal/trace/tizen/trace-manager-impl-tizen.h
+repos/dali-adaptor/dali/internal/window-system/gl-window/gl-window-impl.h
+repos/dali-adaptor/dali/internal/window-system/gl-window/gl-window-render-thread.h
+repos/dali-adaptor/dali/internal/imaging/android/native-image-factory-android.h
+repos/dali-adaptor/dali/internal/imaging/android/native-image-impl-android.h
+repos/dali-adaptor/dali/internal/imaging/android/native-image-queue-impl-android.h
+repos/dali-adaptor/dali/internal/trace/streamline/streamline_annotate_logging.h
+repos/dali-adaptor/dali/internal/trace/streamline/trace-manager-impl-streamline.h
+repos/dali-adaptor/dali/internal/trace/streamline/streamline_annotate.h
+repos/dali-adaptor/dali/internal/system/windows/widget-controller-win.h
+repos/dali-adaptor/dali/internal/system/windows/callback-manager-win.h
+repos/dali-adaptor/dali/internal/system/windows/trigger-event-win.h
+repos/dali-adaptor/dali/internal/system/windows/widget-application-impl-win.h
+repos/dali-adaptor/dali/internal/system/windows/timer-impl-win.h
+repos/dali-adaptor/dali/internal/system/windows/system-factory-win.h
+repos/dali-adaptor/dali/internal/system/windows/file-descriptor-monitor-windows.h
+repos/dali-adaptor/dali/internal/trace/common/trace-factory.h
+repos/dali-adaptor/dali/internal/imaging/windows/native-image-factory-win.h
+repos/dali-adaptor/dali/internal/imaging/windows/native-image-impl-win.h
+repos/dali-adaptor/dali/internal/trace/common/trace-manager-impl.h
+repos/dali-adaptor/dali/internal/trace/generic/trace-manager-impl-generic.h
+repos/dali-adaptor/dali/internal/imaging/macos/native-image-factory-mac.h
+repos/dali-adaptor/dali/internal/imaging/macos/native-image-impl-mac.h
+repos/dali-adaptor/dali/internal/window-system/x11/render-surface-factory-x.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-socket.h
+repos/dali-adaptor/dali/internal/window-system/x11/window-factory-x.h
+repos/dali-adaptor/dali/internal/window-system/x11/window-system-x.h
+repos/dali-adaptor/dali/internal/window-system/x11/pixmap-render-surface-x.h
+repos/dali-adaptor/dali/internal/window-system/x11/display-connection-factory-x.h
+repos/dali-adaptor/dali/internal/window-system/x11/display-connection-impl-x.h
+repos/dali-adaptor/dali/internal/window-system/x11/native-image-surface-impl-x.h
+repos/dali-adaptor/dali/internal/window-system/x11/display-connection-native-types.h
+repos/dali-adaptor/dali/internal/window-system/x11/window-base-x.h
+repos/dali-adaptor/dali/internal/system/macos/system-factory-mac.h
+repos/dali-adaptor/dali/internal/adaptor-framework/common/file-loader-impl.h
+repos/dali-adaptor/dali/internal/adaptor-framework/common/file-stream-impl.h
+repos/dali-adaptor/dali/internal/system/macos/timer-impl-mac.h
+repos/dali-adaptor/dali/internal/system/macos/callback-manager-mac.h
+repos/dali-adaptor/dali/internal/system/macos/file-descriptor-monitor-macos.h
+repos/dali-adaptor/dali/internal/system/macos/widget-application-impl-mac.h
+repos/dali-adaptor/dali/internal/system/macos/trigger-event-mac.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-action.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-accessible.h
+repos/dali-adaptor/dali/internal/trace/android/trace-manager-impl-android.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/accessibility-common.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/collection-impl.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-text.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-component.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/image-loaders.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/dummy/dummy-atspi.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-application.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-object.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/dbus/dbus-locators.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/dbus/dbus.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-base.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-hypertext.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/dbus/dbus-wrapper-eldbus.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-editable-text.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-hyperlink.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-selection.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-collection.h
+repos/dali-adaptor/dali/internal/accessibility/bridge/bridge-value.h
+repos/dali-adaptor/dali/internal/window-system/android/display-connection-impl-android.h
+repos/dali-adaptor/dali/internal/window-system/android/display-connection-factory-android.h
+repos/dali-adaptor/dali/internal/window-system/android/native-image-surface-impl-android.h
+repos/dali-adaptor/dali/internal/window-system/android/render-surface-factory-android.h
+repos/dali-adaptor/dali/internal/window-system/android/window-factory-android.h
+repos/dali-adaptor/dali/internal/window-system/android/window-base-android.h
+repos/dali-adaptor/dali/internal/application-model/widget/appmodel-widget-tizen.h
+repos/dali-adaptor/dali/internal/application-model/widget/widget-base-tizen.h
+repos/dali-adaptor/dali/internal/web-engine/common/web-engine-impl.h
+repos/dali-adaptor/dali/internal/application-model/normal/appmodel-normal-tizen.h
+repos/dali-adaptor/dali/internal/vector-image/common/vector-image-renderer-impl.h
+repos/dali-adaptor/dali/internal/application-model/component-based/appmodel-component-based-tizen.h
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-factory.h
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-impl.h
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.h
+repos/dali-adaptor/dali/internal/window-system/windows/native-image-surface-impl-win.h
+repos/dali-adaptor/dali/internal/window-system/windows/window-factory-win.h
+repos/dali-adaptor/dali/internal/window-system/windows/event-system-win.h
+repos/dali-adaptor/dali/internal/window-system/windows/render-surface-factory-win.h
+repos/dali-adaptor/dali/internal/window-system/windows/platform-implement-win.h
+repos/dali-adaptor/dali/internal/drag-and-drop/common/drag-and-drop-impl.h
+repos/dali-adaptor/dali/internal/window-system/windows/window-base-win.h
+repos/dali-adaptor/dali/internal/window-system/windows/display-connection-impl-win.h
+repos/dali-adaptor/dali/internal/window-system/windows/display-connection-factory-win.h
+repos/dali-adaptor/dali/internal/canvas-renderer/tizen/canvas-renderer-impl-tizen.h
+repos/dali-adaptor/automated-tests/src/dali-platform-abstraction/utc-image-loading-common.h
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h
+repos/dali-adaptor/dali/internal/drag-and-drop/generic/drag-and-drop-impl-generic.h
+repos/dali-adaptor/dali/internal/video/common/video-player-impl.h
+repos/dali-adaptor/dali/internal/drag-and-drop/tizen-wayland/drag-and-drop-impl-ecore-wl2.h
+repos/dali-adaptor/dali/internal/window-system/macos/display-connection-impl-mac.h
+repos/dali-adaptor/dali/internal/window-system/macos/window-base-mac.h
+repos/dali-adaptor/dali/internal/window-system/macos/window-render-surface-cocoa.h
+repos/dali-adaptor/dali/internal/adaptor/tizen/framework-tizen.h
+repos/dali-adaptor/dali/internal/window-system/macos/display-connection-factory-mac.h
+repos/dali-adaptor/dali/internal/adaptor/tizen/framework-factory-tizen.h
+repos/dali-adaptor/dali/internal/adaptor/tizen/component-application-impl.h
+repos/dali-adaptor/dali/internal/window-system/macos/render-surface-factory-mac.h
+repos/dali-adaptor/dali/internal/window-system/macos/native-image-surface-impl-mac.h
+repos/dali-adaptor/dali/internal/window-system/macos/window-factory-mac.h
+repos/dali-adaptor/dali/internal/vector-animation/tizen/vector-animation-renderer-native-tizen.h
+repos/dali-adaptor/dali/internal/adaptor/androidjni/framework-androidjni.h
+repos/dali-adaptor/dali/internal/adaptor/androidjni/framework-factory-androidjni.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/drawable-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/shape-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/canvas-renderer-factory.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/canvas-renderer-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/linear-gradient-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/gradient-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/picture-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/radial-gradient-impl.h
+repos/dali-adaptor/dali/internal/canvas-renderer/common/drawable-group-impl.h
+repos/dali-adaptor/doc/dali-adaptor-doc.h
+repos/dali-adaptor/dali/internal/haptics/common/feedback-player-impl.h
+repos/dali-adaptor/dali/internal/haptics/common/feedback-plugin-proxy.h
+repos/dali-adaptor/dali/internal/vector-animation/common/vector-animation-renderer-plugin-proxy.h
+repos/dali-adaptor/dali/internal/vector-animation/common/vector-animation-renderer-native.h
+repos/dali-adaptor/dali/internal/vector-animation/common/vector-animation-renderer-impl.h
+repos/dali-adaptor/dali/internal/vector-animation/common/vector-animation-renderer-event-manager.h
+repos/dali-adaptor/dali/internal/camera/common/camera-player-impl.h
+repos/dali-adaptor/dali/internal/adaptor/ubuntu/framework-factory-ubuntu.h
+repos/dali-adaptor/dali/internal/adaptor/ubuntu/framework-ubuntu.h
+repos/dali-adaptor/dali/internal/canvas-renderer/generic/canvas-renderer-impl-generic.h
+repos/dali-adaptor/dali/internal/vector-animation/generic/vector-animation-renderer-native-generic.h
+repos/dali-adaptor/dali/internal/input/ubuntu-x11/input-method-context-impl-x.h
+repos/dali-adaptor/dali/internal/input/ubuntu-x11/dali-ecore-input.h
+repos/dali-adaptor/dali/internal/input/tizen-wayland/input-method-context-impl-ecore-wl.h
+repos/dali-adaptor/dali/internal/adaptor/glib/framework-factory-glib.h
+repos/dali-adaptor/dali/internal/adaptor/glib/framework-glib.h
+repos/dali-adaptor/dali/internal/input/tizen-wayland/ecore-virtual-keyboard.h
+repos/dali-adaptor/dali/internal/adaptor/common/combined-update-render-controller-debug.h
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/framework.h
+repos/dali-adaptor/dali/internal/input/windows/input-method-context-impl-win.h
+repos/dali-adaptor/dali/internal/adaptor/common/combined-update-render-controller.h
+repos/dali-adaptor/dali/internal/adaptor/common/application-controller-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-builder-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/ui-context-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/thread-controller-interface.h
+repos/dali-adaptor/dali/internal/adaptor/libuv/framework-libuv.h
+repos/dali-adaptor/dali/internal/adaptor/android/framework-factory-android.h
+repos/dali-adaptor/dali/internal/adaptor/android/framework-android.h
+repos/dali-adaptor/dali/internal/adaptor/android/android-framework-impl.h
+repos/dali-adaptor/dali/internal/adaptor/android/framework-android-interface.h
+repos/dali-adaptor/dali/internal/adaptor/libuv/framework-factory-libuv.h
+repos/dali-adaptor/dali/internal/input/macos/input-method-context-impl-mac.h
+repos/dali-adaptor/dali/internal/adaptor/common/application-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/lifecycle-controller-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-internal-services.h
+repos/dali-adaptor/dali/internal/input/common/key-impl.h
+repos/dali-adaptor/dali/internal/input/common/physical-keyboard-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/framework-factory.h
+repos/dali-adaptor/dali/internal/input/generic/input-method-context-impl-generic.h
+repos/dali-adaptor/dali/internal/input/common/virtual-keyboard-impl.h
+repos/dali-adaptor/dali/internal/adaptor/windows/framework-win.h
+repos/dali-adaptor/dali/internal/input/common/input-method-context-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/threading-mode.h
+repos/dali-adaptor/dali/internal/input/common/input-method-context-factory.h
+repos/dali-adaptor/dali/internal/adaptor/windows/framework-factory-win.h
+repos/dali-adaptor/dali/internal/input/linux/dali-ecore-imf.h
+repos/dali-adaptor/dali/internal/adaptor/common/lifecycle-observer.h
+repos/dali-adaptor/dali/internal/adaptor/macos/framework-factory-mac.h
+repos/dali-adaptor/dali/internal/adaptor/macos/framework-mac.h
+
+exec
+/bin/bash -lc "sed -n '120,340p' repos/dali-adaptor/dali/public-api/adaptor-framework/application.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+ * @SINCE_1_0.0
+ */
+class DALI_ADAPTOR_API Application : public BaseHandle
+{
+public:
+  typedef Signal<void(DeviceStatus::Battery::Status)>     LowBatterySignalType;               ///< Application device signal type @SINCE_1_2.62
+  typedef Signal<void(DeviceStatus::Memory::Status)>      LowMemorySignalType;                ///< Application device signal type @SINCE_1_2.62
+  typedef Signal<void(DeviceStatus::Orientation::Status)> DeviceOrientationChangedSignalType; ///< Application device orientation changed signal type @SINCE_2_2.1
+  typedef Signal<void(Application)>                      AppSignalType;                      ///< Application lifecycle signal and system signal callback type @SINCE_1_0.0
+  typedef Signal<void(Application, void*)>               AppControlSignalType;               ///< Application control signal callback type @SINCE_1_0.0
+
+public:
+  /**
+   * @brief This is the constructor for applications.
+   *
+   * @SINCE_1_0.0
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
+   * @param[in,out]  argc        A pointer to the number of arguments
+   * @param[in,out]  argv        A pointer to the argument list
+   * @param[in]      stylesheet  The path to user defined theme file (optional)
+   * @return A handle to the Application
+   * @note If the stylesheet is not specified, then the library's default stylesheet will not be overridden.
+   */
+  static Application New(int* argc, char** argv[], Dali::StringView stylesheet = "");
+
+  /**
+   * @brief This is the constructor for applications with full window control.
+   *
+   * @SINCE_2_2.23
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
+   * @param[in,out]  argc         A pointer to the number of arguments
+   * @param[in,out]  argv         A pointer to the argument list
+   * @param[in]      stylesheet   The path to user defined theme file
+   * @param[in]      useUiThread  True if the application would create a UI thread
+   * @param[in]      windowData   The window data for the application
+   * @return A handle to the Application
+   * @note If the stylesheet is not specified, then the library's default stylesheet will not be overridden.<BR>
+   * UI thread is an additional thread that DALi creates for UI events.
+   * The UI thread isn't blocked from the system events(AppControl, LanguageChanged, RegionChanged, LowMemory, LowBattery task signals).
+   */
+  static Application New(int* argc, char** argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData);
+
+  /**
+   * @brief Constructs an empty handle.
+   * @SINCE_1_0.0
+   */
+  Application();
+
+  /**
+   * @brief Copy Constructor.
+   * @SINCE_1_0.0
+   * @param[in] application Handle to an object
+   */
+  Application(const Application& application);
+
+  /**
+   * @brief Assignment operator.
+   * @SINCE_1_0.0
+   * @param[in] application Handle to an object
+   * @return A reference to this
+   */
+  Application& operator=(const Application& application);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   */
+  Application(Application&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   * @return A reference to this handle
+   */
+  Application& operator=(Application&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_1_0.0
+   */
+  ~Application();
+
+public:
+  /**
+   * @brief This starts the application.
+   *
+   * On platforms where context loss can occur, the application is responsible for tearing down and
+   * re-loading UI.  The application should listen to Stage::ContextLostSignal and
+   * Stage::ContextRegainedSignal.
+   *
+   * @SINCE_1_0.0
+   */
+  void MainLoop();
+
+  /**
+   * @brief This lowers the application to bottom without actually quitting it.
+   * @SINCE_1_0.0
+   */
+  void Lower();
+
+  /**
+   * @brief This quits the application.  Tizen applications should use Lower to improve re-start performance unless they need to Quit completely.
+   * @SINCE_1_0.0
+   */
+  void Quit();
+
+  /**
+   * @brief Ensures that the function passed in is called from the main loop when it is idle.
+   * @SINCE_1_0.0
+   * @param[in] callback The function to call
+   * @return @c true if added successfully, @c false otherwise
+   *
+   * @note Function must be called from main event thread only
+   *
+   * A callback of the following type may be used:
+   * @code
+   *   void MyFunction();
+   * @endcode
+   * This callback will be deleted once it is called.
+   *
+   * @note Ownership of the callback is passed onto this class.
+   */
+  bool AddIdle(CallbackBase* callback);
+
+  /**
+   * @brief Retrieves the main window used by the Application class.
+   *
+   * The application writer can use the window to change indicator and orientation
+   * properties.
+   * @SINCE_1_0.0
+   * @return A handle to the window
+   */
+  Window GetWindow();
+
+  /**
+   * @brief Get path application resources are stored at
+   *
+   * @SINCE_1_2.2
+   * @return the full path of the resources
+   */
+  static Dali::String GetResourcePath();
+
+  /**
+   * @brief This is used to get region information from device.
+   *
+   * @SINCE_1_2.62
+   * @return Region information
+   */
+  Dali::String GetRegion() const;
+
+  /**
+   * @brief This is used to get language information from device.
+   *
+   * @SINCE_1_2.62
+   * @return Language information
+   */
+  Dali::String GetLanguage() const;
+
+  /**
+   * @brief Gets the Object registry.
+   *
+   * @SINCE_1_9.21
+   * @return The object registry
+   * @note This will only be a valid handle after the InitSignal has been emitted.
+   */
+  ObjectRegistry GetObjectRegistry() const;
+
+public: // Signals
+  /**
+   * @brief The user should connect to this signal to determine when they should initialize
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& InitSignal();
+
+  /**
+   * @brief The user should connect to this signal to determine when they should terminate
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& TerminateSignal();
+
+  /**
+   * @brief The user should connect to this signal if they need to perform any special
+   * activities when the application is about to be paused.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& PauseSignal();
+
+  /**
+   * @brief The user should connect to this signal if they need to perform any special
+   * activities when the application has resumed.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& ResumeSignal();
+
+  /**
+   * @brief This signal is sent when the system requires the user to reinitialize itself.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+
+exec
+/bin/bash -lc "sed -n '80,180p' repos/dali-adaptor/dali/public-api/adaptor-framework/window.h && sed -n '250,340p' repos/dali-adaptor/dali/public-api/adaptor-framework/window.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @SINCE_1_0.0
+   * @param[in] windowPosition The position and size of the Window
+   * @param[in] name The Window title
+   * @param[in] isTransparent Whether Window is transparent
+   * @return A new window
+   * @note This creates an extra window in addition to the default main window
+   */
+  static Window New(PositionSize windowPosition, const Dali::String& name, bool isTransparent = false);
+
+  /**
+   * @brief Creates an initialized handle to a new Window.
+   * @SINCE_2_2.33
+   * @param[in] name The Window title
+   * @param[in] className The Window class name
+   * @param[in] windowData The window data
+   * @note This creates an extra window in addition to the default main window
+   * @return A new Window
+   */
+  static Window New(const Dali::String& name, const Dali::String& className, const WindowData& windowData);
+
+  /**
+   * @brief Creates an uninitialized handle.
+   *
+   * This can be initialized using Dali::Application::GetWindow() or
+   * Dali::Window::New().
+   * @SINCE_1_0.0
+   */
+  Window();
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_1_0.0
+   */
+  ~Window();
+
+  /**
+   * @brief This copy constructor is required for (smart) pointer semantics.
+   *
+   * @SINCE_1_0.0
+   * @param[in] handle A reference to the copied handle
+   */
+  Window(const Window& handle);
+
+  /**
+   * @brief This assignment operator is required for (smart) pointer semantics.
+   *
+   * @SINCE_1_0.0
+   * @param[in] rhs A reference to the copied handle
+   * @return A reference to this
+   */
+  Window& operator=(const Window& rhs);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   */
+  Window(Window&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   * @return A reference to this handle
+   */
+  Window& operator=(Window&& rhs) noexcept;
+
+  /**
+   * @brief Downcast sceneHolder to window
+   *
+   * @SINCE_2_1.46
+   * @param[in] handle The handle need to downcast
+   * @return Whether it's a valid window or not
+   */
+  static Window DownCast(BaseHandle handle);
+
+  /**
+   * @brief Adds a child Actor to the Window.
+   *
+   * The child will be referenced.
+   *
+   * @SINCE_1_4.19
+   * @param[in] actor The child
+   * @pre The actor has been initialized.
+   * @pre The actor does not have a parent.
+   */
+  void Add(Actor actor);
+
+  /**
+   * @brief Removes a child Actor from the Window.
+   *
+   * The child will be unreferenced.
+   *
+   * @SINCE_1_4.19
+   * @param[in] actor The child
+   * @pre The actor has been added to the stage.
+   */
+   * @param[in] klass The class of the window
+   */
+  void SetClass(Dali::String name, Dali::String klass);
+
+  /**
+   * @brief Raises window to the top of Window stack.
+   * @SINCE_1_0.0
+   */
+  void Raise();
+
+  /**
+   * @brief Lowers window to the bottom of Window stack.
+   * @SINCE_1_0.0
+   */
+  void Lower();
+
+  /**
+   * @brief Activates window to the top of Window stack even it is iconified.
+   * @SINCE_1_0.0
+   */
+  void Activate();
+
+  /**
+   * @brief Adds an orientation to the list of available orientations.
+   * @SINCE_1_0.0
+   * @param[in] orientation The available orientation to add
+   */
+  void AddAvailableOrientation(WindowOrientation orientation);
+
+  /**
+   * @brief Removes an orientation from the list of available orientations.
+   * @SINCE_1_0.0
+   * @param[in] orientation The available orientation to remove
+   */
+  void RemoveAvailableOrientation(WindowOrientation orientation);
+
+  /**
+   * @brief Sets a preferred orientation.
+   * @SINCE_1_0.0
+   * @param[in] orientation The preferred orientation
+   * @pre Orientation is in the list of available orientations.
+   *
+   * @note To unset the preferred orientation, orientation should be set NO_ORIENTATION_PREFERENCE.
+   */
+  void SetPreferredOrientation(WindowOrientation orientation);
+
+  /**
+   * @brief Gets the preferred orientation.
+   * @SINCE_1_0.0
+   * @return The preferred orientation if previously set, or none
+   */
+  WindowOrientation GetPreferredOrientation();
+
+  /**
+   * @brief Gets the native handle of the window.
+   *
+   * When users call this function, it wraps the actual type used by the underlying window system.
+   * @SINCE_1_0.0
+   * @return The native handle of the Window or an empty handle
+   */
+  Any GetNativeHandle() const;
+
+  /**
+   * @brief Sets whether window accepts focus or not.
+   *
+   * @SINCE_1_2.60
+   * @param[in] accept If focus is accepted or not. Default is true.
+   */
+  void SetAcceptFocus(bool accept);
+
+  /**
+   * @brief Returns whether window accepts focus or not.
+   *
+   * @SINCE_1_2.60
+   * @return True if the window accept focus, false otherwise
+   */
+  bool IsFocusAcceptable() const;
+
+  /**
+   * @brief Shows the window if it is hidden.
+   * @SINCE_1_2.60
+   */
+  void Show();
+
+  /**
+   * @brief Hides the window if it is showing.
+   * @SINCE_1_2.60
+   */
+  void Hide();
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/build/doc/source/index.md" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+# DALi UI Framework
+
+DALi UI is a high-performance UI library designed with a **Low Memory Assumption (LMA)** architecture. It provides a **Modern C++ Fluent API** with method chaining, enabling declarative and intuitive UI development for resource-constrained systems.
+
+---
+
+### Core Philosophy
+- **Low Memory Assumption**: Minimal object overhead and efficient memory management.
+- **Fluent Interface**: Method chaining for readable, declarative UI composition.
+- **Native Speed**: Zero-cost abstractions over the underlying DALi scene graph.
+
+---
+
+### Quick Start (Fluent API)
+
+Construct complex UI hierarchies with ease using our declarative method chaining:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali::UI;
+
+void Create(Application application) {
+  application.GetWindow().Add(
+    View::New()
+      .SetBackgroundColor(Color::YELLOW)
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
+      .Children({
+        View::New()
+          .SetBackgroundColor(Color::RED)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .With([](View& v) {
+            v.TouchedSignal().Connect([](Actor a, TouchEvent t) {
+              return true;
+            });
+          }),
+        View::New()
+          .SetBackgroundColor(Color::BLUE)
+          .SetPositionX(100_spx)
+          .SetPositionY(100_spx)
+      })
+  );
+}
+```
+
+---
+
+### Documentation Reference
+- [**Class List**](daliUi/annotated.md)
+- [**Namespace Overview**](daliUi/namespaces.md)
+- [**File List**](daliUi/files.md)
+
+---
+> [!NOTE]
+> This developer-centric documentation is version-controlled in `build/doc/source/index.md`.
+
+exec
+/bin/bash -lc "rg --files repos/dali-ui | rg '/view\\.h"'$|dali-ui-foundation.h$|absolute-layout'"\\.h"'$'"'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.h
+repos/dali-ui/dali-ui-foundation/public-api/view.h
+repos/dali-ui/dali-ui-foundation/dali-ui-foundation.h
+
+exec
+/bin/bash -lc "rg -n \"class View|View::New|SetBackgroundColor|SetRequestedWidth|Children\\(|Add\\(\" repos/dali-ui/dali repos/dali-ui/build 2>/dev/null | head -120" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/build/doc/source/index.md:24:  application.GetWindow().Add(
+repos/dali-ui/build/doc/source/index.md:25:    View::New()
+repos/dali-ui/build/doc/source/index.md:26:      .SetBackgroundColor(Color::YELLOW)
+repos/dali-ui/build/doc/source/index.md:27:      .SetRequestedWidth(200_spx)
+repos/dali-ui/build/doc/source/index.md:29:      .Children({
+repos/dali-ui/build/doc/source/index.md:30:        View::New()
+repos/dali-ui/build/doc/source/index.md:31:          .SetBackgroundColor(Color::RED)
+repos/dali-ui/build/doc/source/index.md:32:          .SetRequestedWidth(100_spx)
+repos/dali-ui/build/doc/source/index.md:39:        View::New()
+repos/dali-ui/build/doc/source/index.md:40:          .SetBackgroundColor(Color::BLUE)
+
+exec
+/bin/bash -lc "sed -n '340,460p' repos/dali-adaptor/dali/public-api/adaptor-framework/application.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& ResetSignal();
+
+  /**
+   * @brief This signal is emitted when another application sends a launch request to the application.
+   *
+   * When the application is launched, this signal is emitted after the main loop of the application starts up.
+   * The passed parameter describes the launch request and contains the information about why the application is launched.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppControlSignalType& AppControlSignal();
+
+  /**
+   * @brief This signal is emitted when the language is changed on the device.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& LanguageChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the region of the device is changed.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& RegionChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the battery level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_2.62
+   * @return The signal to connect to
+   */
+  LowBatterySignalType& LowBatterySignal();
+
+  /**
+   * @brief This signal is emitted when the memory level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_2.62
+   * @return The signal to connect to
+   */
+  LowMemorySignalType& LowMemorySignal();
+
+  /**
+   * @brief This signal is emitted when the device orientation is changed
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   *
+   * This signal is only used in Application, it is different to Window's orientation signal.
+   * @SINCE_2_2.1
+   * @return The signal to connect to
+   */
+  DeviceOrientationChangedSignalType& DeviceOrientationChangedSignal();
+
+  // TaskSignal
+  /**
+   * @brief The user should connect to this signal to determine when they should initialize
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskInitSignal();
+
+  /**
+   * @brief The user should connect to this signal to determine when they should terminate
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskTerminateSignal();
+
+  /**
+   * @brief This signal is emitted when another application sends a launch request to the application.
+   *
+   * When the application is launched, this signal is emitted after the main loop of the application starts up.
+   * The passed parameter describes the launch request and contains the information about why the application is launched.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppControlSignalType& TaskAppControlSignal();
+
+  /**
+   * @brief This signal is emitted when the language is changed on the device.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskLanguageChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the region of the device is changed.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskRegionChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the battery level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  LowBatterySignalType& TaskLowBatterySignal();
+
+  /**
+   * @brief This signal is emitted when the memory level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/dali-ui-foundation.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/dali.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/animation/duration.h>
+#include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h>
+#include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
+#include <dali-ui-foundation/public-api/input-field.h>
+#include <dali-ui-foundation/public-api/interactive-view.h>
+#include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/unit.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+#include <dali-ui-foundation/public-api/image-view.h>
+
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+
+#include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
+#include <dali-ui-foundation/public-api/image-loader/sync-image-loader.h>
+
+#include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
+#include <dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h>
+#include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+
+#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
+#include <dali-ui-foundation/public-api/text/input-filter.h>
+#include <dali-ui-foundation/public-api/text/style/bevel.h>
+#include <dali-ui-foundation/public-api/text/style/line-through.h>
+#include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/shadow.h>
+#include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
+
+#include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/mesh-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/primitive-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+#include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
+#include <dali-ui-foundation/public-api/visuals/visual-base.h>
+
+#include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout.h>
+#include <dali-ui-foundation/public-api/layouts/layout-controller.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+
+#include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+
+#include <dali-ui-foundation/public-api/i-scroll-bar.h>
+#include <dali-ui-foundation/public-api/scroll-bar.h>
+#include <dali-ui-foundation/public-api/scroll-view.h>
+#include <dali-ui-foundation/public-api/scrollable-enum.h>
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/actors/custom-actor.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/common/dali-string.h>
+#include <functional>
+#include <initializer_list>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+#include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/visuals/visual-base.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+class RenderEffect;
+class UiColor;
+class ViewAnimationBridge;
+class ViewAnimationSpec;
+
+// @ANIMATION_CONFIG(View)
+// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+// @ANIMATABLE_MANUAL(SizeWidth, float)
+// @ANIMATABLE_MANUAL(SizeHeight, float)
+// @ANIMATABLE_MANUAL(PositionX, float)
+// @ANIMATABLE_MANUAL(PositionY, float)
+
+class ViewImpl;
+
+/**
+ * @brief Move-only callback for custom focus navigation.
+ *
+ * @code
+ * // Member function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(this, &MyClass::OnFocusNavigation));
+ *
+ * // Static function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigationFunc));
+ * @endcode
+ *
+ * @note Signature: View(View currentFocusedView, FocusDirection direction)
+ */
+using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
+
+#include "view.autogen.h"
+/**
+ * @brief View is a base UI component class that extends CustomActor.
+ *
+ * View provides basic UI functionality and can be used as a foundation
+ * for creating custom UI components. It inherits all the capabilities
+ *
+ * View implements the layout system with Measure/Arrange passes.
+ */
+class DALI_UI_API View : public CustomActor
+{
+public:
+  // Typedefs
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized View handle.
+   *
+   * Only derived versions can be instantiated. Calling member
+   * functions with an uninitialized Dali::Object is not allowed.
+   */
+  View();
+
+  /**
+   * @brief Creates an initialized View.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static View New();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Creates another handle that points to the same real object.
+   * @param[in] view Handle to copy
+   */
+  View(const View& view);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  View(View&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~View();
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   *
+   * Changes this handle to point to another real object.
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  View& operator=(const View& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  View& operator=(View&& rhs) noexcept = default;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to View handle.
+   *
+   * If handle points to a View, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a View or an uninitialized handle
+   */
+  static View DownCast(BaseHandle handle);
+
+public: // Measure / Arrange API
+  /**
+   * @brief Measures the view with the given constraints.
+   *
+   * This method implements caching to avoid redundant calculations.
+   * It calls OnMeasure internally (Template Method pattern).
+   *
+   * @param[in] widthConstraint The width constraint for measurement
+   * @param[in] heightConstraint The height constraint for measurement
+   * @return The measured size
+   */
+  MeasuredSize Measure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @brief Arranges the view within the given bounds.
+   *
+   * This method calls OnArrange internally (Template Method pattern).
+   *
+   * @param[in] bounds The bounds to arrange the view in
+   * @return The final arranged size
+   */
+  MeasuredSize Arrange(const LayoutRect& bounds);
+
+  /**
+   * @brief Invalidates the measure of this view.
+   *
+   * This propagates to the parent layout while one exists,
+   * until the layout root is reached (no parent Layout).
+   */
+  void InvalidateMeasure();
+
+  /**
+   * @brief Invalidates the arrange of this view.
+   */
+  void InvalidateArrange();
+
+  /**
+   * @brief Gets the measured size from the last Measure() pass.
+   *
+   * @return The measured size
+   */
+  MeasuredSize GetMeasuredSize() const;
+
+  /**
+   * @brief Sets a custom measure callback for this View.
+   *
+   * When set, the callback replaces the default measurement behavior
+   * during the layout pass. Pass a default-constructed callback to remove.
+   *
+   * @param[in] callback The measure callback (ownership transferred)
+   *
+   * @code
+   * // Member function
+   * view.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));
+   *
+   * // Static function
+   * view.SetMeasureCallback(MeasureCallback::New(&MyMeasure));
+   *
+   * // Remove callback
+   * view.SetMeasureCallback({});
+   * @endcode
+   */
+  void SetMeasureCallback(MeasureCallback callback);
+
+  /**
+   * @brief Sets a custom arrange callback for this View.
+   *
+   * When set, the callback replaces the default arrangement behavior
+   * during the layout pass. Pass a default-constructed callback to remove.
+   *
+   * The callback should arrange children in a LEFT_TO_RIGHT frame by calling
+   * View::Arrange() on each non-standalone child, which writes the child's
+   * POSITION_X / SIZE_WIDTH onto its Actor. The framework then mirrors
+   * direct children horizontally when the View's effective layout direction
+   * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
+   * themselves.
+   *
+   * @param[in] callback The arrange callback (ownership transferred)
+   *
+   * @code
+   * // Member function
+   * view.SetArrangeCallback(ArrangeCallback::New(this, &MyClass::OnArrange));
+   *
+   * // Static function
+   * view.SetArrangeCallback(ArrangeCallback::New(&MyArrange));
+   *
+   * // Remove callback
+   * view.SetArrangeCallback({});
+   * @endcode
+   */
+  void SetArrangeCallback(ArrangeCallback callback);
+
+public: // Properties
+  // @CHAIN_START(View)
+
+  /**
+   * @brief Gets the x scale factor applied to the view.
+   *
+   * @return The x scale factor
+   */
+  float GetScaleX() const;
+
+
+exec
+/bin/bash -lc "rg -n \"SetBackgroundColor|SetRequestedWidth|SetRequestedHeight|Children|Add\\(\" repos/dali-ui/dali-ui-foundation/public-api/view.h repos/dali-ui/dali-ui-foundation/public-api -g'*.h' | head -100" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view.h:348:   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
+repos/dali-ui/dali-ui-foundation/public-api/view.h:468:  View& SetRequestedWidth(float width);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:486:  View& SetRequestedHeight(float height);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:751:  View& SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1129:  View& Children(std::initializer_list<View> children)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1133:      Add(child);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1173:  void RemoveAllChildren();
+repos/dali-ui/dali-ui-foundation/public-api/view.h:348:   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
+repos/dali-ui/dali-ui-foundation/public-api/view.h:468:  View& SetRequestedWidth(float width);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:486:  View& SetRequestedHeight(float height);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:751:  View& SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1129:  View& Children(std::initializer_list<View> children)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1133:      Add(child);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1173:  void RemoveAllChildren();
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:50: *   view.SetBackgroundColor(UiColor::PRIMARY);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.h:40: * parent.Add(view);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:377:   * @copydoc Ui::View::SetBackgroundColor()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:379:  void SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:570:   * @copydoc Ui::View::SetRequestedWidth()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:572:  void SetRequestedWidth(float width);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:580:   * @copydoc Ui::View::SetRequestedHeight()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:582:  void SetRequestedHeight(float height);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:695:   * @copydoc Ui::View::RemoveAllChildren()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:697:  void RemoveAllChildren();
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:890:   * @copydoc Dali::CustomActorImpl::OnChildAdd()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:892:  void OnChildAdd(Actor& child) override;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:955:   * @copydoc Dali::CustomActorImpl::RelayoutDependentOnChildren()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:957:  bool RelayoutDependentOnChildren(Dimension::Type dimension = Dimension::ALL_DIMENSIONS) override;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:1059:  void                    MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:1060:  void                    ArrangeStandaloneChildren(const LayoutRect& bounds);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:1068:  void SetBackgroundColorInternal(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:81:  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:91:  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:233:  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:423:  ChildClass& Children(std::initializer_list<View> children) { View::Children(children); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout.h:46: * Insert(index, View) and RemoveAllChildren() are provided by View.
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout.h:57: * - @b Weight (via StackLayoutParams): Children with weight > 0 share the
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.h:40: * Children are positioned using attached properties that specify their
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:244:   *                      Property::Map().Add( ... ) // Properties to set up visual
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:245:   *                                     .Add( Visual::Property::TRANSFORM,
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:246:   *                                           Property::Array().Add(
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:247:   * Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2( Policy::ABSOLUTE, Policy::RELATIVE ) ) ) .Add(
+
+exec
+/bin/bash -lc "sed -n '448,510p' repos/dali-ui/dali-ui-foundation/public-api/view.h && sed -n '730,770p' repos/dali-ui/dali-ui-foundation/public-api/view.h && sed -n '1110,1142p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @param[in] point The pivot to set
+   */
+  View& SetPivot(const Vector3& point);
+
+  /**
+   * @brief Gets the pivot of the View.
+   *
+   * @return The pivot of the View
+   */
+  Vector3 GetPivot() const;
+
+  /**
+   * @brief Sets the requested width.
+   *
+   * A positive value sets a fixed width.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] width The requested width
+   */
+  View& SetRequestedWidth(float width);
+
+  /**
+   * @brief Gets the requested width.
+   *
+   * @return The requested width
+   */
+  float GetRequestedWidth() const;
+
+  /**
+   * @brief Sets the requested height.
+   *
+   * A positive value sets a fixed height.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] height The requested height
+   */
+  View& SetRequestedHeight(float height);
+
+  /**
+   * @brief Gets the requested height.
+   *
+   * @return The requested height
+   */
+  float GetRequestedHeight() const;
+
+  /**
+   * @brief Sets the minimum width.
+   *
+   * @param[in] width The minimum width
+   */
+  View& SetMinimumWidth(float width);
+
+  /**
+   * @brief Gets the minimum width.
+   *
+   * @return The minimum width
+   */
+  float GetMinimumWidth() const;
+
+  /**
+   * @brief Sets the minimum height.
+  void SetFocusNavigationCallback(FocusNavigationCallback callback);
+
+  /**
+   * @brief Gets the background color.
+   *
+   * @return The background color
+   */
+  UiColor GetBackgroundColor();
+
+  /**
+   * @brief Sets the background color.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * If the UiColor has direct RGBA values, it is applied immediately
+   * and any previous ID-based binding for this property is removed.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBackgroundColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color.
+   *
+   * @return The color
+   */
+  UiColor GetColor() const;
+
+  /**
+   * @brief Sets the color.
+   *
+   * @param[in] color The color to set
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetColor(const UiColor& color);
+
+  /**
+   * @brief Gets the current color.
+   *
+   * @param[in] params The layout parameters to attach to this View
+   * @return Reference to this View for fluent chaining
+   *
+   * @code
+   * child.SetLayoutParams(
+   *   AbsoluteLayoutParams::New()
+   *     .SetBounds(LayoutRect(10, 20, 100, 200))
+   *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+   * @endcode
+   */
+  View& SetLayoutParams(LayoutParams params);
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Adds a list of children to this View in a declarative way.
+   * This method allows for a hierarchical UI tree construction by passing
+   * a brace-enclosed initializer list of View objects.
+   * @param[in] children The initializer list containing child View handles to be added.
+   */
+  View& Children(std::initializer_list<View> children)
+  {
+    for(const auto& child : children)
+    {
+      Add(child);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Adds a list of visuals to this View in a declarative way.
+   * This method allows for append visuals construction by passing
+   * a brace-enclosed initializer list of VisualBase objects.
+
+exec
+/bin/bash -lc "sed -n '1,110p' repos/dali-ui/dali-ui-foundation/public-api/ui-color.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector4.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+/**
+ * @brief A color value that can hold either direct RGBA components or a
+ * string identifier that is resolved at runtime via the current theme.
+ *
+ * When constructed with RGBA values, UiColor behaves like a lightweight
+ * wrapper around Vector4. When constructed with a string color ID, the
+ * actual RGBA values are looked up from the current ThemeLoaderInterface
+ * at the point of GetRgba().
+ *
+ * @code
+ *   // Direct RGBA
+ *   UiColor red(1.0f, 0.0f, 0.0f, 1.0f);
+ *
+ *   // ID-based (resolved from current theme)
+ *   UiColor primary("Primary");
+ *
+ *   // Predefined color IDs
+ *   view.SetBackgroundColor(UiColor::PRIMARY);
+ * @endcode
+ */
+class DALI_UI_API UiColor
+{
+public:
+  static const UiColor PRIMARY;
+  static const UiColor BACKGROUND;
+  static const UiColor OUTLINE;
+
+  /**
+   * @brief Creates a default UiColor (transparent black, no ID).
+   */
+  UiColor();
+
+  /**
+   * @brief Creates a UiColor with explicit RGBA components.
+   *
+   * @param[in] r Red component (0.0 ~ 1.0)
+   * @param[in] g Green component (0.0 ~ 1.0)
+   * @param[in] b Blue component (0.0 ~ 1.0)
+   * @param[in] a Alpha component (0.0 ~ 1.0), defaults to 1.0
+   */
+  UiColor(float r, float g, float b, float a = 1.0f);
+
+  /**
+   * @brief Creates a UiColor from a Vector4.
+   *
+   * @param[in] color The RGBA color as Vector4
+   */
+  UiColor(const Vector4& color);
+
+  /**
+   * @brief Creates a UiColor with a string identifier.
+   *
+   * The actual RGBA value is resolved from the current theme when
+   * GetRgba() is called.
+   *
+   * @param[in] colorId The color identifier string
+   */
+  explicit UiColor(const String& colorId);
+
+  /**
+   * @brief Creates a UiColor with a string identifier (rvalue overload).
+   *
+   * The actual RGBA value is resolved from the current theme when
+   * GetRgba() is called.
+   *
+   * This overload enables moving the string into the internal token registry
+   * to avoid an extra copy when the caller provides an rvalue.
+   *
+   * @param[in] colorId The color identifier string
+   */
+  explicit UiColor(String&& colorId);
+
+  /**
+   * @brief Creates a UiColor from a hex RGB value.
+   *
+   * @param[in] rgb 0xRRGGBB format hex color
+   * @param[in] a Alpha component (0.0 ~ 1.0), defaults to 1.0
+   */
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp && sed -n '327,370p' repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-test-suite-utils.h>
+#include <dali/dali.h>
+#include <dali/devel-api/adaptor-framework/application-devel.h>
+#include <dali/integration-api/string-utils.h>
+#include <stdlib.h>
+
+#include <adaptor-environment-variable.h> ///< for Dali::SetTestEnvironmentVariable
+
+using namespace Dali;
+using Dali::Integration::ToStdString;
+
+void utc_dali_application_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_application_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+namespace
+{
+struct MyTestApp : public ConnectionTracker
+{
+  MyTestApp(Application& app)
+  : initCalled(false),
+    application(app)
+  {
+    application.InitSignal().Connect(this, &MyTestApp::Create);
+  }
+
+  void Create(Application app)
+  {
+    initCalled = true;
+  }
+
+  void Quit()
+  {
+    application.Quit();
+  }
+
+  // Data
+  bool         initCalled;
+  Application& application;
+};
+
+void ApplicationSignalCallback(Application app)
+{
+}
+
+void ApplicationControlSignalCallback(Application, void*)
+{
+}
+
+} // unnamed namespace
+
+void LowBatterySignalCallback(Dali::DeviceStatus::Battery::Status status)
+{
+}
+
+void LowMemorySignalCallback(Dali::DeviceStatus::Memory::Status status)
+{
+}
+
+void OnDeviceOrientationChangedSignalCallback(DeviceStatus::Orientation::Status status)
+{
+}
+
+int UtcDaliApplicationNew01(void)
+{
+  Application application = Application::New(nullptr, nullptr);
+
+  MyTestApp testApp(application);
+
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+}
+
+int UtcDaliApplicationNew02(void)
+{
+  int         argc(1);
+  const char* argList[1] = {"program"};
+  char**      argv       = const_cast<char**>(argList);
+
+  Application application = Application::New(&argc, &argv);
+
+  MyTestApp testApp(application);
+
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+}
+
+int UtcDaliApplicationNew03(void)
+{
+  int         argc(1);
+  const char* argList[1] = {"program"};
+  char**      argv       = const_cast<char**>(argList);
+
+  Application application = Application::New(&argc, &argv, "stylesheet");
+
+int UtcDaliApplicationInitSignalP(void)
+{
+  Application application = Application::New(nullptr, nullptr);
+  application.InitSignal().Connect(&ApplicationSignalCallback);
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+}
+
+int UtcDaliApplicationInitSignalN(void)
+{
+  Application application;
+
+  try
+  {
+    application.InitSignal().Connect(&ApplicationSignalCallback);
+    DALI_TEST_CHECK(false); // Should not get here
+  }
+  catch(...)
+  {
+    DALI_TEST_CHECK(true);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliApplicationTerminateSignalP(void)
+{
+  Application application = Application::New(nullptr, nullptr);
+  application.TerminateSignal().Connect(&ApplicationSignalCallback);
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+}
+
+int UtcDaliApplicationTerminateSignalN(void)
+{
+  Application application;
+
+  try
+  {
+    application.TerminateSignal().Connect(&ApplicationSignalCallback);
+    DALI_TEST_CHECK(false); // Should not get here
+  }
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/extents.h>
+#include <dali/public-api/math/vector2.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+class View;
+
+/**
+ * @brief Enumeration for layout alignment options.
+ */
+enum class LayoutAlignment : uint8_t
+{
+  /**
+   * @brief Fill the available space
+   */
+  FILL = 0,
+  /**
+   * @brief Align to the start (left/top)
+   */
+  START = 1,
+  /**
+   * @brief Align to the center
+   */
+  CENTER = 2,
+  /**
+   * @brief Align to the end (right/bottom)
+   */
+  END = 3
+};
+
+/**
+ * @brief Constant representing wrap-content sizing.
+ *
+ * When RequestedWidth or RequestedHeight is set to this value (the default),
+ * the View sizes to fit its content (natural size or children bounding box).
+ */
+constexpr float WRAP_CONTENT = -1.0f;
+
+/**
+ * @brief Constant representing match-parent sizing.
+ *
+ * When RequestedWidth or RequestedHeight is set to this value,
+ * the View fills the parent container's available space on that axis.
+ */
+constexpr float MATCH_PARENT = -2.0f;
+
+/**
+ * @brief Layout mode of a View.
+ *
+ * Default: the parent container's layout system manages this View's size and position
+ * (measure/arrange follow the parent's layout rules and the View participates in
+ * the parent's accumulation, spacing and index calculations).
+ *
+ * Standalone: the parent container excludes this View from its accumulation/spacing/
+ * index calculations. The View's size is still measured normally (so MATCH_PARENT,
+ * WRAP_CONTENT and explicit RequestedWidth/Height work as usual), but its position is
+ * taken from the View's own SetRequestedPositionX/SetRequestedPositionY instead of
+ * being decided by the parent's layout. Useful for floating overlays, drag previews,
+ * tooltips and absolute positioning within an arbitrary LayoutManager.
+ */
+enum class LayoutMode : uint8_t
+{
+  DEFAULT    = 0, ///< Managed by the parent container's layout (default).
+  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetRequestedPositionX/SetRequestedPositionY.
+};
+
+/**
+ * @brief Class representing measured LayoutDimensions.
+ *
+ * This class stores the measured width and height of a view.
+ */
+class DALI_UI_API MeasuredSize
+{
+public:
+  /**
+   * @brief Default constructor.
+   */
+  MeasuredSize()
+  : width(0.0f),
+    height(0.0f)
+  {
+  }
+
+  /**
+   * @brief Constructor with width and height.
+   *
+   * @param[in] w The width value
+   * @param[in] h The height value
+   */
+  MeasuredSize(float w, float h)
+  : width(w),
+    height(h)
+
+exec
+/bin/bash -lc 'rg -n "KeyEventSignal|typedef.*Key|using.*Key|void OnKeyEvent|Signal<.*Key" repos/dali-adaptor/dali/public-api/adaptor-framework/window.h repos/dali-adaptor/dali/public-api/adaptor-framework/key.h' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:72:  using KeyEventSignalType    = Signal<void(Window, KeyEvent)>;   ///< Key event signal type @SINCE_1_9.21
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:702:  KeyEventSignalType& KeyEventSignal();
+
+exec
+/bin/bash -lc "rg -n \"GetState\\(|enum State|DALI_KEY_ESCAPE|DALI_KEY_BACK|IsKey\\(\" repos/dali-adaptor/dali/public-api/adaptor-framework/key.h repos/dali-adaptor/dali/public-api/adaptor-framework/key*.h repos/dali-core/dali 2>/dev/null | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:42:  DALI_KEY_ESCAPE          = 9,   ///< Escape key @SINCE_1_0.0
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:43:  DALI_KEY_BACKSPACE       = 22,  ///< Backspace key @SINCE_1_0.0
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:50:  DALI_KEY_BACK            = 166, ///< Back key @SINCE_1_0.0
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:93:DALI_ADAPTOR_API bool IsKey(const Dali::KeyEvent& keyEvent, Dali::KEY daliKey);
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:42:  DALI_KEY_ESCAPE          = 9,   ///< Escape key @SINCE_1_0.0
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:43:  DALI_KEY_BACKSPACE       = 22,  ///< Backspace key @SINCE_1_0.0
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:50:  DALI_KEY_BACK            = 166, ///< Back key @SINCE_1_0.0
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h:93:DALI_ADAPTOR_API bool IsKey(const Dali::KeyEvent& keyEvent, Dali::KEY daliKey);
+repos/dali-core/dali/public-api/animation/animation.cpp:149:Dali::Animation::State Animation::GetState() const
+repos/dali-core/dali/public-api/animation/animation.cpp:151:  return GetImplementation(*this).GetState();
+repos/dali-core/dali/public-api/animation/constraint.cpp:127:Constraint::State Constraint::GetState() const
+repos/dali-core/dali/public-api/animation/constraint.cpp:129:  return GetImplementation(*this).GetState();
+repos/dali-core/dali/public-api/animation/animation.h:158:  enum State : uint8_t
+repos/dali-core/dali/public-api/animation/animation.h:503:  State GetState() const;
+repos/dali-core/dali/public-api/animation/constraint.h:295:  enum State
+repos/dali-core/dali/public-api/animation/constraint.h:617:  Constraint::State GetState() const;
+repos/dali-core/dali/public-api/events/touch-event.cpp:56:PointState::Type TouchEvent::GetState(uint32_t point) const
+repos/dali-core/dali/public-api/events/touch-event.cpp:58:  return GetImplementation(*this).GetState(point);
+repos/dali-core/dali/public-api/events/hover-event.h:151:  PointState::Type GetState(uint32_t point) const;
+repos/dali-core/dali/public-api/events/key-event.cpp:111:KeyEvent::State KeyEvent::GetState() const
+repos/dali-core/dali/public-api/events/key-event.cpp:113:  return GetImplementation(*this).GetState();
+repos/dali-core/dali/public-api/events/hover-event.cpp:57:PointState::Type HoverEvent::GetState(uint32_t point) const
+repos/dali-core/dali/public-api/events/hover-event.cpp:59:  return GetImplementation(*this).GetState(point);
+repos/dali-core/dali/public-api/events/touch-event.h:159:  PointState::Type GetState(uint32_t point) const;
+repos/dali-core/dali/integration-api/events/touch-event-combiner.cpp:93:  const PointState::Type                state       = point.GetState();
+repos/dali-core/dali/integration-api/events/key-event-integ.h:42:  enum State
+repos/dali-core/dali/integration-api/events/point.cpp:95:PointState::Type Point::GetState() const
+repos/dali-core/dali/integration-api/events/point.h:130:  PointState::Type GetState() const;
+repos/dali-core/dali/public-api/events/gesture.h:118:  GestureState GetState() const;
+repos/dali-core/dali/public-api/events/key-event.h:66:  enum State
+repos/dali-core/dali/public-api/events/key-event.h:219:   * You need to use IsKey() to know what a key event means instead of direct comparison
+repos/dali-core/dali/public-api/events/key-event.h:248:  State GetState() const;
+repos/dali-core/dali/public-api/events/gesture.cpp:48:GestureState Gesture::GetState() const
+repos/dali-core/dali/public-api/events/gesture.cpp:50:  return GetImplementation(*this).GetState();
+repos/dali-core/dali/internal/update/render-tasks/scene-graph-render-task.h:53:  enum State : uint8_t
+repos/dali-core/dali/internal/update/gestures/scene-graph-pan-gesture.h:151:      state = rhs.GetState();
+repos/dali-core/dali/internal/update/animation/scene-graph-animation.h:46:  enum State
+repos/dali-core/dali/internal/update/animation/scene-graph-animation.h:260:  State GetState() const
+repos/dali-core/dali/internal/event/animation/constraint-base.cpp:294:Dali::Constraint::State ConstraintBase::GetState() const
+repos/dali-core/dali/internal/event/animation/constraint-base.h:152:   * @copydoc Dali::Constraint::GetState()
+repos/dali-core/dali/internal/event/animation/constraint-base.h:154:  Dali::Constraint::State GetState() const;
+repos/dali-core/dali/internal/event/animation/animation-impl.cpp:567:Dali::Animation::State Animation::GetState() const
+repos/dali-core/dali/internal/event/animation/animation-impl.cpp:626:  if(mEndAction == EndAction::BAKE && GetState() != Dali::Animation::STOPPED)
+repos/dali-core/dali/internal/event/animation/animation-impl.cpp:1137:  if(DALI_UNLIKELY(GetState() == Dali::Animation::PLAYING))
+repos/dali-core/dali/internal/update/manager/update-manager.cpp:727:  DALI_ASSERT_DEBUG(animation->GetState() == Animation::Destroyed);
+repos/dali-core/dali/internal/update/manager/update-manager.cpp:737:    const Animation::State state = iter->GetState();
+repos/dali-core/dali/internal/update/manager/update-manager.cpp:1038:    if(animation->GetState() == Animation::Destroyed)
+repos/dali-core/dali/internal/event/animation/animation-impl.h:194:   * @copydoc Dali::Animation::GetState()
+repos/dali-core/dali/internal/event/animation/animation-impl.h:196:  Dali::Animation::State GetState() const;
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-recognizer.cpp:95:        if(currentPoint1.GetState() == PointState::UP || currentPoint2.GetState() == PointState::UP || currentPoint1.GetState() == PointState::INTERRUPTED)
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-recognizer.cpp:137:      if(event.points[0].GetState() == PointState::INTERRUPTED)
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-recognizer.cpp:158:        if((currentPoint1.GetState() == PointState::UP) ||
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-recognizer.cpp:159:           (currentPoint2.GetState() == PointState::UP))
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-recognizer.h:103:  enum State
+repos/dali-core/dali/internal/event/events/touch-event-impl.h:102:   * @copydoc Dali::TouchEvent::GetGetState()
+repos/dali-core/dali/internal/event/events/touch-event-impl.h:104:  PointState::Type GetState(uint32_t point) const;
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-detector-impl.cpp:75:  if(rotation.GetState() != GestureState::CONTINUING)
+repos/dali-core/dali/internal/event/events/rotation-gesture/rotation-gesture-detector-impl.cpp:77:    DALI_LOG_DEBUG_INFO("emitting rotation gesture actor id(%d) state(%d)\n", actor.GetProperty<int32_t>(Dali::Actor::Property::ID), rotation.GetState());
+repos/dali-core/dali/internal/event/events/hit-test-algorithm-impl.cpp:155:    if(GetPoint().GetState() != PointState::STARTED && (GetPropagationType() == Integration::Scene::TouchPropagationType::GEOMETRY || actor->IsAllowedOnlyOwnTouch()) && ownActor != actor)
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:84:  PointState::Type state = event.GetState(0);
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:148:      actorImpl->SetHoverState(hoverEvent.GetState(0));
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:150:      if(hoverEvent.GetState(0) == PointState::MOTION &&
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:163:      else if(hoverEvent.GetState(0) != PointState::MOTION || actorImpl->IsDispatchHoverMotion())
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:387:                    TOUCH_POINT_STATE[currentPoint.GetState()],
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:450:      if(localVars.hoverEvent->GetPoint(0).GetState() != PointState::MOTION)
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:456:                              TOUCH_POINT_STATE[localVars.hoverEvent->GetPoint(0).GetState()]);
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:461:                              TOUCH_POINT_STATE[localVars.hoverEvent->GetPoint(0).GetState()]);
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:703:  if(event.points[0].GetState() == PointState::INTERRUPTED)
+repos/dali-core/dali/internal/event/events/hover-event-processor.cpp:718:  localVars.primaryPointState = localVars.primaryPoint->GetState();
+repos/dali-core/dali/internal/event/events/hover-event-impl.h:84:   * @copydoc Dali::HoverEvent::GetGetState()
+repos/dali-core/dali/internal/event/events/hover-event-impl.h:86:  PointState::Type GetState(uint32_t point) const;
+repos/dali-core/dali/internal/event/events/key-event-impl.cpp:175:Dali::KeyEvent::State KeyEvent::GetState() const
+repos/dali-core/dali/internal/event/events/touch-event-processor.cpp:93:    if(event.GetState(i) == targetState)
+repos/dali-core/dali/internal/event/events/touch-event-processor.cpp:380:    if(currentPoint.GetState() == PointState::STARTED && hitTestResults.actor)
+repos/dali-core/dali/internal/event/events/touch-event-processor.cpp:1001:  if(event.points[0].GetState() == PointState::INTERRUPTED)
+repos/dali-core/dali/internal/event/events/touch-event-processor.cpp:1059:                  TOUCH_POINT_STATE[currentPoint.GetState()],
+repos/dali-core/dali/internal/event/events/touch-event-processor.cpp:1071:  localVars.primaryPointState = localVars.primaryPoint->GetState();
+repos/dali-core/dali/internal/event/events/gesture-detector-impl.cpp:281:    const PointState::Type            state = touch.GetState(0);
+repos/dali-core/dali/internal/event/events/gesture-detector-impl.cpp:302:        point.SetState(touch.GetState(i));
+repos/dali-core/dali/internal/event/events/hover-event-impl.cpp:64:PointState::Type HoverEvent::GetState(uint32_t point) const
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-adaptor/dali/integration-api/adaptor-framework/application-controller.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_APPLICATION_CONTROLLER_H
+#define DALI_APPLICATION_CONTROLLER_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <string>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/window.h>
+#include <dali/public-api/dali-adaptor-common.h>
+
+namespace Dali
+{
+
+namespace Internal DALI_INTERNAL
+{
+namespace Adaptor
+{
+class ApplicationController;
+}
+} //namespace Internal DALI_INTERNAL
+
+/**
+ * @brief Application Controller
+ *
+ * ApplicationController manages the application lifecycle and handles
+ * creation and initialization of Window and Adaptor.
+ *
+ * @note The controller must follow the lifecycle sequence: Initialize -> Pause/Resume -> Terminate
+ */
+class DALI_ADAPTOR_API ApplicationController : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an ApplicationController instance.
+   *
+   * @param[in] windowPositionSize The position and size of the window
+   * @return A handle to the ApplicationController
+   */
+  static ApplicationController New(PositionSize windowPositionSize);
+
+  /**
+   * @brief Constructs an empty handle.
+   */
+  ApplicationController();
+
+  /**
+   * @brief Copy Constructor.
+   *
+   * @param[in] controller Handle to an object
+   */
+  ApplicationController(const ApplicationController& controller);
+
+  /**
+   * @brief Assignment operator.
+   *
+   * @param[in] controller Handle to an object
+   * @return A reference to this
+   */
+  ApplicationController& operator=(const ApplicationController& controller);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs A reference to the moved handle
+   */
+  ApplicationController(ApplicationController&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs A reference to the moved handle
+   * @return A reference to this handle
+   */
+  ApplicationController& operator=(ApplicationController&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~ApplicationController();
+
+  /**
+   * @brief Pre-initializes the application.
+   *
+   * This method should be called during application startup to initialize
+   * the window and adaptor. It must be called before GetWindow().
+   */
+  void PreInitialize();
+
+  /**
+   * @brief Post-initializes the application.
+   *
+   * This method should be called after PreInitialize() to complete the
+   * initialization process and ensure all resources are loaded.
+   *
+   * @pre PreInitialize() must have been called
+   */
+  void PostInitialize();
+
+  /**
+   * @brief Pre-pauses the application.
+   *
+   * This method should be called when the application is about to be paused.
+   */
+  void PrePause();
+
+  /**
+   * @brief Post-pauses the application.
+   *
+   * This method should be called after PrePause() to complete the pause process.
+   *
+   * @pre PrePause() must have been called
+   */
+  void PostPause();
+
+  /**
+   * @brief Pre-resumes the application.
+   *
+   * This method should be called when the application is about to resume from pause.
+   * It prepares the application for foreground execution.
+   */
+  void PreResume();
+
+  /**
+   * @brief Post-resumes the application.
+   *
+   * This method should be called after PreResume() to complete the resume process.
+   *
+   * @pre PreResume() must have been called
+   */
+  void PostResume();
+
+  /**
+   * @brief Pre-terminates the application.
+   *
+   * This method should be called when the application is about to be terminated.
+   * It prepares the application for clean shutdown.
+   *
+   * @pre The application must be initialized
+   */
+  void PreTerminate();
+
+  /**
+   * @brief Post-terminates the application.
+   *
+   * This method should be called after PreTerminate() to complete the termination process.
+   * It stops the adaptor and releases all resources.
+   *
+   * @pre PreTerminate() must have been called
+   */
+  void PostTerminate();
+
+  /**
+   * @brief Called before the application language is changed.
+   *
+   * This method should be called when the application language is about to be changed.
+   * It prepares the application for the language change event.
+   *
+   * @param[in] language The new language to be set
+   */
+  void PreLanguageChanged(const std::string& language);
+
+public: // Not intended for application developers
+
+exec
+/bin/bash -lc "sed -n '1,170p' repos/dali-adaptor/dali/devel-api/adaptor-framework/lifecycle-controller.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_LIFECYCLE_CONTROLLER_H
+#define DALI_LIFECYCLE_CONTROLLER_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/dali-adaptor-common.h>
+
+namespace Dali
+{
+namespace Internal DALI_INTERNAL
+{
+namespace Adaptor
+{
+class LifecycleController;
+}
+} // namespace Internal DALI_INTERNAL
+
+/**
+ * @brief Provides application lifecycle events.
+ *
+ * Connect to the signals of this class to receive notification of events in the lifecycle
+ * of the application. The following example shows how to connect to the Init signal. This
+ * could be done for example in the constructor of a singleton that is known to be created
+ * at startup.
+ *
+ * @code
+ * void MyClass::MyClass()
+ * {
+ *   LifecycleController::Get().InitSignal().Connect( this, &MyClass::OnApplicationInit );
+ * }
+ *
+ * void MyClass::OnApplicationInit()
+ * {
+ *   // ... Do something on init
+ * }
+ * @endcode
+ */
+class DALI_ADAPTOR_API LifecycleController : public BaseHandle
+{
+public:                                           // Typedefs
+  typedef Signal<void(void)> LifecycleSignalType; ///< Lifecycle Signal type
+
+public: // Creation & Destruction
+  /**
+   * @brief Create an uninitialized LifecycleController handle.
+   *
+   * Calling member functions when uninitialized is not allowed.
+   */
+  LifecycleController();
+
+  /**
+   * @brief Creates a copy of the handle.
+   *
+   * The copy will point to the same implementation as the original.
+   * @param[in]  monitor  The LifecycleController to copy from.
+   */
+  LifecycleController(const LifecycleController& monitor);
+
+  /**
+   * @brief Retrieve the initialized instance of the LifecycleController.
+   * @return Handle to LifecycleController.
+   */
+  static LifecycleController Get();
+
+  /**
+   * @brief Destructor
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~LifecycleController();
+
+public: // Signals
+  /**
+   * The user should connect to this signal before initialize their application.
+   */
+  LifecycleSignalType& PreInitSignal();
+
+  /**
+   * The user should connect to this signal to determine when they should initialise
+   * their application.
+   */
+  LifecycleSignalType& InitSignal();
+
+  /**
+   * The user should connect to this signal to determine when they should terminate
+   * their application
+   */
+  LifecycleSignalType& TerminateSignal();
+
+  /**
+   * The user should connect to this signal if they need to perform any special
+   * activities when the application is about to be paused.
+   */
+  LifecycleSignalType& PauseSignal();
+
+  /**
+   * The user should connect to this signal if they need to perform any special
+   * activities when the application has resumed.
+   */
+  LifecycleSignalType& ResumeSignal();
+
+  /**
+   * This signal is sent when the system requires the user to reinitialise itself.
+   */
+  LifecycleSignalType& ResetSignal();
+
+  /**
+   * This signal is emitted when the language is changed on the device.
+   */
+  LifecycleSignalType& LanguageChangedSignal();
+
+public: // Operators
+  /**
+   * @brief Assignment operator.
+   *
+   * The handle points to the same implementation as the one being copied from.
+   * @param[in]  controller  The LifecycleController to copy from.
+   * @return reference to this object
+   */
+  LifecycleController& operator=(const LifecycleController& controller);
+
+public: // Not intended for application developers
+  /**
+   * @brief This constructor is used internally to create a handle from an object pointer.
+   * @param [in] lifecycleController A pointer to the internal LifecycleController.
+   */
+  explicit DALI_INTERNAL LifecycleController(Internal::Adaptor::LifecycleController* lifecycleController);
+};
+
+} // namespace Dali
+
+#endif // DALI_LIFECYCLE_CONTROLLER_H
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-adaptor/dali/devel-api/adaptor-framework/device-status.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-adaptor/dali/devel-api/adaptor-framework/device-status.h: No such file or directory
+
+codex
+---
+title: Adaptor Framework
+sidebar_label: Adaptor Framework
+category: application-framework
+---
+
+# Adaptor Framework
+
+The adaptor framework starts the DALi event loop, creates the main window, and delivers application lifecycle signals for a dali-ui `Dali::Ui::View` tree.
+
+## Table of Contents
+
+- [Starting a dali-ui Application](#starting-a-dali-ui-application)
+- [Creating the Root View on Init](#creating-the-root-view-on-init)
+- [Handling Application Lifecycle Signals](#handling-application-lifecycle-signals)
+- [Using Runtime Application Context](#using-runtime-application-context)
+- [Responding to System Pressure](#responding-to-system-pressure)
+
+## Starting a dali-ui Application
+
+Use `Dali::Application` as the app entry object. Create it with `Dali::Application::New`, connect startup work to `Dali::Application::InitSignal`, then enter `Dali::Application::MainLoop`.
+
+`Dali::Application::InitSignal` uses the callback signature `void(Dali::Application)`, so the callback receives the initialized application handle.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+void OnInit(Dali::Application application)
+{
+  Dali::Ui::View root = Dali::Ui::View::New()
+    .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+    .SetRequestedHeight(Dali::Ui::MATCH_PARENT);
+
+  application.GetWindow().Add(root);
+}
+} // namespace
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Dali::Application application = Dali::Application::New(&argc, &argv);
+  application.InitSignal().Connect(&OnInit);
+  application.MainLoop();
+
+  return 0;
+}
+```
+
+`Dali::Application::New` also accepts an optional stylesheet path:
+
+```cpp
+Dali::Application application =
+  Dali::Application::New(&argc, &argv, "styles/app-theme.json");
+```
+
+## Creating the Root View on Init
+
+Build the app-facing UI as a `Dali::Ui::View` hierarchy. The adaptor provides the main window through `Dali::Application::GetWindow`; the dali-ui content should remain expressed as `Dali::Ui::View` objects.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+Dali::Ui::View CreateContent()
+{
+  return Dali::Ui::View::New()
+    .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+    .SetRequestedHeight(Dali::Ui::MATCH_PARENT)
+    .SetBackgroundColor(Dali::Ui::UiColor(0.08f, 0.09f, 0.11f, 1.0f))
+    .Children({
+      Dali::Ui::View::New()
+        .SetRequestedWidth(240.0f)
+        .SetRequestedHeight(120.0f)
+        .SetBackgroundColor(Dali::Ui::UiColor::PRIMARY),
+
+      Dali::Ui::View::New()
+        .SetRequestedWidth(240.0f)
+        .SetRequestedHeight(80.0f)
+        .SetBackgroundColor(Dali::Ui::UiColor(0.20f, 0.32f, 0.70f, 1.0f))
+    });
+}
+
+void OnInit(Dali::Application application)
+{
+  application.GetWindow().Add(CreateContent());
+}
+} // namespace
+```
+
+`Dali::Ui::View::New` creates an initialized view handle. `Dali::Ui::View::SetRequestedWidth` and `Dali::Ui::View::SetRequestedHeight` return the view, so they can be chained with `Dali::Ui::View::SetBackgroundColor` and `Dali::Ui::View::Children`.
+
+## Handling Application Lifecycle Signals
+
+Connect lifecycle-sensitive work to `Dali::Application` signals. `Dali::Application::PauseSignal`, `Dali::Application::ResumeSignal`, `Dali::Application::TerminateSignal`, `Dali::Application::ResetSignal`, `Dali::Application::LanguageChangedSignal`, and `Dali::Application::RegionChangedSignal` use the same `void(Dali::Application)` callback shape as `Dali::Application::InitSignal`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+void OnPause(Dali::Application application)
+{
+  (void)application;
+}
+
+void OnResume(Dali::Application application)
+{
+  (void)application;
+}
+
+void OnTerminate(Dali::Application application)
+{
+  (void)application;
+}
+
+void ConnectLifecycle(Dali::Application& application)
+{
+  application.PauseSignal().Connect(&OnPause);
+  application.ResumeSignal().Connect(&OnResume);
+  application.TerminateSignal().Connect(&OnTerminate);
+}
+} // namespace
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Dali::Application application = Dali::Application::New(&argc, &argv);
+  ConnectLifecycle(application);
+  application.MainLoop();
+
+  return 0;
+}
+```
+
+Call `Dali::Application::Quit` when the application should leave the main loop completely.
+
+```cpp
+void RequestShutdown(Dali::Application application)
+{
+  application.Quit();
+}
+```
+
+## Using Runtime Application Context
+
+`Dali::Application` exposes runtime context that is useful for locating resources and adapting content to the current environment.
+
+Use `Dali::Application::GetResourcePath` for the application resource directory. Use `Dali::Application::GetLanguage` and `Dali::Application::GetRegion` when the app needs the current device language or region.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+void OnInit(Dali::Application application)
+{
+  Dali::String resourcePath = Dali::Application::GetResourcePath();
+  Dali::String language     = application.GetLanguage();
+  Dali::String region       = application.GetRegion();
+
+  (void)resourcePath;
+  (void)language;
+  (void)region;
+
+  Dali::Ui::View root = Dali::Ui::View::New()
+    .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+    .SetRequestedHeight(Dali::Ui::MATCH_PARENT);
+
+  application.GetWindow().Add(root);
+}
+} // namespace
+```
+
+For updates while the app is already running, connect `Dali::Application::LanguageChangedSignal` or `Dali::Application::RegionChangedSignal` and refresh the affected `Dali::Ui::View` content from the callback.
+
+```cpp
+void OnLanguageChanged(Dali::Application application)
+{
+  Dali::String language = application.GetLanguage();
+  (void)language;
+}
+
+void ConnectLocaleSignals(Dali::Application& application)
+{
+  application.LanguageChangedSignal().Connect(&OnLanguageChanged);
+}
+```
+
+## Responding to System Pressure
+
+The adaptor framework can notify an app about low battery and low memory conditions. `Dali::Application::LowBatterySignal` uses `Dali::DeviceStatus::Battery::Status`; `Dali::Application::LowMemorySignal` uses `Dali::DeviceStatus::Memory::Status`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+void OnLowBattery(Dali::DeviceStatus::Battery::Status status)
+{
+  (void)status;
+}
+
+void OnLowMemory(Dali::DeviceStatus::Memory::Status status)
+{
+  (void)status;
+}
+
+void ConnectSystemSignals(Dali::Application& application)
+{
+  application.LowBatterySignal().Connect(&OnLowBattery);
+  application.LowMemorySignal().Connect(&OnLowMemory);
+}
+} // namespace
+```
+
+A typical dali-ui response is to reduce optional work and keep the existing `Dali::Ui::View` tree stable: defer nonessential loading, release app-owned caches, or postpone expensive content updates until `Dali::Application::ResumeSignal` or the next user-driven refresh.
+tokens used
+47,737
