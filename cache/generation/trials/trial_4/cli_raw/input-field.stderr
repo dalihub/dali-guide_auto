@@ -7,7 +7,7 @@ approval: never
 sandbox: read-only
 reasoning effort: medium
 reasoning summaries: none
-session id: 019e1773-978b-7082-9385-29fde02098cc
+session id: 019e1a46-30d7-72d2-bfaa-414077135dd0
 --------
 user
 You are repairing an existing DALi dali-ui Markdown guide.
@@ -39,7 +39,7 @@ Validator findings to repair:
   {
     "id": "input-field-T3-0001",
     "code": "PROMPT_LEAKAGE",
-    "line": 91,
+    "line": 63,
     "span": "PLACEHOLDER",
     "message": "Prompt/internal wording leaked into the document: placeholder",
     "suggestions": [],
@@ -1117,280 +1117,398 @@ category: views-components
 
 # Input Field
 
-`Dali::Ui::InputField` is a single-line editable text view for dali-ui applications.
+`Dali::Ui::InputField` is the dali-ui single-line editable text view for application text entry.
 
 ## Table of Contents
 
-- [Create an Input Field](#create-an-input-field)
-- [Text Appearance](#text-appearance)
+- [Create and Configure an Input Field](#create-and-configure-an-input-field)
 - [Cursor Behavior](#cursor-behavior)
-- [Editing State and Limits](#editing-state-and-limits)
-- [Selection and Read-Back](#selection-and-read-back)
-- [Password Display](#password-display)
-- [Signals](#signals)
-- [Property Constants](#property-constants)
+- [Text Appearance](#text-appearance)
+- [Selection and Readback](#selection-and-readback)
+- [Input Limits and Password Display](#input-limits-and-password-display)
+- [Respond to Editing Signals](#respond-to-editing-signals)
+- [Property Reference for App Code](#property-reference-for-app-code)
 
-## Create an Input Field
+## Create and Configure an Input Field
 
-Create an input field with `Dali::Ui::InputField::New`. In application code, keep the object as `Dali::Ui::InputField` when configuring text-specific behavior. It is also a `Dali::Ui::View`, so it can be placed in the same view tree as other dali-ui views.
-
-```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-using namespace Dali;
-using namespace Dali::Ui;
-
-InputField CreateNameField()
-{
-  InputField field = InputField::New()
-    .SetEditable(true)
-    .SetFontFamily("SamsungOne")
-    .SetFontSize(20.0f)
-    .SetFontSizeScale(1.0f)
-    .SetCursorWidth(2)
-    .SetCursorBlinkEnabled(true)
-    .SetCursorBlinkInterval(0.5f)
-    .SetCursorColor(UiColor(0x222222));
-
-  return field;
-}
-```
-
-`Dali::Ui::InputField` stores editable UTF-8 text. Use typed setters such as `SetFontFamily`, `SetFontSize`, `SetEditable`, `SetCursorWidth`, and `SetCursorColor` for common application setup.
-
-## Text Appearance
-
-Use `SetFontFamily`, `SetFontSize`, and `SetFontSizeScale` to configure the base text style. `GetFontFamily`, `GetFontSize`, `GetFontSizeScale`, and `GetAdjustedFontSizeScale` let you read the resolved configuration back.
+Create an input field with `Dali::Ui::InputField::New`. In dali-ui application code, treat the field as a `Dali::Ui::View`-based object and configure it with typed `Dali::Ui::InputField` setters when they are available.
 
 ```cpp
-void ConfigureTextStyle(InputField field)
-{
-  field
-    .SetFontFamily("SamsungOne")
-    .SetFontSize(22.0f)
-    .SetFontSizeScale(1.15f);
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-float ReadRenderedScale(InputField field)
-{
-  const float requestedScale = field.GetFontSizeScale();
-  const float adjustedScale = field.GetAdjustedFontSizeScale();
-
-  return adjustedScale > 0.0f ? adjustedScale : requestedScale;
-}
+field
+  .SetEditable(true)
+  .SetFontFamily("SamsungOne")
+  .SetFontSize(20.0f)
+  .SetFontSizeScale(1.0f);
 ```
 
-For style state exposed through the property system, use the `Dali::Ui::InputField::Property` owner. The text-related constants include `InputField::Property::TEXT`, `InputField::Property::FONT_FAMILY`, `InputField::Property::FONT_SIZE`, `InputField::Property::FONT_SIZE_SCALE`, `InputField::Property::MINIMUM_FONT_SIZE_SCALE`, `InputField::Property::MAXIMUM_FONT_SIZE_SCALE`, `InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED`, `InputField::Property::TEXT_COLOR`, `InputField::Property::TEXT_BACKGROUND_COLOR`, `InputField::Property::FONT_WEIGHT`, `InputField::Property::FONT_WIDTH`, and `InputField::Property::FONT_SLANT`.
+Use getters when application logic needs to inspect the current configuration.
+
+```cpp
+Dali::String family = field.GetFontFamily();
+float fontSize = field.GetFontSize();
+float scale = field.GetFontSizeScale();
+```
+
+`Dali::Ui::InputField::Property::TEXT` and `Dali::Ui::InputField::Property::EDITABLE` are the owned property constants for the entered text and editability. Prefer the typed setter form for app-facing code when a typed setter exists.
 
 ## Cursor Behavior
 
-The insertion cursor is configured directly on `Dali::Ui::InputField`. Use `SetCursorWidth` for cursor thickness, `SetCursorColor` for color, `SetCursorBlinkEnabled` for blinking, `SetCursorBlinkInterval` for the blink interval in seconds, and `SetCursorPosition` for the character index.
+The cursor can be configured with width, color, blink behavior, blink interval, handle image, pressed handle image, and position. `SetCursorPosition` uses a character index in the current text.
 
 ```cpp
-void ConfigureCursor(InputField field)
-{
-  field
-    .SetCursorWidth(2)
-    .SetCursorColor(UiColor(0x005BBB))
-    .SetCursorBlinkEnabled(true)
-    .SetCursorBlinkInterval(0.4f)
-    .SetCursorPosition(0u);
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-void MoveCursorToStart(InputField field)
-{
-  const uint32_t oldPosition = field.GetCursorPosition();
-
-  if(oldPosition != 0u)
-  {
-    field.SetCursorPosition(0u);
-  }
-}
+field
+  .SetCursorWidth(2)
+  .SetCursorColor(Dali::Ui::UiColor(0x222222))
+  .SetCursorBlinkEnabled(true)
+  .SetCursorBlinkInterval(0.5f)
+  .SetCursorPosition(0u);
 ```
 
-Cursor handle images are also owned by `Dali::Ui::InputField`. `SetCursorHandleImage` sets the normal cursor handle image, and `SetCursorHandlePressedImage` sets the pressed image.
+Cursor configuration can be queried directly from the same `Dali::Ui::InputField`.
 
 ```cpp
-void ConfigureCursorHandle(InputField field)
-{
-  field
-    .SetCursorHandleImage("images/cursor_handle.png")
-    .SetCursorHandlePressedImage("images/cursor_handle_pressed.png");
-}
-
-Dali::String ReadCursorHandleImage(InputField field)
-{
-  return field.GetCursorHandleImage();
-}
+int cursorWidth = field.GetCursorWidth();
+Dali::Ui::UiColor cursorColor = field.GetCursorColor();
+float blinkInterval = field.GetCursorBlinkInterval();
+uint32_t cursorPosition = field.GetCursorPosition();
 ```
 
-Related property constants include `InputField::Property::CURSOR_WIDTH`, `InputField::Property::CURSOR_COLOR`, `InputField::Property::CURSOR_BLINK_ENABLED`, `InputField::Property::CURSOR_BLINK_INTERVAL`, `InputField::Property::CURSOR_POSITION`, `InputField::Property::CURSOR_HANDLE_IMAGE`, and `InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE`.
-
-## Editing State and Limits
-
-`SetEditable` controls whether the user can edit the field through interaction. The maximum length is exposed through `InputField::Property::MAXIMUM_LENGTH` and can be read with `GetMaximumLength`.
+Use handle images when your application provides custom cursor handle artwork.
 
 ```cpp
-void MakeReadOnly(InputField field)
-{
-  field.SetEditable(false);
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-bool IsLengthLimitConfigured(InputField field)
-{
-  return field.GetMaximumLength() > 0;
-}
+field
+  .SetCursorHandleImage("images/cursor_handle.png")
+  .SetCursorHandlePressedImage("images/cursor_handle_pressed.png");
+
+Dali::String image = field.GetCursorHandleImage();
+Dali::String pressedImage = field.GetCursorHandlePressedImage();
 ```
 
-Use `InputField::Property::EDITABLE` for the editable state and `InputField::Property::MAXIMUM_LENGTH` for the maximum character count when integrating with property-driven configuration.
+The matching owned property constants are `Dali::Ui::InputField::Property::CURSOR_WIDTH`, `Dali::Ui::InputField::Property::CURSOR_COLOR`, `Dali::Ui::InputField::Property::CURSOR_BLINK_ENABLED`, `Dali::Ui::InputField::Property::CURSOR_BLINK_INTERVAL`, `Dali::Ui::InputField::Property::CURSOR_POSITION`, `Dali::Ui::InputField::Property::CURSOR_HANDLE_IMAGE`, and `Dali::Ui::InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE`.
 
-## Selection and Read-Back
+## Text Appearance
 
-Selection state is owned by `Dali::Ui::InputField`. Use `GetSelectedText` to read the current selected UTF-8 text, and use cursor or selection signals to know when to refresh application UI.
+`Dali::Ui::InputField` owns font family, font size, font scale, font slant, font weight, font width, alignment, overflow, layout direction, text color, text background color, and hint text color properties. Use the typed setters that are available for common font setup.
 
 ```cpp
-Dali::String CopySelectionForCommand(InputField field)
-{
-  return field.GetSelectedText();
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-uint32_t ReadInsertionPoint(InputField field)
-{
-  return field.GetCursorPosition();
-}
+field
+  .SetFontFamily("SamsungOne")
+  .SetFontSize(18.0f)
+  .SetFontSizeScale(1.15f)
+  .SetFontSlant(Dali::Ui::Text::FontSlant::ITALIC);
 ```
 
-Selection-related property constants include `InputField::Property::SELECTION_ENABLED`, `InputField::Property::SELECTION_COLOR`, `InputField::Property::SELECTED_TEXT`, `InputField::Property::SELECTED_TEXT_START`, `InputField::Property::SELECTED_TEXT_END`, `InputField::Property::SELECTION_HANDLE_IMAGE_LEFT`, `InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT`, `InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT`, and `InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT`.
-
-## Password Display
-
-Password behavior is part of `Dali::Ui::InputField`. Read password state with `GetPasswordMode`, `GetPasswordMaskCharacter`, and `GetPasswordRevealDuration`.
+Read the resolved font configuration from the field when synchronizing UI state.
 
 ```cpp
-uint32_t ReadMaskCharacter(InputField field)
-{
-  return field.GetPasswordMaskCharacter();
-}
-
-uint32_t ReadRevealDuration(InputField field)
-{
-  return field.GetPasswordRevealDuration();
-}
+Dali::String family = field.GetFontFamily();
+float size = field.GetFontSize();
+float requestedScale = field.GetFontSizeScale();
+float adjustedScale = field.GetAdjustedFontSizeScale();
+Dali::Ui::Text::FontSlant slant = field.GetFontSlant();
 ```
 
-Use `InputField::Property::PASSWORD_MODE` to represent the display mode, `InputField::Property::PASSWORD_MASK_CHARACTER` for the Unicode code point used as the mask character, and `InputField::Property::PASSWORD_REVEAL_DURATION` for the reveal duration in milliseconds.
-
-## Signals
-
-Connect to `Dali::Ui::InputField` signals to react to editing changes. Signal callbacks receive `Dali::Ui::View`, so downcast to `Dali::Ui::InputField` before reading input-field state.
+For scaling constraints, `GetMinimumFontSizeScale`, `GetMaximumFontSizeScale`, and `GetAdjustedFontSizeScale` let an application inspect the effective range used for rendering.
 
 ```cpp
-class SearchController : public ConnectionTracker
+float minimumScale = field.GetMinimumFontSizeScale();
+float maximumScale = field.GetMaximumFontSizeScale();
+float adjustedScale = field.GetAdjustedFontSizeScale();
+```
+
+Owned appearance properties include `Dali::Ui::InputField::Property::FONT_FAMILY`, `Dali::Ui::InputField::Property::FONT_SIZE`, `Dali::Ui::InputField::Property::FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::MINIMUM_FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::MAXIMUM_FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED`, `Dali::Ui::InputField::Property::FONT_SLANT`, `Dali::Ui::InputField::Property::FONT_WEIGHT`, `Dali::Ui::InputField::Property::FONT_WIDTH`, `Dali::Ui::InputField::Property::TEXT_COLOR`, `Dali::Ui::InputField::Property::TEXT_BACKGROUND_COLOR`, `Dali::Ui::InputField::Property::PLACEHOLDER_COLOR`, `Dali::Ui::InputField::Property::HORIZONTAL_ALIGNMENT`, `Dali::Ui::InputField::Property::VERTICAL_ALIGNMENT`, `Dali::Ui::InputField::Property::OVERFLOW_MODE`, and `Dali::Ui::InputField::Property::LAYOUT_DIRECTION_MODE`.
+
+## Selection and Readback
+
+Selection state is exposed through `GetSelectedText`. Cursor and selection-related property constants are owned by `Dali::Ui::InputField::Property`.
+
+```cpp
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
+
+Dali::String selected = field.GetSelectedText();
+uint32_t cursor = field.GetCursorPosition();
+```
+
+Use `Dali::Ui::InputField::Property::SELECTION_ENABLED` to identify whether selection is enabled, `Dali::Ui::InputField::Property::SELECTION_COLOR` for the highlight color, and `Dali::Ui::InputField::Property::SELECTED_TEXT`, `Dali::Ui::InputField::Property::SELECTED_TEXT_START`, and `Dali::Ui::InputField::Property::SELECTED_TEXT_END` for selected text readback.
+
+Custom selection handle assets are represented by `Dali::Ui::InputField::Property::SELECTION_HANDLE_IMAGE_LEFT`, `Dali::Ui::InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT`, `Dali::Ui::InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT`, and `Dali::Ui::InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT`.
+
+## Input Limits and Password Display
+
+Use the owned properties to describe maximum length and password display policy in application configuration. `Dali::Ui::InputField::Property::MAXIMUM_LENGTH` limits the number of characters that can be entered. `Dali::Ui::InputField::Property::PASSWORD_MODE` controls password display mode, `Dali::Ui::InputField::Property::PASSWORD_MASK_CHARACTER` stores the Unicode code point used for masking, and `Dali::Ui::InputField::Property::PASSWORD_REVEAL_DURATION` stores the reveal duration in milliseconds.
+
+```cpp
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
+
+int maximumLength = field.GetMaximumLength();
+Dali::Ui::Text::PasswordMode mode = field.GetPasswordMode();
+uint32_t maskCharacter = field.GetPasswordMaskCharacter();
+uint32_t revealDuration = field.GetPasswordRevealDuration();
+```
+
+When the current mode is `Dali::Ui::Text::PasswordMode`, use `GetPasswordMode` to synchronize application controls with the active password display behavior.
+
+## Respond to Editing Signals
+
+Connect to the signal owned by the `Dali::Ui::InputField` instance that generates the event. Signal callbacks receive `Dali::Ui::View`, so application handlers can stay in the dali-ui view object model.
+
+```cpp
+class InputFieldController : public Dali::ConnectionTracker
 {
 public:
-  void Attach(InputField field)
+  void Setup()
   {
-    mField = field;
+    mField = Dali::Ui::InputField::New();
 
-    mField.TextChangedSignal().Connect(this, &SearchController::OnTextChanged);
-    mField.CursorPositionChangedSignal().Connect(this, &SearchController::OnCursorPositionChanged);
-    mField.MaximumLengthReachedSignal().Connect(this, &SearchController::OnMaximumLengthReached);
-    mField.SelectionStartedSignal().Connect(this, &SearchController::OnSelectionStarted);
-    mField.SelectionChangedSignal().Connect(this, &SearchController::OnSelectionChanged);
-    mField.SelectionClearedSignal().Connect(this, &SearchController::OnSelectionCleared);
+    mField.TextChangedSignal().Connect(this, &InputFieldController::OnTextChanged);
+    mField.CursorPositionChangedSignal().Connect(this, &InputFieldController::OnCursorPositionChanged);
+    mField.MaximumLengthReachedSignal().Connect(this, &InputFieldController::OnMaximumLengthReached);
   }
 
 private:
-  void OnTextChanged(View view)
+  void OnTextChanged(Dali::Ui::View view)
   {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const uint32_t cursor = field.GetCursorPosition();
-    }
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    Dali::String selected = field.GetSelectedText();
   }
 
-  void OnCursorPositionChanged(View view, uint32_t position)
+  void OnCursorPositionChanged(Dali::Ui::View view, uint32_t position)
   {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const uint32_t current = position;
-    }
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    uint32_t currentPosition = field.GetCursorPosition();
   }
 
-  void OnMaximumLengthReached(View view)
+  void OnMaximumLengthReached(Dali::Ui::View view)
   {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const int maximumLength = field.GetMaximumLength();
-    }
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    int maximumLength = field.GetMaximumLength();
   }
 
-  void OnSelectionStarted(View view)
-  {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const Dali::String selectedText = field.GetSelectedText();
-    }
-  }
-
-  void OnSelectionChanged(View view, uint32_t start, uint32_t end)
-  {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const uint32_t selectionStart = start;
-      const uint32_t selectionEnd = end;
-    }
-  }
-
-  void OnSelectionCleared(View view)
-  {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const Dali::String selectedText = field.GetSelectedText();
-    }
-  }
-
-  InputField mField;
+  Dali::Ui::InputField mField;
 };
 ```
 
-Use `TextChangedSignal` when the text content changes, `MaximumLengthReachedSignal` when input reaches the configured length limit, `CursorPositionChangedSignal` when the insertion position changes, `SelectionStartedSignal` when selection begins, `SelectionChangedSignal` when the selected range changes, and `SelectionClearedSignal` when selection is cleared.
-
-## Property Constants
-
-`Dali::Ui::InputField::Property` is the property owner for input-field configuration and state. Use these constants only with `Dali::Ui::InputField` instances.
+Selection and typing-style events use their own signal signatures.
 
 ```cpp
-int CursorWidthProperty()
+class InputSelectionController : public Dali::ConnectionTracker
 {
-  return InputField::Property::CURSOR_WIDTH;
-}
+public:
+  void Setup(Dali::Ui::InputField field)
+  {
+    mField = field;
 
-int HintTextProperty()
-{
-  return InputField::Property::PLACEHOLDER;
-}
+    mField.SelectionStartedSignal().Connect(this, &InputSelectionController::OnSelectionStarted);
+    mField.SelectionChangedSignal().Connect(this, &InputSelectionController::OnSelectionChanged);
+    mField.SelectionClearedSignal().Connect(this, &InputSelectionController::OnSelectionCleared);
+    mField.TypingStyleChangedSignal().Connect(this, &InputSelectionController::OnTypingStyleChanged);
+  }
 
-int SelectedTextProperty()
-{
-  return InputField::Property::SELECTED_TEXT;
-}
+private:
+  void OnSelectionStarted(Dali::Ui::View view)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    Dali::String selected = field.GetSelectedText();
+  }
+
+  void OnSelectionChanged(Dali::Ui::View view, uint32_t start, uint32_t end)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    Dali::String selected = field.GetSelectedText();
+  }
+
+  void OnSelectionCleared(Dali::Ui::View view)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    uint32_t cursor = field.GetCursorPosition();
+  }
+
+  void OnTypingStyleChanged(Dali::Ui::View view, Dali::Ui::Text::TypingStyle::Mask mask)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    float size = field.GetFontSize();
+  }
+
+  Dali::Ui::InputField mField;
+};
 ```
 
-Common property groups are:
+`Dali::Ui::InputField::InputRejectedSignal` reports input rejected by an input filter.
 
-- Text content and style: `InputField::Property::TEXT`, `InputField::Property::FONT_FAMILY`, `InputField::Property::FONT_SIZE`, `InputField::Property::TEXT_COLOR`, `InputField::Property::TEXT_BACKGROUND_COLOR`
-- Hint text: `InputField::Property::PLACEHOLDER`, `InputField::Property::PLACEHOLDER_COLOR`, `InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS`
-- Cursor: `InputField::Property::CURSOR_WIDTH`, `InputField::Property::CURSOR_COLOR`, `InputField::Property::CURSOR_BLINK_ENABLED`, `InputField::Property::CURSOR_BLINK_INTERVAL`, `InputField::Property::CURSOR_POSITION`
-- Selection: `InputField::Property::SELECTION_ENABLED`, `InputField::Property::SELECTION_COLOR`, `InputField::Property::SELECTED_TEXT`, `InputField::Property::SELECTED_TEXT_START`, `InputField::Property::SELECTED_TEXT_END`
-- Editing and layout: `InputField::Property::EDITABLE`, `InputField::Property::MAXIMUM_LENGTH`, `InputField::Property::HORIZONTAL_ALIGNMENT`, `InputField::Property::VERTICAL_ALIGNMENT`, `InputField::Property::OVERFLOW_MODE`, `InputField::Property::LAYOUT_DIRECTION_MODE`
-- Password: `InputField::Property::PASSWORD_MODE`, `InputField::Property::PASSWORD_MASK_CHARACTER`, `InputField::Property::PASSWORD_REVEAL_DURATION`
+```cpp
+class InputRejectedController : public Dali::ConnectionTracker
+{
+public:
+  void Setup(Dali::Ui::InputField field)
+  {
+    mField = field;
+    mField.InputRejectedSignal().Connect(this, &InputRejectedController::OnInputRejected);
+  }
+
+private:
+  void OnInputRejected(Dali::Ui::View view, Dali::Ui::Text::InputFilter::RejectReason reason)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    uint32_t cursor = field.GetCursorPosition();
+  }
+
+  Dali::Ui::InputField mField;
+};
+```
+
+## Property Reference for App Code
+
+`Dali::Ui::InputField::Property` owns the property constants for this feature. Use these names when your app needs a property identifier for a configuration layer or state bridge.
+
+```cpp
+int textProperty = Dali::Ui::InputField::Property::TEXT;
+int placeholderProperty = Dali::Ui::InputField::Property::PLACEHOLDER;
+int cursorWidthProperty = Dali::Ui::InputField::Property::CURSOR_WIDTH;
+int selectedTextProperty = Dali::Ui::InputField::Property::SELECTED_TEXT;
+int passwordModeProperty = Dali::Ui::InputField::Property::PASSWORD_MODE;
+```
+
+Common groups are:
+
+- Text content: `Dali::Ui::InputField::Property::TEXT`, `Dali::Ui::InputField::Property::PLACEHOLDER`, `Dali::Ui::InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS`, `Dali::Ui::InputField::Property::MARKUP_ENABLED`
+- Font and color: `Dali::Ui::InputField::Property::FONT_FAMILY`, `Dali::Ui::InputField::Property::FONT_SIZE`, `Dali::Ui::InputField::Property::FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::FONT_SLANT`, `Dali::Ui::InputField::Property::FONT_WEIGHT`, `Dali::Ui::InputField::Property::FONT_WIDTH`, `Dali::Ui::InputField::Property::TEXT_COLOR`, `Dali::Ui::InputField::Property::TEXT_BACKGROUND_COLOR`
+- Cursor: `Dali::Ui::InputField::Property::CURSOR_WIDTH`, `Dali::Ui::InputField::Property::CURSOR_COLOR`, `Dali::Ui::InputField::Property::CURSOR_BLINK_ENABLED`, `Dali::Ui::InputField::Property::CURSOR_BLINK_INTERVAL`, `Dali::Ui::InputField::Property::CURSOR_POSITION`
+- Selection: `Dali::Ui::InputField::Property::SELECTION_ENABLED`, `Dali::Ui::InputField::Property::SELECTION_COLOR`, `Dali::Ui::InputField::Property::SELECTED_TEXT`, `Dali::Ui::InputField::Property::SELECTED_TEXT_START`, `Dali::Ui::InputField::Property::SELECTED_TEXT_END`
+- Password and limits: `Dali::Ui::InputField::Property::MAXIMUM_LENGTH`, `Dali::Ui::InputField::Property::PASSWORD_MODE`, `Dali::Ui::InputField::Property::PASSWORD_MASK_CHARACTER`, `Dali::Ui::InputField::Property::PASSWORD_REVEAL_DURATION`, `Dali::Ui::InputField::Property::EDITABLE`
+- Typing style: `Dali::Ui::InputField::Property::TYPING_TEXT_COLOR`, `Dali::Ui::InputField::Property::TYPING_FONT_FAMILY`, `Dali::Ui::InputField::Property::TYPING_FONT_SIZE`, `Dali::Ui::InputField::Property::TYPING_FONT_WEIGHT`, `Dali::Ui::InputField::Property::TYPING_FONT_WIDTH`, `Dali::Ui::InputField::Property::TYPING_FONT_SLANT`
+
+exec
+/bin/bash -lc "nl -ba <<'EOF'
+---
+title: Input Field
+sidebar_label: Input Field
+category: views-components
+---
+
+# Input Field
+
+"'`Dali::Ui::InputField` is the dali-ui single-line editable text view for application text entry.
+
+## Table of Contents
+
+- [Create and Configure an Input Field](#create-and-configure-an-input-field)
+- [Cursor Behavior](#cursor-behavior)
+- [Text Appearance](#text-appearance)
+- [Selection and Readback](#selection-and-readback)
+- [Input Limits and Password Display](#input-limits-and-password-display)
+- [Respond to Editing Signals](#respond-to-editing-signals)
+- [Property Reference for App Code](#property-reference-for-app-code)
+
+## Create and Configure an Input Field
+
+Create an input field with `Dali::Ui::InputField::New`. In dali-ui application code, treat the field as a `Dali::Ui::View`-based object and configure it with typed `Dali::Ui::InputField` setters when they are available.
+
+```cpp
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
+
+field
+  .SetEditable(true)
+  .SetFontFamily("SamsungOne")
+  .SetFontSize(20.0f)
+  .SetFontSizeScale(1.0f);
+```
+
+Use getters when application logic needs to inspect the current configuration.
+
+```cpp
+Dali::String family = field.GetFontFamily();
+float fontSize = field.GetFontSize();
+float scale = field.GetFontSizeScale();
+```
+
+`Dali::Ui::InputField::Property::TEXT` and `Dali::Ui::InputField::Property::EDITABLE` are the owned property constants for the entered text and editability. Prefer the typed setter form for app-facing code when a typed setter exists.
+
+## Cursor Behavior
+
+The cursor can be configured with width, color, blink behavior, blink interval, handle image, pressed handle image, and position. `SetCursorPosition` uses a character index in the current text.
+
+```cpp
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
+
+field
+  .SetCursorWidth(2)
+  .SetCursorColor(Dali::Ui::UiColor(0x222222))
+  .SetCursorBlinkEnabled(true)
+  .SetCursorBlinkInterval(0.5f)
+  .SetCursorPosition(0u);
+```
+
+Cursor configuration can be queried directly from the same `Dali::Ui::InputField`.
+EOF' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+     1	---
+     2	title: Input Field
+     3	sidebar_label: Input Field
+     4	category: views-components
+     5	---
+     6	
+     7	# Input Field
+     8	
+     9	`Dali::Ui::InputField` is the dali-ui single-line editable text view for application text entry.
+    10	
+    11	## Table of Contents
+    12	
+    13	- [Create and Configure an Input Field](#create-and-configure-an-input-field)
+    14	- [Cursor Behavior](#cursor-behavior)
+    15	- [Text Appearance](#text-appearance)
+    16	- [Selection and Readback](#selection-and-readback)
+    17	- [Input Limits and Password Display](#input-limits-and-password-display)
+    18	- [Respond to Editing Signals](#respond-to-editing-signals)
+    19	- [Property Reference for App Code](#property-reference-for-app-code)
+    20	
+    21	## Create and Configure an Input Field
+    22	
+    23	Create an input field with `Dali::Ui::InputField::New`. In dali-ui application code, treat the field as a `Dali::Ui::View`-based object and configure it with typed `Dali::Ui::InputField` setters when they are available.
+    24	
+    25	```cpp
+    26	Dali::Ui::InputField field = Dali::Ui::InputField::New();
+    27	
+    28	field
+    29	  .SetEditable(true)
+    30	  .SetFontFamily("SamsungOne")
+    31	  .SetFontSize(20.0f)
+    32	  .SetFontSizeScale(1.0f);
+    33	```
+    34	
+    35	Use getters when application logic needs to inspect the current configuration.
+    36	
+    37	```cpp
+    38	Dali::String family = field.GetFontFamily();
+    39	float fontSize = field.GetFontSize();
+    40	float scale = field.GetFontSizeScale();
+    41	```
+    42	
+    43	`Dali::Ui::InputField::Property::TEXT` and `Dali::Ui::InputField::Property::EDITABLE` are the owned property constants for the entered text and editability. Prefer the typed setter form for app-facing code when a typed setter exists.
+    44	
+    45	## Cursor Behavior
+    46	
+    47	The cursor can be configured with width, color, blink behavior, blink interval, handle image, pressed handle image, and position. `SetCursorPosition` uses a character index in the current text.
+    48	
+    49	```cpp
+    50	Dali::Ui::InputField field = Dali::Ui::InputField::New();
+    51	
+    52	field
+    53	  .SetCursorWidth(2)
+    54	  .SetCursorColor(Dali::Ui::UiColor(0x222222))
+    55	  .SetCursorBlinkEnabled(true)
+    56	  .SetCursorBlinkInterval(0.5f)
+    57	  .SetCursorPosition(0u);
+    58	```
+    59	
+    60	Cursor configuration can be queried directly from the same `Dali::Ui::InputField`.
 
 codex
 ---
@@ -1401,279 +1519,272 @@ category: views-components
 
 # Input Field
 
-`Dali::Ui::InputField` is a single-line editable text view for dali-ui applications.
+`Dali::Ui::InputField` is the dali-ui single-line editable text view for application text entry.
 
 ## Table of Contents
 
-- [Create an Input Field](#create-an-input-field)
-- [Text Appearance](#text-appearance)
+- [Create and Configure an Input Field](#create-and-configure-an-input-field)
 - [Cursor Behavior](#cursor-behavior)
-- [Editing State and Limits](#editing-state-and-limits)
-- [Selection and Read-Back](#selection-and-read-back)
-- [Password Display](#password-display)
-- [Signals](#signals)
-- [Property Constants](#property-constants)
+- [Text Appearance](#text-appearance)
+- [Selection and Readback](#selection-and-readback)
+- [Input Limits and Password Display](#input-limits-and-password-display)
+- [Respond to Editing Signals](#respond-to-editing-signals)
+- [Property Reference for App Code](#property-reference-for-app-code)
 
-## Create an Input Field
+## Create and Configure an Input Field
 
-Create an input field with `Dali::Ui::InputField::New`. In application code, keep the object as `Dali::Ui::InputField` when configuring text-specific behavior. It is also a `Dali::Ui::View`, so it can be placed in the same view tree as other dali-ui views.
-
-```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-using namespace Dali;
-using namespace Dali::Ui;
-
-InputField CreateNameField()
-{
-  InputField field = InputField::New()
-    .SetEditable(true)
-    .SetFontFamily("SamsungOne")
-    .SetFontSize(20.0f)
-    .SetFontSizeScale(1.0f)
-    .SetCursorWidth(2)
-    .SetCursorBlinkEnabled(true)
-    .SetCursorBlinkInterval(0.5f)
-    .SetCursorColor(UiColor(0x222222));
-
-  return field;
-}
-```
-
-`Dali::Ui::InputField` stores editable UTF-8 text. Use typed setters such as `SetFontFamily`, `SetFontSize`, `SetEditable`, `SetCursorWidth`, and `SetCursorColor` for common application setup.
-
-## Text Appearance
-
-Use `SetFontFamily`, `SetFontSize`, and `SetFontSizeScale` to configure the base text style. `GetFontFamily`, `GetFontSize`, `GetFontSizeScale`, and `GetAdjustedFontSizeScale` let you read the resolved configuration back.
+Create an input field with `Dali::Ui::InputField::New`. In dali-ui application code, treat the field as a `Dali::Ui::View`-based object and configure it with typed `Dali::Ui::InputField` setters when they are available.
 
 ```cpp
-void ConfigureTextStyle(InputField field)
-{
-  field
-    .SetFontFamily("SamsungOne")
-    .SetFontSize(22.0f)
-    .SetFontSizeScale(1.15f);
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-float ReadRenderedScale(InputField field)
-{
-  const float requestedScale = field.GetFontSizeScale();
-  const float adjustedScale = field.GetAdjustedFontSizeScale();
-
-  return adjustedScale > 0.0f ? adjustedScale : requestedScale;
-}
+field
+  .SetEditable(true)
+  .SetFontFamily("SamsungOne")
+  .SetFontSize(20.0f)
+  .SetFontSizeScale(1.0f);
 ```
 
-For style state exposed through the property system, use the `Dali::Ui::InputField::Property` owner. The text-related constants include `InputField::Property::TEXT`, `InputField::Property::FONT_FAMILY`, `InputField::Property::FONT_SIZE`, `InputField::Property::FONT_SIZE_SCALE`, `InputField::Property::MINIMUM_FONT_SIZE_SCALE`, `InputField::Property::MAXIMUM_FONT_SIZE_SCALE`, `InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED`, `InputField::Property::TEXT_COLOR`, `InputField::Property::TEXT_BACKGROUND_COLOR`, `InputField::Property::FONT_WEIGHT`, `InputField::Property::FONT_WIDTH`, and `InputField::Property::FONT_SLANT`.
+Use getters when application logic needs to inspect the current configuration.
+
+```cpp
+Dali::String family = field.GetFontFamily();
+float fontSize = field.GetFontSize();
+float scale = field.GetFontSizeScale();
+```
+
+`Dali::Ui::InputField::Property::TEXT` and `Dali::Ui::InputField::Property::EDITABLE` are the owned property constants for the entered text and editability. Prefer the typed setter form for app-facing code when a typed setter exists.
 
 ## Cursor Behavior
 
-The insertion cursor is configured directly on `Dali::Ui::InputField`. Use `SetCursorWidth` for cursor thickness, `SetCursorColor` for color, `SetCursorBlinkEnabled` for blinking, `SetCursorBlinkInterval` for the blink interval in seconds, and `SetCursorPosition` for the character index.
+The cursor can be configured with width, color, blink behavior, blink interval, handle image, pressed handle image, and position. `SetCursorPosition` uses a character index in the current text.
 
 ```cpp
-void ConfigureCursor(InputField field)
-{
-  field
-    .SetCursorWidth(2)
-    .SetCursorColor(UiColor(0x005BBB))
-    .SetCursorBlinkEnabled(true)
-    .SetCursorBlinkInterval(0.4f)
-    .SetCursorPosition(0u);
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-void MoveCursorToStart(InputField field)
-{
-  const uint32_t oldPosition = field.GetCursorPosition();
-
-  if(oldPosition != 0u)
-  {
-    field.SetCursorPosition(0u);
-  }
-}
+field
+  .SetCursorWidth(2)
+  .SetCursorColor(Dali::Ui::UiColor(0x222222))
+  .SetCursorBlinkEnabled(true)
+  .SetCursorBlinkInterval(0.5f)
+  .SetCursorPosition(0u);
 ```
 
-Cursor handle images are also owned by `Dali::Ui::InputField`. `SetCursorHandleImage` sets the normal cursor handle image, and `SetCursorHandlePressedImage` sets the pressed image.
+Cursor configuration can be queried directly from the same `Dali::Ui::InputField`.
 
 ```cpp
-void ConfigureCursorHandle(InputField field)
-{
-  field
-    .SetCursorHandleImage("images/cursor_handle.png")
-    .SetCursorHandlePressedImage("images/cursor_handle_pressed.png");
-}
-
-Dali::String ReadCursorHandleImage(InputField field)
-{
-  return field.GetCursorHandleImage();
-}
+int cursorWidth = field.GetCursorWidth();
+Dali::Ui::UiColor cursorColor = field.GetCursorColor();
+float blinkInterval = field.GetCursorBlinkInterval();
+uint32_t cursorPosition = field.GetCursorPosition();
 ```
 
-Related property constants include `InputField::Property::CURSOR_WIDTH`, `InputField::Property::CURSOR_COLOR`, `InputField::Property::CURSOR_BLINK_ENABLED`, `InputField::Property::CURSOR_BLINK_INTERVAL`, `InputField::Property::CURSOR_POSITION`, `InputField::Property::CURSOR_HANDLE_IMAGE`, and `InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE`.
-
-## Editing State and Limits
-
-`SetEditable` controls whether the user can edit the field through interaction. The maximum length is exposed through `InputField::Property::MAXIMUM_LENGTH` and can be read with `GetMaximumLength`.
+Use handle images when your application provides custom cursor handle artwork.
 
 ```cpp
-void MakeReadOnly(InputField field)
-{
-  field.SetEditable(false);
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-bool IsLengthLimitConfigured(InputField field)
-{
-  return field.GetMaximumLength() > 0;
-}
+field
+  .SetCursorHandleImage("images/cursor_handle.png")
+  .SetCursorHandlePressedImage("images/cursor_handle_pressed.png");
+
+Dali::String image = field.GetCursorHandleImage();
+Dali::String pressedImage = field.GetCursorHandlePressedImage();
 ```
 
-Use `InputField::Property::EDITABLE` for the editable state and `InputField::Property::MAXIMUM_LENGTH` for the maximum character count when integrating with property-driven configuration.
+The matching owned property constants are `Dali::Ui::InputField::Property::CURSOR_WIDTH`, `Dali::Ui::InputField::Property::CURSOR_COLOR`, `Dali::Ui::InputField::Property::CURSOR_BLINK_ENABLED`, `Dali::Ui::InputField::Property::CURSOR_BLINK_INTERVAL`, `Dali::Ui::InputField::Property::CURSOR_POSITION`, `Dali::Ui::InputField::Property::CURSOR_HANDLE_IMAGE`, and `Dali::Ui::InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE`.
 
-## Selection and Read-Back
+## Text Appearance
 
-Selection state is owned by `Dali::Ui::InputField`. Use `GetSelectedText` to read the current selected UTF-8 text, and use cursor or selection signals to know when to refresh application UI.
+`Dali::Ui::InputField` owns font family, font size, font scale, font slant, font weight, font width, alignment, overflow, layout direction, text color, text background color, and hint text color properties. Use the typed setters that are available for common font setup.
 
 ```cpp
-Dali::String CopySelectionForCommand(InputField field)
-{
-  return field.GetSelectedText();
-}
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
 
-uint32_t ReadInsertionPoint(InputField field)
-{
-  return field.GetCursorPosition();
-}
+field
+  .SetFontFamily("SamsungOne")
+  .SetFontSize(18.0f)
+  .SetFontSizeScale(1.15f)
+  .SetFontSlant(Dali::Ui::Text::FontSlant::ITALIC);
 ```
 
-Selection-related property constants include `InputField::Property::SELECTION_ENABLED`, `InputField::Property::SELECTION_COLOR`, `InputField::Property::SELECTED_TEXT`, `InputField::Property::SELECTED_TEXT_START`, `InputField::Property::SELECTED_TEXT_END`, `InputField::Property::SELECTION_HANDLE_IMAGE_LEFT`, `InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT`, `InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT`, and `InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT`.
-
-## Password Display
-
-Password behavior is part of `Dali::Ui::InputField`. Read password state with `GetPasswordMode`, `GetPasswordMaskCharacter`, and `GetPasswordRevealDuration`.
+Read the resolved font configuration from the field when synchronizing UI state.
 
 ```cpp
-uint32_t ReadMaskCharacter(InputField field)
-{
-  return field.GetPasswordMaskCharacter();
-}
-
-uint32_t ReadRevealDuration(InputField field)
-{
-  return field.GetPasswordRevealDuration();
-}
+Dali::String family = field.GetFontFamily();
+float size = field.GetFontSize();
+float requestedScale = field.GetFontSizeScale();
+float adjustedScale = field.GetAdjustedFontSizeScale();
+Dali::Ui::Text::FontSlant slant = field.GetFontSlant();
 ```
 
-Use `InputField::Property::PASSWORD_MODE` to represent the display mode, `InputField::Property::PASSWORD_MASK_CHARACTER` for the Unicode code point used as the mask character, and `InputField::Property::PASSWORD_REVEAL_DURATION` for the reveal duration in milliseconds.
-
-## Signals
-
-Connect to `Dali::Ui::InputField` signals to react to editing changes. Signal callbacks receive `Dali::Ui::View`, so downcast to `Dali::Ui::InputField` before reading input-field state.
+For scaling constraints, `GetMinimumFontSizeScale`, `GetMaximumFontSizeScale`, and `GetAdjustedFontSizeScale` let an application inspect the effective range used for rendering.
 
 ```cpp
-class SearchController : public ConnectionTracker
+float minimumScale = field.GetMinimumFontSizeScale();
+float maximumScale = field.GetMaximumFontSizeScale();
+float adjustedScale = field.GetAdjustedFontSizeScale();
+```
+
+Owned appearance properties include `Dali::Ui::InputField::Property::FONT_FAMILY`, `Dali::Ui::InputField::Property::FONT_SIZE`, `Dali::Ui::InputField::Property::FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::MINIMUM_FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::MAXIMUM_FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED`, `Dali::Ui::InputField::Property::FONT_SLANT`, `Dali::Ui::InputField::Property::FONT_WEIGHT`, `Dali::Ui::InputField::Property::FONT_WIDTH`, `Dali::Ui::InputField::Property::TEXT_COLOR`, `Dali::Ui::InputField::Property::TEXT_BACKGROUND_COLOR`, `Dali::Ui::InputField::Property::PLACEHOLDER_COLOR`, `Dali::Ui::InputField::Property::HORIZONTAL_ALIGNMENT`, `Dali::Ui::InputField::Property::VERTICAL_ALIGNMENT`, `Dali::Ui::InputField::Property::OVERFLOW_MODE`, and `Dali::Ui::InputField::Property::LAYOUT_DIRECTION_MODE`.
+
+## Selection and Readback
+
+Selection state is exposed through `GetSelectedText`. Cursor and selection-related property constants are owned by `Dali::Ui::InputField::Property`.
+
+```cpp
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
+
+Dali::String selected = field.GetSelectedText();
+uint32_t cursor = field.GetCursorPosition();
+```
+
+Use `Dali::Ui::InputField::Property::SELECTION_ENABLED` to identify whether selection is enabled, `Dali::Ui::InputField::Property::SELECTION_COLOR` for the highlight color, and `Dali::Ui::InputField::Property::SELECTED_TEXT`, `Dali::Ui::InputField::Property::SELECTED_TEXT_START`, and `Dali::Ui::InputField::Property::SELECTED_TEXT_END` for selected text readback.
+
+Custom selection handle assets are represented by `Dali::Ui::InputField::Property::SELECTION_HANDLE_IMAGE_LEFT`, `Dali::Ui::InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT`, `Dali::Ui::InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT`, and `Dali::Ui::InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT`.
+
+## Input Limits and Password Display
+
+Use the owned properties to describe maximum length and password display policy in application configuration. `Dali::Ui::InputField::Property::MAXIMUM_LENGTH` limits the number of characters that can be entered. `Dali::Ui::InputField::Property::PASSWORD_MODE` controls password display mode, `Dali::Ui::InputField::Property::PASSWORD_MASK_CHARACTER` stores the Unicode code point used for masking, and `Dali::Ui::InputField::Property::PASSWORD_REVEAL_DURATION` stores the reveal duration in milliseconds.
+
+```cpp
+Dali::Ui::InputField field = Dali::Ui::InputField::New();
+
+int maximumLength = field.GetMaximumLength();
+Dali::Ui::Text::PasswordMode mode = field.GetPasswordMode();
+uint32_t maskCharacter = field.GetPasswordMaskCharacter();
+uint32_t revealDuration = field.GetPasswordRevealDuration();
+```
+
+When the current mode is `Dali::Ui::Text::PasswordMode`, use `GetPasswordMode` to synchronize application controls with the active password display behavior.
+
+## Respond to Editing Signals
+
+Connect to the signal owned by the `Dali::Ui::InputField` instance that generates the event. Signal callbacks receive `Dali::Ui::View`, so application handlers can stay in the dali-ui view object model.
+
+```cpp
+class InputFieldController : public Dali::ConnectionTracker
 {
 public:
-  void Attach(InputField field)
+  void Setup()
   {
-    mField = field;
+    mField = Dali::Ui::InputField::New();
 
-    mField.TextChangedSignal().Connect(this, &SearchController::OnTextChanged);
-    mField.CursorPositionChangedSignal().Connect(this, &SearchController::OnCursorPositionChanged);
-    mField.MaximumLengthReachedSignal().Connect(this, &SearchController::OnMaximumLengthReached);
-    mField.SelectionStartedSignal().Connect(this, &SearchController::OnSelectionStarted);
-    mField.SelectionChangedSignal().Connect(this, &SearchController::OnSelectionChanged);
-    mField.SelectionClearedSignal().Connect(this, &SearchController::OnSelectionCleared);
+    mField.TextChangedSignal().Connect(this, &InputFieldController::OnTextChanged);
+    mField.CursorPositionChangedSignal().Connect(this, &InputFieldController::OnCursorPositionChanged);
+    mField.MaximumLengthReachedSignal().Connect(this, &InputFieldController::OnMaximumLengthReached);
   }
 
 private:
-  void OnTextChanged(View view)
+  void OnTextChanged(Dali::Ui::View view)
   {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const uint32_t cursor = field.GetCursorPosition();
-    }
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    Dali::String selected = field.GetSelectedText();
   }
 
-  void OnCursorPositionChanged(View view, uint32_t position)
+  void OnCursorPositionChanged(Dali::Ui::View view, uint32_t position)
   {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const uint32_t current = position;
-    }
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    uint32_t currentPosition = field.GetCursorPosition();
   }
 
-  void OnMaximumLengthReached(View view)
+  void OnMaximumLengthReached(Dali::Ui::View view)
   {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const int maximumLength = field.GetMaximumLength();
-    }
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    int maximumLength = field.GetMaximumLength();
   }
 
-  void OnSelectionStarted(View view)
-  {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const Dali::String selectedText = field.GetSelectedText();
-    }
-  }
-
-  void OnSelectionChanged(View view, uint32_t start, uint32_t end)
-  {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const uint32_t selectionStart = start;
-      const uint32_t selectionEnd = end;
-    }
-  }
-
-  void OnSelectionCleared(View view)
-  {
-    InputField field = InputField::DownCast(view);
-    if(field)
-    {
-      const Dali::String selectedText = field.GetSelectedText();
-    }
-  }
-
-  InputField mField;
+  Dali::Ui::InputField mField;
 };
 ```
 
-Use `TextChangedSignal` when the text content changes, `MaximumLengthReachedSignal` when input reaches the configured length limit, `CursorPositionChangedSignal` when the insertion position changes, `SelectionStartedSignal` when selection begins, `SelectionChangedSignal` when the selected range changes, and `SelectionClearedSignal` when selection is cleared.
-
-## Property Constants
-
-`Dali::Ui::InputField::Property` is the property owner for input-field configuration and state. Use these constants only with `Dali::Ui::InputField` instances.
+Selection and typing-style events use their own signal signatures.
 
 ```cpp
-int CursorWidthProperty()
+class InputSelectionController : public Dali::ConnectionTracker
 {
-  return InputField::Property::CURSOR_WIDTH;
-}
+public:
+  void Setup(Dali::Ui::InputField field)
+  {
+    mField = field;
 
-int HintTextColorProperty()
-{
-  return InputField::Property::PLACEHOLDER_COLOR;
-}
+    mField.SelectionStartedSignal().Connect(this, &InputSelectionController::OnSelectionStarted);
+    mField.SelectionChangedSignal().Connect(this, &InputSelectionController::OnSelectionChanged);
+    mField.SelectionClearedSignal().Connect(this, &InputSelectionController::OnSelectionCleared);
+    mField.TypingStyleChangedSignal().Connect(this, &InputSelectionController::OnTypingStyleChanged);
+  }
 
-int SelectedTextProperty()
-{
-  return InputField::Property::SELECTED_TEXT;
-}
+private:
+  void OnSelectionStarted(Dali::Ui::View view)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    Dali::String selected = field.GetSelectedText();
+  }
+
+  void OnSelectionChanged(Dali::Ui::View view, uint32_t start, uint32_t end)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    Dali::String selected = field.GetSelectedText();
+  }
+
+  void OnSelectionCleared(Dali::Ui::View view)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    uint32_t cursor = field.GetCursorPosition();
+  }
+
+  void OnTypingStyleChanged(Dali::Ui::View view, Dali::Ui::Text::TypingStyle::Mask mask)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    float size = field.GetFontSize();
+  }
+
+  Dali::Ui::InputField mField;
+};
 ```
 
-Common property groups are:
+`Dali::Ui::InputField::InputRejectedSignal` reports input rejected by an input filter.
 
-- Text content and style: `InputField::Property::TEXT`, `InputField::Property::FONT_FAMILY`, `InputField::Property::FONT_SIZE`, `InputField::Property::TEXT_COLOR`, `InputField::Property::TEXT_BACKGROUND_COLOR`
-- Hint text: `InputField::Property::PLACEHOLDER`, `InputField::Property::PLACEHOLDER_COLOR`, `InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS`
-- Cursor: `InputField::Property::CURSOR_WIDTH`, `InputField::Property::CURSOR_COLOR`, `InputField::Property::CURSOR_BLINK_ENABLED`, `InputField::Property::CURSOR_BLINK_INTERVAL`, `InputField::Property::CURSOR_POSITION`
-- Selection: `InputField::Property::SELECTION_ENABLED`, `InputField::Property::SELECTION_COLOR`, `InputField::Property::SELECTED_TEXT`, `InputField::Property::SELECTED_TEXT_START`, `InputField::Property::SELECTED_TEXT_END`
-- Editing and layout: `InputField::Property::EDITABLE`, `InputField::Property::MAXIMUM_LENGTH`, `InputField::Property::HORIZONTAL_ALIGNMENT`, `InputField::Property::VERTICAL_ALIGNMENT`, `InputField::Property::OVERFLOW_MODE`, `InputField::Property::LAYOUT_DIRECTION_MODE`
-- Password: `InputField::Property::PASSWORD_MODE`, `InputField::Property::PASSWORD_MASK_CHARACTER`, `InputField::Property::PASSWORD_REVEAL_DURATION`
+```cpp
+class InputRejectedController : public Dali::ConnectionTracker
+{
+public:
+  void Setup(Dali::Ui::InputField field)
+  {
+    mField = field;
+    mField.InputRejectedSignal().Connect(this, &InputRejectedController::OnInputRejected);
+  }
+
+private:
+  void OnInputRejected(Dali::Ui::View view, Dali::Ui::Text::InputFilter::RejectReason reason)
+  {
+    Dali::Ui::InputField field = Dali::Ui::InputField::DownCast(view);
+    uint32_t cursor = field.GetCursorPosition();
+  }
+
+  Dali::Ui::InputField mField;
+};
+```
+
+## Property Reference for App Code
+
+`Dali::Ui::InputField::Property` owns the property constants for this feature. Use these names when your app needs a property identifier for a configuration layer or state bridge.
+
+```cpp
+int textProperty = Dali::Ui::InputField::Property::TEXT;
+int hintTextProperty = Dali::Ui::InputField::Property::PLACEHOLDER;
+int cursorWidthProperty = Dali::Ui::InputField::Property::CURSOR_WIDTH;
+int selectedTextProperty = Dali::Ui::InputField::Property::SELECTED_TEXT;
+int passwordModeProperty = Dali::Ui::InputField::Property::PASSWORD_MODE;
+```
+
+Common groups are:
+
+- Text content: `Dali::Ui::InputField::Property::TEXT`, `Dali::Ui::InputField::Property::PLACEHOLDER`, `Dali::Ui::InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS`, `Dali::Ui::InputField::Property::MARKUP_ENABLED`
+- Font and color: `Dali::Ui::InputField::Property::FONT_FAMILY`, `Dali::Ui::InputField::Property::FONT_SIZE`, `Dali::Ui::InputField::Property::FONT_SIZE_SCALE`, `Dali::Ui::InputField::Property::FONT_SLANT`, `Dali::Ui::InputField::Property::FONT_WEIGHT`, `Dali::Ui::InputField::Property::FONT_WIDTH`, `Dali::Ui::InputField::Property::TEXT_COLOR`, `Dali::Ui::InputField::Property::TEXT_BACKGROUND_COLOR`
+- Cursor: `Dali::Ui::InputField::Property::CURSOR_WIDTH`, `Dali::Ui::InputField::Property::CURSOR_COLOR`, `Dali::Ui::InputField::Property::CURSOR_BLINK_ENABLED`, `Dali::Ui::InputField::Property::CURSOR_BLINK_INTERVAL`, `Dali::Ui::InputField::Property::CURSOR_POSITION`
+- Selection: `Dali::Ui::InputField::Property::SELECTION_ENABLED`, `Dali::Ui::InputField::Property::SELECTION_COLOR`, `Dali::Ui::InputField::Property::SELECTED_TEXT`, `Dali::Ui::InputField::Property::SELECTED_TEXT_START`, `Dali::Ui::InputField::Property::SELECTED_TEXT_END`
+- Password and limits: `Dali::Ui::InputField::Property::MAXIMUM_LENGTH`, `Dali::Ui::InputField::Property::PASSWORD_MODE`, `Dali::Ui::InputField::Property::PASSWORD_MASK_CHARACTER`, `Dali::Ui::InputField::Property::PASSWORD_REVEAL_DURATION`, `Dali::Ui::InputField::Property::EDITABLE`
+- Typing style: `Dali::Ui::InputField::Property::TYPING_TEXT_COLOR`, `Dali::Ui::InputField::Property::TYPING_FONT_FAMILY`, `Dali::Ui::InputField::Property::TYPING_FONT_SIZE`, `Dali::Ui::InputField::Property::TYPING_FONT_WEIGHT`, `Dali::Ui::InputField::Property::TYPING_FONT_WIDTH`, `Dali::Ui::InputField::Property::TYPING_FONT_SLANT`
 tokens used
-19,077
+23,588

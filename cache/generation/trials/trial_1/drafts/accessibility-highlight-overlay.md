@@ -6,18 +6,18 @@ category: accessibility
 
 # Accessibility Highlight Overlay
 
-`Dali::Ui::AccessibilityHighlightOverlay` lets a dali-ui app display or hide the accessibility focus highlight overlay, either from the active highlight target or from an explicit rectangle.
+`Dali::Ui::AccessibilityHighlightOverlay` controls the visible accessibility highlight for a dali-ui view flow.
 
 ## Table of Contents
 
-- [Overlay Object and Default Mode](#overlay-object-and-default-mode)
-- [Automatic Highlight Updates](#automatic-highlight-updates)
-- [Manual Highlight Rectangles](#manual-highlight-rectangles)
+- [Overlay Role in a dali-ui App](#overlay-role-in-a-dali-ui-app)
+- [Choosing Automatic or Manual Highlight Bounds](#choosing-automatic-or-manual-highlight-bounds)
+- [Updating the Overlay from the Active Highlight Target](#updating-the-overlay-from-the-active-highlight-target)
 - [Hiding and Resetting the Overlay](#hiding-and-resetting-the-overlay)
 
-## Overlay Object and Default Mode
+## Overlay Role in a dali-ui App
 
-Create `Dali::Ui::AccessibilityHighlightOverlay` as the object that owns overlay state for the current accessibility highlight flow. In a dali-ui app, the app-facing UI should remain organized as `Dali::Ui::View` objects; the overlay API is used when the accessibility integration has an active highlight target to update.
+Use `Dali::Ui::AccessibilityHighlightOverlay` as the object that owns accessibility highlight overlay state. Application UI should remain organized around `Dali::Ui::View`; the overlay is updated by the accessibility bridge or controller when it receives the currently active highlight target.
 
 A newly constructed `Dali::Ui::AccessibilityHighlightOverlay` starts in `Dali::Ui::OverlayHighlightMode::AUTO`.
 
@@ -32,14 +32,9 @@ public:
   {
   }
 
-  bool IsUsingAutomaticHighlight() const
+  Dali::Ui::OverlayHighlightMode CurrentMode() const
   {
-    return mHighlightOverlay.GetOverlayMode() == Dali::Ui::OverlayHighlightMode::AUTO;
-  }
-
-  void UseAutomaticHighlight()
-  {
-    mHighlightOverlay.SetOverlayMode(Dali::Ui::OverlayHighlightMode::AUTO);
+    return mHighlightOverlay.GetOverlayMode();
   }
 
 private:
@@ -47,24 +42,45 @@ private:
 };
 ```
 
-Use `Dali::Ui::AccessibilityHighlightOverlay::GetOverlayMode` when local logic needs to branch on the current mode. Use `Dali::Ui::AccessibilityHighlightOverlay::SetOverlayMode` to switch directly between `Dali::Ui::OverlayHighlightMode::AUTO` and `Dali::Ui::OverlayHighlightMode::MANUAL`.
+`Dali::Ui::AccessibilityHighlightOverlay::GetOverlayMode` returns the current `Dali::Ui::OverlayHighlightMode`, so app-side logic can keep overlay handling consistent with the current accessibility flow.
+
+## Choosing Automatic or Manual Highlight Bounds
+
+`Dali::Ui::AccessibilityHighlightOverlay` supports two overlay modes:
+
+- `Dali::Ui::OverlayHighlightMode::AUTO` uses the active highlight target when `Dali::Ui::AccessibilityHighlightOverlay::UpdateOverlay` is called.
+- `Dali::Ui::OverlayHighlightMode::MANUAL` uses bounds supplied through `Dali::Ui::AccessibilityHighlightOverlay::SetCustomHighlight`.
+
+Use `Dali::Ui::AccessibilityHighlightOverlay::SetOverlayMode` when you only need to switch the mode. Use `Dali::Ui::AccessibilityHighlightOverlay::SetCustomHighlight` when you already know the rectangle to show.
 
 ```cpp
-void ConfigureHighlightMode(Dali::Ui::AccessibilityHighlightOverlay& overlay, bool customBounds)
+void UseAutomaticHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay)
 {
-  overlay.SetOverlayMode(customBounds ? Dali::Ui::OverlayHighlightMode::MANUAL
-                                      : Dali::Ui::OverlayHighlightMode::AUTO);
+  overlay.SetOverlayMode(Dali::Ui::OverlayHighlightMode::AUTO);
+}
+
+void UseManualHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay,
+                        const Dali::Vector2& position,
+                        const Dali::Vector2& size)
+{
+  overlay.SetCustomHighlight(position, size);
 }
 ```
 
-## Automatic Highlight Updates
-
-Use `Dali::Ui::AccessibilityHighlightOverlay::UpdateOverlay` when the accessibility focus target changes and the overlay should track the active highlight target. The method takes the active highlight object as `Dali::Actor&`; application code should still treat the dali-ui `Dali::Ui::View` tree as the app-facing model and keep direct actor handling inside the accessibility bridge or controller that receives the active highlight handle.
+`Dali::Ui::AccessibilityHighlightOverlay::SetCustomHighlight` stores the supplied `Dali::Vector2` position and size and changes the overlay mode to `Dali::Ui::OverlayHighlightMode::MANUAL`.
 
 ```cpp
-#include <dali/public-api/actors/actor.h>
-#include <dali-ui-foundation/integration-api/accessibility-highlight-overlay.h>
+bool IsManualHighlightActive(const Dali::Ui::AccessibilityHighlightOverlay& overlay)
+{
+  return overlay.GetOverlayMode() == Dali::Ui::OverlayHighlightMode::MANUAL;
+}
+```
 
+## Updating the Overlay from the Active Highlight Target
+
+Call `Dali::Ui::AccessibilityHighlightOverlay::UpdateOverlay` when the accessibility focus target changes. The method takes the active highlight object as `Dali::Actor&`; keep that raw actor handling inside the accessibility integration layer, while the rest of the application continues to model UI with `Dali::Ui::View`.
+
+```cpp
 class AccessibilityHighlightController
 {
 public:
@@ -79,60 +95,24 @@ private:
 };
 ```
 
-In automatic mode, `Dali::Ui::AccessibilityHighlightOverlay` calculates the overlay rectangle from the active highlight target during `UpdateOverlay`. Keep `UpdateOverlay` calls tied to actual focus or highlight changes rather than calling it as a general frame update.
+In automatic mode, `Dali::Ui::AccessibilityHighlightOverlay::UpdateOverlay` updates the currently active highlight overlay and creates an overlay when one does not already exist.
+
+Manual bounds can also be applied before updating from the current highlight target.
 
 ```cpp
-void RefreshAutomaticOverlay(Dali::Ui::AccessibilityHighlightOverlay& overlay,
-                             Dali::Actor& activeHighlight)
-{
-  if(overlay.GetOverlayMode() != Dali::Ui::OverlayHighlightMode::AUTO)
-  {
-    overlay.SetOverlayMode(Dali::Ui::OverlayHighlightMode::AUTO);
-  }
-
-  overlay.UpdateOverlay(activeHighlight);
-}
-```
-
-## Manual Highlight Rectangles
-
-Use `Dali::Ui::AccessibilityHighlightOverlay::SetCustomHighlight` when the app or accessibility layer already knows the exact overlay rectangle. The position and size are passed as `Dali::Vector2` values. Calling `SetCustomHighlight` also switches the overlay to `Dali::Ui::OverlayHighlightMode::MANUAL`.
-
-```cpp
-#include <dali/public-api/math/vector2.h>
-#include <dali-ui-foundation/integration-api/accessibility-highlight-overlay.h>
-
-void ShowManualHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay,
-                         Dali::Actor& activeHighlight)
-{
-  const Dali::Vector2 overlayPosition(24.0f, 32.0f);
-  const Dali::Vector2 overlaySize(180.0f, 64.0f);
-
-  overlay.SetCustomHighlight(overlayPosition, overlaySize);
-  overlay.UpdateOverlay(activeHighlight);
-}
-```
-
-Manual mode is useful when the visual highlight should cover a logical region rather than the active highlight target's calculated bounds.
-
-```cpp
-void MoveManualHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay,
-                         Dali::Actor& activeHighlight,
-                         const Dali::Vector2& position,
-                         const Dali::Vector2& size)
+void ShowCustomHighlightForTarget(Dali::Ui::AccessibilityHighlightOverlay& overlay,
+                                  Dali::Actor& activeHighlight,
+                                  const Dali::Vector2& position,
+                                  const Dali::Vector2& size)
 {
   overlay.SetCustomHighlight(position, size);
-
-  if(overlay.GetOverlayMode() == Dali::Ui::OverlayHighlightMode::MANUAL)
-  {
-    overlay.UpdateOverlay(activeHighlight);
-  }
+  overlay.UpdateOverlay(activeHighlight);
 }
 ```
 
 ## Hiding and Resetting the Overlay
 
-Use `Dali::Ui::AccessibilityHighlightOverlay::HideOverlay` when the current accessibility highlight should no longer be visible, for example when focus leaves the relevant content area.
+Use `Dali::Ui::AccessibilityHighlightOverlay::HideOverlay` when the current accessibility highlight should no longer be visible.
 
 ```cpp
 void ClearVisibleHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay)
@@ -141,22 +121,22 @@ void ClearVisibleHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay)
 }
 ```
 
-Use `Dali::Ui::AccessibilityHighlightOverlay::ResetCustomHighlight` to clear the manual rectangle and return the overlay to automatic mode.
+Use `Dali::Ui::AccessibilityHighlightOverlay::ResetCustomHighlight` to clear manual bounds and return the overlay mode to `Dali::Ui::OverlayHighlightMode::AUTO`.
 
 ```cpp
 void ReturnToAutomaticHighlight(Dali::Ui::AccessibilityHighlightOverlay& overlay,
-                                Dali::Actor& activeHighlight)
+                                Dali::Actor& nextActiveHighlight)
 {
   overlay.ResetCustomHighlight();
 
   if(overlay.GetOverlayMode() == Dali::Ui::OverlayHighlightMode::AUTO)
   {
-    overlay.UpdateOverlay(activeHighlight);
+    overlay.UpdateOverlay(nextActiveHighlight);
   }
 }
 ```
 
-A common flow is to hide the current overlay, reset any custom rectangle, and then let the next focus update call `Dali::Ui::AccessibilityHighlightOverlay::UpdateOverlay` in automatic mode.
+A typical manual highlight session ends by hiding the visible overlay and clearing the custom rectangle.
 
 ```cpp
 void EndManualHighlightSession(Dali::Ui::AccessibilityHighlightOverlay& overlay)

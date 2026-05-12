@@ -5,23 +5,30 @@
 - Status: warning
 - Publish ready: true
 - Bugs: 0
-- Warnings: 1
+- Warnings: 2
 - Needs review: 0
-- Repairable issues: 1
+- Repairable issues: 2
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| UNKNOWN_BACKTICK_API_TOKEN | 1 |
+| UNKNOWN_BACKTICK_API_TOKEN | 2 |
 
 ## Human Review
 
 ### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
 
+- Location: line 33
+- Span: `Dali::Signal<void(Dali::Ui::View, Dali::Ui::InputEvent)>`
+- Reason: Backticked API-like token `Dali::Signal<void(Dali::Ui::View, Dali::Ui::InputEvent)>` could not be resolved.
+- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
+
+### 2. UNKNOWN_BACKTICK_API_TOKEN (warning)
+
 - Location: line 85
-- Span: `InteractiveView::DownCast(BaseHandle handle`
-- Reason: Backticked API-like token `InteractiveView::DownCast(BaseHandle handle` could not be resolved.
+- Span: `Dali::Signal<bool(Dali::Ui::View, Dali::Ui::InputEvent)>`
+- Reason: Backticked API-like token `Dali::Signal<bool(Dali::Ui::View, Dali::Ui::InputEvent)>` could not be resolved.
 - Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
 
 ## Machine Data

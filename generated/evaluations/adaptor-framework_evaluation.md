@@ -2,34 +2,27 @@
 
 ## Summary
 
-- Status: warning
+- Status: needs_review
 - Publish ready: true
 - Bugs: 0
-- Warnings: 2
-- Needs review: 0
-- Repairable issues: 2
+- Warnings: 0
+- Needs review: 1
+- Repairable issues: 0
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| UNKNOWN_BACKTICK_API_TOKEN | 2 |
+| UNKNOWN_SCOPED_SYMBOL | 1 |
 
 ## Human Review
 
-### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
+### 1. UNKNOWN_SCOPED_SYMBOL (needs_review)
 
-- Location: line 23
-- Span: `void(Dali::Application`
-- Reason: Backticked API-like token `void(Dali::Application` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
-
-### 2. UNKNOWN_BACKTICK_API_TOKEN (warning)
-
-- Location: line 41
-- Span: `void(Dali::Application`
-- Reason: Backticked API-like token `void(Dali::Application` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
+- Location: line 141
+- Span: `DeviceStatus::Memory::CRITICALLY_LOW`
+- Reason: DeviceStatus::Memory::CRITICALLY_LOW could not be resolved confidently from api_index/context pack.
+- Suggested direction: Inspect whether this is a local helper, an omitted include, or a hallucinated API.
 
 ## Machine Data
 

@@ -1,45 +1,30 @@
-# animated-image-view Evaluation - Trial 1
+# animated-image-view Evaluation - Trial 5
 
 ## Summary
 
-- Status: needs_repair
-- Publish ready: false
-- Bugs: 1
-- Warnings: 2
+- Status: warning
+- Publish ready: true
+- Bugs: 0
+- Warnings: 1
 - Needs review: 0
-- Repairable issues: 3
+- Repairable issues: 1
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| PROMPT_LEAKAGE | 1 |
-| UNKNOWN_BACKTICK_API_TOKEN | 2 |
+| UNKNOWN_BACKTICK_API_TOKEN | 1 |
 
 ## Human Review
 
-### 1. PROMPT_LEAKAGE (bug)
+### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
 
-- Location: line 18
-- Span: `Placeholder`
-- Reason: Prompt/internal wording leaked into the document: placeholder
-- Suggested direction: Remove internal prompt/validation wording from user-facing Markdown.
-
-### 2. UNKNOWN_BACKTICK_API_TOKEN (warning)
-
-- Location: line 27
-- Span: `Dali::Ui::AnimatedImageView&`
-- Reason: Backticked API-like token `Dali::Ui::AnimatedImageView&` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
-
-### 3. UNKNOWN_BACKTICK_API_TOKEN (warning)
-
-- Location: line 37
+- Location: line 38
 - Span: `Dali::Vector<Dali::String>`
 - Reason: Backticked API-like token `Dali::Vector<Dali::String>` could not be resolved.
 - Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
 
 ## Machine Data
 
-- Validation JSON: `cache/generation/trials/trial_1/validation/animated-image-view.validation.json`
-- Source draft: `cache/generation/trials/trial_1/drafts/animated-image-view.md`
+- Validation JSON: `cache/generation/trials/trial_5/validation/animated-image-view.validation.json`
+- Source draft: `cache/generation/trials/trial_5/drafts/animated-image-view.md`

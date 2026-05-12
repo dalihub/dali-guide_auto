@@ -6,382 +6,349 @@ category: views-components
 
 # Interactive View
 
-`Dali::Ui::InteractiveView` is the dali-ui view type for app-facing click, press, long-press, and key-triggered interaction.
+`Dali::Ui::InteractiveView` is a `Dali::Ui::View`-based app-facing object for clickable UI regions, pressed state tracking, long press handling, and key-driven click behavior.
 
 ## Table of Contents
 
-- [Creating an Interactive View](#creating-an-interactive-view)
-- [Handling Clicks](#handling-clicks)
-- [Tracking Pressed and Disabled Interaction State](#tracking-pressed-and-disabled-interaction-state)
-- [Handling Long Press](#handling-long-press)
-- [Controlling Key Click Behavior](#controlling-key-click-behavior)
-- [Using InteractiveView Handles](#using-interactiveview-handles)
-- [Chain Support for Derived Interactive Views](#chain-support-for-derived-interactive-views)
+- [Create an Interactive View](#create-an-interactive-view)
+- [Handle Clicks](#handle-clicks)
+- [Track Pressed and Pseudo Disabled State](#track-pressed-and-pseudo-disabled-state)
+- [Configure Key Click Behavior](#configure-key-click-behavior)
+- [Use Chaining in Derived Components](#use-chaining-in-derived-components)
 
-## Creating an Interactive View
+## Create an Interactive View
 
-Use `Dali::Ui::InteractiveView::New()` when a dali-ui app needs a plain `Dali::Ui::View` object that can emit interaction signals directly. `Dali::Ui::InteractiveView` is a `Dali::Ui::View` subclass, so application code can keep working with the dali-ui view object model while adding built-in interaction behavior.
+Create an interactive region with `Dali::Ui::InteractiveView::New()`. The returned handle is a `Dali::Ui::View` subclass, so application code can keep working with the dali-ui view model while using the direct interactive API exposed by `Dali::Ui::InteractiveView`.
 
-```cpp
-using namespace Dali::Ui;
-
-InteractiveView actionView = InteractiveView::New();
-
-actionView
-  .SetClickable(true)
-  .SetPseudoDisabled(false);
-```
-
-`SetClickable(bool)` controls whether click generation is allowed. `SetPseudoDisabled(bool)` changes the pseudo-disabled interaction state without replacing the view object. The matching query APIs are `IsClickable()` and `IsPseudoDisabled()`.
+`SetClickable()` controls whether the view emits click interactions. `IsClickable()` reads the current clickable state.
 
 ```cpp
-using namespace Dali::Ui;
+#include <dali-ui-foundation/dali-ui-foundation.h>
 
-InteractiveView actionView = InteractiveView::New();
-
-actionView.SetClickable(true);
-
-if(actionView.IsClickable())
+Dali::Ui::InteractiveView CreateInteractiveRegion()
 {
-  actionView.SetPseudoDisabled(false);
+  Dali::Ui::InteractiveView view = Dali::Ui::InteractiveView::New();
+
+  view
+    .SetClickable(true)
+    .SetPseudoDisabled(false);
+
+  bool clickable = view.IsClickable();
+  bool pseudoDisabled = view.IsPseudoDisabled();
+
+  return view;
 }
 ```
 
-## Handling Clicks
-
-`ClickedSignal()` returns a `Dali::Signal` owned by `Dali::Ui::InteractiveView`. The clicked signal callback receives the clicked `Dali::Ui::View` and the `Dali::Ui::InputEvent` that caused the click.
+Use `Dali::Ui::InteractiveView::DownCast()` when application code receives a base handle and needs the interactive API only if the handle is actually an interactive view.
 
 ```cpp
-using namespace Dali::Ui;
-
-class Controller
+Dali::Ui::InteractiveView AsInteractiveView(Dali::BaseHandle handle)
 {
-public:
-  void Create()
-  {
-    mButton = InteractiveView::New();
+  Dali::Ui::InteractiveView view = Dali::Ui::InteractiveView::DownCast(handle);
 
-    mButton.ClickedSignal().Connect(this, &Controller::OnClicked);
+  if(view)
+  {
+    view.SetClickable(true);
   }
 
-private:
-  void OnClicked(View view, InputEvent event)
-  {
-    mLastClicked = view;
-  }
-
-  InteractiveView mButton;
-  View mLastClicked;
-};
+  return view;
+}
 ```
 
-For fluent setup, use `ConnectClickedSignal(T* obj, Func func)`. It connects to the same `ClickedSignal()` and returns the `InteractiveView`, so it can be chained with typed setters.
+## Handle Clicks
+
+`ClickedSignal()` is emitted when the view is clicked. The signal type is `Dali::Signal<void(Dali::Ui::View, Dali::Ui::InputEvent)>`, so callbacks receive the clicked `Dali::Ui::View` and the associated `Dali::Ui::InputEvent`.
+
+For application code, `ConnectClickedSignal()` is the concise form. It connects a handler and returns the same `Dali::Ui::InteractiveView`, which makes it convenient in fluent setup code.
 
 ```cpp
-using namespace Dali::Ui;
-
 class Controller
 {
 public:
-  void Create()
+  Dali::Ui::InteractiveView CreateButton()
   {
-    mButton = InteractiveView::New()
+    Dali::Ui::InteractiveView button = Dali::Ui::InteractiveView::New();
+
+    button
       .SetClickable(true)
       .ConnectClickedSignal(this, &Controller::OnClicked);
+
+    return button;
   }
 
 private:
-  void OnClicked(View view, InputEvent event)
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
   {
     mLastClicked = view;
   }
 
-  InteractiveView mButton;
-  View mLastClicked;
+  Dali::Ui::View mLastClicked;
 };
 ```
 
-Multiple `ConnectClickedSignal()` calls add multiple handlers.
+You can also connect through `ClickedSignal()` directly when you want to keep the signal object visible in the code.
 
 ```cpp
-using namespace Dali::Ui;
-
 class Controller
 {
 public:
-  void Create()
+  void Attach(Dali::Ui::InteractiveView view)
   {
-    mButton = InteractiveView::New();
-
-    mButton.ConnectClickedSignal(this, &Controller::OnPrimaryClicked);
-    mButton.ConnectClickedSignal(this, &Controller::OnAnalyticsClicked);
+    view.ClickedSignal().Connect(this, &Controller::OnClicked);
   }
 
 private:
-  void OnPrimaryClicked(View view, InputEvent event)
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
   {
-    mLastClicked = view;
+    mClicked = true;
   }
 
-  void OnAnalyticsClicked(View view, InputEvent event)
-  {
-    mTrackedClicked = view;
-  }
-
-  InteractiveView mButton;
-  View mLastClicked;
-  View mTrackedClicked;
+  bool mClicked{false};
 };
 ```
 
-## Tracking Pressed and Disabled Interaction State
-
-Use `PressedChangedSignal()` when the UI needs to react to press-down and release transitions. The signal callback receives the `Dali::Ui::View`, a `bool pressed` value, and the `Dali::Ui::InputEvent`.
+Multiple click handlers can be connected to the same `Dali::Ui::InteractiveView`. Each call to `ConnectClickedSignal()` adds another handler.
 
 ```cpp
-using namespace Dali::Ui;
-
 class Controller
 {
 public:
-  void Create()
+  void AttachHandlers(Dali::Ui::InteractiveView view)
   {
-    mButton = InteractiveView::New();
-
-    mButton.PressedChangedSignal().Connect(this, &Controller::OnPressedChanged);
+    view
+      .ConnectClickedSignal(this, &Controller::UpdateSelection)
+      .ConnectClickedSignal(this, &Controller::ClosePopup);
   }
 
 private:
-  void OnPressedChanged(View view, bool pressed, InputEvent event)
+  void UpdateSelection(Dali::Ui::View view, Dali::Ui::InputEvent event)
   {
-    mPressedView = view;
-    mPressed = pressed;
+    mSelected = view;
   }
 
-  InteractiveView mButton;
-  View mPressedView;
-  bool mPressed{false};
+  void ClosePopup(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    mPopupOpen = false;
+  }
+
+  Dali::Ui::View mSelected;
+  bool mPopupOpen{true};
 };
 ```
 
-`ConnectPressedChangedSignal(T* obj, Func func)` is the chainable form. `IsPressed()` can be queried when other app logic needs the current state.
+## Track Pressed and Pseudo Disabled State
+
+`PressedChangedSignal()` reports transitions into and out of the pressed state. The callback receives the `Dali::Ui::View`, a `bool` pressed value, and the `Dali::Ui::InputEvent`.
+
+Use `IsPressed()` when the current state is needed outside the signal callback.
 
 ```cpp
-using namespace Dali::Ui;
-
-class Controller
+class PressController
 {
 public:
-  void Create()
+  Dali::Ui::InteractiveView CreatePressableView()
   {
-    mButton = InteractiveView::New()
+    Dali::Ui::InteractiveView view = Dali::Ui::InteractiveView::New();
+
+    view
       .SetClickable(true)
-      .ConnectPressedChangedSignal(this, &Controller::OnPressedChanged);
-  }
+      .ConnectPressedChangedSignal(this, &PressController::OnPressedChanged);
 
-  bool IsButtonCurrentlyPressed() const
-  {
-    return mButton.IsPressed();
+    return view;
   }
 
 private:
-  void OnPressedChanged(View view, bool pressed, InputEvent event)
+  void OnPressedChanged(Dali::Ui::View view, bool pressed, Dali::Ui::InputEvent event)
   {
     mPressed = pressed;
   }
 
-  InteractiveView mButton;
   bool mPressed{false};
 };
 ```
 
-For pseudo-disabled state changes, connect to `PseudoDisabledChangedSignal()`. This signal receives the `Dali::Ui::View` and the new pseudo-disabled value.
+`SetPseudoDisabled()` sets the pseudo disabled state. This is separate from removing clickability with `SetClickable(false)`: pseudo disabled is a state exposed by `IsPseudoDisabled()` and `PseudoDisabledChangedSignal()`.
 
 ```cpp
-using namespace Dali::Ui;
-
-class Controller
+class StateController
 {
 public:
-  void Create()
+  void Attach(Dali::Ui::InteractiveView view)
   {
-    mButton = InteractiveView::New();
-
-    mButton.PseudoDisabledChangedSignal().Connect(
+    view.PseudoDisabledChangedSignal().Connect(
       this,
-      &Controller::OnPseudoDisabledChanged);
+      &StateController::OnPseudoDisabledChanged);
 
-    mButton.SetPseudoDisabled(true);
+    view.SetPseudoDisabled(true);
+
+    bool pseudoDisabled = view.IsPseudoDisabled();
   }
 
 private:
-  void OnPseudoDisabledChanged(View view, bool pseudoDisabled)
+  void OnPseudoDisabledChanged(Dali::Ui::View view, bool pseudoDisabled)
   {
-    mDisabledView = view;
     mPseudoDisabled = pseudoDisabled;
   }
 
-  InteractiveView mButton;
-  View mDisabledView;
   bool mPseudoDisabled{false};
 };
 ```
 
-## Handling Long Press
-
-`LongPressedSignal()` is emitted when a long press is detected. Its callback receives the `Dali::Ui::View` and `Dali::Ui::InputEvent`, and returns `bool`.
-
-Return `true` to consume the long press and suppress the following click. Return `false` to allow the later click flow.
+A common pattern is to use pseudo disabled for visual state while leaving explicit control over click handling through `SetClickable()`.
 
 ```cpp
-using namespace Dali::Ui;
-
-class Controller
+void SetTemporaryUnavailable(Dali::Ui::InteractiveView view, bool unavailable)
 {
-public:
-  void Create()
-  {
-    mButton = InteractiveView::New();
-
-    mButton.LongPressedSignal().Connect(this, &Controller::OnLongPressed);
-  }
-
-private:
-  bool OnLongPressed(View view, InputEvent event)
-  {
-    mLongPressedView = view;
-    return true;
-  }
-
-  InteractiveView mButton;
-  View mLongPressedView;
-};
-```
-
-The chainable helper is `ConnectLongPressedSignal(T* obj, Func func)`.
-
-```cpp
-using namespace Dali::Ui;
-
-class Controller
-{
-public:
-  void Create()
-  {
-    mButton = InteractiveView::New()
-      .SetClickable(true)
-      .ConnectLongPressedSignal(this, &Controller::OnLongPressed)
-      .ConnectClickedSignal(this, &Controller::OnClicked);
-  }
-
-private:
-  bool OnLongPressed(View view, InputEvent event)
-  {
-    mLongPressedView = view;
-    return true;
-  }
-
-  void OnClicked(View view, InputEvent event)
-  {
-    mClickedView = view;
-  }
-
-  InteractiveView mButton;
-  View mLongPressedView;
-  View mClickedView;
-};
-```
-
-## Controlling Key Click Behavior
-
-`SetKeyClickPolicy(KeyClickPolicy)` controls when key input produces `ClickedSignal()`. `GetKeyClickPolicy()` returns the active policy.
-
-Use `Dali::Ui::KeyClickPolicy::ON_RELEASE` for the default release-style activation, `Dali::Ui::KeyClickPolicy::ON_PRESS` for immediate activation on key press, and `Dali::Ui::KeyClickPolicy::DISABLED` to disable click generation from key input.
-
-```cpp
-using namespace Dali::Ui;
-
-InteractiveView keyButton = InteractiveView::New();
-
-keyButton.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
-
-KeyClickPolicy policy = keyButton.GetKeyClickPolicy();
-```
-
-A common app pattern is to keep touch clicking enabled while choosing a key policy that matches the surrounding focus and remote-control behavior.
-
-```cpp
-using namespace Dali::Ui;
-
-class Controller
-{
-public:
-  void Create()
-  {
-    mButton = InteractiveView::New()
-      .SetClickable(true)
-      .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)
-      .ConnectClickedSignal(this, &Controller::OnActivated);
-  }
-
-private:
-  void OnActivated(View view, InputEvent event)
-  {
-    mActivatedView = view;
-  }
-
-  InteractiveView mButton;
-  View mActivatedView;
-};
-```
-
-## Using InteractiveView Handles
-
-Use `InteractiveView::DownCast(BaseHandle handle)` when app code receives a generic handle and needs to use the `InteractiveView` API. A successful downcast returns a valid `InteractiveView`; otherwise the returned handle is uninitialized.
-
-```cpp
-using namespace Dali::Ui;
-
-void ConfigureIfInteractive(BaseHandle handle)
-{
-  InteractiveView interactiveView = InteractiveView::DownCast(handle);
-
-  if(interactiveView)
-  {
-    interactiveView
-      .SetClickable(true)
-      .SetPseudoDisabled(false);
-  }
+  view
+    .SetPseudoDisabled(unavailable)
+    .SetClickable(!unavailable);
 }
 ```
 
-`InteractiveView` handles support copy and move handle semantics. Copy assignment keeps the same underlying view handle available through another `InteractiveView` variable.
+## Configure Key Click Behavior
+
+`SetKeyClickPolicy()` controls when key input produces click behavior. The public `Dali::Ui::KeyClickPolicy` values are:
+
+- `Dali::Ui::KeyClickPolicy::ON_RELEASE`: trigger the click when the key is released.
+- `Dali::Ui::KeyClickPolicy::ON_PRESS`: trigger the click when the key is pressed.
+- `Dali::Ui::KeyClickPolicy::DISABLED`: disable click events from key input.
+
+Use `GetKeyClickPolicy()` to inspect the current policy.
 
 ```cpp
-using namespace Dali::Ui;
+Dali::Ui::InteractiveView CreateRemoteFriendlyView()
+{
+  Dali::Ui::InteractiveView view = Dali::Ui::InteractiveView::New();
 
-InteractiveView source = InteractiveView::New();
-InteractiveView target;
+  view
+    .SetClickable(true)
+    .SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_RELEASE);
 
-target = source;
+  Dali::Ui::KeyClickPolicy policy = view.GetKeyClickPolicy();
 
-target.SetClickable(true);
+  return view;
+}
 ```
 
-## Chain Support for Derived Interactive Views
-
-`interactive-view.autogen.h` is part of the `InteractiveView` public feature surface. It provides `DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(ChildClass)` for dali-ui component classes that derive from `InteractiveView` and want the same fluent API shape.
-
-The macro forwards chainable methods such as `SetClickable(bool)`, `SetPseudoDisabled(bool)`, `SetKeyClickPolicy(KeyClickPolicy)`, `ConnectClickedSignal(T* obj, Func func)`, `ConnectPressedChangedSignal(T* obj, Func func)`, and `ConnectLongPressedSignal(T* obj, Func func)` so derived view classes can return their own `ChildClass&`.
+For controls that should respond immediately to a key press, use `Dali::Ui::KeyClickPolicy::ON_PRESS`.
 
 ```cpp
-using namespace Dali::Ui;
+void UseImmediateKeyClick(Dali::Ui::InteractiveView view)
+{
+  view.SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_PRESS);
+}
+```
 
-class AppActionView : public InteractiveView
+For a touch-only interactive region, keep pointer click handling enabled and disable key-generated clicks.
+
+```cpp
+void UsePointerOnlyClick(Dali::Ui::InteractiveView view)
+{
+  view
+    .SetClickable(true)
+    .SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::DISABLED);
+}
+```
+
+## Handle Long Press
+
+`LongPressedSignal()` is emitted when the view receives a long press gesture. Its signal type is `Dali::Signal<bool(Dali::Ui::View, Dali::Ui::InputEvent)>`.
+
+Use `ConnectLongPressedSignal()` for fluent setup. The callback returns `true` to consume the long press and suppress the subsequent click, or `false` to allow the click path to continue.
+
+```cpp
+class MenuController
 {
 public:
-  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(AppActionView)
+  Dali::Ui::InteractiveView CreateMenuTarget()
+  {
+    Dali::Ui::InteractiveView target = Dali::Ui::InteractiveView::New();
+
+    target
+      .SetClickable(true)
+      .ConnectLongPressedSignal(this, &MenuController::OnLongPressed)
+      .ConnectClickedSignal(this, &MenuController::OnClicked);
+
+    return target;
+  }
+
+private:
+  bool OnLongPressed(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    mMenuOpen = true;
+    return true;
+  }
+
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    mClicked = true;
+  }
+
+  bool mMenuOpen{false};
+  bool mClicked{false};
 };
 ```
 
-Application code normally uses concrete dali-ui view classes directly. This macro matters when implementing a reusable app component that should keep fluent chaining after adding an `InteractiveView` base.
+Connect to `LongPressedSignal()` directly when you prefer the explicit signal form.
+
+```cpp
+class MenuController
+{
+public:
+  void Attach(Dali::Ui::InteractiveView view)
+  {
+    view.LongPressedSignal().Connect(this, &MenuController::OnLongPressed);
+  }
+
+private:
+  bool OnLongPressed(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    mHandledLongPress = true;
+    return false;
+  }
+
+  bool mHandledLongPress{false};
+};
+```
+
+## Use Chaining in Derived Components
+
+`interactive-view.autogen.h` provides `DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS` for dali-ui component classes that derive from `Dali::Ui::InteractiveView`. The macro adds chain-returning wrappers for interactive methods such as `SetClickable()`, `SetPseudoDisabled()`, `SetKeyClickPolicy()`, `ConnectClickedSignal()`, `ConnectPressedChangedSignal()`, and `ConnectLongPressedSignal()` so derived component setup remains fluent.
+
+```cpp
+class IconButton : public Dali::Ui::InteractiveView
+{
+public:
+  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(IconButton)
+};
+```
+
+With the chain methods available on the derived type, app code can configure the component without dropping back to the base handle type.
+
+```cpp
+class ToolbarController
+{
+public:
+  IconButton CreateToolbarButton()
+  {
+    IconButton button;
+
+    button
+      .SetClickable(true)
+      .SetPseudoDisabled(false)
+      .SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_RELEASE)
+      .ConnectClickedSignal(this, &ToolbarController::OnToolbarButtonClicked);
+
+    return button;
+  }
+
+private:
+  void OnToolbarButtonClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    mActivated = true;
+  }
+
+  bool mActivated{false};
+};
+```

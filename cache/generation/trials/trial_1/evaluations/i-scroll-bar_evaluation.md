@@ -19,7 +19,7 @@
 
 ### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
 
-- Location: line 23
+- Location: line 26
 - Span: `Dali::Ui::IScrollBar&`
 - Reason: Backticked API-like token `Dali::Ui::IScrollBar&` could not be resolved.
 - Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.

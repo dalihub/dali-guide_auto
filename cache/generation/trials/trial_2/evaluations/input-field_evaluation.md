@@ -19,8 +19,8 @@
 
 ### 1. PROMPT_LEAKAGE (bug)
 
-- Location: line 91
-- Span: `PLACEHOLDER`
+- Location: line 51
+- Span: `placeholder`
 - Reason: Prompt/internal wording leaked into the document: placeholder
 - Suggested direction: Remove internal prompt/validation wording from user-facing Markdown.
 

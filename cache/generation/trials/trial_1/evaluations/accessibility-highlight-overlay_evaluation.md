@@ -19,7 +19,7 @@
 
 ### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
 
-- Location: line 32
+- Location: line 45
 - Span: `Dali::Actor&`
 - Reason: Backticked API-like token `Dali::Actor&` could not be resolved.
 - Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.

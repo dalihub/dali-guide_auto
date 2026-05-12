@@ -6,146 +6,349 @@ category: views-components
 
 # Animated Image View
 
-`Dali::Ui::AnimatedImageView` displays and controls animated image resources in a dali-ui application.
+`Dali::Ui::AnimatedImageView` displays and controls animated image resources in a dali-ui view tree.
 
-## Table of Contents
+## Table of contents
 
-- [Create an Animated Image View](#create-an-animated-image-view)
-- [Use a Frame URL Sequence](#use-a-frame-url-sequence)
-- [Control Playback](#control-playback)
-- [Configure Looping, Speed, and Stop Behavior](#configure-looping-speed-and-stop-behavior)
-- [Fit, Sample, Tint, and Crop the Image](#fit-sample-tint-and-crop-the-image)
-- [Loading and Resource Signals](#loading-and-resource-signals)
-- [AnimatedImageView Properties](#animatedimageview-properties)
+- [Create an animated image view](#create-an-animated-image-view)
+- [Choose the image source](#choose-the-image-source)
+- [Control playback and frames](#control-playback-and-frames)
+- [Configure loops, speed, and stop behavior](#configure-loops-speed-and-stop-behavior)
+- [Tune loading and frame buffering](#tune-loading-and-frame-buffering)
+- [Apply fitting, color, pixel area, and masks](#apply-fitting-color-pixel-area-and-masks)
+- [React to loading and animation signals](#react-to-loading-and-animation-signals)
+- [Property constants](#property-constants)
 
-## Create an Animated Image View
+## Create an animated image view
 
-Create the view with `Dali::Ui::AnimatedImageView::New()`. Pass a URL when the source is a single animated image such as GIF or WebP, or create an empty view and set the source later with `SetResourceUrl()`.
+Use `Dali::Ui::AnimatedImageView::New` to create the app-facing view object. The returned `Dali::Ui::AnimatedImageView` is also a `Dali::Ui::View`, so it can be placed in a dali-ui view tree without using raw `Dali::Actor` idioms.
 
 ```cpp
 #include <dali-ui-foundation/public-api/animated-image-view.h>
 
-Dali::Ui::AnimatedImageView CreateSpinner()
-{
-  return Dali::Ui::AnimatedImageView::New("images/loading.gif")
-    .SetDesiredWidth(128)
-    .SetDesiredHeight(128)
-    .SetFittingMode(Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-    .SetLoopCount(-1);
-}
+Dali::Ui::AnimatedImageView loadingView =
+  Dali::Ui::AnimatedImageView::New("images/loading.gif")
+    .SetLoopCount(-1)
+    .SetDesiredWidth(256)
+    .SetDesiredHeight(256)
+    .SetImageLoadWithViewSize(true);
+
+Dali::Ui::View appFacingView = loadingView;
 ```
 
-`Dali::Ui::AnimatedImageView` is a `Dali::Ui::View`, so application code should keep it in the view tree as a view object rather than treating it as a raw actor. The typed setters return `Dali::Ui::AnimatedImageView&`, which makes fluent configuration practical.
+`Dali::Ui::AnimatedImageView::New` also accepts no URL. This is useful when the source is selected later with `SetResourceUrl` or `SetResourceUrls`.
 
 ```cpp
-Dali::Ui::AnimatedImageView badge = Dali::Ui::AnimatedImageView::New();
+Dali::Ui::AnimatedImageView preview = Dali::Ui::AnimatedImageView::New();
 
-badge
-  .SetResourceUrl("images/success.webp")
-  .SetDesiredWidth(96)
-  .SetDesiredHeight(96)
-  .SetImageLoadWithViewSize(true)
+preview
+  .SetDesiredWidth(320)
+  .SetDesiredHeight(240)
   .SetLoopCount(1);
 ```
 
-Use `GetResourceUrl()`, `GetDesiredWidth()`, `GetDesiredHeight()`, and `IsImageLoadWithViewSizeEnabled()` when the app needs to inspect the current configuration.
+## Choose the image source
+
+For a single animated resource such as GIF or animated WebP, call `SetResourceUrl`. The current source can be read back with `GetResourceUrl`.
 
 ```cpp
-Dali::String url = badge.GetResourceUrl();
-int width        = badge.GetDesiredWidth();
-int height       = badge.GetDesiredHeight();
-bool sizedLoad   = badge.IsImageLoadWithViewSizeEnabled();
+void ShowSingleAnimation(Dali::Ui::AnimatedImageView view,
+                         const Dali::String& url)
+{
+  view
+    .SetResourceUrl(url)
+    .SetResourceUrls(Dali::Vector<Dali::String>{})
+    .Play();
+
+  Dali::String currentUrl = view.GetResourceUrl();
+}
 ```
 
-## Use a Frame URL Sequence
-
-`SetResourceUrls()` configures a frame-by-frame animation from a `Dali::Vector<Dali::String>`. This is useful when the frames are stored as separate image files. Setting a URL sequence replaces the single-resource source configured by `SetResourceUrl()`.
+For frame-by-frame animation from separate image files, use `SetResourceUrls`. The frame sequence is stored as `Dali::Vector<Dali::String>` and can be inspected with `GetResourceUrls`.
 
 ```cpp
-Dali::Vector<Dali::String> frames;
-frames.PushBack(Dali::String("frames/progress-001.png"));
-frames.PushBack(Dali::String("frames/progress-002.png"));
-frames.PushBack(Dali::String("frames/progress-003.png"));
-frames.PushBack(Dali::String("frames/progress-004.png"));
+Dali::Vector<Dali::String> MakeFrameUrls()
+{
+  Dali::Vector<Dali::String> urls;
+  urls.PushBack(Dali::String("images/walk-001.png"));
+  urls.PushBack(Dali::String("images/walk-002.png"));
+  urls.PushBack(Dali::String("images/walk-003.png"));
+  urls.PushBack(Dali::String("images/walk-004.png"));
+  return urls;
+}
 
-Dali::Ui::AnimatedImageView progress = Dali::Ui::AnimatedImageView::New()
-  .SetResourceUrls(frames)
-  .SetBatchSize(4)
-  .SetCacheSize(8)
-  .SetFrameDelay(100)
-  .SetLoopCount(-1);
+void ShowFrameSequence(Dali::Ui::AnimatedImageView view)
+{
+  view
+    .SetResourceUrls(MakeFrameUrls())
+    .SetFrameDelay(80)
+    .SetBatchSize(4)
+    .SetCacheSize(8)
+    .Play();
+
+  const Dali::Vector<Dali::String>& urls = view.GetResourceUrls();
+}
 ```
 
-For a sequence source, `SetBatchSize()` controls how many frames are preloaded in each batch, and `SetCacheSize()` controls how many frames are kept cached. `SetFrameDelay()` sets the delay between frames in milliseconds; `GetFrameDelay()` returns the override value, or `-1` when no override is set.
+`SetResourceUrls` overrides the single URL previously supplied through `SetResourceUrl`. When switching back to a single animated file, clear the URL array before calling `SetResourceUrl`.
+
+## Control playback and frames
+
+Use `Play`, `Pause`, and `Stop` for playback. Use `JumpToFrame` when the UI needs to seek to a specific frame.
 
 ```cpp
-const Dali::Vector<Dali::String>& activeFrames = progress.GetResourceUrls();
-
-int batchSize = progress.GetBatchSize();
-int cacheSize = progress.GetCacheSize();
-int delayMs   = progress.GetFrameDelay();
-```
-
-To return from a frame sequence to a single animated file, set an empty URL vector and then set a resource URL.
-
-```cpp
-progress
-  .SetResourceUrls(Dali::Vector<Dali::String>{})
-  .SetResourceUrl("images/progress.webp");
-```
-
-## Control Playback
-
-Playback is controlled with `Play()`, `Pause()`, `Stop()`, and `JumpToFrame()`. These methods operate on the `Dali::Ui::AnimatedImageView` handle and return the view for chaining.
-
-```cpp
-void StartAnimation(Dali::Ui::AnimatedImageView view)
+void PlayPreview(Dali::Ui::AnimatedImageView view)
 {
   view.Play();
 }
 
-void PauseAnimation(Dali::Ui::AnimatedImageView view)
+void PausePreview(Dali::Ui::AnimatedImageView view)
 {
   view.Pause();
 }
 
-void RestartAnimation(Dali::Ui::AnimatedImageView view)
+void StopPreview(Dali::Ui::AnimatedImageView view)
 {
-  view.Stop()
-      .JumpToFrame(0)
-      .Play();
+  view.Stop();
+}
+
+void SeekPreview(Dali::Ui::AnimatedImageView view, int frame)
+{
+  view.JumpToFrame(frame);
 }
 ```
 
-Use `GetPlayState()`, `GetCurrentFrame()`, and `GetTotalFrame()` to report or synchronize UI state.
+Playback state and frame position are available through `GetPlayState`, `GetCurrentFrame`, and `GetTotalFrame`.
 
 ```cpp
-void TogglePlayback(Dali::Ui::AnimatedImageView view)
+bool IsCurrentlyPlaying(Dali::Ui::AnimatedImageView view)
 {
-  if(view.GetPlayState() == Dali::Ui::AnimatedImage::PlayState::PLAYING)
-  {
-    view.Pause();
-  }
-  else
-  {
-    view.Play();
-  }
+  return view.GetPlayState() == Dali::Ui::AnimatedImage::PlayState::PLAYING;
 }
 
-int currentFrame = view.GetCurrentFrame();
-int totalFrames  = view.GetTotalFrame();
+int GetRemainingFrames(Dali::Ui::AnimatedImageView view)
+{
+  return view.GetTotalFrame() - view.GetCurrentFrame();
+}
 ```
 
-`AnimationFinishedSignal()` is emitted when the animation completes all configured loops. The callback receives the finished `Dali::Ui::View`.
+## Configure loops, speed, and stop behavior
+
+`SetLoopCount` controls how many times the animation repeats. A value of `-1` means infinite looping, `0` means it will not play, and a positive value sets an exact loop count.
 
 ```cpp
-class AnimationController : public Dali::ConnectionTracker
+Dali::Ui::AnimatedImageView spinner =
+  Dali::Ui::AnimatedImageView::New("images/spinner.webp")
+    .SetLoopCount(-1)
+    .SetFrameSpeedFactor(1.0f)
+    .Play();
+
+int loopCount = spinner.GetLoopCount();
+float speed = spinner.GetFrameSpeedFactor();
+```
+
+Use `SetFrameSpeedFactor` to scale playback speed and `SetFrameDelay` to override the per-frame delay in milliseconds.
+
+```cpp
+void UseFastPreviewTiming(Dali::Ui::AnimatedImageView view)
+{
+  view
+    .SetFrameSpeedFactor(2.0f)
+    .SetFrameDelay(100);
+
+  float factor = view.GetFrameSpeedFactor();
+  int delayMs = view.GetFrameDelay();
+}
+```
+
+`SetStopBehavior` controls which frame is shown after `Stop`. The value is read back with `GetStopBehavior`.
+
+```cpp
+void StopOnLastFrame(Dali::Ui::AnimatedImageView view)
+{
+  view
+    .SetStopBehavior(Dali::Ui::AnimatedImage::StopBehavior::LAST_FRAME)
+    .Stop();
+
+  Dali::Ui::AnimatedImage::StopBehavior behavior = view.GetStopBehavior();
+}
+```
+
+## Tune loading and frame buffering
+
+`SetBatchSize` sets how many frames are prepared in a batch. `SetCacheSize` sets how many frames are kept cached.
+
+```cpp
+Dali::Ui::AnimatedImageView sequence =
+  Dali::Ui::AnimatedImageView::New()
+    .SetResourceUrls(MakeFrameUrls())
+    .SetBatchSize(4)
+    .SetCacheSize(10)
+    .SetFrameDelay(120);
+
+int batchSize = sequence.GetBatchSize();
+int cacheSize = sequence.GetCacheSize();
+```
+
+Use `SetDesiredWidth` and `SetDesiredHeight` as loader size hints. `SetImageLoadWithViewSize` enables loading based on the current view size.
+
+```cpp
+void ConfigureLoaderSize(Dali::Ui::AnimatedImageView view)
+{
+  view
+    .SetDesiredWidth(480)
+    .SetDesiredHeight(320)
+    .SetImageLoadWithViewSize(true);
+
+  int width = view.GetDesiredWidth();
+  int height = view.GetDesiredHeight();
+  bool usesViewSize = view.IsImageLoadWithViewSizeEnabled();
+}
+```
+
+`SetLoadPolicy`, `SetReleasePolicy`, and `SetSynchronousLoading` control when resources are loaded, when cached resources are released, and whether loading is synchronous.
+
+```cpp
+void ConfigureLoadingPolicy(Dali::Ui::AnimatedImageView view,
+                            Dali::Ui::Image::LoadPolicy loadPolicy,
+                            Dali::Ui::Image::ReleasePolicy releasePolicy)
+{
+  view
+    .SetLoadPolicy(loadPolicy)
+    .SetReleasePolicy(releasePolicy)
+    .SetSynchronousLoading(false);
+
+  Dali::Ui::Image::LoadPolicy currentLoadPolicy = view.GetLoadPolicy();
+  Dali::Ui::Image::ReleasePolicy currentReleasePolicy = view.GetReleasePolicy();
+  bool synchronous = view.IsSynchronousLoading();
+}
+```
+
+## Apply fitting, color, pixel area, and masks
+
+Use `SetFittingMode` to control how the animated image fits inside the view bounds, and `SetSamplingMode` to control scaling quality.
+
+```cpp
+void ConfigureImageScaling(Dali::Ui::AnimatedImageView view,
+                           Dali::Ui::Image::FittingMode fittingMode,
+                           Dali::Ui::Image::SamplingMode samplingMode)
+{
+  view
+    .SetFittingMode(fittingMode)
+    .SetSamplingMode(samplingMode);
+
+  Dali::Ui::Image::FittingMode currentFitting = view.GetFittingMode();
+  Dali::Ui::Image::SamplingMode currentSampling = view.GetSamplingMode();
+}
+```
+
+`SetImageColor` applies a color to the image, and `SetPreMultipliedAlpha` configures alpha handling.
+
+```cpp
+void TintAnimatedImage(Dali::Ui::AnimatedImageView view)
+{
+  view
+    .SetImageColor(Dali::Ui::UiColor(0xFFFFFFFF))
+    .SetPreMultipliedAlpha(true);
+
+  Dali::Ui::UiColor color = view.GetImageColor();
+  bool preMultiplied = view.IsPreMultipliedAlpha();
+}
+```
+
+Use `SetPixelArea` to show a normalized sub-region of the image. The value is `(x, y, width, height)`.
+
+```cpp
+void ShowCenterRegion(Dali::Ui::AnimatedImageView view)
+{
+  view.SetPixelArea(Dali::Vector4(0.25f, 0.25f, 0.5f, 0.5f));
+
+  Dali::Vector4 area = view.GetPixelArea();
+}
+```
+
+For alpha masking, set a mask image with `SetAlphaMaskUrl`, choose whether to crop to the mask bounds with `SetCropToMask`, and choose masking timing with `SetMaskingMode`.
+
+```cpp
+void ApplyAlphaMask(Dali::Ui::AnimatedImageView view,
+                    const Dali::String& maskUrl,
+                    Dali::Ui::Image::MaskingType maskingMode)
+{
+  view
+    .SetAlphaMaskUrl(maskUrl)
+    .SetCropToMask(true)
+    .SetMaskingMode(maskingMode);
+
+  Dali::String currentMask = view.GetAlphaMaskUrl();
+  bool cropToMask = view.IsCropToMask();
+  Dali::Ui::Image::MaskingType currentMode = view.GetMaskingMode();
+}
+```
+
+A fallback image can be supplied while the animated resource is loading.
+
+```cpp
+void UseFallbackImage(Dali::Ui::AnimatedImageView view,
+                      const Dali::String& fallbackUrl,
+                      const Dali::String& animationUrl)
+{
+  view
+    .SetPlaceholderUrl(fallbackUrl)
+    .SetResourceUrl(animationUrl);
+
+  Dali::String fallback = view.GetPlaceholderUrl();
+}
+```
+
+## React to loading and animation signals
+
+`ResourceReadySignal` is emitted when the image resource is ready to display. The callback receives the owning `Dali::Ui::View`.
+
+```cpp
+class AnimatedImageController
 {
 public:
-  void Attach(Dali::Ui::AnimatedImageView view)
+  void SetView(Dali::Ui::AnimatedImageView view)
   {
     mView = view;
-    mView.AnimationFinishedSignal().Connect(this, &AnimationController::OnAnimationFinished);
+    mView.ResourceReadySignal().Connect(this, &AnimatedImageController::OnResourceReady);
+  }
+
+private:
+  void OnResourceReady(Dali::Ui::View view)
+  {
+    Dali::Ui::Visual::ResourceStatus status = mView.GetLoadingStatus();
+    int totalFrames = mView.GetTotalFrame();
+
+    if(status == Dali::Ui::Visual::ResourceStatus::READY && totalFrames > 0)
+    {
+      mView.Play();
+    }
+  }
+
+  Dali::Ui::AnimatedImageView mView;
+};
+```
+
+`AnimationFinishedSignal` is emitted when playback completes its configured loops. It also passes the owning `Dali::Ui::View`.
+
+```cpp
+class LoopOnceController
+{
+public:
+  void SetView(Dali::Ui::AnimatedImageView view)
+  {
+    mView = view;
+    mView
+      .SetLoopCount(1)
+      .SetStopBehavior(Dali::Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+
+    mView.AnimationFinishedSignal().Connect(this, &LoopOnceController::OnAnimationFinished);
+  }
+
+  void Start()
+  {
+    mView.Play();
   }
 
 private:
@@ -158,161 +361,50 @@ private:
 };
 ```
 
-## Configure Looping, Speed, and Stop Behavior
-
-Use `SetLoopCount()` to decide how many times playback repeats. `-1` means infinite looping, `0` prevents playback, and positive values request an exact loop count.
+If a generic `BaseHandle` is passed through shared code, use `Dali::Ui::AnimatedImageView::DownCast` before accessing animated-image-specific APIs.
 
 ```cpp
-Dali::Ui::AnimatedImageView intro = Dali::Ui::AnimatedImageView::New("images/intro.gif")
-  .SetLoopCount(1)
-  .SetFrameSpeedFactor(1.0f)
-  .SetStopBehavior(Dali::Ui::AnimatedImage::StopBehavior::LAST_FRAME);
-```
-
-`SetFrameSpeedFactor()` applies a playback speed multiplier. Values below `1.0f` slow playback down, and values above `1.0f` speed it up.
-
-```cpp
-void UseReducedMotion(Dali::Ui::AnimatedImageView view, bool reducedMotion)
+void ConnectIfAnimatedImage(Dali::BaseHandle handle,
+                            AnimatedImageController& controller)
 {
-  if(reducedMotion)
+  Dali::Ui::AnimatedImageView view =
+    Dali::Ui::AnimatedImageView::DownCast(handle);
+
+  if(view)
   {
-    view.SetFrameSpeedFactor(0.5f);
-  }
-  else
-  {
-    view.SetFrameSpeedFactor(1.0f);
+    controller.SetView(view);
   }
 }
 ```
 
-`SetStopBehavior()` controls which frame is displayed after `Stop()` or after a finite loop completes. Use `Dali::Ui::AnimatedImage::StopBehavior::CURRENT_FRAME`, `FIRST_FRAME`, or `LAST_FRAME`.
+## Property constants
 
-```cpp
-void ConfigureCompletionFrame(Dali::Ui::AnimatedImageView view)
-{
-  view
-    .SetLoopCount(2)
-    .SetStopBehavior(Dali::Ui::AnimatedImage::StopBehavior::FIRST_FRAME)
-    .Play();
-}
+Prefer typed setters such as `SetResourceUrl`, `SetLoopCount`, `SetFrameDelay`, `SetFittingMode`, and `SetAlphaMaskUrl` in application code. `Dali::Ui::AnimatedImageView::Property` owns the property constants for integrations that need property indices.
 
-int loopCount = view.GetLoopCount();
-float speed   = view.GetFrameSpeedFactor();
-Dali::Ui::AnimatedImage::StopBehavior stopBehavior = view.GetStopBehavior();
-```
+The property owner is `Dali::Ui::AnimatedImageView::Property`, including:
 
-## Fit, Sample, Tint, and Crop the Image
+- `Dali::Ui::AnimatedImageView::Property::IMAGE`
+- `Dali::Ui::AnimatedImageView::Property::IMAGE_URLS`
+- `Dali::Ui::AnimatedImageView::Property::LOOP_COUNT`
+- `Dali::Ui::AnimatedImageView::Property::STOP_BEHAVIOR`
+- `Dali::Ui::AnimatedImageView::Property::FRAME_SPEED_FACTOR`
+- `Dali::Ui::AnimatedImageView::Property::BATCH_SIZE`
+- `Dali::Ui::AnimatedImageView::Property::CACHE_SIZE`
+- `Dali::Ui::AnimatedImageView::Property::FRAME_DELAY`
+- `Dali::Ui::AnimatedImageView::Property::IMAGE_COLOR`
+- `Dali::Ui::AnimatedImageView::Property::PRE_MULTIPLIED_ALPHA`
+- `Dali::Ui::AnimatedImageView::Property::FITTING_MODE`
+- `Dali::Ui::AnimatedImageView::Property::SAMPLING_MODE`
+- `Dali::Ui::AnimatedImageView::Property::DESIRED_WIDTH`
+- `Dali::Ui::AnimatedImageView::Property::DESIRED_HEIGHT`
+- `Dali::Ui::AnimatedImageView::Property::LOAD_POLICY`
+- `Dali::Ui::AnimatedImageView::Property::RELEASE_POLICY`
+- `Dali::Ui::AnimatedImageView::Property::SYNCHRONOUS_LOADING`
+- `Dali::Ui::AnimatedImageView::Property::IMAGE_LOAD_WITH_VIEW_SIZE`
+- `Dali::Ui::AnimatedImageView::Property::ALPHA_MASK_URL`
+- `Dali::Ui::AnimatedImageView::Property::CROP_TO_MASK`
+- `Dali::Ui::AnimatedImageView::Property::MASKING_MODE`
+- `Dali::Ui::AnimatedImageView::Property::PLACEHOLDER_IMAGE`
+- `Dali::Ui::AnimatedImageView::Property::PIXEL_AREA`
 
-`AnimatedImageView` exposes image-display controls through typed setters. Use `SetFittingMode()` to choose how the image fits inside the view bounds, and `SetSamplingMode()` to choose the scaling filter.
-
-```cpp
-Dali::Ui::AnimatedImageView avatar = Dali::Ui::AnimatedImageView::New("images/avatar-animated.webp")
-  .SetDesiredWidth(160)
-  .SetDesiredHeight(160)
-  .SetFittingMode(Dali::Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO)
-  .SetSamplingMode(Dali::Ui::Image::SamplingMode::LINEAR);
-```
-
-Use `SetImageColor()` for tinting and `SetPreMultipliedAlpha()` when the source content is prepared for premultiplied alpha rendering.
-
-```cpp
-avatar
-  .SetImageColor(Dali::Ui::UiColor(0xFFFFFFFF))
-  .SetPreMultipliedAlpha(true);
-
-Dali::Ui::UiColor color = avatar.GetImageColor();
-bool premultiplied      = avatar.IsPreMultipliedAlpha();
-```
-
-Use `SetAlphaMaskUrl()`, `SetCropToMask()`, and `SetMaskingMode()` when the animated image should be clipped by an alpha mask.
-
-```cpp
-Dali::Ui::AnimatedImageView masked = Dali::Ui::AnimatedImageView::New("images/animated-card.webp")
-  .SetAlphaMaskUrl("images/card-mask.png")
-  .SetCropToMask(true)
-  .SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_RENDERING)
-  .SetFittingMode(Dali::Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
-```
-
-`SetPixelArea()` displays a normalized sub-region of the image, using `(x, y, width, height)`.
-
-```cpp
-masked.SetPixelArea(Dali::Vector4(0.0f, 0.0f, 0.5f, 1.0f));
-
-Dali::Vector4 pixelArea = masked.GetPixelArea();
-```
-
-## Loading and Resource Signals
-
-Use `SetPlaceholderUrl()` to show a still image while the animated resource is loading. Use `ResourceReadySignal()` to know when the resource is ready to display.
-
-```cpp
-class LoadingController : public Dali::ConnectionTracker
-{
-public:
-  Dali::Ui::AnimatedImageView Create()
-  {
-    mView = Dali::Ui::AnimatedImageView::New("images/large-animation.webp")
-      .SetPlaceholderUrl("images/placeholder.png")
-      .SetLoadPolicy(Dali::Ui::Image::LoadPolicy::ATTACHED)
-      .SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::DETACHED);
-
-    mView.ResourceReadySignal().Connect(this, &LoadingController::OnResourceReady);
-    return mView;
-  }
-
-private:
-  void OnResourceReady(Dali::Ui::View view)
-  {
-    mView.Play();
-  }
-
-  Dali::Ui::AnimatedImageView mView;
-};
-```
-
-`SetSynchronousLoading()` requests synchronous loading, while `SetLoadPolicy()` and `SetReleasePolicy()` control when resources are loaded and released. `GetLoadingStatus()` returns the current `Dali::Ui::Visual::ResourceStatus`.
-
-```cpp
-Dali::Ui::AnimatedImageView icon = Dali::Ui::AnimatedImageView::New("images/icon-animated.gif")
-  .SetSynchronousLoading(false)
-  .SetLoadPolicy(Dali::Ui::Image::LoadPolicy::IMMEDIATE)
-  .SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::NEVER);
-
-bool synchronous = icon.IsSynchronousLoading();
-Dali::Ui::Image::LoadPolicy loadPolicy = icon.GetLoadPolicy();
-Dali::Ui::Image::ReleasePolicy releasePolicy = icon.GetReleasePolicy();
-Dali::Ui::Visual::ResourceStatus status = icon.GetLoadingStatus();
-```
-
-## AnimatedImageView Properties
-
-Prefer typed setters and getters for application code. `Dali::Ui::AnimatedImageView::Property` owns the property constants for this view, and `Dali::Ui::AnimatedImageViewPropertyIndex` is the underlying property-index definition used by the view implementation and property registration.
-
-| Owned property constant | Meaning |
-| --- | --- |
-| `Dali::Ui::AnimatedImageView::Property::IMAGE` | Single animated image URL |
-| `Dali::Ui::AnimatedImageView::Property::IMAGE_URLS` | Frame URL array |
-| `Dali::Ui::AnimatedImageView::Property::LOOP_COUNT` | Loop count, with `-1` for infinite looping |
-| `Dali::Ui::AnimatedImageView::Property::STOP_BEHAVIOR` | Stop behavior as `Dali::Ui::AnimatedImage::StopBehavior` |
-| `Dali::Ui::AnimatedImageView::Property::FRAME_SPEED_FACTOR` | Playback speed multiplier |
-| `Dali::Ui::AnimatedImageView::Property::BATCH_SIZE` | Frame preload batch size |
-| `Dali::Ui::AnimatedImageView::Property::CACHE_SIZE` | Frame cache size |
-| `Dali::Ui::AnimatedImageView::Property::FRAME_DELAY` | Frame delay override in milliseconds |
-| `Dali::Ui::AnimatedImageView::Property::IMAGE_COLOR` | Image tint color |
-| `Dali::Ui::AnimatedImageView::Property::PRE_MULTIPLIED_ALPHA` | Premultiplied alpha flag |
-| `Dali::Ui::AnimatedImageView::Property::FITTING_MODE` | Image fitting mode |
-| `Dali::Ui::AnimatedImageView::Property::SAMPLING_MODE` | Scaling sampling mode |
-| `Dali::Ui::AnimatedImageView::Property::DESIRED_WIDTH` | Desired decode width hint |
-| `Dali::Ui::AnimatedImageView::Property::DESIRED_HEIGHT` | Desired decode height hint |
-| `Dali::Ui::AnimatedImageView::Property::LOAD_POLICY` | Resource load policy |
-| `Dali::Ui::AnimatedImageView::Property::RELEASE_POLICY` | Resource release policy |
-| `Dali::Ui::AnimatedImageView::Property::SYNCHRONOUS_LOADING` | Synchronous loading flag |
-| `Dali::Ui::AnimatedImageView::Property::IMAGE_LOAD_WITH_VIEW_SIZE` | Load using the current view size |
-| `Dali::Ui::AnimatedImageView::Property::ALPHA_MASK_URL` | Alpha mask image URL |
-| `Dali::Ui::AnimatedImageView::Property::CROP_TO_MASK` | Crop-to-mask flag |
-| `Dali::Ui::AnimatedImageView::Property::MASKING_MODE` | Alpha masking mode |
-| `Dali::Ui::AnimatedImageView::Property::PLACEHOLDER_IMAGE` | Placeholder image URL |
-| `Dali::Ui::AnimatedImageView::Property::PIXEL_AREA` | Normalized image sub-region |
-
-`Dali::Ui::AnimatedImageViewPropertyIndex::ALPHA_MASK_URL` and `Dali::Ui::AnimatedImageViewPropertyIndex::BATCH_SIZE` are part of the same owned property-index surface. Application code normally reaches them through `Dali::Ui::AnimatedImageView::Property::ALPHA_MASK_URL` and `Dali::Ui::AnimatedImageView::Property::BATCH_SIZE`, while using `SetAlphaMaskUrl()` and `SetBatchSize()` for type-safe configuration.
+`Dali::Ui::AnimatedImageViewPropertyIndex` provides the backing property-index values used by `Dali::Ui::AnimatedImageView::Property`. For application code, use the `Dali::Ui::AnimatedImageView::Property` owner name when referring to Animated Image View properties.

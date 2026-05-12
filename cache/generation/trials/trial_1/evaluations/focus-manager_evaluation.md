@@ -2,28 +2,22 @@
 
 ## Summary
 
-- Status: warning
+- Status: clean
 - Publish ready: true
 - Bugs: 0
-- Warnings: 1
+- Warnings: 0
 - Needs review: 0
-- Repairable issues: 1
+- Repairable issues: 0
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| UNKNOWN_BACKTICK_API_TOKEN | 1 |
+| None | 0 |
 
 ## Human Review
 
-### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
-
-- Location: line 58
-- Span: `Dali::Ui::FocusManager::MoveFocus(Dali::Ui::FocusDirection::FORWARD`
-- Reason: Backticked API-like token `Dali::Ui::FocusManager::MoveFocus(Dali::Ui::FocusDirection::FORWARD` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
-
+No issues detected.
 ## Machine Data
 
 - Validation JSON: `cache/generation/trials/trial_1/validation/focus-manager.validation.json`

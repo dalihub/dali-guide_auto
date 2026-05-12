@@ -6,26 +6,25 @@ category: platform-integration
 
 # Addon Manager
 
-Addon Manager lets a dali-ui application discover available DALi add-ons, load them by name, inspect their metadata, and call exported add-on procedures through typed function wrappers.
+`Dali::Integration::AddOnManager` loads platform add-ons, queries their metadata, retrieves exported procedures, and forwards application lifecycle events to loaded add-ons.
 
 ## Table of Contents
 
-- [Using Addon Manager from a dali-ui app](#using-addon-manager-from-a-dali-ui-app)
-- [Discovering add-ons and reading metadata](#discovering-add-ons-and-reading-metadata)
-- [Loading add-ons and calling exported procedures](#loading-add-ons-and-calling-exported-procedures)
-- [Registering an add-on dispatch table](#registering-an-add-on-dispatch-table)
-- [Lifecycle callbacks](#lifecycle-callbacks)
+- [Getting the Add-on Manager](#getting-the-add-on-manager)
+- [Discovering and Loading Add-ons](#discovering-and-loading-add-ons)
+- [Reading Add-on Metadata](#reading-add-on-metadata)
+- [Calling Add-on Procedures](#calling-add-on-procedures)
+- [Forwarding Application Lifecycle](#forwarding-application-lifecycle)
+- [Registering a Dispatch Table](#registering-a-dispatch-table)
 
-## Using Addon Manager from a dali-ui app
+## Getting the Add-on Manager
 
-In dali-ui application code, keep the visible object model centered on `Dali::Ui::View`. Use `Dali::Integration::AddOnManager` as a platform-integration service behind your view-level feature code rather than exposing add-on loading as part of the view tree.
+In a dali-ui application, your UI should remain built around `Dali::Ui::View`. `Dali::Integration::AddOnManager` is used at the platform-integration boundary, typically from application setup code that prepares optional platform functionality before views depend on it.
 
-`Dali::Integration::AddOnManager` is provided as a singleton created by the adaptor. Application code obtains it with `Dali::Integration::AddOnManager::Get()`. The function returns a pointer, so always check it before using the manager.
+Use `Dali::Integration::AddOnManager::Get` to access the process-wide manager. Check the returned pointer before using it, because add-on support is integration-provided.
 
 ```cpp
-#include <dali/integration-api/addon-manager.h>
-
-void UseAddonManagerFromViewFeature()
+void InitializePlatformAddOns()
 {
   Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
   if(!manager)
@@ -33,123 +32,18 @@ void UseAddonManagerFromViewFeature()
     return;
   }
 
-  std::vector<std::string> addonNames = manager->EnumerateAddOns();
-
-  for(const std::string& addonName : addonNames)
-  {
-    Dali::AddOnInfo info;
-    if(manager->GetAddOnInfo(addonName, info))
-    {
-      const std::string& name = info.name;
-      const uint32_t version = info.version;
-      (void)name;
-      (void)version;
-    }
-  }
+  manager->Start();
 }
 ```
 
-`Dali::Integration::AddOnManager::EnumerateAddOns()` returns the available add-on names. `Dali::Integration::AddOnManager::GetAddOnInfo()` fills a `Dali::AddOnInfo` object for a named add-on and returns `true` when the metadata was retrieved.
+`Dali::Integration::AddOnManager::AddOnManager` and `Dali::Integration::AddOnManager::~AddOnManager` belong to the integration implementation. Application code normally uses `Dali::Integration::AddOnManager::Get` rather than constructing a manager directly.
 
-## Discovering add-ons and reading metadata
+## Discovering and Loading Add-ons
 
-Use `Dali::AddOnInfo` when you need to display, log, or filter add-on metadata before loading or invoking feature code. The public fields are `Dali::AddOnInfo::name`, `Dali::AddOnInfo::version`, `Dali::AddOnInfo::type`, `Dali::AddOnInfo::next`, and `Dali::AddOnInfo::buildInfo`.
-
-`Dali::AddOnInfo::BuildInfo` stores the DALi library versions used to build the add-on. Its fields are `Dali::AddOnInfo::BuildInfo::libCoreVersion`, `Dali::AddOnInfo::BuildInfo::libAdaptorVersion`, and `Dali::AddOnInfo::BuildInfo::libToolkitVersion`.
+Use `Dali::Integration::AddOnManager::EnumerateAddOns` to obtain the add-on names visible to the integration layer. Load one add-on with `Dali::Integration::AddOnManager::LoadAddOn`, or load a selected list with `Dali::Integration::AddOnManager::LoadAddOns`.
 
 ```cpp
-#include <dali/integration-api/addon-manager.h>
-
-struct AddonMetadata
-{
-  std::string name;
-  uint32_t version;
-  uint32_t coreVersion;
-  uint32_t adaptorVersion;
-  uint32_t toolkitVersion;
-};
-
-std::vector<AddonMetadata> ReadAvailableAddonMetadata()
-{
-  std::vector<AddonMetadata> metadata;
-
-  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
-  if(!manager)
-  {
-    return metadata;
-  }
-
-  const std::vector<std::string> addonNames = manager->EnumerateAddOns();
-
-  for(const std::string& addonName : addonNames)
-  {
-    Dali::AddOnInfo info;
-    if(manager->GetAddOnInfo(addonName, info))
-    {
-      metadata.push_back({
-        info.name,
-        info.version,
-        info.buildInfo.libCoreVersion,
-        info.buildInfo.libAdaptorVersion,
-        info.buildInfo.libToolkitVersion
-      });
-    }
-  }
-
-  return metadata;
-}
-```
-
-`Dali::AddOnInfo::next` is a raw extension-data pointer. Application code should only pass through or inspect data whose format is defined by the specific add-on contract.
-
-## Loading add-ons and calling exported procedures
-
-Use `Dali::Integration::AddOnManager::LoadAddOns()` when your application already knows a set of add-on names. It returns one handle per requested name. A null handle means that add-on was not loaded.
-
-After loading, use the typed `Dali::Integration::AddOnManager::GetGlobalProc()` template to bind a named global procedure. The template argument must match the exported function signature.
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-
-using IsSupportedProc = bool();
-
-bool IsAddonSupported(const std::string& addonName)
-{
-  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
-  if(!manager)
-  {
-    return false;
-  }
-
-  std::vector<std::string> requestedAddons;
-  requestedAddons.push_back(addonName);
-
-  std::vector<void*> libraries = manager->LoadAddOns(requestedAddons);
-  if(libraries.empty() || !libraries[0])
-  {
-    return false;
-  }
-
-  std::function<IsSupportedProc> isSupported =
-    manager->GetGlobalProc<IsSupportedProc>(libraries[0], "IsSupported");
-
-  if(!isSupported)
-  {
-    return false;
-  }
-
-  return isSupported();
-}
-```
-
-For a single known add-on, `Dali::Integration::AddOnManager::GetAddOn()` is a convenience wrapper around `Dali::Integration::AddOnManager::LoadAddOns()`.
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-
-using EnableProc = void(bool);
-
-void EnableAddonFeature(const std::string& addonName, bool enabled)
+void LoadAvailableAddOns()
 {
   Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
   if(!manager)
@@ -157,53 +51,61 @@ void EnableAddonFeature(const std::string& addonName, bool enabled)
     return;
   }
 
-  auto addon = manager->GetAddOn(addonName);
-  if(!addon)
+  const std::vector<std::string> names = manager->EnumerateAddOns();
+
+  for(const std::string& name : names)
+  {
+    auto addOn = manager->LoadAddOn(name, name);
+    (void)addOn;
+  }
+}
+```
+
+When the application already knows which add-ons it requires, pass those names directly to `Dali::Integration::AddOnManager::LoadAddOns`.
+
+```cpp
+void LoadRequiredAddOns()
+{
+  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
   {
     return;
   }
 
-  std::function<EnableProc> enable =
-    manager->GetGlobalProc<EnableProc>(addon, "Enable");
-
-  if(enable)
+  const std::vector<std::string> requiredAddOns =
   {
-    enable(enabled);
-  }
+    "image-loader",
+    "platform-service"
+  };
+
+  const auto loadedAddOns = manager->LoadAddOns(requiredAddOns);
+  (void)loadedAddOns;
 }
 ```
 
-`Dali::Integration::AddOnManager::InvokeGlobalProc()` combines lookup and invocation. Use it only when the procedure is required by your add-on contract, because the call expects the named procedure to be available.
+Use `Dali::Integration::AddOnManager::GetAddOn` when the add-on has already been loaded and you need its library handle for procedure lookup.
 
 ```cpp
-#include <dali/integration-api/addon-manager.h>
-
-int ReadAddonValue(const std::string& addonName)
+auto FindLoadedAddOn(const std::string& addOnName)
 {
   Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
   if(!manager)
   {
-    return 0;
+    return decltype(manager->GetAddOn(addOnName)){};
   }
 
-  auto addon = manager->GetAddOn(addonName);
-  if(!addon)
-  {
-    return 0;
-  }
-
-  return manager->InvokeGlobalProc<int>(addon, "GetValue");
+  return manager->GetAddOn(addOnName);
 }
 ```
 
-Use `Dali::Integration::AddOnManager::LoadAddOn()` when the add-on name and library name are provided separately.
+## Reading Add-on Metadata
+
+`Dali::AddOnInfo` describes one add-on. `Dali::Integration::AddOnManager::GetAddOnInfo` fills a `Dali::AddOnInfo` instance for a named add-on and returns whether information was found.
+
+The primary fields are `Dali::AddOnInfo::name`, `Dali::AddOnInfo::type`, `Dali::AddOnInfo::version`, `Dali::AddOnInfo::buildInfo`, and `Dali::AddOnInfo::next`. Build compatibility information is grouped under `Dali::AddOnInfo::BuildInfo`, including `Dali::AddOnInfo::BuildInfo::libCoreVersion`, `Dali::AddOnInfo::BuildInfo::libAdaptorVersion`, and `Dali::AddOnInfo::BuildInfo::libToolkitVersion`.
 
 ```cpp
-#include <dali/integration-api/addon-manager.h>
-
-using InitializeProc = bool();
-
-bool LoadAddonFromLibrary(const std::string& addonName, const std::string& libraryName)
+bool IsAddOnKnown(const std::string& addOnName)
 {
   Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
   if(!manager)
@@ -211,150 +113,178 @@ bool LoadAddonFromLibrary(const std::string& addonName, const std::string& libra
     return false;
   }
 
-  auto addon = manager->LoadAddOn(addonName, libraryName);
-  if(!addon)
+  Dali::AddOnInfo info;
+  if(!manager->GetAddOnInfo(addOnName, info))
   {
     return false;
   }
 
-  std::function<InitializeProc> initialize =
-    manager->GetGlobalProc<InitializeProc>(addon, "Initialize");
+  const char* name           = info.name;
+  const char* type           = info.type;
+  const char* version        = info.version;
+  const char* coreVersion    = info.buildInfo.libCoreVersion;
+  const char* adaptorVersion = info.buildInfo.libAdaptorVersion;
+  const char* toolkitVersion = info.buildInfo.libToolkitVersion;
 
-  return initialize ? initialize() : false;
-}
-```
+  (void)name;
+  (void)type;
+  (void)version;
+  (void)coreVersion;
+  (void)adaptorVersion;
+  (void)toolkitVersion;
 
-## Registering an add-on dispatch table
-
-An add-on exposes itself to `Dali::Integration::AddOnManager` with `Dali::AddOnDispatchTable`. The table names the add-on and provides callbacks for metadata, global procedure lookup, instance procedure lookup, and lifecycle events.
-
-The required table fields are `Dali::AddOnDispatchTable::name`, `Dali::AddOnDispatchTable::GetAddOnInfo`, `Dali::AddOnDispatchTable::GetGlobalProc`, and `Dali::AddOnDispatchTable::GetInstanceProc`. Lifecycle fields are `Dali::AddOnDispatchTable::OnStart`, `Dali::AddOnDispatchTable::OnResume`, `Dali::AddOnDispatchTable::OnPause`, and `Dali::AddOnDispatchTable::OnStop`.
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-
-namespace
-{
-bool IsSupported()
-{
   return true;
 }
-
-void FillAddonInfo(Dali::AddOnInfo& info)
-{
-  info.name = "example-addon";
-  info.version = 1u;
-  info.buildInfo.libCoreVersion = 0u;
-  info.buildInfo.libAdaptorVersion = 0u;
-  info.buildInfo.libToolkitVersion = 0u;
-  info.next = nullptr;
-}
-
-void* LookupGlobalProc(const char* procName)
-{
-  const std::string name(procName);
-
-  if(name == "IsSupported")
-  {
-    return reinterpret_cast<void*>(&IsSupported);
-  }
-
-  return nullptr;
-}
-
-void* LookupInstanceProc(const char* procName)
-{
-  (void)procName;
-  return nullptr;
-}
-
-void OnStart()
-{
-}
-
-void OnResume()
-{
-}
-
-void OnPause()
-{
-}
-
-void OnStop()
-{
-}
-
-const Dali::AddOnDispatchTable EXAMPLE_ADDON_DISPATCH_TABLE =
-{
-  "example-addon",
-  &FillAddonInfo,
-  &LookupGlobalProc,
-  &LookupInstanceProc,
-  &OnStart,
-  &OnResume,
-  &OnPause,
-  &OnStop
-};
-}
-
-void RegisterExampleAddon()
-{
-  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
-  if(manager)
-  {
-    manager->RegisterAddOnDispatchTable(&EXAMPLE_ADDON_DISPATCH_TABLE);
-  }
-}
 ```
 
-`Dali::Integration::AddOnManager::RegisterAddOnDispatchTable()` stores the table in the platform implementation. Once registered, application code can retrieve metadata with `Dali::Integration::AddOnManager::GetAddOnInfo()` and bind procedures with `Dali::Integration::AddOnManager::GetGlobalProc()` or `Dali::Integration::AddOnManager::GetInstanceProc()`.
-
-## Lifecycle callbacks
-
-The manager exposes lifecycle forwarding methods: `Dali::Integration::AddOnManager::Start()`, `Dali::Integration::AddOnManager::Resume()`, `Dali::Integration::AddOnManager::Pause()`, and `Dali::Integration::AddOnManager::Stop()`. These methods are intended for adaptor lifecycle forwarding. Add-ons participate by filling the matching callbacks in `Dali::AddOnDispatchTable`.
+`Dali::AddOnInfo::next` allows add-on metadata to be represented as a linked list when an add-on exposes more than one information record.
 
 ```cpp
-#include <dali/integration-api/addon-manager.h>
+void VisitAddOnInfoChain(const Dali::AddOnInfo& firstInfo)
+{
+  const Dali::AddOnInfo* current = &firstInfo;
 
-namespace
-{
-void StartAddonServices()
-{
-}
-
-void ResumeAddonServices()
-{
-}
-
-void PauseAddonServices()
-{
-}
-
-void StopAddonServices()
-{
-}
-
-const Dali::AddOnDispatchTable LIFECYCLE_DISPATCH_TABLE =
-{
-  "lifecycle-addon",
-  nullptr,
-  nullptr,
-  nullptr,
-  &StartAddonServices,
-  &ResumeAddonServices,
-  &PauseAddonServices,
-  &StopAddonServices
-};
-}
-
-void RegisterLifecycleCallbacks()
-{
-  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
-  if(manager)
+  while(current)
   {
-    manager->RegisterAddOnDispatchTable(&LIFECYCLE_DISPATCH_TABLE);
+    const char* name    = current->name;
+    const char* version = current->version;
+
+    (void)name;
+    (void)version;
+
+    current = current->next;
   }
 }
 ```
 
-For a dali-ui application, view code normally reacts to application state through its usual app structure and `Dali::Ui::View` ownership. Add-on lifecycle callbacks are useful when the loaded native extension needs to start, pause, resume, or stop its own internal resources together with the DALi adaptor lifecycle.
+## Calling Add-on Procedures
+
+After an add-on is loaded, use `Dali::Integration::AddOnManager::GetGlobalProc` to retrieve a typed global procedure. The template argument is the function signature you expect from the add-on.
+
+```cpp
+bool TryReadAddOnStatus(const std::string& addOnName)
+{
+  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return false;
+  }
+
+  auto addOn = manager->GetAddOn(addOnName);
+  auto getStatus = manager->GetGlobalProc<int()>(addOn, "GetStatus");
+
+  if(!getStatus)
+  {
+    return false;
+  }
+
+  const int status = getStatus();
+  return status == 0;
+}
+```
+
+For one-off calls, `Dali::Integration::AddOnManager::InvokeGlobalProc` combines lookup and invocation.
+
+```cpp
+int ReadAddOnValue(const std::string& addOnName, int fallbackValue)
+{
+  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return fallbackValue;
+  }
+
+  auto addOn = manager->GetAddOn(addOnName);
+  return manager->InvokeGlobalProc<int>(addOn, "ReadValue", fallbackValue);
+}
+```
+
+Use `Dali::Integration::AddOnManager::GetInstanceProc` when the exported function is associated with an add-on instance object supplied by that add-on.
+
+```cpp
+bool ConfigureAddOnInstance(const std::string& addOnName, void* instance, int option)
+{
+  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return false;
+  }
+
+  auto addOn = manager->GetAddOn(addOnName);
+  auto configure = manager->GetInstanceProc<bool(void*, int)>(addOn, "Configure");
+
+  if(!configure)
+  {
+    return false;
+  }
+
+  return configure(instance, option);
+}
+```
+
+## Forwarding Application Lifecycle
+
+Add-ons that allocate platform resources should receive lifecycle transitions. Call `Dali::Integration::AddOnManager::Start` when add-on services should become active, `Dali::Integration::AddOnManager::Pause` when the application is suspended, `Dali::Integration::AddOnManager::Resume` when it becomes active again, and `Dali::Integration::AddOnManager::Stop` during shutdown.
+
+```cpp
+class AddOnLifecycle
+{
+public:
+  void OnAppStart()
+  {
+    if(Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get())
+    {
+      manager->Start();
+    }
+  }
+
+  void OnAppPause()
+  {
+    if(Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get())
+    {
+      manager->Pause();
+    }
+  }
+
+  void OnAppResume()
+  {
+    if(Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get())
+    {
+      manager->Resume();
+    }
+  }
+
+  void OnAppStop()
+  {
+    if(Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get())
+    {
+      manager->Stop();
+    }
+  }
+};
+```
+
+The manager forwards these transitions through each registered `Dali::AddOnDispatchTable` by using lifecycle entries such as `Dali::AddOnDispatchTable::OnStart`, `Dali::AddOnDispatchTable::OnPause`, `Dali::AddOnDispatchTable::OnResume`, and `Dali::AddOnDispatchTable::OnStop`.
+
+## Registering a Dispatch Table
+
+`Dali::AddOnDispatchTable` is the add-on side of the integration contract. It identifies an add-on through `Dali::AddOnDispatchTable::name`, exposes metadata through `Dali::AddOnDispatchTable::GetAddOnInfo`, and provides procedure lookup through `Dali::AddOnDispatchTable::GetGlobalProc` and `Dali::AddOnDispatchTable::GetInstanceProc`.
+
+Application developers usually consume add-ons through `Dali::Integration::AddOnManager`; platform or add-on integration code registers dispatch tables with `Dali::Integration::AddOnManager::RegisterAddOnDispatchTable`.
+
+```cpp
+extern const Dali::AddOnDispatchTable gExampleAddOnDispatchTable;
+
+void RegisterExampleAddOn()
+{
+  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return;
+  }
+
+  manager->RegisterAddOnDispatchTable(&gExampleAddOnDispatchTable);
+}
+```
+
+Once registered, the manager can use the dispatch table to answer `Dali::Integration::AddOnManager::GetAddOnInfo`, resolve procedures through `Dali::Integration::AddOnManager::GetGlobalProc`, and include the add-on in lifecycle dispatch through `Dali::Integration::AddOnManager::Start`, `Dali::Integration::AddOnManager::Pause`, `Dali::Integration::AddOnManager::Resume`, and `Dali::Integration::AddOnManager::Stop`.

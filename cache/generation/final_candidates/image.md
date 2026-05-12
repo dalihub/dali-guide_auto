@@ -6,123 +6,271 @@ category: images-visuals
 
 # Image
 
-`Dali::Ui::View` 기반 dali-ui 앱에서 이미지 관련 뷰를 배치하고, 애니메이션 이미지 이벤트와 Lottie 이미지의 동적 속성 입력을 다룹니다.
+`dali-ui` image UI is built as `Dali::Ui::View` objects that can be placed in the view tree, configured with typed setters, and observed through signals.
 
 ## Table of Contents
 
-- [dali-ui 이미지 뷰 모델](#dali-ui-이미지-뷰-모델)
-- [애니메이션 이미지 뷰를 앱 구조에 보관하기](#애니메이션-이미지-뷰를-앱-구조에-보관하기)
-- [이미지 영역을 레이아웃에 맞추기](#이미지-영역을-레이아웃에-맞추기)
-- [이미지 이벤트 연결 수명 관리](#이미지-이벤트-연결-수명-관리)
-- [Lottie 이미지의 동적 속성 정보 구성](#lottie-이미지의-동적-속성-정보-구성)
+- [Use Image Views in a dali-ui View Tree](#use-image-views-in-a-dali-ui-view-tree)
+- [Play Animated Image Resources](#play-animated-image-resources)
+- [React to Image Resource and Playback Events](#react-to-image-resource-and-playback-events)
+- [Control Animated Image Loading and Frame Behavior](#control-animated-image-loading-and-frame-behavior)
+- [Describe Dynamic Lottie Image Properties](#describe-dynamic-lottie-image-properties)
 
-## dali-ui 이미지 뷰 모델
+## Use Image Views in a dali-ui View Tree
 
-dali-ui 앱에서는 이미지도 화면 트리의 한 항목으로 취급합니다. 앱 코드는 raw actor 중심으로 작성하지 말고, app-facing handle을 `Dali::Ui::View` 계층으로 보관하는 방식이 자연스럽습니다. `Dali::Ui::AnimatedImageView`는 그 계층에서 애니메이션 이미지 리소스를 표시하는 이미지 전용 view입니다.
+In a `dali-ui` app, treat image widgets as `Dali::Ui::View` objects. This keeps image content compatible with layout containers, child insertion, and app-level view composition.
+
+`Dali::Ui::AnimatedImageView` is a `Dali::Ui::View` for animated image resources such as GIF or animated WebP files. Create it with `Dali::Ui::AnimatedImageView::New`, then configure it through typed setters.
 
 ```cpp
 #include <dali-ui-foundation/public-api/animated-image-view.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 
-Dali::Ui::AnimatedImageView KeepImageHandle(Dali::Ui::AnimatedImageView source)
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateAnimatedImagePreview()
 {
-  Dali::Ui::AnimatedImageView image(std::move(source));
+  AnimatedImageView image =
+    AnimatedImageView::New("images/loading.gif")
+      .SetLoopCount(-1)
+      .SetFrameSpeedFactor(1.0f)
+      .SetImageLoadWithViewSize(true)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
   return image;
 }
 ```
 
-위 예시는 `Dali::Ui::AnimatedImageView::AnimatedImageView` move constructor를 사용해 이미지 view handle을 앱 내부 상태로 넘기는 형태입니다. 실제 화면 구성에서는 이 handle을 `Dali::Ui::View` 기반 트리에 배치하고, 이미지 전용 제어는 `Dali::Ui::AnimatedImageView` handle에서 수행합니다.
+Use `Dali::Ui::StackLayoutParams` when the image participates in a stack layout. `StackLayoutParams::New().SetWeight(...)` gives the child a proportional share of the remaining space on the stack axis.
 
-## 애니메이션 이미지 뷰를 앱 구조에 보관하기
+```cpp
+StackLayoutParams params = StackLayoutParams::New().SetWeight(2.0f);
+float weight = params.GetWeight();
 
-이미지 화면을 담당하는 controller는 이미지 view handle과 신호 연결 수명을 함께 소유하는 편이 좋습니다. `Dali::ConnectionTracker`는 signal 연결을 controller 생명주기에 묶을 때 사용하는 기본 구성 요소입니다.
+AnimatedImageView image = AnimatedImageView::New("images/banner.webp");
+image.SetLayoutParams(params);
+```
+
+## Play Animated Image Resources
+
+`Dali::Ui::AnimatedImageView` exposes playback control through typed methods. Use `Play`, `Pause`, `Stop`, and `JumpToFrame` instead of manipulating lower-level actor properties.
+
+```cpp
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class GalleryPreview
+{
+public:
+  GalleryPreview()
+  : mImage(AnimatedImageView::New("images/hero-animation.webp")
+             .SetLoopCount(3)
+             .SetFrameDelay(80)
+             .SetFrameSpeedFactor(1.0f))
+  {
+  }
+
+  View GetView()
+  {
+    return mImage;
+  }
+
+  void Start()
+  {
+    mImage.Play();
+  }
+
+  void Pause()
+  {
+    mImage.Pause();
+  }
+
+  void StopAtBeginning()
+  {
+    mImage.Stop();
+    mImage.JumpToFrame(0);
+  }
+
+private:
+  AnimatedImageView mImage;
+};
+```
+
+`SetLoopCount(-1)` configures infinite looping. `SetLoopCount(0)` prevents playback. A positive value plays that exact number of loops.
+
+```cpp
+AnimatedImageView spinner =
+  AnimatedImageView::New("images/spinner.gif")
+    .SetLoopCount(-1)
+    .SetFrameSpeedFactor(1.5f);
+
+spinner.Play();
+
+int loopCount = spinner.GetLoopCount();
+float speed = spinner.GetFrameSpeedFactor();
+```
+
+## React to Image Resource and Playback Events
+
+Use `Dali::ConnectionTracker` as the owner for signal connections. This is the same pattern used by DALi samples: the controller derives from `ConnectionTracker`, then connects view signals to member callbacks.
+
+`Dali::Ui::AnimatedImageView::ResourceReadySignal` is emitted when the image resource is ready to display. `Dali::Ui::AnimatedImageView::AnimationFinishedSignal` uses the signal type `Signal<void(Dali::Ui::View)>` and is emitted when the animation completes all configured loops.
 
 ```cpp
 #include <dali/public-api/signals/connection-tracker.h>
 #include <dali-ui-foundation/public-api/animated-image-view.h>
 
-class ImageScreen : public Dali::ConnectionTracker
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ImageController : public ConnectionTracker
 {
 public:
-  ImageScreen()
-  : Dali::ConnectionTracker()
+  ImageController()
+  : mImage(AnimatedImageView::New("images/done.gif").SetLoopCount(1))
   {
+    mImage.ResourceReadySignal().Connect(this, &ImageController::OnResourceReady);
+    mImage.AnimationFinishedSignal().Connect(this, &ImageController::OnAnimationFinished);
   }
 
-  void SetImage(Dali::Ui::AnimatedImageView image)
+  View GetView()
   {
-    mImage = Dali::Ui::AnimatedImageView(std::move(image));
+    return mImage;
+  }
+
+  void PlayWhenVisible()
+  {
+    mImage.Play();
   }
 
 private:
-  Dali::Ui::AnimatedImageView mImage;
+  void OnResourceReady(View view)
+  {
+    AnimatedImageView image = AnimatedImageView::DownCast(view);
+    if(image)
+    {
+      image.Play();
+    }
+  }
+
+  void OnAnimationFinished(View view)
+  {
+    AnimatedImageView image = AnimatedImageView::DownCast(view);
+    if(image)
+    {
+      image.Stop();
+    }
+  }
+
+private:
+  AnimatedImageView mImage;
 };
 ```
 
-`Dali::ConnectionTracker::ConnectionTracker`는 controller를 signal owner로 사용할 준비를 합니다. 이미지 뷰 자체는 `Dali::Ui::AnimatedImageView` handle로 보관하되, 앱의 나머지 화면 구성과 상호작용할 때는 `Dali::Ui::View` 기반 흐름 안에서 다루는 것이 dali-ui 앱 모델과 맞습니다.
+When a callback receives a `Dali::Ui::View`, downcast with `Dali::Ui::AnimatedImageView::DownCast` before calling animated-image-specific methods.
 
-## 이미지 영역을 레이아웃에 맞추기
+## Control Animated Image Loading and Frame Behavior
 
-이미지 콘텐츠는 보통 다른 controls와 함께 stack layout에 들어갑니다. 이때 per-child layout 정보는 `Dali::Ui::StackLayoutParams`로 복사하거나 재사용할 수 있습니다. 이미지 view를 직접 actor property로 조정하는 대신, view에 붙는 layout parameter를 별도 handle로 관리합니다.
+`Dali::Ui::AnimatedImageView` can be configured for loading hints, frame cache behavior, and display behavior with typed setters. These settings are useful for image-heavy views where decoding cost and playback behavior matter.
 
 ```cpp
-#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
 
-Dali::Ui::StackLayoutParams CopyImageLayoutParams(Dali::Ui::StackLayoutParams source)
+using namespace Dali;
+using namespace Dali::Ui;
+
+AnimatedImageView CreateTimelinePreview()
 {
-  Dali::Ui::StackLayoutParams params(source);
-  return params;
+  AnimatedImageView image =
+    AnimatedImageView::New("images/story.gif")
+      .SetDesiredWidth(320)
+      .SetDesiredHeight(180)
+      .SetBatchSize(2)
+      .SetCacheSize(4)
+      .SetFrameDelay(100)
+      .SetLoopCount(1);
+
+  image.SetImageLoadWithViewSize(true);
+  return image;
 }
 ```
 
-`Dali::Ui::StackLayoutParams::StackLayoutParams` copy constructor는 이미 구성된 per-child layout handle을 복사해 같은 이미지 화면 안의 다른 image slot에 적용할 때 유용합니다. 이렇게 하면 이미지 뷰의 리소스 제어와 레이아웃 제어를 분리해서 유지할 수 있습니다.
-
-## 이미지 이벤트 연결 수명 관리
-
-이미지 리소스 준비, 애니메이션 완료 같은 이벤트는 public signal을 통해 처리합니다. 앱 controller는 `Dali::ConnectionTracker`를 상속해 연결 수명을 controller와 함께 정리되도록 구성합니다.
+Use frame query methods when updating app UI around playback state.
 
 ```cpp
-#include <dali/public-api/signals/connection-tracker.h>
-#include <dali-ui-foundation/public-api/animated-image-view.h>
-
-class AnimatedImageEvents : public Dali::ConnectionTracker
+void LogAnimatedImageState(AnimatedImageView image)
 {
-public:
-  AnimatedImageEvents()
-  : Dali::ConnectionTracker()
-  {
-  }
+  Ui::AnimatedImage::PlayState state = image.GetPlayState();
+  int currentFrame = image.GetCurrentFrame();
+  int totalFrames = image.GetTotalFrame();
+  int frameDelay = image.GetFrameDelay();
 
-  void Track(Dali::Ui::AnimatedImageView image)
-  {
-    mImage = Dali::Ui::AnimatedImageView(std::move(image));
-  }
-
-private:
-  Dali::Ui::AnimatedImageView mImage;
-};
+  (void)state;
+  (void)currentFrame;
+  (void)totalFrames;
+  (void)frameDelay;
+}
 ```
 
-이 구조에서 `Dali::ConnectionTracker`는 signal connection owner 역할을 하고, `Dali::Ui::AnimatedImageView`는 이미지 view handle 역할을 합니다. signal 연결 API는 해당 signal을 소유한 view나 trait에서 호출해야 하며, 연결된 callback은 view 기반 이벤트 흐름 안에서 처리합니다.
+For stop behavior, use `Dali::Ui::AnimatedImage::StopBehavior` values with `SetStopBehavior`.
 
-## Lottie 이미지의 동적 속성 정보 구성
+```cpp
+AnimatedImageView image =
+  AnimatedImageView::New("images/progress.gif")
+    .SetLoopCount(1)
+    .SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
 
-Lottie 기반 이미지에서는 특정 layer 또는 element path에 대해 per-frame 값을 공급해야 할 수 있습니다. 이때 `Dali::Ui::LottieAnimation::DynamicPropertyInfo`가 동적 속성 입력을 담는 owned data 구조입니다.
+image.Play();
 
-`Dali::Ui::LottieAnimation::DynamicPropertyInfo::id`는 callback으로 전달될 식별자이고, `Dali::Ui::LottieAnimation::DynamicPropertyInfo::keyPath`는 대상 layer 또는 element path입니다. `Dali::Ui::LottieAnimation::DynamicPropertyInfo::property`는 동적으로 갱신할 Lottie vector property를 지정하며, `Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback`은 frame마다 값을 계산하는 callback 포인터입니다.
+Ui::AnimatedImage::StopBehavior behavior = image.GetStopBehavior();
+(void)behavior;
+```
+
+## Describe Dynamic Lottie Image Properties
+
+`Dali::Ui::LottieAnimation::DynamicPropertyInfo` describes a dynamic property update for Lottie image content. It is owned API content for the image feature because its fields define how an app identifies the target element, property, callback, and application-defined identifier.
+
+The structure has four public members:
+
+- `Dali::Ui::LottieAnimation::DynamicPropertyInfo::id`: an application-defined integer passed back to the callback.
+- `Dali::Ui::LottieAnimation::DynamicPropertyInfo::keyPath`: the Lottie target path, such as a specific layer path or `"**"` for all matching elements.
+- `Dali::Ui::LottieAnimation::DynamicPropertyInfo::property`: the vector property to animate.
+- `Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback`: the callback object. Ownership is transferred to the visual after the dynamic property is applied.
+
+The callback is invoked on a worker thread, so it must not call DALi APIs.
 
 ```cpp
 #include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 
-Dali::Ui::LottieAnimation::DynamicPropertyInfo MakeLottieDynamicPropertyInfo()
-{
-  Dali::Ui::LottieAnimation::DynamicPropertyInfo info{};
+using namespace Dali;
+using namespace Dali::Ui;
 
-  info.id       = 1001;
-  info.keyPath  = "**";
-  info.callback = nullptr;
+LottieAnimation::DynamicPropertyInfo CreateFillColorProperty(CallbackBase* callback)
+{
+  LottieAnimation::DynamicPropertyInfo info;
+  info.id = 1;
+  info.keyPath = "**";
+  info.property = LottieAnimation::VectorProperty::FILL_COLOR;
+  info.callback = callback;
 
   return info;
 }
 ```
 
-`Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback`의 ownership은 동적 속성 적용 후 visual 쪽으로 넘어가는 형태로 정의되어 있습니다. callback은 worker thread에서 호출될 수 있으므로, callback 내부에서 DALi object model을 직접 조작하는 방식은 피하고 계산 결과만 반환하도록 설계합니다.
+Keep `DynamicPropertyInfo` setup small and explicit. The `id` lets one callback distinguish multiple dynamic properties without requiring separate callback functions for every target.
+
+```cpp
+void ConfigureDynamicProperty(LottieAnimation::DynamicPropertyInfo& info,
+                              int32_t id,
+                              const Dali::String& keyPath,
+                              CallbackBase* callback)
+{
+  info.id = id;
+  info.keyPath = keyPath;
+  info.property = LottieAnimation::VectorProperty::FILL_COLOR;
+  info.callback = callback;
+}
+```

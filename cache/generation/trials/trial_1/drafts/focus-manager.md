@@ -6,27 +6,296 @@ category: input-interaction
 
 # Focus Manager
 
-`Dali::Ui::FocusManager` manages view focus, directional focus movement, focus groups, focus indicators, and focus-change notifications in a dali-ui application.
+`Dali::Ui::FocusManager` controls focus ownership, focus movement, focus groups, focus indicators, and focus-change notifications for `Dali::Ui::View` objects in a dali-ui application.
 
 ## Table of Contents
 
 - [Getting the Focus Manager](#getting-the-focus-manager)
-- [Requesting and Reading Focus](#requesting-and-reading-focus)
-- [Moving Focus](#moving-focus)
-- [Focus Groups](#focus-groups)
-- [Focus Indicators](#focus-indicators)
-- [Focus Change Signals](#focus-change-signals)
-- [Focus Clearing and Window Focus Policy](#focus-clearing-and-window-focus-policy)
-- [Last Focus Change Device](#last-focus-change-device)
+- [Requesting and Setting Focus](#requesting-and-setting-focus)
+- [Moving and Clearing Focus](#moving-and-clearing-focus)
+- [Containing Focus with Focus Groups](#containing-focus-with-focus-groups)
+- [Customizing the Focus Indicator](#customizing-the-focus-indicator)
+- [Reacting to Focus Changes](#reacting-to-focus-changes)
+- [Window Focus Loss Policy](#window-focus-loss-policy)
+- [Inspecting the Last Focus Change Device](#inspecting-the-last-focus-change-device)
 
 ## Getting the Focus Manager
 
-`Dali::Ui::FocusManager` is the application-facing manager for keyboard and directional focus. In application code, get the singleton handle with `Dali::Ui::FocusManager::Get()` and keep your focus logic in terms of `Dali::Ui::View`.
+Use `Dali::Ui::FocusManager::Get` to access the singleton focus manager. The manager is a handle type, so application code usually stores it briefly where focus behavior is configured.
 
 ```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
+void ConfigureFocus()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
 
-void InitializeFocus()
+  Dali::Ui::View focusedView = focusManager.GetCurrentFocusView();
+  if(focusedView)
+  {
+    // A View currently owns focus.
+  }
+}
+```
+
+The default constructor `Dali::Ui::FocusManager::FocusManager` creates an uninitialized handle. For application focus control, prefer `Dali::Ui::FocusManager::Get`.
+
+```cpp
+Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+```
+
+## Requesting and Setting Focus
+
+Use `Dali::Ui::FocusManager::RequestFocus` for normal application focus requests. It accepts a `Dali::Ui::View` and returns `true` when focus is successfully assigned.
+
+```cpp
+bool FocusFirstField(Dali::Ui::View firstField)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  bool focused = focusManager.RequestFocus(firstField);
+  if(focused)
+  {
+    Dali::Ui::View current = focusManager.GetCurrentFocusView();
+    return current == firstField;
+  }
+
+  return false;
+}
+```
+
+`Dali::Ui::FocusManager::SetCurrentFocusView` sets focus directly to the supplied `Dali::Ui::View`. Use it when the exact view should become the focused view.
+
+```cpp
+bool RestoreKnownFocus(Dali::Ui::View previouslyFocusedView)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  if(focusManager.SetCurrentFocusView(previouslyFocusedView))
+  {
+    return focusManager.GetCurrentFocusView() == previouslyFocusedView;
+  }
+
+  return false;
+}
+```
+
+A common pattern is to request focus first, then read back `Dali::Ui::FocusManager::GetCurrentFocusView` when the application needs the resolved focus owner.
+
+```cpp
+Dali::Ui::View RequestAndReadFocus(Dali::Ui::View target)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  if(focusManager.RequestFocus(target))
+  {
+    return focusManager.GetCurrentFocusView();
+  }
+
+  return Dali::Ui::View();
+}
+```
+
+## Moving and Clearing Focus
+
+Use `Dali::Ui::FocusManager::MoveFocus` to move from the current focused `Dali::Ui::View` in a focus direction. The method returns `true` when a new focus target is found and focused.
+
+```cpp
+bool MoveFocusRight()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.MoveFocus(Dali::Ui::FocusDirection::RIGHT);
+}
+```
+
+Forward and backward traversal can be driven through `Dali::Ui::FocusManager::MoveFocus`.
+
+```cpp
+bool MoveToNextFocusableView()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.MoveFocus(Dali::Ui::FocusDirection::FORWARD);
+}
+
+bool MoveToPreviousFocusableView()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.MoveFocus(Dali::Ui::FocusDirection::BACKWARD);
+}
+```
+
+`Dali::Ui::FocusManager::MoveFocusBackward` moves back to the previously focused view. `Dali::Ui::FocusManager::ClearFocus` removes focus so that no `Dali::Ui::View` is currently focused.
+
+```cpp
+void LeaveCurrentPanel()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.MoveFocusBackward();
+
+  if(!focusManager.GetCurrentFocusView())
+  {
+    focusManager.ClearFocus();
+  }
+}
+```
+
+For explicit cancellation flows, call `Dali::Ui::FocusManager::ClearFocus` directly.
+
+```cpp
+void CancelEditing()
+{
+  Dali::Ui::FocusManager::Get().ClearFocus();
+}
+```
+
+## Containing Focus with Focus Groups
+
+A focus group confines focus movement inside a `Dali::Ui::View` subtree. Use `Dali::Ui::FocusManager::SetAsFocusGroup` to enable or disable the group state.
+
+```cpp
+void EnableDialogFocusGroup(Dali::Ui::View dialogRoot)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetAsFocusGroup(dialogRoot, true);
+}
+```
+
+Use `Dali::Ui::FocusManager::IsFocusGroup` to check whether a view is configured as a focus group.
+
+```cpp
+bool ToggleFocusGroup(Dali::Ui::View container)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  bool enabled = focusManager.IsFocusGroup(container);
+  focusManager.SetAsFocusGroup(container, !enabled);
+
+  return focusManager.IsFocusGroup(container);
+}
+```
+
+Use `Dali::Ui::FocusManager::GetFocusGroup` to find the closest focus group for a focused view.
+
+```cpp
+Dali::Ui::View GetCurrentFocusGroup()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  Dali::Ui::View current = focusManager.GetCurrentFocusView();
+  if(current)
+  {
+    return focusManager.GetFocusGroup(current);
+  }
+
+  return Dali::Ui::View();
+}
+```
+
+## Customizing the Focus Indicator
+
+`Dali::Ui::FocusManager::SetFocusIndicatorActor` replaces the default focus indicator with a `Dali::Ui::View`. Although the method name contains `Actor`, the dali-ui application-facing argument is a `Dali::Ui::View`.
+
+```cpp
+void UseCustomFocusIndicator(Dali::Ui::View indicatorView)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetFocusIndicatorActor(indicatorView);
+}
+```
+
+Use `Dali::Ui::FocusManager::GetFocusIndicatorView` when code needs to reuse or inspect the currently configured focus indicator view.
+
+```cpp
+Dali::Ui::View ReplaceFocusIndicator(Dali::Ui::View newIndicator)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  Dali::Ui::View previousIndicator = focusManager.GetFocusIndicatorView();
+  focusManager.SetFocusIndicatorActor(newIndicator);
+
+  return previousIndicator;
+}
+```
+
+## Reacting to Focus Changes
+
+`Dali::Ui::FocusManager::FocusChangedSignal` is emitted after the current focused view changes. The callback receives the previous focused `Dali::Ui::View` and the new focused `Dali::Ui::View`.
+
+```cpp
+class FocusStatus : public Dali::ConnectionTracker
+{
+public:
+  void Connect()
+  {
+    Dali::Ui::FocusManager::Get().FocusChangedSignal().Connect(
+      this,
+      &FocusStatus::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(Dali::Ui::View previous, Dali::Ui::View current)
+  {
+    mPreviousFocus = previous;
+    mCurrentFocus  = current;
+  }
+
+  Dali::Ui::View mPreviousFocus;
+  Dali::Ui::View mCurrentFocus;
+};
+```
+
+The `current` argument can be empty after `Dali::Ui::FocusManager::ClearFocus`.
+
+```cpp
+class FocusClearedWatcher : public Dali::ConnectionTracker
+{
+public:
+  void Start()
+  {
+    Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+    focusManager.FocusChangedSignal().Connect(this, &FocusClearedWatcher::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(Dali::Ui::View previous, Dali::Ui::View current)
+  {
+    if(previous && !current)
+    {
+      mFocusWasCleared = true;
+    }
+  }
+
+  bool mFocusWasCleared{false};
+};
+```
+
+## Window Focus Loss Policy
+
+By default, focus is cleared when the window loses focus. Use `Dali::Ui::FocusManager::SetClearFocusOnWindowFocusLost` to change that policy, and `Dali::Ui::FocusManager::GetClearFocusOnWindowFocusLost` to read it back.
+
+```cpp
+void PreserveFocusWhileWindowIsInactive()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetClearFocusOnWindowFocusLost(false);
+
+  bool preserveFocus = !focusManager.GetClearFocusOnWindowFocusLost();
+  if(preserveFocus)
+  {
+    // The focused View can remain recorded while the window is inactive.
+  }
+}
+```
+
+Restore the default clear-on-loss behavior when leaving a mode that needs focus preservation.
+
+```cpp
+void RestoreDefaultWindowFocusPolicy()
 {
   Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
 
@@ -34,245 +303,9 @@ void InitializeFocus()
 }
 ```
 
-A default-constructed `Dali::Ui::FocusManager` is only a handle. Use `Dali::Ui::FocusManager::Get()` before calling focus-management methods.
+## Inspecting the Last Focus Change Device
 
-```cpp
-void UseFocusManager()
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  const bool clearOnLost = focusManager.GetClearFocusOnWindowFocusLost();
-  focusManager.SetClearFocusOnWindowFocusLost(clearOnLost);
-}
-```
-
-## Requesting and Reading Focus
-
-Use `Dali::Ui::FocusManager::RequestFocus()` when an application wants focus to land on a `Dali::Ui::View` or on an appropriate focusable descendant of a container view. Use `Dali::Ui::FocusManager::SetCurrentFocusView()` when the application wants to set focus directly to that exact view.
-
-```cpp
-bool FocusInitialView(Dali::Ui::View initialView)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  const bool focused = focusManager.RequestFocus(initialView);
-  if(focused)
-  {
-    Dali::Ui::View current = focusManager.GetCurrentFocusView();
-    return current == initialView;
-  }
-
-  return false;
-}
-```
-
-`Dali::Ui::FocusManager::GetCurrentFocusView()` returns the currently focused `Dali::Ui::View`. If no view is focused, it returns an empty handle.
-
-```cpp
-Dali::Ui::View ReplaceFocus(Dali::Ui::View nextView)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  Dali::Ui::View previousView = focusManager.GetCurrentFocusView();
-  const bool changed = focusManager.SetCurrentFocusView(nextView);
-
-  return changed ? previousView : focusManager.GetCurrentFocusView();
-}
-```
-
-## Moving Focus
-
-Use `Dali::Ui::FocusManager::MoveFocus()` for directional navigation. It takes a `Dali::Ui::FocusDirection` value such as `Dali::Ui::FocusDirection::LEFT`, `Dali::Ui::FocusDirection::RIGHT`, `Dali::Ui::FocusDirection::UP`, `Dali::Ui::FocusDirection::DOWN`, `Dali::Ui::FocusDirection::FORWARD`, or `Dali::Ui::FocusDirection::BACKWARD`.
-
-```cpp
-bool MoveFocusForArrowKey(Dali::Ui::FocusDirection direction)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  return focusManager.MoveFocus(direction);
-}
-
-void MoveFocusRightThenDown()
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  const bool movedRight = focusManager.MoveFocus(Dali::Ui::FocusDirection::RIGHT);
-  if(movedRight)
-  {
-    focusManager.MoveFocus(Dali::Ui::FocusDirection::DOWN);
-  }
-}
-```
-
-For reverse navigation, `Dali::Ui::FocusManager::MoveFocusBackward()` moves focus back to the previously focused view.
-
-```cpp
-void RestorePreviousFocus()
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  focusManager.MoveFocusBackward();
-}
-```
-
-## Focus Groups
-
-A focus group contains directional focus movement inside a view subtree. Mark a `Dali::Ui::View` as a group with `Dali::Ui::FocusManager::SetAsFocusGroup()`, check it with `Dali::Ui::FocusManager::IsFocusGroup()`, and find the containing group for a child view with `Dali::Ui::FocusManager::GetFocusGroup()`.
-
-```cpp
-void EnableDialogFocusGroup(Dali::Ui::View dialogRoot, Dali::Ui::View firstField)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  focusManager.SetAsFocusGroup(dialogRoot, true);
-
-  if(focusManager.IsFocusGroup(dialogRoot))
-  {
-    focusManager.RequestFocus(firstField);
-  }
-}
-```
-
-When the current focus is inside a focus group, directional movement such as `Dali::Ui::FocusManager::MoveFocus(Dali::Ui::FocusDirection::FORWARD)` is evaluated within that group boundary.
-
-```cpp
-bool MoveInsideCurrentGroup(Dali::Ui::View currentView)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  Dali::Ui::View group = focusManager.GetFocusGroup(currentView);
-  if(group)
-  {
-    return focusManager.MoveFocus(Dali::Ui::FocusDirection::FORWARD);
-  }
-
-  return false;
-}
-```
-
-Disable the group when the view should no longer trap focus.
-
-```cpp
-void DisableDialogFocusGroup(Dali::Ui::View dialogRoot)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  focusManager.SetAsFocusGroup(dialogRoot, false);
-}
-```
-
-## Focus Indicators
-
-`Dali::Ui::FocusManager::SetFocusIndicatorActor()` installs the `Dali::Ui::View` used as the focus indicator. `Dali::Ui::FocusManager::GetFocusIndicatorView()` returns the current indicator view.
-
-```cpp
-void ConfigureFocusIndicator(Dali::Ui::View indicatorView)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  focusManager.SetFocusIndicatorActor(indicatorView);
-
-  Dali::Ui::View activeIndicator = focusManager.GetFocusIndicatorView();
-  if(activeIndicator == indicatorView)
-  {
-    focusManager.SetClearFocusOnWindowFocusLost(true);
-  }
-}
-```
-
-Use this for application-level focus styling that should follow the currently focused `Dali::Ui::View`.
-
-## Focus Change Signals
-
-`Dali::Ui::FocusManager::FocusChangedSignal()` is emitted after the current focused view changes. The callback receives the previous focused `Dali::Ui::View` and the new focused `Dali::Ui::View`.
-
-```cpp
-class FocusStatusController : public Dali::ConnectionTracker
-{
-public:
-  void Connect()
-  {
-    Dali::Ui::FocusManager::Get().FocusChangedSignal().Connect(
-      this,
-      &FocusStatusController::OnFocusChanged);
-  }
-
-private:
-  void OnFocusChanged(Dali::Ui::View previousView, Dali::Ui::View currentView)
-  {
-    mPreviousFocusedView = previousView;
-    mCurrentFocusedView = currentView;
-  }
-
-  Dali::Ui::View mPreviousFocusedView;
-  Dali::Ui::View mCurrentFocusedView;
-};
-```
-
-A lambda can also be connected when the owning object is a valid connection tracker.
-
-```cpp
-class FocusLogger : public Dali::ConnectionTracker
-{
-public:
-  void Connect()
-  {
-    Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-    focusManager.FocusChangedSignal().Connect(
-      this,
-      [this](Dali::Ui::View previousView, Dali::Ui::View currentView)
-      {
-        mLastPreviousView = previousView;
-        mLastCurrentView = currentView;
-      });
-  }
-
-private:
-  Dali::Ui::View mLastPreviousView;
-  Dali::Ui::View mLastCurrentView;
-};
-```
-
-## Focus Clearing and Window Focus Policy
-
-Use `Dali::Ui::FocusManager::ClearFocus()` to remove focus from the current view. After clearing, `Dali::Ui::FocusManager::GetCurrentFocusView()` returns an empty handle.
-
-```cpp
-void CloseFocusedPopup()
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  focusManager.ClearFocus();
-
-  Dali::Ui::View currentView = focusManager.GetCurrentFocusView();
-  if(!currentView)
-  {
-    focusManager.SetClearFocusOnWindowFocusLost(true);
-  }
-}
-```
-
-`Dali::Ui::FocusManager::SetClearFocusOnWindowFocusLost()` controls whether focus is cleared when the application window loses focus. Read the current policy with `Dali::Ui::FocusManager::GetClearFocusOnWindowFocusLost()`.
-
-```cpp
-void PreserveFocusAcrossWindowFocusLoss(bool preserve)
-{
-  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
-
-  focusManager.SetClearFocusOnWindowFocusLost(!preserve);
-
-  const bool clearOnWindowFocusLost = focusManager.GetClearFocusOnWindowFocusLost();
-  if(clearOnWindowFocusLost)
-  {
-    focusManager.ClearFocus();
-  }
-}
-```
-
-## Last Focus Change Device
-
-`Dali::Ui::FocusManager::GetLastFocusChangeDevice()` reports the device category that caused the most recent focus change. `Dali::Ui::FocusManager::GetLastFocusChangeDeviceName()` returns the device name string for that change.
+`Dali::Ui::FocusManager::GetLastFocusChangeDevice` reports the device category for the most recent focus change. Programmatic changes made through focus APIs are reported with the programmatic device value.
 
 ```cpp
 bool LastFocusChangeWasProgrammatic()
@@ -283,14 +316,13 @@ bool LastFocusChangeWasProgrammatic()
 }
 ```
 
-Use the device information when your app needs different behavior for keyboard, pointer, touch, wheel, gamepad, or programmatic focus changes.
+`Dali::Ui::FocusManager::GetLastFocusChangeDeviceName` returns the device name associated with the last focus change. For programmatic focus changes, the returned string can be empty.
 
 ```cpp
-Dali::String GetLastFocusDeviceName()
+const Dali::String& ReadLastFocusDeviceName()
 {
   Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
 
-  const Dali::String& deviceName = focusManager.GetLastFocusChangeDeviceName();
-  return deviceName;
+  return focusManager.GetLastFocusChangeDeviceName();
 }
 ```

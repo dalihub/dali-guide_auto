@@ -6,212 +6,282 @@ category: application-framework
 
 # Adaptor Framework
 
-The adaptor framework starts the DALi event loop, creates the main window, and delivers application lifecycle signals for a dali-ui `Dali::Ui::View` tree.
+`Dali::Application` starts the DALi event loop, exposes application lifecycle signals, and gives a dali-ui app the window where its `Dali::Ui::View` tree is attached.
 
 ## Table of Contents
 
 - [Starting a dali-ui Application](#starting-a-dali-ui-application)
-- [Creating the Root View on Init](#creating-the-root-view-on-init)
-- [Handling Application Lifecycle Signals](#handling-application-lifecycle-signals)
-- [Using Runtime Application Context](#using-runtime-application-context)
-- [Responding to System Pressure](#responding-to-system-pressure)
+- [Creating the Initial View Tree](#creating-the-initial-view-tree)
+- [Handling Lifecycle and Device State](#handling-lifecycle-and-device-state)
+- [Using Window Services from the Application](#using-window-services-from-the-application)
+- [Accessing Application Environment Data](#accessing-application-environment-data)
 
 ## Starting a dali-ui Application
 
-Use `Dali::Application` as the app entry object. Create it with `Dali::Application::New`, connect startup work to `Dali::Application::InitSignal`, then enter `Dali::Application::MainLoop`.
-
-`Dali::Application::InitSignal` uses the callback signature `void(Dali::Application)`, so the callback receives the initialized application handle.
+Every dali-ui application creates one `Dali::Application`, connects to `InitSignal()`, and then enters `MainLoop()`. Create `Dali::Ui::View` objects from the init callback, not before the application has initialized.
 
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-namespace
-{
-void OnInit(Dali::Application application)
-{
-  Dali::Ui::View root = Dali::Ui::View::New()
-    .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
-    .SetRequestedHeight(Dali::Ui::MATCH_PARENT);
+using namespace Dali;
+using namespace Dali::Ui;
 
-  application.GetWindow().Add(root);
-}
-} // namespace
-
-int DALI_EXPORT_API main(int argc, char** argv)
+class GuideApp : public ConnectionTracker
 {
-  Dali::Application application = Dali::Application::New(&argc, &argv);
-  application.InitSignal().Connect(&OnInit);
+public:
+  explicit GuideApp(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &GuideApp::OnInit);
+  }
+
+  void OnInit(Application application)
+  {
+    auto window = application.GetWindow();
+    window.SetBackgroundColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    View root = View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetBackgroundColor(UiColor(0xF7F8FA));
+
+    window.Add(root);
+    mRoot = root;
+  }
+
+private:
+  Application& mApplication;
+  View         mRoot;
+};
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  GuideApp controller(application);
   application.MainLoop();
-
   return 0;
 }
 ```
 
-`Dali::Application::New` also accepts an optional stylesheet path:
+`Application::New()` consumes DALi-supported command-line options such as width, height, and DPI options. `MainLoop()` blocks until the application is lowered or quit through APIs such as `Quit()`.
+
+## Creating the Initial View Tree
+
+Use `Dali::Ui::View` as the application-facing object model. The adaptor framework supplies the initialized `Application` and main window; dali-ui supplies the view tree that your app owns.
 
 ```cpp
-Dali::Application application =
-  Dali::Application::New(&argc, &argv, "styles/app-theme.json");
-```
-
-## Creating the Root View on Init
-
-Build the app-facing UI as a `Dali::Ui::View` hierarchy. The adaptor provides the main window through `Dali::Application::GetWindow`; the dali-ui content should remain expressed as `Dali::Ui::View` objects.
-
-```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-namespace
+void BuildContent(Application application)
 {
-Dali::Ui::View CreateContent()
-{
-  return Dali::Ui::View::New()
-    .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
-    .SetRequestedHeight(Dali::Ui::MATCH_PARENT)
-    .SetBackgroundColor(Dali::Ui::UiColor(0.08f, 0.09f, 0.11f, 1.0f))
-    .Children({
-      Dali::Ui::View::New()
-        .SetRequestedWidth(240.0f)
-        .SetRequestedHeight(120.0f)
-        .SetBackgroundColor(Dali::Ui::UiColor::PRIMARY),
+  auto window = application.GetWindow();
 
-      Dali::Ui::View::New()
-        .SetRequestedWidth(240.0f)
-        .SetRequestedHeight(80.0f)
-        .SetBackgroundColor(Dali::Ui::UiColor(0.20f, 0.32f, 0.70f, 1.0f))
-    });
-}
+  View root = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT)
+    .SetBackgroundColor(UiColor(0xFFFFFF));
 
-void OnInit(Dali::Application application)
-{
-  application.GetWindow().Add(CreateContent());
-}
-} // namespace
-```
+  View header = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(72.0f)
+    .SetBackgroundColor(UiColor(0x1F2937));
 
-`Dali::Ui::View::New` creates an initialized view handle. `Dali::Ui::View::SetRequestedWidth` and `Dali::Ui::View::SetRequestedHeight` return the view, so they can be chained with `Dali::Ui::View::SetBackgroundColor` and `Dali::Ui::View::Children`.
+  View content = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT)
+    .SetBackgroundColor(UiColor(0xEEF2F7));
 
-## Handling Application Lifecycle Signals
+  root.Add(header);
+  root.Add(content);
 
-Connect lifecycle-sensitive work to `Dali::Application` signals. `Dali::Application::PauseSignal`, `Dali::Application::ResumeSignal`, `Dali::Application::TerminateSignal`, `Dali::Application::ResetSignal`, `Dali::Application::LanguageChangedSignal`, and `Dali::Application::RegionChangedSignal` use the same `void(Dali::Application)` callback shape as `Dali::Application::InitSignal`.
-
-```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-namespace
-{
-void OnPause(Dali::Application application)
-{
-  (void)application;
-}
-
-void OnResume(Dali::Application application)
-{
-  (void)application;
-}
-
-void OnTerminate(Dali::Application application)
-{
-  (void)application;
-}
-
-void ConnectLifecycle(Dali::Application& application)
-{
-  application.PauseSignal().Connect(&OnPause);
-  application.ResumeSignal().Connect(&OnResume);
-  application.TerminateSignal().Connect(&OnTerminate);
-}
-} // namespace
-
-int DALI_EXPORT_API main(int argc, char** argv)
-{
-  Dali::Application application = Dali::Application::New(&argc, &argv);
-  ConnectLifecycle(application);
-  application.MainLoop();
-
-  return 0;
+  window.Add(root);
 }
 ```
 
-Call `Dali::Application::Quit` when the application should leave the main loop completely.
+For app-level code, keep layout and visual state on `View` through typed setters such as `SetRequestedWidth()`, `SetRequestedHeight()`, and `SetBackgroundColor()`. The window is only the scene entry point; the actual UI should remain a `View` hierarchy.
+
+## Handling Lifecycle and Device State
+
+`Dali::Application` owns lifecycle signals such as `InitSignal()`, `PauseSignal()`, `ResumeSignal()`, `TerminateSignal()`, and `ResetSignal()`. These callbacks receive the `Application` handle, so they can update retained `View` handles or query application state as needed.
 
 ```cpp
-void RequestShutdown(Dali::Application application)
+class LifecycleAwareApp : public ConnectionTracker
 {
-  application.Quit();
-}
+public:
+  explicit LifecycleAwareApp(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &LifecycleAwareApp::OnInit);
+    mApplication.PauseSignal().Connect(this, &LifecycleAwareApp::OnPause);
+    mApplication.ResumeSignal().Connect(this, &LifecycleAwareApp::OnResume);
+    mApplication.LowMemorySignal().Connect(this, &LifecycleAwareApp::OnLowMemory);
+  }
+
+  void OnInit(Application application)
+  {
+    auto window = application.GetWindow();
+
+    mRoot = View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetBackgroundColor(UiColor(0xFFFFFF));
+
+    window.Add(mRoot);
+  }
+
+  void OnPause(Application)
+  {
+    mRoot.SetOpacity(0.6f);
+  }
+
+  void OnResume(Application)
+  {
+    mRoot.SetOpacity(1.0f);
+  }
+
+  void OnLowMemory(DeviceStatus::Memory::Status status)
+  {
+    if(status == DeviceStatus::Memory::CRITICALLY_LOW)
+    {
+      mRoot.RemoveAllChildren();
+    }
+  }
+
+private:
+  Application& mApplication;
+  View         mRoot;
+};
 ```
 
-## Using Runtime Application Context
+Use `LowBatterySignal()`, `LowMemorySignal()`, and `DeviceOrientationChangedSignal()` for device-state responses that affect UI. Their callback parameter types are owned by the adaptor framework: `DeviceStatus::Battery::Status`, `DeviceStatus::Memory::Status`, and `DeviceStatus::Orientation::Status`.
 
-`Dali::Application` exposes runtime context that is useful for locating resources and adapting content to the current environment.
+## Using Window Services from the Application
 
-Use `Dali::Application::GetResourcePath` for the application resource directory. Use `Dali::Application::GetLanguage` and `Dali::Application::GetRegion` when the app needs the current device language or region.
+`Application::GetWindow()` returns the main window after initialization. In a dali-ui app, use it for application shell concerns such as background color, visibility, focus acceptance, and attaching the root `View`.
 
 ```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-namespace
+class WindowShell : public ConnectionTracker
 {
-void OnInit(Dali::Application application)
-{
-  Dali::String resourcePath = Dali::Application::GetResourcePath();
-  Dali::String language     = application.GetLanguage();
-  Dali::String region       = application.GetRegion();
+public:
+  explicit WindowShell(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &WindowShell::OnInit);
+  }
 
-  (void)resourcePath;
-  (void)language;
-  (void)region;
+  void OnInit(Application application)
+  {
+    auto window = application.GetWindow();
 
-  Dali::Ui::View root = Dali::Ui::View::New()
-    .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
-    .SetRequestedHeight(Dali::Ui::MATCH_PARENT);
+    window.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+    window.SetAcceptFocus(true);
+    window.Show();
 
-  application.GetWindow().Add(root);
-}
-} // namespace
+    View root = View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetBackgroundColor(UiColor(0x101820));
+
+    window.Add(root);
+    mRoot = root;
+  }
+
+private:
+  Application& mApplication;
+  View         mRoot;
+};
 ```
 
-For updates while the app is already running, connect `Dali::Application::LanguageChangedSignal` or `Dali::Application::RegionChangedSignal` and refresh the affected `Dali::Ui::View` content from the callback.
+Window signals are also useful at the app shell boundary. For example, `FocusChangeSignal()` reports whether the window gained or lost focus, and `ResizeSignal()` reports the new `Window::WindowSize`.
 
 ```cpp
-void OnLanguageChanged(Dali::Application application)
+class WindowSignals : public ConnectionTracker
 {
-  Dali::String language = application.GetLanguage();
-  (void)language;
-}
+public:
+  explicit WindowSignals(Application& application)
+  {
+    application.InitSignal().Connect(this, &WindowSignals::OnInit);
+  }
 
-void ConnectLocaleSignals(Dali::Application& application)
-{
-  application.LanguageChangedSignal().Connect(&OnLanguageChanged);
-}
+  void OnInit(Application application)
+  {
+    auto window = application.GetWindow();
+
+    mRoot = View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT);
+
+    window.Add(mRoot);
+    window.FocusChangeSignal().Connect(this, &WindowSignals::OnFocusChanged);
+    window.ResizeSignal().Connect(this, &WindowSignals::OnResized);
+  }
+
+  void OnFocusChanged(Window, bool focusIn)
+  {
+    mRoot.SetOpacity(focusIn ? 1.0f : 0.5f);
+  }
+
+  void OnResized(Window, Window::WindowSize)
+  {
+    mRoot.InvalidateMeasure();
+    mRoot.InvalidateArrange();
+  }
+
+private:
+  View mRoot;
+};
 ```
 
-## Responding to System Pressure
+## Accessing Application Environment Data
 
-The adaptor framework can notify an app about low battery and low memory conditions. `Dali::Application::LowBatterySignal` uses `Dali::DeviceStatus::Battery::Status`; `Dali::Application::LowMemorySignal` uses `Dali::DeviceStatus::Memory::Status`.
+`Dali::Application` also provides environment information that is useful when building a dali-ui app shell. `GetResourcePath()` is static and can be used to locate bundled resources. `GetLanguage()` and `GetRegion()` return the current device language and region from an initialized application.
 
 ```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
+class EnvironmentAwareApp : public ConnectionTracker
+{
+public:
+  explicit EnvironmentAwareApp(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &EnvironmentAwareApp::OnInit);
+    mApplication.LanguageChangedSignal().Connect(this, &EnvironmentAwareApp::OnLanguageChanged);
+    mApplication.RegionChangedSignal().Connect(this, &EnvironmentAwareApp::OnRegionChanged);
+  }
 
-namespace
-{
-void OnLowBattery(Dali::DeviceStatus::Battery::Status status)
-{
-  (void)status;
-}
+  void OnInit(Application application)
+  {
+    auto resourcePath = Application::GetResourcePath();
+    auto language     = application.GetLanguage();
+    auto region       = application.GetRegion();
 
-void OnLowMemory(Dali::DeviceStatus::Memory::Status status)
-{
-  (void)status;
-}
+    auto window = application.GetWindow();
+    mRoot = View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetBackgroundColor(UiColor(0xFFFFFF));
 
-void ConnectSystemSignals(Dali::Application& application)
-{
-  application.LowBatterySignal().Connect(&OnLowBattery);
-  application.LowMemorySignal().Connect(&OnLowMemory);
-}
-} // namespace
+    window.Add(mRoot);
+
+    UpdateLocalizedUi(language, region, resourcePath);
+  }
+
+  void OnLanguageChanged(Application application)
+  {
+    UpdateLocalizedUi(application.GetLanguage(), application.GetRegion(), Application::GetResourcePath());
+  }
+
+  void OnRegionChanged(Application application)
+  {
+    UpdateLocalizedUi(application.GetLanguage(), application.GetRegion(), Application::GetResourcePath());
+  }
+
+  void UpdateLocalizedUi(const String&, const String&, const String&)
+  {
+    mRoot.InvalidateMeasure();
+  }
+
+private:
+  Application& mApplication;
+  View         mRoot;
+};
 ```
 
-A typical dali-ui response is to reduce optional work and keep the existing `Dali::Ui::View` tree stable: defer nonessential loading, release app-owned caches, or postpone expensive content updates until `Dali::Application::ResumeSignal` or the next user-driven refresh.
+Keep environment handling separate from view construction: `Application` owns the process and device-facing information, while `Dali::Ui::View` owns the app-facing UI structure and visual state.

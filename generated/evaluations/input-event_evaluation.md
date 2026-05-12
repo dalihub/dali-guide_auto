@@ -19,7 +19,7 @@
 
 ### 1. UNKNOWN_BACKTICK_API_TOKEN (warning)
 
-- Location: line 67
+- Location: line 63
 - Span: `Dali::Ui::InputEvent::New(const WheelEvent&`
 - Reason: Backticked API-like token `Dali::Ui::InputEvent::New(const WheelEvent&` could not be resolved.
 - Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
