@@ -1,0 +1,629 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="05-layout-design_8ko_8md" kind="file" language="Markdown">
+    <compoundname>05-layout-design.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>Layout<sp/>Engine<sp/>설계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서의<sp/>목적은<sp/>`Prepared<sp/>glyph<sp/>/<sp/>cluster`<sp/>데이터를<sp/>기반으로<sp/>여러<sp/>`exclusion<sp/>bounds`를<sp/>피해<sp/>multi-line<sp/>layout하는<sp/>`TextVisualizer`<sp/>전용<sp/>layout<sp/>engine<sp/>구조를<sp/>설계하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>구현<sp/>기준<sp/>문서로<sp/>사용되므로,<sp/>단순<sp/>개념<sp/>설명이<sp/>아니라<sp/>아래를<sp/>분명히<sp/>정의한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare`와<sp/>`Layout`의<sp/>책임<sp/>경계</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`가<sp/>보유해야<sp/>할<sp/>최소<sp/>데이터</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>기준<sp/>layout이<sp/>필요한<sp/>이유</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region을<sp/>interval로<sp/>변환하는<sp/>알고리즘</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>/<sp/>fragment<sp/>/<sp/>glyph<sp/>placement<sp/>결과<sp/>구조</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`prepare-only`<sp/>/<sp/>`layout-only`<sp/>invalidation<sp/>규칙</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>1차<sp/>구현에서<sp/>제외할<sp/>기능과<sp/>향후<sp/>확장<sp/>가능성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">애매한<sp/>내용은<sp/>추측하지<sp/>않고<sp/>`확인<sp/>필요`로<sp/>표시한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>전제</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>항상<sp/>multi-line이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`style`,<sp/>`ellipsis`,<sp/>`selection`,<sp/>`cursor`는<sp/>이번<sp/>구현에서<sp/>제외한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>입력된<sp/>`exclusion<sp/>bounds`<sp/>영역에는<sp/>텍스트가<sp/>배치되지<sp/>않아야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>한<sp/>줄<sp/>안에<sp/>여러<sp/>개의<sp/>`available<sp/>interval`이<sp/>생길<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text<sp/>/<sp/>font<sp/>/<sp/>fontSize`가<sp/>바뀌지<sp/>않는<sp/>한<sp/>shaping은<sp/>다시<sp/>하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>현재<sp/>구조<sp/>요약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`의<sp/>text<sp/>pipeline은<sp/>아래<sp/>두<sp/>단계로<sp/>분리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Text<sp/>/<sp/>Font<sp/>/<sp/>FontSize]<sp/>--&gt;<sp/>B[Prepare]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[PreparedText]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[LayoutBounds<sp/>/<sp/>ExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[Layout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[LayoutResult]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[AtlasRenderer]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>원칙:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`Prepare`는<sp/>expensive<sp/>text<sp/>processing<sp/>단계다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`Layout`은<sp/>prepared<sp/>결과를<sp/>소비하는<sp/>geometry<sp/>단계다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Layout`은<sp/>width<sp/>/<sp/>height<sp/>/<sp/>exclusion<sp/>변경에<sp/>빠르게<sp/>재실행되어야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>cluster를<sp/>깨지<sp/>않고<sp/>줄바꿈과<sp/>fragment<sp/>분할을<sp/>수행해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Prepare<sp/>단계와<sp/>Layout<sp/>단계의<sp/>분리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Prepare<sp/>단계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Prepare`는<sp/>text<sp/>내용과<sp/>font<sp/>조건이<sp/>바뀔<sp/>때만<sp/>다시<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">책임:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-32<sp/>text<sp/>준비</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>fallback</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shaping</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>metrics<sp/>확보</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>경계<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>-&gt;<sp/>glyph<sp/>범위<sp/>매핑</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>candidate<sp/>계산</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">특징:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>bounds를<sp/>보지<sp/>않는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region을<sp/>보지<sp/>않는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>position을<sp/>계산하지<sp/>않는다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`Prepare`는<sp/>&quot;어떤<sp/>glyph들이<sp/>어떤<sp/>cluster<sp/>구조로<sp/>존재하는가&quot;까지<sp/>확정하고<sp/>끝난다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Layout<sp/>단계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Layout`은<sp/>`PreparedText`를<sp/>입력으로<sp/>받아<sp/>geometry만<sp/>계산한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">책임:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>height<sp/>/<sp/>baseline<sp/>progression</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line별<sp/>available<sp/>interval<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>단위<sp/>줄바꿈<sp/>결정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fragment<sp/>단위<sp/>glyph<sp/>placement</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>/<sp/>fragment<sp/>/<sp/>glyph<sp/>placement<sp/>결과<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>전체<sp/>layout<sp/>size<sp/>계산</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">특징:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shaping을<sp/>다시<sp/>하지<sp/>않는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>fallback을<sp/>다시<sp/>하지<sp/>않는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>metrics를<sp/>다시<sp/>계산하지<sp/>않는다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`Layout`은<sp/>&quot;prepared<sp/>glyph들을<sp/>어디에<sp/>둘<sp/>것인가&quot;만<sp/>결정한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>PreparedText에<sp/>필요한<sp/>데이터<sp/>구조</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`PreparedText`는<sp/>최소한<sp/>아래<sp/>데이터를<sp/>가져야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>PreparedCluster</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>characterStart;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>characterEnd;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphStart;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphEnd;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>advance;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>bool<sp/><sp/><sp/><sp/><sp/>mandatoryBreakBefore;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>bool<sp/><sp/><sp/><sp/><sp/>allowBreakBefore;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>bool<sp/><sp/><sp/><sp/><sp/>allowBreakAfter;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">struct<sp/>PreparedText</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;Character&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>text;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;GlyphInfo&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>glyphs;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;Vector2&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>glyphOffsets;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;float&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>glyphAdvances;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;PreparedCluster&gt;<sp/><sp/><sp/>clusters;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;uint8_t&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>lineBreakFlags;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;CharacterIndex&gt;<sp/><sp/><sp/><sp/>glyphsToCharacters;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;uint32_t&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>charactersToClusters;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>defaultLineHeight;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>defaultAscender;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>defaultDescender;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>필수<sp/>의미</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphs`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>atlas<sp/>renderer가<sp/>최종적으로<sp/>필요로<sp/>하는<sp/>glyph<sp/>identity</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphOffsets`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>cluster<sp/>origin<sp/>기준<sp/>glyph<sp/>local<sp/>offset</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphAdvances`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>width<sp/>accumulation<sp/>및<sp/>cluster<sp/>advance<sp/>계산<sp/>보조</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`clusters`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>layout의<sp/>최소<sp/>원자<sp/>단위</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lineBreakFlags`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>break<sp/>가능<sp/>지점<sp/>정보를<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphsToCharacters`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>디버깅<sp/>및<sp/>향후<sp/>hit-test<sp/>확장<sp/>기반</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`charactersToClusters`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>character<sp/>index에서<sp/>cluster<sp/>index로<sp/>빠르게<sp/>접근하기<sp/>위한<sp/>보조<sp/>맵</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>관점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`PreparedText`는<sp/>`TextVisualizer`의<sp/>가장<sp/>중요한<sp/>캐시다.<sp/>이<sp/>객체가<sp/>살아<sp/>있는<sp/>동안<sp/>bounds/exclusion이<sp/>바뀌어도<sp/>shaping을<sp/>다시<sp/>하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Cluster<sp/>기준<sp/>layout이<sp/>필요한<sp/>이유</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`는<sp/>glyph<sp/>하나씩이<sp/>아니라<sp/>cluster<sp/>단위로<sp/>layout해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>하나의<sp/>cluster가<sp/>여러<sp/>glyph로<sp/>구성될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>하나의<sp/>glyph가<sp/>여러<sp/>character를<sp/>대표할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>ligature,<sp/>combining<sp/>mark,<sp/>emoji<sp/>sequence<sp/>등은<sp/>중간을<sp/>잘라<sp/>배치하면<sp/>안<sp/>된다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>exclusion<sp/>region<sp/>때문에<sp/>fragment가<sp/>잘리더라도<sp/>cluster<sp/>내부는<sp/>분해하지<sp/>않아야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>한글<sp/>조합<sp/>/<sp/>자모<sp/>결합</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Arabic<sp/>shaping</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>emoji<sp/>ZWJ<sp/>sequence</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Latin<sp/>ligature</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>line<sp/>breaking과<sp/>fragment<sp/>분할의<sp/>최소<sp/>단위는<sp/>`glyph`가<sp/>아니라<sp/>`cluster`여야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>line<sp/>break<sp/>candidate<sp/>저장<sp/>방식</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1차<sp/>구현에서는<sp/>`cluster`<sp/>기준<sp/>break<sp/>candidate를<sp/>저장하는<sp/>방식이<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">enum<sp/>LineBreakFlag<sp/>:<sp/>uint8_t</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>LINE_BREAK_NONE<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>LINE_BREAK_ALLOW_BEFORE<sp/><sp/><sp/><sp/><sp/>=<sp/>1u<sp/>&lt;&lt;<sp/>0,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>LINE_BREAK_ALLOW_AFTER<sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>1u<sp/>&lt;&lt;<sp/>1,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>LINE_BREAK_MANDATORY_BEFORE<sp/>=<sp/>1u<sp/>&lt;&lt;<sp/>2,</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">저장<sp/>단위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`lineBreakFlags[clusterIndex]`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ALLOW_BEFORE`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>현재<sp/>cluster<sp/>앞에서<sp/>줄바꿈<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ALLOW_AFTER`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>현재<sp/>cluster<sp/>뒤에서<sp/>줄바꿈<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`MANDATORY_BEFORE`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>현재<sp/>cluster<sp/>앞에서<sp/>강제<sp/>줄바꿈</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>방식의<sp/>장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>단계가<sp/>character<sp/>단위<sp/>탐색을<sp/>하지<sp/>않아도<sp/>된다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>scan만으로<sp/>break<sp/>지점을<sp/>판단할<sp/>수<sp/>있다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>향후<sp/>line<sp/>break<sp/>penalty를<sp/>추가하기<sp/>쉽다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`allowBreakBefore`<sp/>/<sp/>`allowBreakAfter`를<sp/>둘<sp/>다<sp/>둘지,<sp/>하나의<sp/>canonical<sp/>규칙으로<sp/>단순화할지는<sp/>구현<sp/>시점에<sp/>추가<sp/>정리<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>line별<sp/>available<sp/>interval<sp/>계산<sp/>방식</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">한<sp/>line은<sp/>하나의<sp/>연속<sp/>폭이<sp/>아니라<sp/>여러<sp/>개의<sp/>사용<sp/>가능한<sp/>interval로<sp/>구성될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예시<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>TextExclusionRegion</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Rect&lt;float&gt;<sp/>bounds;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">struct<sp/>AvailableInterval</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/>x;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/>width;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">line<sp/>계산<sp/>입력:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>content<sp/>bounds</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>current<sp/>line<sp/>top<sp/>/<sp/>bottom</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">출력:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>line<sp/>band에서<sp/>사용<sp/>가능한<sp/>`AvailableInterval`<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기본<sp/>원칙:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>먼저<sp/>line<sp/>band와<sp/>수직으로<sp/>겹치는<sp/>exclusion만<sp/>수집한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>그<sp/>exclusion들의<sp/>x-range를<sp/>line<sp/>기준<sp/>blocked<sp/>interval로<sp/>본다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>content<sp/>bounds<sp/>전체<sp/>구간에서<sp/>blocked<sp/>interval을<sp/>뺀<sp/>나머지를<sp/>`AvailableInterval`로<sp/>만든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>여러<sp/>exclusion<sp/>bounds가<sp/>있을<sp/>때<sp/>interval을<sp/>만드는<sp/>알고리즘</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1차<sp/>구현<sp/>알고리즘은<sp/>다음이<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>입력</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Rect&lt;float&gt;<sp/>contentBounds`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`float<sp/>lineTop`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`float<sp/>lineBottom`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Vector&lt;TextExclusionRegion&gt;<sp/>exclusions`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>알고리즘</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`blockedRanges`를<sp/>빈<sp/>배열로<sp/>시작한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>각<sp/>exclusion<sp/>region에<sp/>대해:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>`region.bounds.y<sp/>&lt;<sp/>lineBottom`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>`region.bounds.y<sp/>+<sp/>region.bounds.height<sp/>&gt;<sp/>lineTop`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>위<sp/>조건을<sp/>만족하면<sp/>line<sp/>band와<sp/>수직<sp/>overlap이<sp/>있으므로<sp/>채택</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>채택된<sp/>region의<sp/>x-range를<sp/>`blockedRanges`에<sp/>추가한다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`blockedRanges`를<sp/>`x`<sp/>기준<sp/>정렬한다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>겹치거나<sp/>맞닿는<sp/>blocked<sp/>range를<sp/>merge한다.</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>`contentBounds`의<sp/>`[left,<sp/>right)`에서<sp/>merged<sp/>blocked<sp/>range를<sp/>차례로<sp/>빼서<sp/>`AvailableInterval`을<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>width가<sp/>0<sp/>이하인<sp/>interval은<sp/>제거한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>예시<sp/>의사코드</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">Vector&lt;AvailableInterval&gt;<sp/>BuildAvailableIntervals(</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>const<sp/>Rect&lt;float&gt;&amp;<sp/>contentBounds,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/>lineTop,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/>lineBottom,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>const<sp/>Vector&lt;TextExclusionRegion&gt;&amp;<sp/>exclusions)</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;Range&gt;<sp/>blockedRanges;</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>for(const<sp/>auto&amp;<sp/>region<sp/>:<sp/>exclusions)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>if(OverlapsVertically(region.bounds,<sp/>lineTop,<sp/>lineBottom))</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>blockedRanges.PushBack({region.bounds.x,<sp/>region.bounds.x<sp/>+<sp/>region.bounds.width});</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>SortAndMerge(blockedRanges);</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;AvailableInterval&gt;<sp/>result;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/>cursor<sp/>=<sp/>contentBounds.x;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/>right<sp/><sp/>=<sp/>contentBounds.x<sp/>+<sp/>contentBounds.width;</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>for(const<sp/>auto&amp;<sp/>blocked<sp/>:<sp/>blockedRanges)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>if(cursor<sp/>&lt;<sp/>blocked.start)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>result.PushBack({cursor,<sp/>blocked.start<sp/>-<sp/>cursor});</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>cursor<sp/>=<sp/>std::max(cursor,<sp/>blocked.end);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>if(cursor<sp/>&lt;<sp/>right)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>result.PushBack({cursor,<sp/>right<sp/>-<sp/>cursor});</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>return<sp/>result;</highlight></codeline>
+<codeline><highlight class="normal">}</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>복잡도</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>region<sp/>수를<sp/>`N`이라<sp/>하면<sp/>line당<sp/>대략<sp/>`O(N<sp/>log<sp/>N)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1차<sp/>구현에서는<sp/>충분히<sp/>단순하고<sp/>디버깅<sp/>가능하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">향후<sp/>최적화:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>y-range<sp/>index</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>interval<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>region<sp/>변경분<sp/>기반<sp/>partial<sp/>rebuild</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>한<sp/>line이<sp/>여러<sp/>fragment로<sp/>나뉘는<sp/>구조</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">하나의<sp/>line에는<sp/>여러<sp/>fragment가<sp/>존재할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예시<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>TextLineFragment</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphStart;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphEnd;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>clusterStart;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>clusterEnd;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>x;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>y;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>width;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">struct<sp/>TextLine</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>y;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>height;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ascender;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>descender;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;TextLineFragment&gt;<sp/><sp/>fragments;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>의미</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLine`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>동일<sp/>baseline<sp/>band를<sp/>공유하는<sp/>line</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLineFragment`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>같은<sp/>line<sp/>안의<sp/>하나의<sp/>available<sp/>interval에<sp/>실제로<sp/>배치된<sp/>cluster<sp/>덩어리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>line은<sp/>논리적<sp/>줄이고,<sp/>fragment는<sp/>그<sp/>줄<sp/>안의<sp/>물리적<sp/>배치<sp/>조각이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Line<sp/>y<sp/>band]<sp/>--&gt;<sp/>B[AvailableInterval<sp/>#1]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A<sp/>--&gt;<sp/>C[AvailableInterval<sp/>#2]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A<sp/>--&gt;<sp/>D[AvailableInterval<sp/>#3]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>E[Fragment<sp/>#1]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>F[Fragment<sp/>#2]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>G[Fragment<sp/>#3]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>배치<sp/>규칙</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>한<sp/>line의<sp/>fragment는<sp/>x<sp/>순서대로<sp/>정렬된다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>fragment<sp/>사이에는<sp/>exclusion<sp/>region이<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>cluster는<sp/>한<sp/>fragment<sp/>안에서만<sp/>연속<sp/>배치된다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>fragment가<sp/>끝나고<sp/>cluster가<sp/>남으면<sp/>같은<sp/>line의<sp/>다음<sp/>interval로<sp/>이동한다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>다음<sp/>interval에도<sp/>못<sp/>들어가면<sp/>다음<sp/>line으로<sp/>이동한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>glyph<sp/>placement<sp/>결과<sp/>구조</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">최종<sp/>layout<sp/>결과는<sp/>atlas<sp/>renderer<sp/>adapter가<sp/>직접<sp/>소비할<sp/>수<sp/>있어야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>GlyphPlacement</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphIndex;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>x;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>y;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">struct<sp/>LayoutResult</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;GlyphPlacement&gt;<sp/>placements;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector&lt;TextLine&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/>lines;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector2<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>layoutSize;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>laidOutGlyphCount;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>laidOutClusterCount;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>설계<sp/>포인트</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`placements`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>atlas<sp/>renderer<sp/>adapter가<sp/>바로<sp/>glyph<sp/>position<sp/>배열로<sp/>변환<sp/>가능해야<sp/>한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lines`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>디버깅,<sp/>natural<sp/>size,<sp/>향후<sp/>selection/hit-test<sp/>확장<sp/>기반</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`layoutSize`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>view<sp/>measure<sp/>/<sp/>render<sp/>actor<sp/>size에<sp/>사용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>추가<sp/>권장<sp/>정보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추후<sp/>확장을<sp/>고려하면<sp/>아래<sp/>정보도<sp/>유용하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>ClusterPlacement</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>clusterIndex;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphStart;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>glyphEnd;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>lineIndex;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>fragmentIndex;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>x;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>float<sp/><sp/><sp/><sp/>width;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1차<sp/>구현에서<sp/>필수는<sp/>아니지만,<sp/>hit-test와<sp/>selection<sp/>확장을<sp/>생각하면<sp/>유지<sp/>가치가<sp/>높다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Layout<sp/>알고리즘<sp/>개요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>알고리즘은<sp/>cluster<sp/>streaming<sp/>방식이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>입력</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>content<sp/>bounds</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>regions</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>반복</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>현재<sp/>line의<sp/>y<sp/>band를<sp/>계산한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>line에서<sp/>사용<sp/>가능한<sp/>interval<sp/>목록을<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>각<sp/>interval에<sp/>대해:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>현재<sp/>cluster가<sp/>들어갈<sp/>수<sp/>있는지<sp/>검사</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>들어가면<sp/>fragment에<sp/>배치</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>-<sp/>못<sp/>들어가면<sp/>break<sp/>candidate를<sp/>역추적</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>line이<sp/>끝나면<sp/>다음<sp/>line으로<sp/>이동한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>핵심<sp/>규칙</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>interval<sp/>내부에서<sp/>cluster<sp/>advance를<sp/>누적한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>overflow<sp/>시<sp/>직전<sp/>break<sp/>candidate로<sp/>되돌린다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>break<sp/>candidate가<sp/>없으면<sp/>긴<sp/>cluster를<sp/>단독<sp/>line<sp/>처리한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>line의<sp/>다음<sp/>interval로<sp/>넘어갈지,<sp/>다음<sp/>line으로<sp/>갈지는<sp/>overflow<sp/>시점과<sp/>잔여<sp/>interval<sp/>폭으로<sp/>결정한다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Current<sp/>Line]<sp/>--&gt;<sp/>B[BuildAvailableIntervals]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[Current<sp/>Interval]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[Try<sp/>Place<sp/>Cluster]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E{Fits?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--<sp/>yes<sp/>--&gt;<sp/>F[Advance<sp/>Cluster<sp/>Cursor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G{More<sp/>Clusters?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--<sp/>yes<sp/>--&gt;<sp/>D</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--<sp/>no<sp/>--&gt;<sp/>H[Finish<sp/>Layout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--<sp/>no<sp/>--&gt;<sp/>I{Break<sp/>Candidate<sp/>Exists?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--<sp/>yes<sp/>--&gt;<sp/>J[Commit<sp/>Fragment<sp/>at<sp/>Break]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--<sp/>no<sp/>--&gt;<sp/>K[Force<sp/>Single<sp/>Cluster<sp/>Placement]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>L{More<sp/>Intervals<sp/>In<sp/>Line?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>K<sp/>--&gt;<sp/>L</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>--<sp/>yes<sp/>--&gt;<sp/>C</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>--<sp/>no<sp/>--&gt;<sp/>M[Next<sp/>Line]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>M<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>layout-only<sp/>invalidation<sp/>조건</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>조건은<sp/>`Prepare`를<sp/>다시<sp/>하지<sp/>않고<sp/>`Layout`만<sp/>다시<sp/>수행할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>content<sp/>width<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>content<sp/>height<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>padding<sp/>변경으로<sp/>usable<sp/>bounds<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>추가<sp/>/<sp/>제거<sp/>/<sp/>이동<sp/>/<sp/>크기<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>spacing<sp/>정책<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>height<sp/>정책<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>origin<sp/>변경</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>원칙:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>set이<sp/>유지되고</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>경계가<sp/>유지되며</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>fallback<sp/>/<sp/>shaping<sp/>결과가<sp/>유지되면</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Layout-only<sp/>invalidation`이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>prepare<sp/>invalidation<sp/>조건</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>조건은<sp/>`Prepare`를<sp/>다시<sp/>수행해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>family<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>size<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>variation<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>weight<sp/>/<sp/>width<sp/>/<sp/>slant<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>locale<sp/>또는<sp/>fallback<sp/>결과에<sp/>영향을<sp/>주는<sp/>font<sp/>environment<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>script/bidi/shaping<sp/>결과가<sp/>달라질<sp/>수<sp/>있는<sp/>속성<sp/>변경</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>원칙:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>identity가<sp/>바뀔<sp/>가능성이<sp/>있으면<sp/>`Prepare<sp/>invalidation`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>경계가<sp/>바뀔<sp/>가능성이<sp/>있으면<sp/>`Prepare<sp/>invalidation`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>지원하지<sp/>않을<sp/>기능<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1차<sp/>구현에서는<sp/>아래<sp/>기능을<sp/>지원하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>decorator</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>background</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editing<sp/>/<sp/>IME</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>clipboard</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>per-character<sp/>style<sp/>run</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertical<sp/>text</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>justification</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>non-rectangular<sp/>exclusion<sp/>geometry</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">위<sp/>기능들은<sp/>`LayoutResult`와<sp/>`PreparedText`를<sp/>더<sp/>복잡하게<sp/>만들므로<sp/>초기<sp/>구현에서는<sp/>의도적으로<sp/>제외한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>향후<sp/>확장<sp/>가능성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>설계는<sp/>아래<sp/>기능으로<sp/>확장<sp/>가능해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>1.<sp/>style<sp/>run</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>per-fragment<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline<sp/>/<sp/>background<sp/>/<sp/>shadow</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.<sp/>hit-test<sp/>/<sp/>selection</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ClusterPlacement`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLineFragment`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLine`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">위<sp/>구조를<sp/>유지하면<sp/>확장<sp/>가능하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.<sp/>ellipsis</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>line별<sp/>overflow<sp/>판정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>마지막<sp/>fragment의<sp/>trailing<sp/>cluster<sp/>치환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.<sp/>incremental<sp/>layout</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>일부만<sp/>바뀌면<sp/>영향<sp/>받는<sp/>line부터<sp/>재계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>interval<sp/>cache<sp/>도입</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>5.<sp/>non-rectangular<sp/>exclusion</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재는<sp/>rectangle<sp/>subtraction이지만,<sp/>향후<sp/>line<sp/>band와<sp/>shape<sp/>intersection<sp/>결과를<sp/>interval로<sp/>환원하는<sp/>구조로<sp/>확장<sp/>가능하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer에<sp/>필요한<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare`와<sp/>`Layout`의<sp/>캐시<sp/>분리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>단위<sp/>line<sp/>breaking</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line별<sp/>available<sp/>interval<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>multi-fragment<sp/>line<sp/>구조</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Layout-only<sp/>invalidation`과<sp/>`Prepare<sp/>invalidation`<sp/>분리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>renderer<sp/>adapter가<sp/>바로<sp/>소비할<sp/>수<sp/>있는<sp/>glyph<sp/>placement<sp/>결과</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>참고용<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphsToCharacters`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`charactersToClusters`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ClusterPlacement`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>향후<sp/>style<sp/>/<sp/>hit-test<sp/>확장<sp/>포인트</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>버릴<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>설계<sp/>문서<sp/>범위에서는<sp/>아래를<sp/>의도적으로<sp/>다루지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>editing<sp/>state<sp/>machine</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>/<sp/>cursor<sp/>geometry</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>decorator<sp/>actor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>IME<sp/>연동</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>decoration<sp/>mesh</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis<sp/>replacement</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>설계<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`의<sp/>layout<sp/>engine은<sp/>기존<sp/>단일<sp/>box<sp/>line<sp/>layout이<sp/>아니라,<sp/>`Prepared<sp/>cluster<sp/>stream<sp/>+<sp/>line별<sp/>available<sp/>interval<sp/>+<sp/>multi-fragment<sp/>line`<sp/>모델로<sp/>설계하는<sp/>것이<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심은<sp/>다음<sp/>세<sp/>가지다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`Prepare`는<sp/>glyph/cluster<sp/>캐시를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`Layout`은<sp/>exclusion-aware<sp/>geometry만<sp/>계산한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>최종<sp/>결과는<sp/>atlas<sp/>renderer가<sp/>바로<sp/>소비할<sp/>수<sp/>있는<sp/>glyph<sp/>placement<sp/>배열로<sp/>정리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>확인<sp/>필요<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>height를<sp/>font<sp/>metrics<sp/>기반<sp/>단일<sp/>값으로<sp/>둘지,<sp/>cluster/font별<sp/>line<sp/>metrics를<sp/>더<sp/>세밀하게<sp/>가져갈지<sp/>구현<sp/>시<sp/>확정<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster가<sp/>어떤<sp/>interval에도<sp/>들어가지<sp/>못할<sp/>정도로<sp/>폭이<sp/>큰<sp/>경우<sp/>강제<sp/>배치<sp/>정책을<sp/>어떻게<sp/>둘지<sp/>구현<sp/>시<sp/>확정<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>1차<sp/>구현에서<sp/>bidi<sp/>재배치를<sp/>`Prepare`<sp/>결과로<sp/>완전히<sp/>고정할지<sp/>추가<sp/>검토<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer<sp/>설계에<sp/>주는<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`TextVisualizer`는<sp/>shaping<sp/>결과를<sp/>재사용하는<sp/>`Prepare<sp/>/<sp/>Layout`<sp/>2단계<sp/>구조여야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>layout의<sp/>최소<sp/>단위는<sp/>glyph가<sp/>아니라<sp/>cluster여야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>exclusion<sp/>region<sp/>대응은<sp/>line별<sp/>blocked-range<sp/>subtraction으로<sp/>interval을<sp/>만드는<sp/>방식이<sp/>가장<sp/>단순하고<sp/>구현<sp/>가능성이<sp/>높다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>line은<sp/>하나의<sp/>box가<sp/>아니라<sp/>여러<sp/>fragment를<sp/>가지는<sp/>구조로<sp/>모델링해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>1차<sp/>구현은<sp/>style/ellipsis/editing을<sp/>제외한<sp/>plain<sp/>glyph<sp/>placement에<sp/>집중하는<sp/>것이<sp/>맞다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/05-layout-design.ko.md"/>
+  </compounddef>
+</doxygen>

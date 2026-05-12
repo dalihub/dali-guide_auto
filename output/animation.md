@@ -6,281 +6,249 @@ category: animation-motion
 
 # Animation
 
-Animation in dali-ui provides a type-safe, fluent API for animating `View` properties. The framework offers two complementary patterns: the Bridge pattern for immediate animation construction and the Spec pattern for reusable animation specifications.
+Animation in dali-ui provides a type-safe, fluent API for animating `View` properties. The framework offers two complementary patterns: the Bridge pattern for inline animations and the Spec pattern for reusable animation definitions.
 
 ## Table of Contents
 
-- [Creating Animations](#creating-animations)
-- [View-First Animation with Bridge Pattern](#view-first-animation-with-bridge-pattern)
-- [Reusable Animation Specifications](#reusable-animation-specifications)
+- [Creating and Playing Animations](#creating-and-playing-animations)
+- [View-First Bridge Pattern](#view-first-bridge-pattern)
+- [Spec-First Reusable Animations](#spec-first-reusable-animations)
 - [Alpha Functions](#alpha-functions)
 - [Key Frame Animations](#key-frame-animations)
 - [Animation Control](#animation-control)
-- [Looping and Repeat](#looping-and-repeat)
-- [Animation Lifecycle and Signals](#animation-lifecycle-and-signals)
+- [Looping and Speed](#looping-and-speed)
+- [Animation Signals](#animation-signals)
 
-## Creating Animations
+## Creating and Playing Animations
 
-Create an `Animation` using `Animation::New()`. The animation can be created with or without an initial duration.
-
-```cpp
-// Create with explicit duration
-Animation anim = Animation::New(2.0f);
-
-// Create without duration (auto-extended as animators are added)
-Animation anim = Animation::New();
-```
-
-The animation duration is automatically extended if any individual animator exceeds the initial duration.
-
-## View-First Animation with Bridge Pattern
-
-The Bridge pattern provides a fluent, type-safe API for animating `View` properties. Call `View::Animate()` with an `Animation` instance to obtain a `ViewAnimationBridge`, then chain property animations.
+Create an `Animation` using `Animation::New()` with an optional duration parameter. Call `Play()` to start the animation.
 
 ```cpp
-Animation anim = Animation::New();
-view.Animate(anim)
-  .Opacity(0.0f, 300_ms, AlphaFunction::EASE_OUT)
-  .PositionY(50.0f, 500_ms);
+// Create animation with default duration
+auto anim = Animation::New();
+
+// Create animation with specific duration (3 seconds)
+auto anim = Animation::New(3.0f);
+
+// Start the animation
 anim.Play();
 ```
 
-The `ViewAnimationBridge` supports both absolute (`AnimateTo`-style) and relative (`AnimateBy`-style) methods:
+The animation duration is automatically extended if any individual animator exceeds it. Use `SetDuration()` to modify the duration after creation.
+
+```cpp
+anim.SetDuration(2.0f);
+float duration = anim.GetDuration();
+```
+
+## View-First Bridge Pattern
+
+The Bridge pattern provides a fluent, type-safe API for animating `View` properties. Call `Animate()` on a `View` with an `Animation` instance to get a `ViewAnimationBridge`, then chain property animations.
+
+```cpp
+auto anim = Animation::New();
+view.Animate(anim)
+  .Opacity(0.0f, 300_ms, AlphaFunction::EASE_OUT)
+  .PositionY(50.0f, 200_ms);
+
+anim.Play();
+```
+
+The `ViewAnimationBridge` is stack-allocated with zero heap overhead. Each method accepts the target value, a `Duration`, an optional `AlphaFunction`, and an optional delay.
+
+### Available Bridge Methods
 
 | Method | Description |
 |--------|-------------|
 | `Opacity(target, duration, alpha, delay)` | Animates opacity to target value |
 | `OpacityBy(relative, duration, alpha, delay)` | Animates opacity by relative amount |
-| `PositionX(target, duration, alpha, delay)` | Animates X position to target |
-| `PositionXBy(relative, duration, alpha, delay)` | Animates X position by relative amount |
-| `PositionY(target, duration, alpha, delay)` | Animates Y position to target |
-| `PositionYBy(relative, duration, alpha, delay)` | Animates Y position by relative amount |
-| `ScaleX(target, duration, alpha, delay)` | Animates X scale to target |
-| `ScaleY(target, duration, alpha, delay)` | Animates Y scale to target |
+| `PositionX(target, duration, alpha, delay)` | Animates X position |
+| `PositionY(target, duration, alpha, delay)` | Animates Y position |
+| `ScaleX(target, duration, alpha, delay)` | Animates X scale |
+| `ScaleY(target, duration, alpha, delay)` | Animates Y scale |
 | `BackgroundColor(target, duration, alpha, delay)` | Animates background color |
 | `CornerRadius(target, duration, alpha, delay)` | Animates corner radius |
 | `BorderlineWidth(target, duration, alpha, delay)` | Animates borderline width |
 
-### Duration Literals
+### Chaining Multiple Properties
 
-Use the user-defined literals for readable duration values:
-
-```cpp
-using namespace Dali::Ui;
-
-Duration d1 = 300_ms;   // 0.3 seconds
-Duration d2 = 1500_ms;  // 1.5 seconds
-Duration d3 = 2_s;      // 2.0 seconds
-```
-
-### Complete Bridge Example
+Multiple properties can be animated in parallel within the same `Animation`:
 
 ```cpp
-void OnViewClicked(View view, InputEvent e)
-{
-  Animation anim = Animation::New();
-  view.Animate(anim)
-    .BackgroundColor(UiColor::PRIMARY, 500_ms)
-    .PositionY(50.0f, 300_ms, AlphaFunction::EASE_OUT);
-  anim.Play();
-}
-```
+auto anim = Animation::New();
+view.Animate(anim)
+  .Opacity(0.0f, 500_ms)
+  .ScaleX(1.2f, 500_ms, AlphaFunction::EASE_OUT)
+  .ScaleY(1.2f, 500_ms, AlphaFunction::EASE_OUT)
+  .PositionY(-20.0f, 250_ms);
 
-## Reusable Animation Specifications
-
-The Spec pattern allows defining reusable animation configurations. Create a `ViewAnimationSpec` via `View::NewAnimationSpec()`, configure it, then apply to any `View`.
-
-```cpp
-// Define a reusable fade-in specification
-ViewAnimationSpec fadeInSpec = View::NewAnimationSpec()
-  .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
-
-// Apply to multiple views
-Animation anim = Animation::New();
-fadeInSpec.ApplyTo(anim, view1);
-fadeInSpec.ApplyTo(anim, view2);
 anim.Play();
 ```
 
-### Spec-First Pattern Example
+## Spec-First Reusable Animations
+
+The Spec pattern creates reusable animation definitions that can be applied to multiple Views. Use `View::NewAnimationSpec()` to create a `ViewAnimationSpec`, then call `ApplyTo()` with an `Animation` and `View`.
 
 ```cpp
-class MyController : public ConnectionTracker
-{
-public:
-  void Create(Application application)
-  {
-    // Build reusable spec once
-    mFadeInSpec = View::NewAnimationSpec()
-      .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
-  }
+// Create a reusable fade-in spec
+auto fadeInSpec = View::NewAnimationSpec()
+  .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
 
-  void OnButtonClicked(View view, InputEvent e)
-  {
-    Animation anim = Animation::New();
-    mFadeInSpec.ApplyTo(anim, view);
-    anim.Play();
-  }
+// Apply to multiple views
+auto anim1 = Animation::New();
+fadeInSpec.ApplyTo(anim1, view1);
+anim1.Play();
 
-private:
-  ViewAnimationSpec mFadeInSpec;
-};
+auto anim2 = Animation::New();
+fadeInSpec.ApplyTo(anim2, view2);
+anim2.Play();
+```
+
+This pattern is useful for defining animations once and reusing them across different Views or throughout an application.
+
+Alternatively, use the Bridge pattern directly for the same animation on multiple views:
+
+```cpp
+// Apply fade-in animation to multiple views using Bridge pattern
+auto anim1 = Animation::New();
+view1.Animate(anim1).Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
+anim1.Play();
+
+auto anim2 = Animation::New();
+view2.Animate(anim2).Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
+anim2.Play();
 ```
 
 ## Alpha Functions
 
-`AlphaFunction` controls the rate of change of animation progress over time. Built-in functions provide common easing curves.
+Alpha functions define the rate of change of animation progress over time. Use built-in functions or create custom curves.
 
 ### Built-in Alpha Functions
 
-| Constant | Description |
-|----------|-------------|
-| `AlphaFunction::LINEAR` | No transformation, constant speed |
-| `AlphaFunction::EASE_IN` | Speeds up, sudden stop (cubic) |
-| `AlphaFunction::EASE_OUT` | Sudden start, slows to stop (cubic) |
-| `AlphaFunction::EASE_IN_OUT` | Speeds up then slows down (cubic) |
-| `AlphaFunction::EASE_IN_SINE` | Speeds up, sudden stop (sinusoidal) |
-| `AlphaFunction::EASE_OUT_SINE` | Sudden start, slows to stop (sinusoidal) |
-| `AlphaFunction::EASE_IN_OUT_SINE` | Speeds up then slows down (sinusoidal) |
-| `AlphaFunction::SIN` | Single sine revolution |
-| `AlphaFunction::BOUNCE` | Bounces at end |
-| `AlphaFunction::EASE_OUT_BACK` | Exceeds end, returns to stop |
-| `AlphaFunction::REVERSE` | Reverse linear |
-
-### Using Alpha Functions
-
 ```cpp
-// Set default alpha function for an animation
-Animation anim = Animation::New(1.0f);
-anim.SetDefaultAlphaFunction(AlphaFunction::EASE_IN_OUT);
-
-// Per-animator alpha function
-view.Animate(anim)
-  .Opacity(0.0f, 300_ms, AlphaFunction::EASE_OUT);
+AlphaFunction::LINEAR           // No transformation
+AlphaFunction::EASE_IN          // Speeds up, sudden stop
+AlphaFunction::EASE_OUT         // Sudden start, slows down
+AlphaFunction::EASE_IN_OUT      // Speeds up, then slows down
+AlphaFunction::EASE_OUT_BACK    // Exceeds end, returns
+AlphaFunction::BOUNCE           // Bounces back to start
+AlphaFunction::SIN             // Single sine revolution
 ```
 
-### Bezier Curve Alpha Function
+Set a default alpha function for an animation:
 
-Create custom easing with a cubic Bezier curve:
+```cpp
+anim.SetDefaultAlphaFunction(AlphaFunction::EASE_IN_OUT);
+AlphaFunction alpha = anim.GetDefaultAlphaFunction();
+```
+
+### Spring Animations
+
+Spring animations provide physics-based motion with natural settling behavior:
+
+```cpp
+// Predefined spring types
+AlphaFunction spring(AlphaFunction::GENTLE);   // Slow, smooth
+AlphaFunction spring(AlphaFunction::QUICK);     // Fast settling
+AlphaFunction spring(AlphaFunction::BOUNCY);   // Elastic, oscillatory
+AlphaFunction spring(AlphaFunction::SLOW);     // Relaxed, longer settling
+
+// Apply to animation
+view.Animate(anim).Opacity(1.0f, 500_ms, AlphaFunction::BOUNCY);
+```
+
+### Custom Bezier Curves
+
+Create custom easing curves with bezier control points:
 
 ```cpp
 // Control points define the curve shape
-AlphaFunction customEase(Vector2(0.25f, 0.1f), Vector2(0.25f, 1.0f));
-```
-
-### Spring Alpha Function
-
-Use physics-based spring animation with predefined presets:
-
-```cpp
-// Spring presets
-AlphaFunction spring(AlphaFunction::GENTLE);  // Slow, smooth
-AlphaFunction spring(AlphaFunction::QUICK);   // Fast settling
-AlphaFunction spring(AlphaFunction::BOUNCY);  // Highly oscillatory
-AlphaFunction spring(AlphaFunction::SLOW);    // Relaxed motion
+AlphaFunction custom(Vector2(0.25f, 0.1f), Vector2(0.25f, 1.0f));
 ```
 
 ## Key Frame Animations
 
-For complex animations with multiple intermediate values, use `KeyFrames` with `AnimateBetween()`.
-
-### Creating Key Frames
+Use `KeyFrames` with `AnimateBetween()` for complex multi-step animations. Add key frames with progress values between 0.0 and 1.0.
 
 ```cpp
 KeyFrames keyFrames = KeyFrames::New();
 keyFrames.Add(0.00f, Property::Value(Vector4(0.0f, 0.0f, 1.0f, 1.0f)));
 keyFrames.Add(0.25f, Property::Value(Vector4(0.0f, 0.0f, 0.5f, 0.5f)));
 keyFrames.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f, 0.5f)));
+keyFrames.Add(0.75f, Property::Value(Vector4(0.5f, 0.5f, 0.5f, 0.5f)));
 keyFrames.Add(1.00f, Property::Value(Vector4(0.0f, 0.0f, 1.0f, 1.0f)));
-```
 
-### Animating Between Key Frames
-
-```cpp
 Animation anim = Animation::New(3.0f);
-anim.SetLooping(true);
-anim.AnimateBetween(
-  Property(view, propertyIndex),
-  keyFrames,
-  AlphaFunction::EASE_IN_OUT);
+anim.AnimateBetween(Property(view, View::Property::CORNER_RADIUS), keyFrames, AlphaFunction::EASE_IN_OUT);
 anim.Play();
 ```
 
 ### Interpolation Modes
 
-`AnimateBetween()` supports two interpolation modes:
-
-- `Animation::LINEAR`: Linear interpolation between key frames (default)
-- `Animation::CUBIC`: Cubic interpolation for smoother curves
+`AnimateBetween()` supports linear or cubic interpolation:
 
 ```cpp
-anim.AnimateBetween(Property(view, propertyIndex), keyFrames,
-                    AlphaFunction::EASE_IN_OUT,
-                    Animation::CUBIC);
+// Linear interpolation (default)
+anim.AnimateBetween(target, keyFrames, Animation::LINEAR);
+
+// Cubic interpolation for smoother curves
+anim.AnimateBetween(target, keyFrames, Animation::CUBIC);
 ```
 
 ## Animation Control
 
-### Playing Animations
+Control animation playback with `Play()`, `Pause()`, and `Stop()`.
 
 ```cpp
-// Start animation
+// Start or resume
 anim.Play();
 
 // Play from specific progress (0.0 to 1.0)
 anim.PlayFrom(0.5f);
 
 // Play after delay
-anim.PlayAfter(0.5f);
-```
+anim.PlayAfter(1.0f);  // 1 second delay
 
-### Pausing and Stopping
-
-```cpp
-// Pause animation
+// Pause
 anim.Pause();
 
-// Stop animation (applies end action)
+// Stop (applies end action)
 anim.Stop();
 
 // Clear all animators
 anim.Clear();
 ```
 
-### Querying State
+Query the current state:
 
 ```cpp
 Animation::State state = anim.GetState();
-// Possible values: Animation::STOPPED, Animation::PLAYING, Animation::PAUSED
+// Returns: Animation::STOPPED, Animation::PLAYING, or Animation::PAUSED
 ```
 
-### Progress and Speed
+### Progress Control
+
+Set or get the current animation progress:
 
 ```cpp
-// Get current progress (0.0 to 1.0)
-float progress = anim.GetCurrentProgress();
-
-// Set progress manually
 anim.SetCurrentProgress(0.5f);
-
-// Speed factor (1.0 = normal, <1.0 = slower, >1.0 = faster, negative = reverse)
-anim.SetSpeedFactor(2.0f);
-float speed = anim.GetSpeedFactor();
+float progress = anim.GetCurrentProgress();
 ```
 
 ### Play Range
 
-Limit animation to a sub-range:
+Limit animation to a specific progress range:
 
 ```cpp
-// Play only from 25% to 75% of the animation
-anim.SetPlayRange(Vector2(0.25f, 0.75f));
+anim.SetPlayRange(Vector2(0.25f, 0.75f));  // Play middle half only
 Vector2 range = anim.GetPlayRange();
 ```
 
-## Looping and Repeat
+## Looping and Speed
 
-### Basic Looping
+### Looping
+
+Enable continuous looping or set a specific loop count:
 
 ```cpp
 // Loop forever
@@ -289,67 +257,75 @@ anim.SetLooping(true);
 // Loop specific number of times
 anim.SetLoopCount(3);
 
-// Check if looping
-bool isLooping = anim.IsLooping();
-
-// Get current loop count
+int32_t loopCount = anim.GetLoopCount();
 int32_t currentLoop = anim.GetCurrentLoop();
+bool isLooping = anim.IsLooping();
 ```
 
-### Looping Modes
+### Looping Mode
+
+Control how looping behaves at boundaries:
 
 ```cpp
-// Restart from beginning each loop (default)
+// Restart from beginning (default)
 anim.SetLoopingMode(Animation::RESTART);
 
-// Reverse direction at each loop end
+// Reverse direction at end
 anim.SetLoopingMode(Animation::AUTO_REVERSE);
+
 Animation::LoopingMode mode = anim.GetLoopingMode();
 ```
 
-## Animation Lifecycle and Signals
+### Speed Factor
+
+Adjust animation speed with a multiplier:
+
+```cpp
+anim.SetSpeedFactor(2.0f);  // 2x speed
+anim.SetSpeedFactor(0.5f);  // Half speed
+anim.SetSpeedFactor(-1.0f); // Reverse
+
+float factor = anim.GetSpeedFactor();
+```
+
+## Animation Signals
+
+Connect to `FinishedSignal()` to be notified when an animation completes.
+
+```cpp
+anim.FinishedSignal().Connect(this, &MyClass::OnAnimationFinished);
+
+// Handler signature
+void OnAnimationFinished(Animation& animation)
+{
+  // Animation completed
+}
+```
 
 ### End Actions
 
 Control what happens when an animation ends or is stopped:
 
-| End Action | Behavior |
-|------------|----------|
-| `Animation::BAKE` | Save animated property values at end |
-| `Animation::DISCARD` | Forget animated values, revert to original |
-| `Animation::BAKE_FINAL` | Save values as if animation completed (on stop) |
-
 ```cpp
+// Save final property values (default)
 anim.SetEndAction(Animation::BAKE);
-anim.SetDisconnectAction(Animation::BAKE_FINAL);
+
+// Discard animated values, revert to original
+anim.SetEndAction(Animation::DISCARD);
+
+// Save values as if animation ran to completion
+anim.SetEndAction(Animation::BAKE_FINAL);
+
+Animation::EndAction action = anim.GetEndAction();
 ```
 
-### Finished Signal
+### Disconnect Action
 
-Connect to receive notification when animation completes:
-
-```cpp
-void OnAnimationFinished(Animation& anim)
-{
-  // Animation completed
-}
-
-// Connect signal
-anim.FinishedSignal().Connect(this, &MyClass::OnAnimationFinished);
-```
-
-### Fire and Forget
-
-Animations continue playing even if the handle is discarded. This enables "fire and forget" patterns:
+Handle the case where an animated View is removed from the scene:
 
 ```cpp
-void FadeOut(View view)
-{
-  Animation anim = Animation::New();
-  view.Animate(anim).Opacity(0.0f, 300_ms, AlphaFunction::EASE_OUT);
-  anim.Play();
-  // anim goes out of scope, but animation continues
-}
+anim.SetDisconnectAction(Animation::BAKE_FINAL);  // Default
+Animation::EndAction action = anim.GetDisconnectAction();
 ```
 
 ### Blend Point
@@ -357,6 +333,6 @@ void FadeOut(View view)
 For `AnimateBetween()`, set a blend point to smoothly transition from the current value to the first key frame:
 
 ```cpp
-anim.SetBlendPoint(0.2f);  // Blend during first 20% of animation
-float blend = anim.GetBlendPoint();
+anim.SetBlendPoint(0.1f);  // Blend during first 10% of animation
+float blendPoint = anim.GetBlendPoint();
 ```

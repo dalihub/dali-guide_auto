@@ -1,0 +1,718 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_219-render-optimization-phase2-plan_8ko</compoundname>
+    <title>TextVisualizer Render Optimization Phase 2 Plan</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md736"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md737">
+<title>1. Phase 2 목적</title>
+<para>Phase 1은 <computeroutput>TextVisualizer</computeroutput>의 first stable version이다.</para>
+<para>Phase 1에서는 기존 <computeroutput>TextController</computeroutput> / <computeroutput>TextView</computeroutput>를 수정하지 않고 별도 경로로 다음 기능을 동작시켰다.</para>
+<para><itemizedlist>
+<listitem><para>prepare / shaping / glyph metrics cache</para>
+</listitem><listitem><para>exclusion 기반 layout</para>
+</listitem><listitem><para>moving bounds demo</para>
+</listitem><listitem><para>word wrap</para>
+</listitem><listitem><para>atlas renderer bridge</para>
+</listitem><listitem><para>render dirty clear</para>
+</listitem><listitem><para>layout unchanged render skip</para>
+</listitem><listitem><para>prepare / layout / adapter cache 최적화</para>
+</listitem></itemizedlist>
+</para>
+<para>Phase 2는 “layout 이후 render update 비용”을 줄이는 단계다.</para>
+<para>핵심 목표는 다음 문장으로 고정한다.</para>
+<para><blockquote><para><zwj/><computeroutput>TextVisualizer</computeroutput>의 차별화 포인트는 text를 매 frame 새로 만드는 것이 아니라, prepared glyph data를 유지한 상태에서 layout / exclusion / glyph position 변화에 빠르게 반응하는 것이다. </para>
+</blockquote>따라서 Phase 2의 primary target은 **prepare 이후 layout-dynamic text**다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md738">
+<title>2. Phase 1 완료 범위 요약</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md739">
+<title>PreparedText</title>
+<para>Phase 1의 <computeroutput>PreparedText</computeroutput>는 다음 stable data를 보관한다.</para>
+<para><itemizedlist>
+<listitem><para>UTF-32 characters</para>
+</listitem><listitem><para>line break info</para>
+</listitem><listitem><para>paragraph info</para>
+</listitem><listitem><para>script / font run 기반 shaping 결과</para>
+</listitem><listitem><para>glyphs</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem><listitem><para>glyph-to-character map</para>
+</listitem><listitem><para>characters-per-glyph</para>
+</listitem><listitem><para>character-to-glyph / glyphs-per-character tables</para>
+</listitem><listitem><para>prepared-level line metrics</para>
+</listitem><listitem><para>stable <computeroutput>GlyphLayoutData</computeroutput><itemizedlist>
+<listitem><para>advance</para>
+</listitem><listitem><para>width</para>
+</listitem><listitem><para>prefix advance</para>
+</listitem><listitem><para>character start / end</para>
+</listitem><listitem><para>break allowed / mandatory after glyph</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>이 범위는 text / font / font size가 변하지 않는 동안 재사용된다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md740">
+<title>Layout</title>
+<para>Phase 1의 layout 경로는 다음을 지원한다.</para>
+<para><itemizedlist>
+<listitem><para>exclusion region 회피 layout</para>
+</listitem><listitem><para>y-sorted exclusion scan</para>
+</listitem><listitem><para>basic word wrap</para>
+</listitem><listitem><para>line metrics 기반 natural line height</para>
+</listitem><listitem><para><computeroutput>TextLine.metrics</computeroutput></para>
+</listitem><listitem><para><computeroutput>LayoutResult::Reserve()</computeroutput></para>
+</listitem><listitem><para>placeholder / glyph layout buffer reserve</para>
+</listitem><listitem><para>layout result signature</para>
+</listitem></itemizedlist>
+</para>
+<para>아직 partial relayout은 없다. exclusion 또는 size 변경 시 <computeroutput>LayoutGlyphs()</computeroutput>는 전체 placement를 다시 계산한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md741">
+<title>Adapter</title>
+<para><computeroutput>AtlasViewAdapter</computeroutput>는 <computeroutput>PreparedText</computeroutput>와 <computeroutput>LayoutResult</computeroutput>를 render-ready view 형태로 연결한다.</para>
+<para>현재 adapter cache는 다음을 포함한다.</para>
+<para><itemizedlist>
+<listitem><para>line-level metrics cache</para>
+</listitem><listitem><para>renderer glyph position cache</para>
+</listitem><listitem><para>text color / control size / layout size</para>
+</listitem></itemizedlist>
+</para>
+<para>renderer glyph positions는 layout result 연결 시점에 미리 계산된다. 따라서 <computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>는 glyph position 계산을 매번 반복하지 않고 cache를 우선 사용한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md742">
+<title>Bridge</title>
+<para><computeroutput>AtlasRendererBridge</computeroutput>는 다음 역할을 수행한다.</para>
+<para><itemizedlist>
+<listitem><para>render host lifecycle 관리</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface</computeroutput> 연결</para>
+</listitem><listitem><para><computeroutput>Text::AtlasRenderer::Render()</computeroutput> 호출</para>
+</listitem><listitem><para>output actor attach / detach</para>
+</listitem><listitem><para>lightweight <computeroutput>UpdateRenderData()</computeroutput> validation</para>
+</listitem><listitem><para>render dirty clear success gate</para>
+</listitem><listitem><para>render diagnostics getter 제공</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>UpdateRenderData()</computeroutput>는 더 이상 glyph count만큼 full render data vector를 만들지 않는다. 현재는 renderer ensure와 first / last glyph smoke validation 중심의 lightweight gate다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md743">
+<title>Sample</title>
+<para>Phase 1 sample 상태는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>text-visualizer-performance-example.cpp</computeroutput><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> 중심 performance demo</para>
+</listitem><listitem><para>moving orb / overlay text</para>
+</listitem><listitem><para>static / dynamic exclusion split</para>
+</listitem><listitem><para>optional debug status</para>
+</listitem><listitem><para>FPS-only default status</para>
+</listitem><listitem><para>window-wide orb movement</para>
+</listitem><listitem><para>foreground title / overlay text layering</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>text-visualizer-experimental-example.cpp</computeroutput><itemizedlist>
+<listitem><para>기존 <computeroutput>text-experimental-example.cpp</computeroutput>의 text grid simulation을 <computeroutput>TextVisualizer</computeroutput>로 비교</para>
+</listitem><listitem><para><computeroutput>SINGLE_TEXT_VISUALIZER</computeroutput></para>
+</listitem><listitem><para><computeroutput>PARTIAL_TEXT_VISUALIZER_TILES</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md744">
+<title>3. Phase 2 Primary Workload</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md745">
+<title>A. Layout-Dynamic Workload</title>
+<para>Phase 2의 primary workload는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>text content stable</para>
+</listitem><listitem><para>glyph sequence stable</para>
+</listitem><listitem><para>font / style stable</para>
+</listitem><listitem><para>prepared glyph data stable</para>
+</listitem><listitem><para>exclusion regions move</para>
+</listitem><listitem><para>layout result changes</para>
+</listitem><listitem><para>glyph positions change</para>
+</listitem><listitem><para>render output must update</para>
+</listitem></itemizedlist>
+</para>
+<para>예시는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>PreText-like editorial demo</para>
+</listitem><listitem><para>moving object collision with paragraphs</para>
+</listitem><listitem><para>live image / object avoidance</para>
+</listitem><listitem><para>animated exclusion bounds</para>
+</listitem><listitem><para>prepared long-form text reflow</para>
+</listitem></itemizedlist>
+</para>
+<para>최적화 목표는 다음이다.</para>
+<para><itemizedlist>
+<listitem><para>no re-prepare</para>
+</listitem><listitem><para>minimal relayout</para>
+</listitem><listitem><para>minimal render update</para>
+</listitem><listitem><para>ideally geometry-only update</para>
+</listitem></itemizedlist>
+</para>
+<para>Phase 2에서 가장 중요한 질문은 “glyph identity는 그대로인데 position만 바뀌는 경우, 왜 renderer가 매번 full rebuild를 해야 하는가?”다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md746">
+<title>4. Non-Primary Workload</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md747">
+<title>B. Content-Dynamic Workload</title>
+<para>Phase 2의 non-primary workload는 다음이다.</para>
+<para><itemizedlist>
+<listitem><para>text content changes every frame</para>
+</listitem><listitem><para>glyph sequence changes</para>
+</listitem><listitem><para><computeroutput>SetText()</computeroutput> frequently called</para>
+</listitem><listitem><para>prepare / shaping / string rebuild is dominant</para>
+</listitem></itemizedlist>
+</para>
+<para>예시는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>text-experimental</computeroutput> ASCII raster</para>
+</listitem><listitem><para>terminal / canvas-like dynamic text grid</para>
+</listitem><listitem><para>tile text animation</para>
+</listitem><listitem><para>per-frame content generation</para>
+</listitem></itemizedlist>
+</para>
+<para>이 workload도 가치가 있지만 성격이 다르다.</para>
+<para>현재 <computeroutput>TextVisualizer</computeroutput>가 강점을 보이려는 지점은 “prepared glyph를 유지하고 placement만 빠르게 바꾸는 것”이다. content-dynamic workload는 별도 전략이 필요하다.</para>
+<para>가능한 별도 전략:</para>
+<para><itemizedlist>
+<listitem><para>monospace dynamic text renderer</para>
+</listitem><listitem><para>fixed-cell glyph cache</para>
+</listitem><listitem><para>tile-level persistent glyph buffers</para>
+</listitem><listitem><para>content-diff renderer update</para>
+</listitem></itemizedlist>
+</para>
+<para>Phase 2는 이 workload를 먼저 최적화하지 않는다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md748">
+<title>5. Current Render Bottleneck</title>
+<para>현재 render update path는 다음과 같다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[TextVisualizerImpl]<sp/>--&gt;<sp/>B[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[TextVisualizerViewInterface]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[AtlasRendererBridge::AttachRendererToHost]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[Text::AtlasRenderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[view.GetGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[AddGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[Mesh<sp/>container<sp/>build]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[VertexBuffer<sp/>/<sp/>Geometry<sp/>/<sp/>Renderer<sp/>/<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[Output<sp/>actor<sp/>attach]</highlight></codeline>
+</programlisting></para>
+<para>Phase 1은 prepare / layout / adapter 비용을 줄였다. 하지만 <computeroutput>Text::AtlasRenderer::Render()</computeroutput>는 여전히 generic full render update 경로를 수행한다.</para>
+<para>코드 기준으로 현재 <computeroutput>AtlasRenderer::Render()</computeroutput>는 다음 일을 할 수 있다.</para>
+<para><itemizedlist>
+<listitem><para>render 시작 시 <computeroutput>UnparentAndReset(mImpl-&gt;mActor)</computeroutput></para>
+</listitem><listitem><para>glyph / position vector 생성</para>
+</listitem><listitem><para><computeroutput>view.GetGlyphs()</computeroutput> 호출</para>
+</listitem><listitem><para><computeroutput>AddGlyphs()</computeroutput> 호출</para>
+</listitem><listitem><para>style / decoration branch 확인</para>
+</listitem><listitem><para>glyph atlas lookup / cache reference update</para>
+</listitem><listitem><para><computeroutput>RemoveText()</computeroutput>로 previous text cache ref count 감소</para>
+</listitem><listitem><para>mesh container 생성</para>
+</listitem><listitem><para><computeroutput>VertexBuffer::New()</computeroutput></para>
+</listitem><listitem><para><computeroutput>Geometry::New()</computeroutput></para>
+</listitem><listitem><para><computeroutput>Dali::Renderer::New()</computeroutput></para>
+</listitem><listitem><para>mesh actor 생성</para>
+</listitem><listitem><para>output actor child 구성</para>
+</listitem></itemizedlist>
+</para>
+<para>이 경로가 남아 있으면, layout-dynamic workload에서 <computeroutput>LayoutGlyphs()</computeroutput>가 빨라져도 최종 frame cost는 renderer backend full rebuild에 의해 제한된다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md749">
+<title>6. Why Not Modify AtlasRenderer Directly First</title>
+<para><computeroutput>Text::AtlasRenderer</computeroutput>는 기존 text pipeline과 공유된다.</para>
+<para>영향 가능 대상:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Label</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput></para>
+</listitem><listitem><para>기존 <computeroutput>TextView</computeroutput></para>
+</listitem><listitem><para>기존 <computeroutput>TextController</computeroutput> 기반 rendering</para>
+</listitem><listitem><para>markup / style / decoration</para>
+</listitem><listitem><para>text fit / ellipsis / cutout</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>AtlasRenderer</computeroutput>는 <computeroutput>TextVisualizer</computeroutput>가 현재 필요로 하지 않는 많은 기능을 지원한다.</para>
+<para><itemizedlist>
+<listitem><para>underline</para>
+</listitem><listitem><para>strikethrough</para>
+</listitem><listitem><para>shadow</para>
+</listitem><listitem><para>outline</para>
+</listitem><listitem><para>background</para>
+</listitem><listitem><para>markup color</para>
+</listitem><listitem><para>hyphen</para>
+</listitem><listitem><para>ellipsis</para>
+</listitem><listitem><para>cutout</para>
+</listitem><listitem><para>color glyph / emoji</para>
+</listitem><listitem><para>generic style runs</para>
+</listitem></itemizedlist>
+</para>
+<para>따라서 <computeroutput>text-atlas-renderer.*</computeroutput>를 먼저 수정하면 기존 text stack 회귀 위험이 크다.</para>
+<para>Phase 2의 첫 방향은 다음과 같이 잡는다.</para>
+<para><orderedlist>
+<listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput>는 그대로 둔다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> 전용 lightweight renderer prototype을 별도 internal 경로로 설계한다.</para>
+</listitem><listitem><para>prototype이 유효하면 나중에 <computeroutput>AtlasRenderer</computeroutput>에 geometry-only update path를 통합할지, 별도 renderer로 유지할지 결정한다.</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md750">
+<title>7. TextVisualizer-Only Lightweight Renderer Prototype Direction</title>
+<para>추천 component 이름:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">TextVisualizerGlyphRenderer</highlight></codeline>
+</programlisting></para>
+<para>위치 후보:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">dali-ui-foundation/internal/text/text-visualizer/rendering/</highlight></codeline>
+</programlisting></para>
+<para>책임:</para>
+<para><itemizedlist>
+<listitem><para>output actor 소유</para>
+</listitem><listitem><para>mesh actor / renderer / geometry lifecycle 관리</para>
+</listitem><listitem><para><computeroutput>PreparedText</computeroutput> + <computeroutput>LayoutResult</computeroutput> + <computeroutput>AtlasViewAdapter</computeroutput> cache 사용</para>
+</listitem><listitem><para>renderer glyph positions cache 사용</para>
+</listitem><listitem><para>current <computeroutput>TextVisualizer</computeroutput> scope만 지원</para>
+</listitem><listitem><para>glyph position만 바뀌는 경우 actor / renderer / geometry 재생성 회피 시도</para>
+</listitem><listitem><para>가능한 경우 vertex buffer / geometry data in-place update</para>
+</listitem></itemizedlist>
+</para>
+<para>지원 범위:</para>
+<para><itemizedlist>
+<listitem><para>glyph rendering</para>
+</listitem><listitem><para>single text color</para>
+</listitem><listitem><para>prepared glyph sequence</para>
+</listitem><listitem><para>layout result / glyph positions update</para>
+</listitem><listitem><para>fallback to existing <computeroutput>AtlasRenderer</computeroutput> 가능</para>
+</listitem></itemizedlist>
+</para>
+<para>명시적 non-goals:</para>
+<para><itemizedlist>
+<listitem><para>full <computeroutput>Label</computeroutput> feature 지원</para>
+</listitem><listitem><para>rich markup 지원</para>
+</listitem><listitem><para>underline / strikethrough / shadow / outline 지원</para>
+</listitem><listitem><para>ellipsis / text fit 지원</para>
+</listitem><listitem><para>editing / selection / cursor / decorator 지원</para>
+</listitem><listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput> 글로벌 대체</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md751">
+<title>8. Prototype Design Candidates</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md752">
+<title>Candidate A. Bridge-Level Cached Output With Existing AtlasRenderer</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>Text::AtlasRenderer</computeroutput>를 계속 사용한다.</para>
+</listitem><listitem><para>bridge / adapter / <computeroutput>ViewInterface</computeroutput> overhead만 더 줄인다.</para>
+</listitem><listitem><para>output attach path를 최소화한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>low risk</para>
+</listitem><listitem><para>기존 renderer behavior 유지</para>
+</listitem><listitem><para>기존 fallback과 동일</para>
+</listitem></itemizedlist>
+</para>
+<para>한계:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AddGlyphs()</computeroutput> / mesh / actor rebuild를 해결하지 못한다.</para>
+</listitem><listitem><para>Phase 2 핵심 병목을 직접 줄이지 못할 가능성이 크다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md753">
+<title>Candidate B. TextVisualizer-Only Renderer Using Existing Atlas Cache Helpers</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer</computeroutput> 아래 새 renderer class를 둔다.</para>
+</listitem><listitem><para>existing atlas glyph manager / mesh helper를 가능한 범위에서 사용한다.</para>
+</listitem><listitem><para><computeroutput>PreparedText</computeroutput> glyphs와 cached renderer positions로 mesh를 만든다.</para>
+</listitem><listitem><para>actor / renderer / geometry를 renderer 내부에 유지한다.</para>
+</listitem><listitem><para>같은 glyph sequence / atlas page / style이면 geometry-only update를 시도한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>primary workload와 직접 맞는다.</para>
+</listitem><listitem><para>기존 <computeroutput>Label</computeroutput> / <computeroutput>InputField</computeroutput> renderer를 건드리지 않는다.</para>
+</listitem><listitem><para>성공 시 Phase 2 value를 가장 잘 증명할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>위험:</para>
+<para><itemizedlist>
+<listitem><para>atlas cache helper 접근성이 부족할 수 있다.</para>
+</listitem><listitem><para><computeroutput>Text::AtlasRenderer::Impl</computeroutput> 내부 logic을 일부 중복할 수 있다.</para>
+</listitem><listitem><para>atlas page split / color glyph 처리가 생각보다 복잡할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>추천:</para>
+<para><itemizedlist>
+<listitem><para>가장 먼저 feasibility를 확인한다.</para>
+</listitem><listitem><para>helper access가 부족하면 필요한 internal access point를 문서화한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md754">
+<title>Candidate C. TextVisualizer-Only Renderer With Temporary Simple Texture Path</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para>빠른 prototype을 위해 간단한 texture / mesh path를 별도로 만든다.</para>
+</listitem><listitem><para>existing atlas infra를 일부 우회한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>MVP를 빨리 만들 수 있다.</para>
+</listitem><listitem><para>geometry-only update structure를 독립적으로 검증할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>위험:</para>
+<para><itemizedlist>
+<listitem><para>glyph atlas behavior가 incomplete할 수 있다.</para>
+</listitem><listitem><para>duplicate renderer logic이 커질 수 있다.</para>
+</listitem><listitem><para>fallback font / emoji / atlas page handling이 빠질 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>결론:</para>
+<para><itemizedlist>
+<listitem><para>실험 prototype으로만 허용한다.</para>
+</listitem><listitem><para>production path로 바로 삼지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md755">
+<title>Candidate D. Modify Text::AtlasRenderer With Geometry-Only Update Path</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>Text::AtlasRenderer</computeroutput>에 persistent actor / renderer / geometry path를 추가한다.</para>
+</listitem><listitem><para>stable glyph sequence에서 vertex buffer만 update한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>가장 integrated한 방향이다.</para>
+</listitem><listitem><para>기존 text stack도 장기적으로 이득을 볼 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>위험:</para>
+<para><itemizedlist>
+<listitem><para>shared renderer 회귀 위험이 가장 크다.</para>
+</listitem><listitem><para>style / markup / decoration / ellipsis 조합 검증 범위가 넓다.</para>
+</listitem></itemizedlist>
+</para>
+<para>결론:</para>
+<para><itemizedlist>
+<listitem><para>Phase 2 later step이다.</para>
+</listitem><listitem><para>첫 구현 커밋으로는 적절하지 않다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md756">
+<title>9. Required Data For Lightweight Renderer</title>
+<para><computeroutput>TextVisualizerGlyphRenderer</computeroutput>가 필요한 data는 다음과 같다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md757">
+<title>From PreparedText</title>
+<para><itemizedlist>
+<listitem><para>glyphs</para>
+</listitem><listitem><para>glyph index</para>
+</listitem><listitem><para>font id</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem><listitem><para>glyph identity for atlas lookup</para>
+</listitem><listitem><para>glyph style flags</para>
+</listitem><listitem><para>optional text buffer / glyph-to-character map</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md758">
+<title>From LayoutResult / AtlasViewAdapter</title>
+<para><itemizedlist>
+<listitem><para>glyph placements</para>
+</listitem><listitem><para>cached renderer glyph positions</para>
+</listitem><listitem><para>layout size</para>
+</listitem><listitem><para>control size</para>
+</listitem><listitem><para>text color</para>
+</listitem><listitem><para>renderable glyph count</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md759">
+<title>From Existing Atlas Infrastructure</title>
+<para><itemizedlist>
+<listitem><para>glyph bitmap / atlas slot lookup</para>
+</listitem><listitem><para>atlas texture</para>
+</listitem><listitem><para>texture coordinates</para>
+</listitem><listitem><para>atlas page id</para>
+</listitem><listitem><para>mesh generation helper</para>
+</listitem><listitem><para>shader</para>
+</listitem><listitem><para>texture set</para>
+</listitem><listitem><para>pixel format split</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md760">
+<title>10. Key Technical Questions</title>
+<para>다음 구현 전 반드시 확인해야 할 질문이다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>가 사용할 수 있는 existing atlas / glyph cache class는 무엇인가?</para>
+</listitem><listitem><para>glyph atlas cache 접근이 <computeroutput>Text::AtlasRenderer::Impl</computeroutput> 안에 숨겨져 있는가?</para>
+</listitem><listitem><para><computeroutput>AtlasGlyphManager</computeroutput> / <computeroutput>AtlasMeshFactory</computeroutput>를 새 renderer에서 직접 사용할 수 있는가?</para>
+</listitem><listitem><para>mesh generation helper를 재사용할 수 있는가, 아니면 중복 구현이 필요한가?</para>
+</listitem><listitem><para>DALi <computeroutput>VertexBuffer</computeroutput> data는 생성 후 안정적으로 update할 수 있는가?</para>
+</listitem><listitem><para><computeroutput>Geometry</computeroutput> / <computeroutput>Renderer</computeroutput>를 유지한 채 vertex buffer data만 교체할 수 있는가?</para>
+</listitem><listitem><para>하나의 mesh actor로 충분한가, atlas page별 multiple mesh actor가 필요한가?</para>
+</listitem><listitem><para>현재 <computeroutput>AtlasRenderer</computeroutput>는 texture / pixel format / atlas page 기준으로 mesh를 어떻게 split하는가?</para>
+</listitem><listitem><para>textColor는 shader uniform인지 vertex color인지, lightweight path에서 어떻게 맞출 것인가?</para>
+</listitem><listitem><para>color glyph / emoji와 L8 glyph가 섞이면 renderer / shader split이 어떻게 필요한가?</para>
+</listitem><listitem><para><computeroutput>RemoveText()</computeroutput> / glyph reference count를 lightweight renderer가 어떻게 관리해야 하는가?</para>
+</listitem><listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput> fallback과 output actor lifecycle을 어떻게 공존시킬 것인가?</para>
+</listitem><listitem><para><computeroutput>TextVisualizerGlyphRenderer</computeroutput> MVP가 <computeroutput>text-atlas-renderer.*</computeroutput> 수정 없이 가능한가?</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md761">
+<title>11. Phase 2 Implementation Steps</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md762">
+<title>Commit 1. Phase 2 plan document</title>
+<para>현재 커밋이다.</para>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>Phase 2 target 고정</para>
+</listitem><listitem><para>render bottleneck 고정</para>
+</listitem><listitem><para>prototype 방향 고정</para>
+</listitem><listitem><para>다음 구현 단위 정리</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md763">
+<title>Commit 2. Inspect atlas cache access points</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasGlyphManager</computeroutput> / <computeroutput>AtlasMeshFactory</computeroutput> 접근 가능성 확인</para>
+</listitem><listitem><para><computeroutput>Text::AtlasRenderer::Impl</computeroutput> private dependency 목록화</para>
+</listitem><listitem><para><computeroutput>TextVisualizerGlyphRenderer</computeroutput> MVP에 필요한 minimum class / method 정리</para>
+</listitem></itemizedlist>
+</para>
+<para>형태:</para>
+<para><itemizedlist>
+<listitem><para>md-only 또는 tiny internal probe</para>
+</listitem><listitem><para>behavior change 없음</para>
+</listitem></itemizedlist>
+</para>
+<para>커밋 후보명:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Inspect<sp/>TextVisualizer<sp/>lightweight<sp/>renderer<sp/>dependencies</highlight></codeline>
+</programlisting></para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md764">
+<title>Commit 3. Add TextVisualizerGlyphRenderer skeleton</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>새 class files 추가</para>
+</listitem><listitem><para>output actor lifecycle skeleton</para>
+</listitem><listitem><para>renderer state reset / clear</para>
+</listitem><listitem><para>no active usage</para>
+</listitem><listitem><para>no actual glyph rendering</para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>empty state UTC</para>
+</listitem><listitem><para>no behavior change</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md765">
+<title>Commit 4. Add simple glyph mesh build prototype</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>existing atlas cache helper 사용 가능하면 사용</para>
+</listitem><listitem><para>static text 1회 draw prototype</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> active path에는 아직 연결하지 않거나 internal feature flag 뒤에 둔다.</para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>simple text visual smoke</para>
+</listitem><listitem><para>atlas page / renderer count 확인</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md766">
+<title>Commit 5. Integrate optional renderer path into AtlasRendererBridge</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>Text::AtlasRenderer</computeroutput> path를 fallback으로 유지</para>
+</listitem><listitem><para>internal switch로 lightweight renderer path 사용</para>
+</listitem><listitem><para>public API 없음</para>
+</listitem><listitem><para>실패 시 기존 renderer path 사용</para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>기존 TextVisualizer UTC</para>
+</listitem><listitem><para>performance sample visual smoke</para>
+</listitem><listitem><para>actor leak check</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md767">
+<title>Commit 6. Geometry-only update</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>same glyph sequence</para>
+</listitem><listitem><para>same atlas pages</para>
+</listitem><listitem><para>same style</para>
+</listitem><listitem><para>positions only changed</para>
+</listitem><listitem><para>vertex buffer / geometry data update only</para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>moving bounds FPS 비교</para>
+</listitem><listitem><para>output renderer count 안정성</para>
+</listitem><listitem><para>stale actor 없음</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md768">
+<title>Commit 7. Decide integration direction</title>
+<para>결정:</para>
+<para><itemizedlist>
+<listitem><para>TextVisualizer-only renderer로 유지</para>
+</listitem><listitem><para>또는 proven path를 <computeroutput>AtlasRenderer</computeroutput> shared geometry-only update로 추출</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md769">
+<title>12. Validation Plan</title>
+<para>각 구현 단계에서 확인할 항목:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UtcDaliTextVisualizer</computeroutput></para>
+</listitem><listitem><para>performance sample build</para>
+</listitem><listitem><para>visual smoke</para>
+</listitem><listitem><para>existing <computeroutput>AtlasRenderer</computeroutput> path fallback</para>
+</listitem><listitem><para>lightweight path comparison</para>
+</listitem></itemizedlist>
+</para>
+<para>workload:</para>
+<para><itemizedlist>
+<listitem><para>stable text + moving exclusions</para>
+</listitem><listitem><para>text color change</para>
+</listitem><listitem><para>font size change</para>
+</listitem><listitem><para>text change</para>
+</listitem><listitem><para>empty text</para>
+</listitem><listitem><para>long text</para>
+</listitem><listitem><para>fallback font / mixed glyph</para>
+</listitem><listitem><para>color glyph / emoji</para>
+</listitem><listitem><para>multiple atlas pages if possible</para>
+</listitem></itemizedlist>
+</para>
+<para>metrics:</para>
+<para><itemizedlist>
+<listitem><para>render call count</para>
+</listitem><listitem><para>actor count</para>
+</listitem><listitem><para>renderer count</para>
+</listitem><listitem><para>output child count</para>
+</listitem><listitem><para>glyph count</para>
+</listitem><listitem><para>glyph placement count</para>
+</listitem><listitem><para>FPS rough</para>
+</listitem><listitem><para>visual correctness</para>
+</listitem><listitem><para>memory growth</para>
+</listitem><listitem><para>stale actor leak</para>
+</listitem><listitem><para>fallback frequency</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>sample FPS는 rough value다.</para>
+</listitem><listitem><para>status debug on 상태는 measurement를 왜곡할 수 있다.</para>
+</listitem><listitem><para>first target은 layout-dynamic workload다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md770">
+<title>13. Risks</title>
+<para>Phase 2 renderer prototype의 주요 risk:</para>
+<para><itemizedlist>
+<listitem><para>glyph atlas access가 너무 private할 수 있다.</para>
+</listitem><listitem><para><computeroutput>Text::AtlasRenderer</computeroutput> logic을 중복할 수 있다.</para>
+</listitem><listitem><para>fallback font behavior가 빠질 수 있다.</para>
+</listitem><listitem><para>color glyph / emoji 처리가 어렵다.</para>
+</listitem><listitem><para>atlas page splitting이 복잡할 수 있다.</para>
+</listitem><listitem><para>shader / textColor 적용이 기존 output과 다를 수 있다.</para>
+</listitem><listitem><para>actor / renderer lifecycle bug가 생길 수 있다.</para>
+</listitem><listitem><para>stale actor / stale glyph reference가 누적될 수 있다.</para>
+</listitem><listitem><para>visual output이 기존 <computeroutput>AtlasRenderer</computeroutput>와 달라질 수 있다.</para>
+</listitem><listitem><para>existing renderer fallback과 bridge state가 꼬일 수 있다.</para>
+</listitem><listitem><para>너무 일찍 <computeroutput>AtlasRenderer</computeroutput>에 통합하면 <computeroutput>Label</computeroutput> / <computeroutput>InputField</computeroutput> regression risk가 커진다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md771">
+<title>14. Decision Criteria</title>
+<para>prototype이 가치 있다고 판단할 조건:</para>
+<para><itemizedlist>
+<listitem><para>stable text + moving exclusion case에서 명확한 개선이 있다.</para>
+</listitem><listitem><para>visual output이 기존 <computeroutput>AtlasRenderer</computeroutput> path와 충분히 일치한다.</para>
+</listitem><listitem><para>actor / renderer count가 frame마다 증가하지 않는다.</para>
+</listitem><listitem><para>output actor lifecycle이 안정적이다.</para>
+</listitem><listitem><para>no stale actor accumulation.</para>
+</listitem><listitem><para>no obvious memory growth.</para>
+</listitem><listitem><para>code가 <computeroutput>Label</computeroutput> / <computeroutput>InputField</computeroutput> path와 격리된다.</para>
+</listitem><listitem><para>fallback path가 남아 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>가치가 부족한 경우:</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput> path를 유지한다.</para>
+</listitem><listitem><para><computeroutput>ViewInterface::GetGlyphs()</computeroutput> copy path만 더 줄인다.</para>
+</listitem><listitem><para>데모 후 <computeroutput>AtlasRenderer</computeroutput> shared geometry-only update 설계로 전환한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md772">
+<title>15. Next Immediate Work</title>
+<para>이 문서 다음 추천 작업:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Inspect<sp/>TextVisualizer<sp/>lightweight<sp/>renderer<sp/>dependencies</highlight></codeline>
+</programlisting></para>
+<para>해당 작업에서 답해야 하는 것:</para>
+<para><itemizedlist>
+<listitem><para>어떤 file / class가 필요한가?</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>가 atlas glyph cache에 접근할 수 있는가?</para>
+</listitem><listitem><para><computeroutput>AtlasMeshFactory</computeroutput>를 재사용할 수 있는가?</para>
+</listitem><listitem><para><computeroutput>VertexBuffer</computeroutput> / <computeroutput>Geometry</computeroutput> reuse가 가능한가?</para>
+</listitem><listitem><para>MVP renderer에 필요한 최소 기능은 무엇인가?</para>
+</listitem><listitem><para>새 renderer 위치는 <computeroutput>internal/text/text-visualizer/rendering/</computeroutput>이 맞는가?</para>
+</listitem><listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput> fallback과 bridge를 어떻게 공존시킬 것인가?</para>
+</listitem></itemizedlist>
+</para>
+<para>이 작업은 가능하면 문서 중심으로 시작하고, 필요한 경우 compile-only skeleton은 별도 커밋으로 분리한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio21bbbb4dece2ff743893459610d9daac_1autotoc_md773">
+<title>16. Conclusion</title>
+<para>Phase 2는 layout-dynamic render update 최적화 단계다.</para>
+<para>현재 <computeroutput>TextVisualizer</computeroutput>는 prepare / layout / adapter cache를 상당 부분 갖췄지만, 최종 render backend는 여전히 <computeroutput>Text::AtlasRenderer::Render()</computeroutput> full rebuild 경로를 사용한다.</para>
+<para>다음 큰 성능 가치는 다음에서 온다.</para>
+<para><itemizedlist>
+<listitem><para>prepared glyph sequence 유지</para>
+</listitem><listitem><para>placement / position만 변경</para>
+</listitem><listitem><para>renderer output actor 유지</para>
+</listitem><listitem><para>mesh / geometry / renderer 재사용</para>
+</listitem><listitem><para>vertex buffer data만 update</para>
+</listitem></itemizedlist>
+</para>
+<para>첫 구현 방향은 shared <computeroutput>AtlasRenderer</computeroutput> 직접 수정이 아니라, <computeroutput>TextVisualizer</computeroutput> 전용 <computeroutput>TextVisualizerGlyphRenderer</computeroutput> prototype이다. 이 prototype으로 가치와 위험을 분리해 검증한 뒤, 장기적으로 shared <computeroutput>AtlasRenderer</computeroutput> geometry-only path에 통합할지 결정한다.</para>
+<para>content-dynamic workload는 중요하지만 별도 문제다. Phase 2 설계를 content-dynamic ASCII raster workload에 맞추지 않는다. </para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/19-render-optimization-phase2-plan.ko.md"/>
+  </compounddef>
+</doxygen>

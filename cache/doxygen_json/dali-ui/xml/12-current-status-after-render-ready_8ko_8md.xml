@@ -1,0 +1,839 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="12-current-status-after-render-ready_8ko_8md" kind="file" language="Markdown">
+    <compoundname>12-current-status-after-render-ready.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>Current<sp/>Status<sp/>After<sp/>Render-Ready</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>`render-ready<sp/>state<sp/>tracking`까지<sp/>반영된<sp/>현재<sp/>`TextVisualizer`<sp/>구현<sp/>상태를<sp/>compact<sp/>이후에도<sp/>다음<sp/>작업자가<sp/>정확히<sp/>이어받을<sp/>수<sp/>있도록<sp/>정리한<sp/>인수인계<sp/>문서이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">특히<sp/>아래를<sp/>분명히<sp/>고정한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>구현이<sp/>`Prepare<sp/>-&gt;<sp/>Layout<sp/>-&gt;<sp/>Adapter<sp/>-&gt;<sp/>ViewInterface<sp/>-&gt;<sp/>Bridge<sp/>-&gt;<sp/>RenderHost<sp/>-&gt;<sp/>Renderer::Render()`까지<sp/>어디에<sp/>도달했는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRenderReady()`가<sp/>현재<sp/>무엇을<sp/>의미하고,<sp/>무엇을<sp/>의미하지<sp/>않는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>아직<sp/>`render<sp/>dirty`를<sp/>clear하면<sp/>안<sp/>되는<sp/>이유</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>작업<sp/>후보와<sp/>금지<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">애매한<sp/>내용은<sp/>추측하지<sp/>않고<sp/>`확인<sp/>필요`로<sp/>표시한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>1.<sp/>현재<sp/>최신<sp/>커밋<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">최신<sp/>커밋:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Add<sp/>TextVisualizer<sp/>render-ready<sp/>state<sp/>tracking`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>커밋<sp/>해시:<sp/>`65c8c10`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이전<sp/>중요<sp/>커밋:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Add<sp/>TextVisualizer<sp/>renderer<sp/>render-call<sp/>skeleton`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>커밋<sp/>해시:<sp/>`f804f4c`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Adjust<sp/>TextVisualizer<sp/>glyph<sp/>render<sp/>positions`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>커밋<sp/>해시:<sp/>`5a6b74c`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Verify<sp/>TextVisualizer<sp/>text<sp/>color<sp/>render<sp/>path`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>커밋<sp/>해시:<sp/>`c1ac606`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>2.<sp/>전체<sp/>구현<sp/>상태<sp/>요약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>구현<sp/>상태를<sp/>전체<sp/>흐름으로<sp/>정리하면<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[TextVisualizer<sp/>public<sp/>API]<sp/>--&gt;<sp/>B[TextVisualizerImpl]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[TextPreparer]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[PreparedText]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[LayoutEngine]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[LayoutResult]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>G</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[TextVisualizerViewInterface]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>I[AtlasRendererBridge]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>I</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[RenderHost<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>K[Text::Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>K</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>K<sp/>--&gt;<sp/>L[Renderer<sp/>Output<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단계별<sp/>현재<sp/>상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer<sp/>public<sp/>API`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>handle/property/method<sp/>skeleton과<sp/>기본<sp/>property가<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>prepare/layout/render<sp/>dirty,<sp/>render<sp/>host<sp/>lifecycle,<sp/>adapter/bridge<sp/>연결을<sp/>담당한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextPreparer`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>shaping<sp/>직전이<sp/>아니라<sp/>shaping<sp/>+<sp/>glyph<sp/>metrics까지<sp/>포함한<sp/>prepare<sp/>cache<sp/>생성<sp/>경로가<sp/>구현되어<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>prepare-stage<sp/>데이터와<sp/>glyph<sp/>관련<sp/>vector를<sp/>복사<sp/>저장한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutEngine`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>placeholder<sp/>layout과<sp/>glyph<sp/>advance<sp/>기반<sp/>layout이<sp/>모두<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>line<sp/>/<sp/>fragment<sp/>/<sp/>cluster<sp/>placement<sp/>/<sp/>glyph<sp/>placement를<sp/>저장한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasViewAdapter`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`PreparedText`와<sp/>`LayoutResult`를<sp/>non-owning으로<sp/>참조하며<sp/>renderer-friendly<sp/>getter를<sp/>제공한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerViewInterface`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Text::ViewInterface`<sp/>최소<sp/>구현체가<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRendererBridge`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>renderer<sp/>생성,<sp/>render<sp/>data<sp/>변환,<sp/>`Renderer::Render()`<sp/>호출,<sp/>output<sp/>actor<sp/>attach,<sp/>render-ready<sp/>state<sp/>추적이<sp/>구현되어<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RenderHost<sp/>Actor`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TextVisualizerImpl`이<sp/>host<sp/>actor를<sp/>생성/소유한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Renderer::Render()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>실제<sp/>호출<sp/>경로가<sp/>열려<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Renderer<sp/>Output<sp/>Actor`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>부분<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>bridge가<sp/>actor를<sp/>보관하고<sp/>host에<sp/>attach할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>다만<sp/>visual<sp/>correctness와<sp/>ownership<sp/>정책은<sp/>아직<sp/>확정<sp/>전이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>3.<sp/>Prepare<sp/>단계<sp/>현재<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">완료된<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-8<sp/>-&gt;<sp/>UTF-32<sp/>변환</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>info<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>paragraph<sp/>info<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>script<sp/>run<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>run<sp/>/<sp/>fallback<sp/>validation</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ShapeText()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>mapping<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Metrics::GetGlyphMetrics()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`에<sp/>필요한<sp/>vector만<sp/>복사<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextController<sp/>/<sp/>TextView<sp/>/<sp/>VisualModel`<sp/>전체를<sp/>소유하지<sp/>않음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`PreparedText`가<sp/>보유하는<sp/>핵심<sp/>데이터:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>original<sp/>text</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>family<sp/>/<sp/>font<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>characters</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>info</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>paragraph<sp/>info</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>script<sp/>runs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>runs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyphs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph-to-character<sp/>map</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>characters-per-glyph</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>character-to-glyph<sp/>table</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyphs-per-character<sp/>table</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>new<sp/>paragraph<sp/>glyphs</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아직<sp/>미완료:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>correctness</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>emoji<sp/>ZWJ<sp/>cluster<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>variation<sp/>완전<sp/>반영</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>/<sp/>rich<sp/>text</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`clusterCount`는<sp/>여전히<sp/>실제<sp/>cluster<sp/>수가<sp/>아니라<sp/>character<sp/>count<sp/>기반<sp/>placeholder<sp/>성격이<sp/>강하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`는<sp/>“layout-only<sp/>재계산”을<sp/>가능하게<sp/>하는<sp/>cache이지만,<sp/>cluster-quality<sp/>line<sp/>break까지는<sp/>아직<sp/>완성되지<sp/>않았다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>4.<sp/>Layout<sp/>단계<sp/>현재<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">완료된<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>기반<sp/>available<sp/>interval<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>layout<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>advance<sp/>기반<sp/>`LayoutGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphPlacement`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLineFragment.glyphStart<sp/>/<sp/>glyphEnd`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl`이<sp/>glyph<sp/>data/metrics가<sp/>있으면<sp/>`LayoutGlyphs()`,<sp/>아니면<sp/>`LayoutPlaceholder()`<sp/>사용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>layout<sp/>관련<sp/>핵심<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AvailableInterval`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLineFragment`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLine`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ClusterPlacement`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphPlacement`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>동작<sp/>요약:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region과<sp/>vertical<sp/>overlap이<sp/>있는<sp/>blocked<sp/>interval만<sp/>line에서<sp/>제거한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>interval은<sp/>merge<sp/>/<sp/>clamp<sp/>/<sp/>zero-width<sp/>제거를<sp/>거친다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>layout은<sp/>glyph<sp/>advance<sp/>기준으로<sp/>interval을<sp/>순회하며<sp/>line을<sp/>구성한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output은<sp/>`LayoutResult.lines`,<sp/>`clusterPlacements`,<sp/>`glyphPlacements`에<sp/>저장된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아직<sp/>미완료:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>word<sp/>/<sp/>cluster<sp/>기반<sp/>line<sp/>break<sp/>품질</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>bidi<sp/>visual<sp/>reorder</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>RTL</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>zero<sp/>advance<sp/>/<sp/>combining<sp/>mark<sp/>정밀<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ascender<sp/>/<sp/>descender<sp/>기반<sp/>line<sp/>metrics</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>5.<sp/>Renderer/ViewInterface<sp/>단계<sp/>현재<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">완료된<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasViewAdapter`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`PreparedText<sp/>/<sp/>LayoutResult`<sp/>비소유<sp/>참조</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>renderable<sp/>glyph<sp/>validation</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>glyph<sp/>info<sp/>/<sp/>glyph<sp/>placement<sp/>/<sp/>text<sp/>buffer<sp/>/<sp/>glyph-to-character<sp/>map<sp/>accessor</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>control<sp/>size<sp/>/<sp/>layout<sp/>size<sp/>/<sp/>text<sp/>color<sp/>보관</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>renderer<sp/>glyph<sp/>position<sp/>adjustment<sp/>제공</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerViewInterface`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Text::ViewInterface`<sp/>직접<sp/>구현</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>실제<sp/>연결한<sp/>method:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetNumberOfGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetControlSize()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetLayoutSize()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetTextColor()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetTextBuffer()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>`GetGlyphsToCharacters()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>no-op<sp/>/<sp/>empty<sp/>처리한<sp/>method:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>colors<sp/>/<sp/>color<sp/>indices</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>background<sp/>colors</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>underline<sp/>/<sp/>shadow<sp/>/<sp/>outline</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>hyphen</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>ellipsis</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>strikethrough</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>bounded<sp/>paragraph<sp/>runs</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>character<sp/>spacing</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>-<sp/>cutout</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRendererBridge`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Text::AtlasRenderer::New()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`UpdateRenderData()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Renderer::Render()`<sp/>호출</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>renderer<sp/>output<sp/>actor<sp/>보관</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>output<sp/>actor를<sp/>`RenderHost<sp/>Actor`에<sp/>attach</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Detach<sp/>/<sp/>Clear<sp/>/<sp/>Reset`<sp/>상태<sp/>정리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>renderer<sp/>경로<sp/>의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>더<sp/>이상<sp/>“renderer<sp/>생성<sp/>가능<sp/>여부”<sp/>수준이<sp/>아니라<sp/>실제<sp/>`Render()`<sp/>호출과<sp/>output<sp/>actor<sp/>attach<sp/>skeleton까지<sp/>도달했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>하지만<sp/>이<sp/>상태를<sp/>아직<sp/>“draw<sp/>correctness<sp/>완료”로<sp/>보면<sp/>안<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>6.<sp/>glyph<sp/>render<sp/>position<sp/>adjustment<sp/>현재<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>glyph<sp/>위치<sp/>정책은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult`는<sp/>layout<sp/>좌표를<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer-specific<sp/>보정은<sp/>`AtlasViewAdapter<sp/>/<sp/>TextVisualizerViewInterface`<sp/>경계에서<sp/>수행한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>보정식:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`x<sp/>=<sp/>placement.x<sp/>+<sp/>glyph.xBearing`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`baselineOffset<sp/>=<sp/>같은<sp/>line의<sp/>glyph들<sp/>중<sp/>max(yBearing)`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`y<sp/>=<sp/>placement.y<sp/>+<sp/>baselineOffset<sp/>-<sp/>glyph.yBearing`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>보정은<sp/>임시<sp/>규칙이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ascender<sp/>/<sp/>descender<sp/>기반<sp/>line<sp/>metrics가<sp/>들어오면<sp/>조정될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`minLineOffset`은<sp/>아직<sp/>`0.0f`<sp/>유지다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>해석:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutEngine::LayoutGlyphs()`는<sp/>pen/line-top<sp/>성격의<sp/>좌표를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer`는<sp/>glyph<sp/>quad<sp/>origin에<sp/>가까운<sp/>좌표를<sp/>기대하므로,<sp/>renderer<sp/>직전<sp/>경계에서<sp/>bearing을<sp/>반영한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>설계는<sp/>`LayoutResult`를<sp/>renderer-specific<sp/>좌표로<sp/>오염시키지<sp/>않기<sp/>위한<sp/>선택이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>7.<sp/>textColor<sp/>render<sp/>path<sp/>현재<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>정책은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer`는<sp/>`GetColors()`,<sp/>`GetColorIndices()`,<sp/>`GetTextColor()`를<sp/>읽는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColors()<sp/>/<sp/>GetColorIndices()`가<sp/>`nullptr`이면<sp/>`defaultColor`<sp/>path를<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`defaultColor`는<sp/>`GetTextColor()`<sp/>반환값이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>1차<sp/>구현은<sp/>per-glyph<sp/>color를<sp/>지원하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColors()<sp/>/<sp/>GetColorIndices()`는<sp/>`nullptr`<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetTextColor()`만<sp/>`TEXT_COLOR`를<sp/>전달한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SyncRenderStateToAdapter()`가<sp/>layout<sp/>dirty<sp/>여부와<sp/>무관하게<sp/>render<sp/>직전<sp/>`controlSize<sp/>/<sp/>textColor`를<sp/>adapter에<sp/>반영한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TEXT_COLOR`<sp/>변경은<sp/>prepare/layout을<sp/>다시<sp/>하지<sp/>않아도<sp/>된다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>색만<sp/>바뀐<sp/>경우에도<sp/>다음<sp/>render<sp/>path에서<sp/>최신<sp/>색을<sp/>보게<sp/>된다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다만<sp/>실제<sp/>shader<sp/>반영<sp/>correctness는<sp/>아직<sp/>manual/sample<sp/>검증<sp/>전이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>8.<sp/>render-ready<sp/>state<sp/>현재<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>bridge에<sp/>추가된<sp/>API:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRendererOutput()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRenderReady()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`IsRenderReady()`<sp/>조건:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRendererCreated()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRenderHost()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRendererOutput()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRendererAttached()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasViewInterfaceAdapter()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRenderableGlyphs()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`IsRenderReady()`의<sp/>의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>생성,<sp/>view<sp/>adapter<sp/>연결,<sp/>host<sp/>보관,<sp/>output<sp/>actor<sp/>보관,<sp/>attach<sp/>상태가<sp/>bridge<sp/>내부에서<sp/>일관적이라는<sp/>뜻이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`IsRenderReady()`가<sp/>의미하지<sp/>않는<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>geometry<sp/>correctness<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>baseline<sp/>/<sp/>bearing<sp/>/<sp/>offset<sp/>검증<sp/>완료</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>화면<sp/>품질<sp/>보장</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`render<sp/>dirty`<sp/>clear<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`IsRenderReady()`는<sp/>“bridge<sp/>내부<sp/>상태가<sp/>논리적으로<sp/>준비되었는가”를<sp/>말할<sp/>뿐,<sp/>“지금<sp/>픽셀이<sp/>올바르게<sp/>보인다”를<sp/>뜻하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>9.<sp/>render<sp/>dirty<sp/>현재<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>정책은<sp/>매우<sp/>명확하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`render<sp/>dirty`는<sp/>아직<sp/>clear하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>geometry<sp/>correctness가<sp/>아직<sp/>완전히<sp/>검증되지<sp/>않음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>baseline<sp/>/<sp/>bearing<sp/>/<sp/>offset이<sp/>임시<sp/>규칙</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>textColor<sp/>shader<sp/>반영은<sp/>manual/sample<sp/>검증<sp/>전</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`animatablePropertyIndex<sp/>/<sp/>alignmentOffset<sp/>/<sp/>depth`<sp/>의미<sp/>미정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>화면<sp/>품질<sp/>검증<sp/>전</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중요한<sp/>금지<sp/>사항:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>작업에서도<sp/>`IsRenderReady()`만으로<sp/>`render<sp/>dirty`를<sp/>clear하면<sp/>안<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>10.<sp/>현재<sp/>UTC<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>테스트<sp/>상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`tct-dali-ui-foundation-core<sp/>-s<sp/>-m<sp/>TextVisualizer`<sp/>통과</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`gcov<sp/>timestamp<sp/>warning`은<sp/>실패<sp/>아님</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>검증<sp/>범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>handle<sp/>/<sp/>property</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>data</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>/<sp/>script<sp/>/<sp/>font<sp/>/<sp/>shaping<sp/>/<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>interval<sp/>builder</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>layout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>advance<sp/>layout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>adapter<sp/>/<sp/>ViewInterface</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`<sp/>call<sp/>skeleton</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>host</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render-ready<sp/>state</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아직<sp/>없는<sp/>검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>pixel<sp/>output</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>correctness</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>app<sp/>visual<sp/>verification</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region이<sp/>실제<sp/>화면에서<sp/>비워지는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>11.<sp/>다음<sp/>작업<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>후보를<sp/>비교하면<sp/>아래와<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>A.<sp/>Minimal<sp/>sample<sp/>app<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목적:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>화면에<sp/>`TextVisualizer`가<sp/>보이는지<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`textColor`가<sp/>보이는지<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region이<sp/>시각적으로<sp/>비워지는지<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>지금까지의<sp/>render<sp/>path가<sp/>실제로<sp/>의미<sp/>있는지<sp/>빠르게<sp/>검증<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample은<sp/>automated<sp/>correctness를<sp/>보장하지<sp/>않음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>B.<sp/>Line<sp/>metrics<sp/>/<sp/>baseline<sp/>보강</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목적:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`max(yBearing)`<sp/>임시<sp/>`baselineOffset`을<sp/>ascender<sp/>/<sp/>descender<sp/>기반으로<sp/>개선</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>correctness에<sp/>직접<sp/>기여</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>text<sp/>metrics<sp/>구조를<sp/>더<sp/>깊게<sp/>조사해야<sp/>함</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>C.<sp/>render<sp/>dirty<sp/>clear<sp/>조건<sp/>실험</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목적:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRenderReady()`<sp/>이후<sp/>`render<sp/>dirty`를<sp/>clear할<sp/>수<sp/>있는지<sp/>검토</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>권장:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>아직<sp/>하지<sp/>말<sp/>것</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>/<sp/>manual<sp/>검증<sp/>전에는<sp/>보류</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>권장<sp/>방향:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>커밋은<sp/>sample<sp/>app을<sp/>작게<sp/>추가해서<sp/>실제<sp/>visual<sp/>path를<sp/>확인하는<sp/>것이<sp/>좋다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>단,<sp/>sample은<sp/>별도<sp/>커밋으로<sp/>작게<sp/>진행한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`render<sp/>dirty<sp/>clear`는<sp/>sample/manual<sp/>확인<sp/>이후로<sp/>미룬다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>visual<sp/>verification<sp/>sample</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>파일:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`samples/text/text-visualizer-example.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>목적:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>실제<sp/>화면에<sp/>`TextVisualizer`가<sp/>보이는지<sp/>수동<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TEXT_COLOR`가<sp/>defaultColor<sp/>path로<sp/>반영되는지<sp/>수동<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>exclusion<sp/>region이<sp/>시각적으로<sp/>비워지는지<sp/>수동<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>repeated<sp/>relayout에서<sp/>crash가<sp/>없는지<sp/>수동<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>수동<sp/>확인<sp/>항목:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>기본<sp/>텍스트<sp/>표시<sp/>여부</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>키<sp/>입력에<sp/>따른<sp/>text<sp/>color<sp/>변경<sp/>여부</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>오른쪽<sp/>패널의<sp/>exclusion<sp/>overlay<sp/>위치와<sp/>실제<sp/>text<sp/>회피<sp/>여부</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>exclusion<sp/>on/off<sp/>및<sp/>이동<sp/>반복<sp/>시<sp/>crash<sp/>여부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>아직<sp/>없는<sp/>것:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>pixel<sp/>automated<sp/>test</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>sample<sp/>기반<sp/>visual<sp/>correctness<sp/>자동<sp/>검증</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>measure<sp/>/<sp/>relayout<sp/>visibility<sp/>diagnosis</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>텍스트가<sp/>보이지<sp/>않을<sp/>때는<sp/>renderer<sp/>경로만이<sp/>아니라<sp/>`measure<sp/>/<sp/>relayout<sp/>/<sp/>host<sp/>size`도<sp/>함께<sp/>확인해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`가<sp/>`0<sp/>x<sp/>0`으로<sp/>측정되거나<sp/>`OnRelayout()`의<sp/>`size.x`가<sp/>`0`이면<sp/>`LayoutGlyphs()`<sp/>결과가<sp/>empty가<sp/>되어<sp/>renderable<sp/>glyph가<sp/>사라질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>보강<sp/>정책:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>sample에서는<sp/>`TextVisualizer`에<sp/>explicit<sp/>requested<sp/>size를<sp/>준다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TextVisualizerImpl`은<sp/>`RenderHost<sp/>Actor`에<sp/>explicit<sp/>size<sp/>sync를<sp/>적용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RenderHost`는<sp/>`ResizePolicy::FILL_TO_PARENT`를<sp/>유지하되,<sp/>relayout<sp/>시점에<sp/>control<sp/>size를<sp/>한<sp/>번<sp/>더<sp/>명시적으로<sp/>맞춘다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`OnRelayout()`<sp/>base<sp/>call<sp/>순서는<sp/>이번<sp/>커밋에서<sp/>바꾸지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>확인<sp/>결과<sp/>`Label<sp/>/<sp/>InputField`는<sp/>`ViewImpl::OnRelayout()`를<sp/>명시적으로<sp/>호출하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TextVisualizer`는<sp/>현재<sp/>padding/margin<sp/>기반<sp/>child<sp/>arrange에<sp/>의존하지<sp/>않으므로,<sp/>우선<sp/>size<sp/>sync만<sp/>보강하고<sp/>base<sp/>call<sp/>순서는<sp/>유지한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>atlas<sp/>output<sp/>visibility<sp/>diagnosis</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>sample<sp/>관찰<sp/>기준:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TextVisualizer`<sp/>text<sp/>area<sp/>background는<sp/>보인다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>exclusion<sp/>overlay와<sp/>relayout<sp/>반응도<sp/>보인다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>하지만<sp/>glyph<sp/>text는<sp/>여전히<sp/>보이지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>따라서<sp/>현재<sp/>의심<sp/>지점은<sp/>`measure/layout`<sp/>자체보다<sp/>`AtlasRenderer<sp/>output<sp/>actor<sp/>visibility`<sp/>쪽이<sp/>더<sp/>크다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>조사<sp/>결과:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::AtlasRenderer::Render()`는<sp/>최종적으로<sp/>`mActor`를<sp/>반환한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>`mActor`는<sp/>text<sp/>mesh를<sp/>직접<sp/>가진<sp/>actor가<sp/>아니라,<sp/>mesh<sp/>renderer를<sp/>가진<sp/>child<sp/>actor들을<sp/>담는<sp/>container<sp/>actor다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>즉<sp/>output<sp/>actor<sp/>자체의<sp/>`GetRendererCount()`는<sp/>`0`일<sp/>수<sp/>있고,<sp/>실제<sp/>draw<sp/>content는<sp/>child<sp/>actor들에<sp/>있을<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CommonTextUtils::RenderText()`를<sp/>보면<sp/>stencil이<sp/>없는<sp/>경우에도<sp/>renderable<sp/>actor를<sp/>text<sp/>control에<sp/>직접<sp/>붙이는<sp/>경로가<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>따라서<sp/>“stencil이<sp/>없어서<sp/>절대<sp/>안<sp/>보인다”는<sp/>결론은<sp/>현재<sp/>코드만으로는<sp/>확정할<sp/>수<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputField`는<sp/>clipping/cursor/decoration<sp/>때문에<sp/>stencil<sp/>actor를<sp/>쓰지만,<sp/>이는<sp/>곧바로<sp/>glyph<sp/>visibility의<sp/>필수<sp/>조건이라고<sp/>단정할<sp/>수는<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">비교<sp/>요약:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>항목<sp/>|<sp/>Label/InputField/TextView<sp/>기존<sp/>path<sp/>|<sp/>TextVisualizer<sp/>현재<sp/>path<sp/>|<sp/>차이/위험<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`Renderer::Render()`<sp/>입력<sp/>actor<sp/>|<sp/>기존<sp/>text<sp/>control<sp/>self<sp/>|<sp/>`RenderHost<sp/>Actor`<sp/>|<sp/>현재<sp/>`animatablePropertyIndex`가<sp/>`INVALID_INDEX`라<sp/>즉시<sp/>치명적이라고<sp/>단정할<sp/>수는<sp/>없지만,<sp/>후속<sp/>확인<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>output<sp/>actor<sp/>구조<sp/>|<sp/>container<sp/>actor<sp/>+<sp/>child<sp/>mesh<sp/>actors<sp/>|<sp/>동일한<sp/>`AtlasRenderer`<sp/>output<sp/>actor<sp/>|<sp/>output<sp/>actor<sp/>자체에<sp/>renderer가<sp/>없어도<sp/>이상<sp/>아님<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>stencil/clipping<sp/>|<sp/>`InputField`는<sp/>stencil<sp/>사용,<sp/>`CommonTextUtils`는<sp/>stencil<sp/>없는<sp/>direct<sp/>attach<sp/>경로도<sp/>보유<sp/>|<sp/>현재<sp/>stencil<sp/>없음<sp/>|<sp/>stencil<sp/>필수<sp/>여부는<sp/>아직<sp/>미확정<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>attach<sp/>위치<sp/>|<sp/>text<sp/>control<sp/>또는<sp/>stencil<sp/>actor<sp/>|<sp/>`RenderHost<sp/>Actor`<sp/>|<sp/>attach<sp/>자체는<sp/>가능,<sp/>실제<sp/>draw<sp/>여부는<sp/>별도<sp/>검증<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>size<sp/>sync<sp/>|<sp/>control/stencil<sp/>size를<sp/>기존<sp/>path가<sp/>맞춤<sp/>|<sp/>`RenderHost`<sp/>explicit<sp/>size<sp/>sync<sp/>추가<sp/>|<sp/>host<sp/>size는<sp/>보강됐지만<sp/>output<sp/>actor<sp/>draw<sp/>보장은<sp/>아님<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>진단<sp/>helper:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRendererOutput()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRendererOutputParentedToHost()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputChildCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputRendererCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRenderHostSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRendererOutputVisible()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>판단:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>이미<sp/>output<sp/>actor를<sp/>host에<sp/>붙일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>하지만<sp/>그<sp/>actor가<sp/>실제로<sp/>보이는지,<sp/>child<sp/>mesh<sp/>actor들이<sp/>정상<sp/>geometry/atlas/shader<sp/>상태인지까지는<sp/>아직<sp/>확인되지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>조사<sp/>포인트는:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Render()`에<sp/>넘기는<sp/>actor를<sp/>`RenderHost`로<sp/>유지하는<sp/>것이<sp/>맞는지</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>output<sp/>actor<sp/>child<sp/>mesh가<sp/>실제로<sp/>생성되는지</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>sample에서<sp/>fallback<sp/>`Label`은<sp/>보이는데<sp/>`TextVisualizer`만<sp/>안<sp/>보이는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>stencil<sp/>requirement<sp/>verification</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>단계에서는<sp/>“`TextVisualizer`에<sp/>stencil이<sp/>없어서<sp/>glyph가<sp/>안<sp/>보인다”는<sp/>가정을<sp/>기존<sp/>구현<sp/>기준으로<sp/>다시<sp/>검증했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>결론부터<sp/>적으면<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>결론:<sp/>**B.<sp/>stencil은<sp/>현재<sp/>코드<sp/>근거만으로<sp/>필수라고<sp/>볼<sp/>수<sp/>없고,<sp/>더<sp/>가능성이<sp/>큰<sp/>문제는<sp/>output<sp/>child<sp/>mesh<sp/>생성<sp/>또는<sp/>`ViewInterface`/`Render()`<sp/>입력<sp/>mismatch<sp/>쪽이다.**</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">근거는<sp/>아래와<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>1.<sp/>`CommonTextUtils::RenderText()`는<sp/>stencil<sp/>없는<sp/>direct<sp/>attach<sp/>경로를<sp/>실제로<sp/>가진다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`CommonTextUtils::RenderText()`를<sp/>보면<sp/>`stencil`<sp/>actor를<sp/>인자로<sp/>받지만,<sp/>`stencil<sp/>==<sp/>nullptr`인<sp/>경우에도<sp/>별도<sp/>direct<sp/>attach<sp/>경로가<sp/>존재한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`stencil`이<sp/>있으면:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`self<sp/>=<sp/>stencil`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`renderableActor`를<sp/>stencil<sp/>아래에<sp/>붙인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`stencil`이<sp/>없으면:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`self<sp/>=<sp/>textActor`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`IntegrationView::AddActorChild(Ui::View::DownCast(self),<sp/>child)`로<sp/>text<sp/>control에<sp/>직접<sp/>붙인다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>기존<sp/>공용<sp/>text<sp/>rendering<sp/>helper<sp/>자체는<sp/>“stencil이<sp/>없으면<sp/>glyph<sp/>visibility가<sp/>불가능하다”는<sp/>전제를<sp/>갖고<sp/>있지<sp/>않다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래는<sp/>현재<sp/>코드<sp/>의미를<sp/>정리한<sp/>표다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>조건<sp/>|<sp/>parent<sp/>actor<sp/>|<sp/>renderable<sp/>actor<sp/>attach<sp/>위치<sp/>|<sp/>stencil<sp/>사용<sp/>여부<sp/>|<sp/>실제<sp/>glyph<sp/>visibility<sp/>전제<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`stencil<sp/>!=<sp/>nullptr`<sp/>|<sp/>stencil<sp/>actor<sp/>|<sp/>stencil<sp/>actor<sp/>아래<sp/>|<sp/>사용<sp/>|<sp/>clipping/scroll/decorator<sp/>합성이<sp/>필요한<sp/>경우<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`stencil<sp/>==<sp/>nullptr`<sp/>|<sp/>text<sp/>control<sp/>actor<sp/>|<sp/>text<sp/>control<sp/>아래<sp/>direct<sp/>attach<sp/>|<sp/>미사용<sp/>|<sp/>direct<sp/>renderable<sp/>actor<sp/>path가<sp/>유효하다는<sp/>전제<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.<sp/>`AtlasRenderer`<sp/>자체는<sp/>stencil을<sp/>전혀<sp/>알지<sp/>못한다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Text::AtlasRenderer::Render()`와<sp/>`AddGlyphs()`를<sp/>보면<sp/>stencil/clipping/render<sp/>task를<sp/>직접<sp/>다루지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`는:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`view.GetNumberOfGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`view.GetGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`view.GetTextColor()`<sp/>등에서<sp/>데이터만<sp/>읽는다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>이후<sp/>`AddGlyphs()`로<sp/>mesh를<sp/>만들고<sp/>output<sp/>actor를<sp/>반환한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CreateActors()`<sp/>/<sp/>`CreateMeshActor()`는:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>container<sp/>actor<sp/>`mActor`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>child<sp/>mesh<sp/>actor들</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>geometry<sp/>/<sp/>renderer<sp/>/<sp/>shader<sp/>/<sp/>texture</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>만<sp/>생성한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stencil<sp/>actor,<sp/>clipping<sp/>actor,<sp/>render<sp/>task<sp/>생성<sp/>코드는<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>`AtlasRenderer`는<sp/>“어떤<sp/>parent<sp/>아래에<sp/>attach될지”는<sp/>외부가<sp/>결정하지만,<sp/>자체적으로<sp/>stencil을<sp/>요구하는<sp/>구조는<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.<sp/>`InputField`의<sp/>stencil<sp/>사용은<sp/>glyph<sp/>visibility<sp/>자체보다<sp/>clipping/composition<sp/>요구와<sp/>더<sp/>강하게<sp/>연결돼<sp/>있다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`InputFieldImpl`은<sp/>`EnableClipping()`에서<sp/>stencil<sp/>actor를<sp/>만들고:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`CLIP_TO_BOUNDING_BOX`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`FILL_TO_PARENT`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor<sp/>layer<sp/>/<sp/>decoration<sp/>/<sp/>selection<sp/>/<sp/>scroll<sp/>offset</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">과<sp/>함께<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`OnRelayout()`에서도<sp/>stencil과<sp/>cursor<sp/>layer<sp/>size/position을<sp/>별도로<sp/>맞춘다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>`InputField`의<sp/>stencil<sp/>사용<sp/>이유는:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>scrolling<sp/>text</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor<sp/>clipping</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>/<sp/>highlight<sp/>/<sp/>decoration<sp/>composition</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">같은<sp/>input-specific<sp/>요구가<sp/>강하다.<sp/>이것만으로<sp/>“glyph<sp/>text<sp/>자체가<sp/>stencil<sp/>없이는<sp/>절대<sp/>보이지<sp/>않는다”고<sp/>결론내리기는<sp/>어렵다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>4.<sp/>`Label`은<sp/>현재<sp/>direct<sp/>`AtlasRenderer`<sp/>+<sp/>stencil<sp/>경로의<sp/>기준<sp/>사례가<sp/>아니다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`LabelImpl`은<sp/>`TextVisual`<sp/>기반<sp/>path를<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>생성<sp/>/<sp/>등록</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>async<sp/>renderer<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cutout<sp/>/<sp/>mask<sp/>effect</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">등이<sp/>얽혀<sp/>있고,<sp/>`InputField`처럼<sp/>`CommonTextUtils::RenderText()`<sp/>+<sp/>direct<sp/>`Text::Renderer`<sp/>경로를<sp/>기준<sp/>사례로<sp/>삼기<sp/>어렵다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>`Label`은<sp/>“stencil이<sp/>있어야<sp/>atlas<sp/>glyph가<sp/>보인다”는<sp/>주장을<sp/>뒷받침하는<sp/>직접<sp/>비교군이<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>5.<sp/>현재<sp/>`TextVisualizer`와<sp/>기존<sp/>path<sp/>비교</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>항목<sp/>|<sp/>기존<sp/>Label/InputField/TextView<sp/>|<sp/>TextVisualizer<sp/>현재<sp/>|<sp/>차이<sp/>|<sp/>위험도<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`textControl`<sp/>actor<sp/>|<sp/>기존<sp/>text<sp/>control<sp/>self를<sp/>주는<sp/>경향이<sp/>강함<sp/>(`InputField`,<sp/>`CommonTextUtils`)<sp/>|<sp/>`RenderHost<sp/>Actor`를<sp/>`Render()`에<sp/>전달<sp/>|<sp/>control<sp/>self가<sp/>아님<sp/>|<sp/>높음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>stencil<sp/>actor<sp/>|<sp/>`InputField`는<sp/>사용,<sp/>`CommonTextUtils`는<sp/>optional<sp/>|<sp/>없음<sp/>|<sp/>stencil<sp/>direct<sp/>path<sp/>사용<sp/>중<sp/>|<sp/>중간<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>renderable<sp/>actor<sp/>parent<sp/>|<sp/>stencil<sp/>또는<sp/>text<sp/>control<sp/>|<sp/>`RenderHost<sp/>Actor`<sp/>|<sp/>parent가<sp/>별도<sp/>host<sp/>|<sp/>중간<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>clipping<sp/>mode<sp/>|<sp/>`InputField`는<sp/>stencil<sp/>clipping<sp/>|<sp/>host<sp/>자체는<sp/>별도<sp/>stencil<sp/>없음<sp/>|<sp/>clipping<sp/>setup<sp/>단순<sp/>|<sp/>낮음~중간<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>render<sp/>task<sp/>|<sp/>명시적<sp/>text-only<sp/>render<sp/>task는<sp/>현재<sp/>조사<sp/>범위에서<sp/>없음<sp/>|<sp/>없음<sp/>|<sp/>큰<sp/>차이<sp/>미확정<sp/>|<sp/>낮음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>output<sp/>actor<sp/>size<sp/>|<sp/>renderer/container<sp/>actor가<sp/>`view.GetLayoutSize()`<sp/>기반<sp/>size를<sp/>가짐<sp/>|<sp/>host<sp/>size<sp/>sync는<sp/>있음,<sp/>output<sp/>size는<sp/>renderer<sp/>내부<sp/>|<sp/>직접<sp/>mismatch<sp/>여부<sp/>미확정<sp/>|<sp/>중간<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>child<sp/>mesh<sp/>actor<sp/>생성<sp/>|<sp/>`AtlasRenderer`<sp/>내부<sp/>child<sp/>mesh<sp/>actor<sp/>생성<sp/>|<sp/>동일<sp/>renderer<sp/>사용<sp/>|<sp/>child<sp/>mesh<sp/>생성<sp/>여부<sp/>runtime<sp/>확인<sp/>필요<sp/>|<sp/>높음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>parent<sp/>origin/pivot<sp/>|<sp/>`TOP_LEFT`<sp/>정렬<sp/>|<sp/>host/output<sp/>모두<sp/>`TOP_LEFT`<sp/>지향<sp/>|<sp/>큰<sp/>차이<sp/>없음<sp/>|<sp/>낮음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>depth/z-order<sp/>|<sp/>renderer<sp/>depth<sp/>index<sp/>사용<sp/>|<sp/>동일<sp/>renderer<sp/>사용<sp/>|<sp/>값<sp/>자체는<sp/>후속<sp/>검토<sp/>필요<sp/>|<sp/>낮음~중간<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>actor<sp/>color/opacity<sp/>|<sp/>renderer<sp/>child<sp/>actor가<sp/>`USE_OWN_MULTIPLY_PARENT_COLOR`<sp/>|<sp/>동일<sp/>|<sp/>큰<sp/>차이<sp/>없음<sp/>|<sp/>낮음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>renderer<sp/>count<sp/>|<sp/>output<sp/>actor는<sp/>0일<sp/>수<sp/>있고<sp/>child<sp/>mesh<sp/>actor가<sp/>renderer를<sp/>가질<sp/>수<sp/>있음<sp/>|<sp/>동일<sp/>|<sp/>output<sp/>actor만<sp/>보고<sp/>판단하면<sp/>오진<sp/>가능<sp/>|<sp/>높음<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>6.<sp/>direct<sp/>attach<sp/>path의<sp/>실제<sp/>의미</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>조사<sp/>기준으로<sp/>direct<sp/>attach<sp/>path는<sp/>“legacy/no-op<sp/>fallback”이<sp/>아니라,<sp/>현재<sp/>공용<sp/>text<sp/>helper<sp/>안에<sp/>실제로<sp/>남아<sp/>있는<sp/>정상<sp/>경로다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다만<sp/>이것이<sp/>자동으로<sp/>현재<sp/>`TextVisualizer`에서도<sp/>잘<sp/>보인다는<sp/>뜻은<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>더<sp/>유력한<sp/>문제<sp/>후보는<sp/>다음이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`Render()`에<sp/>넘기는<sp/>`textControl`<sp/>actor가<sp/>`RenderHost`인<sp/>점</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`ViewInterface`가<sp/>제공하는<sp/>glyph/layout/control<sp/>data가<sp/>기존<sp/>path<sp/>기대와<sp/>미세하게<sp/>어긋나는<sp/>점</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>output<sp/>actor는<sp/>붙었지만<sp/>child<sp/>mesh<sp/>actor가<sp/>실제로<sp/>생성되지<sp/>않거나<sp/>renderer<sp/>count가<sp/>0인<sp/>점</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>glyph<sp/>atlas<sp/>upload<sp/>/<sp/>mesh<sp/>generation<sp/>조건이<sp/>runtime에서<sp/>충족되지<sp/>않는<sp/>점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>7.<sp/>최종<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">결론은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>**B.<sp/>stencil은<sp/>필요<sp/>없고,<sp/>문제는<sp/>output<sp/>child<sp/>mesh<sp/>생성<sp/>또는<sp/>`ViewInterface`<sp/>data<sp/>mismatch다.**</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>결론을<sp/>택한<sp/>이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`CommonTextUtils`에<sp/>stencil<sp/>없는<sp/>direct<sp/>attach<sp/>path가<sp/>실제로<sp/>존재한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer`<sp/>자체는<sp/>stencil을<sp/>모른다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputField`의<sp/>stencil은<sp/>input/decorator/clipping<sp/>요구와<sp/>강하게<sp/>결합돼<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>따라서<sp/>현재<sp/>`TextVisualizer`<sp/>미표시<sp/>문제를<sp/>stencil<sp/>부재<sp/>하나로<sp/>단정하는<sp/>것은<sp/>코드<sp/>근거상<sp/>과도하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>8.<sp/>다음<sp/>커밋<sp/>계획</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>권장<sp/>커밋:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Commit<sp/>26:<sp/>Trace<sp/>TextVisualizer<sp/>AtlasRenderer<sp/>glyph<sp/>mesh<sp/>generation`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">포함할<sp/>내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`<sp/>직후<sp/>output<sp/>actor<sp/>child<sp/>count<sp/>/<sp/>child<sp/>renderer<sp/>count를<sp/>더<sp/>강하게<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ViewInterface::GetGlyphs()`<sp/>return<sp/>count와<sp/>`Render()`<sp/>입력<sp/>glyph<sp/>count<sp/>비교</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`에<sp/>넘기는<sp/>actor를<sp/>`RenderHost`<sp/>대신<sp/>`Self()`로<sp/>바꿔<sp/>보는<sp/>제한적<sp/>실험<sp/>여부<sp/>검토</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>child<sp/>mesh<sp/>actor의<sp/>renderer/size/visibility/runtime<sp/>parent<sp/>상태<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>glyph<sp/>upload가<sp/>실제로<sp/>일어나는지<sp/>간접<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>커밋에서도<sp/>`render<sp/>dirty`는<sp/>clear하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-atlas-renderer.*`,<sp/>`TextController`,<sp/>`TextView`<sp/>수정은<sp/>계속<sp/>금지다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>atlas<sp/>glyph<sp/>mesh<sp/>generation<sp/>trace</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>단계에서는<sp/>“stencil이<sp/>꼭<sp/>필요한가”에서<sp/>한<sp/>단계<sp/>더<sp/>나아가,<sp/>실제<sp/>`Render()`<sp/>호출<sp/>중<sp/>glyph<sp/>mesh<sp/>경로가<sp/>열리는지<sp/>직접<sp/>추적하는<sp/>방향으로<sp/>진단<sp/>기준을<sp/>잡는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추적<sp/>포인트는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerViewInterface::GetGlyphs()`<sp/>호출<sp/>횟수</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs()`에<sp/>요청된<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs()`가<sp/>실제로<sp/>반환한<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Renderer<sp/>Output<sp/>Actor`의<sp/>direct<sp/>child<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Renderer<sp/>Output<sp/>Actor`<sp/>아래<sp/>descendant<sp/>actor<sp/>수</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Renderer<sp/>Output<sp/>Actor`<sp/>아래<sp/>total<sp/>renderer<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>첫<sp/>child<sp/>actor의<sp/>size<sp/>/<sp/>visible<sp/>상태</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`에<sp/>넘기는<sp/>`textControl`<sp/>actor를<sp/>`RenderHost`<sp/>대신<sp/>`TextVisualizer<sp/>self`로<sp/>분리해<sp/>볼<sp/>때<sp/>차이가<sp/>있는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>실험<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>attach<sp/>parent는<sp/>계속<sp/>`RenderHost<sp/>Actor`로<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`에<sp/>넘기는<sp/>`textControl`<sp/>actor는<sp/>internal-only로<sp/>분리<sp/>가능하게<sp/>두고,<sp/>우선<sp/>`TextVisualizer<sp/>self`를<sp/>전달해<sp/>본다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>변경은<sp/>public<sp/>API를<sp/>늘리지<sp/>않고,<sp/>기존<sp/>`CommonTextUtils`/`InputField`<sp/>path가<sp/>“text<sp/>control<sp/>self”를<sp/>기준으로<sp/>동작하는<sp/>점과<sp/>맞춰<sp/>보기<sp/>위한<sp/>진단<sp/>실험이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">판단<sp/>기준은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs()`<sp/>호출<sp/>0회</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Render()`가<sp/>glyph<sp/>path에<sp/>실제로<sp/>들어가지<sp/>못한<sp/>것이다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`ViewInterface`<sp/>상태<sp/>또는<sp/>`Render()`<sp/>호출<sp/>조건<sp/>문제<sp/>가능성이<sp/>크다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs()`<sp/>반환<sp/>count<sp/>&gt;<sp/>0,<sp/>descendant<sp/>renderer<sp/>count<sp/>=<sp/>0</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`AtlasRenderer::AddGlyphs()`<sp/>또는<sp/>mesh<sp/>creation<sp/>조건<sp/>문제<sp/>가능성이<sp/>크다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`ViewInterface`<sp/>data<sp/>mismatch<sp/>가능성도<sp/>높다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>descendant<sp/>renderer<sp/>count<sp/>&gt;<sp/>0,<sp/>여전히<sp/>화면에<sp/>안<sp/>보임</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>actor<sp/>visibility<sp/>/<sp/>z-order<sp/>/<sp/>shader<sp/>/<sp/>texture<sp/>/<sp/>atlas<sp/>upload<sp/>쪽<sp/>문제로<sp/>범위를<sp/>더<sp/>좁힐<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`textControl<sp/>self`<sp/>사용으로<sp/>증상이<sp/>달라짐</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Render()`<sp/>입력<sp/>actor<sp/>mismatch가<sp/>원인<sp/>후보가<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>추적에서<sp/>여전히<sp/>확인이<sp/>필요한<sp/>항목:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer::AddGlyphs()`<sp/>내부<sp/>mesh<sp/>creation<sp/>skip<sp/>조건</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>texture<sp/>upload<sp/>성공<sp/>여부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>child<sp/>renderer<sp/>count가<sp/>0인<sp/>경우의<sp/>정확한<sp/>runtime<sp/>원인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>장기적으로<sp/>`textControl`<sp/>actor를<sp/>self로<sp/>넘기는<sp/>것이<sp/>맞는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>attach<sp/>parent를<sp/>계속<sp/>`RenderHost`로<sp/>둘지,<sp/>self로<sp/>옮겨야<sp/>하는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`render<sp/>dirty`<sp/>clear<sp/>시점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>RenderHost<sp/>vs<sp/>stencil<sp/>actor</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>단계에서는<sp/>`TextVisualizerImpl`의<sp/>`mRenderHost`가<sp/>이미<sp/>“중간<sp/>attach<sp/>host<sp/>/<sp/>stencil-like<sp/>actor”<sp/>역할을<sp/>하고<sp/>있다는<sp/>가정<sp/>아래,<sp/>기존<sp/>`InputField`<sp/>stencil<sp/>actor와<sp/>설정<sp/>차이를<sp/>다시<sp/>비교했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>결론은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderHost`는<sp/>이미<sp/>별도<sp/>output<sp/>actor<sp/>attach<sp/>parent<sp/>역할을<sp/>수행하고<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>따라서<sp/>지금<sp/>단계에서<sp/>`StencilHost`<sp/>actor를<sp/>하나<sp/>더<sp/>추가하는<sp/>것은<sp/>중복<sp/>계층만<sp/>늘릴<sp/>가능성이<sp/>크다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>stencil<sp/>actor와<sp/>비교했을<sp/>때<sp/>안전하게<sp/>빠져<sp/>있던<sp/>설정은<sp/>주로<sp/>`CLIPPING_MODE`였다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>그래서<sp/>별도<sp/>actor<sp/>추가<sp/>대신,<sp/>`mRenderHost`<sp/>자체를<sp/>stencil-like<sp/>host에<sp/>더<sp/>가깝게<sp/>맞추는<sp/>최소<sp/>보강만<sp/>적용했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">비교<sp/>요약은<sp/>아래와<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>항목<sp/>|<sp/>기존<sp/>stencil<sp/>actor<sp/>|<sp/>TextVisualizer<sp/>`mRenderHost`<sp/>|<sp/>차이<sp/>|<sp/>조치<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`ParentOrigin`<sp/>|<sp/>`TOP_LEFT`<sp/>|<sp/>`TOP_LEFT`<sp/>|<sp/>없음<sp/>|<sp/>유지<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`Pivot`<sp/>|<sp/>`TOP_LEFT`<sp/>|<sp/>`TOP_LEFT`<sp/>|<sp/>없음<sp/>|<sp/>유지<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`ResizePolicy`<sp/>|<sp/>`FILL_TO_PARENT`<sp/>|<sp/>`FILL_TO_PARENT`<sp/>|<sp/>없음<sp/>|<sp/>유지<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>explicit<sp/>size<sp/>sync<sp/>|<sp/>relayout에서<sp/>별도<sp/>size<sp/>sync<sp/>사용<sp/>|<sp/>`SyncRenderHostSize()`<sp/>사용<sp/>|<sp/>의미상<sp/>유사<sp/>|<sp/>유지<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>attach<sp/>parent<sp/>|<sp/>control<sp/>self<sp/>아래<sp/>|<sp/>control<sp/>self<sp/>아래<sp/>|<sp/>없음<sp/>|<sp/>유지<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`CLIPPING_MODE`<sp/>|<sp/>`CLIP_TO_BOUNDING_BOX`<sp/>|<sp/>이전에는<sp/>없음<sp/>|<sp/>차이<sp/>있음<sp/>|<sp/>`mRenderHost`에<sp/>추가<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>explicit<sp/>position<sp/>|<sp/>보통<sp/>`TOP_LEFT`<sp/>기준<sp/>|<sp/>이전에는<sp/>암묵적<sp/>|<sp/>약한<sp/>차이<sp/>|<sp/>`POSITION<sp/>=<sp/>ZERO`<sp/>명시<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>visible<sp/>|<sp/>기본값<sp/>의존<sp/>가능<sp/>|<sp/>기본값<sp/>의존<sp/>가능<sp/>|<sp/>약한<sp/>차이<sp/>|<sp/>`VISIBLE<sp/>=<sp/>true`<sp/>명시<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>적용한<sp/>최소<sp/>보강:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderHost.SetProperty(Actor::Property::CLIPPING_MODE,<sp/>ClippingMode::CLIP_TO_BOUNDING_BOX);`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderHost.SetProperty(Actor::Property::POSITION,<sp/>Vector3::ZERO);`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderHost.SetProperty(Actor::Property::VISIBLE,<sp/>true);`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>단계에서<sp/>별도<sp/>`StencilHost`를<sp/>만들지<sp/>않은<sp/>이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderHost`가<sp/>이미<sp/>output<sp/>actor<sp/>attach<sp/>parent<sp/>역할을<sp/>하고<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>추가<sp/>actor를<sp/>하나<sp/>더<sp/>만드는<sp/>것만으로는<sp/>`GetGlyphs()`<sp/>호출<sp/>여부,<sp/>output<sp/>child<sp/>mesh<sp/>생성<sp/>여부,<sp/>renderer<sp/>descendant<sp/>count<sp/>같은<sp/>핵심<sp/>진단<sp/>지점이<sp/>바뀌지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>지금<sp/>더<sp/>유력한<sp/>문제<sp/>후보는:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Render()`<sp/>입력<sp/>actor<sp/>mismatch</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>output<sp/>child<sp/>mesh<sp/>/<sp/>renderer<sp/>생성<sp/>조건</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>atlas<sp/>/<sp/>shader<sp/>/<sp/>visibility<sp/>문제</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>현재<sp/>방향은:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>host<sp/>계층을<sp/>더<sp/>늘리지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRenderHost`를<sp/>기존<sp/>stencil<sp/>actor에<sp/>최대한<sp/>가깝게<sp/>맞춘다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>그<sp/>위에서<sp/>existing<sp/>diagnostics:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`GetGlyphs()`<sp/>call<sp/>/<sp/>returned<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>output<sp/>child<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>descendant<sp/>renderer<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>를<sp/>계속<sp/>본다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아직<sp/>남은<sp/>문제<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`에<sp/>`Self()`를<sp/>넘기는<sp/>정책이<sp/>장기적으로<sp/>맞는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>child<sp/>mesh<sp/>actor가<sp/>실제로<sp/>생성되는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>descendant<sp/>renderer<sp/>count가<sp/>0인<sp/>runtime<sp/>원인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>clipping<sp/>추가<sp/>후에도<sp/>glyph가<sp/>계속<sp/>안<sp/>보이면<sp/>atlas/shader/mesh<sp/>generation<sp/>쪽으로<sp/>더<sp/>좁혀야<sp/>하는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>runtime<sp/>diagnostics<sp/>log</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재는<sp/>sample<sp/>실행<sp/>중<sp/>internal<sp/>runtime<sp/>값을<sp/>눈으로<sp/>확인할<sp/>방법이<sp/>부족하므로,<sp/>`TextVisualizerImpl`<sp/>render<sp/>path에서<sp/>diagnostics<sp/>log를<sp/>출력한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">출력<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>dirty<sp/>cycle<sp/>당<sp/>1회만<sp/>출력한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>아래<sp/>중<sp/>하나가<sp/>호출되면<sp/>다음<sp/>relayout/render<sp/>path에서<sp/>다시<sp/>1회<sp/>출력한다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkPrepareDirty()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkLayoutDirty()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`MarkRenderDirty()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">로그<sp/>항목:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>control<sp/>`size.x<sp/>/<sp/>size.y`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mLayoutResult.glyphPlacements.Count()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRenderableGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`UpdateRenderData()`<sp/>결과</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AttachRendererToHost()`<sp/>결과</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRenderReady()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRenderCallCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetAttachCallCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetViewInterfaceGetGlyphsCallCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLastRequestedGlyphCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLastReturnedGlyphCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLastGlyphStartIndex()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputChildCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputDescendantCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputRendererCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputTotalRendererCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasRendererOutputRenderableDescendant()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsRendererOutputParentedToHost()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRenderHostSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRendererOutputSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetFirstRendererOutputChildSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsFirstRendererOutputChildVisible()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">판단<sp/>기준:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs<sp/>call<sp/>count<sp/>==<sp/>0`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Render()`가<sp/>glyph<sp/>path에<sp/>실제로<sp/>들어가지<sp/>못한<sp/>상태다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Last<sp/>returned<sp/>glyph<sp/>count<sp/>==<sp/>0`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`ViewInterface`가<sp/>glyph를<sp/>요청받았지만<sp/>실질적으로<sp/>전달하지<sp/>못하고<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Output<sp/>total<sp/>renderer<sp/>count<sp/>==<sp/>0`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>output<sp/>actor<sp/>아래<sp/>mesh/renderer<sp/>generation이<sp/>아직<sp/>되지<sp/>않은<sp/>상태다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Output<sp/>total<sp/>renderer<sp/>count<sp/>&gt;<sp/>0`인데도<sp/>안<sp/>보임</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>actor<sp/>visibility,<sp/>shader,<sp/>texture,<sp/>atlas<sp/>upload,<sp/>z-order<sp/>쪽으로<sp/>범위를<sp/>더<sp/>좁힐<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">sample<sp/>실행<sp/>후<sp/>우선<sp/>기록해야<sp/>할<sp/>값:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`getGlyphsCalls`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastRequested`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastReturned`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`outputChildren`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`outputTotalRenderers`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`hasRenderableDescendant`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`outputParentedToHost`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>로그는<sp/>`render<sp/>dirty<sp/>clear`<sp/>판단<sp/>근거가<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>geometry<sp/>correctness,<sp/>baseline/bearing/offset,<sp/>최종<sp/>visual<sp/>correctness는<sp/>여전히<sp/>별도<sp/>검증<sp/>대상이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>atlas<sp/>output<sp/>re-render<sp/>on<sp/>layout<sp/>changes</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기존<sp/>문제:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>최초<sp/>render<sp/>이후<sp/>`mRendererAttached<sp/>==<sp/>true`이면<sp/>`AttachRendererToHost()`가<sp/>바로<sp/>`true`를<sp/>반환하는<sp/>early<sp/>return<sp/>구조였다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>경우<sp/>exclusion<sp/>region<sp/>변경이나<sp/>width<sp/>변경으로<sp/>`LayoutResult`와<sp/>glyph<sp/>placement가<sp/>바뀌어도,<sp/>`Renderer::Render()`가<sp/>다시<sp/>호출되지<sp/>않을<sp/>수<sp/>있었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>결과적으로<sp/>`PreparedText`와<sp/>`LayoutResult`는<sp/>최신이어도,<sp/>AtlasRenderer<sp/>output<sp/>mesh는<sp/>이전<sp/>배치<sp/>상태로<sp/>남을<sp/>위험이<sp/>있었다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">수정<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>attached<sp/>상태여도<sp/>`Renderer::Render()`를<sp/>다시<sp/>호출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>attach는<sp/>“output<sp/>actor를<sp/>host에<sp/>처음<sp/>붙일<sp/>때만”<sp/>수행한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>즉<sp/>render<sp/>update와<sp/>attach를<sp/>개념적으로<sp/>분리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>bridge<sp/>diagnostics:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetRenderCallCount()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`Renderer::Render()`를<sp/>실제<sp/>호출할<sp/>때마다<sp/>증가한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetAttachCallCount()`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>output<sp/>actor를<sp/>`mRenderHost.Add(output)`로<sp/>실제<sp/>attach할<sp/>때만<sp/>증가한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>동작<sp/>의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>relayout<sp/>이후에도<sp/>`render<sp/>call<sp/>count`는<sp/>증가해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이미<sp/>같은<sp/>output<sp/>actor가<sp/>host에<sp/>붙어<sp/>있으면<sp/>`attach<sp/>call<sp/>count`는<sp/>그대로여야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>즉<sp/>“re-render는<sp/>반복,<sp/>duplicate<sp/>attach는<sp/>금지”가<sp/>현재<sp/>정책이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가<sp/>보강:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl`은<sp/>`mLastLayoutSize<sp/>!=<sp/>size`일<sp/>때<sp/>`MarkLayoutDirty()`뿐<sp/>아니라<sp/>`MarkRenderDirty()`도<sp/>같이<sp/>호출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>size<sp/>변화는<sp/>glyph<sp/>placement를<sp/>바꾸므로,<sp/>render<sp/>update도<sp/>다시<sp/>필요하기<sp/>때문이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">sample<sp/>확인<sp/>포인트:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>key<sp/>`3`으로<sp/>exclusion<sp/>region을<sp/>이동했을<sp/>때<sp/>glyph가<sp/>새<sp/>blocked<sp/>region을<sp/>피해서<sp/>재배치되어야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>높이나<sp/>영역만<sp/>바뀌고<sp/>glyph<sp/>mesh가<sp/>그대로<sp/>남아<sp/>있으면<sp/>re-render가<sp/>아직<sp/>충분히<sp/>일어나지<sp/>않는<sp/>상태다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>12.<sp/>다음<sp/>커밋<sp/>금지<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`TextController`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`TextView`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`internal/text/layouts/layout-engine.*`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editing<sp/>/<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>decorator<sp/>/<sp/>IME<sp/>경로<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API<sp/>추가<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-atlas-renderer.*`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`render<sp/>dirty`<sp/>clear<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>대규모<sp/>refactor<sp/>금지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>13.<sp/>mermaid<sp/>구조도</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[TextVisualizerImpl::OnRelayout]<sp/>--&gt;<sp/>B[Prepare<sp/>if<sp/>dirty]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[PreparedText]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[LayoutEngine::LayoutGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[LayoutResult]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>F</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[TextVisualizerViewInterface]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>H[AtlasRendererBridge::UpdateRenderData]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>I[Text::Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[Renderer<sp/>Output<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>K[RenderHost<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>K<sp/>--&gt;<sp/>L[IsRenderReady]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>-.<sp/>does<sp/>not<sp/>clear<sp/>.-&gt;<sp/>M[RenderDirty<sp/>remains<sp/>true]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/12-current-status-after-render-ready.ko.md"/>
+  </compounddef>
+</doxygen>

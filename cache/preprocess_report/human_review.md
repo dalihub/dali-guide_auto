@@ -1,0 +1,233 @@
+# Preprocess Review
+
+This report validates preprocess inputs before markdown generation.
+
+## Summary
+
+- info: 2
+- needs_review: 28
+- warning: 53
+
+## Needs Review
+
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (accessibility-highlight-overlay)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (adaptor-framework)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (addon-manager)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (animated-image-view)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (focus-manager)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (i-scroll-bar)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (image)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (image-loader)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (input-event)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (input-field)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (interactive-view)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (layouts)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (lottie-animation-view)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (render-effects)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (scroll-bar)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (scroll-view)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (signals)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (state-event)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (text)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (trait-id)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-color)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-color-manager)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-component-config)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-config)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-theme-manager)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (view-state)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (visuals)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (web-view)
+  - action: Review category rules or add a category assignment override.
+
+## Warning
+
+- [warning] PLANNING_AMBIGUOUS_RAW_FEATURE: Raw ambiguous feature is not a document target. (uncategorized_ambiguous_root)
+  - action: Improve parser/path inference or suppress/merge the raw ambiguous feature.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (accessibility-highlight-overlay)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (adaptor-framework)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (addon-manager)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (animated-image-view)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (focus-manager)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (i-scroll-bar)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (image)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (image-loader)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (input-event)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (input-field)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (interactive-view)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (layouts)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (lottie-animation-view)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (render-effects)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (scroll-bar)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (scroll-view)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (signals)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (state-event)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (text)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (trait-id)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-color)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-color-manager)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-component-config)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-config)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-theme-manager)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (view-state)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (visuals)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (web-view)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_LLM_API_KEY_MISSING: LLM API key is missing; category assignments fell back to uncategorized. (category_assignment)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_LLM_API_KEY_MISSING: LLM API key is missing; ownership suggestions were skipped. (supporting_ownership)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_MISSING_ENTRY_HEADERS: Document feature has no app entry headers. (adaptor-framework)
+  - action: Check whether the feature is truly app-facing or should be supporting/context only.
+- [warning] PLANNING_MISSING_ENTRY_HEADERS: Document feature has no app entry headers. (addon-manager)
+  - action: Check whether the feature is truly app-facing or should be supporting/context only.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (align-enumerations)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (callback)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (common)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (core-enumerations)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (custom-actor)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (direction-enums)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (drawable-actor)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (dummy-component)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (dummy-component.autogen)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (interactive-event-receiver-interface)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (processor-interface)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (property-bridge)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (size-negotiation)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (text-visualizer-properties)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (theme-loader-interface)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] PLANNING_UNRESOLVED_SUPPORTING_OWNER: Supporting or suppressed feature has no confident owner document feature. (trait-interface)
+  - action: Add a general ownership rule or reviewed override if this feature should be included.
+- [warning] UNKNOWN_PLANNER_ROLE: Role inference rule emits a role without a configured section hint. (role:impl)
+  - action: Add the role to role_section_hints or fix the role inference rule.
+- [warning] UNKNOWN_PLANNER_ROLE: Role inference rule emits a role without a configured section hint. (role:interface)
+  - action: Add the role to role_section_hints or fix the role inference rule.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (ui-theme-manager)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (view-state)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+
+## Decisions
+
+- accessibility-highlight-overlay: category=uncategorized (llm_category_fallback)
+- adaptor-framework: category=uncategorized (llm_category_fallback)
+- addon-manager: category=uncategorized (llm_category_fallback)
+- animated-image-view: category=uncategorized (llm_category_fallback)
+- animation: category=animation-motion (category_override)
+- focus-manager: category=uncategorized (llm_category_fallback)
+- i-scroll-bar: category=uncategorized (llm_category_fallback)
+- image: category=uncategorized (llm_category_fallback)
+- image-loader: category=uncategorized (llm_category_fallback)
+- image-view: category=views-components (category_override)
+- input-event: category=uncategorized (llm_category_fallback)
+- input-field: category=uncategorized (llm_category_fallback)
+- interactive-view: category=uncategorized (llm_category_fallback)
+- label: category=views-components (category_override)
+- layouts: category=uncategorized (llm_category_fallback)
+- lottie-animation-view: category=uncategorized (llm_category_fallback)
+- render-effects: category=uncategorized (llm_category_fallback)
+- scroll-bar: category=uncategorized (llm_category_fallback)
+- scroll-view: category=uncategorized (llm_category_fallback)
+- signals: category=uncategorized (llm_category_fallback)
+- state-event: category=uncategorized (llm_category_fallback)
+- text: category=uncategorized (llm_category_fallback)
+- trait-id: category=uncategorized (llm_category_fallback)
+- ui-color: category=uncategorized (llm_category_fallback)
+- ui-color-manager: category=uncategorized (llm_category_fallback)
+- ui-component-config: category=uncategorized (llm_category_fallback)
+- ui-config: category=uncategorized (llm_category_fallback)
+- ui-theme-manager: category=uncategorized (llm_category_fallback)
+- view: category=views-components (category_override)
+- view-state: category=uncategorized (llm_category_fallback)
+- visuals: category=uncategorized (llm_category_fallback)
+- web-view: category=uncategorized (llm_category_fallback)
+- <global>: llm_usage category_requests=0 ownership_requests=0 estimated_input_tokens=0 (document_plan_llm_usage)
+- actors -> view: document_feature_rules.merge_into -> view (supporting_features)
+- align-enumerations: document_feature_rules.suppress ->  (supporting_features)
+- callback: document_feature_rules.suppress ->  (supporting_features)
+- camera-view -> view: document_feature_rules.suppress -> view (supporting_features)
+- common: document_feature_rules.suppress ->  (supporting_features)
+- custom-actor: document_feature_rules.suppress ->  (supporting_features)
+- drawable-actor: document_feature_rules.suppress ->  (supporting_features)
+- dummy-component: document_feature_rules.suppress ->  (supporting_features)
+- image-view-types -> image-view: document_feature_rules.merge_into -> image-view (supporting_features)
+- interactive-trait -> view: document_feature_rules.merge_into -> view (supporting_features)
+- selectable-trait -> view: document_feature_rules.merge_into -> view (supporting_features)
+- size-negotiation: document_feature_rules.suppress ->  (supporting_features)
+- trait -> view: document_feature_rules.merge_into -> view (supporting_features)
+- ui-state -> view: document_feature_rules.merge_into -> view (supporting_features)
+- view-impl -> view: document_feature_rules.extension_surfaces -> view (supporting_features)
+
+## Follow-Up Notes
+
+- `document_feature_rules` in `doc_config.yaml` is the canonical location for document ownership, suppress, merge, and extension-surface policy.
+- Context feature extraction is intentionally separated from Phase 1.6; feature-specific hardcoded context fallbacks should not be reintroduced.
