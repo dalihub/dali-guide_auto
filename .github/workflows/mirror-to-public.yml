@@ -1,0 +1,89 @@
+name: Mirror to Public GitHub
+
+on:
+  schedule:
+    # 3시간마다 실행
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch to sync from'
+        required: true
+        default: 'internal'
+      destination_branch:
+        description: 'Destination branch to sync to'
+        required: true
+        default: 'internal'
+
+jobs:
+  repo-sync:
+    runs-on: [ code-linux, code-large ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.source_branch || 'internal' }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Force push to public github
+        env:
+          PAT_TOKEN: ${{ secrets.PUBLIC_GITHUB_PAT }}
+        run: |
+          SRC="${{ github.event.inputs.source_branch || 'internal' }}"
+          DEST="${{ github.event.inputs.destination_branch || 'internal' }}"
+          REMOTE_URL="https://${PAT_TOKEN}@github.com/dalihub/dali-guide_auto.git"
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+
+          git remote add public "$REMOTE_URL"
+
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            if git push public "$SRC:$DEST" --force; then
+              echo "Push succeeded"
+              SUCCESS=true
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              echo "Retry attempt $RETRY_COUNT after 5 sec..."
+              sleep 5
+            fi
+          done
+
+          if [ "$SUCCESS" = false ]; then
+            echo "Failed to push to public github"
+            exit 1
+          fi
+
+      - name: Sync tags
+        env:
+          PAT_TOKEN: ${{ secrets.PUBLIC_GITHUB_PAT }}
+        run: |
+          REMOTE_URL="https://${PAT_TOKEN}@github.com/dalihub/dali-guide_auto.git"
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            if git push "$REMOTE_URL" --tags --force; then
+              echo "Tags sync succeeded"
+              SUCCESS=true
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              echo "Retry attempt $RETRY_COUNT after 5 sec..."
+              sleep 5
+            fi
+          done
+
+          if [ "$SUCCESS" = false ]; then
+            echo "Failed to sync tags to public github"
+            exit 1
+          fi
