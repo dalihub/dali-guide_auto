@@ -6,104 +6,110 @@ category: uncategorized
 
 # Image
 
-ImageView and AnimatedImageView provide image display capabilities in dali-ui applications. They support various image formats, fitting modes, loading policies, and advanced features like pixel area selection and alpha masking.
+ImageView and AnimatedImageView provide high-level components for displaying static and animated images in dali-ui applications.
 
 ## Table of Contents
 
 - [Creating an ImageView](#creating-an-imageview)
-- [Image Fitting and Sampling](#image-fitting-and-sampling)
-- [Loading Policies](#loading-policies)
-- [Pixel Area Selection](#pixel-area-selection)
+- [Loading and Resource Management](#loading-and-resource-management)
+- [Fitting and Scaling](#fitting-and-scaling)
+- [Image Color and Tinting](#image-color-and-tinting)
+- [Pixel Area and Sub-Regions](#pixel-area-and-sub-regions)
 - [Animated Images](#animated-images)
-- [Resource Ready Signal](#resource-ready-signal)
+- [Alpha Masking](#alpha-masking)
 
 ## Creating an ImageView
 
-Create an `ImageView` by calling `ImageView::New()` with an optional URL. The image loads asynchronously by default.
+`ImageView` displays static image resources such as PNG, JPG, and other supported formats. Create an ImageView by passing a URL to the `New()` factory method:
 
 ```cpp
-using namespace Dali;
+#include <dali-ui-foundation/public-api/image-view.h>
+
 using namespace Dali::Ui;
 
-// Create with a URL
-ImageView imageView = ImageView::New("image.png")
-  .SetRequestedWidth(200.0f)
-  .SetRequestedHeight(200.0f);
+// Create from a resource URL
+ImageView imageView = ImageView::New("images/photo.jpg");
 
-// Create empty and set URL later
+// Set size and add to the view tree
+imageView.SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(MATCH_PARENT);
+
+container.Add(imageView);
+```
+
+You can also create an empty ImageView and set the resource URL later:
+
+```cpp
 ImageView imageView = ImageView::New();
-imageView.SetResourceUrl("image.png");
+imageView.SetResourceUrl("images/photo.png");
 ```
 
-Use `SetImageColor()` to apply a color multiplier to the image:
+Use `Reload()` to reload the current image from its source:
 
 ```cpp
-imageView.SetImageColor(UiColor(0xFF0000));  // Red tint
+imageView.Reload();
 ```
 
-## Image Fitting and Sampling
+## Loading and Resource Management
 
-Control how the image fits within the view bounds using `SetFittingMode()`. The `Ui::Image::FittingMode` enum provides several options:
+### Asynchronous Loading
 
-| Value | Description |
-|-------|-------------|
-| `FILL` | Stretch to fill bounds (default) |
-| `FIT_KEEP_ASPECT_RATIO` | Scale to fit, preserve aspect ratio |
-| `OVER_FIT_KEEP_ASPECT_RATIO` | Scale to cover, crop overflow |
-| `CENTER` | Keep original size, center in bounds |
+Images load asynchronously by default. Connect to `ResourceReadySignal()` to be notified when loading completes:
 
 ```cpp
-imageView.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+class MyController : public ConnectionTracker
+{
+public:
+    void SetupImage()
+    {
+        mImageView = ImageView::New("images/large.png");
+        mImageView.ResourceReadySignal().Connect(this, &MyController::OnImageReady);
+        container.Add(mImageView);
+    }
+
+    void OnImageReady(View view)
+    {
+        // Image is now displayed
+        auto status = ImageView::DownCast(view).GetLoadingStatus();
+    }
+
+private:
+    ImageView mImageView;
+};
 ```
-
-Control the filtering algorithm used during scaling with `SetSamplingMode()`:
-
-```cpp
-imageView.SetSamplingMode(Ui::Image::SamplingMode::LINEAR);
-```
-
-Available sampling modes include `NEAREST`, `LINEAR`, `BOX`, and `LANCZOS`.
-
-## Loading Policies
-
-Control when images load and release from memory using load and release policies.
 
 ### Load Policy
 
-`Ui::Image::LoadPolicy` determines when loading begins:
+Control when the image loads using `SetLoadPolicy()`:
 
-| Value | Description |
-|-------|-------------|
-| `IMMEDIATE` | Load when the ImageView is created |
-| `ATTACHED` | Load when the ImageView is attached to the scene |
+- `Image::LoadPolicy::IMMEDIATE` — Load when the ImageView is created
+- `Image::LoadPolicy::ATTACHED` — Load when the ImageView is attached to the scene (default)
 
 ```cpp
-imageView.SetLoadPolicy(Ui::Image::LoadPolicy::ATTACHED);
+imageView.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
 ```
 
 ### Release Policy
 
-`Ui::Image::ReleasePolicy` controls when the texture is released from cache:
+Control when the image texture is released from cache using `SetReleasePolicy()`:
 
-| Value | Description |
-|-------|-------------|
-| `DETACHED` | Release when visual is detached from scene |
-| `DESTROYED` | Release when visual is destroyed |
-| `NEVER` | Keep in cache indefinitely |
+- `Image::ReleasePolicy::DETACHED` — Release when removed from scene
+- `Image::ReleasePolicy::DESTROYED` — Release when the view is destroyed
+- `Image::ReleasePolicy::NEVER` — Keep in cache indefinitely
 
 ```cpp
-imageView.SetReleasePolicy(Ui::Image::ReleasePolicy::DETACHED);
+imageView.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
 ```
 
 ### Synchronous Loading
 
-For cases where blocking load is required, enable synchronous loading:
+For cases where you need the image immediately, enable synchronous loading:
 
 ```cpp
 imageView.SetSynchronousLoading(true);
 ```
 
-### Fast Track Uploading
+### Fast-Track Uploading
 
 Enable background GPU upload to reduce main-thread stalls:
 
@@ -111,73 +117,176 @@ Enable background GPU upload to reduce main-thread stalls:
 imageView.SetFastTrackUpload(true);
 ```
 
-## Pixel Area Selection
+### Placeholder Images
 
-Display a sub-region of an image using `SetPixelArea()`. The area is specified as normalized coordinates `(x, y, width, height)` where each component ranges from 0.0 to 1.0.
+Set a placeholder image to display while the main image loads:
 
 ```cpp
+imageView.SetPlaceholderUrl("images/placeholder.png");
+```
+
+## Fitting and Scaling
+
+### Fitting Mode
+
+Control how the image fits within the view bounds using `SetFittingMode()`:
+
+```cpp
+// Scale to fit while preserving aspect ratio (may show letterboxing)
+imageView.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+
+// Stretch to fill the entire view (may distort)
+imageView.SetFittingMode(Image::FittingMode::FILL);
+
+// Scale to cover while preserving aspect ratio (may crop)
+imageView.SetFittingMode(Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+
+// Display at original image size, centered
+imageView.SetFittingMode(Image::FittingMode::CENTER);
+```
+
+### Sampling Mode
+
+Control the filter applied when scaling the image:
+
+```cpp
+// Nearest-neighbor for pixel art
+imageView.SetSamplingMode(Image::SamplingMode::NEAREST);
+
+// Linear filtering for smooth scaling
+imageView.SetSamplingMode(Image::SamplingMode::LINEAR);
+
+// High-quality Lanczos filtering
+imageView.SetSamplingMode(Image::SamplingMode::LANCZOS);
+```
+
+### Desired Size Hints
+
+Provide size hints to the image loader for memory efficiency:
+
+```cpp
+imageView.SetDesiredWidth(320);
+imageView.SetDesiredHeight(480);
+```
+
+Alternatively, use `SetImageLoadWithViewSize()` to automatically load at the resolved view size:
+
+```cpp
+imageView.SetImageLoadWithViewSize(true);
+```
+
+## Image Color and Tinting
+
+Apply a color multiplier to tint the image using `SetImageColor()`. White (1.0, 1.0, 1.0, 1.0) displays the original image:
+
+```cpp
+// No tint (original colors)
+imageView.SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
+
+// Red tint
+imageView.SetImageColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+
+// Grayscale effect
+imageView.SetImageColor(UiColor(0.5f, 0.5f, 0.5f, 1.0f));
+
+// 50% transparent
+imageView.SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 0.5f));
+```
+
+You can also use hex color values:
+
+```cpp
+imageView.SetImageColor(UiColor(0xFF0000));  // Red tint
+```
+
+## Pixel Area and Sub-Regions
+
+Display a sub-region of the image using `SetPixelArea()`. The area is specified as normalized coordinates (x, y, width, height) in the range [0, 1]:
+
+```cpp
+// Display the full image
+imageView.SetPixelArea(Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+
 // Display the top-left quadrant
 imageView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 
 // Display the center region
 imageView.SetPixelArea(Vector4(0.25f, 0.25f, 0.5f, 0.5f));
-
-// Display full image (default)
-imageView.SetPixelArea(Vector4(0.0f, 0.0f, 1.0f, 1.0f));
 ```
 
-Pixel area is animatable. Create smooth pan and zoom effects by animating the `PIXEL_AREA` property:
+PixelArea is animatable, enabling pan and zoom effects:
 
 ```cpp
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/key-frames.h>
 
+// Create key frames for a pan + zoom animation
 KeyFrames keyFrames = KeyFrames::New();
-keyFrames.Add(0.0f, Property::Value(Vector4(0.0f, 0.0f, 1.0f, 1.0f)));  // Full
-keyFrames.Add(0.5f, Property::Value(Vector4(0.25f, 0.25f, 0.5f, 0.5f))); // Center zoom
-keyFrames.Add(1.0f, Property::Value(Vector4(0.0f, 0.0f, 1.0f, 1.0f)));  // Back to full
+keyFrames.Add(0.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
+keyFrames.Add(0.25f, Property::Value(Vector4(0.0f,  0.0f,  0.5f,  0.5f)));
+keyFrames.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f,  0.5f)));
+keyFrames.Add(0.75f, Property::Value(Vector4(0.5f,  0.5f,  0.5f,  0.5f)));
+keyFrames.Add(1.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
 
 Animation animation = Animation::New(3.0f);
 animation.SetLooping(true);
 animation.AnimateBetween(
-  Property(imageView, ImageView::Property::PIXEL_AREA),
-  keyFrames,
-  AlphaFunction::EASE_IN_OUT);
+    Property(imageView, ImageView::Property::PIXEL_AREA),
+    keyFrames,
+    AlphaFunction::EASE_IN_OUT);
 animation.Play();
 ```
 
 ## Animated Images
 
-Use `AnimatedImageView` for animated image formats like GIF. It provides playback control and loop configuration.
+`AnimatedImageView` displays animated image formats such as GIF. It provides playback control methods:
 
 ```cpp
-AnimatedImageView animatedView = AnimatedImageView::New("animation.gif")
-  .SetRequestedWidth(200.0f)
-  .SetRequestedHeight(200.0f)
-  .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+#include <dali-ui-foundation/public-api/animated-image-view.h>
 
-// Control playback
-animatedView.Play();
-animatedView.Pause();
-animatedView.Stop();
+// Create from a GIF file
+AnimatedImageView animView = AnimatedImageView::New("animations/spinner.gif");
+animView.SetLoopCount(-1);  // Infinite looping
+animView.Play();
+```
 
-// Configure looping (-1 for infinite)
-animatedView.SetLoopCount(3);
+### Playback Control
+
+```cpp
+// Start or resume playback
+animView.Play();
+
+// Pause playback
+animView.Pause();
+
+// Stop and reset to first frame
+animView.Stop();
+```
+
+### Loop Configuration
+
+```cpp
+// Infinite looping
+animView.SetLoopCount(-1);
+
+// Play exactly 3 times
+animView.SetLoopCount(3);
 ```
 
 ### Frame Control
 
-Access frame information and control playback speed:
-
 ```cpp
-int currentFrame = animatedView.GetCurrentFrame();
-int totalFrames = animatedView.GetTotalFrame();
-
 // Jump to a specific frame
-animatedView.JumpToFrame(10);
+animView.JumpToFrame(10);
+
+// Get current frame
+int currentFrame = animView.GetCurrentFrame();
+
+// Get total frame count
+int totalFrames = animView.GetTotalFrame();
 
 // Adjust playback speed (values > 1 speed up, < 1 slow down)
-animatedView.SetFrameSpeedFactor(1.5f);
+animView.SetFrameSpeedFactor(1.5f);
 ```
 
 ### Animation Finished Signal
@@ -185,53 +294,41 @@ animatedView.SetFrameSpeedFactor(1.5f);
 Connect to `AnimationFinishedSignal()` to be notified when the animation completes all loops:
 
 ```cpp
-animatedView.AnimationFinishedSignal().Connect(this, &MyClass::OnAnimationFinished);
+animView.AnimationFinishedSignal().Connect(this, &MyController::OnAnimationFinished);
 ```
 
-## Resource Ready Signal
+### Common Image Properties
 
-Both `ImageView` and `AnimatedImageView` emit `ResourceReadySignal()` when the image finishes loading. Use this to defer actions until the image is ready.
+AnimatedImageView supports the same fitting, scaling, and color properties as ImageView:
 
 ```cpp
-class MyController : public ConnectionTracker
-{
-  void CreateImageView()
-  {
-    mImageView = ImageView::New("image.png");
-    mImageView.ResourceReadySignal().Connect(this, &MyController::OnImageReady);
-  }
-
-  void OnImageReady(View view)
-  {
-    // Image is now loaded and displayed
-    auto status = ImageView::DownCast(view).GetLoadingStatus();
-    // Proceed with dependent operations
-  }
-
-private:
-  ImageView mImageView;
-};
+animView.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+animView.SetImageColor(UiColor(0xFF8080));
+animView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 ```
 
-Check `IsResourceReady()` before connecting to avoid missing the signal on cached images:
+## Alpha Masking
+
+Apply an alpha mask to shape the visible region of the image:
 
 ```cpp
-if (imageView.IsResourceReady())
-{
-  // Already loaded
-}
-else
-{
-  imageView.ResourceReadySignal().Connect(this, &MyClass::OnImageReady);
-}
+// Set the mask image URL
+imageView.SetAlphaMaskUrl("masks/rounded-corner-mask.png");
+
+// Optionally crop the image to mask bounds
+imageView.SetCropToMask(true);
+
+// Set masking mode
+imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_RENDERING);
 ```
 
-### Reloading Images
+### N-Patch Borders
 
-Force a reload of the current image from its source URL:
+For stretchable UI elements like buttons and frames, use N-patch borders:
 
 ```cpp
-imageView.Reload();
-```
-</task_progress>
-</write_to_file>
+// Set border insets (left, top, right, bottom)
+imageView.SetNPatchBorder(Vector4(10, 10, 10, 10));
+
+// Render only the border (for hollow frames)
+imageView.SetNPatchBorderOnly(true);

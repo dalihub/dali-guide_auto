@@ -14,7 +14,7 @@
           "kind": "enum",
           "api_tier": "devel-api",
           "brief": "",
-          "detailed": "",
+          "detailed": "Detail level for DumpTree JSON. Values 0-1 return a minimal uncompressed JSON field set. Values 2-4 return the full field set as plain JSON. Values 5-7 mirror 2-4 but prefer LZ4+base64 wire encoding, falling back to plain JSON when compression is unavailable or fails. Numeric mapping must match AtspiDumpDetailLevelType (at-spi2-core) / aurum.",
           "enumvalues": [
             {
               "name": "DUMP_SHORT",
@@ -33,11 +33,19 @@
               "brief": ""
             },
             {
-              "name": "DUMP_FULL_SHOWING_ONLY_LZ4",
+              "name": "DUMP_FULL_EFFECTIVE_SHOWING_ONLY",
               "brief": ""
             },
             {
-              "name": "DUMP_FULL_LZ4",
+              "name": "DUMP_FULL_COMPRESSION",
+              "brief": ""
+            },
+            {
+              "name": "DUMP_FULL_COMPRESSION_SHOWING_ONLY",
+              "brief": ""
+            },
+            {
+              "name": "DUMP_FULL_COMPRESSION_EFFECTIVE_SHOWING_ONLY",
               "brief": ""
             }
           ]
@@ -424,10 +432,10 @@
           "brief": "Adds an existing feature instance.",
           "detailed": "This template function registers an existing feature instance. The feature type T must inherit from IAccessibilityFeature.",
           "type": "void",
-          "signature": "void AddFeature(std::shared_ptr< Accessible > accessible)",
+          "signature": "void AddFeature(Dali::SharedPtr< Accessible > accessible)",
           "params": [
             {
-              "type": "std::shared_ptr< Accessible >",
+              "type": "Dali::SharedPtr< Accessible >",
               "name": "accessible",
               "description": "Shared pointer to the existing feature instance"
             }
@@ -442,8 +450,8 @@
           "notes": [
             "Returns nullptr if the feature has not been registered or if the dynamic cast to type T fails."
           ],
-          "type": "std::shared_ptr< T >",
-          "signature": "std::shared_ptr< T > GetFeature() const",
+          "type": "Dali::SharedPtr< T >",
+          "signature": "Dali::SharedPtr< T > GetFeature() const",
           "returns": "Shared pointer to the feature instance, or nullptr if not found"
         },
         {
@@ -600,10 +608,10 @@
           "brief": "The method registers functor resposible for converting Actor into Accessible.",
           "detailed": "",
           "type": "void",
-          "signature": "void RegisterExternalAccessibleGetter(std::function< std::pair< std::shared_ptr< Accessible >, bool >(Dali::Actor)> functor)",
+          "signature": "void RegisterExternalAccessibleGetter(std::function< std::pair< SharedPtr< Accessible >, bool >(Dali::Actor)> functor)",
           "params": [
             {
-              "type": "std::function< std::pair< std::shared_ptr< Accessible >, bool >(Dali::Actor)>",
+              "type": "std::function< std::pair< SharedPtr< Accessible >, bool >(Dali::Actor)>",
               "name": "functor",
               "description": "The returning Accessible handle from Actor object"
             }
@@ -632,8 +640,8 @@
           "api_tier": "devel-api",
           "brief": "Acquires Accessible object from Actor object.",
           "detailed": "",
-          "type": "std::shared_ptr< Accessible >",
-          "signature": "std::shared_ptr< Accessible > GetOwningPtr(Dali::Actor actor)",
+          "type": "Dali::SharedPtr< Accessible >",
+          "signature": "Dali::SharedPtr< Accessible > GetOwningPtr(Dali::Actor actor)",
           "returns": "The owning pointer to Accessible object",
           "params": [
             {
@@ -1063,9 +1071,9 @@
           "api_tier": "devel-api",
           "brief": "Gets rectangle describing size.",
           "detailed": "",
-          "type": "Dali::Rect< float >",
-          "signature": "Dali::Rect< float > GetExtents(CoordinateType type) const override",
-          "returns": "Rect<float> object",
+          "type": "Dali::Bounds",
+          "signature": "Dali::Bounds GetExtents(CoordinateType type) const override",
+          "returns": "Bounds object",
           "params": [
             {
               "type": "CoordinateType",
@@ -1199,10 +1207,10 @@
           "brief": "Helper function for emiting bounds-changed event.",
           "detailed": "",
           "type": "void",
-          "signature": "void EmitBoundsChanged(Rect< int > rect)",
+          "signature": "void EmitBoundsChanged(BoundsInteger rect)",
           "params": [
             {
-              "type": "Rect< int >",
+              "type": "BoundsInteger",
               "name": "rect",
               "description": "The rectangle for changed bounds"
             }
@@ -1496,7 +1504,7 @@
         "Dali::Accessibility::Collection",
         "Dali::ConnectionTracker",
         "Dali::BaseObjectObserver",
-        "std::enable_shared_from_this< ActorAccessible >"
+        "Dali::EnableSharedFromThis< ActorAccessible >"
       ]
     },
     {
@@ -1521,7 +1529,7 @@
           "api_tier": "integration-api",
           "brief": "SceneHolder created signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(Dali::Integration::SceneHolder &)>"
+          "aliased_type": "Signal< void(Dali::Integration::SceneHolder)>"
         },
         {
           "name": "LocaleChangedSignalType",
@@ -1537,7 +1545,7 @@
           "api_tier": "integration-api",
           "brief": "Surface size type.",
           "detailed": "",
-          "aliased_type": "Uint16Pair"
+          "aliased_type": "Int32Pair"
         },
         {
           "name": "Internal::Adaptor::Adaptor",
@@ -2896,7 +2904,7 @@
           "brief": "Application lifecycle signal and system signal callback type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Application &)>"
+          "aliased_type": "Signal< void(Application)>"
         },
         {
           "name": "AppControlSignalType",
@@ -2905,7 +2913,7 @@
           "brief": "Application control signal callback type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Application &, void *)>"
+          "aliased_type": "Signal< void(Application, void *)>"
         },
         {
           "name": "New",
@@ -3391,7 +3399,6 @@
       ],
       "derived_classes": [
         "Dali::ComponentApplication",
-        "Dali::WatchApplication",
         "Dali::WidgetApplication"
       ]
     },
@@ -5212,7 +5219,7 @@
     },
     {
       "name": "Dali::Accessibility::Bridge",
-      "kind": "struct",
+      "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility-bridge.h",
       "api_tier": "devel-api",
       "brief": "Base class for different accessibility bridges.",
@@ -5344,7 +5351,7 @@
           "brief": "Adds the accessible object associated with given actorId to the brige.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool AddAccessible(uint32_t actorId, std::shared_ptr< Accessible > accessible)=0",
+          "signature": "bool AddAccessible(uint32_t actorId, SharedPtr< Accessible > accessible)=0",
           "returns": "true if given accessible is added to the bridge",
           "params": [
             {
@@ -5353,7 +5360,7 @@
               "description": "The actorId assosiated with the accessible"
             },
             {
-              "type": "std::shared_ptr< Accessible >",
+              "type": "SharedPtr< Accessible >",
               "name": "accessible",
               "description": "The accessible object"
             }
@@ -5381,8 +5388,8 @@
           "api_tier": "devel-api",
           "brief": "Gets the accessible object associated with given actor from the bridge.",
           "detailed": "",
-          "type": "std::shared_ptr< Accessible >",
-          "signature": "std::shared_ptr< Accessible > GetAccessible(Actor actor) const =0",
+          "type": "SharedPtr< Accessible >",
+          "signature": "SharedPtr< Accessible > GetAccessible(Actor actor) const =0",
           "params": [
             {
               "type": "Actor",
@@ -5397,8 +5404,8 @@
           "api_tier": "devel-api",
           "brief": "Gets the accessible object associated with given path from the bridge.",
           "detailed": "",
-          "type": "std::shared_ptr< Accessible >",
-          "signature": "std::shared_ptr< Accessible > GetAccessible(const std::string &path) const =0",
+          "type": "SharedPtr< Accessible >",
+          "signature": "SharedPtr< Accessible > GetAccessible(const std::string &path) const =0",
           "params": [
             {
               "type": "const std::string &",
@@ -5904,10 +5911,10 @@
           "brief": "Emits state-changed event on at-spi bus.",
           "detailed": "",
           "type": "void",
-          "signature": "void EmitStateChanged(std::shared_ptr< Accessible > obj, State state, int newValue, int reserved=0)=0",
+          "signature": "void EmitStateChanged(SharedPtr< Accessible > obj, State state, int newValue, int reserved=0)=0",
           "params": [
             {
-              "type": "std::shared_ptr< Accessible >",
+              "type": "SharedPtr< Accessible >",
               "name": "obj",
               "description": "The accessible object"
             },
@@ -5961,10 +5968,10 @@
           "brief": "Emits property-changed event on at-spi bus.",
           "detailed": "",
           "type": "void",
-          "signature": "void Emit(std::shared_ptr< Accessible > obj, ObjectPropertyChangeEvent event)=0",
+          "signature": "void Emit(SharedPtr< Accessible > obj, ObjectPropertyChangeEvent event)=0",
           "params": [
             {
-              "type": "std::shared_ptr< Accessible >",
+              "type": "SharedPtr< Accessible >",
               "name": "obj",
               "description": "The accessible object"
             },
@@ -5982,15 +5989,15 @@
           "brief": "Emits bounds-changed event on at-spi bus.",
           "detailed": "",
           "type": "void",
-          "signature": "void EmitBoundsChanged(std::shared_ptr< Accessible > obj, Rect< int > rect)=0",
+          "signature": "void EmitBoundsChanged(SharedPtr< Accessible > obj, BoundsInteger rect)=0",
           "params": [
             {
-              "type": "std::shared_ptr< Accessible >",
+              "type": "SharedPtr< Accessible >",
               "name": "obj",
               "description": "The accessible object"
             },
             {
-              "type": "Rect< int >",
+              "type": "BoundsInteger",
               "name": "rect",
               "description": "The rectangle for changed bounds"
             }
@@ -6003,10 +6010,10 @@
           "brief": "Emits org.a11y.atspi.Event.Window.PostRender on the AT-SPI bus.",
           "detailed": "The sender of this event is expected to be an Accessible object that represents a top-level window. The actual number of events emitted during a given time interval may be smaller than the number of calls to this method, but at least one is guaranteed.",
           "type": "void",
-          "signature": "void EmitPostRender(std::shared_ptr< Accessible > obj)=0",
+          "signature": "void EmitPostRender(SharedPtr< Accessible > obj)=0",
           "params": [
             {
-              "type": "std::shared_ptr< Accessible >",
+              "type": "SharedPtr< Accessible >",
               "name": "obj",
               "description": "The Accessible sender object"
             }
@@ -6251,8 +6258,8 @@
           "api_tier": "devel-api",
           "brief": "Returns instance of bridge singleton object.",
           "detailed": "",
-          "type": "std::shared_ptr< Bridge >",
-          "signature": "std::shared_ptr< Bridge > GetCurrentBridge()",
+          "type": "Dali::SharedPtr< Bridge >",
+          "signature": "Dali::SharedPtr< Bridge > GetCurrentBridge()",
           "returns": "The current bridge object"
         },
         {
@@ -7140,8 +7147,8 @@
           "notes": [
             "The bounding box doesn't indicate the rendering region in the result but primitive region of the object."
           ],
-          "type": "Rect< float >",
-          "signature": "Rect< float > GetBoundingBox() const",
+          "type": "Bounds",
+          "signature": "Bounds GetBoundingBox() const",
           "returns": "Returns the bounding box information."
         },
         {
@@ -7546,11 +7553,11 @@
           "brief": "Append the given rectangle with rounded corner to the path. The roundedCorner arguments specify the radii of the ellipses defining the corners of the rounded rectangle.",
           "detailed": "roundedCorner are specified in terms of width and height respectively. If roundedCorner's values are 0, then it will draw a rectangle without rounded corner.",
           "type": "bool",
-          "signature": "bool AddRect(Rect< float > rect, Vector2 roundedCorner)",
+          "signature": "bool AddRect(Bounds rect, Vector2 roundedCorner)",
           "returns": "Returns True when it's successful. False otherwise.",
           "params": [
             {
-              "type": "Rect< float >",
+              "type": "Bounds",
               "name": "rect",
               "description": "size of the rectangle."
             },
@@ -9058,9 +9065,9 @@
           "api_tier": "devel-api",
           "brief": "Gets rectangle describing size.",
           "detailed": "",
-          "type": "Rect< float >",
-          "signature": "Rect< float > GetExtents(CoordinateType type) const =0",
-          "returns": "Rect<float> object",
+          "type": "Bounds",
+          "signature": "Bounds GetExtents(CoordinateType type) const =0",
+          "returns": "Bounds object",
           "params": [
             {
               "type": "CoordinateType",
@@ -10286,7 +10293,7 @@
           "brief": "",
           "detailed": "Performs an OpenGL set damage command with damaged rects",
           "type": "void",
-          "signature": "void SetDamageRegion(EGLSurface &eglSurface, std::vector< Rect< int > > &damagedRects)=0",
+          "signature": "void SetDamageRegion(EGLSurface &eglSurface, std::vector< BoundsInteger > &damagedRects)=0",
           "params": [
             {
               "type": "EGLSurface &",
@@ -10294,7 +10301,7 @@
               "description": ""
             },
             {
-              "type": "std::vector< Rect< int > > &",
+              "type": "std::vector< BoundsInteger > &",
               "name": "damagedRects",
               "description": ""
             }
@@ -10323,7 +10330,7 @@
           "brief": "",
           "detailed": "Performs an OpenGL swap buffers command",
           "type": "void",
-          "signature": "void SwapBuffers(EGLSurface &eglSurface, const std::vector< Rect< int > > &damagedRects)=0",
+          "signature": "void SwapBuffers(EGLSurface &eglSurface, const std::vector< BoundsInteger > &damagedRects)=0",
           "params": [
             {
               "type": "EGLSurface &",
@@ -10331,7 +10338,7 @@
               "description": ""
             },
             {
-              "type": "const std::vector< Rect< int > > &",
+              "type": "const std::vector< BoundsInteger > &",
               "name": "damagedRects",
               "description": ""
             }
@@ -11075,6 +11082,43 @@
       ]
     },
     {
+      "name": "Dali::FileDownloadPluginProxy::EventThreadCallbackObserver",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h",
+      "api_tier": "integration-api",
+      "brief": "",
+      "detailed": "",
+      "members": [
+        {
+          "name": "EventThreadCallbackObserver",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "EventThreadCallbackObserver()=default"
+        },
+        {
+          "name": "~EventThreadCallbackObserver",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "~EventThreadCallbackObserver()=default"
+        },
+        {
+          "name": "OnTriggered",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "void",
+          "signature": "void OnTriggered()=0"
+        }
+      ]
+    },
+    {
       "name": "Dali::FeedbackPlayer",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-player.h",
@@ -11372,6 +11416,159 @@
               "type": "int",
               "name": "pattern",
               "description": "The ID of the pattern to play."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dali::FileDownloadPlugin",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/file-download-plugin.h",
+      "api_tier": "devel-api",
+      "brief": "Abstract interface for file download implementations (e.g., curl-based, libfetch, etc.)",
+      "detailed": "Plugin implementations must provide a factory function pair that follows this interface. The plugin must export: extern \"C\" FileDownloadPlugin* CreateFileDownloadPlugin() extern \"C\" bool InitializePluginFunction(Dali::FileDownloadPlugin*) extern \"C\" void DestroyFileDownloadPlugin(FileDownloadPlugin* plugin)",
+      "members": [
+        {
+          "name": "~FileDownloadPlugin",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "",
+          "detailed": "Virtual destructor for safe polymorphic deletion",
+          "type": "",
+          "signature": "~FileDownloadPlugin()=default"
+        },
+        {
+          "name": "InitializePlugin",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "Second phase initialization for the plugin.",
+          "detailed": "",
+          "notes": [
+            "Threading: Can be called from multiple threads."
+          ],
+          "type": "bool",
+          "signature": "bool InitializePlugin()=0",
+          "returns": "True if initialize successed, or already initialized. False if initialize failed."
+        },
+        {
+          "name": "DownloadRemoteFileIntoMemory",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "",
+          "detailed": "Download a requested file into a memory buffer.",
+          "notes": [
+            "Threading: Can be called from multiple threads after initialization."
+          ],
+          "type": "bool",
+          "signature": "bool DownloadRemoteFileIntoMemory(const std::string &url, Dali::Vector< uint8_t > &dataBuffer, size_t &dataSize, size_t maximumAllowedSizeBytes)=0",
+          "returns": "true on success, false on failure",
+          "params": [
+            {
+              "type": "const std::string &",
+              "name": "url",
+              "description": "The requested file URL"
+            },
+            {
+              "type": "Dali::Vector< uint8_t > &",
+              "name": "dataBuffer",
+              "description": "A memory buffer object to be written with downloaded file data."
+            },
+            {
+              "type": "size_t &",
+              "name": "dataSize",
+              "description": "The size of the memory buffer."
+            },
+            {
+              "type": "size_t",
+              "name": "maximumAllowedSizeBytes",
+              "description": "The maximum allowed file size in bytes to download."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dali::FileDownloadPluginProxy",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h",
+      "api_tier": "integration-api",
+      "brief": "A proxy loader for the file download plugin system.",
+      "detailed": "This class handles dynamic loading of file download plugins (e.g., curl-based plugin) and provides a static interface that matches the public file-download API. Features: Lazy loading: Plugin is loaded on first use, not at startup Graceful degradation: If plugin loading fails, function returns false Environment variable override: Can specify custom plugin path Thread-safe lazy initialization",
+      "members": [
+        {
+          "name": "RegisterEventThreadCallback",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Register EventThreadCallback s.t. download plugin could access.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void RegisterEventThreadCallback()"
+        },
+        {
+          "name": "UnregisterEventThreadCallback",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Unregister EventThreadCallback.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void UnregisterEventThreadCallback()"
+        },
+        {
+          "name": "Destroy",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "Explicitly unload the plugin and cleanup resources. This is normally not required as cleanup happens on process exit. Provided for testing and explicit resource management.",
+          "type": "void",
+          "signature": "void Destroy()"
+        },
+        {
+          "name": "DownloadRemoteFileIntoMemory",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "Download a requested file into a memory buffer. Attempts to load and use the registered file download plugin. If the plugin cannot be loaded, returns false and logs appropriate messages.",
+          "type": "bool",
+          "signature": "bool DownloadRemoteFileIntoMemory(const std::string &url, Dali::Vector< uint8_t > &dataBuffer, size_t &dataSize, size_t maximumAllowedSizeBytes)",
+          "returns": "true on success, false on failure (including plugin unavailable)",
+          "params": [
+            {
+              "type": "const std::string &",
+              "name": "url",
+              "description": "The requested file URL"
+            },
+            {
+              "type": "Dali::Vector< uint8_t > &",
+              "name": "dataBuffer",
+              "description": "A memory buffer object to be written with downloaded file data."
+            },
+            {
+              "type": "size_t &",
+              "name": "dataSize",
+              "description": "The size of the memory buffer."
+            },
+            {
+              "type": "size_t",
+              "name": "maximumAllowedSizeBytes",
+              "description": "The maximum allowed file size in bytes to download."
+            }
+          ]
+        },
+        {
+          "name": "RegisterEventThreadObserver",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Register event thread callback that plugin could got callback at event thread.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool RegisterEventThreadObserver(EventThreadCallbackObserver &observer)",
+          "returns": "True if register successed, so we can assume OnTrigger() will be invoked. False if register failed, so OnTrigger() will not be invoked.",
+          "params": [
+            {
+              "type": "EventThreadCallbackObserver &",
+              "name": "observer",
+              "description": ""
             }
           ]
         }
@@ -13317,7 +13514,7 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "Uint16Pair"
+          "aliased_type": "Int32Pair"
         },
         {
           "name": "KeyEventSignalType",
@@ -13325,7 +13522,7 @@
           "api_tier": "devel-api",
           "brief": "GlWindow Key Event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const KeyEvent &)>"
+          "aliased_type": "Signal< void(KeyEvent)>"
         },
         {
           "name": "TouchEventSignalType",
@@ -13333,7 +13530,7 @@
           "api_tier": "devel-api",
           "brief": "GlWindow Touch Event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const TouchEvent &)>"
+          "aliased_type": "Signal< void(TouchEvent)>"
         },
         {
           "name": "FocusChangeSignalType",
@@ -13728,10 +13925,10 @@
           "brief": "Sets a region to accept input events.",
           "detailed": "",
           "type": "void",
-          "signature": "void SetInputRegion(const Rect< int > &inputRegion)",
+          "signature": "void SetInputRegion(const BoundsInteger &inputRegion)",
           "params": [
             {
-              "type": "const Rect< int > &",
+              "type": "const BoundsInteger &",
               "name": "inputRegion",
               "description": "The region to accept input events."
             }
@@ -13917,12 +14114,12 @@
           "kind": "function",
           "api_tier": "devel-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(KeyEventevent);",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(KeyEventevent);"
           ]
         },
         {
@@ -13930,7 +14127,7 @@
           "kind": "function",
           "api_tier": "devel-api",
           "brief": "This signal is emitted when the screen is touched and when the touch ends (i.e. the down & up touch events only).",
-          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(constTouchEvent&event);",
+          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(TouchEventevent);",
           "notes": [
             "Motion events are not emitted."
           ],
@@ -13938,7 +14135,7 @@
           "signature": "TouchEventSignalType & TouchedSignal()",
           "returns": "The touch signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constTouchEvent&event);"
+            "voidYourCallbackName(TouchEventevent);"
           ]
         },
         {
@@ -15186,7 +15383,7 @@
           "api_tier": "devel-api",
           "brief": "Keyboard actived signal.",
           "detailed": "",
-          "aliased_type": "Signal< void(InputMethodContext &)>"
+          "aliased_type": "Signal< void(InputMethodContext)>"
         },
         {
           "name": "KeyboardEventSignalType",
@@ -15194,7 +15391,7 @@
           "api_tier": "devel-api",
           "brief": "keyboard events",
           "detailed": "",
-          "aliased_type": "Signal< CallbackData(InputMethodContext &, const EventData &)>"
+          "aliased_type": "Signal< CallbackData(InputMethodContext, const EventData &)>"
         },
         {
           "name": "VoidSignalType",
@@ -15458,8 +15655,8 @@
           "api_tier": "devel-api",
           "brief": "Provides size and position of keyboard.",
           "detailed": "Position is relative to whether keyboard is visible or not. If keyboard is not visible then position will be off the screen. If keyboard is not being shown when this method is called the keyboard is partially setup (IMFContext) to get the values then taken down. So ideally GetInputMethodArea() should be called after Show().",
-          "type": "Dali::Rect< int >",
-          "signature": "Dali::Rect< int > GetInputMethodArea()",
+          "type": "Dali::BoundsInteger",
+          "signature": "Dali::BoundsInteger GetInputMethodArea()",
           "returns": "rect which is keyboard panel x, y, width, height"
         },
         {
@@ -17576,6 +17773,36 @@
           ]
         },
         {
+          "name": "GetDepthBufferRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets whether the depth buffer is required for this surface.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool GetDepthBufferRequired() const override",
+          "returns": "True if depth buffer is required"
+        },
+        {
+          "name": "GetStencilBufferRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets whether the stencil buffer is required for this surface.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool GetStencilBufferRequired() const override",
+          "returns": "True if stencil buffer is required"
+        },
+        {
+          "name": "GetMSAALevel",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets the multi-sample anti-aliasing level for this surface.",
+          "detailed": "",
+          "type": "int",
+          "signature": "int GetMSAALevel() const override",
+          "returns": "The MSAA level (0 = disabled)"
+        },
+        {
           "name": "NativeRenderSurface",
           "kind": "function",
           "api_tier": "integration-api",
@@ -17842,7 +18069,7 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "Uint16Pair"
+          "aliased_type": "Int32Pair"
         },
         {
           "name": "New",
@@ -18043,7 +18270,7 @@
           "detailed": "This size determines the dimensions of the offscreen framebuffer.",
           "type": "WindowSize",
           "signature": "WindowSize GetSize() const",
-          "returns": "The size of the OffscreenWindow as a Uint16Pair (width, height)"
+          "returns": "The size of the OffscreenWindow as a Int32Pair (width, height)"
         },
         {
           "name": "AddPostRenderSyncCallback",
@@ -19726,9 +19953,9 @@
           "api_tier": "devel-api",
           "brief": "Gets rectangle describing size.",
           "detailed": "",
-          "type": "Rect< float >",
-          "signature": "Rect< float > GetExtents(CoordinateType type) const override",
-          "returns": "Rect<float> object",
+          "type": "Bounds",
+          "signature": "Bounds GetExtents(CoordinateType type) const override",
+          "returns": "Bounds object",
           "params": [
             {
               "type": "CoordinateType",
@@ -20220,10 +20447,10 @@
           "brief": "Sets the size of the surface.",
           "detailed": "",
           "type": "void",
-          "signature": "void Resize(Uint16Pair size)=0",
+          "signature": "void Resize(SurfaceSize size)=0",
           "params": [
             {
-              "type": "Uint16Pair",
+              "type": "SurfaceSize",
               "name": "size",
               "description": "The new size of the surface"
             }
@@ -20245,7 +20472,7 @@
           "brief": "Invoked by render thread before Core::RenderScene If the operation fails, then Core::Render should not be called until there is a surface to render onto.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool PreRender(bool resizingSurface, const std::vector< Rect< int > > &damagedRects, Rect< int > &clippingRect)=0",
+          "signature": "bool PreRender(bool resizingSurface, const std::vector< BoundsInteger > &damagedRects, BoundsInteger &clippingRect)=0",
           "returns": "True if the operation is successful, False if the operation failed",
           "params": [
             {
@@ -20254,12 +20481,12 @@
               "description": "True if the surface is being resized"
             },
             {
-              "type": "const std::vector< Rect< int > > &",
+              "type": "const std::vector< BoundsInteger > &",
               "name": "damagedRects",
               "description": "List of damaged rects this render pass"
             },
             {
-              "type": "Rect< int > &",
+              "type": "BoundsInteger &",
               "name": "clippingRect",
               "description": ""
             }
@@ -20325,26 +20552,6 @@
           "detailed": "",
           "type": "void",
           "signature": "void MakeContextCurrent()=0"
-        },
-        {
-          "name": "GetDepthBufferRequired",
-          "kind": "function",
-          "api_tier": "integration-api",
-          "brief": "Get whether the depth buffer is required.",
-          "detailed": "",
-          "type": "Integration::DepthBufferAvailable",
-          "signature": "Integration::DepthBufferAvailable GetDepthBufferRequired()=0",
-          "returns": "TRUE if the depth buffer is required"
-        },
-        {
-          "name": "GetStencilBufferRequired",
-          "kind": "function",
-          "api_tier": "integration-api",
-          "brief": "Get whether the stencil buffer is required.",
-          "detailed": "",
-          "type": "Integration::StencilBufferAvailable",
-          "signature": "Integration::StencilBufferAvailable GetStencilBufferRequired()=0",
-          "returns": "TRUE if the stencil buffer is required"
         },
         {
           "name": "SetAdaptor",
@@ -20443,6 +20650,141 @@
           "type": "bool",
           "signature": "bool IsFullSwapRequired() const",
           "returns": "True if full surface swap required."
+        },
+        {
+          "name": "SetDepthBufferRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether the depth buffer is required for this surface.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetDepthBufferRequired(bool enable)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enable",
+              "description": "True if depth buffer is required"
+            }
+          ]
+        },
+        {
+          "name": "GetDepthBufferRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets whether the depth buffer is required for this surface.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool GetDepthBufferRequired() const",
+          "returns": "True if depth buffer is required"
+        },
+        {
+          "name": "SetStencilBufferRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether the stencil buffer is required for this surface.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetStencilBufferRequired(bool enable)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enable",
+              "description": "True if stencil buffer is required"
+            }
+          ]
+        },
+        {
+          "name": "GetStencilBufferRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets whether the stencil buffer is required for this surface.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool GetStencilBufferRequired() const",
+          "returns": "True if stencil buffer is required"
+        },
+        {
+          "name": "SetPartialUpdateRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether partial update is required for this surface.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetPartialUpdateRequired(bool enable)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enable",
+              "description": "True if partial update is required"
+            }
+          ]
+        },
+        {
+          "name": "GetPartialUpdateRequired",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets whether partial update is required for this surface.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool GetPartialUpdateRequired() const",
+          "returns": "True if partial update is required"
+        },
+        {
+          "name": "SetMSAALevel",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets the multi-sample anti-aliasing level for this surface.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetMSAALevel(int level)",
+          "params": [
+            {
+              "type": "int",
+              "name": "level",
+              "description": "The MSAA level (0 = disabled)"
+            }
+          ]
+        },
+        {
+          "name": "GetMSAALevel",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets the multi-sample anti-aliasing level for this surface.",
+          "detailed": "",
+          "type": "int",
+          "signature": "int GetMSAALevel() const",
+          "returns": "The MSAA level (0 = disabled)"
+        },
+        {
+          "name": "SetSurfaceConfigDirty",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Marks that the surface EGL config needs to be rebuilt.",
+          "detailed": "",
+          "notes": [
+            "Thread-safe: may be called from the main thread while the render thread reads it."
+          ],
+          "type": "void",
+          "signature": "void SetSurfaceConfigDirty()"
+        },
+        {
+          "name": "IsSurfaceConfigDirty",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Checks whether the surface EGL config needs to be rebuilt.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool IsSurfaceConfigDirty() const",
+          "returns": "True if the config is dirty and needs rebuilding"
+        },
+        {
+          "name": "ClearSurfaceConfigDirty",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Clears the surface config dirty flag after rebuild.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void ClearSurfaceConfigDirty()"
         }
       ],
       "base_classes": [
@@ -20628,13 +20970,6 @@
           "detailed": ""
         },
         {
-          "name": "scalingMode",
-          "kind": "variable",
-          "api_tier": "devel-api",
-          "brief": "",
-          "detailed": ""
-        },
-        {
           "name": "samplingMode",
           "kind": "variable",
           "api_tier": "devel-api",
@@ -20648,16 +20983,11 @@
           "brief": "",
           "detailed": "",
           "type": "",
-          "signature": "ScalingParameters(ImageDimensions dimensions=ImageDimensions(), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::DEFAULT)",
+          "signature": "ScalingParameters(ImageDimensions dimensions=ImageDimensions(), SamplingMode::Type samplingMode=SamplingMode::DEFAULT)",
           "params": [
             {
               "type": "ImageDimensions",
               "name": "dimensions",
-              "description": ""
-            },
-            {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
               "description": ""
             },
             {
@@ -20683,7 +21013,7 @@
           "api_tier": "integration-api",
           "brief": "Key event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const Dali::KeyEvent &)>"
+          "aliased_type": "Signal< void(Dali::Integration::SceneHolder, Dali::KeyEvent)>"
         },
         {
           "name": "KeyEventGeneratedSignalType",
@@ -20691,7 +21021,7 @@
           "api_tier": "integration-api",
           "brief": "Key event generated signal type.",
           "detailed": "",
-          "aliased_type": "Signal< bool(const Dali::KeyEvent &)>"
+          "aliased_type": "Signal< bool(Dali::Integration::SceneHolder, Dali::KeyEvent)>"
         },
         {
           "name": "TouchEventSignalType",
@@ -20699,7 +21029,7 @@
           "api_tier": "integration-api",
           "brief": "Touch signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const Dali::TouchEvent &)>"
+          "aliased_type": "Signal< void(Dali::Integration::SceneHolder, Dali::TouchEvent)>"
         },
         {
           "name": "WheelEventSignalType",
@@ -20707,7 +21037,7 @@
           "api_tier": "integration-api",
           "brief": "Touched signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const Dali::WheelEvent &)>"
+          "aliased_type": "Signal< void(Dali::Integration::SceneHolder, Dali::WheelEvent)>"
         },
         {
           "name": "WheelEventGeneratedSignalType",
@@ -20715,7 +21045,7 @@
           "api_tier": "integration-api",
           "brief": "Wheel event generated signal type.",
           "detailed": "",
-          "aliased_type": "Signal< bool(const Dali::WheelEvent &)>"
+          "aliased_type": "Signal< bool(Dali::Integration::SceneHolder, Dali::WheelEvent)>"
         },
         {
           "name": "FocusChangedGeneratedSignalType",
@@ -21007,12 +21337,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21020,12 +21350,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "KeyEventGeneratedSignalType &",
           "signature": "KeyEventGeneratedSignalType & KeyEventGeneratedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21033,12 +21363,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received. Intercepts KeyEvents in the window before dispatching KeyEvents to the control. If a KeyEvent is consumed, no KeyEvent is delivered to the control.",
-          "detailed": "A callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "KeyEventGeneratedSignalType &",
           "signature": "KeyEventGeneratedSignalType & InterceptKeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21046,12 +21376,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventMonitorSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21059,7 +21389,7 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when the screen is touched and when the touch ends (i.e. the down & up touch events only).",
-          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(TouchEventevent);",
+          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,TouchEventevent);",
           "notes": [
             "Motion events are not emitted."
           ],
@@ -21067,7 +21397,7 @@
           "signature": "TouchEventSignalType & TouchedSignal()",
           "returns": "The touch signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(TouchEventevent);"
+            "voidYourCallbackName(SceneHoldersceneHolder,TouchEventevent);"
           ]
         },
         {
@@ -21075,12 +21405,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when wheel event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constWheelEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,WheelEventevent);",
           "type": "WheelEventSignalType &",
           "signature": "WheelEventSignalType & WheelEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constWheelEvent&event);"
+            "voidYourCallbackName(SceneHoldersceneHolder,WheelEventevent);"
           ]
         },
         {
@@ -21088,12 +21418,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted to KeyboardFocusManager when a custom wheel type event is received. When a custom wheel event occurs, it need to process the focused actor first.",
-          "detailed": "Therefore, KeyboardFocusManager first checks whether WheelEvent is generated as WheelEventGeneratedSignal. This is only valid for custom wheel events. A callback of the following type may be connected: boolYourCallbackName(constWheelEvent&event);",
+          "detailed": "Therefore, KeyboardFocusManager first checks whether WheelEvent is generated as WheelEventGeneratedSignal. This is only valid for custom wheel events. A callback of the following type may be connected: boolYourCallbackName(SceneHoldersceneHolder,WheelEventevent);",
           "type": "WheelEventGeneratedSignalType &",
           "signature": "WheelEventGeneratedSignalType & WheelEventGeneratedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constWheelEvent&event);"
+            "boolYourCallbackName(SceneHoldersceneHolder,WheelEventevent);"
           ]
         },
         {
@@ -21216,6 +21546,27 @@
           "detailed": ""
         },
         {
+          "name": "mPreviousTouchEvent",
+          "kind": "variable",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "mPreviousHoverEvent",
+          "kind": "variable",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "mPreviousType",
+          "kind": "variable",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
           "name": "mDpi",
           "kind": "variable",
           "api_tier": "integration-api",
@@ -21238,27 +21589,6 @@
         },
         {
           "name": "mHandledMultiTouch",
-          "kind": "variable",
-          "api_tier": "integration-api",
-          "brief": "",
-          "detailed": ""
-        },
-        {
-          "name": "mPreviousTouchEvent",
-          "kind": "variable",
-          "api_tier": "integration-api",
-          "brief": "",
-          "detailed": ""
-        },
-        {
-          "name": "mPreviousHoverEvent",
-          "kind": "variable",
-          "api_tier": "integration-api",
-          "brief": "",
-          "detailed": ""
-        },
-        {
-          "name": "mPreviousType",
           "kind": "variable",
           "api_tier": "integration-api",
           "brief": "",
@@ -21672,6 +22002,127 @@
           "returns": "The native window id"
         },
         {
+          "name": "SetDepthBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether the window has a depth buffer or not.",
+          "detailed": "",
+          "since": "2.5.20",
+          "notes": [
+            "This is an alternative to setting the environment variable. There is no longer a global setting; the environment variable will only affect the main window (the automatically generated window)."
+          ],
+          "type": "void",
+          "signature": "void SetDepthBufferEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if a depth buffer should be created."
+            }
+          ]
+        },
+        {
+          "name": "IsDepthBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Queries whether the window has a depth buffer.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsDepthBufferEnabled() const",
+          "returns": "True if the window has a depth buffer"
+        },
+        {
+          "name": "SetStencilBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether the window has a depth buffer or not.",
+          "detailed": "",
+          "since": "2.5.20",
+          "notes": [
+            "This is an alternative to setting the environment variable. There is no longer a global setting; the environment variable will only affect the main window (the automatically generated window)."
+          ],
+          "type": "void",
+          "signature": "void SetStencilBufferEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if a depth buffer should be created."
+            }
+          ]
+        },
+        {
+          "name": "IsStencilBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Queries whether the window has a stencil buffer.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsStencilBufferEnabled() const",
+          "returns": "True if the window has a stencil buffer"
+        },
+        {
+          "name": "SetMultiSampledAntiAliasingEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether the window has MSAA.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "void",
+          "signature": "void SetMultiSampledAntiAliasingEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if MSAA should be initialized"
+            }
+          ]
+        },
+        {
+          "name": "IsMultiSampledAntiAliasingEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Queries whether the window has MSAA.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsMultiSampledAntiAliasingEnabled() const",
+          "returns": "True if the window has MSAA"
+        },
+        {
+          "name": "SetPartialUpdateEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets whether the window will update partial area or full area.",
+          "detailed": "",
+          "since": "2.5.20",
+          "notes": [
+            "This is an alternative to setting the environment variable. There is no longer a global setting; the environment variable will only affect the main window (the automatically generated window)"
+          ],
+          "type": "void",
+          "signature": "void SetPartialUpdateEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if the window should update partial area"
+            }
+          ]
+        },
+        {
+          "name": "IsPartialUpdateEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Queries whether the window will update partial area.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsPartialUpdateEnabled() const",
+          "returns": "True if the window should update partial area"
+        },
+        {
           "name": "AddFrameRenderedCallback",
           "kind": "function",
           "api_tier": "integration-api",
@@ -21728,15 +22179,6 @@
           ]
         },
         {
-          "name": "CreateRenderTarget",
-          "kind": "function",
-          "api_tier": "integration-api",
-          "brief": "Creates the render target for the surface when the surface is created/resized/replaced.",
-          "detailed": "",
-          "type": "void",
-          "signature": "void CreateRenderTarget()"
-        },
-        {
           "name": "GetRenderTaskList",
           "kind": "function",
           "api_tier": "integration-api",
@@ -21751,12 +22193,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "Dali::Integration::SceneHolder::KeyEventSignalType &",
           "signature": "Dali::Integration::SceneHolder::KeyEventSignalType & KeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21764,12 +22206,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "Dali::Integration::SceneHolder::KeyEventGeneratedSignalType &",
           "signature": "Dali::Integration::SceneHolder::KeyEventGeneratedSignalType & KeyEventGeneratedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21777,12 +22219,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received. Intercepts KeyEvents in the window before dispatching KeyEvents to the control. If a KeyEvent is consumed, no KeyEvent is delivered to the control.",
-          "detailed": "A callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "Dali::Integration::SceneHolder::KeyEventGeneratedSignalType &",
           "signature": "Dali::Integration::SceneHolder::KeyEventGeneratedSignalType & InterceptKeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21790,12 +22232,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);",
           "type": "Dali::Integration::SceneHolder::KeyEventSignalType &",
           "signature": "Dali::Integration::SceneHolder::KeyEventSignalType & KeyEventMonitorSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(SceneHoldersceneHolder,KeyEventevent);"
           ]
         },
         {
@@ -21803,7 +22245,7 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when the screen is touched and when the touch ends (i.e. the down & up touch events only).",
-          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(TouchEventevent);",
+          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,TouchEventevent);",
           "notes": [
             "Motion events are not emitted."
           ],
@@ -21811,7 +22253,7 @@
           "signature": "Dali::Integration::SceneHolder::TouchEventSignalType & TouchedSignal()",
           "returns": "The touch signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(TouchEventevent);"
+            "voidYourCallbackName(SceneHoldersceneHolder,TouchEventevent);"
           ]
         },
         {
@@ -21819,12 +22261,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when wheel event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constWheelEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(SceneHoldersceneHolder,WheelEventevent);",
           "type": "Dali::Integration::SceneHolder::WheelEventSignalType &",
           "signature": "Dali::Integration::SceneHolder::WheelEventSignalType & WheelEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constWheelEvent&event);"
+            "voidYourCallbackName(SceneHoldersceneHolder,WheelEventevent);"
           ]
         },
         {
@@ -21832,12 +22274,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted to KeyboardFocusManager when a custom wheel type event is received. When a custom wheel event occurs, it need to process the focused actor first.",
-          "detailed": "Therefore, KeyboardFocusManager first checks whether WheelEvent is generated as WheelEventGeneratedSignal. This is only valid for custom wheel events. A callback of the following type may be connected: boolYourCallbackName(constWheelEvent&event);",
+          "detailed": "Therefore, KeyboardFocusManager first checks whether WheelEvent is generated as WheelEventGeneratedSignal. This is only valid for custom wheel events. A callback of the following type may be connected: boolYourCallbackName(SceneHoldersceneHolder,WheelEventevent);",
           "type": "Dali::Integration::SceneHolder::WheelEventGeneratedSignalType &",
           "signature": "Dali::Integration::SceneHolder::WheelEventGeneratedSignalType & WheelEventGeneratedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constWheelEvent&event);"
+            "boolYourCallbackName(SceneHoldersceneHolder,WheelEventevent);"
           ]
         },
         {
@@ -22911,7 +23353,7 @@
           "api_tier": "devel-api",
           "brief": "Sound play finished signal.",
           "detailed": "",
-          "aliased_type": "Signal< void(SoundPlayer &)>"
+          "aliased_type": "Signal< void(SoundPlayer)>"
         },
         {
           "name": "SoundPlayer",
@@ -23435,9 +23877,9 @@
           "api_tier": "devel-api",
           "brief": "Gets the bounding box for text within a range in text.",
           "detailed": "",
-          "type": "Rect< float >",
-          "signature": "Rect< float > GetRangeExtents(std::size_t startOffset, std::size_t endOffset, CoordinateType type)=0",
-          "returns": "Rect<float> giving the position and size of the specified range of text",
+          "type": "Bounds",
+          "signature": "Bounds GetRangeExtents(std::size_t startOffset, std::size_t endOffset, CoordinateType type)=0",
+          "returns": "Bounds giving the position and size of the specified range of text",
           "params": [
             {
               "type": "std::size_t",
@@ -23700,7 +24142,7 @@
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/tilt-sensor.h",
       "api_tier": "devel-api",
       "brief": "",
-      "detailed": "TiltSensor provides pitch & roll values when the device is tilted. The basic usage is shown below: voidExample() { TiltSensorsensor=TiltSensor::Get(); //Trytostartthetiltsensor if(sensor.Start()) { //Querythecurrentvalues std::cout<<\"Roll=\"<<sensor.GetRoll()<<\",Pitch=\"<<sensor.GetPitch()<<std::endl; //Getnotificationswhenthedeviceistilted sensor.TiltedSignal().Connect(&OnTilted); } } voidOnTilted(constTiltSensor&sensor) { //Querythenewvalues std::cout<<\"Roll=\"<<sensor.GetRoll()<<\",Pitch=\"<<sensor.GetPitch()<<std::endl; } While the tilt sensor is started, it will periodically poll for the latest pitch & roll values. For performance & power-saving, applications should disable this polling when no longer needed: voidEndExample() { //Stopthesensorwhennolongerneeded TiltSensor::Get().Stop(); }",
+      "detailed": "TiltSensor provides pitch & roll values when the device is tilted. The basic usage is shown below: voidExample() { TiltSensorsensor=TiltSensor::Get(); //Trytostartthetiltsensor if(sensor.Start()) { //Querythecurrentvalues std::cout<<\"Roll=\"<<sensor.GetRoll()<<\",Pitch=\"<<sensor.GetPitch()<<std::endl; //Getnotificationswhenthedeviceistilted sensor.TiltedSignal().Connect(&OnTilted); } } voidOnTilted(TiltSensorsensor) { //Querythenewvalues std::cout<<\"Roll=\"<<sensor.GetRoll()<<\",Pitch=\"<<sensor.GetPitch()<<std::endl; } While the tilt sensor is started, it will periodically poll for the latest pitch & roll values. For performance & power-saving, applications should disable this polling when no longer needed: voidEndExample() { //Stopthesensorwhennolongerneeded TiltSensor::Get().Stop(); }",
       "members": [
         {
           "name": "TiltedSignalType",
@@ -23708,7 +24150,7 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "Signal< void(const TiltSensor &)>"
+          "aliased_type": "Signal< void(TiltSensor)>"
         },
         {
           "name": "DEFAULT_UPDATE_FREQUENCY",
@@ -24642,6 +25084,26 @@
           ],
           "code_examples": [
             "boolMyFunction();"
+          ]
+        },
+        {
+          "name": "RemoveIdle",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Removes a previously added idle callback.",
+          "detailed": "",
+          "notes": [
+            "Function must be called from main event thread only",
+            "Ownership of the callback is NOT returned; the callback is deleted. @SINCE_2_5.20"
+          ],
+          "type": "void",
+          "signature": "void RemoveIdle(CallbackBase *callback)",
+          "params": [
+            {
+              "type": "CallbackBase *",
+              "name": "callback",
+              "description": "The callback to remove"
+            }
           ]
         },
         {
@@ -27243,449 +27705,6 @@
       "since": "1.1.38."
     },
     {
-      "name": "Dali::WatchApplication",
-      "kind": "class",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/watch/watch-application.h",
-      "api_tier": "devel-api",
-      "brief": "A WatchApplication class object should be created by every watch application that wishes to use Dali.",
-      "detailed": "It provides a means for initialising the resources required by the Dali::Core. Like Application class, the WatchApplication class manages Tizen watch application life cycle. The WatchApplication class emits additional signals which are availalble only in the watch application (TimeTick, AmbientTick, AmbientChanged) This feature is supported in wearable applications only. WatchApplication should follow the example below: classExampleController:publicConnectionTracker { public: ExampleController(WatchApplication&application) :mApplication(application) { mApplication.InitSignal().Connect(this,&ExampleController::Create); } voidCreate(Application&application) { //CreateDalicomponents... } ... private: WatchApplication&mApplication; }; intDALI_ADAPTOR_APImain(intargc,char**argv) { WatchApplicationapp=WatchApplication::New(&argc,&argv); ExampleControllerexample(app); app.MainLoop(); } If required, you can also connect class member functions to a signal: MyApplicationapp; app.ResumeSignal().Connect(&app,&MyApplication::Resume); When the above options are found, they are stripped from argv, and argc is updated appropriately.",
-      "members": [
-        {
-          "name": "WatchTimeSignal",
-          "kind": "typedef",
-          "api_tier": "devel-api",
-          "brief": "Watch pointer signal callback type",
-          "detailed": "",
-          "since": "1.1.37.",
-          "aliased_type": "Signal< void(Application &, const WatchTime &)>"
-        },
-        {
-          "name": "WatchBoolSignal",
-          "kind": "typedef",
-          "api_tier": "devel-api",
-          "brief": "Watch bool signal callback type",
-          "detailed": "",
-          "since": "1.1.37.",
-          "aliased_type": "Signal< void(Application &, bool)>"
-        },
-        {
-          "name": "New",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "This is the constructor for applications without an argument list.",
-          "detailed": "",
-          "since": "1.1.37.",
-          "type": "WatchApplication",
-          "signature": "WatchApplication New()",
-          "returns": "A handle to the WatchApplication"
-        },
-        {
-          "name": "New",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "This is the constructor for applications.",
-          "detailed": "",
-          "since": "1.1.37",
-          "type": "WatchApplication",
-          "signature": "WatchApplication New(int *argc, char **argv[])",
-          "returns": "A handle to the WatchApplication",
-          "params": [
-            {
-              "type": "int *",
-              "name": "argc",
-              "description": "A pointer to the number of arguments"
-            },
-            {
-              "type": "char **",
-              "name": "argv",
-              "description": "A pointer the the argument list"
-            }
-          ]
-        },
-        {
-          "name": "New",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "This is the constructor for applications with a name.",
-          "detailed": "",
-          "since": "1.1.37",
-          "type": "WatchApplication",
-          "signature": "WatchApplication New(int *argc, char **argv[], Dali::StringView stylesheet)",
-          "returns": "A handle to the WatchApplication",
-          "params": [
-            {
-              "type": "int *",
-              "name": "argc",
-              "description": "A pointer to the number of arguments"
-            },
-            {
-              "type": "char **",
-              "name": "argv",
-              "description": "A pointer the the argument list"
-            },
-            {
-              "type": "Dali::StringView",
-              "name": "stylesheet",
-              "description": "The path to user defined theme file"
-            }
-          ]
-        },
-        {
-          "name": "WatchApplication",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Construct an empty handle",
-          "detailed": "",
-          "since": "1.1.37.",
-          "type": "",
-          "signature": "WatchApplication()"
-        },
-        {
-          "name": "WatchApplication",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Copy Constructor",
-          "detailed": "",
-          "since": "1.1.37.",
-          "type": "",
-          "signature": "WatchApplication(const WatchApplication &implementation)",
-          "params": [
-            {
-              "type": "const WatchApplication &",
-              "name": "implementation",
-              "description": "The WatchApplication implementation"
-            }
-          ]
-        },
-        {
-          "name": "operator=",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Assignment operator",
-          "detailed": "",
-          "since": "1.1.37.",
-          "type": "WatchApplication &",
-          "signature": "WatchApplication & operator=(const WatchApplication &application)",
-          "returns": "A reference to this",
-          "params": [
-            {
-              "type": "const WatchApplication &",
-              "name": "application",
-              "description": "Handle to an object"
-            }
-          ]
-        },
-        {
-          "name": "WatchApplication",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Move constructor.",
-          "detailed": "",
-          "since": "1.9.24",
-          "type": "",
-          "signature": "WatchApplication(WatchApplication &&rhs) noexcept",
-          "params": [
-            {
-              "type": "WatchApplication &&",
-              "name": "rhs",
-              "description": "A reference to the moved handle"
-            }
-          ]
-        },
-        {
-          "name": "operator=",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Move assignment operator.",
-          "detailed": "",
-          "since": "1.9.24",
-          "type": "WatchApplication &",
-          "signature": "WatchApplication & operator=(WatchApplication &&rhs) noexcept",
-          "returns": "A reference to this handle",
-          "params": [
-            {
-              "type": "WatchApplication &&",
-              "name": "rhs",
-              "description": "A reference to the moved handle"
-            }
-          ]
-        },
-        {
-          "name": "~WatchApplication",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Destructor.",
-          "detailed": "This is non-virtual since derived Handle types must not contain data or virtual methods.",
-          "since": "1.1.37",
-          "type": "",
-          "signature": "~WatchApplication()"
-        },
-        {
-          "name": "TimeTickSignal",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "This signal is emitted at every second A callback of the following type may be connected:",
-          "detailed": "voidYourCallbackName(Application&application,constWatchTime&time); time(watch time handle) will not be available after returning this callback. It will be freed by the framework.",
-          "since": "1.1.37",
-          "type": "WatchTimeSignal &",
-          "signature": "WatchTimeSignal & TimeTickSignal()",
-          "returns": "The signal to connect to",
-          "code_examples": [
-            "voidYourCallbackName(Application&application,constWatchTime&time);"
-          ]
-        },
-        {
-          "name": "AmbientTickSignal",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "This signal is emitted at each minute in ambient mode A callback of the following type may be connected:",
-          "detailed": "voidYourCallbackName(Application&application,constWatchTime&time); time(watch time handle) will not be available after returning this callback. It will be freed by the framework.",
-          "since": "1.1.37",
-          "type": "WatchTimeSignal &",
-          "signature": "WatchTimeSignal & AmbientTickSignal()",
-          "returns": "The signal to connect to",
-          "code_examples": [
-            "voidYourCallbackName(Application&application,constWatchTime&time);"
-          ]
-        },
-        {
-          "name": "AmbientChangedSignal",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "This signal is emitted when the device enters or exits ambient mode A callback of the following type may be connected:",
-          "detailed": "voidYourCallbackName(Application&application,boolambient); ambient_mode If true the device enters the ambient mode, otherwise false",
-          "since": "1.1.37",
-          "type": "WatchBoolSignal &",
-          "signature": "WatchBoolSignal & AmbientChangedSignal()",
-          "returns": "The signal to connect to",
-          "code_examples": [
-            "voidYourCallbackName(Application&application,boolambient);"
-          ]
-        }
-      ],
-      "since": "1.1.37",
-      "base_classes": [
-        "Dali::Application"
-      ]
-    },
-    {
-      "name": "Dali::WatchTime",
-      "kind": "class",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/watch/watch-time.h",
-      "api_tier": "devel-api",
-      "brief": "The WatchTime class is used to get time for the WatchApplication.",
-      "detailed": "A WatchTime has a time handle from watch application framework. You can get time(hour, minute, second, millisecond) and date(year, month, day) on receiving timeTick signal.",
-      "members": [
-        {
-          "name": "WatchTime",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Constructor.",
-          "detailed": "",
-          "since": "1.1.37.",
-          "type": "",
-          "signature": "WatchTime()"
-        },
-        {
-          "name": "~WatchTime",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Destructor.",
-          "detailed": "",
-          "since": "1.1.37.",
-          "type": "",
-          "signature": "~WatchTime()"
-        },
-        {
-          "name": "GetHour",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current hour.",
-          "detailed": "",
-          "since": "1.1.37",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetHour() const",
-          "returns": "The current hour"
-        },
-        {
-          "name": "GetHour24",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current hour24.",
-          "detailed": "",
-          "since": "1.1.37",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetHour24() const",
-          "returns": "The current hour(the 24-hour clock)"
-        },
-        {
-          "name": "GetMinute",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current minute.",
-          "detailed": "",
-          "since": "1.1.37",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetMinute() const",
-          "returns": "The current minute"
-        },
-        {
-          "name": "GetSecond",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current second.",
-          "detailed": "",
-          "since": "1.1.37",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetSecond() const",
-          "returns": "The current second"
-        },
-        {
-          "name": "GetMillisecond",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current millisecond.",
-          "detailed": "",
-          "since": "1.2.32",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetMillisecond() const",
-          "returns": "The current millisecond"
-        },
-        {
-          "name": "GetYear",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current year.",
-          "detailed": "",
-          "since": "1.2.32",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetYear() const",
-          "returns": "The current year"
-        },
-        {
-          "name": "GetMonth",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current month.",
-          "detailed": "",
-          "since": "1.2.32",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetMonth() const",
-          "returns": "The current month"
-        },
-        {
-          "name": "GetDay",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current day.",
-          "detailed": "",
-          "since": "1.2.32",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetDay() const",
-          "returns": "The current day"
-        },
-        {
-          "name": "GetDayOfWeek",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the current day of week.",
-          "detailed": "The value returns from 1 (Sunday) to 7 (Saturday).",
-          "since": "1.2.32",
-          "notes": [
-            "The return value is always positive."
-          ],
-          "type": "int",
-          "signature": "int GetDayOfWeek() const",
-          "returns": "The current day of week"
-        },
-        {
-          "name": "GetUtcTime",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the UTC time. (Coordinated Universal Time)",
-          "detailed": "Regarding struct tm (the return value), please refer to the site : http://www.cplusplus.com/reference/ctime/tm/",
-          "since": "1.2.32",
-          "type": "struct tm",
-          "signature": "struct tm GetUtcTime() const",
-          "returns": "The UTC time"
-        },
-        {
-          "name": "GetUtcTimeStamp",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the UTC timestamp.",
-          "detailed": "",
-          "since": "1.2.32",
-          "type": "time_t",
-          "signature": "time_t GetUtcTimeStamp() const",
-          "returns": "The UTC timestamp"
-        },
-        {
-          "name": "GetTimeZone",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the ID of timezone.",
-          "detailed": "The timezone ID, according to the IANA(Internet Assigned Numbers Authority) If you want to see more information, please refer to the site : https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
-          "since": "1.2.32",
-          "type": "const char *",
-          "signature": "const char * GetTimeZone() const",
-          "returns": "The ID of timezone"
-        },
-        {
-          "name": "GetDaylightSavingTimeStatus",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "Returns the daylight saving time status.",
-          "detailed": "",
-          "since": "1.2.32",
-          "type": "bool",
-          "signature": "bool GetDaylightSavingTimeStatus() const",
-          "returns": "The Daylight Saving Time status"
-        },
-        {
-          "name": "WatchTime",
-          "kind": "function",
-          "api_tier": "devel-api",
-          "brief": "",
-          "detailed": "",
-          "type": "DALI_ADAPTOR_API",
-          "signature": "DALI_ADAPTOR_API WatchTime(void *time_handle)",
-          "params": [
-            {
-              "type": "void *",
-              "name": "time_handle",
-              "description": ""
-            }
-          ]
-        }
-      ],
-      "since": "1.1.37"
-    },
-    {
       "name": "Dali::WebEngine",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine.h",
@@ -28951,11 +28970,11 @@
           "brief": "Get snapshot of the specified viewArea of page.",
           "detailed": "",
           "type": "Dali::PixelData",
-          "signature": "Dali::PixelData GetScreenshot(Dali::Rect< int32_t > viewArea, float scaleFactor)",
+          "signature": "Dali::PixelData GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)",
           "returns": "pixel data of screen shot",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The rectangle of screen shot"
             },
@@ -28973,11 +28992,11 @@
           "brief": "Request to get snapshot of the specified viewArea of page asynchronously.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool GetScreenshotAsynchronously(Dali::Rect< int32_t > viewArea, float scaleFactor, Dali::WebEnginePlugin::ScreenshotCapturedCallback callback)",
+          "signature": "bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, Dali::WebEnginePlugin::ScreenshotCapturedCallback callback)",
           "returns": "true if requested successfully, false otherwise",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The rectangle of screen shot"
             },
@@ -29033,10 +29052,10 @@
           "brief": "Update display area.",
           "detailed": "",
           "type": "void",
-          "signature": "void UpdateDisplayArea(Dali::Rect< int32_t > displayArea)",
+          "signature": "void UpdateDisplayArea(Dali::BoundsInteger displayArea)",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "displayArea",
               "description": "The area to display web page"
             }
@@ -33912,11 +33931,11 @@
           "brief": "Get snapshot of the specified viewArea of page.",
           "detailed": "",
           "type": "Dali::PixelData",
-          "signature": "Dali::PixelData GetScreenshot(Dali::Rect< int32_t > viewArea, float scaleFactor)=0",
+          "signature": "Dali::PixelData GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)=0",
           "returns": "pixel data of screen shot",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The rectangle of screen shot"
             },
@@ -33934,11 +33953,11 @@
           "brief": "Request to get snapshot of the specified viewArea of page asynchronously.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool GetScreenshotAsynchronously(Dali::Rect< int32_t > viewArea, float scaleFactor, ScreenshotCapturedCallback callback)=0",
+          "signature": "bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback)=0",
           "returns": "true if requested successfully, false otherwise",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The rectangle of screen shot"
             },
@@ -33994,10 +34013,10 @@
           "brief": "Update display area.",
           "detailed": "",
           "type": "void",
-          "signature": "void UpdateDisplayArea(Dali::Rect< int32_t > displayArea)=0",
+          "signature": "void UpdateDisplayArea(Dali::BoundsInteger displayArea)=0",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "displayArea",
               "description": "The display area need be updated."
             }
@@ -36417,7 +36436,7 @@
           "brief": "Window size type",
           "detailed": "",
           "since": "1.2.60.",
-          "aliased_type": "Uint16Pair"
+          "aliased_type": "Int32Pair"
         },
         {
           "name": "WindowPosition",
@@ -36453,7 +36472,7 @@
           "brief": "Key event signal type",
           "detailed": "",
           "since": "1.9.21.",
-          "aliased_type": "Signal< void(const KeyEvent &)>"
+          "aliased_type": "Signal< void(Window, KeyEvent)>"
         },
         {
           "name": "TouchEventSignalType",
@@ -36462,7 +36481,7 @@
           "brief": "Touch signal type",
           "detailed": "",
           "since": "1.9.28.",
-          "aliased_type": "Signal< void(const TouchEvent &)>"
+          "aliased_type": "Signal< void(Window, TouchEvent)>"
         },
         {
           "name": "New",
@@ -37091,10 +37110,10 @@
           "detailed": "",
           "since": "1.2.60.",
           "type": "void",
-          "signature": "void SetInputRegion(const Rect< int > &inputRegion)",
+          "signature": "void SetInputRegion(const BoundsInteger &inputRegion)",
           "params": [
             {
-              "type": "const Rect< int > &",
+              "type": "const BoundsInteger &",
               "name": "inputRegion",
               "description": "The region to accept input events."
             }
@@ -37386,6 +37405,96 @@
           ]
         },
         {
+          "name": "SetDepthBufferEnabled",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets whether the window has a depth buffer or not.",
+          "detailed": "",
+          "since": "2.5.20",
+          "notes": [
+            "This is an alternative to setting the environment variable. There is no longer a global setting; the environment variable will only affect the main window (the automatically generated window)."
+          ],
+          "type": "void",
+          "signature": "void SetDepthBufferEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if a depth buffer should be created."
+            }
+          ]
+        },
+        {
+          "name": "IsDepthBufferEnabled",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Queries whether the window has a depth buffer.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsDepthBufferEnabled() const",
+          "returns": "True if the window has a depth buffer"
+        },
+        {
+          "name": "SetStencilBufferEnabled",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets whether the window has a depth buffer or not.",
+          "detailed": "",
+          "since": "2.5.20",
+          "notes": [
+            "This is an alternative to setting the environment variable. There is no longer a global setting; the environment variable will only affect the main window (the automatically generated window)."
+          ],
+          "type": "void",
+          "signature": "void SetStencilBufferEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if a depth buffer should be created."
+            }
+          ]
+        },
+        {
+          "name": "IsStencilBufferEnabled",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Queries whether the window has a stencil buffer.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsStencilBufferEnabled() const",
+          "returns": "True if the window has a stencil buffer"
+        },
+        {
+          "name": "SetMultiSampledAntiAliasingEnabled",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets whether the window has MSAA.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "void",
+          "signature": "void SetMultiSampledAntiAliasingEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": "True if MSAA should be initialized"
+            }
+          ]
+        },
+        {
+          "name": "IsMultiSampledAntiAliasingEnabled",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Queries whether the window has MSAA.",
+          "detailed": "",
+          "since": "2.5.20",
+          "type": "bool",
+          "signature": "bool IsMultiSampledAntiAliasingEnabled() const",
+          "returns": "True if the window has MSAA"
+        },
+        {
           "name": "SetPartialUpdateEnabled",
           "kind": "function",
           "api_tier": "public-api",
@@ -37393,7 +37502,7 @@
           "detailed": "",
           "since": "2.2.33",
           "notes": [
-            "This doesn't change the global value which is set by the environment variable. This works when partial update is enabled by the environment variable. If the partial update is disabled by the environment variable, it changes nothing."
+            "This is an alternative to setting the environment variable. There is no longer a global setting; the environment variable will only affect the main window (the automatically generated window)"
           ],
           "type": "void",
           "signature": "void SetPartialUpdateEnabled(bool enabled)",
@@ -37449,13 +37558,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Windowwindow,KeyEventevent);",
           "since": "1.9.21",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(Windowwindow,KeyEventevent);"
           ]
         },
         {
@@ -37463,7 +37572,7 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when the screen is touched and when the touch ends (i.e. the down & up touch events only).",
-          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(constTouchEvent&event);",
+          "detailed": "If there are multiple touch points, then this will be emitted when the first touch occurs and then when the last finger is lifted. An interrupted event will also be emitted (if it occurs). A callback of the following type may be connected: voidYourCallbackName(Windowwindow,TouchEventevent);",
           "since": "1.9.28",
           "notes": [
             "Motion events are not emitted."
@@ -37472,7 +37581,7 @@
           "signature": "TouchEventSignalType & TouchedSignal()",
           "returns": "The touch signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constTouchEvent&event);"
+            "voidYourCallbackName(Windowwindow,TouchEventevent);"
           ]
         }
       ],
@@ -37839,10 +37948,10 @@
           "detailed": "",
           "since": "2.2.23",
           "type": "void",
-          "signature": "void SetPositionSize(Dali::Rect< int > &positionSize)",
+          "signature": "void SetPositionSize(Dali::BoundsInteger &positionSize)",
           "params": [
             {
-              "type": "Dali::Rect< int > &",
+              "type": "Dali::BoundsInteger &",
               "name": "positionSize",
               "description": "Position and Size"
             }
@@ -37855,8 +37964,8 @@
           "brief": "Gets the PositionSize.",
           "detailed": "",
           "since": "2.2.23",
-          "type": "Dali::Rect< int >",
-          "signature": "Dali::Rect< int > GetPositionSize() const",
+          "type": "Dali::BoundsInteger",
+          "signature": "Dali::BoundsInteger GetPositionSize() const",
           "returns": "The position and size"
         },
         {
@@ -38472,7 +38581,7 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "Dali::Rect< int >"
+          "aliased_type": "Dali::BoundsInteger"
         },
         {
           "name": "GlWindowImpl",
@@ -38520,7 +38629,7 @@
           "api_tier": "integration-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "Uint16Pair"
+          "aliased_type": "Int32Pair"
         },
         {
           "name": "ADAPTOR_MAJOR_VERSION",
@@ -38730,7 +38839,7 @@
             "This method is thread safe, i.e. can be called from any thread."
           ],
           "type": "Devel::PixelBuffer",
-          "signature": "Devel::PixelBuffer LoadImageFromFile(const std::string &url, ImageDimensions size=ImageDimensions(0, 0), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
+          "signature": "Devel::PixelBuffer LoadImageFromFile(const std::string &url, ImageDimensions size=ImageDimensions(0, 0), SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
           "returns": "handle to the loaded PixelBuffer object or an empty handle in case loading failed.",
           "params": [
             {
@@ -38742,11 +38851,6 @@
               "type": "ImageDimensions",
               "name": "size",
               "description": "The width and height to fit the loaded image to, 0.0 means whole image"
-            },
-            {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
-              "description": "The method used to fit the shape of the image before loading to the shape defined by the size parameter."
             },
             {
               "type": "SamplingMode::Type",
@@ -38770,7 +38874,7 @@
             "This method is thread safe, i.e. can be called from any thread. If the image file doesn't support to load planes, this method returns a bitmap image instead."
           ],
           "type": "void",
-          "signature": "void LoadImagePlanesFromFile(const std::string &url, std::vector< Devel::PixelBuffer > &buffers, ImageDimensions size=ImageDimensions(0, 0), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
+          "signature": "void LoadImagePlanesFromFile(const std::string &url, std::vector< Devel::PixelBuffer > &buffers, ImageDimensions size=ImageDimensions(0, 0), SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
           "params": [
             {
               "type": "const std::string &",
@@ -38788,11 +38892,6 @@
               "description": "The width and height to fit the loaded image to, 0.0 means whole image"
             },
             {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
-              "description": "The method used to fit the shape of the image before loading to the shape defined by the size parameter."
-            },
-            {
               "type": "SamplingMode::Type",
               "name": "samplingMode",
               "description": "The filtering method used when sampling pixels from the input image while fitting it to desired size."
@@ -38814,7 +38913,7 @@
             "This method is thread safe, i.e. can be called from any thread."
           ],
           "type": "Devel::PixelBuffer",
-          "signature": "Devel::PixelBuffer LoadImageFromBuffer(const Dali::Vector< uint8_t > &buffer, ImageDimensions size=ImageDimensions(0, 0), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
+          "signature": "Devel::PixelBuffer LoadImageFromBuffer(const Dali::Vector< uint8_t > &buffer, ImageDimensions size=ImageDimensions(0, 0), SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
           "returns": "handle to the loaded PixelBuffer object or an empty handle in case loading failed.",
           "params": [
             {
@@ -38828,11 +38927,6 @@
               "description": "The width and height to fit the loaded image to, 0.0 means whole image"
             },
             {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
-              "description": "The method used to fit the shape of the image before loading to the shape defined by the size parameter."
-            },
-            {
               "type": "SamplingMode::Type",
               "name": "samplingMode",
               "description": "The filtering method used when sampling pixels from the input image while fitting it to desired size."
@@ -38854,7 +38948,7 @@
             "This method is thread safe, i.e. can be called from any thread."
           ],
           "type": "Devel::PixelBuffer",
-          "signature": "Devel::PixelBuffer LoadImageFromBuffer(uint8_t *buffer, size_t bufferSize, ImageDimensions size=ImageDimensions(0, 0), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
+          "signature": "Devel::PixelBuffer LoadImageFromBuffer(uint8_t *buffer, size_t bufferSize, ImageDimensions size=ImageDimensions(0, 0), SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
           "returns": "handle to the loaded PixelBuffer object or an empty handle in case loading failed.",
           "params": [
             {
@@ -38871,11 +38965,6 @@
               "type": "ImageDimensions",
               "name": "size",
               "description": "The width and height to fit the loaded image to, 0.0 means whole image"
-            },
-            {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
-              "description": "The method used to fit the shape of the image before loading to the shape defined by the size parameter."
             },
             {
               "type": "SamplingMode::Type",
@@ -38896,7 +38985,7 @@
           "brief": "Determine the size of an image that LoadImageFromFile will provide when given the same image loading parameters.",
           "detailed": "This is a synchronous request. This function is used to determine the size of an image before it has loaded.",
           "type": "ImageDimensions",
-          "signature": "ImageDimensions GetClosestImageSize(const std::string &filename, ImageDimensions size=ImageDimensions(0, 0), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
+          "signature": "ImageDimensions GetClosestImageSize(const std::string &filename, ImageDimensions size=ImageDimensions(0, 0), SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
           "returns": "dimensions that image will have if it is loaded with given parameters.",
           "params": [
             {
@@ -38908,11 +38997,6 @@
               "type": "ImageDimensions",
               "name": "size",
               "description": "The requested size for the image."
-            },
-            {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
-              "description": "The method to use to map the source image to the desired dimensions."
             },
             {
               "type": "SamplingMode::Type",
@@ -38955,7 +39039,7 @@
           "brief": "Load an image synchronously from a remote resource.",
           "detailed": "",
           "type": "Devel::PixelBuffer",
-          "signature": "Devel::PixelBuffer DownloadImageSynchronously(const std::string &url, ImageDimensions size=ImageDimensions(0, 0), FittingMode::Type fittingMode=FittingMode::DEFAULT, SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
+          "signature": "Devel::PixelBuffer DownloadImageSynchronously(const std::string &url, ImageDimensions size=ImageDimensions(0, 0), SamplingMode::Type samplingMode=SamplingMode::BOX_THEN_LINEAR, bool orientationCorrection=true)",
           "returns": "handle to the loaded PixelBuffer object or an empty handle in case downloading or decoding failed.",
           "params": [
             {
@@ -38967,11 +39051,6 @@
               "type": "ImageDimensions",
               "name": "size",
               "description": "The width and height to fit the loaded image to, 0.0 means whole image"
-            },
-            {
-              "type": "FittingMode::Type",
-              "name": "fittingMode",
-              "description": "The method used to fit the shape of the image before loading to the shape defined by the size parameter."
             },
             {
               "type": "SamplingMode::Type",
@@ -39010,6 +39089,45 @@
               "description": "The name of thread. The name can be up to 16 bytes long, and should be null-terminated if it contains fewer bytes."
             }
           ]
+        },
+        {
+          "name": "GetThreadId",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "Get the thread id.",
+          "detailed": "",
+          "notes": [
+            "If thread id getter doesn't supported, it will return 0 as default."
+          ],
+          "type": "int32_t",
+          "signature": "int32_t GetThreadId()",
+          "returns": "The thread id."
+        },
+        {
+          "name": "GetMainThreadId",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "Get the main thread id.",
+          "detailed": "",
+          "notes": [
+            "If thread id getter doesn't supported, it will return 0 as default."
+          ],
+          "type": "int32_t",
+          "signature": "int32_t GetMainThreadId()",
+          "returns": "The main thread id."
+        },
+        {
+          "name": "GetUiThreadId",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "Get the UI thread id, which DALi::Adaptor runs on.",
+          "detailed": "",
+          "notes": [
+            "If thread id getter doesn't supported, it will return 0 as default."
+          ],
+          "type": "int32_t",
+          "signature": "int32_t GetUiThreadId()",
+          "returns": "The UI thread id."
         },
         {
           "name": "CreateNativeSurface",
@@ -39468,6 +39586,15 @@
         }
       ],
       "synthetic": true
+    },
+    {
+      "name": "Dali",
+      "kind": "namespace",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.cpp",
+      "api_tier": "integration-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
     },
     {
       "name": "Dali",
@@ -44147,12 +44274,20 @@
           "aliased_type": "Signal< void()>"
         },
         {
+          "name": "KeyboardRepeatSettingsChangedSignalType",
+          "kind": "typedef",
+          "api_tier": "devel-api",
+          "brief": "Keyboard repeat settings changed signal type.",
+          "detailed": "",
+          "aliased_type": "Signal< void()>"
+        },
+        {
           "name": "KeyEventSignalType",
           "kind": "typedef",
           "api_tier": "devel-api",
           "brief": "Key event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const KeyEvent &)>"
+          "aliased_type": "Signal< void(Window, KeyEvent)>"
         },
         {
           "name": "TouchEventSignalType",
@@ -44160,7 +44295,7 @@
           "api_tier": "devel-api",
           "brief": "Touch signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const TouchEvent &)>"
+          "aliased_type": "Signal< void(Window, TouchEvent)>"
         },
         {
           "name": "WheelEventSignalType",
@@ -44168,7 +44303,7 @@
           "api_tier": "devel-api",
           "brief": "Wheel signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const WheelEvent &)>"
+          "aliased_type": "Signal< void(Window, WheelEvent)>"
         },
         {
           "name": "VisibilityChangedSignalType",
@@ -44185,14 +44320,6 @@
           "brief": "Effect signal type and state.",
           "detailed": "",
           "aliased_type": "Signal< void(Window, WindowEffectState, WindowEffectType)>"
-        },
-        {
-          "name": "KeyboardRepeatSettingsChangedSignalType",
-          "kind": "typedef",
-          "api_tier": "devel-api",
-          "brief": "Keyboard repeat settings changed signal type.",
-          "detailed": "",
-          "aliased_type": "Signal< void()>"
         },
         {
           "name": "AuxiliaryMessageSignalType",
@@ -44216,7 +44343,7 @@
           "api_tier": "devel-api",
           "brief": "Intercept Key event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< bool(const KeyEvent &)>"
+          "aliased_type": "Signal< bool(Window, KeyEvent)>"
         },
         {
           "name": "MovedSignalType",
@@ -44342,7 +44469,7 @@
           "kind": "function",
           "api_tier": "devel-api",
           "brief": "This signal is emitted when wheel event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constWheelEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Windowwindow,WheelEventevent);",
           "type": "WheelEventSignalType &",
           "signature": "WheelEventSignalType & WheelEventSignal(Window window)",
           "returns": "The signal to connect to",
@@ -44354,7 +44481,7 @@
             }
           ],
           "code_examples": [
-            "voidYourCallbackName(constWheelEvent&event);"
+            "voidYourCallbackName(Windowwindow,WheelEventevent);"
           ]
         },
         {
@@ -44861,7 +44988,7 @@
           "brief": "Includes input region.",
           "detailed": "This function inlcudes input regions. It can be used multiple times and supports multiple regions. It means input region will be extended. This input is related to mouse and touch event. If device has touch screen, this function is useful. Otherwise device does not have that, we can use it after connecting mouse to the device.",
           "type": "void",
-          "signature": "void IncludeInputRegion(Window window, const Rect< int > &inputRegion)",
+          "signature": "void IncludeInputRegion(Window window, const BoundsInteger &inputRegion)",
           "params": [
             {
               "type": "Window",
@@ -44869,7 +44996,7 @@
               "description": "The window instance."
             },
             {
-              "type": "const Rect< int > &",
+              "type": "const BoundsInteger &",
               "name": "inputRegion",
               "description": "The added region to accept input events."
             }
@@ -44882,7 +45009,7 @@
           "brief": "Excludes input region.",
           "detailed": "This function excludes input regions. It can be used multiple times and supports multiple regions. It means input region will be reduced. Nofice, should be set input area by IncludeInputRegion() before this function is used. This input is related to mouse and touch event. If device has touch screen, this function is useful. Otherwise device does not have that, we can use it after connecting mouse to the device.",
           "type": "void",
-          "signature": "void ExcludeInputRegion(Window window, const Rect< int > &inputRegion)",
+          "signature": "void ExcludeInputRegion(Window window, const BoundsInteger &inputRegion)",
           "params": [
             {
               "type": "Window",
@@ -44890,7 +45017,7 @@
               "description": "The window instance."
             },
             {
-              "type": "const Rect< int > &",
+              "type": "const BoundsInteger &",
               "name": "inputRegion",
               "description": "The subtracted region to except input events."
             }
@@ -44963,7 +45090,7 @@
           "name": "FeedWheelEvent",
           "kind": "function",
           "api_tier": "devel-api",
-          "brief": "Feed (Send) wheel event to window.",
+          "brief": "",
           "detailed": "",
           "type": "void",
           "signature": "void FeedWheelEvent(Window window, const Dali::WheelEvent &wheelEvent)",
@@ -44971,12 +45098,12 @@
             {
               "type": "Window",
               "name": "window",
-              "description": "The window instance"
+              "description": ""
             },
             {
               "type": "const Dali::WheelEvent &",
               "name": "wheelEvent",
-              "description": "The wheel event"
+              "description": ""
             }
           ]
         },
@@ -45929,6 +46056,27 @@
               "description": "The window instance"
             }
           ]
+        },
+        {
+          "name": "FeedWheelEvent",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "Feed (Send) wheel event to window.",
+          "detailed": "",
+          "type": "DALI_ADAPTOR_API void",
+          "signature": "DALI_ADAPTOR_API void FeedWheelEvent(Window window, Dali::WheelEvent wheelEvent)",
+          "params": [
+            {
+              "type": "Window",
+              "name": "window",
+              "description": "The window instance"
+            },
+            {
+              "type": "Dali::WheelEvent",
+              "name": "wheelEvent",
+              "description": "The wheel event"
+            }
+          ]
         }
       ]
     },
@@ -46330,90 +46478,6 @@
           "name": "TEXT",
           "kind": "enumvalue",
           "brief": "File will be loaded as text."
-        }
-      ],
-      "synthetic": true
-    },
-    {
-      "name": "Dali::FittingMode",
-      "kind": "namespace",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h",
-      "api_tier": "public-api",
-      "brief": "Fitting options, used when resizing images to fit desired dimensions.",
-      "detailed": "A fitting mode controls the region of a loaded image to be mapped to the desired image rectangle. All fitting modes preserve the aspect ratio of the image contents.",
-      "members": [
-        {
-          "name": "Type",
-          "kind": "enum",
-          "api_tier": "public-api",
-          "brief": "Enumeration for FittingMode type.",
-          "detailed": "",
-          "since": "2.5.14.",
-          "enumvalues": [
-            {
-              "name": "SHRINK_TO_FIT",
-              "brief": ""
-            },
-            {
-              "name": "SCALE_TO_FILL",
-              "brief": ""
-            },
-            {
-              "name": "FIT_WIDTH",
-              "brief": ""
-            },
-            {
-              "name": "FIT_HEIGHT",
-              "brief": ""
-            },
-            {
-              "name": "VISUAL_FITTING",
-              "brief": ""
-            }
-          ]
-        },
-        {
-          "name": "DEFAULT",
-          "kind": "variable",
-          "api_tier": "public-api",
-          "brief": "",
-          "detailed": ""
-        }
-      ],
-      "since": "2.5.14"
-    },
-    {
-      "name": "Dali::FittingMode::Type",
-      "kind": "enum",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h",
-      "api_tier": "public-api",
-      "brief": "Enumeration for FittingMode type.",
-      "detailed": "",
-      "members": [
-        {
-          "name": "SHRINK_TO_FIT",
-          "kind": "enumvalue",
-          "brief": ""
-        },
-        {
-          "name": "SCALE_TO_FILL",
-          "kind": "enumvalue",
-          "brief": ""
-        },
-        {
-          "name": "FIT_WIDTH",
-          "kind": "enumvalue",
-          "brief": ""
-        },
-        {
-          "name": "FIT_HEIGHT",
-          "kind": "enumvalue",
-          "brief": ""
-        },
-        {
-          "name": "VISUAL_FITTING",
-          "kind": "enumvalue",
-          "brief": ""
         }
       ],
       "synthetic": true
@@ -47629,7 +47693,7 @@
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h",
       "api_tier": "public-api",
       "brief": "Filtering options, used when resizing images to sample original pixels.",
-      "detailed": "A SamplingMode controls how pixels in an input image are sampled and combined to generate each pixel of a destination image during a scaling. NoFilter and Box modes do not guarantee that the output pixel array exactly matches the rectangle specified by the desired dimensions and FittingMode, but all other filter modes do if the desired dimensions are <= the raw dimensions of the input image file.",
+      "detailed": "A SamplingMode controls how pixels in an input image are sampled and combined to generate each pixel of a destination image during a scaling. NoFilter and Box modes do not guarantee that the output pixel array exactly matches the rectangle specified by the desired dimensions, but all other filter modes do if the desired dimensions are <= the raw dimensions of the input image file.",
       "members": [
         {
           "name": "Type",
@@ -50504,8 +50568,8 @@
           "api_tier": "devel-api",
           "brief": "Provides size and position of keyboard.",
           "detailed": "Position is relative to whether keyboard is visible or not. If keyboard is not visible then position will be off the screen. If keyboard is not being shown when this method is called the keyboard is partially setup (IMFContext) to get the values then taken down. So ideally GetSizeAndPosition() should be called after Show().",
-          "type": "Rect< int >",
-          "signature": "Rect< int > GetSizeAndPosition()",
+          "type": "BoundsInteger",
+          "signature": "BoundsInteger GetSizeAndPosition()",
           "returns": "rect which is keyboard panel x, y, width, height"
         },
         {
@@ -50651,15 +50715,6 @@
     },
     {
       "name": "Shape public CanvasRenderer",
-      "kind": "namespace",
-      "file": "[generated]",
-      "api_tier": "unknown",
-      "brief": "",
-      "detailed": "",
-      "members": []
-    },
-    {
-      "name": "std",
       "kind": "namespace",
       "file": "[generated]",
       "api_tier": "unknown",
@@ -51171,6 +51226,15 @@
       "name": "feedback-plugin.h",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-plugin.h",
+      "api_tier": "devel-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "file-download-plugin.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/adaptor-framework/file-download-plugin.h",
       "api_tier": "devel-api",
       "brief": "",
       "detailed": "",
@@ -52535,33 +52599,6 @@
       "members": []
     },
     {
-      "name": "dali-wearable.h",
-      "kind": "file",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/watch/dali-wearable.h",
-      "api_tier": "devel-api",
-      "brief": "",
-      "detailed": "",
-      "members": []
-    },
-    {
-      "name": "watch-application.h",
-      "kind": "file",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/watch/watch-application.h",
-      "api_tier": "devel-api",
-      "brief": "",
-      "detailed": "",
-      "members": []
-    },
-    {
-      "name": "watch-time.h",
-      "kind": "file",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/devel-api/watch/watch-time.h",
-      "api_tier": "devel-api",
-      "brief": "",
-      "detailed": "",
-      "members": []
-    },
-    {
       "name": "adaptor.h",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/adaptor.h",
@@ -52648,6 +52685,24 @@
       "name": "egl-interface.h",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/egl-interface.h",
+      "api_tier": "integration-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "file-download-plugin-proxy.cpp",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.cpp",
+      "api_tier": "integration-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "file-download-plugin-proxy.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h",
       "api_tier": "integration-api",
       "brief": "",
       "detailed": "",

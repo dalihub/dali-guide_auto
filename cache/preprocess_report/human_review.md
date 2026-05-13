@@ -5,8 +5,8 @@ This report validates preprocess inputs before markdown generation.
 ## Summary
 
 - info: 2
-- needs_review: 28
-- warning: 53
+- needs_review: 31
+- warning: 66
 
 ## Needs Review
 
@@ -17,6 +17,8 @@ This report validates preprocess inputs before markdown generation.
 - [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (addon-manager)
   - action: Review category rules or add a category assignment override.
 - [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (animated-image-view)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (attachment-id)
   - action: Review category rules or add a category assignment override.
 - [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (focus-manager)
   - action: Review category rules or add a category assignment override.
@@ -58,7 +60,11 @@ This report validates preprocess inputs before markdown generation.
   - action: Review category rules or add a category assignment override.
 - [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-config)
   - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-scale-manager)
+  - action: Review category rules or add a category assignment override.
 - [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-theme-manager)
+  - action: Review category rules or add a category assignment override.
+- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (unique-any)
   - action: Review category rules or add a category assignment override.
 - [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (view-state)
   - action: Review category rules or add a category assignment override.
@@ -78,6 +84,8 @@ This report validates preprocess inputs before markdown generation.
 - [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (addon-manager)
   - action: Review the planner evidence and update rules if needed.
 - [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (animated-image-view)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (attachment-id)
   - action: Review the planner evidence and update rules if needed.
 - [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (focus-manager)
   - action: Review the planner evidence and update rules if needed.
@@ -119,7 +127,11 @@ This report validates preprocess inputs before markdown generation.
   - action: Review the planner evidence and update rules if needed.
 - [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-config)
   - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-scale-manager)
+  - action: Review the planner evidence and update rules if needed.
 - [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-theme-manager)
+  - action: Review the planner evidence and update rules if needed.
+- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (unique-any)
   - action: Review the planner evidence and update rules if needed.
 - [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (view-state)
   - action: Review the planner evidence and update rules if needed.
@@ -171,6 +183,26 @@ This report validates preprocess inputs before markdown generation.
   - action: Add the role to role_section_hints or fix the role inference rule.
 - [warning] UNKNOWN_PLANNER_ROLE: Role inference rule emits a role without a configured section hint. (role:interface)
   - action: Add the role to role_section_hints or fix the role inference rule.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (accessibility-highlight-overlay)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] MISSING_ENTRY_HEADER: feature_spec has no entry header. (adaptor-framework)
+  - action: Review document_plan entry header selection.
+- [warning] MISSING_ENTRY_HEADER: feature_spec has no entry header. (addon-manager)
+  - action: Review document_plan entry header selection.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (addon-manager)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (i-scroll-bar)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (image-loader)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (state-event)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (trait-id)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (ui-color-manager)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
+- [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (ui-component-config)
+  - action: This may be acceptable; add samples or improve sample matching if examples are needed.
 - [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (ui-theme-manager)
   - action: This may be acceptable; add samples or improve sample matching if examples are needed.
 - [warning] NO_SAMPLE_EVIDENCE: No matching sample path was found for this feature. (view-state)
@@ -183,6 +215,7 @@ This report validates preprocess inputs before markdown generation.
 - addon-manager: category=uncategorized (llm_category_fallback)
 - animated-image-view: category=uncategorized (llm_category_fallback)
 - animation: category=animation-motion (category_override)
+- attachment-id: category=uncategorized (llm_category_fallback)
 - focus-manager: category=uncategorized (llm_category_fallback)
 - i-scroll-bar: category=uncategorized (llm_category_fallback)
 - image: category=uncategorized (llm_category_fallback)
@@ -205,7 +238,9 @@ This report validates preprocess inputs before markdown generation.
 - ui-color-manager: category=uncategorized (llm_category_fallback)
 - ui-component-config: category=uncategorized (llm_category_fallback)
 - ui-config: category=uncategorized (llm_category_fallback)
+- ui-scale-manager: category=uncategorized (llm_category_fallback)
 - ui-theme-manager: category=uncategorized (llm_category_fallback)
+- unique-any: category=uncategorized (llm_category_fallback)
 - view: category=views-components (category_override)
 - view-state: category=uncategorized (llm_category_fallback)
 - visuals: category=uncategorized (llm_category_fallback)

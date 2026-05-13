@@ -865,7 +865,7 @@
       "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
       "kind": "method",
       "public_api": true,
-      "signature": "std::size_t GetConnectionCount() const",
+      "signature": "uint32_t GetConnectionCount() const",
       "surface": "dali-core",
       "symbol_id": "Dali::BaseSignal::GetConnectionCount",
       "usage_scope": "primary_member"
@@ -1245,7 +1245,7 @@
       "header_path": "repos/dali-core/dali/public-api/signals/connection-tracker.h",
       "kind": "method",
       "public_api": true,
-      "signature": "std::size_t GetConnectionCount() const",
+      "signature": "uint32_t GetConnectionCount() const",
       "surface": "dali-core",
       "symbol_id": "Dali::ConnectionTracker::GetConnectionCount",
       "usage_scope": "primary_member"
@@ -2036,7 +2036,6 @@
       "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
       "matched_symbols": [
         "Allocate",
-        "BaseSignal",
         "CallbackBase",
         "Emit",
         "Execute",
@@ -2233,7 +2232,7 @@
       "relevance": "strong",
       "score": 0.75,
       "selection_reason": "symbol_and_path_match",
-      "snippet": " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n *\n */\n\n#include <dali-test-suite-utils.h>\n#include <dali/devel-api/actors/drawable-actor.h>\n#include <dali/devel-api/signals/render-callback.h>\n\nnamespace\n{\nstruct DrawableObject\n{\n  bool Render(const RenderCallbackInput& inputData)\n  {\n    // Store the size and clipping box of rendered area\n    size        = inputData.size;\n    clippingBox = inputData.clippingBox;\n    worldColor  = inputData.worldColor;\n    terminate   = inputData.isTerminated;\n\n    return false;\n  }\n\n  bool RenderWithTextures(const RenderCallbackInput& inputData)\n  {\n    // Store the size and clipping box of rendered area\n    size        = inputData.size;\n    clippingBox = inputData.clippingBox;\n    worldColor  = inputData.worldColor;\n\n    auto count = inputData.textureBindings.Count();\n\n    // test whether number of textures matches 1\n    DALI_TEST_EQUALS(count, 1, TEST_LOCATION);\n\n    return false;\n  }\n\n  Size          size{};\n  Rect<int32_t> clippingBox{};\n  Vector4       worldColor{};\n  bool          terminate{};\n};\n} // namespace\n\nint UtcDaliRendererSetRenderCallbackP(void)\n{\n  tet_infoline(\"Testing Renderer:LSetRenderCallback()\");\n  TestApplication application;\n\n  DrawableObject drawable{};\n\n  auto callback = RenderCallback::New<DrawableObject>(&drawable, &DrawableObject::Render);\n\n  Actor actor = Actor::New();\n  application.GetScene().Add(actor);\n\n  const float opacity = 0.5f;\n  actor.SetProperty(Actor::Property::SIZE, Vector2(100, 100));\n  actor.SetProperty(Actor::Property::COLOR, Color::MAROON * Vector4(1.0f, 1.0f, 1.0f, opacity));\n\n  auto renderer = Renderer::New(*callback);\n  actor.AddRenderer(renderer);\n\n  // flush the queue and render once\n  application.SendNotification();\n  application.Render();\n\n  // Check the size ad color (whether callback has been called)\n  DALI_TEST_EQUALS(drawable.terminate, false, TEST_LOCATION);\n  DALI_TEST_EQUALS(drawable.size, Size(100, 100), TEST_LOCATION);\n  DALI_TEST_EQUALS(drawable.worldColor, Color::MAROON * Vector4(1.0f, 1.0f, 1.0f, opacity), TEST_LOCATION);\n\n  // render once again, for line coverage\n  application.SendNotification();\n  application.Render();\n\n  END_TEST;",
+      "snippet": " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n *\n */\n\n#include <dali-test-suite-utils.h>\n#include <dali/devel-api/actors/drawable-actor.h>\n#include <dali/devel-api/signals/render-callback.h>\n\nnamespace\n{\nstruct DrawableObject\n{\n  bool Render(const RenderCallbackInput& inputData)\n  {\n    // Store the size and clipping box of rendered area\n    size        = inputData.size;\n    clippingBox = inputData.clippingBox;\n    worldColor  = inputData.worldColor;\n    terminate   = inputData.isTerminated;\n\n    return false;\n  }\n\n  bool RenderWithTextures(const RenderCallbackInput& inputData)\n  {\n    // Store the size and clipping box of rendered area\n    size        = inputData.size;\n    clippingBox = inputData.clippingBox;\n    worldColor  = inputData.worldColor;\n\n    auto count = inputData.textureBindings.Count();\n\n    // test whether number of textures matches 1\n    DALI_TEST_EQUALS(count, 1, TEST_LOCATION);\n\n    return false;\n  }\n\n  Size          size{};\n  BoundsInteger clippingBox{};\n  Vector4       worldColor{};\n  bool          terminate{};\n};\n} // namespace\n\nint UtcDaliRendererSetRenderCallbackP(void)\n{\n  tet_infoline(\"Testing Renderer:LSetRenderCallback()\");\n  TestApplication application;\n\n  DrawableObject drawable{};\n\n  auto callback = RenderCallback::New<DrawableObject>(&drawable, &DrawableObject::Render);\n\n  Actor actor = Actor::New();\n  application.GetScene().Add(actor);\n\n  const float opacity = 0.5f;\n  actor.SetProperty(Actor::Property::SIZE, Vector2(100, 100));\n  actor.SetProperty(Actor::Property::COLOR, Color::MAROON * Vector4(1.0f, 1.0f, 1.0f, opacity));\n\n  auto renderer = Renderer::New(*callback);\n  actor.AddRenderer(renderer);\n\n  // flush the queue and render once\n  application.SendNotification();\n  application.Render();\n\n  // Check the size ad color (whether callback has been called)\n  DALI_TEST_EQUALS(drawable.terminate, false, TEST_LOCATION);\n  DALI_TEST_EQUALS(drawable.size, Size(100, 100), TEST_LOCATION);\n  DALI_TEST_EQUALS(drawable.worldColor, Color::MAROON * Vector4(1.0f, 1.0f, 1.0f, opacity), TEST_LOCATION);\n\n  // render once again, for line coverage\n  application.SendNotification();\n  application.Render();\n\n  END_TEST;",
       "snippet_end_line": 91,
       "snippet_start_line": 12
     },
@@ -2243,7 +2242,6 @@
       "matched_features": [],
       "matched_primary_symbols": [
         "Allocate",
-        "BaseSignal",
         "CallbackBase",
         "Emit",
         "Execute",
@@ -2266,7 +2264,7 @@
       "relevance": "strong",
       "score": 0.75,
       "selection_reason": "symbol_and_path_match",
-      "snippet": "{\n  gStaticCallbackCalled = true;\n}\n\n} // anonymous namespace\n\nint UtcSignalConnectionPoolNew(void)\n{\n  tet_infoline(\"Testing SignalConnectionPool creation and first allocation\");\n\n  SignalConnectionPool pool;\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 0u, TEST_LOCATION);\n  DALI_TEST_CHECK(pool.GetFirstBlock() == nullptr);\n\n  SignalConnectionNode* connection = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_CHECK(connection != nullptr);\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 1u, TEST_LOCATION);\n  DALI_TEST_CHECK(pool.GetFirstBlock() != nullptr);\n\n  // First block should have capacity 2\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mCapacity, 2u, TEST_LOCATION);\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mHighWaterMark, 1u, TEST_LOCATION);\n\n  pool.Free(connection);\n\n  // Block count doesn't decrease after free\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 1u, TEST_LOCATION);\n\n  END_TEST;\n}\n\nint UtcSignalConnectionPoolBlockGrowth(void)\n{\n  tet_infoline(\"Testing block doubling growth strategy: 2, 4, 8, 16, ...\");\n\n  SignalConnectionPool pool;\n\n  // Fill block 0 (capacity 2)\n  auto* c0 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  auto* c1 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 1u, TEST_LOCATION);\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mCapacity, 2u, TEST_LOCATION);\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mHighWaterMark, 2u, TEST_LOCATION);\n\n  // Next allocation triggers block 1 (capacity 4)\n  auto* c2 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 2u, TEST_LOCATION);\n\n  auto* block1 = pool.GetFirstBlock()->mNext;\n  DALI_TEST_CHECK(block1 != nullptr);\n  DALI_TEST_EQUALS(block1->mCapacity, 4u, TEST_LOCATION);\n\n  // Fill block 1 (3 more to fill remaining 3 of 4)\n  pool.Allocate(MakeCallback(&StaticVoidCallback));\n  pool.Allocate(MakeCallback(&StaticVoidCallback));\n  pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 2u, TEST_LOCATION);\n  DALI_TEST_EQUALS(block1->mHighWaterMark, 4u, TEST_LOCATION);\n\n  // Next triggers block 2 (capacity 8)\n  pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 3u, TEST_LOCATION);\n\n  auto* block2 = block1->mNext;\n  DALI_TEST_CHECK(block2 != nullptr);\n  DALI_TEST_EQUALS(block2->mCapacity, 8u, TEST_LOCATION);\n\n  // Clean up — free all. Pool destructor handles block memory.\n  pool.Free(c0);\n  pool.Free(c1);\n  pool.Free(c2);\n  // Remaining 4 connections are still live — pool destructor frees block memory.\n  // (In real usage, ~BaseSignal disconnects all live connections before pool destruction.)\n\n  END_TEST;\n}\n\nint UtcSignalConnectionPoolFreeListReuse(void)\n{\n  tet_infoline(\"Testing that freed slots are recycled from the free list\");",
+      "snippet": "{\n  gStaticCallbackCalled = true;\n}\n\n} // anonymous namespace\n\nint UtcSignalConnectionPoolNew(void)\n{\n  tet_infoline(\"Testing SignalConnectionPool creation and first allocation\");\n\n  SignalConnectionPool pool;\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 0u, TEST_LOCATION);\n  DALI_TEST_CHECK(pool.GetFirstBlock() == nullptr);\n\n  SignalConnectionNode* connection = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_CHECK(connection != nullptr);\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 1u, TEST_LOCATION);\n  DALI_TEST_CHECK(pool.GetFirstBlock() != nullptr);\n\n  // First block should have capacity 2\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mCapacity, 2u, TEST_LOCATION);\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mHighWaterMark, 1u, TEST_LOCATION);\n\n  pool.Free(connection);\n\n  // Block count doesn't decrease after free\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 1u, TEST_LOCATION);\n\n  END_TEST;\n}\n\nint UtcSignalConnectionPoolBlockGrowth(void)\n{\n  tet_infoline(\"Testing block doubling growth strategy: 2, 4, 8, 16, ...\");\n\n  SignalConnectionPool pool;\n\n  // Fill block 0 (capacity 2)\n  auto* c0 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  auto* c1 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 1u, TEST_LOCATION);\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mCapacity, 2u, TEST_LOCATION);\n  DALI_TEST_EQUALS(pool.GetFirstBlock()->mHighWaterMark, 2u, TEST_LOCATION);\n\n  // Next allocation triggers block 1 (capacity 4)\n  auto* c2 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 2u, TEST_LOCATION);\n\n  auto* block1 = pool.GetFirstBlock()->mNext;\n  DALI_TEST_CHECK(block1 != nullptr);\n  DALI_TEST_EQUALS(block1->mCapacity, 4u, TEST_LOCATION);\n\n  // Fill block 1 (3 more to fill remaining 3 of 4)\n  auto* c3 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  auto* c4 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  auto* c5 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 2u, TEST_LOCATION);\n  DALI_TEST_EQUALS(block1->mHighWaterMark, 4u, TEST_LOCATION);\n\n  // Next triggers block 2 (capacity 8)\n  auto* c6 = pool.Allocate(MakeCallback(&StaticVoidCallback));\n  DALI_TEST_EQUALS(pool.GetBlockCount(), 3u, TEST_LOCATION);\n\n  auto* block2 = block1->mNext;\n  DALI_TEST_CHECK(block2 != nullptr);\n  DALI_TEST_EQUALS(block2->mCapacity, 8u, TEST_LOCATION);\n\n  // Clean up — free all. Pool destructor handles block memory.\n  pool.Free(c0);\n  pool.Free(c1);\n  pool.Free(c2);\n  pool.Free(c3);\n  pool.Free(c4);\n  pool.Free(c5);\n  pool.Free(c6);\n\n  END_TEST;\n}\n\nint UtcSignalConnectionPoolFreeListReuse(void)",
       "snippet_end_line": 124,
       "snippet_start_line": 45
     },
@@ -2401,7 +2399,7 @@
           "kind": "method",
           "name": "GetConnectionCount",
           "selection_reason": "getter",
-          "signature": "std::size_t GetConnectionCount() const",
+          "signature": "uint32_t GetConnectionCount() const",
           "symbol_id": "Dali::BaseSignal::GetConnectionCount"
         },
         {
@@ -3284,7 +3282,7 @@
           "kind": "method",
           "name": "GetConnectionCount",
           "selection_reason": "getter",
-          "signature": "std::size_t GetConnectionCount() const",
+          "signature": "uint32_t GetConnectionCount() const",
           "symbol_id": "Dali::ConnectionTracker::GetConnectionCount"
         },
         {
@@ -5279,8 +5277,26 @@
           "kind": "method",
           "name": "GetConnectionCount",
           "selection_reason": "getter",
-          "signature": "std::size_t GetConnectionCount() const",
+          "signature": "uint32_t GetConnectionCount() const",
           "symbol_id": "Dali::SignalMixin::GetConnectionCount"
+        },
+        {
+          "brief": "",
+          "include_in_prompt": true,
+          "kind": "constructor",
+          "name": "SignalMixin",
+          "selection_reason": "signal_or_connection_method",
+          "signature": "SignalMixin()",
+          "symbol_id": "Dali::SignalMixin::SignalMixin"
+        },
+        {
+          "brief": "",
+          "include_in_prompt": true,
+          "kind": "method",
+          "name": "~SignalMixin",
+          "selection_reason": "signal_or_connection_method",
+          "signature": "~SignalMixin()",
+          "symbol_id": "Dali::SignalMixin::~SignalMixin"
         },
         {
           "brief": "Queries whether there are any connected slots.",
@@ -5408,7 +5424,7 @@
           "kind": "method",
           "name": "GetConnectionCount",
           "selection_reason": "getter",
-          "signature": "std::size_t GetConnectionCount() const",
+          "signature": "uint32_t GetConnectionCount() const",
           "symbol_id": "Dali::SlotDelegate::GetConnectionCount"
         },
         {
@@ -6943,7 +6959,7 @@
         "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
         "kind": "method",
         "public_api": true,
-        "signature": "std::size_t GetConnectionCount() const",
+        "signature": "uint32_t GetConnectionCount() const",
         "surface": "dali-core",
         "symbol_id": "Dali::BaseSignal::GetConnectionCount",
         "usage_scope": "primary_member"
@@ -7100,7 +7116,6 @@
         "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
         "matched_symbols": [
           "Allocate",
-          "BaseSignal",
           "CallbackBase",
           "Emit",
           "Execute",
@@ -7737,12 +7752,12 @@
     }
   ],
   "source_hashes": {
-    "api_symbols": "cc905a6b95cbe731c1b8d55fc52efccb3abc0555eb2388fc640ef3a939c3d18c",
-    "document_features": "12e0c220be2dcd29a3e638e77fedce7a7af8761e8acaa1fa008b65f1bc53c4c0",
-    "feature_spec": "4d966108d40b3fec0895cbbb5b87d3237042fdab716ed65f53a94978f5ce497d",
-    "feature_to_symbols": "b72ec5486f4300ea7bc6daef92f37648f41f8a1af45f39c2c75c72cc7d1a9c5c",
-    "generation_config": "2857f9a491dd707c1e66ae9bf70889f746a86e03e879deec4d0ffa777447ee43",
-    "symbol_to_feature": "334e493eb62eb920f59fa25226aeb3d9dee042026a2a8f1e2369a6e2b2777810"
+    "api_symbols": "36436e0dbd9b800be96a50f99a80187b85e8208853428ae6852d4a564012a38f",
+    "document_features": "715253d7602ceef3fa78855b08b6c6076297670197e2f11a9af7175ca2931fc0",
+    "feature_spec": "f55e38858d0af8197559964d1cf53bfe11cbd2e58309a6367a9285f4eddd0e7a",
+    "feature_to_symbols": "11d2214fa0a36cf15cfc6a67256a7f2ab7660d5904e7423f4c706a73fb9ecea9",
+    "generation_config": "8f1a87a64acbdc9e2ac386fdaab9115289247742bea448707a39739e59a324a2",
+    "symbol_to_feature": "f387596777c2899ebe66a1abaca23cc6ce5e0377749a5d5c3a8e00f202ece72d"
   },
   "supporting_api": [],
   "surface_usage": {
@@ -7757,11 +7772,11 @@
     }
   },
   "token_estimate": {
-    "context_pack_tokens": 60625,
-    "input_tokens": 8793,
+    "context_pack_tokens": 60682,
+    "input_tokens": 8788,
     "limit": 80000,
-    "prompt_projection_tokens": 8793,
-    "rendered_prompt_tokens": 8457
+    "prompt_projection_tokens": 8788,
+    "rendered_prompt_tokens": 8452
   },
   "uncertainties": [
     {

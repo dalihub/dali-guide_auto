@@ -562,7 +562,7 @@
     },
     {
       "display_name": "Text",
-      "header_path": "repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.cpp",
+      "header_path": "repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-candidate.cpp",
       "kind": "namespace",
       "public_api": true,
       "signature": "Dali::Ui::Text",
@@ -784,7 +784,7 @@
       "symbols": [
         {
           "brief": "",
-          "header_path": "repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.cpp",
+          "header_path": "repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-candidate.cpp",
           "selection_reason": "evidence_symbol",
           "symbol_id": "Dali::Ui::Text"
         },
@@ -966,6 +966,25 @@
         "Text",
         "UiConfig"
       ],
+      "path": "repos/dali-ui/samples/attachment/my-button-example.cpp",
+      "relevance": "strong",
+      "score": 0.85,
+      "selection_reason": "symbol_and_path_match",
+      "snippet_end_line": 124,
+      "snippet_start_line": 45
+    },
+    {
+      "kind": "sample",
+      "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+      "matched_symbols": [
+        "Alignment",
+        "Apply",
+        "CENTER",
+        "DownCast",
+        "New",
+        "Text",
+        "UiConfig"
+      ],
       "path": "repos/dali-ui/samples/image-view/animated-image-view-example.cpp",
       "relevance": "strong",
       "score": 0.85,
@@ -1008,27 +1027,8 @@
       "relevance": "strong",
       "score": 0.85,
       "selection_reason": "symbol_and_path_match",
-      "snippet_end_line": 143,
-      "snippet_start_line": 64
-    },
-    {
-      "kind": "sample",
-      "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
-      "matched_symbols": [
-        "Alignment",
-        "Apply",
-        "CENTER",
-        "DownCast",
-        "New",
-        "Text",
-        "UiConfig"
-      ],
-      "path": "repos/dali-ui/samples/image-view/image-pixel-area-example.cpp",
-      "relevance": "strong",
-      "score": 0.85,
-      "selection_reason": "symbol_and_path_match",
-      "snippet_end_line": 150,
-      "snippet_start_line": 71
+      "snippet_end_line": 173,
+      "snippet_start_line": 94
     }
   ],
   "examples_legacy": [
@@ -1152,6 +1152,28 @@
         "UiConfig"
       ],
       "matched_supporting_symbols": [],
+      "path": "repos/dali-ui/samples/attachment/my-button-example.cpp",
+      "relevance": "strong",
+      "score": 0.85,
+      "selection_reason": "symbol_and_path_match",
+      "snippet": "    Label   label;\n    UiColor normalColor;\n    UiColor pressedColor;\n    uint32_t clickCount{0u};\n  };\n\n  MyButton() = default;\n\n  static MyButton New(const Dali::String& text)\n  {\n    MyButton button(InteractiveView::New());\n    button.Initialize(text);\n    return button;\n  }\n\n  static MyButton DownCast(BaseHandle handle)\n  {\n    InteractiveView view = InteractiveView::DownCast(handle);\n    return view && view.GetAttachment<Data>(GetDataId()) ? MyButton(view) : MyButton();\n  }\n\n  void Initialize(const Dali::String& text)\n  {\n    Label label = Label::New(text)\n        .SetRequestedWidth(MATCH_PARENT)\n        .SetRequestedHeight(MATCH_PARENT)\n        .SetFontSize(18.0f)\n        .SetTextColor(UiColor(0xFFFFFF))\n        .SetHorizontalTextAlignment(Text::Alignment::CENTER)\n        .SetVerticalTextAlignment(Text::Alignment::CENTER);\n\n    Add(label);\n    SetAttachment(GetDataId(), Dali::MakeUnique<Data>(label, UiColor(0x1565C0), UiColor(0x2E7D32)));\n    SetBackgroundColor(UiColor(0x1565C0));\n  }\n\n  void IncrementClickCount()\n  {\n    Data* data = GetAttachment<Data>(GetDataId());\n    if(data)\n    {\n      ++data->clickCount;\n      SetBackgroundColor((data->clickCount % 2u) ? data->pressedColor : data->normalColor);\n\n      char text[64];\n      std::snprintf(text, sizeof(text), \"MyButton: %u\", data->clickCount);\n      data->label.SetText(text);\n    }\n  }\n\npublic:\n  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)\n\nprivate:\n  explicit MyButton(InteractiveView view)\n  : InteractiveView(view)\n  {\n  }\n\n  static AttachmentId GetDataId()\n  {\n    static AttachmentId id = AttachmentId::Alloc();\n    return id;\n  }\n};\n\nclass MyButtonExampleController : public ConnectionTracker\n{\npublic:\n  explicit MyButtonExampleController(Application& application)\n  : mApplication(application)\n  {\n    mApplication.InitSignal().Connect(this, &MyButtonExampleController::Create);\n  }\n\n  void Create(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x202020));\n",
+      "snippet_end_line": 124,
+      "snippet_start_line": 45
+    },
+    {
+      "kind": "sample",
+      "matched_context_symbols": [],
+      "matched_features": [],
+      "matched_primary_symbols": [
+        "Alignment",
+        "Apply",
+        "CENTER",
+        "DownCast",
+        "New",
+        "Text",
+        "UiConfig"
+      ],
+      "matched_supporting_symbols": [],
       "path": "repos/dali-ui/samples/image-view/animated-image-view-example.cpp",
       "relevance": "strong",
       "score": 0.85,
@@ -1200,31 +1222,9 @@
       "relevance": "strong",
       "score": 0.85,
       "selection_reason": "symbol_and_path_match",
-      "snippet": "\nprivate:\n  void OnInit(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x1B1B1B));\n\n    window.Add(\n      StackLayout::New(StackOrientation::VERTICAL)\n        .SetRequestedWidth(MATCH_PARENT)\n        .SetRequestedHeight(MATCH_PARENT)\n        .Children({\n          CreateTypeSelector(),\n          CreateContents(),\n        }));\n\n    window.KeyEventSignal().Connect(this, &ImageLoadingPolicyController::OnKeyEvent);\n  }\n\n  View CreateTypeSelector()\n  {\n    static const char* TYPE_NAMES[] = {\"IMAGE\", \"ANIMATED\", \"LOTTIE\"};\n    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)\n                        .SetSpacing(4.0f)\n                        .SetRequestedWidth(MATCH_PARENT)\n                        .SetRequestedHeight(48.0f)\n                        .SetPadding(Extents(4, 4, 4, 4))\n                        .SetBackgroundColor(UiColor(0x111111));\n\n    for(int i = 0; i < (int)ViewType::COUNT; ++i)\n    {\n      StackLayout button = StackLayout::New(StackOrientation::VERTICAL)\n                             .SetRequestedWidth(WRAP_CONTENT)\n                             .SetRequestedHeight(MATCH_PARENT)\n                             .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))\n                             .SetBackgroundColor(i == (int)mViewType ? UiColor(0xD32F2F) : UiColor(0x333333))\n                             .Children({\n                               Label::New(TYPE_NAMES[i])\n                                 .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT)\n                                 .SetFontSize(12.0f).SetTextColor(UiColor(0xFFFFFF))\n                                 .SetHorizontalTextAlignment(Text::Alignment::CENTER)\n                                 .SetVerticalTextAlignment(Text::Alignment::CENTER),\n                             });\n      button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnViewTypeButtonClicked);\n      mTypeButtons[i] = button;\n      row.Add(button);\n    }\n    return row;\n  }\n\n  void OnViewTypeButtonClicked(View clickedView, InputEvent /*event*/)\n  {\n    for(int i = 0; i < (int)ViewType::COUNT; ++i)\n    {\n      if(mTypeButtons[i] == clickedView)\n      {\n        if(mViewType != (ViewType)i)\n        {\n          mTypeButtons[(int)mViewType].SetBackgroundColor(UiColor(0x333333));\n          mViewType = (ViewType)i;\n          mTypeButtons[(int)mViewType].SetBackgroundColor(UiColor(0xD32F2F));\n          DALI_LOG_ERROR(\"[ImageLoadingPolicy] ViewType changed to %d\\n\", (int)mViewType);\n          ResetSections();\n        }\n        return;\n      }\n    }\n  }\n\n  void ConnectResourceReady(View view, void (ImageLoadingPolicyController::*callback)(View))\n  {\n    if(auto v = ImageView::DownCast(view)) v.ResourceReadySignal().Connect(this, callback);\n    else if(auto v = AnimatedImageView::DownCast(view)) v.ResourceReadySignal().Connect(this, callback);\n    else if(auto v = LottieAnimationView::DownCast(view)) v.ResourceReadySignal().Connect(this, callback);\n  }\n\n  void ResetSections()\n  {\n    mSyncLoadingContainer.Remove(mSyncLoadingImage);\n    mSyncLoadingImage = CreateTargetView(false);",
-      "snippet_end_line": 143,
-      "snippet_start_line": 64
-    },
-    {
-      "kind": "sample",
-      "matched_context_symbols": [],
-      "matched_features": [],
-      "matched_primary_symbols": [
-        "Alignment",
-        "Apply",
-        "CENTER",
-        "DownCast",
-        "New",
-        "Text",
-        "UiConfig"
-      ],
-      "matched_supporting_symbols": [],
-      "path": "repos/dali-ui/samples/image-view/image-pixel-area-example.cpp",
-      "relevance": "strong",
-      "score": 0.85,
-      "selection_reason": "symbol_and_path_match",
-      "snippet": "\n    window.Add(CreateContents());\n\n    window.KeyEventSignal().Connect(this, &ImagePixelAreaController::OnKeyEvent);\n  }\n\n  View CreateContents()\n  {\n    return StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .Children({\n        CreateImageArea(),\n        CreateInfoLabel(),\n        CreateAreaButtonRow(),\n        CreateExtraButtonRow(),\n      });\n  }\n\n  View CreateImageArea()\n  {\n    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));\n\n    mImage = ImageView::New(JPG_URL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)\n      .SetPixelArea(AREAS[mActiveIndex].area);\n\n    mImageContainer.Add(mImage);\n    return mImageContainer;\n  }\n\n  View CreateInfoLabel()\n  {\n    return Label::New(MakeInfoText())\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(40.0f)\n      .SetFontSize(14.0f)\n      .SetTextColor(UiColor(0xCCCCCC))\n      .SetHorizontalTextAlignment(Text::Alignment::CENTER)\n      .SetVerticalTextAlignment(Text::Alignment::CENTER)\n      .As(mInfoLabel);\n  }\n\n  View CreateAreaButtonRow()\n  {\n    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)\n                        .SetSpacing(4.0f)\n                        .SetRequestedWidth(MATCH_PARENT)\n                        .SetRequestedHeight(80.0f)\n                        .SetPadding(Extents(4, 4, 4, 4));\n\n    for(int i = 0; i < AREA_COUNT; ++i)\n    {\n      row.Add(CreateAreaButton(i));\n    }\n\n    return row;\n  }\n\n  View CreateExtraButtonRow()\n  {\n    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)\n                        .SetSpacing(4.0f)\n                        .SetRequestedWidth(MATCH_PARENT)\n                        .SetRequestedHeight(80.0f)\n                        .SetPadding(Extents(4, 4, 4, 4));\n\n    // GIF toggle button\n    StackLayout gifButton = StackLayout::New(StackOrientation::VERTICAL)\n                              .SetRequestedWidth(WRAP_CONTENT)\n                              .SetRequestedHeight(MATCH_PARENT)\n                              .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))\n                              .SetBackgroundColor(UiColor(0x2E7D32))\n                              .Children({\n                                Label::New(\"GIF\")",
-      "snippet_end_line": 150,
-      "snippet_start_line": 71
+      "snippet": "    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x1B1B1B));\n    window.Add(CreateRoot());\n    window.KeyEventSignal().Connect(this, &ImageLoadingPolicyController::OnKeyEvent);\n  }\n\n  View CreateRoot()\n  {\n    return StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .Children({\n        CreateTypeRow(),\n        CreateImageArea(),\n        CreateStatusBar(),\n        CreateControls(),\n      });\n  }\n\n  // ── ViewType selector ─────────────────────────────────────────────────────\n\n  View CreateTypeRow()\n  {\n    static const char* NAMES[TYPE_COUNT] = {\"IMAGE\", \"ANIMATED\", \"LOTTIE\"};\n    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)\n                        .SetSpacing(4.0f)\n                        .SetRequestedWidth(MATCH_PARENT)\n                        .SetRequestedHeight(44.0f)\n                        .SetPadding(Extents(4, 4, 4, 4))\n                        .SetBackgroundColor(UiColor(0x111111));\n    for(int i = 0; i < TYPE_COUNT; ++i)\n    {\n      mTypeButtons[i] = MakeBtn(NAMES[i], i == static_cast<int>(mViewType) ? UiColor(0xD32F2F) : UiColor(0x444444));\n      mTypeButtons[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnTypeClicked);\n      row.Add(mTypeButtons[i]);\n    }\n    return row;\n  }\n\n  // ── Single image area ─────────────────────────────────────────────────────\n\n  View CreateImageArea()\n  {\n    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)\n                        .SetRequestedWidth(MATCH_PARENT)\n                        .SetRequestedHeight(WRAP_CONTENT)\n                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))\n                        .SetBackgroundColor(UiColor(0x222222));\n    RebuildView();\n    return mImageContainer;\n  }\n\n  // ── Status bar ────────────────────────────────────────────────────────────\n\n  View CreateStatusBar()\n  {\n    Label::New(\"\")\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(20.0f)\n      .SetFontSize(10.0f)\n      .SetTextColor(UiColor(0x888888))\n      .SetHorizontalTextAlignment(Text::Alignment::CENTER)\n      .SetVerticalTextAlignment(Text::Alignment::CENTER)\n      .As(mStatusLabel);\n    RefreshStatus();\n    return mStatusLabel;\n  }\n\n  void RefreshStatus()\n  {\n    std::string s;\n    s += mSyncLoading ? \"Sync:ON\" : \"Sync:OFF\";\n    s += \"  FT:\";\n    s += (mViewType == ViewType::LOTTIE) ? \"N/A\" : (mFastTrack ? \"ON\" : \"OFF\");\n    s += \"  Rel:\";\n    s += RELEASE_POLICIES[mReleasePolicyIndex].label;\n    s += \"  Load:\";\n    s += (mLoadPolicyIndex == 0) ? \"ATTACHED\" : \"IMMEDIATE\";\n    mStatusLabel.SetText(s.c_str());\n  }",
+      "snippet_end_line": 173,
+      "snippet_start_line": 94
     }
   ],
   "feature": "ui-config",
@@ -2324,7 +2324,7 @@
       },
       {
         "display_name": "Text",
-        "header_path": "repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.cpp",
+        "header_path": "repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-candidate.cpp",
         "kind": "namespace",
         "public_api": true,
         "signature": "Dali::Ui::Text",
@@ -2591,6 +2591,25 @@
           "Text",
           "UiConfig"
         ],
+        "path": "repos/dali-ui/samples/attachment/my-button-example.cpp",
+        "relevance": "strong",
+        "score": 0.85,
+        "selection_reason": "symbol_and_path_match",
+        "snippet_end_line": 124,
+        "snippet_start_line": 45
+      },
+      {
+        "kind": "sample",
+        "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+        "matched_symbols": [
+          "Alignment",
+          "Apply",
+          "CENTER",
+          "DownCast",
+          "New",
+          "Text",
+          "UiConfig"
+        ],
         "path": "repos/dali-ui/samples/image-view/animated-image-view-example.cpp",
         "relevance": "strong",
         "score": 0.85,
@@ -2633,27 +2652,8 @@
         "relevance": "strong",
         "score": 0.85,
         "selection_reason": "symbol_and_path_match",
-        "snippet_end_line": 143,
-        "snippet_start_line": 64
-      },
-      {
-        "kind": "sample",
-        "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
-        "matched_symbols": [
-          "Alignment",
-          "Apply",
-          "CENTER",
-          "DownCast",
-          "New",
-          "Text",
-          "UiConfig"
-        ],
-        "path": "repos/dali-ui/samples/image-view/image-pixel-area-example.cpp",
-        "relevance": "strong",
-        "score": 0.85,
-        "selection_reason": "symbol_and_path_match",
-        "snippet_end_line": 150,
-        "snippet_start_line": 71
+        "snippet_end_line": 173,
+        "snippet_start_line": 94
       }
     ],
     "feature": "ui-config",
@@ -2819,12 +2819,12 @@
     }
   ],
   "source_hashes": {
-    "api_symbols": "cc905a6b95cbe731c1b8d55fc52efccb3abc0555eb2388fc640ef3a939c3d18c",
-    "document_features": "12e0c220be2dcd29a3e638e77fedce7a7af8761e8acaa1fa008b65f1bc53c4c0",
-    "feature_spec": "620700f25aa4ec0421b7c52aefb19630af40dcb8b118056bea810f0b085ff342",
-    "feature_to_symbols": "b72ec5486f4300ea7bc6daef92f37648f41f8a1af45f39c2c75c72cc7d1a9c5c",
-    "generation_config": "2857f9a491dd707c1e66ae9bf70889f746a86e03e879deec4d0ffa777447ee43",
-    "symbol_to_feature": "334e493eb62eb920f59fa25226aeb3d9dee042026a2a8f1e2369a6e2b2777810"
+    "api_symbols": "36436e0dbd9b800be96a50f99a80187b85e8208853428ae6852d4a564012a38f",
+    "document_features": "715253d7602ceef3fa78855b08b6c6076297670197e2f11a9af7175ca2931fc0",
+    "feature_spec": "c9dd1d63d1ffe9dae072983390ce0ad37ce69dcf86a9720bb815c690e33ecc48",
+    "feature_to_symbols": "11d2214fa0a36cf15cfc6a67256a7f2ab7660d5904e7423f4c706a73fb9ecea9",
+    "generation_config": "8f1a87a64acbdc9e2ac386fdaab9115289247742bea448707a39739e59a324a2",
+    "symbol_to_feature": "f387596777c2899ebe66a1abaca23cc6ce5e0377749a5d5c3a8e00f202ece72d"
   },
   "supporting_api": [
     {
@@ -2891,11 +2891,11 @@
     }
   },
   "token_estimate": {
-    "context_pack_tokens": 27529,
-    "input_tokens": 7292,
+    "context_pack_tokens": 27286,
+    "input_tokens": 7291,
     "limit": 80000,
-    "prompt_projection_tokens": 7292,
-    "rendered_prompt_tokens": 6957
+    "prompt_projection_tokens": 7291,
+    "rendered_prompt_tokens": 6956
   },
   "uncertainties": [
     {

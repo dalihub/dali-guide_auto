@@ -16,7 +16,7 @@
           "brief": "Touch signal type",
           "detailed": "",
           "since": "1.1.37.",
-          "aliased_type": "Signal< bool(Actor, const TouchEvent &)>"
+          "aliased_type": "Signal< bool(Actor, TouchEvent)>"
         },
         {
           "name": "HoverSignalType",
@@ -25,7 +25,7 @@
           "brief": "Hover signal type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< bool(Actor, const HoverEvent &)>"
+          "aliased_type": "Signal< bool(Actor, HoverEvent)>"
         },
         {
           "name": "WheelEventSignalType",
@@ -34,7 +34,7 @@
           "brief": "Wheel signal type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< bool(Actor, const WheelEvent &)>"
+          "aliased_type": "Signal< bool(Actor, WheelEvent)>"
         },
         {
           "name": "OnSceneSignalType",
@@ -805,13 +805,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when hover input is received.",
-          "detailed": "A callback of the following type may be connected: boolYourCallbackName(Actoractor,constHoverEvent&event); The return value of True, indicates that the hover event should be consumed. Otherwise the signal will be emitted on the next sensitive parent of the actor.",
+          "detailed": "A callback of the following type may be connected: boolYourCallbackName(Actoractor,HoverEventevent); The return value of True, indicates that the hover event should be consumed. Otherwise the signal will be emitted on the next sensitive parent of the actor.",
           "since": "1.0.0",
           "type": "HoverSignalType &",
           "signature": "HoverSignalType & HoveredSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(Actoractor,constHoverEvent&event);"
+            "boolYourCallbackName(Actoractor,HoverEventevent);"
           ]
         },
         {
@@ -819,13 +819,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when wheel event is received.",
-          "detailed": "A callback of the following type may be connected: boolYourCallbackName(Actoractor,constWheelEvent&event); The return value of True, indicates that the wheel event should be consumed. Otherwise the signal will be emitted on the next sensitive parent of the actor.",
+          "detailed": "A callback of the following type may be connected: boolYourCallbackName(Actoractor,WheelEventevent); The return value of True, indicates that the wheel event should be consumed. Otherwise the signal will be emitted on the next sensitive parent of the actor.",
           "since": "1.0.0",
           "type": "WheelEventSignalType &",
           "signature": "WheelEventSignalType & WheelEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(Actoractor,constWheelEvent&event);"
+            "boolYourCallbackName(Actoractor,WheelEventevent);"
           ]
         },
         {
@@ -2428,7 +2428,7 @@
           "brief": "Animation finished signal type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Animation &)>"
+          "aliased_type": "Signal< void(Animation)>"
         },
         {
           "name": "AnyFunction",
@@ -3792,7 +3792,7 @@
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/object/any.h",
       "api_tier": "public-api",
       "brief": "Stores a value of any type.",
-      "detailed": "Examples of use: AnyuintVariable=5u; AnyfloatVariable(4.5f); AnystrVariable(Dali::String(\"Helloworld\")); uintVariable=1u; uint32_tvariable=AnyCast<uint32_t>(uintVariable); if(typeid(int)==uintVariable.GetType())",
+      "detailed": "Examples of use: AnyuintVariable=5u; AnyfloatVariable(4.5f); AnystrVariable(Dali::String(\"Helloworld\")); uintVariable=1u; uint32_tvariable=AnyCast<uint32_t>(uintVariable); if(uintVariable.IsType<int>())",
       "members": [
         {
           "name": "CloneFunc",
@@ -3959,12 +3959,29 @@
           "name": "GetType",
           "kind": "function",
           "api_tier": "public-api",
-          "brief": "Returns the type info of the stored value.",
+          "brief": "Returns the type identifier of the stored value.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "DALI_CORE_API const std::type_info &",
-          "signature": "DALI_CORE_API const std::type_info & GetType() const",
-          "returns": "The std::type_info of the stored value or the type info of the void type if there is no value stored"
+          "type": "DALI_CORE_API const TypeInfoId &",
+          "signature": "DALI_CORE_API const TypeInfoId & GetType() const",
+          "returns": "The TypeInfoId of the stored value, or a default-constructed TypeInfoId (representing void) if there is no value stored"
+        },
+        {
+          "name": "IsType",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Checks if the stored value is of type T.",
+          "detailed": "This method provides a type-safe way to query the type of the stored value without using RTTI directly. It is the recommended way to check types before calling Get<T>() or AnyCast<T>() to avoid exceptions. Typical use cases: Checking if an Any value can be safely retrieved as a specific type Implementing type-safe visitors for Any values Conditional processing based on the stored type Example: Anyvalue=42; if(value.IsType<int>()) { intintValue=AnyCast<int>(value);//Safe,noexception } elseif(value.IsType<float>()) { floatfloatValue=AnyCast<float>(value); }",
+          "since": "2.5.21",
+          "notes": [
+            "Use this method instead of comparing GetType() with DALI_TYPE_ID(T). The IsType<T>() method handles the type name resolution internally and works correctly even when T is a template parameter."
+          ],
+          "type": "bool",
+          "signature": "bool IsType() const",
+          "returns": "true if the stored value is of type T, false otherwise (including if empty)",
+          "code_examples": [
+            "Anyvalue=42;\nif(value.IsType<int>())\n{\nintintValue=AnyCast<int>(value);//Safe,noexception\n}\nelseif(value.IsType<float>())\n{\nfloatfloatValue=AnyCast<float>(value);\n}"
+          ]
         },
         {
           "name": "Get",
@@ -4067,12 +4084,12 @@
           "detailed": "",
           "since": "1.0.0",
           "type": "",
-          "signature": "AnyContainerBase(const std::type_info &type, CloneFunc cloneFunc, DeleteFunc deleteFunc)",
+          "signature": "AnyContainerBase(TypeInfoId type, CloneFunc cloneFunc, DeleteFunc deleteFunc)",
           "params": [
             {
-              "type": "const std::type_info &",
+              "type": "TypeInfoId",
               "name": "type",
-              "description": "typeid of container"
+              "description": "TypeInfoId of container"
             },
             {
               "type": "CloneFunc",
@@ -4090,11 +4107,11 @@
           "name": "GetType",
           "kind": "function",
           "api_tier": "public-api",
-          "brief": "Gets the typeid of this container.",
+          "brief": "Gets the TypeInfoId of this container.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "const std::type_info &",
-          "signature": "const std::type_info & GetType() const",
+          "type": "const TypeInfoId &",
+          "signature": "const TypeInfoId & GetType() const",
           "returns": "Type"
         }
       ],
@@ -5012,8 +5029,8 @@
           "brief": "Queries the number of slots.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "std::size_t",
-          "signature": "std::size_t GetConnectionCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetConnectionCount() const",
           "returns": "The number of slots connected to this signal"
         },
         {
@@ -7167,8 +7184,8 @@
           "brief": "Returns the connection count.",
           "detailed": "",
           "since": "1.0.0.",
-          "type": "std::size_t",
-          "signature": "std::size_t GetConnectionCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetConnectionCount() const",
           "returns": "The connection count"
         }
       ],
@@ -7235,6 +7252,145 @@
       "derived_classes": [
         "Dali::ConnectionTracker"
       ]
+    },
+    {
+      "name": "Dali::ManagedOpenHashMap::ConstIterator",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "Const forward iterator over live entries.",
+      "detailed": "operator*() — returns ConstKeyValuePair& (stable lvalue) operator->() — returns ConstKeyValuePair* Usage: for(autoit=map.cbegin();it!=map.cend();++it) { DoSomething(it->key(),it->value()); }",
+      "members": [
+        {
+          "name": "ConstIterator",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "ConstIterator(const Entry *entries, uint32_t capacity, uint32_t index)",
+          "params": [
+            {
+              "type": "const Entry *",
+              "name": "entries",
+              "description": ""
+            },
+            {
+              "type": "uint32_t",
+              "name": "capacity",
+              "description": ""
+            },
+            {
+              "type": "uint32_t",
+              "name": "index",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator*",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const ConstKeyValuePair &",
+          "signature": "const ConstKeyValuePair & operator*() const"
+        },
+        {
+          "name": "operator->",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const ConstKeyValuePair *",
+          "signature": "const ConstKeyValuePair * operator->() const"
+        },
+        {
+          "name": "operator++",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "ConstIterator &",
+          "signature": "ConstIterator & operator++()"
+        },
+        {
+          "name": "operator!=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator!=(const ConstIterator &rhs) const",
+          "params": [
+            {
+              "type": "const ConstIterator &",
+              "name": "rhs",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator==",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator==(const ConstIterator &rhs) const",
+          "params": [
+            {
+              "type": "const ConstIterator &",
+              "name": "rhs",
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "since": "2.5.20"
+    },
+    {
+      "name": "Dali::ManagedOpenHashMap::ConstKeyValuePair",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "Value type exposed by ConstIterator.",
+      "detailed": "Provides stable const references to both key and value.",
+      "members": [
+        {
+          "name": "keyPtr",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "valuePtr",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "key",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const Key &",
+          "signature": "const Key & key() const"
+        },
+        {
+          "name": "value",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const Value &",
+          "signature": "const Value & value() const"
+        }
+      ],
+      "since": "2.5.20"
     },
     {
       "name": "Dali::Constraint",
@@ -8155,7 +8311,7 @@
           "brief": "",
           "detailed": "This is called before rendering any scene in the next frame. This method should be preceded by a call up Update. Multi-threading note: this method should be called from a dedicated rendering thread.",
           "type": "void",
-          "signature": "void PreRenderScene(Integration::Scene &scene, Integration::ScenePreRenderStatus &status, std::vector< Rect< int > > &damagedRects)",
+          "signature": "void PreRenderScene(Integration::Scene &scene, Integration::ScenePreRenderStatus &status, std::vector< BoundsInteger > &damagedRects)",
           "returns": "true if the scene has something to render, false if there is nothing to render",
           "params": [
             {
@@ -8169,7 +8325,7 @@
               "description": "The status of pre render operation."
             },
             {
-              "type": "std::vector< Rect< int > > &",
+              "type": "std::vector< BoundsInteger > &",
               "name": "damagedRects",
               "description": "containing damaged render items rects for this pass."
             }
@@ -8208,7 +8364,7 @@
           "brief": "",
           "detailed": "Render a scene in the next frame. This method should be preceded by a call to PreRender. This method should be called twice. The first pass to render off-screen frame buffers if any, and the second pass to render the surface. Multi-threading note: this method should be called from a dedicated rendering thread.",
           "type": "void",
-          "signature": "void RenderScene(RenderStatus &status, Integration::Scene &scene, bool renderToFbo, Rect< int > &clippingRect)",
+          "signature": "void RenderScene(RenderStatus &status, Integration::Scene &scene, bool renderToFbo, BoundsInteger &clippingRect)",
           "params": [
             {
               "type": "RenderStatus &",
@@ -8226,7 +8382,7 @@
               "description": "True to render off-screen frame buffers only if any, and False to render the surface only."
             },
             {
-              "type": "Rect< int > &",
+              "type": "BoundsInteger &",
               "name": "clippingRect",
               "description": "The rect to clip rendered scene."
             }
@@ -9522,6 +9678,66 @@
       ]
     },
     {
+      "name": "Dali::DefaultDeleter",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/unique-ptr.h",
+      "api_tier": "public-api",
+      "brief": "Default deleter for UniquePtr.",
+      "detailed": "Uses operator delete to free the managed object. Being an empty class, it qualifies for Empty Base Optimization (EBO) so that UniquePtr<T> (with the default deleter) does not waste memory storing the deleter.",
+      "members": [
+        {
+          "name": "DefaultDeleter",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Default constructor.",
+          "detailed": "",
+          "since": "2.5.19.",
+          "type": "",
+          "signature": "DefaultDeleter()=default"
+        },
+        {
+          "name": "DefaultDeleter",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Converting constructor.",
+          "detailed": "Allows construction of DefaultDeleter<Base> from DefaultDeleter<Derived>, enabling UniquePtr<Derived> to be converted to UniquePtr<Base>.",
+          "since": "2.5.19",
+          "type": "",
+          "signature": "DefaultDeleter(const DefaultDeleter< U > &, typename EnableIf< IsConvertible< U *, Type * >::value >::type *=nullptr)",
+          "params": [
+            {
+              "type": "const DefaultDeleter< U > &",
+              "name": "",
+              "description": ""
+            },
+            {
+              "type": "typename EnableIf< IsConvertible< U *, Type * >::value >::type *",
+              "name": "",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator()",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Deletes the managed object.",
+          "detailed": "",
+          "since": "2.5.19.",
+          "type": "void",
+          "signature": "void operator()(Type *ptr) const",
+          "params": [
+            {
+              "type": "Type *",
+              "name": "ptr",
+              "description": "Pointer to the object to delete"
+            }
+          ]
+        }
+      ],
+      "since": "2.5.19"
+    },
+    {
       "name": "Dali::Degree",
       "kind": "struct",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/degree.h",
@@ -10254,7 +10470,7 @@
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/devel-api/common/bitwise-enum.h",
       "api_tier": "devel-api",
       "brief": "",
-      "detailed": "Type traits and methods to enable type safe bit field operators for an enum. usage: template<> struct EnableBitMaskOperators< MyEnumType > { static const bool ENABLE = true; }; after this one can set bitfields with | and |=, like MyEnumType value = FLAG1 | FLAG2; and test them with &, like: if( myFlag & FLAG2 ) // do something",
+      "detailed": "Type traits and methods to enable type safe bit field operators for an enum. usage: template<> struct EnableBitMaskOperators< MyEnumType > { static const bool ENABLE = true; }; after this one can set bitfields with | and |=, like MyEnumType value = FLAG1 | FLAG2;, clear them with &~ and &= ~, MyEnumType value &= ~FLAG1; and test them with &, like: if( myFlag & FLAG2 ) // do something",
       "members": [
         {
           "name": "ENABLE",
@@ -10269,6 +10485,23 @@
       "name": "Dali::EnableBitMaskOperators< Integration::CorePolicyFlags >",
       "kind": "struct",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/core-enumerations.h",
+      "api_tier": "integration-api",
+      "brief": "",
+      "detailed": "",
+      "members": [
+        {
+          "name": "ENABLE",
+          "kind": "variable",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": ""
+        }
+      ]
+    },
+    {
+      "name": "Dali::EnableBitMaskOperators< ScenePolicyFlagBits >",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/scene.h",
       "api_tier": "integration-api",
       "brief": "",
       "detailed": "",
@@ -10310,6 +10543,114 @@
         }
       ],
       "since": "2.5.11"
+    },
+    {
+      "name": "Dali::EnableSharedFromThis",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/shared-ptr.h",
+      "api_tier": "public-api",
+      "brief": "Base class that enables shared_from_this for Dali::SharedPtr.",
+      "detailed": "Derive from this class to be able to call SharedFromThis() on objects managed by Dali::SharedPtr.",
+      "members": [
+        {
+          "name": "SharedFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get a SharedPtr that shares ownership with existing SharedPtrs.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "notes": [
+            "This method will return an empty SharedPtr if the object is not managed by a SharedPtr (i.e., not created via MakeShared or similar)"
+          ],
+          "type": "SharedPtr< Type >",
+          "signature": "SharedPtr< Type > SharedFromThis()",
+          "returns": "A SharedPtr that manages the same object"
+        },
+        {
+          "name": "SharedFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get a const SharedPtr that shares ownership with existing SharedPtrs.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "SharedPtr< const Type >",
+          "signature": "SharedPtr< const Type > SharedFromThis() const",
+          "returns": "A const SharedPtr that manages the same object"
+        },
+        {
+          "name": "WeakFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get a WeakPtr to this object.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "WeakPtr< Type >",
+          "signature": "WeakPtr< Type > WeakFromThis()",
+          "returns": "A WeakPtr that references this object"
+        },
+        {
+          "name": "WeakFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get a const WeakPtr to this object.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "WeakPtr< const Type >",
+          "signature": "WeakPtr< const Type > WeakFromThis() const",
+          "returns": "A const WeakPtr that references this object"
+        },
+        {
+          "name": "EnableSharedFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "EnableSharedFromThis()=default"
+        },
+        {
+          "name": "EnableSharedFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "EnableSharedFromThis(const EnableSharedFromThis &)",
+          "params": [
+            {
+              "type": "const EnableSharedFromThis &",
+              "name": "",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "EnableSharedFromThis &",
+          "signature": "EnableSharedFromThis & operator=(const EnableSharedFromThis &)",
+          "params": [
+            {
+              "type": "const EnableSharedFromThis &",
+              "name": "",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "~EnableSharedFromThis",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "~EnableSharedFromThis()=default"
+        }
+      ],
+      "since": "2.5.22"
     },
     {
       "name": "Dali::AddOns::DispatchTable::Entry",
@@ -10389,6 +10730,38 @@
           "detailed": ""
         }
       ]
+    },
+    {
+      "name": "Dali::ManagedOpenHashMap::Entry",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "A single entry in the hash table.",
+      "detailed": "",
+      "members": [
+        {
+          "name": "key",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "value",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "state",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        }
+      ],
+      "since": "2.5.20."
     },
     {
       "name": "Dali::Epsilon",
@@ -12080,8 +12453,8 @@
           "brief": "Adds a VertexBuffer to be used as source of geometry vertices.",
           "detailed": "",
           "since": "1.9.27",
-          "type": "std::size_t",
-          "signature": "std::size_t AddVertexBuffer(VertexBuffer &vertexBuffer)",
+          "type": "uint32_t",
+          "signature": "uint32_t AddVertexBuffer(VertexBuffer &vertexBuffer)",
           "returns": "Index of the newly added buffer, can be used with RemoveVertexBuffer to remove this buffer if no longer required",
           "params": [
             {
@@ -12098,8 +12471,8 @@
           "brief": "Retrieves the number of vertex buffers that have been added to this geometry.",
           "detailed": "",
           "since": "1.9.27",
-          "type": "std::size_t",
-          "signature": "std::size_t GetNumberOfVertexBuffers() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetNumberOfVertexBuffers() const",
           "returns": "Number of vertex buffers that have been added to this geometry"
         },
         {
@@ -12110,10 +12483,10 @@
           "detailed": "",
           "since": "1.9.27",
           "type": "void",
-          "signature": "void RemoveVertexBuffer(std::size_t index)",
+          "signature": "void RemoveVertexBuffer(uint32_t index)",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "Index to the vertex buffer to remove"
             }
@@ -12127,7 +12500,7 @@
           "detailed": "",
           "since": "1.1.43",
           "type": "void",
-          "signature": "void SetIndexBuffer(const uint16_t *indices, size_t count)",
+          "signature": "void SetIndexBuffer(const uint16_t *indices, uint32_t count)",
           "params": [
             {
               "type": "const uint16_t *",
@@ -12135,7 +12508,7 @@
               "description": "Array of indices"
             },
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "count",
               "description": "Number of indices in the array"
             }
@@ -12149,7 +12522,7 @@
           "detailed": "",
           "since": "2.2.16",
           "type": "void",
-          "signature": "void SetIndexBuffer(const uint32_t *indices, size_t count)",
+          "signature": "void SetIndexBuffer(const uint32_t *indices, uint32_t count)",
           "params": [
             {
               "type": "const uint32_t *",
@@ -12157,7 +12530,7 @@
               "description": "Array of indices with uint32_t elements."
             },
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "count",
               "description": "Number of indices in the array"
             }
@@ -12537,8 +12910,8 @@
           "brief": "Returns the number of actors attached to the gesture detector.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "size_t",
-          "signature": "size_t GetAttachedActorCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetAttachedActorCount() const",
           "returns": "The count"
         },
         {
@@ -12549,11 +12922,11 @@
           "detailed": "",
           "since": "1.0.0",
           "type": "Actor",
-          "signature": "Actor GetAttachedActor(size_t index) const",
+          "signature": "Actor GetAttachedActor(uint32_t index) const",
           "returns": "The attached actor or an empty handle",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The attached actor's index"
             }
@@ -12566,7 +12939,7 @@
           "brief": "The gesture is recognized by sending a Touch event to the actor.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool HandleEvent(Dali::Actor &actor, Dali::TouchEvent &touch)",
+          "signature": "bool HandleEvent(Dali::Actor &actor, const Dali::TouchEvent &touch)",
           "returns": "If true , the gesture is being recognized.",
           "params": [
             {
@@ -12575,7 +12948,7 @@
               "description": "The actor receiving touch events"
             },
             {
-              "type": "Dali::TouchEvent &",
+              "type": "const Dali::TouchEvent &",
               "name": "touch",
               "description": "The thouch event"
             }
@@ -19662,7 +20035,7 @@
           "api_tier": "public-api",
           "brief": "PropertySetSignal function prototype for signal handler. Called when a property is set on this object.",
           "detailed": "",
-          "aliased_type": "Signal< void(Handle &handle, Property::Index index, const Property::Value &value)>"
+          "aliased_type": "Signal< void(Handle handle, Property::Index index, const Property::Value &value)>"
         },
         {
           "name": "Handle",
@@ -20746,8 +21119,8 @@
           "brief": "Returns the total number of points in this hover event.",
           "detailed": "",
           "since": "1.9.25",
-          "type": "std::size_t",
-          "signature": "std::size_t GetPointCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetPointCount() const",
           "returns": "Total number of Points"
         },
         {
@@ -20761,11 +21134,11 @@
             "If point is greater than GetPointCount() then this method will return -1."
           ],
           "type": "int32_t",
-          "signature": "int32_t GetDeviceId(std::size_t point) const",
+          "signature": "int32_t GetDeviceId(uint32_t point) const",
           "returns": "The Device ID of this point",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20782,11 +21155,11 @@
             "If point is greater than GetPointCount() then this method will return PointState::FINISHED. If you set Actor::Property::LEAVE_REQUIRED to true, when the hover event enters the actor, it will receive STARTED state. an actor that received a hover PointState::MOTION event will receive PointState::INTERRUPTED event when Actor::Property::SENSITIVE is changed to false. However, an actor that received a hover PointState::STARTED event will not receive any event when Actor::Property::SENSITIVE is changed to false."
           ],
           "type": "PointState::Type",
-          "signature": "PointState::Type GetState(std::size_t point) const",
+          "signature": "PointState::Type GetState(uint32_t point) const",
           "returns": "The state of the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20803,11 +21176,11 @@
             "If point is greater than GetPointCount() then this method will return an empty handle."
           ],
           "type": "Actor",
-          "signature": "Actor GetHitActor(std::size_t point) const",
+          "signature": "Actor GetHitActor(uint32_t point) const",
           "returns": "The actor that was underneath the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20826,11 +21199,11 @@
             "If point is greater than GetPointCount() then this method will return Vector2::ZERO."
           ],
           "type": "const Vector2 &",
-          "signature": "const Vector2 & GetLocalPosition(std::size_t point) const",
+          "signature": "const Vector2 & GetLocalPosition(uint32_t point) const",
           "returns": "The co-ordinates relative to the top-left of the hit-actor of the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20847,11 +21220,11 @@
             "If point is greater than GetPointCount() then this method will return Vector2::ZERO."
           ],
           "type": "const Vector2 &",
-          "signature": "const Vector2 & GetScreenPosition(std::size_t point) const",
+          "signature": "const Vector2 & GetScreenPosition(uint32_t point) const",
           "returns": "The co-ordinates relative to the top-left of the screen of the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20865,11 +21238,11 @@
           "detailed": "The device class type is classification type of the input device of event received.",
           "since": "2.4.31",
           "type": "Device::Class::Type",
-          "signature": "Device::Class::Type GetDeviceClass(std::size_t point) const",
+          "signature": "Device::Class::Type GetDeviceClass(uint32_t point) const",
           "returns": "The type of the device class",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20883,11 +21256,11 @@
           "detailed": "The device subclass type is subclassification type of the input device of event received.",
           "since": "2.4.31",
           "type": "Device::Subclass::Type",
-          "signature": "Device::Subclass::Type GetDeviceSubclass(std::size_t point) const",
+          "signature": "Device::Subclass::Type GetDeviceSubclass(uint32_t point) const",
           "returns": "The type of the device subclass",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -20901,11 +21274,11 @@
           "detailed": "",
           "since": "2.4.34",
           "type": "const Dali::String &",
-          "signature": "const Dali::String & GetDeviceName(std::size_t point) const",
+          "signature": "const Dali::String & GetDeviceName(uint32_t point) const",
           "returns": "The device name string",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": ""
             }
@@ -23201,6 +23574,159 @@
       ]
     },
     {
+      "name": "Dali::IsNothrowCopyAssignable",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/type-traits.h",
+      "api_tier": "public-api",
+      "brief": "Type trait to check if a type is nothrow-copy-assignable.",
+      "detailed": "Equivalent to std::is_nothrow_copy_assignable. Uses the noexcept operator to detect whether Type's copy-assignment operator is noexcept. The tested expression lvalue = const_lvalue mirrors exactly what a copy-assignment call looks like at the call site. This is the copy counterpart of IsNothrowMoveAssignable: Use IsNothrowCopyAssignable when the operation being guarded copies from a const lvalue source (e.g. rehashing an existing table into a new one). Use IsNothrowMoveAssignable when the operation moves from an rvalue source. Example usage: IsNothrowCopyAssignable<int>::value;//true IsNothrowCopyAssignable<MyClass>::value;//trueonlyifMyClass::operator=(constMyClass&)isnoexcept",
+      "members": [],
+      "since": "2.5.20",
+      "base_classes": [
+        "Dali::IntegralConstant< noexcept(Detail::Declval< Type & >()=Detail::Declval< const Type & >())>"
+      ]
+    },
+    {
+      "name": "Dali::IsNothrowMoveAssignable",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/type-traits.h",
+      "api_tier": "public-api",
+      "brief": "Type trait to check if a type is nothrow-move-assignable.",
+      "detailed": "Equivalent to std::is_nothrow_move_assignable. Uses the noexcept operator to detect whether Type's move-assignment operator is noexcept. The tested expression lvalue = rvalue mirrors exactly what a move-assignment operator call looks like at the call site, so the noexcept deduction is precise. This is distinct from IsNothrowMoveConstructible: a type may have a noexcept move constructor but a potentially-throwing move-assignment operator (e.g. one that frees heap memory before acquiring the new resource). The two traits must therefore be used in the appropriate context: Use IsNothrowMoveConstructible for move-constructor noexcept specs. Use IsNothrowMoveAssignable for move-assignment operator noexcept specs. Example usage: IsNothrowMoveAssignable<int>::value;//true IsNothrowMoveAssignable<MyClass>::value;//trueonlyifMyClass::operator=(MyClass&&)isnoexcept",
+      "members": [],
+      "since": "2.5.20",
+      "base_classes": [
+        "Dali::IntegralConstant< noexcept(Detail::Declval< Type & >()=Detail::Declval< Type && >())>"
+      ]
+    },
+    {
+      "name": "Dali::IsNothrowMoveConstructible",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/type-traits.h",
+      "api_tier": "public-api",
+      "brief": "Type trait to check if a type is nothrow-move-constructible.",
+      "detailed": "Equivalent to std::is_nothrow_move_constructible. Uses the noexcept operator to detect whether Type's move constructor is noexcept. Example usage: IsNothrowMoveConstructible<int>::value;//true",
+      "members": [],
+      "since": "2.5.20",
+      "base_classes": [
+        "Dali::IntegralConstant< noexcept(Type(Detail::Declval< Type && >()))>"
+      ]
+    },
+    {
+      "name": "Dali::ManagedOpenHashMap::Iterator",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "Forward iterator over live entries.",
+      "detailed": "operator*() — returns KeyValuePair& (stable lvalue, satisfies InputIterator) operator->() — returns KeyValuePair* (pointer to the same stable object) Usage: for(autoit=map.begin();it!=map.end();++it) { DoSomething(it->key(),it->value());//viaoperator-> DoSomething((*it).key(),(*it).value());//viaoperator* } //Range-for: for(auto&kv:map) { DoSomething(kv.key(),kv.value()); }",
+      "members": [
+        {
+          "name": "Iterator",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "Iterator(Entry *entries, uint32_t capacity, uint32_t index)",
+          "params": [
+            {
+              "type": "Entry *",
+              "name": "entries",
+              "description": ""
+            },
+            {
+              "type": "uint32_t",
+              "name": "capacity",
+              "description": ""
+            },
+            {
+              "type": "uint32_t",
+              "name": "index",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator*",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "KeyValuePair &",
+          "signature": "KeyValuePair & operator*()"
+        },
+        {
+          "name": "operator*",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const KeyValuePair &",
+          "signature": "const KeyValuePair & operator*() const"
+        },
+        {
+          "name": "operator->",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "KeyValuePair *",
+          "signature": "KeyValuePair * operator->()"
+        },
+        {
+          "name": "operator->",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const KeyValuePair *",
+          "signature": "const KeyValuePair * operator->() const"
+        },
+        {
+          "name": "operator++",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "Iterator &",
+          "signature": "Iterator & operator++()"
+        },
+        {
+          "name": "operator!=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator!=(const Iterator &rhs) const",
+          "params": [
+            {
+              "type": "const Iterator &",
+              "name": "rhs",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator==",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator==(const Iterator &rhs) const",
+          "params": [
+            {
+              "type": "const Iterator &",
+              "name": "rhs",
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "since": "2.5.20"
+    },
+    {
       "name": "Dali::Integration::KeyEvent",
       "kind": "struct",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/events/key-event-integ.h",
@@ -23939,6 +24465,49 @@
       "base_classes": [
         "Dali::BaseHandle"
       ]
+    },
+    {
+      "name": "Dali::ManagedOpenHashMap::KeyValuePair",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "Value type exposed by Iterator.",
+      "detailed": "Provides stable references to the key (const) and value (mutable) of a live entry. The key is exposed as const to match std::unordered_map semantics, which prohibits mutating a key through an iterator. Supports: it->key() / it->value() — via operator-> on Iterator (it).key() / (*it).value() — via operator on Iterator kv.key() / kv.value() — via range-for: for(auto& kv : map)",
+      "members": [
+        {
+          "name": "keyPtr",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "valuePtr",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "key",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const Key &",
+          "signature": "const Key & key() const"
+        },
+        {
+          "name": "value",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "Value &",
+          "signature": "Value & value() const"
+        }
+      ],
+      "since": "2.5.20"
     },
     {
       "name": "Dali::Layer",
@@ -24746,7 +25315,7 @@
           "brief": "Gesture detected signal type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Actor, const LongPressGesture &)>"
+          "aliased_type": "Signal< void(Actor, LongPressGesture)>"
         },
         {
           "name": "LongPressGestureDetector",
@@ -24910,13 +25479,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when the specified long press is detected on the attached actor.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,constLongPressGesture&gesture);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,LongPressGesturegesture);",
           "since": "1.0.0",
           "type": "DetectedSignalType &",
           "signature": "DetectedSignalType & DetectedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(Actoractor,constLongPressGesture&gesture);"
+            "voidYourCallbackName(Actoractor,LongPressGesturegesture);"
           ]
         },
         {
@@ -24993,6 +25562,578 @@
       "since": "1.0.0.",
       "base_classes": [
         "Dali::GestureDetector"
+      ]
+    },
+    {
+      "name": "Dali::ManagedOpenHashMap",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "A managed open-addressed hash map with linear probing.",
+      "detailed": "Unlike OpenHashMap (which requires trivially-copyable/destructible types and uses calloc/memset for zero-overhead operation), ManagedOpenHashMap properly manages the lifecycle of its keys and values via constructors, destructors, and move semantics. This allows it to work with non-trivial types such as Dali::String. Uses a single contiguous allocation (new Entry[]) for the entry table. Power-of-2 capacity, grows at 75% load. Deletion uses tombstones. Entry state is tracked via an explicit EntryState enum per slot. Key requirements: Must be default-constructible (required by Entry struct and new Entry[n]() in RehashTo/Grow). Must be copyable and/or movable. Must support comparison via KeyEqual. Value requirements: Must be default-constructible (required by Entry struct and new Entry[n]() in RehashTo/Grow). Must be copyable and/or movable. Note: the default-constructibility requirement exists because Entry holds Key and Value as plain members with default-initialisation (key{}, value{}), and RehashTo allocates new tables with new Entry[n]() which value-initialises every slot. Removing this constraint would require separating storage from construction (e.g. via placement new into raw memory), which is a more invasive change deferred for a future revision. Resource release policy: Erase() and Clear() do not reset key/value objects in the affected slots. Resources are released lazily: on slot reuse (Insert overwrites) or when the table is destroyed (delete[] destructs every Entry). To release resources eagerly after a Clear(), call Rehash() immediately afterwards — it frees the entire table buffer when size is zero. Exception safety: All operations provide at least the basic guarantee (no leaks, no dangling pointers). Rehash/Grow provides the strong guarantee: if it throws, the map is unchanged. Move constructor is noexcept conditional on Hash and KeyEqual being nothrow-move-constructible. Move assignment is noexcept conditional on Hash and KeyEqual being nothrow-move-assignable. RehashTo always copies (never moves) key/value into the new table. This unconditionally preserves the strong guarantee: if any copy throws, the old table is still fully intact and the new (partial) table is discarded. The cost is that rehash is always O(n) copy work rather than O(n) move work, but correctness is not compromised even for types whose move-assignment can throw. IMPORTANT — differences from std::unordered_map: Pointer/iterator stability. std::unordered_map guarantees that pointers and references to values remain valid as long as the element is not erased. THIS MAP DOES NOT. Any Insert() that triggers a grow reallocates the entire Entry[] array. Every Value* or Entry* obtained from a previous Find(), Insert(), operator[], At(), or iterator dereference is INVALIDATED by any subsequent insert that grows the table. Do not cache pointers or references across inserts. Insert() always overwrites; std::unordered_map::insert() does not. In standard maps, insert({key, value}) is a no-op when the key already exists — only insert_or_assign() and operator[] overwrite. Here, Insert() always overwrites the existing value on collision. Use TryInsert() for insert-if-absent semantics that match std::unordered_map::insert(). No exception on missing key. std::unordered_map::at() throws std::out_of_range when the key is absent. At() in this map calls DALI_ASSERT_ALWAYS instead. operator[] inserts a default-constructed value for missing keys (same as std::unordered_map). API summary (std::unordered_map equivalents): map[key] -> operator[] (insert-or-get, overwrites) map.at(key) -> At() (assert on miss, no insert) map.insert({key, value}) -> TryInsert() (insert-if-absent only) map.insert_or_assign(k, v) -> Insert() (always overwrites) map.find(key) -> Find() (returns Value* or nullptr) map.contains(key) -> Contains() map.count(key) -> Count() map.erase(key) -> Erase() map.clear() -> Clear() for(auto& kv : map) -> range-for via begin()/end(), use kv.key()/kv.value()",
+      "members": [
+        {
+          "name": "InsertResult",
+          "kind": "typedef",
+          "api_tier": "public-api",
+          "brief": "Result type returned by TryInsert.",
+          "detailed": "Equivalent to the std::pair<iterator, bool> returned by std::unordered_map::insert: first : pointer to the value for the key (never null) second : true if a new entry was inserted, false if the key already existed Uses Dali::Pair so callers get the full Dali::Pair interface (comparison operators, Swap, MakePair) and the familiar first/second field names without depending on any bespoke type.",
+          "since": "2.5.20",
+          "aliased_type": "Dali::Pair< Value *, bool >"
+        },
+        {
+          "name": "ManagedOpenHashMap",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Default constructor.",
+          "detailed": "Creates an empty map with no allocated table (capacity 0). The table is allocated on the first Insert.",
+          "since": "2.5.20",
+          "type": "",
+          "signature": "ManagedOpenHashMap()=default"
+        },
+        {
+          "name": "~ManagedOpenHashMap",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Destructor.",
+          "detailed": "Destroys all live key-value pairs and frees the entry table.",
+          "since": "2.5.20",
+          "type": "",
+          "signature": "~ManagedOpenHashMap()"
+        },
+        {
+          "name": "ManagedOpenHashMap",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy constructor is deleted.",
+          "detailed": "ManagedOpenHashMap is not copyable because copying a hash map with non-trivial key/value types is expensive and easily done unintentionally. Use move semantics or manually copy entries via ForEach() + Insert().",
+          "since": "2.5.20",
+          "type": "",
+          "signature": "ManagedOpenHashMap(const ManagedOpenHashMap &)=delete",
+          "params": [
+            {
+              "type": "const ManagedOpenHashMap &",
+              "name": "",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy assignment operator is deleted.",
+          "detailed": "ManagedOpenHashMap is not copy-assignable for the same reason as the copy constructor.",
+          "since": "2.5.20",
+          "type": "ManagedOpenHashMap &",
+          "signature": "ManagedOpenHashMap & operator=(const ManagedOpenHashMap &)=delete",
+          "params": [
+            {
+              "type": "const ManagedOpenHashMap &",
+              "name": "",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "ManagedOpenHashMap",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move constructor.",
+          "detailed": "Transfers ownership of the entry table from rhs to this map. After the move, rhs is in a valid empty state (size 0, capacity 0). noexcept is conditional on Hash and KeyEqual being nothrow-move-constructible. If either functor's move constructor can throw, std::terminate would be called.",
+          "type": "",
+          "signature": "ManagedOpenHashMap(ManagedOpenHashMap &&rhs) noexcept(IsNothrowMoveConstructible< Hash >::value &&IsNothrowMoveConstructible< KeyEqual >::value)",
+          "params": [
+            {
+              "type": "ManagedOpenHashMap &&",
+              "name": "rhs",
+              "description": "The map to move from @SINCE_2_5.20"
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move assignment operator.",
+          "detailed": "Frees this map's current entry table, then transfers ownership of the entry table from rhs. After the move, rhs is in a valid empty state (size 0, capacity 0). noexcept is conditional on Hash and KeyEqual being nothrow-move-assignable.",
+          "type": "ManagedOpenHashMap &",
+          "signature": "ManagedOpenHashMap & operator=(ManagedOpenHashMap &&rhs) noexcept(IsNothrowMoveAssignable< Hash >::value &&IsNothrowMoveAssignable< KeyEqual >::value)",
+          "returns": "Reference to this map @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "ManagedOpenHashMap &&",
+              "name": "rhs",
+              "description": "The map to move from"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert or update a key-value pair (copy both).",
+          "detailed": "WARNING: Unlike std::unordered_map::insert(), this always overwrites an existing value when the key is already present. Use TryInsert() for insert-if-absent semantics. WARNING: Any pointer or iterator obtained before this call may be invalidated if the insert triggers a table grow.",
+          "type": "Value *",
+          "signature": "Value * Insert(const Key &key, const Value &value)",
+          "returns": "Pointer to the inserted/updated entry's value @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to insert"
+            },
+            {
+              "type": "const Value &",
+              "name": "value",
+              "description": "The value to associate"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert or update a key-value pair (move both).",
+          "detailed": "WARNING: Unlike std::unordered_map::insert(), this always overwrites an existing value when the key is already present. Use TryInsert() for insert-if-absent semantics. WARNING: Any pointer or iterator obtained before this call may be invalidated if the insert triggers a table grow.",
+          "type": "Value *",
+          "signature": "Value * Insert(Key &&key, Value &&value)",
+          "returns": "Pointer to the inserted/updated entry's value @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "Key &&",
+              "name": "key",
+              "description": "The key to insert (rvalue reference)"
+            },
+            {
+              "type": "Value &&",
+              "name": "value",
+              "description": "The value to associate (rvalue reference)"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert or update a key-value pair (move key, copy value).",
+          "detailed": "WARNING: Unlike std::unordered_map::insert(), this always overwrites an existing value when the key is already present. Use TryInsert() for insert-if-absent semantics. WARNING: Any pointer or iterator obtained before this call may be invalidated if the insert triggers a table grow.",
+          "type": "Value *",
+          "signature": "Value * Insert(Key &&key, const Value &value)",
+          "returns": "Pointer to the inserted/updated entry's value @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "Key &&",
+              "name": "key",
+              "description": "The key to insert (rvalue reference)"
+            },
+            {
+              "type": "const Value &",
+              "name": "value",
+              "description": "The value to associate"
+            }
+          ]
+        },
+        {
+          "name": "Insert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert or update a key-value pair (copy key, move value).",
+          "detailed": "WARNING: Unlike std::unordered_map::insert(), this always overwrites an existing value when the key is already present. Use TryInsert() for insert-if-absent semantics. WARNING: Any pointer or iterator obtained before this call may be invalidated if the insert triggers a table grow.",
+          "type": "Value *",
+          "signature": "Value * Insert(const Key &key, Value &&value)",
+          "returns": "Pointer to the inserted/updated entry's value @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to insert"
+            },
+            {
+              "type": "Value &&",
+              "name": "value",
+              "description": "The value to associate (rvalue reference)"
+            }
+          ]
+        },
+        {
+          "name": "operator[]",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Access or insert a value by key.",
+          "detailed": "If the key is present, returns a reference to the existing value unchanged. If the key is absent, inserts a default-constructed Value and returns a reference to it. This matches std::unordered_map::operator[] exactly. Implementation note: routes through TryInsertImpl (not InsertImpl) so that an existing value is never overwritten by a default-constructed Value{}. Using InsertImpl here would silently reset an existing value to Value{} on every operator[] access for a key that is already present. WARNING: Any reference obtained before this call may be invalidated if the call triggers a table grow.",
+          "type": "Value &",
+          "signature": "Value & operator[](const Key &key)",
+          "returns": "Reference to the value associated with key @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to look up or insert"
+            }
+          ]
+        },
+        {
+          "name": "At",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Access a value by key with an assertion on miss (non-const).",
+          "detailed": "Equivalent to std::unordered_map::at() but calls DALI_ASSERT_ALWAYS instead of throwing std::out_of_range when the key is absent. Does NOT insert a default value for missing keys (unlike operator[]).",
+          "type": "Value &",
+          "signature": "Value & At(const Key &key)",
+          "returns": "Reference to the value associated with key @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to look up"
+            }
+          ]
+        },
+        {
+          "name": "At",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Access a value by key with an assertion on miss (const).",
+          "detailed": "Equivalent to std::unordered_map::at() const but calls DALI_ASSERT_ALWAYS instead of throwing std::out_of_range when the key is absent.",
+          "type": "const Value &",
+          "signature": "const Value & At(const Key &key) const",
+          "returns": "Const reference to the value associated with key @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to look up"
+            }
+          ]
+        },
+        {
+          "name": "TryInsert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert a key-value pair only if the key is absent (copy both).",
+          "detailed": "Equivalent to std::unordered_map::insert(). Unlike Insert(), this never overwrites an existing value. If the key is already present, the existing value is left unchanged. WARNING: Any pointer or iterator obtained before this call may be invalidated if the insert triggers a table grow.",
+          "type": "InsertResult",
+          "signature": "InsertResult TryInsert(const Key &key, const Value &value)",
+          "returns": "InsertResult::first — pointer to the value (existing or newly inserted) InsertResult::second — true if inserted, false if key already existed @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to insert"
+            },
+            {
+              "type": "const Value &",
+              "name": "value",
+              "description": "The value to associate"
+            }
+          ]
+        },
+        {
+          "name": "TryInsert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert a key-value pair only if the key is absent (move both).",
+          "detailed": "",
+          "type": "InsertResult",
+          "signature": "InsertResult TryInsert(Key &&key, Value &&value)",
+          "returns": "InsertResult @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "Key &&",
+              "name": "key",
+              "description": "The key to insert (rvalue reference)"
+            },
+            {
+              "type": "Value &&",
+              "name": "value",
+              "description": "The value to associate (rvalue reference)"
+            }
+          ]
+        },
+        {
+          "name": "TryInsert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert a key-value pair only if the key is absent (move key, copy value).",
+          "detailed": "",
+          "type": "InsertResult",
+          "signature": "InsertResult TryInsert(Key &&key, const Value &value)",
+          "returns": "InsertResult @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "Key &&",
+              "name": "key",
+              "description": "The key to insert (rvalue reference)"
+            },
+            {
+              "type": "const Value &",
+              "name": "value",
+              "description": "The value to associate"
+            }
+          ]
+        },
+        {
+          "name": "TryInsert",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Insert a key-value pair only if the key is absent (copy key, move value).",
+          "detailed": "",
+          "type": "InsertResult",
+          "signature": "InsertResult TryInsert(const Key &key, Value &&value)",
+          "returns": "InsertResult @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to insert"
+            },
+            {
+              "type": "Value &&",
+              "name": "value",
+              "description": "The value to associate (rvalue reference)"
+            }
+          ]
+        },
+        {
+          "name": "Find",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Find a value by key.",
+          "detailed": "",
+          "type": "Value *",
+          "signature": "Value * Find(const Key &key)",
+          "returns": "Pointer to the value, or nullptr if not found @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to look up"
+            }
+          ]
+        },
+        {
+          "name": "Find",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Find a value by key (const).",
+          "detailed": "",
+          "type": "const Value *",
+          "signature": "const Value * Find(const Key &key) const",
+          "returns": "Pointer to the value, or nullptr if not found @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to look up"
+            }
+          ]
+        },
+        {
+          "name": "Erase",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Erase an entry by key.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool Erase(const Key &key)",
+          "returns": "true if the key was found and erased, false otherwise @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to erase"
+            }
+          ]
+        },
+        {
+          "name": "Clear",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Mark all entries as empty.",
+          "detailed": "Every slot (OCCUPIED or TOMBSTONE) is reset to EMPTY and the size counters are zeroed. The table buffer itself is retained for reuse. Key and Value objects in formerly-occupied slots are left in their current state: they will be overwritten when the slot is reused by a subsequent Insert, or destroyed when the table is freed. If you need resources released immediately rather than lazily, follow this call with Rehash(), which frees the entire table when size is zero: map.Clear(); map.Rehash();//releasesthetablebufferandallKey/Valuestorageimmediately",
+          "since": "2.5.20",
+          "type": "void",
+          "signature": "void Clear()",
+          "code_examples": [
+            "map.Clear();\nmap.Rehash();//releasesthetablebufferandallKey/Valuestorageimmediately"
+          ]
+        },
+        {
+          "name": "ForEach",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Call a functor for each live entry.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void ForEach(Functor &&functor)",
+          "params": [
+            {
+              "type": "Functor &&",
+              "name": "functor",
+              "description": "Called with (const Key& key, Value& value) for each entry @SINCE_2_5.20"
+            }
+          ]
+        },
+        {
+          "name": "ForEach",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Call a functor for each live entry (const version).",
+          "detailed": "",
+          "type": "void",
+          "signature": "void ForEach(Functor &&functor) const",
+          "params": [
+            {
+              "type": "Functor &&",
+              "name": "functor",
+              "description": "Called with (const Key& key, const Value& value) for each entry @SINCE_2_5.20"
+            }
+          ]
+        },
+        {
+          "name": "Size",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "uint32_t",
+          "signature": "uint32_t Size() const",
+          "returns": "Number of live entries. @SINCE_2_5.20"
+        },
+        {
+          "name": "Empty",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool Empty() const",
+          "returns": "true if there are no live entries. @SINCE_2_5.20"
+        },
+        {
+          "name": "Capacity",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "uint32_t",
+          "signature": "uint32_t Capacity() const",
+          "returns": "Current table capacity (always a power of 2, or 0). @SINCE_2_5.20"
+        },
+        {
+          "name": "Contains",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Test whether a key exists in the map.",
+          "detailed": "Equivalent to std::unordered_map::contains() (C++20).",
+          "type": "bool",
+          "signature": "bool Contains(const Key &key) const",
+          "returns": "true if the key is present, false otherwise @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to test"
+            }
+          ]
+        },
+        {
+          "name": "Count",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return the number of entries with the given key (0 or 1).",
+          "detailed": "Equivalent to std::unordered_map::count(). Since this is a map (not a multimap), the return value is always 0 or 1.",
+          "type": "uint32_t",
+          "signature": "uint32_t Count(const Key &key) const",
+          "returns": "1 if the key is present, 0 otherwise @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const Key &",
+              "name": "key",
+              "description": "The key to count"
+            }
+          ]
+        },
+        {
+          "name": "begin",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return an iterator to the first live entry.",
+          "detailed": "Iteration order is unspecified (depends on hash distribution). The iterator is invalidated by any operation that may grow or rehash the table.",
+          "since": "2.5.20",
+          "type": "Iterator",
+          "signature": "Iterator begin()"
+        },
+        {
+          "name": "end",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return a past-the-end iterator.",
+          "detailed": "",
+          "since": "2.5.20.",
+          "type": "Iterator",
+          "signature": "Iterator end()"
+        },
+        {
+          "name": "begin",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return a const iterator to the first live entry.",
+          "detailed": "",
+          "since": "2.5.20.",
+          "type": "ConstIterator",
+          "signature": "ConstIterator begin() const"
+        },
+        {
+          "name": "end",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return a past-the-end const iterator.",
+          "detailed": "",
+          "since": "2.5.20.",
+          "type": "ConstIterator",
+          "signature": "ConstIterator end() const"
+        },
+        {
+          "name": "cbegin",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return a const iterator to the first live entry (explicit const).",
+          "detailed": "",
+          "since": "2.5.20.",
+          "type": "ConstIterator",
+          "signature": "ConstIterator cbegin() const"
+        },
+        {
+          "name": "cend",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Return a past-the-end const iterator (explicit const).",
+          "detailed": "",
+          "since": "2.5.20.",
+          "type": "ConstIterator",
+          "signature": "ConstIterator cend() const"
+        },
+        {
+          "name": "Rehash",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Resize the table to the smallest power-of-2 capacity that keeps load under 75%, clearing all tombstones in the process.",
+          "detailed": "If the input capacity is bigger than zero, the table will be resized to at least that capacity (rounded up to the next power of 2). If the map is empty and targetCapacity is 0, the table is freed entirely (capacity becomes 0). This releases all Key/Value storage immediately via delete[], which is the recommended way to eagerly release resources after Clear(): map.Clear(); map.Rehash();//freesthetablebuffer,destructingallKey/Valueobjects If the current capacity is already optimal, this is a no-op (unless there are tombstones, in which case an in-place rehash clears them). Provides the strong exception guarantee: if RehashTo throws during the copy, the map is left unchanged. WARNING: Invalidates all pointers, references, and iterators obtained before this call.",
+          "type": "void",
+          "signature": "void Rehash(uint32_t targetCapacity=0u)",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "targetCapacity",
+              "description": "Minimum desired capacity (0 to shrink to fit). @SINCE_2_5.20"
+            }
+          ],
+          "code_examples": [
+            "map.Clear();\nmap.Rehash();//freesthetablebuffer,destructingallKey/Valueobjects"
+          ]
+        }
       ]
     },
     {
@@ -26996,6 +28137,15 @@
           "signature": "void Clear()"
         },
         {
+          "name": "Release",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Remove all entries and release relative memory too.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void Release()"
+        },
+        {
           "name": "ForEach",
           "kind": "function",
           "api_tier": "integration-api",
@@ -27061,10 +28211,17 @@
           "name": "Rehash",
           "kind": "function",
           "api_tier": "integration-api",
-          "brief": "Shrink the table to the smallest power-of-2 capacity that keeps load under 75%, clearing all tombstones in the process.",
-          "detailed": "If the map is empty, the table is freed entirely (capacity becomes 0). If the current capacity is already optimal, this is a no-op.",
+          "brief": "Resize the table to the smallest power-of-2 capacity that keeps load under 75%, clearing all tombstones in the process.",
+          "detailed": "If the input capacity is bigger than zero, the table will be resized to at least that capacity (rounded up to the next power of 2). If the map is empty and targetCapacity is 0, the table is freed entirely (capacity becomes 0). If the current capacity is already optimal, this is a no-op.",
           "type": "void",
-          "signature": "void Rehash()"
+          "signature": "void Rehash(uint32_t targetCapacity=0u)",
+          "params": [
+            {
+              "type": "uint32_t",
+              "name": "targetCapacity",
+              "description": "Minimum desired capacity (0 to shrink to fit)."
+            }
+          ]
         }
       ]
     },
@@ -27134,7 +28291,7 @@
           "api_tier": "integration-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "typename std::unordered_map< const T *, Iterator, Hash, KeyEqual >"
+          "aliased_type": "typename Dali::Integration::OpenHashMap< const T *, Iterator, Hash, KeyEqual >"
         },
         {
           "name": "SizeType",
@@ -27142,7 +28299,7 @@
           "api_tier": "integration-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "std::size_t"
+          "aliased_type": "uint32_t"
         },
         {
           "name": "OrderedSet",
@@ -28352,7 +29509,7 @@
           "brief": "Pan gesture detected signal type",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Actor, const PanGesture &)>"
+          "aliased_type": "Signal< void(Actor, PanGesture)>"
         },
         {
           "name": "AngleThresholdPair",
@@ -28663,8 +29820,8 @@
           "brief": "Returns the count of angles that this pan gesture detector emits a signal.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "size_t",
-          "signature": "size_t GetAngleCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetAngleCount() const",
           "returns": "The count"
         },
         {
@@ -28675,11 +29832,11 @@
           "detailed": "",
           "since": "1.0.0",
           "type": "AngleThresholdPair",
-          "signature": "AngleThresholdPair GetAngle(size_t index) const",
+          "signature": "AngleThresholdPair GetAngle(uint32_t index) const",
           "returns": "An angle threshold pair, or a zero valued angle pair when index is invalid",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The angle's index"
             }
@@ -28741,13 +29898,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when the pan gesture is detected on the attached actor.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,constPanGesture&gesture);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,PanGesturegesture);",
           "since": "1.0.0",
           "type": "DetectedSignalType &",
           "signature": "DetectedSignalType & DetectedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(Actoractor,constPanGesture&gesture);"
+            "voidYourCallbackName(Actoractor,PanGesturegesture);"
           ]
         },
         {
@@ -29053,11 +30210,11 @@
           "detailed": "",
           "since": "1.0.0",
           "type": "Vector3 &",
-          "signature": "Vector3 & GetPoint(size_t index)",
+          "signature": "Vector3 & GetPoint(uint32_t index)",
           "returns": "A reference to the interpolation point",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The index of the interpolation point"
             }
@@ -29071,11 +30228,11 @@
           "detailed": "",
           "since": "1.0.0",
           "type": "Vector3 &",
-          "signature": "Vector3 & GetControlPoint(size_t index)",
+          "signature": "Vector3 & GetControlPoint(uint32_t index)",
           "returns": "A reference to the control point",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The index of the control point"
             }
@@ -29088,8 +30245,8 @@
           "brief": "Gets the number of interpolation points in the path.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "size_t",
-          "signature": "size_t GetPointCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetPointCount() const",
           "returns": "The number of interpolation points in the path"
         }
       ],
@@ -29415,7 +30572,7 @@
           "brief": "Signal type.",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Actor, const PinchGesture &)>"
+          "aliased_type": "Signal< void(Actor, PinchGesture)>"
         },
         {
           "name": "PinchGestureDetector",
@@ -29512,13 +30669,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when the pinch gesture is detected on the attached actor.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,constPinchGesture&gesture);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,PinchGesturegesture);",
           "since": "1.0.0",
           "type": "DetectedSignalType &",
           "signature": "DetectedSignalType & DetectedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(Actoractor,constPinchGesture&gesture);"
+            "voidYourCallbackName(Actoractor,PinchGesturegesture);"
           ]
         },
         {
@@ -31478,7 +32635,7 @@
           "api_tier": "public-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "std::size_t"
+          "aliased_type": "uint32_t"
         },
         {
           "name": "SizeType",
@@ -31486,7 +32643,7 @@
           "api_tier": "public-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "std::size_t"
+          "aliased_type": "uint32_t"
         },
         {
           "name": "Index",
@@ -34158,8 +35315,8 @@
           "brief": "Retrieves the arguments that this condition uses.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "std::size_t",
-          "signature": "std::size_t GetArgumentCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetArgumentCount() const",
           "returns": "The arguments used for this condition"
         },
         {
@@ -34173,11 +35330,11 @@
             "The container will only be valid as long PropertyCondition is valid."
           ],
           "type": "float",
-          "signature": "float GetArgument(std::size_t index) const",
+          "signature": "float GetArgument(uint32_t index) const",
           "returns": "The arguments used for this condition",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The condition index to get the argument"
             }
@@ -36115,6 +37272,40 @@
       "since": "1.0.0."
     },
     {
+      "name": "Dali::RefCountControlBlock",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/shared-ptr.h",
+      "api_tier": "public-api",
+      "brief": "Control block for reference counting.",
+      "detailed": "This structure holds both strong (shared) and weak reference counts. It is used internally by SharedPtr and WeakPtr.",
+      "members": [
+        {
+          "name": "strongCount",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "Number of SharedPtr references.",
+          "detailed": ""
+        },
+        {
+          "name": "weakCount",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "Number of WeakPtr references.",
+          "detailed": ""
+        },
+        {
+          "name": "RefCountControlBlock",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "RefCountControlBlock()"
+        }
+      ],
+      "since": "2.5.22"
+    },
+    {
       "name": "Dali::RefCountedVector",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/devel-api/common/ref-counted-dali-vector.h",
@@ -37397,13 +38588,63 @@
           ]
         },
         {
+          "name": "BuiltinCameraType",
+          "kind": "enum",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "enumvalues": [
+            {
+              "name": "ATTACHED_TO_SCENE",
+              "brief": "Builtin camera attached to scene."
+            },
+            {
+              "name": "ATTACHED_TO_SOURCE_ACTOR",
+              "brief": "Builtin camera attached to source actor."
+            },
+            {
+              "name": "ATTACHED_TO_STOPPER_ACTOR",
+              "brief": "Builtin camera attached to stopper actor, or source actor if stopper node not applied."
+            }
+          ]
+        },
+        {
+          "name": "CameraActorType",
+          "kind": "enum",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "enumvalues": [
+            {
+              "name": "DEFAULT",
+              "brief": "Default camera from RenderTaskList."
+            },
+            {
+              "name": "USER",
+              "brief": "CameraActor set by SetCameraActor."
+            },
+            {
+              "name": "BUILTIN_SCENE",
+              "brief": "CameraActor set by SetBuiltinCameraActor with BuiltinCameraType::ATTACHED_TO_SCENE."
+            },
+            {
+              "name": "BUILTIN_SOURCE_ACTOR",
+              "brief": "CameraActor set by SetBuiltinCameraActor with BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR."
+            },
+            {
+              "name": "BUILTIN_STOPPER_ACTOR",
+              "brief": "CameraActor set by SetBuiltinCameraActor with BuiltinCameraType::ATTACHED_TO_STOPPER_ACTOR."
+            }
+          ]
+        },
+        {
           "name": "RenderTaskSignalType",
           "kind": "typedef",
           "api_tier": "public-api",
           "brief": "Typedef for signals sent by this class.",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(RenderTask &)>"
+          "aliased_type": "Signal< void(RenderTask)>"
         },
         {
           "name": "ScreenToFrameBufferFunction",
@@ -37669,8 +38910,8 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "Sets the actor from which the scene is viewed.",
-          "detailed": "",
-          "since": "1.0.0.",
+          "detailed": "It will make CameraActorType::USER This is exclusive with SetBuiltinCameraActor - calling this will clear any built-in camera actor.",
+          "since": "1.0.0",
           "type": "void",
           "signature": "void SetCameraActor(CameraActor cameraActor)",
           "params": [
@@ -37678,6 +38919,33 @@
               "type": "CameraActor",
               "name": "cameraActor",
               "description": "The scene is viewed from the perspective of this actor"
+            }
+          ]
+        },
+        {
+          "name": "SetBuiltinCameraActor",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets an internal built-in camera actor.",
+          "detailed": "This method creates an internal camera actor, looks at the center of it's parent. The camera uses the provided size for perspective projection via SetPerspectiveProjection. BuiltinCameraType decide where to be attached the camera actor. BuiltinCameraType::ATTACHED_TO_SCENE attached to the root layer of the source actor. BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR attached to the source actor. BuiltinCameraType::ATTACHED_TO_STOPPER_ACTOR attached to the stopper actor. It will make CameraActorType::BUILTIN_SCENE, CameraActorType::BUILTIN_SOURCE_ACTOR, and CameraActorType::BUILTIN_STOPPER_ACTOR This is exclusive with SetCameraActor - calling this will clear any user-set camera actor.",
+          "since": "2.5.21",
+          "type": "void",
+          "signature": "void SetBuiltinCameraActor(BuiltinCameraType builtinCameraType, Dali::Size screenSize, const Dali::Property::Map &cameraPropertyMap=Dali::Property::Map())",
+          "params": [
+            {
+              "type": "BuiltinCameraType",
+              "name": "builtinCameraType",
+              "description": "The type of built-in camera actor. It will decide where will the camera be attached."
+            },
+            {
+              "type": "Dali::Size",
+              "name": "screenSize",
+              "description": "The size used for SetPerspectiveProjection of the internal camera."
+            },
+            {
+              "type": "const Dali::Property::Map &",
+              "name": "cameraPropertyMap",
+              "description": "The extra properties for the internal camera. For example, InvertY, or offset from center of parent."
             }
           ]
         },
@@ -37691,6 +38959,17 @@
           "type": "CameraActor",
           "signature": "CameraActor GetCameraActor() const",
           "returns": "The scene is viewed from the perspective of this actor"
+        },
+        {
+          "name": "GetCameraActorType",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Retrieves the type of camera actor.",
+          "detailed": "",
+          "since": "2.5.21",
+          "type": "CameraActorType",
+          "signature": "CameraActorType GetCameraActorType() const",
+          "returns": "The type of camera actor for the render task."
         },
         {
           "name": "SetFrameBuffer",
@@ -38659,7 +39938,7 @@
           "api_tier": "public-api",
           "brief": "Signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(Actor, const RotationGesture &)>"
+          "aliased_type": "Signal< void(Actor, RotationGesture)>"
         },
         {
           "name": "RotationGestureDetector",
@@ -38756,13 +40035,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when the rotation gesture is detected on the attached actor.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,constRotationGesture&gesture);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,RotationGesturegesture);",
           "since": "1.9.27",
           "type": "DetectedSignalType &",
           "signature": "DetectedSignalType & DetectedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(Actoractor,constRotationGesture&gesture);"
+            "voidYourCallbackName(Actoractor,RotationGesturegesture);"
           ]
         },
         {
@@ -39062,7 +40341,7 @@
           "api_tier": "integration-api",
           "brief": "Key event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const Dali::KeyEvent &)>"
+          "aliased_type": "Signal< void(Dali::KeyEvent)>"
         },
         {
           "name": "KeyEventGeneratedSignalType",
@@ -39070,7 +40349,7 @@
           "api_tier": "integration-api",
           "brief": "key event generated signal type",
           "detailed": "",
-          "aliased_type": "Signal< bool(const Dali::KeyEvent &)>"
+          "aliased_type": "Signal< bool(Dali::KeyEvent)>"
         },
         {
           "name": "TouchEventSignalType",
@@ -39078,7 +40357,7 @@
           "api_tier": "integration-api",
           "brief": "Touch signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const Dali::TouchEvent &)>"
+          "aliased_type": "Signal< void(Dali::TouchEvent)>"
         },
         {
           "name": "WheelEventSignalType",
@@ -39086,7 +40365,7 @@
           "api_tier": "integration-api",
           "brief": "WheelEvent signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const Dali::WheelEvent &)>"
+          "aliased_type": "Signal< void(Dali::WheelEvent)>"
         },
         {
           "name": "WheelEventGeneratedSignalType",
@@ -39094,7 +40373,7 @@
           "api_tier": "integration-api",
           "brief": "WheelEvent generated signal type.",
           "detailed": "",
-          "aliased_type": "Signal< bool(const Dali::WheelEvent &)>"
+          "aliased_type": "Signal< bool(Dali::WheelEvent)>"
         },
         {
           "name": "FrameCallbackContainer",
@@ -39111,9 +40390,14 @@
           "brief": "Create an initialized Scene handle.",
           "detailed": "",
           "type": "Scene",
-          "signature": "Scene New(Size size, int32_t windowOrientation=0, int32_t screenOrientation=0)",
+          "signature": "Scene New(const Graphics::RenderTargetCreateInfo &createInfo, Size size, int32_t windowOrientation=0, int32_t screenOrientation=0, ScenePolicyFlagBits flags=ScenePolicyFlagBits::DEFAULT)",
           "returns": "a handle to a newly allocated Dali resource.",
           "params": [
+            {
+              "type": "const Graphics::RenderTargetCreateInfo &",
+              "name": "createInfo",
+              "description": "The RenderTarget create info this scene needs to generate (in the render thread)"
+            },
             {
               "type": "Size",
               "name": "size",
@@ -39128,6 +40412,11 @@
               "type": "int32_t",
               "name": "screenOrientation",
               "description": "The rotated angle of the screen"
+            },
+            {
+              "type": "ScenePolicyFlagBits",
+              "name": "flags",
+              "description": "Scene policy flags"
             }
           ]
         },
@@ -39697,8 +40986,8 @@
           "api_tier": "integration-api",
           "brief": "Gets the current surface rectangle. It gets the value from the scene object.",
           "detailed": "",
-          "type": "const Rect< int32_t > &",
-          "signature": "const Rect< int32_t > & GetCurrentSurfaceRect() const",
+          "type": "const BoundsInteger &",
+          "signature": "const BoundsInteger & GetCurrentSurfaceRect() const",
           "returns": "The current surface rectangle"
         },
         {
@@ -39753,13 +41042,88 @@
           ]
         },
         {
+          "name": "SetDepthBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetDepthBufferEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "IsDepthBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool IsDepthBufferEnabled() const"
+        },
+        {
+          "name": "SetStencilBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetStencilBufferEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "IsStencilBufferEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool IsStencilBufferEnabled() const"
+        },
+        {
+          "name": "SetMultiSampledAntiAliasingEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetMultiSampledAntiAliasingEnabled(bool enabled)",
+          "params": [
+            {
+              "type": "bool",
+              "name": "enabled",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "IsMultiSampledAntiAliasingEnabled",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool IsMultiSampledAntiAliasingEnabled() const"
+        },
+        {
           "name": "SetPartialUpdateEnabled",
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "Sets whether the scene will update partial area or full area.",
           "detailed": "",
           "notes": [
-            "This doesn't change the global value which is set by the environment variable. This works when partial update is enabled by the environment variable. If the partial update is disabled by the environment variable, it changes nothing."
+            "This is now the only way of setting partial update on the scene. The global environment variable is used to set the value for the main window on initialization; the application may change it afterwards through the window API."
           ],
           "type": "void",
           "signature": "void SetPartialUpdateEnabled(bool enabled)",
@@ -39868,12 +41232,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(KeyEventevent);",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(KeyEventevent);"
           ]
         },
         {
@@ -39881,12 +41245,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "The user would connect to this signal to get a KeyEvent when KeyEvent is generated.",
-          "detailed": "If the control already consumed key event, KeyEventProcessor do not need to Emit keyEvent. Therefore, KeyinputManager first checks whether KeyEvent is generated as KeyEventGeneratedSignal. After that keyEventProcessor must invoke KeyEvent only if KeyEventGeneratedSignal () is not consumed. A callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "If the control already consumed key event, KeyEventProcessor do not need to Emit keyEvent. Therefore, KeyinputManager first checks whether KeyEvent is generated as KeyEventGeneratedSignal. After that keyEventProcessor must invoke KeyEvent only if KeyEventGeneratedSignal () is not consumed. A callback of the following type may be connected: boolYourCallbackName(KeyEventevent);",
           "type": "KeyEventGeneratedSignalType &",
           "signature": "KeyEventGeneratedSignalType & KeyEventGeneratedSignal()",
           "returns": "The return is true if KeyEvent is consumed, otherwise false.",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(KeyEventevent);"
           ]
         },
         {
@@ -39894,12 +41258,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "The user would connect to this signal to intercept a KeyEvent at window.",
-          "detailed": "Intercepts KeyEvents in the window before dispatching KeyEvents to the control. If a KeyEvent is consumed, no KeyEvent is delivered to the control. A callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "Intercepts KeyEvents in the window before dispatching KeyEvents to the control. If a KeyEvent is consumed, no KeyEvent is delivered to the control. A callback of the following type may be connected: boolYourCallbackName(KeyEventevent);",
           "type": "KeyEventGeneratedSignalType &",
           "signature": "KeyEventGeneratedSignalType & InterceptKeyEventSignal()",
           "returns": "The return is true if KeyEvent is consumed, otherwise false.",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(KeyEventevent);"
           ]
         },
         {
@@ -39907,12 +41271,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "The user would connect to this signal to monitor a KeyEvent at window. This signal is emitted when KeyEvent is generated.",
-          "detailed": "A Callback of the following type may be connected: boolYourCallbackName(constKeyEvent&event);",
+          "detailed": "A Callback of the following type may be connected: boolYourCallbackName(KeyEventevent);",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventMonitorSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "boolYourCallbackName(constKeyEvent&event);"
+            "boolYourCallbackName(KeyEventevent);"
           ]
         },
         {
@@ -39936,12 +41300,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "This signal is emitted when wheel event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constWheelEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(WheelEventevent);",
           "type": "WheelEventSignalType &",
           "signature": "WheelEventSignalType & WheelEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constWheelEvent&event);"
+            "voidYourCallbackName(WheelEventevent);"
           ]
         },
         {
@@ -39949,12 +41313,12 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "When a custom wheel event occurs, it need to process the focused actor first.",
-          "detailed": "Therefore, KeyboardFocusManager first checks whether WheelEvent is generated as WheelEventGeneratedSignal. After that wheelEventProcessor must invoke WheelEvent only if wheelEventGeneratedSignal () is not consumed. This is only valid for custom wheel events. A callback of the following type may be connected: boolYourCallbackName(constWheelEvent&event);",
+          "detailed": "Therefore, KeyboardFocusManager first checks whether WheelEvent is generated as WheelEventGeneratedSignal. After that wheelEventProcessor must invoke WheelEvent only if wheelEventGeneratedSignal () is not consumed. This is only valid for custom wheel events. A callback of the following type may be connected: boolYourCallbackName(WheelEventevent);",
           "type": "WheelEventGeneratedSignalType &",
           "signature": "WheelEventGeneratedSignalType & WheelEventGeneratedSignal()",
           "returns": "The return is true if WheelEvent is consumed, otherwise false.",
           "code_examples": [
-            "boolYourCallbackName(constWheelEvent&event);"
+            "boolYourCallbackName(WheelEventevent);"
           ]
         },
         {
@@ -40654,6 +42018,28 @@
           "detailed": ""
         },
         {
+          "name": "EnableSharedFromThis",
+          "kind": "friend",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "friend",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "DynamicPointerCast",
+          "kind": "friend",
+          "api_tier": "public-api",
+          "brief": "Performs a dynamic cast on a SharedPtr.",
+          "detailed": "Creates a new SharedPtr that manages the same object but with a different pointer type obtained via dynamic_cast. The returned SharedPtr shares ownership with the original.",
+          "since": "2.5.22"
+        },
+        {
           "name": "SharedPtr",
           "kind": "function",
           "api_tier": "public-api",
@@ -40893,6 +42279,17 @@
           "since": "2.5.16.",
           "type": "",
           "signature": "operator bool() const"
+        },
+        {
+          "name": "IsEmpty",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Check if the SharedPtr is empty (null).",
+          "detailed": "",
+          "since": "2.5.16.",
+          "type": "bool",
+          "signature": "bool IsEmpty() const",
+          "returns": "true if the SharedPtr is empty"
         },
         {
           "name": "Get",
@@ -43339,9 +44736,27 @@
           "brief": "Queries the number of slots.",
           "detailed": "",
           "since": "1.0.0",
-          "type": "std::size_t",
-          "signature": "std::size_t GetConnectionCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetConnectionCount() const",
           "returns": "The number of slots connected to this signal"
+        },
+        {
+          "name": "SignalMixin",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "SignalMixin()"
+        },
+        {
+          "name": "~SignalMixin",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "~SignalMixin()"
         },
         {
           "name": "Impl",
@@ -43643,8 +45058,8 @@
           "brief": "Returns the connection count.",
           "detailed": "",
           "since": "1.0.0.",
-          "type": "std::size_t",
-          "signature": "std::size_t GetConnectionCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetConnectionCount() const",
           "returns": "The connection count"
         },
         {
@@ -44007,7 +45422,7 @@
           "api_tier": "devel-api",
           "brief": "Key event signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const KeyEvent &)>"
+          "aliased_type": "Signal< void(KeyEvent)>"
         },
         {
           "name": "EventProcessingFinishedSignalType",
@@ -44023,7 +45438,7 @@
           "api_tier": "devel-api",
           "brief": "Touch signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const TouchEvent &)>"
+          "aliased_type": "Signal< void(TouchEvent)>"
         },
         {
           "name": "WheelEventSignalType",
@@ -44031,7 +45446,7 @@
           "api_tier": "devel-api",
           "brief": "Wheel signal type.",
           "detailed": "",
-          "aliased_type": "Signal< void(const WheelEvent &)>"
+          "aliased_type": "Signal< void(WheelEvent)>"
         },
         {
           "name": "ContextStatusSignal",
@@ -44305,12 +45720,12 @@
           "kind": "function",
           "api_tier": "devel-api",
           "brief": "This signal is emitted when key event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constKeyEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(KeyEventevent);",
           "type": "KeyEventSignalType &",
           "signature": "KeyEventSignalType & KeyEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constKeyEvent&event);"
+            "voidYourCallbackName(KeyEventevent);"
           ]
         },
         {
@@ -44344,12 +45759,12 @@
           "kind": "function",
           "api_tier": "devel-api",
           "brief": "This signal is emitted when wheel event is received.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(constWheelEvent&event);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(WheelEventevent);",
           "type": "WheelEventSignalType &",
           "signature": "WheelEventSignalType & WheelEventSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(constWheelEvent&event);"
+            "voidYourCallbackName(WheelEventevent);"
           ]
         },
         {
@@ -44604,8 +46019,8 @@
           "brief": "Get the number of bytes in the string.",
           "detailed": "",
           "since": "2.5.15",
-          "type": "size_t",
-          "signature": "size_t Size() const",
+          "type": "uint32_t",
+          "signature": "uint32_t Size() const",
           "returns": "the number of bytes in the string"
         },
         {
@@ -44648,11 +46063,11 @@
           "detailed": "",
           "since": "2.5.15",
           "type": "char &",
-          "signature": "char & operator[](size_t position)",
+          "signature": "char & operator[](uint32_t position)",
           "returns": "a modifiable reference to the character",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "position",
               "description": "The position in the string to index"
             }
@@ -44666,11 +46081,11 @@
           "detailed": "",
           "since": "2.5.15",
           "type": "const char &",
-          "signature": "const char & operator[](size_t position) const",
+          "signature": "const char & operator[](uint32_t position) const",
           "returns": "an unmodifiable reference to the character",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "position",
               "description": "The position in the string to index"
             }
@@ -44894,6 +46309,70 @@
       ]
     },
     {
+      "name": "Dali::StringEqual",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/dali-string.h",
+      "api_tier": "public-api",
+      "brief": "Equality functor for Dali::String.",
+      "detailed": "",
+      "members": [
+        {
+          "name": "operator()",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Compares two Dali::String objects for equality.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator()(const String &a, const String &b) const",
+          "returns": "true if strings are equal, false otherwise @SINCE_2_5.20",
+          "params": [
+            {
+              "type": "const String &",
+              "name": "a",
+              "description": "First string"
+            },
+            {
+              "type": "const String &",
+              "name": "b",
+              "description": "Second string"
+            }
+          ]
+        }
+      ],
+      "since": "2.5.20."
+    },
+    {
+      "name": "Dali::StringHash",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/dali-string.h",
+      "api_tier": "public-api",
+      "brief": "Hash functor for Dali::String.",
+      "detailed": "",
+      "members": [
+        {
+          "name": "operator()",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Computes hash value for a Dali::String.",
+          "detailed": "",
+          "notes": [
+            "Uses std::size_t as the return type to match the standard hash functor interface. @SINCE_2_5.20"
+          ],
+          "type": "std::size_t",
+          "signature": "std::size_t operator()(const String &key) const",
+          "returns": "The hash value",
+          "params": [
+            {
+              "type": "const String &",
+              "name": "key",
+              "description": "The string to hash"
+            }
+          ]
+        }
+      ],
+      "since": "2.5.20."
+    },
+    {
       "name": "Dali::Internal::StringImpl",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/dali-string-impl.h",
@@ -45018,7 +46497,7 @@
           "detailed": "",
           "since": "2.5.15",
           "type": "",
-          "signature": "StringView(const char *str, size_t length)",
+          "signature": "StringView(const char *str, uint32_t length)",
           "params": [
             {
               "type": "const char *",
@@ -45026,7 +46505,7 @@
               "description": "A pointer to character data (not necessarily null-terminated)"
             },
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "length",
               "description": "The number of characters"
             }
@@ -45100,8 +46579,8 @@
           "brief": "Get the number of bytes in the view.",
           "detailed": "",
           "since": "2.5.15",
-          "type": "size_t",
-          "signature": "size_t Size() const",
+          "type": "uint32_t",
+          "signature": "uint32_t Size() const",
           "returns": "The number of bytes in the view"
         },
         {
@@ -45412,7 +46891,7 @@
           "brief": "Signal type for detected signal.",
           "detailed": "",
           "since": "1.0.0.",
-          "aliased_type": "Signal< void(Actor, const TapGesture &)>"
+          "aliased_type": "Signal< void(Actor, TapGesture)>"
         },
         {
           "name": "TapGestureDetector",
@@ -45590,13 +47069,13 @@
           "kind": "function",
           "api_tier": "public-api",
           "brief": "This signal is emitted when the specified tap is detected on the attached actor.",
-          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,constTapGesture&gesture);",
+          "detailed": "A callback of the following type may be connected: voidYourCallbackName(Actoractor,TapGesturegesture);",
           "since": "1.0.0",
           "type": "DetectedSignalType &",
           "signature": "DetectedSignalType & DetectedSignal()",
           "returns": "The signal to connect to",
           "code_examples": [
-            "voidYourCallbackName(Actoractor,constTapGesture&gesture);"
+            "voidYourCallbackName(Actoractor,TapGesturegesture);"
           ]
         },
         {
@@ -46115,10 +47594,10 @@
           "detailed": "",
           "since": "1.1.43",
           "type": "void",
-          "signature": "void SetTexture(size_t index, Texture texture)",
+          "signature": "void SetTexture(uint32_t index, Texture texture)",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The position in the texture set of the texture"
             },
@@ -46137,11 +47616,11 @@
           "detailed": "",
           "since": "1.1.43",
           "type": "Texture",
-          "signature": "Texture GetTexture(size_t index) const",
+          "signature": "Texture GetTexture(uint32_t index) const",
           "returns": "A handle to the image at the the specified position",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The position in the texture set of the image"
             }
@@ -46155,10 +47634,10 @@
           "detailed": "",
           "since": "1.1.43",
           "type": "void",
-          "signature": "void SetSampler(size_t index, Sampler sampler)",
+          "signature": "void SetSampler(uint32_t index, Sampler sampler)",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The position in the texture set of the sampler"
             },
@@ -46177,11 +47656,11 @@
           "detailed": "",
           "since": "1.1.43",
           "type": "Sampler",
-          "signature": "Sampler GetSampler(size_t index) const",
+          "signature": "Sampler GetSampler(uint32_t index) const",
           "returns": "A handle to the sampler at the specified position",
           "params": [
             {
-              "type": "size_t",
+              "type": "uint32_t",
               "name": "index",
               "description": "The position in the texture set of the image"
             }
@@ -46788,8 +48267,8 @@
           "brief": "Returns the total number of points in this TouchEvent.",
           "detailed": "",
           "since": "1.9.26",
-          "type": "std::size_t",
-          "signature": "std::size_t GetPointCount() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetPointCount() const",
           "returns": "Total number of Points"
         },
         {
@@ -46803,11 +48282,11 @@
             "If point is greater than GetPointCount() then this method will return -1."
           ],
           "type": "int32_t",
-          "signature": "int32_t GetDeviceId(std::size_t point) const",
+          "signature": "int32_t GetDeviceId(uint32_t point) const",
           "returns": "The Device ID of this point",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46824,11 +48303,11 @@
             "If point is greater than GetPointCount() then this method will return PointState::FINISHED."
           ],
           "type": "PointState::Type",
-          "signature": "PointState::Type GetState(std::size_t point) const",
+          "signature": "PointState::Type GetState(uint32_t point) const",
           "returns": "The state of the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46845,11 +48324,11 @@
             "If point is greater than GetPointCount() then this method will return an empty handle."
           ],
           "type": "Actor",
-          "signature": "Actor GetHitActor(std::size_t point) const",
+          "signature": "Actor GetHitActor(uint32_t point) const",
           "returns": "The actor that was underneath the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46868,11 +48347,11 @@
             "If point is greater than GetPointCount() then this method will return Vector2::ZERO."
           ],
           "type": "const Vector2 &",
-          "signature": "const Vector2 & GetLocalPosition(std::size_t point) const",
+          "signature": "const Vector2 & GetLocalPosition(uint32_t point) const",
           "returns": "The co-ordinates relative to the top-left of the hit-actor of the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46889,11 +48368,11 @@
             "If point is greater than GetPointCount() then this method will return Vector2::ZERO."
           ],
           "type": "const Vector2 &",
-          "signature": "const Vector2 & GetScreenPosition(std::size_t point) const",
+          "signature": "const Vector2 & GetScreenPosition(uint32_t point) const",
           "returns": "The co-ordinates relative to the top-left of the screen of the point specified",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46910,11 +48389,11 @@
             "If point is greater than GetPointCount() then this method will return 0.0f."
           ],
           "type": "float",
-          "signature": "float GetRadius(std::size_t point) const",
+          "signature": "float GetRadius(uint32_t point) const",
           "returns": "The radius of the press point",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46931,11 +48410,11 @@
             "If point is greater than GetPointCount() then this method will return Vector2::ZERO."
           ],
           "type": "const Vector2 &",
-          "signature": "const Vector2 & GetEllipseRadius(std::size_t point) const",
+          "signature": "const Vector2 & GetEllipseRadius(uint32_t point) const",
           "returns": "The horizontal and vertical radii of the press point",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46952,11 +48431,11 @@
             "If point is greater than GetPointCount() then this method will return 1.0f."
           ],
           "type": "float",
-          "signature": "float GetPressure(std::size_t point) const",
+          "signature": "float GetPressure(uint32_t point) const",
           "returns": "The touch pressure",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46973,11 +48452,11 @@
             "If point is greater than GetPointCount() then this method will return Degree()."
           ],
           "type": "Degree",
-          "signature": "Degree GetAngle(std::size_t point) const",
+          "signature": "Degree GetAngle(uint32_t point) const",
           "returns": "The angle of the press point",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -46991,11 +48470,11 @@
           "detailed": "The device class type is classification type of the input device of event received.",
           "since": "1.9.26",
           "type": "Device::Class::Type",
-          "signature": "Device::Class::Type GetDeviceClass(std::size_t point) const",
+          "signature": "Device::Class::Type GetDeviceClass(uint32_t point) const",
           "returns": "The type of the device class",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -47009,11 +48488,11 @@
           "detailed": "The device subclass type is subclassification type of the input device of event received.",
           "since": "1.9.26",
           "type": "Device::Subclass::Type",
-          "signature": "Device::Subclass::Type GetDeviceSubclass(std::size_t point) const",
+          "signature": "Device::Subclass::Type GetDeviceSubclass(uint32_t point) const",
           "returns": "The type of the device subclass",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -47027,11 +48506,11 @@
           "detailed": "",
           "since": "1.9.26",
           "type": "MouseButton::Type",
-          "signature": "MouseButton::Type GetMouseButton(std::size_t point) const",
+          "signature": "MouseButton::Type GetMouseButton(uint32_t point) const",
           "returns": "The mouse button value",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": "The point required"
             }
@@ -47056,11 +48535,11 @@
           "detailed": "",
           "since": "2.4.34",
           "type": "const Dali::String &",
-          "signature": "const Dali::String & GetDeviceName(std::size_t point) const",
+          "signature": "const Dali::String & GetDeviceName(uint32_t point) const",
           "returns": "The device name string",
           "params": [
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "point",
               "description": ""
             }
@@ -47912,6 +49391,130 @@
       ]
     },
     {
+      "name": "Dali::TypeInfoId",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/object/type-info-id.h",
+      "api_tier": "public-api",
+      "brief": "A lightweight type identifier that replaces std::type_info in public APIs.",
+      "detailed": "TypeInfoId uses a 32-bit FNV-1a hash of the type name as the primary identity, with the original name retained for human-readable display and collision detection. TypeInfoId is an immutable value type (uint32_t + const char*). It is safe to copy and compare across threads without synchronisation. The const char* member always points to a string with static storage duration — either a string literal (from DALI_TYPE_ID stringification) or a static Dali::String buffer (from the Any::TypeInfoIdFromTypeid helper). Examples of use: TypeInfoIdvoidType;//default-constructed(void) TypeInfoIdintType=DALI_TYPE_ID(int);//frommacro TypeInfoIdactorType=DALI_TYPE_ID(Dali::Actor);//frommacrowithnamespace if(intType==actorType) { //nevertrue } constchar*name=intType.GetName();//\"int\" *",
+      "members": [
+        {
+          "name": "IdType",
+          "kind": "typedef",
+          "api_tier": "public-api",
+          "brief": "The underlying integer type used for the type identifier.",
+          "detailed": "",
+          "since": "2.5.21.",
+          "aliased_type": "uint32_t"
+        },
+        {
+          "name": "TypeInfoId",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Default constructor representing the \"void\" type (no type).",
+          "detailed": "",
+          "since": "2.5.21",
+          "type": "constexpr",
+          "signature": "constexpr TypeInfoId()"
+        },
+        {
+          "name": "TypeInfoId",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Constructs a TypeInfoId from a hash and name.",
+          "detailed": "",
+          "since": "2.5.21",
+          "type": "constexpr",
+          "signature": "constexpr TypeInfoId(IdType id, const char *name)",
+          "params": [
+            {
+              "type": "IdType",
+              "name": "id",
+              "description": "The FNV-1a hash of the type name"
+            },
+            {
+              "type": "const char *",
+              "name": "name",
+              "description": "The human-readable type name (must point to static-duration storage)"
+            }
+          ]
+        },
+        {
+          "name": "operator==",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Equality operator.",
+          "detailed": "Uses hash comparison as the fast path, with a string comparison fallback to guard against hash collisions.",
+          "since": "2.5.21",
+          "type": "bool",
+          "signature": "bool operator==(const TypeInfoId &other) const",
+          "returns": "true if both TypeInfoId values represent the same type, false otherwise",
+          "params": [
+            {
+              "type": "const TypeInfoId &",
+              "name": "other",
+              "description": "The TypeInfoId to compare with"
+            }
+          ]
+        },
+        {
+          "name": "operator!=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Inequality operator.",
+          "detailed": "",
+          "since": "2.5.21",
+          "type": "bool",
+          "signature": "bool operator!=(const TypeInfoId &other) const",
+          "returns": "true if the TypeInfoId values represent different types, false otherwise",
+          "params": [
+            {
+              "type": "const TypeInfoId &",
+              "name": "other",
+              "description": "The TypeInfoId to compare with"
+            }
+          ]
+        },
+        {
+          "name": "GetName",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets the human-readable type name.",
+          "detailed": "",
+          "since": "2.5.21",
+          "notes": [
+            "Returns \"void\" for both the default-constructed (empty) state and for an explicitly void-typed value. Use IsValid() to distinguish the two."
+          ],
+          "type": "const char *",
+          "signature": "const char * GetName() const",
+          "returns": "The type name string, or \"void\" if no type is set."
+        },
+        {
+          "name": "GetId",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets the numeric type identifier.",
+          "detailed": "",
+          "since": "2.5.21",
+          "type": "IdType",
+          "signature": "IdType GetId() const",
+          "returns": "The FNV-1a hash of the type name"
+        },
+        {
+          "name": "IsValid",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Checks whether this TypeInfoId represents a valid type.",
+          "detailed": "Returns false only for default-constructed (empty) TypeInfoId values. A TypeInfoId constructed via DALI_TYPE_ID or TypeInfoIdFromTypeid is always valid.",
+          "since": "2.5.21",
+          "type": "bool",
+          "signature": "bool IsValid() const",
+          "returns": "true if a type is set, false if default-constructed (void/empty)"
+        }
+      ],
+      "since": "2.5.21"
+    },
+    {
       "name": "Dali::TypeRegistration",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/devel-api/object/type-registry.h",
@@ -48449,7 +50052,7 @@
     {
       "name": "Dali::TypeTraits< Uint16Pair >",
       "kind": "struct",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/uint-16-pair.h",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/int-pair.h",
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",
@@ -48525,7 +50128,7 @@
     {
       "name": "Dali::Uint16Pair",
       "kind": "class",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/uint-16-pair.h",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/int-pair.h",
       "api_tier": "public-api",
       "brief": "Simple class for passing around pairs of small unsigned integers.",
       "detailed": "Use this for integer dimensions and points with limited range such as image sizes and pixel coordinates where a pair of floating point numbers is inefficient and illogical (i.e. the data is inherently integer). One of these can be passed in a single 32 bit integer register on common architectures.",
@@ -49170,6 +50773,28 @@
               "description": "The object to take ownership of"
             }
           ]
+        },
+        {
+          "name": "GetDeleter",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get the deleter.",
+          "detailed": "",
+          "since": "2.5.19.",
+          "type": "Deleter &",
+          "signature": "Deleter & GetDeleter()",
+          "returns": "A reference to the deleter"
+        },
+        {
+          "name": "GetDeleter",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get the deleter (const).",
+          "detailed": "",
+          "since": "2.5.19.",
+          "type": "const Deleter &",
+          "signature": "const Deleter & GetDeleter() const",
+          "returns": "A const reference to the deleter"
         }
       ],
       "since": "2.5.11"
@@ -49180,7 +50805,7 @@
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/unique-ptr.h",
       "api_tier": "public-api",
       "brief": "Templated unique pointer partial specialization with functor deleters (non-function-pointer types).",
-      "detailed": "",
+      "detailed": "Uses Empty Base Optimization (EBO) by inheriting from the Deleter. When the Deleter is an empty class (like DefaultDeleter), no additional memory is used for storing the deleter.",
       "members": [
         {
           "name": "UniquePtr",
@@ -49193,14 +50818,21 @@
           "name": "UniquePtr",
           "kind": "function",
           "api_tier": "public-api",
+          "brief": "Default constructor.",
+          "detailed": "Constructs a UniquePtr with a null pointer and default-constructed Deleter. This is enabled only when Deleter is default-constructible.",
+          "since": "2.5.19",
+          "type": "",
+          "signature": "UniquePtr()"
+        },
+        {
+          "name": "UniquePtr",
+          "kind": "function",
+          "api_tier": "public-api",
           "brief": "Constructor that takes ownership of a raw pointer.",
           "detailed": "",
           "since": "2.5.11.",
-          "notes": [
-            "For functor deleters, the deleter parameter is required"
-          ],
           "type": "",
-          "signature": "UniquePtr(Type *ptr, Deleter deleter)",
+          "signature": "UniquePtr(Type *ptr, Deleter deleter=Deleter())",
           "params": [
             {
               "type": "Type *",
@@ -49304,15 +50936,6 @@
               "description": "The derived UniquePtr to move from"
             }
           ]
-        },
-        {
-          "name": "UniquePtr",
-          "kind": "function",
-          "api_tier": "public-api",
-          "brief": "Deleted default constructor.",
-          "detailed": "",
-          "type": "",
-          "signature": "UniquePtr()=delete"
         },
         {
           "name": "UniquePtr",
@@ -49455,9 +51078,34 @@
               "description": "The object to take ownership of"
             }
           ]
+        },
+        {
+          "name": "GetDeleter",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get the deleter.",
+          "detailed": "",
+          "since": "2.5.19.",
+          "type": "Deleter &",
+          "signature": "Deleter & GetDeleter()",
+          "returns": "A reference to the deleter"
+        },
+        {
+          "name": "GetDeleter",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get the deleter (const).",
+          "detailed": "",
+          "since": "2.5.19.",
+          "type": "const Deleter &",
+          "signature": "const Deleter & GetDeleter() const",
+          "returns": "A const reference to the deleter"
         }
       ],
-      "since": "2.5.11"
+      "since": "2.5.11",
+      "base_classes": [
+        "Deleter"
+      ]
     },
     {
       "name": "Dali::UpdateProxy",
@@ -50963,16 +52611,16 @@
           "name": "Vector2",
           "kind": "function",
           "api_tier": "public-api",
-          "brief": "Conversion constructor from a Uint16Pair.",
+          "brief": "Conversion constructor from an IntPair.",
           "detailed": "",
-          "since": "1.9.21",
+          "since": "2.5.20",
           "type": "",
-          "signature": "Vector2(const Uint16Pair &pair)",
+          "signature": "Vector2(const IntPair< tIntType, tUintType, tDataType > &pair)",
           "params": [
             {
-              "type": "const Uint16Pair &",
+              "type": "const IntPair< tIntType, tUintType, tDataType > &",
               "name": "pair",
-              "description": "The Uint16Pair to create this vector from"
+              "description": "The IntPair to create this vector from"
             }
           ]
         },
@@ -53241,7 +54889,7 @@
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/dali-vector-base.h",
       "api_tier": "public-api",
       "brief": "Base class to handle the memory of simple vector.",
-      "detailed": "Memory layout is such that it has two size_t to hold the count and capacity of the vector. VectorBase::mData is adjusted so that it points to the beginning of the first real item so that iterating the items is quick.",
+      "detailed": "Memory layout is such that it has two SizeType values to hold the count and capacity of the vector. VectorBase::mData is adjusted so that it points to the beginning of the first real item so that iterating the items is quick.",
       "members": [
         {
           "name": "SizeType",
@@ -53249,7 +54897,7 @@
           "api_tier": "public-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "size_t"
+          "aliased_type": "uint32_t"
         },
         {
           "name": "MemMoveFunctionType",
@@ -53257,7 +54905,7 @@
           "api_tier": "public-api",
           "brief": "",
           "detailed": "",
-          "aliased_type": "void *(*)(void *, const void *, size_t)"
+          "aliased_type": "void *(*)(void *, const void *, SizeType)"
         },
         {
           "name": "SHRINK_REQUIRED_RATIO",
@@ -53457,7 +55105,7 @@
           "detailed": "source and destination must not overlap.",
           "since": "1.0.0",
           "type": "void",
-          "signature": "void CopyMemory(uint8_t *destination, const uint8_t *source, size_t numberOfBytes)",
+          "signature": "void CopyMemory(uint8_t *destination, const uint8_t *source, SizeType numberOfBytes)",
           "params": [
             {
               "type": "uint8_t *",
@@ -53470,7 +55118,7 @@
               "description": "Pointer to the source address"
             },
             {
-              "type": "size_t",
+              "type": "SizeType",
               "name": "numberOfBytes",
               "description": "The number of bytes to be copied"
             }
@@ -53708,7 +55356,7 @@
           "detailed": "This function expects a pointer to an array of structures with the same format that was given in the construction, and the number of elements to be the same as the size of the buffer. If the initial structure was: { { \"position\", VECTOR3}, { \"uv\", VECTOR2 } } and a size of 10 elements, this function should be called with a pointer equivalent to: struct Vertex { Dali::Vector3 position; Dali::Vector2 uv; }; Vertex vertices[ 10 ] = { ... }; vertexBuffer.SetData( vertices );",
           "since": "1.9.27",
           "type": "void",
-          "signature": "void SetData(const void *data, std::size_t size)",
+          "signature": "void SetData(const void *data, uint32_t size)",
           "params": [
             {
               "type": "const void *",
@@ -53716,7 +55364,7 @@
               "description": "A pointer to the data that will be copied to the buffer"
             },
             {
-              "type": "std::size_t",
+              "type": "uint32_t",
               "name": "size",
               "description": "Number of elements to expand or contract the buffer"
             }
@@ -53729,8 +55377,8 @@
           "brief": "Gets the number of elements in the buffer.",
           "detailed": "",
           "since": "1.9.27",
-          "type": "std::size_t",
-          "signature": "std::size_t GetSize() const",
+          "type": "uint32_t",
+          "signature": "uint32_t GetSize() const",
           "returns": "Number of elements to expand or contract the buffer"
         },
         {
@@ -54640,6 +56288,243 @@
       ]
     },
     {
+      "name": "Dali::WeakPtr",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/shared-ptr.h",
+      "api_tier": "public-api",
+      "brief": "Templated weak pointer class.",
+      "detailed": "WeakPtr holds a non-owning reference to an object managed by SharedPtr. It must be converted to SharedPtr using Lock() to access the object.",
+      "members": [
+        {
+          "name": "WeakPtr",
+          "kind": "friend",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "SharedPtr",
+          "kind": "friend",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "EnableSharedFromThis",
+          "kind": "friend",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Default constructor.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "",
+          "signature": "WeakPtr() noexcept"
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Construct from SharedPtr.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "",
+          "signature": "WeakPtr(const SharedPtr< Type > &shared) noexcept",
+          "params": [
+            {
+              "type": "const SharedPtr< Type > &",
+              "name": "shared",
+              "description": "The SharedPtr to create a weak reference to"
+            }
+          ]
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy constructor.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "",
+          "signature": "WeakPtr(const WeakPtr &other) noexcept",
+          "params": [
+            {
+              "type": "const WeakPtr &",
+              "name": "other",
+              "description": "The WeakPtr to copy"
+            }
+          ]
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move constructor.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "",
+          "signature": "WeakPtr(WeakPtr &&other) noexcept",
+          "params": [
+            {
+              "type": "WeakPtr &&",
+              "name": "other",
+              "description": "The WeakPtr to move"
+            }
+          ]
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Converting copy constructor from derived type.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "notes": [
+            "Enabled only if U* is convertible to Type*"
+          ],
+          "type": "",
+          "signature": "WeakPtr(const WeakPtr< U > &other) noexcept",
+          "params": [
+            {
+              "type": "const WeakPtr< U > &",
+              "name": "other",
+              "description": "The derived WeakPtr to copy from"
+            }
+          ]
+        },
+        {
+          "name": "WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Converting move constructor from derived type.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "notes": [
+            "Enabled only if U* is convertible to Type*"
+          ],
+          "type": "",
+          "signature": "WeakPtr(WeakPtr< U > &&other) noexcept",
+          "params": [
+            {
+              "type": "WeakPtr< U > &&",
+              "name": "other",
+              "description": "The derived WeakPtr to move from"
+            }
+          ]
+        },
+        {
+          "name": "~WeakPtr",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Destructor.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "",
+          "signature": "~WeakPtr()"
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy assignment operator.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "WeakPtr &",
+          "signature": "WeakPtr & operator=(const WeakPtr &other) noexcept",
+          "params": [
+            {
+              "type": "const WeakPtr &",
+              "name": "other",
+              "description": "The WeakPtr to assign"
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move assignment operator.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "WeakPtr &",
+          "signature": "WeakPtr & operator=(WeakPtr &&other) noexcept",
+          "params": [
+            {
+              "type": "WeakPtr &&",
+              "name": "other",
+              "description": "The WeakPtr to move"
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Assign from SharedPtr.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "WeakPtr &",
+          "signature": "WeakPtr & operator=(const SharedPtr< Type > &shared) noexcept",
+          "params": [
+            {
+              "type": "const SharedPtr< Type > &",
+              "name": "shared",
+              "description": "The SharedPtr to create a weak reference to"
+            }
+          ]
+        },
+        {
+          "name": "Reset",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Reset to empty.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "void",
+          "signature": "void Reset() noexcept"
+        },
+        {
+          "name": "Expired",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Check if the managed object has been deleted.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "bool",
+          "signature": "bool Expired() const noexcept",
+          "returns": "true if the managed object has been deleted"
+        },
+        {
+          "name": "Lock",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get a SharedPtr to the managed object.",
+          "detailed": "Returns an empty SharedPtr if the object has been deleted.",
+          "since": "2.5.22",
+          "type": "SharedPtr< Type >",
+          "signature": "SharedPtr< Type > Lock() const noexcept",
+          "returns": "A SharedPtr to the managed object, or empty if expired"
+        },
+        {
+          "name": "UseCount",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Get the number of SharedPtr objects referring to the same managed object.",
+          "detailed": "",
+          "since": "2.5.22.",
+          "type": "uint32_t",
+          "signature": "uint32_t UseCount() const noexcept",
+          "returns": "The use count"
+        }
+      ],
+      "since": "2.5.22"
+    },
+    {
       "name": "Dali::Integration::WheelEvent",
       "kind": "struct",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/events/wheel-event-integ.h",
@@ -55217,8 +57102,8 @@
       "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/actors/actor-enumerations.h",
       "api_tier": "public-api",
-      "brief": "The DALi namespace.",
-      "detailed": "< for std::chrono::time_point < for uint32_t, size_t The class should implement Dali::ConnectionTrackerInterface, or inherit from Dali::ConnectionTracker. < Dali::Min , Dali::Max < for time(nullptr) < Dali::Swap < for std::move() < for srand() and rand() As the Implementation is bit complex because of Small Buffer Optimization (SBO) In the Property::Value class and Tagged Union implementation in the Impl class. Here is the brief description of the motivation and internal of this implementation. The main motivation is to keep the value semantic without doing any heap allocation. In the public class we keep a aligned buffer of 16byte instead of keeping the Pimpl pointer. we create the Impl object inplace in that buffer to avoid the memory allocation. we don't store the Impl* along with the SBO storage to save 8byte from the Property::Value object. Every time we need to access Impl object we access it through Read() and Write() which retrieves the already constructed Impl object from the SBO storage. with SBO , the move and assignment operator are tricky , so we use std::copy to move the object and update the moved from object to NONE to keep it in a safe state. In the Impl class, we keep a Uninitialized Union and manage lifecycle of objects by doing construct/destroy manually. We keep the Type information along with the Object to keep the size as 16byte (using common initial sequence(CIS) ). This enforces automatic disconnection when an object is destroyed, so you don't have to manually disconnect from signals. Alternatively, you can use a Dali::SlotDelegate if you don't want to inherit. E.g: classMyClass:publicConnectionTracker { voidCallback(Actoractor,constTouchEvent&event) { ... } voidInit() { Actoractor=Actor::New(); actor.TouchedSignal().Connect(this,&MyClass::Callback); } ~MyClass() { //ConnectionTrackerbaseclassautomaticallydisconnects } } The top level DALi namespace",
+      "brief": "< for std::unique_ptr",
+      "detailed": "< for std::hash and std::equal_to < for std::chrono::time_point < for uint32_t, size_t The class should implement Dali::ConnectionTrackerInterface, or inherit from Dali::ConnectionTracker. < Dali::Min , Dali::Max < for time(nullptr) < Dali::Swap < for std::move() The DALi namespace. < for srand() and rand() As the Implementation is bit complex because of Small Buffer Optimization (SBO) In the Property::Value class and Tagged Union implementation in the Impl class. Here is the brief description of the motivation and internal of this implementation. The main motivation is to keep the value semantic without doing any heap allocation. In the public class we keep a aligned buffer of 16byte instead of keeping the Pimpl pointer. we create the Impl object inplace in that buffer to avoid the memory allocation. we don't store the Impl* along with the SBO storage to save 8byte from the Property::Value object. Every time we need to access Impl object we access it through Read() and Write() which retrieves the already constructed Impl object from the SBO storage. with SBO , the move and assignment operator are tricky , so we use std::copy to move the object and update the moved from object to NONE to keep it in a safe state. In the Impl class, we keep a Uninitialized Union and manage lifecycle of objects by doing construct/destroy manually. We keep the Type information along with the Object to keep the size as 16byte (using common initial sequence(CIS) ). This enforces automatic disconnection when an object is destroyed, so you don't have to manually disconnect from signals. Alternatively, you can use a Dali::SlotDelegate if you don't want to inherit. E.g: classMyClass:publicConnectionTracker { voidCallback(Actoractor,constTouchEvent&event) { ... } voidInit() { Actoractor=Actor::New(); actor.TouchedSignal().Connect(this,&MyClass::Callback); } ~MyClass() { //ConnectionTrackerbaseclassautomaticallydisconnects } } The top level DALi namespace",
       "members": [
         {
           "name": "GestureState",
@@ -55316,6 +57201,35 @@
             {
               "name": "IMAGE_LOADER",
               "brief": ""
+            }
+          ]
+        },
+        {
+          "name": "ScenePolicyFlagBits",
+          "kind": "enum",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "enumvalues": [
+            {
+              "name": "DEFAULT",
+              "brief": ""
+            },
+            {
+              "name": "DEPTH_BUFFER_ENABLED",
+              "brief": "Whether the depth buffer is available or not."
+            },
+            {
+              "name": "STENCIL_BUFFER_ENABLED",
+              "brief": "Whether the stencil buffer is available or not."
+            },
+            {
+              "name": "PARTIAL_UPDATE_ENABLED",
+              "brief": "Whether partial update is available or not."
+            },
+            {
+              "name": "MULTI_SAMPLING_ENABLED",
+              "brief": "Whether multi-sampling anti-aliasing is available or not."
             }
           ]
         },
@@ -55528,6 +57442,14 @@
           "aliased_type": "__GLsync *"
         },
         {
+          "name": "ScenePolicyFlags",
+          "kind": "typedef",
+          "api_tier": "integration-api",
+          "brief": "",
+          "detailed": "",
+          "aliased_type": "uint8_t"
+        },
+        {
           "name": "CORE_MAJOR_VERSION",
           "kind": "variable",
           "api_tier": "public-api",
@@ -55598,6 +57520,24 @@
               "type": "const String &",
               "name": "rhs",
               "description": "The right operand string"
+            }
+          ]
+        },
+        {
+          "name": "MoveIfNoexcept",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy a value when its move constructor may throw.",
+          "detailed": "This overload is selected when the type's move constructor is not noexcept. Returns a const lvalue reference, forcing a copy and preserving the strong exception guarantee.",
+          "since": "2.5.20",
+          "type": "EnableIf<!IsNothrowMoveConstructible< Type >::value, constType & >::type",
+          "signature": "EnableIf<!IsNothrowMoveConstructible< Type >::value, constType & >::type MoveIfNoexcept(Type &arg) noexcept",
+          "returns": "A const lvalue reference to the argument",
+          "params": [
+            {
+              "type": "Type &",
+              "name": "arg",
+              "description": "The argument to copy"
             }
           ]
         },
@@ -55699,6 +57639,28 @@
           ]
         },
         {
+          "name": "operator&=",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "",
+          "detailed": "Negate two bitfields",
+          "type": "std::enable_if< EnableBitMaskOperators< EnumType >::ENABLE, EnumType & >::type",
+          "signature": "std::enable_if< EnableBitMaskOperators< EnumType >::ENABLE, EnumType & >::type operator&=(EnumType &lhs, EnumType rhs)",
+          "returns": "reference to lhs with only common bits set",
+          "params": [
+            {
+              "type": "EnumType &",
+              "name": "lhs",
+              "description": "bitfield to and"
+            },
+            {
+              "type": "EnumType",
+              "name": "rhs",
+              "description": "bitfield to and"
+            }
+          ]
+        },
+        {
           "name": "operator&",
           "kind": "function",
           "api_tier": "devel-api",
@@ -55717,6 +57679,23 @@
               "type": "EnumType",
               "name": "rhs",
               "description": "bitfield to AND"
+            }
+          ]
+        },
+        {
+          "name": "operator~",
+          "kind": "function",
+          "api_tier": "devel-api",
+          "brief": "",
+          "detailed": "One's complement of a bitfield",
+          "type": "std::enable_if< EnableBitMaskOperators< EnumType >::ENABLE, EnumType >::type",
+          "signature": "std::enable_if< EnableBitMaskOperators< EnumType >::ENABLE, EnumType >::type operator~(EnumType bitfield)",
+          "returns": "EnumType with inverted bits",
+          "params": [
+            {
+              "type": "EnumType",
+              "name": "bitfield",
+              "description": "to invert"
             }
           ]
         },
@@ -56178,6 +58157,42 @@
       "synthetic": true
     },
     {
+      "name": "Dali::ScenePolicyFlagBits",
+      "kind": "enum",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/scene.h",
+      "api_tier": "integration-api",
+      "brief": "",
+      "detailed": "",
+      "members": [
+        {
+          "name": "DEFAULT",
+          "kind": "enumvalue",
+          "brief": ""
+        },
+        {
+          "name": "DEPTH_BUFFER_ENABLED",
+          "kind": "enumvalue",
+          "brief": "Whether the depth buffer is available or not."
+        },
+        {
+          "name": "STENCIL_BUFFER_ENABLED",
+          "kind": "enumvalue",
+          "brief": "Whether the stencil buffer is available or not."
+        },
+        {
+          "name": "PARTIAL_UPDATE_ENABLED",
+          "kind": "enumvalue",
+          "brief": "Whether partial update is available or not."
+        },
+        {
+          "name": "MULTI_SAMPLING_ENABLED",
+          "kind": "enumvalue",
+          "brief": "Whether multi-sampling anti-aliasing is available or not."
+        }
+      ],
+      "synthetic": true
+    },
+    {
       "name": "Dali",
       "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/object/property-array.cpp",
@@ -56216,7 +58231,7 @@
     {
       "name": "Dali",
       "kind": "namespace",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/signals/functor-delegate.cpp",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/animation/constraint.cpp",
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",
@@ -56225,7 +58240,7 @@
     {
       "name": "Dali",
       "kind": "namespace",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/animation/constraint.cpp",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/signals/functor-delegate.cpp",
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",
@@ -56245,6 +58260,15 @@
       "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/devel-api/threading/thread-pool.cpp",
       "api_tier": "devel-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "Dali",
+      "kind": "namespace",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/dali-vector-base.cpp",
+      "api_tier": "public-api",
       "brief": "",
       "detailed": "",
       "members": []
@@ -61870,7 +63894,17 @@
       "api_tier": "public-api",
       "brief": "Internal namespace for implementation details of IsLValueReference.",
       "detailed": "",
-      "members": []
+      "members": [
+        {
+          "name": "Declval",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Declval helper - never defined, used only in unevaluated contexts.",
+          "detailed": "Equivalent to std::declval. Converts any type T to a reference type, enabling use in decltype/noexcept contexts without constructing the object.",
+          "type": "Type &&",
+          "signature": "Type && Declval() noexcept"
+        }
+      ]
     },
     {
       "name": "Dali::DevelActor",
@@ -61927,8 +63961,8 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "Calculates screen position and size using event-side properties. This function calculates the bounding box screen coordinates and size of an actor by automatically detecting whether to use 2D or 3D calculation based on the actor's context and ancestor layers. For 2D calculation (when no 3D layers in ancestors): Uses 2D-specific optimizations Assumes orthographic projection and no camera rotation Transforms 4 corner points in 2D space (Z=0) for bounding box calculation Faster calculation with 2D limitations For 3D calculation (when 3D layers exist in ancestors): Uses full 3D projection with view and projection matrices Supports perspective projection, camera rotation, and full 3D transforms Transforms all 8 corners of the 3D bounding box for accurate screen extents Accounts for perspective foreshortening and 3D rotation effects More accurate but computationally expensive",
-          "type": "Rect",
-          "signature": "Rect CalculateScreenExtents(Actor actor)",
+          "type": "Bounds",
+          "signature": "Bounds CalculateScreenExtents(Actor actor)",
           "returns": "Rect containing position of top-left corner on screen and size respectively. Returns (0,0,0,0) if actor is not on scene.",
           "params": [
             {
@@ -61944,8 +63978,8 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "Calculates screen position and size from current node values. This function calculates the bounding box screen coordinates and size of an actor using the current state from the update thread (node). It automatically detects whether to use 2D or 3D calculation based on the actor's context and ancestor layers. For 2D calculation (when no 3D layers in ancestors): Uses 2D-specific optimizations Assumes orthographic projection and no camera rotation Transforms 4 corner points in 2D space (Z=0) for bounding box calculation Uses current node state for the specified buffer index Faster calculation with 2D limitations For 3D calculation (when 3D layers exist in ancestors): Uses full 3D projection with view and projection matrices Supports perspective projection, camera rotation, and full 3D transforms Transforms all 8 corners of the 3D bounding box for accurate screen extents Accounts for perspective foreshortening and 3D rotation effects Uses current node state for the specified buffer index More accurate but computationally expensive",
-          "type": "Rect",
-          "signature": "Rect CalculateCurrentScreenExtents(Actor actor)",
+          "type": "Bounds",
+          "signature": "Bounds CalculateCurrentScreenExtents(Actor actor)",
           "returns": "Rect containing position of top-left corner on screen and size respectively. Returns (0,0,0,0) if actor is not on scene.",
           "params": [
             {
@@ -65257,7 +67291,7 @@
           "api_tier": "devel-api",
           "brief": "Stage key event generated signal type.",
           "detailed": "",
-          "aliased_type": "Signal< bool(const KeyEvent &)>"
+          "aliased_type": "Signal< bool(KeyEvent)>"
         },
         {
           "name": "KeyEventGeneratedSignal",
@@ -66701,18 +68735,6 @@
             {
               "name": "RENDER_TO_FRAME_BUFFER",
               "brief": "Whether we should render to the frame-buffer or not."
-            },
-            {
-              "name": "DEPTH_BUFFER_AVAILABLE",
-              "brief": "Whether the depth buffer is available or not."
-            },
-            {
-              "name": "STENCIL_BUFFER_AVAILABLE",
-              "brief": "Whether the stencil buffer is available or not."
-            },
-            {
-              "name": "PARTIAL_UPDATE_AVAILABLE",
-              "brief": "Whether the partial update is available or not."
             }
           ]
         },
@@ -68052,7 +70074,7 @@
             "If texture is native or fast track case, we don't actual upload. Just update the context. In that case, pixelData only be used for get BytesPerPixel value."
           ],
           "type": "bool",
-          "signature": "bool TextureUploadWithContent(Dali::Texture texture, Dali::PixelData pixelData, Dali::String context, TextureContextTypeHint::Type typeHint=TextureContextTypeHint::UNKNOWN)",
+          "signature": "bool TextureUploadWithContent(Dali::Texture texture, Dali::PixelData pixelData, Dali::String context, TextureContextTypeHint::Type typeHint=TextureContextTypeHint::UNKNOWN, bool updateContextOnly=false, bool keepPreviousContext=false)",
           "returns": "True if the PixelData object has compatible pixel format and fits within the texture, false otherwise",
           "params": [
             {
@@ -68063,7 +70085,7 @@
             {
               "type": "Dali::PixelData",
               "name": "pixelData",
-              "description": "The pixelData object"
+              "description": "The pixelData object. If empty handle, only context will be updated without actual upload."
             },
             {
               "type": "Dali::String",
@@ -68074,6 +70096,16 @@
               "type": "TextureContextTypeHint::Type",
               "name": "typeHint",
               "description": "Specifies hint for the texture which kind of image uploaded (optional)"
+            },
+            {
+              "type": "bool",
+              "name": "updateContextOnly",
+              "description": "Whether to only update the context without actual upload (optional)"
+            },
+            {
+              "type": "bool",
+              "name": "keepPreviousContext",
+              "description": "Whether to keep previous context when update context (optional)"
             }
           ]
         }
@@ -68180,21 +70212,6 @@
           "name": "RENDER_TO_FRAME_BUFFER",
           "kind": "enumvalue",
           "brief": "Whether we should render to the frame-buffer or not."
-        },
-        {
-          "name": "DEPTH_BUFFER_AVAILABLE",
-          "kind": "enumvalue",
-          "brief": "Whether the depth buffer is available or not."
-        },
-        {
-          "name": "STENCIL_BUFFER_AVAILABLE",
-          "kind": "enumvalue",
-          "brief": "Whether the stencil buffer is available or not."
-        },
-        {
-          "name": "PARTIAL_UPDATE_AVAILABLE",
-          "kind": "enumvalue",
-          "brief": "Whether the partial update is available or not."
         }
       ],
       "synthetic": true
@@ -68938,14 +70955,6 @@
               "brief": "SVG image."
             },
             {
-              "name": "NATIVE_IMAGE",
-              "brief": "Standard native image."
-            },
-            {
-              "name": "NATIVE_LOTTIE_IMAGE",
-              "brief": "Lottie as native image."
-            },
-            {
               "name": "TEXT_SIMPLE_LABEL",
               "brief": "Text for simple label."
             },
@@ -68958,12 +70967,68 @@
               "brief": "Text atlas (Editor / Field)"
             },
             {
+              "name": "NATIVE_IMAGE",
+              "brief": "Standard native image."
+            },
+            {
+              "name": "NATIVE_LOTTIE_IMAGE",
+              "brief": "Lottie as native image."
+            },
+            {
+              "name": "FBO_ATTACHED_COLOR_TEXTURE",
+              "brief": "Texture attached to FBO."
+            },
+            {
+              "name": "FBO_ATTACHED_DEPTH_TEXTURE",
+              "brief": "Depth texture attached to FBO."
+            },
+            {
+              "name": "FBO_ATTACHED_DEPTH_STENCIL_TEXTURE",
+              "brief": "Depth stencil texture attached to FBO."
+            },
+            {
+              "name": "SCENE3D_STANDARD_IMAGE",
+              "brief": "Standard image for Scene3D."
+            },
+            {
+              "name": "SCENE3D_BUFFER_IMAGE",
+              "brief": "Buffer image for Scene3D."
+            },
+            {
+              "name": "SCENE3D_DEFAULT_WHITE",
+              "brief": "Global default white texture for Scene3D."
+            },
+            {
+              "name": "SCENE3D_DEFAULT_WHITE_CUBE",
+              "brief": "Global default white cube texture for Scene3D."
+            },
+            {
+              "name": "SCENE3D_DEFAULT_BRDF",
+              "brief": "Global default brdf texture for Scene3D."
+            },
+            {
+              "name": "SCENE3D_ENVIRONMENT_CUBEMAP",
+              "brief": "Environment map for Scene3D, as cubemap and 2d environment map."
+            },
+            {
+              "name": "SCENE3D_ENVIRONMENT_EQUIRECTANGULAR",
+              "brief": "Environment map for Scene3D, for equirectangular projection."
+            },
+            {
+              "name": "SCENE3D_MATERIAL_IMAGE",
+              "brief": "Material texture for Scene3D, like base color, metallic roughness, normal, etc."
+            },
+            {
               "name": "EXTERNAL_IMAGE",
               "brief": "External image from GenerateUrl()"
             },
             {
               "name": "GRADIENT_TEXTURE",
               "brief": "Gradient texture."
+            },
+            {
+              "name": "SCENE3D_BLENDSHAPE_DATA",
+              "brief": "Data exture for Scene3D blend shape."
             },
             {
               "name": "END_OF_DALI_TEXTURES",
@@ -69022,16 +71087,6 @@
           "brief": "SVG image."
         },
         {
-          "name": "NATIVE_IMAGE",
-          "kind": "enumvalue",
-          "brief": "Standard native image."
-        },
-        {
-          "name": "NATIVE_LOTTIE_IMAGE",
-          "kind": "enumvalue",
-          "brief": "Lottie as native image."
-        },
-        {
           "name": "TEXT_SIMPLE_LABEL",
           "kind": "enumvalue",
           "brief": "Text for simple label."
@@ -69047,6 +71102,71 @@
           "brief": "Text atlas (Editor / Field)"
         },
         {
+          "name": "NATIVE_IMAGE",
+          "kind": "enumvalue",
+          "brief": "Standard native image."
+        },
+        {
+          "name": "NATIVE_LOTTIE_IMAGE",
+          "kind": "enumvalue",
+          "brief": "Lottie as native image."
+        },
+        {
+          "name": "FBO_ATTACHED_COLOR_TEXTURE",
+          "kind": "enumvalue",
+          "brief": "Texture attached to FBO."
+        },
+        {
+          "name": "FBO_ATTACHED_DEPTH_TEXTURE",
+          "kind": "enumvalue",
+          "brief": "Depth texture attached to FBO."
+        },
+        {
+          "name": "FBO_ATTACHED_DEPTH_STENCIL_TEXTURE",
+          "kind": "enumvalue",
+          "brief": "Depth stencil texture attached to FBO."
+        },
+        {
+          "name": "SCENE3D_STANDARD_IMAGE",
+          "kind": "enumvalue",
+          "brief": "Standard image for Scene3D."
+        },
+        {
+          "name": "SCENE3D_BUFFER_IMAGE",
+          "kind": "enumvalue",
+          "brief": "Buffer image for Scene3D."
+        },
+        {
+          "name": "SCENE3D_DEFAULT_WHITE",
+          "kind": "enumvalue",
+          "brief": "Global default white texture for Scene3D."
+        },
+        {
+          "name": "SCENE3D_DEFAULT_WHITE_CUBE",
+          "kind": "enumvalue",
+          "brief": "Global default white cube texture for Scene3D."
+        },
+        {
+          "name": "SCENE3D_DEFAULT_BRDF",
+          "kind": "enumvalue",
+          "brief": "Global default brdf texture for Scene3D."
+        },
+        {
+          "name": "SCENE3D_ENVIRONMENT_CUBEMAP",
+          "kind": "enumvalue",
+          "brief": "Environment map for Scene3D, as cubemap and 2d environment map."
+        },
+        {
+          "name": "SCENE3D_ENVIRONMENT_EQUIRECTANGULAR",
+          "kind": "enumvalue",
+          "brief": "Environment map for Scene3D, for equirectangular projection."
+        },
+        {
+          "name": "SCENE3D_MATERIAL_IMAGE",
+          "kind": "enumvalue",
+          "brief": "Material texture for Scene3D, like base color, metallic roughness, normal, etc."
+        },
+        {
           "name": "EXTERNAL_IMAGE",
           "kind": "enumvalue",
           "brief": "External image from GenerateUrl()"
@@ -69055,6 +71175,11 @@
           "name": "GRADIENT_TEXTURE",
           "kind": "enumvalue",
           "brief": "Gradient texture."
+        },
+        {
+          "name": "SCENE3D_BLENDSHAPE_DATA",
+          "kind": "enumvalue",
+          "brief": "Data exture for Scene3D blend shape."
         },
         {
           "name": "END_OF_DALI_TEXTURES",
@@ -73278,6 +75403,13 @@
           "api_tier": "devel-api",
           "brief": "",
           "detailed": "Adds a value, typically an enum, to the table within a scope but without the scope name Example converts ( Layer, LAYER_UI ) to ( \"LAYER_UI\", Layer::LayerUI )"
+        },
+        {
+          "name": "DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE",
+          "kind": "define",
+          "api_tier": "devel-api",
+          "brief": "",
+          "detailed": "Adds a value, typically an enum class, to the table within a scope but without the scope name Example converts ( GestureSourceType, MOUSE ) to ( \"MOUSE\", GestureSourceType::MOUSE )"
         }
       ]
     },
@@ -79472,6 +81604,13 @@
           "api_tier": "public-api",
           "brief": "Use DALI_FALLTHROUGH in switch statements where one case is supposed to fall through into another case.",
           "detailed": ""
+        },
+        {
+          "name": "DALI_NO_UNIQUE_ADDRESS",
+          "kind": "define",
+          "api_tier": "public-api",
+          "brief": "Use DALI_NO_UNIQUE_ADDRESS to allow empty base class optimization for compilers that support it.",
+          "detailed": ""
         }
       ]
     },
@@ -79611,6 +81750,15 @@
       "members": []
     },
     {
+      "name": "open-hash-map-managed.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/open-hash-map-managed.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
       "name": "shared-ptr.h",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/common/shared-ptr.h",
@@ -79626,7 +81774,22 @@
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",
-      "members": []
+      "members": [
+        {
+          "name": "DALI_HAS_TRIVIAL_COPY",
+          "kind": "define",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "DALI_HAS_TRIVIAL_DESTRUCTOR",
+          "kind": "define",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        }
+      ]
     },
     {
       "name": "unique-ptr.h",
@@ -80251,15 +82414,6 @@
       "members": []
     },
     {
-      "name": "uint-16-pair.h",
-      "kind": "file",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/uint-16-pair.h",
-      "api_tier": "public-api",
-      "brief": "",
-      "detailed": "",
-      "members": []
-    },
-    {
       "name": "vector2.cpp",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/math/vector2.cpp",
@@ -80627,6 +82781,33 @@
       "brief": "",
       "detailed": "",
       "members": []
+    },
+    {
+      "name": "type-info-id.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-core/dali/public-api/object/type-info-id.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": [
+        {
+          "name": "DALI_TYPE_ID",
+          "kind": "define",
+          "api_tier": "public-api",
+          "brief": "Macro to create a TypeInfoId from a C++ type at call sites.",
+          "detailed": "Uses preprocessor stringification (#Type) to obtain the type name and FNV-1a to hash it at compile time. The type must be a complete, named type — not a template parameter token. Examples of use: DALI_TYPE_ID(int)->TypeInfoId(HashFNV1a(\"int\"),\"int\") DALI_TYPE_ID(Dali::Actor)->TypeInfoId(HashFNV1a(\"Dali::Actor\"),\"Dali::Actor\")",
+          "notes": [
+            "Do NOT use this macro inside a template method body where the argument is itself a template parameter (e.g., DALI_TYPE_ID(T) where T is a typename). Use Dali::Any::IsType<T>() for type queries on Dali::Any values, or refer to the Dali::Any class internals which use TypeInfoIdFromTypeid<T>() directly. * The macro uses preprocessor stringification (#Type) to obtain the type name."
+          ]
+        },
+        {
+          "name": "DALI_TYPE_ID_ALIAS",
+          "kind": "define",
+          "api_tier": "public-api",
+          "brief": "Macro to create a TypeInfoId from an explicit string alias.",
+          "detailed": "Use this variant when the type name cannot be stringified directly by the preprocessor — for example, template types containing commas, or when a stable alias name is preferred over the C++ identifier. The alias string MUST be unique within the DALi type registry, and MUST be used consistently at both registration and lookup sites. Unlike DALI_TYPE_ID, this macro provides no compile-time type checking — the compiler does not validate that the alias string matches the type. Prefer a typedef/using alias with DALI_TYPE_ID over this macro. Examples of use: usingIntVector=std::vector<int>; DALI_TYPE_ID(IntVector)//preferred //Orifatypedefisnotpossible: DALI_TYPE_ID_ALIAS(std::vector<int>,\"std::vector<int>\")"
+        }
+      ]
     },
     {
       "name": "weak-handle.cpp",

@@ -150,7 +150,7 @@
 <codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Commands</highlight><highlight class="normal"></highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Prepare();</highlight></codeline>
 <codeline><highlight class="normal"></highlight></codeline>
-<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;&amp;<sp/>regions);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>ClearExclusionRegions();</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>GetExclusionRegionCount()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
 <codeline><highlight class="normal"></highlight></codeline>
@@ -235,7 +235,7 @@
 <codeline><highlight class="normal"></highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Prepare();</highlight></codeline>
 <codeline><highlight class="normal"></highlight></codeline>
-<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;&amp;<sp/>regions);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ClearExclusionRegions();</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>GetExclusionRegionCount()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
 <codeline><highlight class="normal"></highlight></codeline>
@@ -260,7 +260,7 @@
 <codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mFontFamily;</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mFontSize;</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>UiColor<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mTextColor;</highlight></codeline>
-<codeline><highlight class="normal"><sp/><sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;<sp/><sp/>mExclusionRegions;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::Vector&lt;Bounds&gt;<sp/><sp/>mExclusionRegions;</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>Text::RendererPtr<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mRenderer;</highlight></codeline>
 <codeline><highlight class="normal">};</highlight></codeline>
 <codeline><highlight class="normal"></highlight></codeline>
@@ -463,9 +463,9 @@
 <title>권장안</title>
 <para><computeroutput>SetExclusionRegions()</computeroutput>가 더 적절하다.</para>
 <para>단, ABI 안정성을 위해 public parameter type은 별도 public struct보다 아래처럼 단순하게 두는 것이 좋다.</para>
-<para><programlisting filename=".cpp"><codeline><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;&amp;<sp/>regions);</highlight></codeline>
+<para><programlisting filename=".cpp"><codeline><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
 </programlisting></para>
-<para>즉, naming은 <computeroutput>Regions</computeroutput>, type은 <computeroutput>Rect&lt;float&gt;</computeroutput> 집합으로 가는 것이 1차 구현에 가장 안정적이다.</para>
+<para>즉, naming은 <computeroutput>Regions</computeroutput>, type은 <computeroutput>Bounds</computeroutput> 집합으로 가는 것이 1차 구현에 가장 안정적이다.</para>
 </sect2>
 </sect1>
 <sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio0339e4448aa73db778d6864150812dc0_1autotoc_md323">
@@ -538,7 +538,7 @@
 <title>2. exclusion region용 새 public struct는 신중해야 한다</title>
 <para>public <computeroutput>struct TextExclusionRegion</computeroutput>을 노출하면 향후 필드 추가가 ABI 부담이 된다.</para>
 <para>따라서 1차 구현에서는 새 public struct보다 다음이 더 안전하다.</para>
-<para><programlisting filename=".cpp"><codeline><highlight class="normal">Dali::Vector&lt;Rect&lt;float&gt;&gt;</highlight></codeline>
+<para><programlisting filename=".cpp"><codeline><highlight class="normal">Dali::Vector&lt;Bounds&gt;</highlight></codeline>
 </programlisting></para>
 </sect2>
 <sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatio0339e4448aa73db778d6864150812dc0_1autotoc_md331">

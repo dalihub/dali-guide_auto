@@ -1513,6 +1513,27 @@
       "matched_symbols": [
         "Application",
         "ConnectionTracker",
+        "InputEvent",
+        "New",
+        "ScrollView",
+        "SetContent",
+        "SetScrollDirection",
+        "StackLayout",
+        "View"
+      ],
+      "path": "repos/dali-ui/samples/ui-scale/ui-scale-example.cpp",
+      "relevance": "strong",
+      "score": 0.95,
+      "selection_reason": "symbol_and_path_match",
+      "snippet_end_line": 104,
+      "snippet_start_line": 25
+    },
+    {
+      "kind": "sample",
+      "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+      "matched_symbols": [
+        "Application",
+        "ConnectionTracker",
         "New",
         "ScrollView",
         "SetContent",
@@ -1673,6 +1694,30 @@
       "snippet": "constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;\nconstexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;\nconstexpr uint32_t COLOR_YELLOW       = 0xFFFF00;\nconstexpr uint32_t COLOR_CYAN         = 0x00FFFF;\nconstexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;\n\nLabel CreateButton(const char* text, uint32_t bgColor)\n{\n  return Label::New(text)\n    .SetFontSize(11.0f)\n    .SetHorizontalTextAlignment(Text::Alignment::CENTER)\n    .SetVerticalTextAlignment(Text::Alignment::CENTER)\n    .SetBackgroundColor(UiColor(bgColor))\n    .SetRequestedWidth(0.0f)\n    .SetRequestedHeight(BUTTON_HEIGHT)\n    .SetPadding(Extents(4, 4, 4, 4))\n    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));\n}\n\nView CreateButtonRow(std::initializer_list<Label> buttons)\n{\n  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)\n    .SetRequestedWidth(MATCH_PARENT)\n    .SetRequestedHeight(WRAP_CONTENT)\n    .SetSpacing(BUTTON_SPACING);\n\n  for(auto& btn : buttons)\n  {\n    row.Add(btn);\n  }\n  return row;\n}\n} // namespace\n\nclass InputFieldController : public ConnectionTracker\n{\npublic:\n  explicit InputFieldController(Application& application)\n  : mApplication(application)\n  {\n    mApplication.InitSignal().Connect(this, &InputFieldController::OnInit);\n  }\n\nprivate:\n  void OnInit(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0xF5F5F5));\n\n    // Target InputField\n    mInputField = InputField::New()\n      .SetPlaceholder(\"Type here\")\n      .SetPlaceholderColor(UiColor(COLOR_DARK_GRAY))\n      .SetFontSize(20.0f)\n      .SetCursorWidth(2)\n      .SetCursorColor(UiColor(COLOR_DARK_TEXT))\n      .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))\n      .SetTextHandleEnabled(true)\n      .SetTextHandleColor(UiColor(0x000080))\n      .SetMaximumLength(50)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(INPUT_HEIGHT)\n      .SetBackgroundColor(UiColor(0xFFFFFF))\n      .SetTextColor(UiColor(COLOR_DARK_TEXT))\n      .SetPadding(Extents(12, 12, 12, 12))\n      .SetVerticalTextAlignment(Text::Alignment::CENTER)\n      .SetFocusable(true);\n\n    // Set text handle images\n    mInputField.SetCursorHandleImage(RESOURCES_DIR \"cursor_handle.png\");\n    mInputField.SetCursorHandlePressedImage(RESOURCES_DIR \"cursor_handle_pressed.png\");\n    mInputField.SetSelectionHandleImageLeft(RESOURCES_DIR \"selection_handle_left.png\");\n    mInputField.SetSelectionHandleImageRight(RESOURCES_DIR \"selection_handle_right.png\");\n    mInputField.SetSelectionHandlePressedImageLeft(RESOURCES_DIR \"selection_handle_left_pressed.png\");\n    mInputField.SetSelectionHandlePressedImageRight(RESOURCES_DIR \"selection_handle_right_pressed.png\");\n\n    // Connect signals\n    mInputField.TextChangedSignal().Connect(this, &InputFieldController::OnTextChanged);\n    mInputField.MaximumLengthReachedSignal().Connect(this, &InputFieldController::OnMaximumLengthReached);\n    mInputField.CursorPositionChangedSignal().Connect(this, &InputFieldController::OnCursorPositionChanged);",
       "snippet_end_line": 112,
       "snippet_start_line": 33
+    },
+    {
+      "kind": "sample",
+      "matched_context_symbols": [],
+      "matched_features": [],
+      "matched_primary_symbols": [
+        "Application",
+        "ConnectionTracker",
+        "InputEvent",
+        "New",
+        "ScrollView",
+        "SetContent",
+        "SetScrollDirection",
+        "StackLayout",
+        "View"
+      ],
+      "matched_supporting_symbols": [],
+      "path": "repos/dali-ui/samples/ui-scale/ui-scale-example.cpp",
+      "relevance": "strong",
+      "score": 0.95,
+      "selection_reason": "symbol_and_path_match",
+      "snippet": " *    - Custom scale InputField + Apply button\n *\n *  [Zone A] INHERIT (default)\n *    - Three colored 60×60 boxes, all INHERIT\n *    - All grow/shrink proportionally with system scale\n *    - Nested 2×2 GridLayout also scales\n *\n *  [Zone B] DISABLED container + ENABLED children  ← KEY TEST\n *    - The outer StackLayout is DISABLED (effectiveScale = 1.0 always)\n *    - Red box:   INHERIT  → inherits DISABLED parent → does NOT scale\n *    - Green box: ENABLED  → bypasses DISABLED parent → DOES scale\n *    - Blue box:  ENABLED  → same as green\n *    Observe: Red stays 60×60. Green/Blue grow as scale increases.\n *\n *  [Zone C] DISABLED subtree inside normal INHERIT parent\n *    - Orange box: INHERIT inside INHERIT zone → scales\n *    - Purple sub-container: DISABLED → isolates its children\n *      - Purple child: INHERIT under DISABLED → does NOT scale\n *      - Orange-red child: ENABLED → scales despite DISABLED parent\n *\n * Press Escape / Back to quit.\n */\n\n#include <dali-ui-foundation/dali-ui-foundation.h>\n#include <iomanip>\n#include <sstream>\n#include <stdexcept>\n#include <string>\n\nusing namespace Dali;\nusing namespace Dali::Ui;\n\n// ─────────────────────────── Color palette ───────────────────────────────────\nnamespace\n{\nconstexpr uint32_t C_CTRL_BG    = 0x1A1A2E; // Control panel dark bg\nconstexpr uint32_t C_BTN        = 0x0F3460; // Preset button bg\nconstexpr uint32_t C_BTN_APPLY  = 0x00695C; // Apply button (teal)\nconstexpr uint32_t C_WHITE      = 0xFFFFFF;\nconstexpr uint32_t C_LIGHT_TEXT = 0xF5F5F5;\nconstexpr uint32_t C_YELLOW_HI  = 0xFFEB3B; // Scale display highlight\nconstexpr uint32_t C_DARK_TEXT  = 0x212121;\nconstexpr uint32_t C_GRAY_TEXT  = 0x757575;\nconstexpr uint32_t C_INPUT_BG   = 0x2D2D4E;\n\n// Zone backgrounds\nconstexpr uint32_t C_ZONE_A_BG  = 0xE3F2FD; // light blue\nconstexpr uint32_t C_ZONE_B_BG  = 0xFFF9C4; // light yellow\nconstexpr uint32_t C_ZONE_C_BG  = 0xE8F5E9; // light green\nconstexpr uint32_t C_ZONE_TITLE = 0x37474F;\n\n// Box colors\nconstexpr uint32_t C_RED        = 0xE53935;\nconstexpr uint32_t C_GREEN      = 0x43A047;\nconstexpr uint32_t C_BLUE       = 0x1E88E5;\nconstexpr uint32_t C_ORANGE     = 0xFB8C00;\nconstexpr uint32_t C_PURPLE     = 0x8E24AA;\nconstexpr uint32_t C_DEEP_ORG   = 0xE64A19; // \"ENABLED in DISABLED subtree\"\n\n// Grid cell colors\nconstexpr uint32_t C_GRID[4]    = {0xEF9A9A, 0x90CAF9, 0xA5D6A7, 0xFFCC80};\n\n// Misc\nconstexpr float    BOX_SIZE     = 60.0f;  // natural size of each demo box\nconstexpr float    ZONE_RADIUS  = 10.0f;\nconstexpr float    BOX_RADIUS   = 6.0f;\nconstexpr float    BTN_RADIUS   = 8.0f;\nconstexpr float    BTN_HEIGHT   = 44.0f;\n} // namespace\n\n// ──────────────────── float → \"1.23\" helper ──────────────────────────────────\nstatic std::string Fmt(float v)\n{\n  std::ostringstream oss;\n  oss << std::fixed << std::setprecision(2) << v;\n  return oss.str();\n}\n\n// ─────────────────────────── Controller ──────────────────────────────────────\nclass UiScaleController : public ConnectionTracker",
+      "snippet_end_line": 104,
+      "snippet_start_line": 25
     },
     {
       "kind": "sample",
@@ -2834,6 +2879,27 @@
         "matched_symbols": [
           "Application",
           "ConnectionTracker",
+          "InputEvent",
+          "New",
+          "ScrollView",
+          "SetContent",
+          "SetScrollDirection",
+          "StackLayout",
+          "View"
+        ],
+        "path": "repos/dali-ui/samples/ui-scale/ui-scale-example.cpp",
+        "relevance": "strong",
+        "score": 0.95,
+        "selection_reason": "symbol_and_path_match",
+        "snippet_end_line": 104,
+        "snippet_start_line": 25
+      },
+      {
+        "kind": "sample",
+        "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+        "matched_symbols": [
+          "Application",
+          "ConnectionTracker",
           "New",
           "ScrollView",
           "SetContent",
@@ -3292,12 +3358,12 @@
     }
   ],
   "source_hashes": {
-    "api_symbols": "cc905a6b95cbe731c1b8d55fc52efccb3abc0555eb2388fc640ef3a939c3d18c",
-    "document_features": "12e0c220be2dcd29a3e638e77fedce7a7af8761e8acaa1fa008b65f1bc53c4c0",
-    "feature_spec": "21544fc13bb43ad2e1edfd46786906231e6974a24d71392bf9085d39bb017214",
-    "feature_to_symbols": "b72ec5486f4300ea7bc6daef92f37648f41f8a1af45f39c2c75c72cc7d1a9c5c",
-    "generation_config": "2857f9a491dd707c1e66ae9bf70889f746a86e03e879deec4d0ffa777447ee43",
-    "symbol_to_feature": "334e493eb62eb920f59fa25226aeb3d9dee042026a2a8f1e2369a6e2b2777810"
+    "api_symbols": "36436e0dbd9b800be96a50f99a80187b85e8208853428ae6852d4a564012a38f",
+    "document_features": "715253d7602ceef3fa78855b08b6c6076297670197e2f11a9af7175ca2931fc0",
+    "feature_spec": "e924dd86dbc221aed29fb2043d9cb977c8657a661646579ba35cd48f17a0a7c9",
+    "feature_to_symbols": "11d2214fa0a36cf15cfc6a67256a7f2ab7660d5904e7423f4c706a73fb9ecea9",
+    "generation_config": "8f1a87a64acbdc9e2ac386fdaab9115289247742bea448707a39739e59a324a2",
+    "symbol_to_feature": "f387596777c2899ebe66a1abaca23cc6ce5e0377749a5d5c3a8e00f202ece72d"
   },
   "supporting_api": [
     {
@@ -3366,11 +3432,11 @@
     }
   },
   "token_estimate": {
-    "context_pack_tokens": 29366,
-    "input_tokens": 6391,
+    "context_pack_tokens": 30482,
+    "input_tokens": 6505,
     "limit": 80000,
-    "prompt_projection_tokens": 6391,
-    "rendered_prompt_tokens": 6047
+    "prompt_projection_tokens": 6505,
+    "rendered_prompt_tokens": 6161
   },
   "uncertainties": [
     {

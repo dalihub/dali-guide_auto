@@ -27,15 +27,15 @@
 <codeline></codeline>
 <codeline><highlight class="normal">|<sp/>항목<sp/>|<sp/>현재<sp/>위치<sp/>|<sp/>공개<sp/>범위<sp/>|<sp/>역할<sp/>|</highlight></codeline>
 <codeline><highlight class="normal">|---|---|---|---|</highlight></codeline>
-<codeline><highlight class="normal">|<sp/>`SortedExclusionRegion`<sp/>|<sp/>`layout-engine.cpp`<sp/>anonymous<sp/>namespace<sp/>|<sp/>cpp-local<sp/>|<sp/>`Rect&lt;float&gt;`와<sp/>`top`<sp/>/<sp/>`bottom`<sp/>cache<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`SortedExclusionRegion`<sp/>|<sp/>`layout-engine.cpp`<sp/>anonymous<sp/>namespace<sp/>|<sp/>cpp-local<sp/>|<sp/>`Bounds`와<sp/>`top`<sp/>/<sp/>`bottom`<sp/>cache<sp/>|</highlight></codeline>
 <codeline><highlight class="normal">|<sp/>`SortedExclusionRegions`<sp/>|<sp/>`layout-engine.cpp`<sp/>anonymous<sp/>namespace<sp/>|<sp/>cpp-local<sp/>|<sp/>`std::vector&lt;SortedExclusionRegion&gt;`<sp/>alias<sp/>|</highlight></codeline>
-<codeline><highlight class="normal">|<sp/>`BuildSortedExclusionRegions()`<sp/>|<sp/>`layout-engine.cpp`<sp/>anonymous<sp/>namespace<sp/>|<sp/>cpp-local<sp/>|<sp/>`Dali::Vector&lt;Rect&lt;float&gt;&gt;`를<sp/>y-sort<sp/>cache로<sp/>변환<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`BuildSortedExclusionRegions()`<sp/>|<sp/>`layout-engine.cpp`<sp/>anonymous<sp/>namespace<sp/>|<sp/>cpp-local<sp/>|<sp/>`Dali::Vector&lt;Bounds&gt;`를<sp/>y-sort<sp/>cache로<sp/>변환<sp/>|</highlight></codeline>
 <codeline><highlight class="normal">|<sp/>`BuildAvailableIntervalsFromSorted()`<sp/>|<sp/>`layout-engine.cpp`<sp/>anonymous<sp/>namespace<sp/>|<sp/>cpp-local<sp/>|<sp/>sorted<sp/>regions를<sp/>line<sp/>y<sp/>band로<sp/>scan<sp/>|</highlight></codeline>
 <codeline><highlight class="normal">|<sp/>`LayoutGlyphs()`<sp/>|<sp/>`LayoutEngine`<sp/>public<sp/>static<sp/>internal<sp/>API<sp/>|<sp/>header<sp/>exposed<sp/>|<sp/>glyph<sp/>placement<sp/>layout<sp/>|</highlight></codeline>
 <codeline><highlight class="normal">|<sp/>`LayoutPlaceholder()`<sp/>|<sp/>`LayoutEngine`<sp/>public<sp/>static<sp/>internal<sp/>API<sp/>|<sp/>header<sp/>exposed<sp/>|<sp/>placeholder<sp/>cluster<sp/>layout<sp/>|</highlight></codeline>
 <codeline><highlight class="normal">|<sp/>`BuildAvailableIntervals()`<sp/>|<sp/>`LayoutEngine`<sp/>public<sp/>static<sp/>internal<sp/>API<sp/>|<sp/>header<sp/>exposed<sp/>|<sp/>test/helper용<sp/>vector<sp/>기반<sp/>interval<sp/>build<sp/>|</highlight></codeline>
 <codeline></codeline>
-<codeline><highlight class="normal">현재<sp/>`TextVisualizerImpl`이<sp/>볼<sp/>수<sp/>있는<sp/>것은<sp/>`Dali::Vector&lt;Rect&lt;float&gt;&gt;<sp/>mExclusionRegions`뿐이다.<sp/>sorted<sp/>representation은<sp/>`LayoutEngine`<sp/>안에서<sp/>layout<sp/>pass마다<sp/>생성되고<sp/>사라진다.</highlight></codeline>
+<codeline><highlight class="normal">현재<sp/>`TextVisualizerImpl`이<sp/>볼<sp/>수<sp/>있는<sp/>것은<sp/>`Dali::Vector&lt;Bounds&gt;<sp/>mExclusionRegions`뿐이다.<sp/>sorted<sp/>representation은<sp/>`LayoutEngine`<sp/>안에서<sp/>layout<sp/>pass마다<sp/>생성되고<sp/>사라진다.</highlight></codeline>
 <codeline></codeline>
 <codeline><highlight class="normal">##<sp/>3.<sp/>현재<sp/>비용</highlight></codeline>
 <codeline></codeline>
@@ -83,7 +83,7 @@
 <codeline><highlight class="normal">```cpp</highlight></codeline>
 <codeline><highlight class="normal">struct<sp/>SortedExclusionRegion</highlight></codeline>
 <codeline><highlight class="normal">{</highlight></codeline>
-<codeline><highlight class="normal"><sp/><sp/>Rect&lt;float&gt;<sp/>rect;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Bounds<sp/>rect;</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>float<sp/>top{0.0f};</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>float<sp/>bottom{0.0f};</highlight></codeline>
 <codeline><highlight class="normal">};</highlight></codeline>
@@ -124,7 +124,7 @@
 <codeline><highlight class="normal">{</highlight></codeline>
 <codeline><highlight class="normal">public:</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>void<sp/>Clear();</highlight></codeline>
-<codeline><highlight class="normal"><sp/><sp/>void<sp/>SetRegions(const<sp/>Dali::Vector&lt;Rect&lt;float&gt;&gt;&amp;<sp/>regions);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>void<sp/>SetRegions(const<sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>const<sp/>SortedExclusionRegions&amp;<sp/>GetSortedRegions()<sp/>const;</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>uint64_t<sp/>GetVersion()<sp/>const;</highlight></codeline>
 <codeline><highlight class="normal"><sp/><sp/>bool<sp/>Empty()<sp/>const;</highlight></codeline>
@@ -295,7 +295,7 @@
 <codeline><highlight class="normal">-<sp/>`SortedExclusionRegions`</highlight></codeline>
 <codeline><highlight class="normal">-<sp/>`ExclusionLayoutCache`</highlight></codeline>
 <codeline></codeline>
-<codeline><highlight class="normal">`ExclusionLayoutCache::SetRegions()`는<sp/>raw<sp/>`Dali::Vector&lt;Rect&lt;float&gt;&gt;`를<sp/>받아<sp/>`top`<sp/>/<sp/>`bottom`<sp/>값을<sp/>미리<sp/>계산하고<sp/>y<sp/>기준으로<sp/>정렬한다.<sp/>`Clear()`와<sp/>`SetRegions()`는<sp/>version을<sp/>증가시켜<sp/>cache<sp/>변경<sp/>추적이<sp/>가능하게<sp/>했다.</highlight></codeline>
+<codeline><highlight class="normal">`ExclusionLayoutCache::SetRegions()`는<sp/>raw<sp/>`Dali::Vector&lt;Bounds&gt;`를<sp/>받아<sp/>`top`<sp/>/<sp/>`bottom`<sp/>값을<sp/>미리<sp/>계산하고<sp/>y<sp/>기준으로<sp/>정렬한다.<sp/>`Clear()`와<sp/>`SetRegions()`는<sp/>version을<sp/>증가시켜<sp/>cache<sp/>변경<sp/>추적이<sp/>가능하게<sp/>했다.</highlight></codeline>
 <codeline></codeline>
 <codeline><highlight class="normal">`LayoutEngine`에는<sp/>다음<sp/>sorted<sp/>cache<sp/>overload를<sp/>추가했다.</highlight></codeline>
 <codeline></codeline>

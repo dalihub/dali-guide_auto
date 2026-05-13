@@ -3685,6 +3685,65 @@
       ]
     },
     {
+      "name": "Dali::Ui::AttachmentId",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h",
+      "api_tier": "public-api",
+      "brief": "A lightweight identifier for an attachment slot.",
+      "detailed": "AttachmentId values are allocated sequentially via AttachmentId::Alloc(). Allocate one id per logical attachment type and store the returned id in static storage so it can be reused for SetAttachment(), GetAttachment(), and DetachAttachment(). Do not allocate a new id per object instance or per API call. Repeated one-shot allocation wastes the process-wide id space and makes previously stored attachments impossible to retrieve. //One-timeallocationperattachmenttype(e.g.inananonymousnamespaceorasastatic) staticconstAttachmentIdkMyViewDataAttachment=AttachmentId::Alloc();",
+      "members": [
+        {
+          "name": "value",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "Alloc",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Allocates and returns the next unique AttachmentId.",
+          "detailed": "Uses an internal atomic counter. Thread-safe and lock-free. Call once per logical attachment type and store the result statically. If the uint32_t id space is exhausted, an assertion is raised instead of wrapping around to an already allocated id.",
+          "type": "AttachmentId",
+          "signature": "AttachmentId Alloc()",
+          "returns": "A new unique AttachmentId"
+        },
+        {
+          "name": "operator==",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Equality operator.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator==(const AttachmentId &other) const",
+          "params": [
+            {
+              "type": "const AttachmentId &",
+              "name": "other",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator!=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Inequality operator.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool operator!=(const AttachmentId &other) const",
+          "params": [
+            {
+              "type": "const AttachmentId &",
+              "name": "other",
+              "description": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Dali::Ui::BackgroundBlurEffect",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h",
@@ -10378,6 +10437,79 @@
       ]
     },
     {
+      "name": "Dali::Ui::UniqueAny::Holder",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/unique-any.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": [
+        {
+          "name": "mValue",
+          "kind": "variable",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": ""
+        },
+        {
+          "name": "Holder",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "Holder(U &&value)",
+          "params": [
+            {
+              "type": "U &&",
+              "name": "value",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "GetType",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const TypeInfoId &",
+          "signature": "const TypeInfoId & GetType() const override"
+        }
+      ],
+      "base_classes": [
+        "Dali::Ui::UniqueAny::HolderBase"
+      ]
+    },
+    {
+      "name": "Dali::Ui::UniqueAny::HolderBase",
+      "kind": "struct",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/unique-any.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": [
+        {
+          "name": "~HolderBase",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "",
+          "signature": "~HolderBase()"
+        },
+        {
+          "name": "GetType",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "",
+          "detailed": "",
+          "type": "const TypeInfoId &",
+          "signature": "const TypeInfoId & GetType() const =0"
+        }
+      ]
+    },
+    {
       "name": "Dali::Ui::ImageUrl",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/image-loader/image-url.h",
@@ -15467,16 +15599,17 @@
           "detailed": "",
           "type": "MeasuredSize",
           "signature": "MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override",
+          "returns": "Measured visual (scale-applied) size.",
           "params": [
             {
               "type": "float",
               "name": "widthConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT."
             },
             {
               "type": "float",
               "name": "heightConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT."
             }
           ]
         },
@@ -17070,6 +17203,16 @@
           "type": "float",
           "signature": "float GetTextUiScale() const",
           "returns": "The text UI scale."
+        },
+        {
+          "name": "GetEffectiveTextPadding",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets the effective padding used for text layout.",
+          "detailed": "The view padding is adjusted by the current text UI scale.",
+          "type": "Extents",
+          "signature": "Extents GetEffectiveTextPadding() const",
+          "returns": "The effective text padding."
         },
         {
           "name": "OnInitialize",
@@ -23150,16 +23293,17 @@
           "detailed": "",
           "type": "MeasuredSize",
           "signature": "MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override",
+          "returns": "Measured visual (scale-applied) size.",
           "params": [
             {
               "type": "float",
               "name": "widthConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT."
             },
             {
               "type": "float",
               "name": "heightConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT."
             }
           ]
         },
@@ -24623,6 +24767,16 @@
           "returns": "The text UI scale."
         },
         {
+          "name": "GetEffectiveTextPadding",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets the effective padding used for text layout.",
+          "detailed": "The view padding is adjusted by the current text UI scale.",
+          "type": "Extents",
+          "signature": "Extents GetEffectiveTextPadding() const",
+          "returns": "The effective text padding."
+        },
+        {
           "name": "OnInitialize",
           "kind": "function",
           "api_tier": "integration-api",
@@ -25608,16 +25762,17 @@
           "detailed": "",
           "type": "MeasuredSize",
           "signature": "MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override",
+          "returns": "Measured visual (scale-applied) size.",
           "params": [
             {
               "type": "float",
               "name": "widthConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT."
             },
             {
               "type": "float",
               "name": "heightConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT."
             }
           ]
         },
@@ -25800,7 +25955,7 @@
           "kind": "function",
           "api_tier": "integration-api",
           "brief": "Arranges a child view within the given bounds.",
-          "detailed": "Helper method for derived classes to arrange a child view.",
+          "detailed": "",
           "type": "MeasuredSize",
           "signature": "MeasuredSize ArrangeChild(ViewImpl *child, const LayoutRect &bounds)",
           "returns": "The final arranged size",
@@ -25813,7 +25968,7 @@
             {
               "type": "const LayoutRect &",
               "name": "bounds",
-              "description": "The bounds for the child"
+              "description": "The visual bounds for the child"
             }
           ]
         },
@@ -27069,6 +27224,33 @@
           "returns": "The URL of the placeholder image, or empty string if not set"
         },
         {
+          "name": "SetPixelArea",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets the pixel area used to display a sub-region of the animation.",
+          "detailed": "The area is specified as normalized coordinates: (x, y, width, height) where each component is in the range [0, 1].",
+          "type": "LottieAnimationView &",
+          "signature": "LottieAnimationView & SetPixelArea(const Dali::Vector4 &pixelArea)",
+          "returns": "Reference to this for fluent chaining",
+          "params": [
+            {
+              "type": "const Dali::Vector4 &",
+              "name": "pixelArea",
+              "description": "The normalized sub-region of the animation to display"
+            }
+          ]
+        },
+        {
+          "name": "GetPixelArea",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets the pixel area.",
+          "detailed": "",
+          "type": "Dali::Vector4",
+          "signature": "Dali::Vector4 GetPixelArea() const",
+          "returns": "The current pixel area as normalized coordinates"
+        },
+        {
           "name": "GetLoadingStatus",
           "kind": "function",
           "api_tier": "public-api",
@@ -27829,6 +28011,33 @@
           "returns": "The URL of the placeholder image, or empty string if not set"
         },
         {
+          "name": "SetPixelArea",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Sets the pixel area used to display a sub-region of the animation.",
+          "detailed": "The area is specified as normalized coordinates: (x, y, width, height) where each component is in the range [0, 1].",
+          "type": "void",
+          "signature": "void SetPixelArea(const Dali::Vector4 &pixelArea)",
+          "returns": "Reference to this for fluent chaining",
+          "params": [
+            {
+              "type": "const Dali::Vector4 &",
+              "name": "pixelArea",
+              "description": "The normalized sub-region of the animation to display"
+            }
+          ]
+        },
+        {
+          "name": "GetPixelArea",
+          "kind": "function",
+          "api_tier": "integration-api",
+          "brief": "Gets the pixel area.",
+          "detailed": "",
+          "type": "Dali::Vector4",
+          "signature": "Dali::Vector4 GetPixelArea() const",
+          "returns": "The current pixel area as normalized coordinates"
+        },
+        {
           "name": "AnimationFinishedSignal",
           "kind": "function",
           "api_tier": "integration-api",
@@ -27979,6 +28188,12 @@
           "kind": "enumvalue",
           "api_tier": "public-api",
           "brief": "The URL of the placeholder image shown while loading."
+        },
+        {
+          "name": "PIXEL_AREA",
+          "kind": "enumvalue",
+          "api_tier": "public-api",
+          "brief": "The UV sub-region of the texture to display, as (x, y, width, height) in [0,1] normalized coordinates."
         }
       ]
     },
@@ -28293,33 +28508,6 @@
               "type": "Image::ReleasePolicy",
               "name": "releasePolicy",
               "description": "The release policy to set"
-            }
-          ]
-        },
-        {
-          "name": "GetFittingMode",
-          "kind": "function",
-          "api_tier": "public-api",
-          "brief": "Gets the fitting mode of the LottieAnimationVisual.",
-          "detailed": "",
-          "type": "Image::FittingMode",
-          "signature": "Image::FittingMode GetFittingMode() const",
-          "returns": "The fitting mode of the LottieAnimationVisual"
-        },
-        {
-          "name": "SetFittingMode",
-          "kind": "function",
-          "api_tier": "public-api",
-          "brief": "Sets the fitting mode of the LottieAnimationVisual.",
-          "detailed": "",
-          "type": "LottieAnimationVisual &",
-          "signature": "LottieAnimationVisual & SetFittingMode(Image::FittingMode fittingMode)",
-          "returns": "Reference to this for fluent chaining",
-          "params": [
-            {
-              "type": "Image::FittingMode",
-              "name": "fittingMode",
-              "description": "The fitting mode to set"
             }
           ]
         },
@@ -30962,6 +31150,12 @@
           "kind": "enumvalue",
           "api_tier": "integration-api",
           "brief": ""
+        },
+        {
+          "name": "PIXEL_AREA",
+          "kind": "enumvalue",
+          "api_tier": "integration-api",
+          "brief": ""
         }
       ]
     },
@@ -31427,6 +31621,12 @@
           "kind": "enumvalue",
           "api_tier": "public-api",
           "brief": ""
+        },
+        {
+          "name": "PIXEL_AREA",
+          "kind": "enumvalue",
+          "api_tier": "public-api",
+          "brief": ""
         }
       ]
     },
@@ -31500,12 +31700,6 @@
         },
         {
           "name": "RELEASE_POLICY",
-          "kind": "enumvalue",
-          "api_tier": "public-api",
-          "brief": ""
-        },
-        {
-          "name": "FITTING_MODE",
           "kind": "enumvalue",
           "api_tier": "public-api",
           "brief": ""
@@ -36208,10 +36402,10 @@
           "brief": "Sets the exclusion regions used by the future layout pass.",
           "detailed": "",
           "type": "void",
-          "signature": "void SetExclusionRegions(const Dali::Vector< Rect< float > > &regions)",
+          "signature": "void SetExclusionRegions(const Dali::Vector< Bounds > &regions)",
           "params": [
             {
-              "type": "const Dali::Vector< Rect< float > > &",
+              "type": "const Dali::Vector< Bounds > &",
               "name": "regions",
               "description": "Regions where text should not be placed."
             }
@@ -36223,8 +36417,8 @@
           "api_tier": "integration-api",
           "brief": "Gets the currently stored exclusion regions.",
           "detailed": "",
-          "type": "Dali::Vector< Rect< float > >",
-          "signature": "Dali::Vector< Rect< float > > GetExclusionRegions() const",
+          "type": "Dali::Vector< Bounds >",
+          "signature": "Dali::Vector< Bounds > GetExclusionRegions() const",
           "returns": "The current exclusion regions."
         },
         {
@@ -36537,10 +36731,10 @@
           "brief": "Sets the exclusion regions used by the future layout pass.",
           "detailed": "",
           "type": "void",
-          "signature": "void SetExclusionRegions(const Dali::Vector< Rect< float > > &regions)",
+          "signature": "void SetExclusionRegions(const Dali::Vector< Bounds > &regions)",
           "params": [
             {
-              "type": "const Dali::Vector< Rect< float > > &",
+              "type": "const Dali::Vector< Bounds > &",
               "name": "regions",
               "description": "Regions where text should not be placed."
             }
@@ -36552,8 +36746,8 @@
           "api_tier": "integration-api",
           "brief": "Gets the currently stored exclusion regions.",
           "detailed": "",
-          "type": "Dali::Vector< Rect< float > >",
-          "signature": "Dali::Vector< Rect< float > > GetExclusionRegions() const",
+          "type": "Dali::Vector< Bounds >",
+          "signature": "Dali::Vector< Bounds > GetExclusionRegions() const",
           "returns": "The current exclusion regions."
         },
         {
@@ -36603,16 +36797,17 @@
           "detailed": "",
           "type": "MeasuredSize",
           "signature": "MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override",
+          "returns": "Measured visual (scale-applied) size.",
           "params": [
             {
               "type": "float",
               "name": "widthConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT."
             },
             {
               "type": "float",
               "name": "heightConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT."
             }
           ]
         },
@@ -40380,6 +40575,156 @@
       ]
     },
     {
+      "name": "Dali::Ui::UiScaleManager",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-scale-manager.h",
+      "api_tier": "public-api",
+      "brief": "Provides access to the system-driven adaptive UI scale.",
+      "detailed": "UiScaleManager is a handle-based singleton that exposes the current system scale factor and propagates scale changes to all registered layout roots. floatscale=UiScaleManager::Get().GetScale();",
+      "members": [
+        {
+          "name": "UiScaleManager",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Creates an uninitialized UiScaleManager handle.",
+          "detailed": "",
+          "type": "",
+          "signature": "UiScaleManager()"
+        },
+        {
+          "name": "~UiScaleManager",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Destructor.",
+          "detailed": "",
+          "type": "",
+          "signature": "~UiScaleManager()=default"
+        },
+        {
+          "name": "UiScaleManager",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy constructor.",
+          "detailed": "",
+          "type": "",
+          "signature": "UiScaleManager(const UiScaleManager &handle)=default",
+          "params": [
+            {
+              "type": "const UiScaleManager &",
+              "name": "handle",
+              "description": "Handle to copy"
+            }
+          ]
+        },
+        {
+          "name": "UiScaleManager",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move constructor.",
+          "detailed": "",
+          "type": "",
+          "signature": "UiScaleManager(UiScaleManager &&rhs) noexcept=default",
+          "params": [
+            {
+              "type": "UiScaleManager &&",
+              "name": "rhs",
+              "description": "Handle to move"
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Copy assignment operator.",
+          "detailed": "",
+          "type": "UiScaleManager &",
+          "signature": "UiScaleManager & operator=(const UiScaleManager &handle)=default",
+          "returns": "Reference to this",
+          "params": [
+            {
+              "type": "const UiScaleManager &",
+              "name": "handle",
+              "description": "Object to assign this to"
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move assignment operator.",
+          "detailed": "",
+          "type": "UiScaleManager &",
+          "signature": "UiScaleManager & operator=(UiScaleManager &&rhs) noexcept=default",
+          "returns": "Reference to this",
+          "params": [
+            {
+              "type": "UiScaleManager &&",
+              "name": "rhs",
+              "description": "Object to assign this to"
+            }
+          ]
+        },
+        {
+          "name": "GetScale",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Returns the current system scale factor.",
+          "detailed": "",
+          "type": "float",
+          "signature": "float GetScale() const",
+          "returns": "The current scale value (1.0 by default)"
+        },
+        {
+          "name": "SetScale",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets the system scale factor.",
+          "detailed": "Called by system/vconf handlers when the display scale changes. Invalidates all registered layout roots and triggers re-layout.",
+          "type": "void",
+          "signature": "void SetScale(float scale)",
+          "params": [
+            {
+              "type": "float",
+              "name": "scale",
+              "description": "The new scale factor"
+            }
+          ]
+        },
+        {
+          "name": "Get",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Returns the singleton UiScaleManager instance.",
+          "detailed": "Creates the instance on first call.",
+          "type": "UiScaleManager",
+          "signature": "UiScaleManager Get()",
+          "returns": "A handle to the UiScaleManager singleton"
+        },
+        {
+          "name": "DownCast",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Downcasts a handle to a UiScaleManager handle.",
+          "detailed": "",
+          "type": "UiScaleManager",
+          "signature": "UiScaleManager DownCast(BaseHandle handle)",
+          "returns": "A handle to a UiScaleManager or an uninitialized handle",
+          "params": [
+            {
+              "type": "BaseHandle",
+              "name": "handle",
+              "description": "Handle to an object"
+            }
+          ]
+        }
+      ],
+      "base_classes": [
+        "BaseHandle"
+      ]
+    },
+    {
       "name": "Dali::Ui::UiThemeManager",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h",
@@ -40884,6 +41229,144 @@
       ]
     },
     {
+      "name": "Dali::Ui::UniqueAny",
+      "kind": "class",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/unique-any.h",
+      "api_tier": "public-api",
+      "brief": "Type-erased object stored as an attachment.",
+      "detailed": "UniqueAny is move-only. It owns one stored value and can hold copyable and move-only value types.",
+      "members": [
+        {
+          "name": "UniqueAny",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Creates an empty UniqueAny.",
+          "detailed": "",
+          "type": "",
+          "signature": "UniqueAny()"
+        },
+        {
+          "name": "UniqueAny",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Creates a UniqueAny that owns value.",
+          "detailed": "The stored value is constructed from value. Passing an rvalue moves the value into the UniqueAny, so move-only value types are supported.",
+          "type": "",
+          "signature": "UniqueAny(T &&value)",
+          "params": [
+            {
+              "type": "T &&",
+              "name": "value",
+              "description": "The value to store"
+            }
+          ]
+        },
+        {
+          "name": "UniqueAny",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move constructor.",
+          "detailed": "",
+          "type": "",
+          "signature": "UniqueAny(UniqueAny &&rhs) noexcept",
+          "params": [
+            {
+              "type": "UniqueAny &&",
+              "name": "rhs",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "operator=",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Move assignment operator.",
+          "detailed": "",
+          "type": "UniqueAny &",
+          "signature": "UniqueAny & operator=(UniqueAny &&rhs) noexcept",
+          "params": [
+            {
+              "type": "UniqueAny &&",
+              "name": "rhs",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "~UniqueAny",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Destructor.",
+          "detailed": "",
+          "type": "",
+          "signature": "~UniqueAny()"
+        },
+        {
+          "name": "Empty",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Checks whether this UniqueAny stores a value.",
+          "detailed": "",
+          "type": "bool",
+          "signature": "bool Empty() const",
+          "returns": "True if no value is stored"
+        },
+        {
+          "name": "operator bool",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Checks whether this UniqueAny stores a value.",
+          "detailed": "",
+          "type": "",
+          "signature": "operator bool() const",
+          "returns": "True if a value is stored"
+        },
+        {
+          "name": "Reset",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Clears the stored value.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void Reset()"
+        },
+        {
+          "name": "Get",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets a pointer to the stored value.",
+          "detailed": "The returned pointer is owned by this UniqueAny. The caller must not delete it and must not use it after this UniqueAny is destroyed or moved from.",
+          "type": "Dali::DecayType< T >::type *",
+          "signature": "Dali::DecayType< T >::type * Get()",
+          "returns": "Pointer to the stored value, or nullptr if the type does not match"
+        },
+        {
+          "name": "Get",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets a const pointer to the stored value.",
+          "detailed": "The returned pointer is owned by this UniqueAny. The caller must not delete it and must not use it after this UniqueAny is destroyed or moved from.",
+          "type": "const Dali::DecayType< T >::type *",
+          "signature": "const Dali::DecayType< T >::type * Get() const",
+          "returns": "Pointer to the stored value, or nullptr if the type does not match"
+        },
+        {
+          "name": "Detach",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Detaches the stored value from this UniqueAny.",
+          "detailed": "If the stored value type matches T, ownership is transferred to the returned UniquePtr and this UniqueAny becomes empty. If the type does not match, this UniqueAny is left unchanged.",
+          "type": "Dali::UniquePtr< typename Dali::DecayType< T >::type >",
+          "signature": "Dali::UniquePtr< typename Dali::DecayType< T >::type > Detach()",
+          "returns": "The detached value, or nullptr if the type does not match"
+        }
+      ],
+      "notes": [
+        "Use a stable namespace-scope type as the stored value type. Local types and anonymous-namespace types should not be used when the value may be retrieved from another translation unit, because they may not have a stable cross-translation-unit type identity."
+      ]
+    },
+    {
       "name": "Dali::Ui::View",
       "kind": "class",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/view.h",
@@ -41297,6 +41780,33 @@
           "type": "float",
           "signature": "float GetCurrentScaleY() const",
           "returns": "The current y scale factor"
+        },
+        {
+          "name": "SetUiScalePolicy",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets the UiScale participation policy for this view.",
+          "detailed": "",
+          "type": "View &",
+          "signature": "View & SetUiScalePolicy(UiScalePolicy policy)",
+          "returns": "Reference to this View for fluent chaining",
+          "params": [
+            {
+              "type": "UiScalePolicy",
+              "name": "policy",
+              "description": "The UiScalePolicy to apply"
+            }
+          ]
+        },
+        {
+          "name": "GetUiScalePolicy",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets the UiScale participation policy of this view.",
+          "detailed": "",
+          "type": "UiScalePolicy",
+          "signature": "UiScalePolicy GetUiScalePolicy() const",
+          "returns": "The current UiScalePolicy"
         },
         {
           "name": "SetScaleY",
@@ -42614,6 +43124,103 @@
           ]
         },
         {
+          "name": "SetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets an attachment from uniquely owned data.",
+          "detailed": "The data ownership is moved into this View. If another attachment already exists for id, it is destroyed and replaced. The stored attachment is destroyed when it is removed, replaced, or when the View implementation is destroyed.",
+          "notes": [
+            "This typed attachment API stores Dali::UniquePtr<T> with its default deleter. UniquePtr types with custom deleters are not supported by this overload.",
+            "Use a stable namespace-scope type for attachment data. Local types and anonymous-namespace types should not be used when the attachment may be retrieved from another translation unit, because they may not have a stable cross-translation-unit type identity."
+          ],
+          "type": "View &",
+          "signature": "View & SetAttachment(AttachmentId id, Dali::UniquePtr< T > data)",
+          "returns": "Reference to this View",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            },
+            {
+              "type": "Dali::UniquePtr< T >",
+              "name": "data",
+              "description": "The data whose ownership is transferred to this View"
+            }
+          ]
+        },
+        {
+          "name": "RemoveAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Removes an attachment.",
+          "detailed": "Removing an attachment destroys the stored UniqueAny and its owned value.",
+          "type": "bool",
+          "signature": "bool RemoveAttachment(AttachmentId id)",
+          "returns": "True if an attachment was removed",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
+          "name": "GetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets an attachment value.",
+          "detailed": "The returned pointer is owned by this View. The caller must not delete it and must not use it after the attachment is removed, replaced, or the View implementation is destroyed.",
+          "type": "T *",
+          "signature": "T * GetAttachment(AttachmentId id)",
+          "returns": "Pointer to the stored value, or nullptr if missing or type mismatched",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
+          "name": "GetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets a const attachment value.",
+          "detailed": "The returned pointer is owned by this View. The caller must not delete it and must not use it after the attachment is removed, replaced, or the View implementation is destroyed.",
+          "type": "const T *",
+          "signature": "const T * GetAttachment(AttachmentId id) const",
+          "returns": "Pointer to the stored value, or nullptr if missing or type mismatched",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
+          "name": "DetachAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Detaches an attachment value.",
+          "detailed": "If the stored value type matches T, the attachment is removed from this View and ownership of the value is transferred to the returned UniquePtr. If the attachment is missing or the type does not match, this View is left unchanged and nullptr is returned.",
+          "notes": [
+            "This typed attachment API detaches Dali::UniquePtr<T> with its default deleter. UniquePtr types with custom deleters are not supported by this overload."
+          ],
+          "type": "Dali::UniquePtr< T >",
+          "signature": "Dali::UniquePtr< T > DetachAttachment(AttachmentId id)",
+          "returns": "The detached value, or nullptr if missing or type mismatched",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
           "name": "Insert",
           "kind": "function",
           "api_tier": "public-api",
@@ -43111,6 +43718,27 @@
           ],
           "code_examples": [
             "autoanim=Animation::New();\nview.Animate(anim).Opacity(0.5f,300_ms);\nanim.Play();"
+          ]
+        },
+        {
+          "name": "SetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets an attachment internally.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetAttachment(AttachmentId id, UniqueAny attachment)",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            },
+            {
+              "type": "UniqueAny",
+              "name": "attachment",
+              "description": "The attachment whose ownership is transferred to this View"
+            }
           ]
         },
         {
@@ -46537,6 +47165,100 @@
           ]
         },
         {
+          "name": "SetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets an attachment from uniquely owned data.",
+          "detailed": "The data ownership is moved into this View. If another attachment already exists for id, it is destroyed and replaced. The stored attachment is destroyed when it is removed, replaced, or when the View implementation is destroyed.",
+          "notes": [
+            "This typed attachment API stores Dali::UniquePtr<T> with its default deleter. UniquePtr types with custom deleters are not supported by this overload.",
+            "Use a stable namespace-scope type for attachment data. Local types and anonymous-namespace types should not be used when the attachment may be retrieved from another translation unit, because they may not have a stable cross-translation-unit type identity."
+          ],
+          "type": "void",
+          "signature": "void SetAttachment(AttachmentId id, UniqueAny attachment)",
+          "returns": "Reference to this View",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            },
+            {
+              "type": "UniqueAny",
+              "name": "attachment",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "RemoveAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Removes an attachment.",
+          "detailed": "Removing an attachment destroys the stored UniqueAny and its owned value.",
+          "type": "bool",
+          "signature": "bool RemoveAttachment(AttachmentId id)",
+          "returns": "True if an attachment was removed",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
+          "name": "GetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets a raw attachment.",
+          "detailed": "",
+          "type": "UniqueAny *",
+          "signature": "UniqueAny * GetAttachment(AttachmentId id)",
+          "returns": "Pointer to the attachment, or nullptr if missing",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
+          "name": "GetAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets a const raw attachment.",
+          "detailed": "",
+          "type": "const UniqueAny *",
+          "signature": "const UniqueAny * GetAttachment(AttachmentId id) const",
+          "returns": "Pointer to the attachment, or nullptr if missing",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
+          "name": "DetachAttachment",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Detaches a raw attachment.",
+          "detailed": "",
+          "type": "UniqueAny",
+          "signature": "UniqueAny DetachAttachment(AttachmentId id)",
+          "returns": "The stored attachment, or an empty UniqueAny if missing",
+          "params": [
+            {
+              "type": "AttachmentId",
+              "name": "id",
+              "description": "The key to identify the attachment"
+            }
+          ]
+        },
+        {
           "name": "AddVisual",
           "kind": "function",
           "api_tier": "public-api",
@@ -46663,6 +47385,42 @@
           "detailed": "This propagates to the parent layout while one exists, until the layout root is reached (no parent Layout).",
           "type": "void",
           "signature": "void InvalidateMeasure()"
+        },
+        {
+          "name": "SetUiScalePolicy",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Sets the UiScale participation policy for this view.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void SetUiScalePolicy(UiScalePolicy policy)",
+          "params": [
+            {
+              "type": "UiScalePolicy",
+              "name": "policy",
+              "description": "The UiScalePolicy to apply"
+            }
+          ]
+        },
+        {
+          "name": "GetUiScalePolicy",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets the UiScale participation policy of this view.",
+          "detailed": "",
+          "type": "UiScalePolicy",
+          "signature": "UiScalePolicy GetUiScalePolicy() const",
+          "returns": "The current UiScalePolicy"
+        },
+        {
+          "name": "GetEffectiveScale",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Gets the effective scale for this view. Lazily computed on first call after invalidation; valid after first Measure.",
+          "detailed": "",
+          "type": "float",
+          "signature": "float GetEffectiveScale() const",
+          "returns": "The effective scale factor"
         },
         {
           "name": "InvalidateArrange",
@@ -47261,6 +48019,31 @@
           "returns": "true if the view is on scene, false otherwise"
         },
         {
+          "name": "ResetEffectiveScaleRecursive",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Recursively resets the effective-scale cache and measure cache for this view and all its descendants. Called by UiScaleManagerImpl::SetScale() so that the entire subtree re-evaluates its effective scale on the next Measure pass.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void ResetEffectiveScaleRecursive()"
+        },
+        {
+          "name": "OnEffectiveScaleChanged",
+          "kind": "function",
+          "api_tier": "public-api",
+          "brief": "Called when the effective scale changes. Subclasses (Label, InputField) override this to update font size scale.",
+          "detailed": "",
+          "type": "void",
+          "signature": "void OnEffectiveScaleChanged(float newScale)",
+          "params": [
+            {
+              "type": "float",
+              "name": "newScale",
+              "description": "The new effective scale factor"
+            }
+          ]
+        },
+        {
           "name": "New",
           "kind": "function",
           "api_tier": "public-api",
@@ -47295,16 +48078,17 @@
           "detailed": "",
           "type": "MeasuredSize",
           "signature": "MeasuredSize OnMeasure(float widthConstraint, float heightConstraint)",
+          "returns": "Measured visual (scale-applied) size.",
           "params": [
             {
               "type": "float",
               "name": "widthConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT."
             },
             {
               "type": "float",
               "name": "heightConstraint",
-              "description": ""
+              "description": "Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT."
             }
           ]
         },
@@ -51627,11 +52411,11 @@
           "brief": "Gets a screenshot.",
           "detailed": "",
           "type": "Dali::Ui::ImageView",
-          "signature": "Dali::Ui::ImageView GetScreenshot(Dali::Rect< int32_t > viewArea, float scaleFactor)",
+          "signature": "Dali::Ui::ImageView GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)",
           "returns": "An ImageView containing the screenshot",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The view area"
             },
@@ -51649,11 +52433,11 @@
           "brief": "Gets a screenshot asynchronously.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool GetScreenshotAsynchronously(Dali::Rect< int32_t > viewArea, float scaleFactor, ScreenshotCapturedCallback callback)",
+          "signature": "bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback)",
           "returns": "True if the operation started successfully",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The view area"
             },
@@ -52845,11 +53629,11 @@
           "brief": "Gets a screenshot.",
           "detailed": "",
           "type": "Dali::Ui::ImageView",
-          "signature": "Dali::Ui::ImageView GetScreenshot(Dali::Rect< int32_t > viewArea, float scaleFactor)",
+          "signature": "Dali::Ui::ImageView GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)",
           "returns": "An ImageView containing the screenshot",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The view area"
             },
@@ -52867,11 +53651,11 @@
           "brief": "Gets a screenshot asynchronously.",
           "detailed": "",
           "type": "bool",
-          "signature": "bool GetScreenshotAsynchronously(Dali::Rect< int32_t > viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback)",
+          "signature": "bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback)",
           "returns": "True if the operation started successfully",
           "params": [
             {
-              "type": "Dali::Rect< int32_t >",
+              "type": "Dali::BoundsInteger",
               "name": "viewArea",
               "description": "The view area"
             },
@@ -53520,6 +54304,15 @@
     {
       "name": "",
       "kind": "namespace",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/unique-any.cpp",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "",
+      "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/devel-api/asset-manager/asset-manager.cpp",
       "api_tier": "devel-api",
       "brief": "",
@@ -54045,6 +54838,27 @@
           ]
         },
         {
+          "name": "UiScalePolicy",
+          "kind": "enum",
+          "api_tier": "public-api",
+          "brief": "Controls how a view participates in the system-driven UiScale.",
+          "detailed": "Mirrors the semantics of LayoutDirection / RTL: each view can inherit from its parent, force-apply the system scale, or opt out entirely.",
+          "enumvalues": [
+            {
+              "name": "INHERIT",
+              "brief": "Inherit effective scale from parent; root inherits from UiScaleManager (default)."
+            },
+            {
+              "name": "ENABLED",
+              "brief": "Always apply the current UiScaleManager scale, ignoring parent policy."
+            },
+            {
+              "name": "DISABLED",
+              "brief": "Opt out of scaling (effectiveScale = 1.0); descendant INHERIT views also get 1.0."
+            }
+          ]
+        },
+        {
           "name": "AccessibilityState",
           "kind": "enum",
           "api_tier": "public-api",
@@ -54513,7 +55327,7 @@
           "brief": "Move-only callback for custom layout measurement.",
           "detailed": "view.SetMeasureCallback(MeasureCallback::New(this,&MyClass::OnMeasure));",
           "notes": [
-            "Signature: MeasuredSize(View view, float widthConstraint, float heightConstraint)"
+            "Signature: MeasuredSize(View view, float widthConstraint, float heightConstraint) Both widthConstraint and heightConstraint are visual (scale-applied) sizes, consistent with ArrangeCallback. The return value must also be visual."
           ],
           "aliased_type": "Callback< MeasuredSize(View, float, float)>"
         },
@@ -56267,6 +57081,32 @@
       "synthetic": true
     },
     {
+      "name": "Dali::Ui::UiScalePolicy",
+      "kind": "enum",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-scale-policy.h",
+      "api_tier": "public-api",
+      "brief": "Controls how a view participates in the system-driven UiScale.",
+      "detailed": "",
+      "members": [
+        {
+          "name": "INHERIT",
+          "kind": "enumvalue",
+          "brief": "Inherit effective scale from parent; root inherits from UiScaleManager (default)."
+        },
+        {
+          "name": "ENABLED",
+          "kind": "enumvalue",
+          "brief": "Always apply the current UiScaleManager scale, ignoring parent policy."
+        },
+        {
+          "name": "DISABLED",
+          "kind": "enumvalue",
+          "brief": "Opt out of scaling (effectiveScale = 1.0); descendant INHERIT views also get 1.0."
+        }
+      ],
+      "synthetic": true
+    },
+    {
       "name": "Dali::Ui::AccessibilityState",
       "kind": "enum",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/view-accessibility-enums.h",
@@ -56841,6 +57681,15 @@
       "name": "Dali::Ui",
       "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "Dali::Ui",
+      "kind": "namespace",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp",
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",
@@ -62590,6 +63439,15 @@
     {
       "name": "Dali::Ui::Text",
       "kind": "namespace",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.cpp",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "Dali::Ui::Text",
+      "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/text/font-variation/font-variation-axis.cpp",
       "api_tier": "public-api",
       "brief": "",
@@ -62663,15 +63521,6 @@
       "name": "Dali::Ui::Text",
       "kind": "namespace",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-candidate.cpp",
-      "api_tier": "public-api",
-      "brief": "",
-      "detailed": "",
-      "members": []
-    },
-    {
-      "name": "Dali::Ui::Text",
-      "kind": "namespace",
-      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.cpp",
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",
@@ -65788,6 +66637,24 @@
       "members": []
     },
     {
+      "name": "attachment-id.cpp",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "attachment-id.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
       "name": "callback.h",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/callback.h",
@@ -67052,6 +67919,33 @@
       "members": []
     },
     {
+      "name": "ui-scale-manager.cpp",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-scale-manager.cpp",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "ui-scale-manager.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-scale-manager.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "ui-scale-policy.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-scale-policy.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
       "name": "ui-theme-manager.cpp",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp",
@@ -67064,6 +67958,24 @@
       "name": "ui-theme-manager.h",
       "kind": "file",
       "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "unique-any.cpp",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/unique-any.cpp",
+      "api_tier": "public-api",
+      "brief": "",
+      "detailed": "",
+      "members": []
+    },
+    {
+      "name": "unique-any.h",
+      "kind": "file",
+      "file": "/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/public-api/unique-any.h",
       "api_tier": "public-api",
       "brief": "",
       "detailed": "",

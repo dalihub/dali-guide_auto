@@ -1635,7 +1635,7 @@
       "header_path": "repos/dali-core/dali/public-api/animation/path.h",
       "kind": "method",
       "public_api": true,
-      "signature": "Vector3 & GetControlPoint(size_t index)",
+      "signature": "Vector3 & GetControlPoint(uint32_t index)",
       "surface": "dali-core",
       "symbol_id": "Dali::Path::GetControlPoint",
       "usage_scope": "primary_member"
@@ -1645,7 +1645,7 @@
       "header_path": "repos/dali-core/dali/public-api/animation/path.h",
       "kind": "method",
       "public_api": true,
-      "signature": "Vector3 & GetPoint(size_t index)",
+      "signature": "Vector3 & GetPoint(uint32_t index)",
       "surface": "dali-core",
       "symbol_id": "Dali::Path::GetPoint",
       "usage_scope": "primary_member"
@@ -1655,7 +1655,7 @@
       "header_path": "repos/dali-core/dali/public-api/animation/path.h",
       "kind": "method",
       "public_api": true,
-      "signature": "size_t GetPointCount() const",
+      "signature": "uint32_t GetPointCount() const",
       "surface": "dali-core",
       "symbol_id": "Dali::Path::GetPointCount",
       "usage_scope": "primary_member"
@@ -3088,6 +3088,7 @@
         "Animation",
         "Application",
         "Apply",
+        "Clear",
         "ConnectionTracker",
         "DownCast",
         "GetState",
@@ -3309,7 +3310,7 @@
       "relevance": "strong",
       "score": 1.0,
       "selection_reason": "symbol_and_path_match",
-      "snippet": " * - PixelArea is specified as normalized (x, y, width, height) in [0, 1]\n * - Buttons select preset regions: FULL, four quadrants, and a center zoom\n * - A label shows the currently active region name\n * - \"GIF\" button toggles between a static JPG and an animated GIF to verify\n *   that PixelArea works on both\n * - \"ANIMATE\" button runs a looping PixelArea animation (pan + zoom)\n * - Press Escape or Back to quit\n */\nclass ImagePixelAreaController : public ConnectionTracker\n{\n  static constexpr int AREA_COUNT = 6;\n\n  struct AreaEntry\n  {\n    const char* name;\n    Vector4     area; // (x, y, width, height) normalized\n  };\n\n  static const AreaEntry AREAS[AREA_COUNT];\n\n  static const char* const JPG_URL;\n  static const char* const GIF_URL;\n\npublic:\n  explicit ImagePixelAreaController(Application& application)\n  : mApplication(application),\n    mActiveIndex(0),\n    mUsingGif(false),\n    mAnimating(false)\n  {\n    mApplication.InitSignal().Connect(this, &ImagePixelAreaController::OnInit);\n  }\n\nprivate:\n  void OnInit(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x1A1A1A));\n\n    window.Add(CreateContents());\n\n    window.KeyEventSignal().Connect(this, &ImagePixelAreaController::OnKeyEvent);\n  }\n\n  View CreateContents()\n  {\n    return StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .Children({\n        CreateImageArea(),\n        CreateInfoLabel(),\n        CreateAreaButtonRow(),\n        CreateExtraButtonRow(),\n      });\n  }\n\n  View CreateImageArea()\n  {\n    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));\n\n    mImage = ImageView::New(JPG_URL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)\n      .SetPixelArea(AREAS[mActiveIndex].area);\n\n    mImageContainer.Add(mImage);\n    return mImageContainer;\n  }\n\n  View CreateInfoLabel()\n  {\n    return Label::New(MakeInfoText())\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(40.0f)\n      .SetFontSize(14.0f)",
+      "snippet": " * - PixelArea is specified as normalized (x, y, width, height) in [0, 1]\n * - Buttons select preset regions: FULL, four quadrants, and a center zoom\n * - A label shows the currently active region name\n * - \"GIF\" button toggles between a static JPG and an animated GIF to verify\n *   that PixelArea works on both\n * - \"ANIMATE\" button runs a looping PixelArea animation (pan + zoom)\n * - Press Escape or Back to quit\n */\nclass ImagePixelAreaController : public ConnectionTracker\n{\n  static constexpr int AREA_COUNT = 6;\n\n  struct AreaEntry\n  {\n    const char* name;\n    Vector4     area; // (x, y, width, height) normalized\n  };\n\n  static const AreaEntry AREAS[AREA_COUNT];\n\n  static const char* const JPG_URL;\n  static const char* const GIF_URL;\n\npublic:\n  explicit ImagePixelAreaController(Application& application)\n  : mApplication(application),\n    mActiveIndex(0),\n    mUsingGif(false),\n    mAnimating(false)\n  {\n    mApplication.InitSignal().Connect(this, &ImagePixelAreaController::OnInit);\n  }\n\nprivate:\n  void OnInit(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x1A1A1A));\n\n    window.Add(CreateContents());\n\n    window.KeyEventSignal().Connect(this, &ImagePixelAreaController::OnKeyEvent);\n  }\n\n  View CreateContents()\n  {\n    return StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .Children({\n        CreateImageArea(),\n        CreateInfoLabel(),\n        CreateAreaButtonRow(),\n        CreateExtraButtonRow(),\n      });\n  }\n\n  View CreateImageArea()\n  {\n    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(WRAP_CONTENT)\n      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));\n\n    mImage = ImageView::New(JPG_URL)\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(MATCH_PARENT)\n      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)\n      .SetPixelArea(AREAS[mActiveIndex].area);\n\n    mImageContainer.Add(mImage);\n    return mImageContainer;\n  }\n\n  View CreateInfoLabel()\n  {\n    return Label::New(MakeInfoText())\n      .SetRequestedWidth(MATCH_PARENT)\n      .SetRequestedHeight(40.0f)\n      .SetFontSize(14.0f)",
       "snippet_end_line": 112,
       "snippet_start_line": 33
     },
@@ -3322,6 +3323,7 @@
         "Animation",
         "Application",
         "Apply",
+        "Clear",
         "ConnectionTracker",
         "DownCast",
         "GetState",
@@ -3342,7 +3344,7 @@
       "relevance": "strong",
       "score": 1.0,
       "selection_reason": "symbol_and_path_match",
-      "snippet": "\nusing namespace Dali;\nusing namespace Dali::Ui;\n\n/**\n * LottieAnimationView sample.\n *\n * Demonstrates:\n *   - Play / Pause / Stop / JumpToFrame\n *   - LoopCount  (infinite / 3 / 1)\n *   - LoopingMode  (RESTART / AUTO_REVERSE)\n *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)\n *   - StopBehavior  (CURRENT / FIRST / LAST)\n *   - SetMinMaxFrame  (full / first-half / second-half)\n *   - RenderScale  (0.5× / 1.0× / 2.0×)\n *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)\n *   - AnimationFinishedSignal\n *\n * Resources (from dali-demo):\n *   - done.json        (short check-mark completion animation)\n *   - jolly_walker.json  (looping character walk cycle)\n *\n * Press Escape or Back to quit.\n */\nclass LottieAnimationViewSampleController : public ConnectionTracker\n{\n  static constexpr int JUMP_FRAME = 10;\n\npublic:\n  explicit LottieAnimationViewSampleController(Application& application)\n  : mApplication(application),\n    mLoopIndex(0),\n    mLoopingModeIndex(0),\n    mSpeedIndex(1),\n    mStopBehaviorIndex(0),\n    mFrameRangeIndex(0),\n    mRenderScaleIndex(1)\n  {\n    mMonitorTimer = Timer::New(100);\n    mMonitorTimer.TickSignal().Connect(this, &LottieAnimationViewSampleController::OnMonitorTimerTick);\n\n    mApplication.InitSignal().Connect(this, &LottieAnimationViewSampleController::OnInit);\n  }\n\nprivate:\n  void OnInit(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x1A1A1A));\n\n    window.Add(\n      StackLayout::New(StackOrientation::VERTICAL)\n        .SetRequestedWidth(MATCH_PARENT)\n        .SetRequestedHeight(MATCH_PARENT)\n        .SetSpacing(4.0f)\n        .SetPadding(Extents(8, 8, 8, 8))\n        .Children({\n          CreateAnimationArea(),\n          CreateStatusLabel(),\n          CreatePlaybackRow(),\n          CreateLoopRow(),\n          CreateLoopingModeRow(),\n          CreateSpeedRow(),\n          CreateStopBehaviorRow(),\n          CreateFrameRangeRow(),\n          CreateRenderScaleRow(),\n        }));\n\n    window.KeyEventSignal().Connect(this, &LottieAnimationViewSampleController::OnKeyEvent);\n\n    mMonitorTimer.Start();\n  }\n\n  // ── Widgets ─────────────────────────────────────────────────────────────\n\n  View CreateAnimationArea()\n  {\n    LottieAnimationView::New(RESOURCES_DIR \"jolly_walker.json\")\n      .SetRequestedWidth(300.0f)\n      .SetRequestedHeight(300.0f)",
+      "snippet": "\nusing namespace Dali;\nusing namespace Dali::Ui;\n\n/**\n * LottieAnimationView sample.\n *\n * Demonstrates:\n *   - Play / Pause / Stop / JumpToFrame\n *   - LoopCount  (infinite / 3 / 1)\n *   - LoopingMode  (RESTART / AUTO_REVERSE)\n *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)\n *   - StopBehavior  (CURRENT / FIRST / LAST)\n *   - SetMinMaxFrame  (full / first-half / second-half)\n *   - RenderScale  (0.5× / 1.0× / 2.0×)\n *   - PlaceholderUrl  (show placeholder while new URL loads)\n *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)\n *   - AnimationFinishedSignal\n *\n * Resources:\n *   - jolly_walker.json     (looping character walk cycle)\n *   - placeholder_image.png (placeholder shown while Lottie loads)\n *\n * Press Escape or Back to quit.\n */\nclass LottieAnimationViewSampleController : public ConnectionTracker\n{\n  static constexpr int JUMP_FRAME = 10;\n\npublic:\n  explicit LottieAnimationViewSampleController(Application& application)\n  : mApplication(application),\n    mLoopIndex(0),\n    mLoopingModeIndex(0),\n    mSpeedIndex(1),\n    mStopBehaviorIndex(0),\n    mFrameRangeIndex(0),\n    mRenderScaleIndex(1)\n  {\n    mMonitorTimer = Timer::New(100);\n    mMonitorTimer.TickSignal().Connect(this, &LottieAnimationViewSampleController::OnMonitorTimerTick);\n\n    mApplication.InitSignal().Connect(this, &LottieAnimationViewSampleController::OnInit);\n  }\n\nprivate:\n  void OnInit(Application application)\n  {\n    Window window = application.GetWindow();\n    window.SetBackgroundColor(UiColor(0x1A1A1A));\n\n    window.Add(\n      StackLayout::New(StackOrientation::VERTICAL)\n        .SetRequestedWidth(MATCH_PARENT)\n        .SetRequestedHeight(MATCH_PARENT)\n        .SetSpacing(4.0f)\n        .SetPadding(Extents(8, 8, 8, 8))\n        .Children({\n          CreateAnimationArea(),\n          CreateStatusLabel(),\n          CreatePlaybackRow(),\n          CreateLoopRow(),\n          CreateLoopingModeRow(),\n          CreateSpeedRow(),\n          CreateStopBehaviorRow(),\n          CreateFrameRangeRow(),\n          CreateRenderScaleRow(),\n          CreatePlaceholderRow(),\n        }));\n\n    window.KeyEventSignal().Connect(this, &LottieAnimationViewSampleController::OnKeyEvent);\n\n    mMonitorTimer.Start();\n  }\n\n  // ── Widgets ─────────────────────────────────────────────────────────────\n\n  View CreateAnimationArea()\n  {\n    LottieAnimationView::New(RESOURCES_DIR \"jolly_walker.json\")",
       "snippet_end_line": 100,
       "snippet_start_line": 21
     },
@@ -3470,7 +3472,7 @@
       "relevance": "strong",
       "score": 0.75,
       "selection_reason": "symbol_and_path_match",
-      "snippet": "static void ResetTouchCallbacks(TestApplication& application)\n{\n  // reset touch\n  Dali::Integration::Point point;\n  point.SetDeviceId(1);\n  point.SetState(PointState::UP);\n  point.SetScreenPosition(Vector2(10.f, 10.f));\n  Dali::Integration::TouchEvent touchEvent;\n  touchEvent.AddPoint(point);\n  application.ProcessEvent(touchEvent);\n\n  ResetTouchCallbacks();\n}\n\nstatic bool TestCallback3(Actor actor, const HoverEvent& event)\n{\n  gHoverCallBackCalled = true;\n  return false;\n  END_TEST;\n}\n\n// validation stuff for onstage & offstage signals\nstatic std::vector<String> gActorNamesOnOffScene;\nstatic int                 gOnSceneCallBackCalled;\nvoid                       OnSceneCallback(Actor actor)\n{\n  ++gOnSceneCallBackCalled;\n  gActorNamesOnOffScene.push_back(actor.GetProperty<String>(Actor::Property::NAME));\n  DALI_TEST_CHECK(actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) == true);\n}\nstatic int gOffSceneCallBackCalled;\nvoid       OffSceneCallback(Actor actor)\n{\n  ++gOffSceneCallBackCalled;\n  gActorNamesOnOffScene.push_back(actor.GetProperty<String>(Actor::Property::NAME));\n  DALI_TEST_CHECK(actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) == false);\n}\n\nstruct PositionComponentConstraint\n{\n  PositionComponentConstraint()\n  {\n  }\n\n  void operator()(Vector3& pos, const PropertyInputContainer& inputs)\n  {\n    const Matrix& m = inputs[0]->GetMatrix();\n    Vector3       scale;\n    Quaternion    rot;\n    m.GetTransformComponents(pos, rot, scale);\n  }\n};\n\nstruct OrientationComponentConstraint\n{\n  OrientationComponentConstraint()\n  {\n  }\n\n  void operator()(Quaternion& orientation, const PropertyInputContainer& inputs)\n  {\n    const Quaternion& parentOrientation = inputs[0]->GetQuaternion();\n    Vector3           pos, scale;\n    Quaternion        rot;\n    orientation = parentOrientation;\n  }\n};\n\nstruct TestConstraintIgnored\n{\n  TestConstraintIgnored(bool& ignored, bool& worldIgnored)\n  : ignored(ignored),\n    worldIgnored(worldIgnored)\n  {\n  }\n\n  void operator()(Vector4& color, const PropertyInputContainer& inputs)\n  {\n    gTestConstraintCalled = true;\n",
+      "snippet": "static void ResetTouchCallbacks(TestApplication& application)\n{\n  // reset touch\n  Dali::Integration::Point point;\n  point.SetDeviceId(1);\n  point.SetState(PointState::UP);\n  point.SetScreenPosition(Vector2(10.f, 10.f));\n  Dali::Integration::TouchEvent touchEvent;\n  touchEvent.AddPoint(point);\n  application.ProcessEvent(touchEvent);\n\n  ResetTouchCallbacks();\n}\n\nstatic bool TestCallback3(Actor actor, HoverEvent event)\n{\n  gHoverCallBackCalled = true;\n  return false;\n  END_TEST;\n}\n\n// validation stuff for onstage & offstage signals\nstatic std::vector<String> gActorNamesOnOffScene;\nstatic int                 gOnSceneCallBackCalled;\nvoid                       OnSceneCallback(Actor actor)\n{\n  ++gOnSceneCallBackCalled;\n  gActorNamesOnOffScene.push_back(actor.GetProperty<String>(Actor::Property::NAME));\n  DALI_TEST_CHECK(actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) == true);\n}\nstatic int gOffSceneCallBackCalled;\nvoid       OffSceneCallback(Actor actor)\n{\n  ++gOffSceneCallBackCalled;\n  gActorNamesOnOffScene.push_back(actor.GetProperty<String>(Actor::Property::NAME));\n  DALI_TEST_CHECK(actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) == false);\n}\n\nstruct PositionComponentConstraint\n{\n  PositionComponentConstraint()\n  {\n  }\n\n  void operator()(Vector3& pos, const PropertyInputContainer& inputs)\n  {\n    const Matrix& m = inputs[0]->GetMatrix();\n    Vector3       scale;\n    Quaternion    rot;\n    m.GetTransformComponents(pos, rot, scale);\n  }\n};\n\nstruct OrientationComponentConstraint\n{\n  OrientationComponentConstraint()\n  {\n  }\n\n  void operator()(Quaternion& orientation, const PropertyInputContainer& inputs)\n  {\n    const Quaternion& parentOrientation = inputs[0]->GetQuaternion();\n    Vector3           pos, scale;\n    Quaternion        rot;\n    orientation = parentOrientation;\n  }\n};\n\nstruct TestConstraintIgnored\n{\n  TestConstraintIgnored(bool& ignored, bool& worldIgnored)\n  : ignored(ignored),\n    worldIgnored(worldIgnored)\n  {\n  }\n\n  void operator()(Vector4& color, const PropertyInputContainer& inputs)\n  {\n    gTestConstraintCalled = true;\n",
       "snippet_end_line": 212,
       "snippet_start_line": 133
     }
@@ -5397,7 +5399,7 @@
           "kind": "method",
           "name": "GetControlPoint",
           "selection_reason": "getter",
-          "signature": "Vector3 & GetControlPoint(size_t index)",
+          "signature": "Vector3 & GetControlPoint(uint32_t index)",
           "symbol_id": "Dali::Path::GetControlPoint"
         },
         {
@@ -5406,7 +5408,7 @@
           "kind": "method",
           "name": "GetPoint",
           "selection_reason": "getter",
-          "signature": "Vector3 & GetPoint(size_t index)",
+          "signature": "Vector3 & GetPoint(uint32_t index)",
           "symbol_id": "Dali::Path::GetPoint"
         },
         {
@@ -5415,7 +5417,7 @@
           "kind": "method",
           "name": "GetPointCount",
           "selection_reason": "getter",
-          "signature": "size_t GetPointCount() const",
+          "signature": "uint32_t GetPointCount() const",
           "symbol_id": "Dali::Path::GetPointCount"
         },
         {
@@ -8385,6 +8387,7 @@
           "Animation",
           "Application",
           "Apply",
+          "Clear",
           "ConnectionTracker",
           "DownCast",
           "GetState",
@@ -9775,12 +9778,12 @@
     }
   ],
   "source_hashes": {
-    "api_symbols": "cc905a6b95cbe731c1b8d55fc52efccb3abc0555eb2388fc640ef3a939c3d18c",
-    "document_features": "12e0c220be2dcd29a3e638e77fedce7a7af8761e8acaa1fa008b65f1bc53c4c0",
-    "feature_spec": "a712f30230821ecd416318e52175b2e45546b0cc370745b887d602572257c4d7",
-    "feature_to_symbols": "b72ec5486f4300ea7bc6daef92f37648f41f8a1af45f39c2c75c72cc7d1a9c5c",
-    "generation_config": "2857f9a491dd707c1e66ae9bf70889f746a86e03e879deec4d0ffa777447ee43",
-    "symbol_to_feature": "334e493eb62eb920f59fa25226aeb3d9dee042026a2a8f1e2369a6e2b2777810"
+    "api_symbols": "36436e0dbd9b800be96a50f99a80187b85e8208853428ae6852d4a564012a38f",
+    "document_features": "715253d7602ceef3fa78855b08b6c6076297670197e2f11a9af7175ca2931fc0",
+    "feature_spec": "495f39e94ded6bf72f352dab614f2532243c283eae005e0052b2d6428e43953d",
+    "feature_to_symbols": "11d2214fa0a36cf15cfc6a67256a7f2ab7660d5904e7423f4c706a73fb9ecea9",
+    "generation_config": "8f1a87a64acbdc9e2ac386fdaab9115289247742bea448707a39739e59a324a2",
+    "symbol_to_feature": "f387596777c2899ebe66a1abaca23cc6ce5e0377749a5d5c3a8e00f202ece72d"
   },
   "supporting_api": [],
   "surface_usage": {
@@ -9796,11 +9799,11 @@
     }
   },
   "token_estimate": {
-    "context_pack_tokens": 78627,
-    "input_tokens": 10335,
+    "context_pack_tokens": 78640,
+    "input_tokens": 10337,
     "limit": 80000,
-    "prompt_projection_tokens": 10335,
-    "rendered_prompt_tokens": 10014
+    "prompt_projection_tokens": 10337,
+    "rendered_prompt_tokens": 10016
   },
   "uncertainties": [],
   "usage_patterns": [
