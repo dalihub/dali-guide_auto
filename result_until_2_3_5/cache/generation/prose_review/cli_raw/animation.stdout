@@ -1,0 +1,279 @@
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Animation
+sidebar_label: Animation
+category: animation-motion
+---
+
+# Animation
+
+Use `Dali::Ui::View::Animate` with `Dali::Animation` to add timed motion to `dali-ui` views.
+
+## Table of Contents
+
+- [Animate a View](#animate-a-view)
+- [Reuse Motion with Animation Specs](#reuse-motion-with-animation-specs)
+- [Control Playback](#control-playback)
+- [Coordinate Timing, Delays, and Easing](#coordinate-timing-delays-and-easing)
+- [Use Label Animation APIs](#use-label-animation-apis)
+
+## Animate a View
+
+`Dali::Ui::View` is the application-facing object model for `dali-ui`. Start with a `Dali::Animation`, ask the view for a `Dali::Ui::ViewAnimationBridge` through `Dali::Ui::View::Animate`, then chain typed animation operations such as `Opacity`, `PositionY`, `ScaleX`, and `ScaleY`.
+
+`Dali::Ui::ViewAnimationBridge` is a lightweight bridge that applies typed animation entries to the supplied `Dali::Animation` while keeping application code focused on `Dali::Ui::View` rather than raw actor property calls.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void FadeAndLift(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New(0.6f);
+
+  view.Animate(animation)
+    .Opacity(0.0f, Dali::Ui::Duration(0.4f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT))
+    .PositionY(-32.0f, Dali::Ui::Duration(0.6f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT));
+
+  animation.Play();
+}
+```
+
+Use the `By` methods when the motion should be relative to the view's current value.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void Nudge(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New(0.25f);
+
+  view.Animate(animation)
+    .PositionXBy(24.0f, Dali::Ui::Duration(0.25f))
+    .OpacityBy(-0.2f, Dali::Ui::Duration(0.25f));
+
+  animation.Play();
+}
+```
+
+For common view motion, prefer the typed `Dali::Ui::ViewAnimationBridge` methods over raw property animation. The bridge maps transform and opacity methods to inherited actor properties such as `Dali::Actor::Property::OPACITY`, `Dali::Actor::Property::POSITION_X`, `Dali::Actor::Property::POSITION_Y`, `Dali::Actor::Property::SCALE_X`, and `Dali::Actor::Property::SCALE_Y`, but application examples should stay View-first.
+
+## Reuse Motion with Animation Specs
+
+Use `Dali::Ui::ViewAnimationSpec` when the same animation recipe should be applied to multiple views or replayed later. A spec stores typed entries; `Dali::Ui::ViewAnimationSpec::ApplyTo` applies those entries to a concrete `Dali::Animation` and `Dali::Ui::View`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::ViewAnimationSpec CreateAppearSpec()
+{
+  return Dali::Ui::View::NewAnimationSpec()
+    .Opacity(1.0f, Dali::Ui::Duration(0.3f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT))
+    .ScaleX(1.0f, Dali::Ui::Duration(0.3f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT))
+    .ScaleY(1.0f, Dali::Ui::Duration(0.3f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT));
+}
+
+void PlayAppear(Dali::Ui::View view, const Dali::Ui::ViewAnimationSpec& spec)
+{
+  Dali::Animation animation = Dali::Animation::New(0.3f);
+  spec.ApplyTo(animation, view);
+  animation.Play();
+}
+```
+
+A spec is useful for consistent interaction states. For example, a pressed state can move and fade by relative amounts, while the release state can restore absolute target values.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::ViewAnimationSpec CreatePressSpec()
+{
+  return Dali::Ui::View::NewAnimationSpec()
+    .PositionYBy(6.0f, Dali::Ui::Duration(0.12f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT))
+    .OpacityBy(-0.1f, Dali::Ui::Duration(0.12f));
+}
+
+void ApplyPress(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New(0.12f);
+  Dali::Ui::ViewAnimationSpec spec = CreatePressSpec();
+
+  spec.ApplyTo(animation, view);
+  animation.Play();
+}
+```
+
+## Control Playback
+
+`Dali::Animation` owns playback state. After adding entries through `Dali::Ui::View::Animate` or `Dali::Ui::ViewAnimationSpec::ApplyTo`, use `Play`, `Pause`, `PlayAfter`, or `PlayFrom` to control when the animation runs.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+class ViewMotion
+{
+public:
+  void Build(Dali::Ui::View view)
+  {
+    mAnimation = Dali::Animation::New(0.5f);
+
+    view.Animate(mAnimation)
+      .Opacity(1.0f, Dali::Ui::Duration(0.5f))
+      .PositionX(120.0f, Dali::Ui::Duration(0.5f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT));
+  }
+
+  void Start()
+  {
+    mAnimation.Play();
+  }
+
+  void StartAfterDelay()
+  {
+    mAnimation.PlayAfter(0.2f);
+  }
+
+  void Pause()
+  {
+    if(mAnimation.GetState() == Dali::Animation::PLAYING)
+    {
+      mAnimation.Pause();
+    }
+  }
+
+  void ReplayFromHalfway()
+  {
+    mAnimation.PlayFrom(0.5f);
+  }
+
+private:
+  Dali::Animation mAnimation;
+};
+```
+
+Use loop settings for repeating motion. `Dali::Animation::SetLooping` enables looping, `Dali::Animation::SetLoopCount` sets a loop count where `0` repeats forever, and `Dali::Animation::SetLoopingMode` chooses restart or auto-reverse behavior. Do not combine `SetLooping` and `SetLoopCount` for the same animation because each resets the other setting.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Animation CreatePulse(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New(0.8f);
+
+  view.Animate(animation)
+    .ScaleX(1.08f, Dali::Ui::Duration(0.4f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT))
+    .ScaleY(1.08f, Dali::Ui::Duration(0.4f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT));
+
+  animation.SetLooping(true);
+  animation.SetLoopingMode(Dali::Animation::AUTO_REVERSE);
+  animation.Play();
+
+  return animation;
+}
+```
+
+## Coordinate Timing, Delays, and Easing
+
+Each `Dali::Ui::ViewAnimationBridge` and `Dali::Ui::ViewAnimationSpec` entry accepts a `Dali::Ui::Duration`, an optional `Dali::AlphaFunction`, and an optional delay. `Dali::Ui::Duration` stores seconds and can report values through `InSeconds` and `InMilliseconds`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void StageEntrance(Dali::Ui::View title, Dali::Ui::View panel)
+{
+  Dali::Ui::Duration quick(0.2f);
+  Dali::Ui::Duration normal(0.45f);
+
+  Dali::Animation animation = Dali::Animation::New(normal.InSeconds());
+
+  title.Animate(animation)
+    .Opacity(1.0f, quick, Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT));
+
+  panel.Animate(animation)
+    .Opacity(1.0f, normal, Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT), Dali::Ui::Duration(0.1f))
+    .PositionY(0.0f, normal, Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT), Dali::Ui::Duration(0.1f));
+
+  animation.Play();
+}
+```
+
+`Dali::AlphaFunction` controls how progress is mapped over time. The default `Dali::AlphaFunction()` is linear. Use built-in values such as `Dali::AlphaFunction::EASE_IN`, `Dali::AlphaFunction::EASE_OUT`, and `Dali::AlphaFunction::EASE_IN_OUT` for common UI motion curves.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void CompareCurves(Dali::Ui::View slowStart, Dali::Ui::View smooth)
+{
+  Dali::Animation animation = Dali::Animation::New(0.5f);
+
+  slowStart.Animate(animation)
+    .PositionX(80.0f, Dali::Ui::Duration(0.5f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN));
+
+  smooth.Animate(animation)
+    .PositionX(80.0f, Dali::Ui::Duration(0.5f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT));
+
+  animation.Play();
+}
+```
+
+## Use Label Animation APIs
+
+Labels can use the same view animation concepts through `Dali::Ui::LabelAnimationBridge` and `Dali::Ui::LabelAnimationSpec`. These `dali-ui` animation symbols extend the view animation surface with label-specific animation methods while preserving the fluent chaining style.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void FadeLabel(Dali::Ui::Label label)
+{
+  Dali::Animation animation = Dali::Animation::New(0.3f);
+
+  label.Animate(animation)
+    .Opacity(0.0f, Dali::Ui::Duration(0.3f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT));
+
+  animation.Play();
+}
+```
+
+Use `Dali::Ui::LabelAnimationSpec` when a label motion recipe should be reused in the same way as a `Dali::Ui::ViewAnimationSpec`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::LabelAnimationSpec CreateLabelRevealSpec()
+{
+  return Dali::Ui::Label::NewAnimationSpec()
+    .Opacity(1.0f, Dali::Ui::Duration(0.25f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_IN_OUT))
+    .PositionY(0.0f, Dali::Ui::Duration(0.25f), Dali::AlphaFunction(Dali::AlphaFunction::EASE_OUT));
+}
+
+void RevealLabel(Dali::Ui::Label label)
+{
+  Dali::Animation animation = Dali::Animation::New(0.25f);
+  Dali::Ui::LabelAnimationSpec spec = CreateLabelRevealSpec();
+
+  spec.ApplyTo(animation, label);
+  animation.Play();
+}
+```
+-----END_REVISED_MARKDOWN-----
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Animation Prose Review
+
+Changed prose:
+- Clarified the opening sentence to make `Dali::Ui::View::Animate` the app-facing entry point with `Dali::Animation` as the playback object.
+- Replaced "owned by the `dali-ui` animation surface" with a more precise description of `Dali::Ui::ViewAnimationBridge` as a lightweight bridge that applies typed entries to a supplied `Dali::Animation`.
+- Narrowed the raw property mapping paragraph to source-backed property names used by the bridge implementation: `OPACITY`, `POSITION_X`, `POSITION_Y`, `SCALE_X`, and `SCALE_Y`.
+- Updated loop-setting prose to note that `SetLooping` and `SetLoopCount` should not be combined, and that `SetLoopCount(0)` repeats forever.
+- Slightly tightened label prose to say the label bridge/spec extend the view animation surface with label-specific methods.
+
+Source evidence:
+- `repos/dali-ui/dali-ui-foundation/public-api/view.h` and `view.cpp` expose `Dali::Ui::View::Animate(Animation)` and `Dali::Ui::View::NewAnimationSpec()`.
+- `repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h` documents `ViewAnimationBridge` as lightweight, stack-allocated, and type-safe, with methods such as `Opacity`, `PositionX`, `PositionY`, `ScaleX`, and `ScaleY`.
+- `repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp` maps typed methods to `Dali::Animation::AnimateTo` / `AnimateBy` on actor and view properties.
+- `repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp` shows `ViewAnimationSpec::ApplyTo(Animation, View)` applying stored entries.
+- `repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h` confirms `Dali::Ui::Duration`, `InSeconds`, and `InMilliseconds`.
+- `repos/dali-core/dali/public-api/animation/animation.h` confirms `Play`, `Pause`, `PlayAfter`, `PlayFrom`, `SetLooping`, `SetLoopCount`, and `SetLoopingMode`, including the reset behavior between `SetLooping` and `SetLoopCount`.
+- `repos/dali-ui/dali-ui-foundation/public-api/label.h`, `label.cpp`, `label-animation-bridge.autogen.h`, and `label-animation-spec.autogen.h` confirm label animation bridge/spec APIs and label-specific extension behavior.
+- `repos/dali-ui/samples/animation/animation-example.cpp` demonstrates `View::NewAnimationSpec()`, `view.Animate(anim)`, fluent chaining, and `anim.Play()`.
+
+Remaining concerns:
+- Code blocks were preserved as requested and checked against public signatures, but they were not compiled in this read-only review pass.
+-----END_PROSE_REVIEW_REPORT-----

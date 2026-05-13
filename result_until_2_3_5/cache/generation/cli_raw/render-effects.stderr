@@ -1,0 +1,1774 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e1fbb-d9cd-7fa1-b5d5-e7eb269816e2
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Render Effects (render-effects)
+- Category: images-visuals
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 44
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::BackgroundBlurEffect | scope=primary
+- Dali::Ui::GaussianBlurEffect | scope=primary
+- Dali::Ui::MaskEffect | scope=primary
+- Dali::Ui::RenderEffect | scope=primary
+- Dali::Ui::BackgroundBlurEffect::AddBlurOpacityAnimation | void AddBlurOpacityAnimation(Animation &animation, AlphaFunction alphaFunction, TimePeriod timePeriod, float fromValue, float toValue) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::AddBlurStrengthAnimation | void AddBlurStrengthAnimation(Animation &animation, AlphaFunction alphaFunction, TimePeriod timePeriod, float fromValue, float toValue) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::BackgroundBlurEffect | BackgroundBlurEffect() | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::FinishedSignal | FinishedSignalType & FinishedSignal() | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::GetBlurDownscaleFactor | float GetBlurDownscaleFactor() const | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::GetBlurOnce | bool GetBlurOnce() const | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::GetBlurRadius | uint32_t GetBlurRadius() const | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::New | BackgroundBlurEffect New(uint32_t blurRadius) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::SetBlurDownscaleFactor | void SetBlurDownscaleFactor(float downscaleFactor) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::SetBlurOnce | void SetBlurOnce(bool blurOnce) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::SetBlurRadius | void SetBlurRadius(uint32_t blurRadius) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::SetSourceActor | void SetSourceActor(Dali::Actor sourceActor) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::SetStopperActor | void SetStopperActor(Dali::Actor stopperActor) | scope=primary_member
+- Dali::Ui::BackgroundBlurEffect::~BackgroundBlurEffect | ~BackgroundBlurEffect() | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::AddBlurOpacityAnimation | void AddBlurOpacityAnimation(Animation &animation, AlphaFunction alphaFunction, TimePeriod timePeriod, float fromValue, float toValue) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::AddBlurStrengthAnimation | void AddBlurStrengthAnimation(Animation &animation, AlphaFunction alphaFunction, TimePeriod timePeriod, float fromValue, float toValue) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::FinishedSignal | FinishedSignalType & FinishedSignal() | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::GaussianBlurEffect | GaussianBlurEffect(const GaussianBlurEffect &handle) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::GetBlurDownscaleFactor | float GetBlurDownscaleFactor() const | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::GetBlurOnce | bool GetBlurOnce() const | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::GetBlurRadius | uint32_t GetBlurRadius() const | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::New | GaussianBlurEffect New(uint32_t blurRadius) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::SetBlurDownscaleFactor | void SetBlurDownscaleFactor(float downscaleFactor) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::SetBlurOnce | void SetBlurOnce(bool blurOnce) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::SetBlurRadius | void SetBlurRadius(uint32_t blurRadius) | scope=primary_member
+- Dali::Ui::GaussianBlurEffect::~GaussianBlurEffect | ~GaussianBlurEffect() | scope=primary_member
+- Dali::Ui::MaskEffect::GetSourceMaskOnce | bool GetSourceMaskOnce() const | scope=primary_member
+- Dali::Ui::MaskEffect::GetTargetMaskOnce | bool GetTargetMaskOnce() const | scope=primary_member
+- Dali::Ui::MaskEffect::MaskEffect | MaskEffect() | scope=primary_member
+- Dali::Ui::MaskEffect::MaskMode | scope=primary_member
+- Dali::Ui::MaskEffect::New | MaskEffect New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale) | scope=primary_member
+- Dali::Ui::MaskEffect::SetSourceMaskOnce | void SetSourceMaskOnce(bool sourceMaskOnce) | scope=primary_member
+- Dali::Ui::MaskEffect::SetTargetMaskOnce | void SetTargetMaskOnce(bool targetMaskOnce) | scope=primary_member
+- Dali::Ui::MaskEffect::~MaskEffect | ~MaskEffect() | scope=primary_member
+- Dali::Ui::RenderEffect::Activate | void Activate() | scope=primary_member
+- Dali::Ui::RenderEffect::Deactivate | void Deactivate() | scope=primary_member
+- Dali::Ui::RenderEffect::IsActivated | bool IsActivated() | scope=primary_member
+- Dali::Ui::RenderEffect::Refresh | void Refresh() | scope=primary_member
+- Dali::Ui::RenderEffect::RenderEffect | RenderEffect()=default | scope=primary_member
+- Dali::Ui::RenderEffect::~RenderEffect | ~RenderEffect()=default | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "render-effects_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::BackgroundBlurEffect::New",
+      "Dali::Ui::GaussianBlurEffect::New",
+      "Dali::Ui::MaskEffect::New",
+      "Dali::Ui::BackgroundBlurEffect::SetBlurDownscaleFactor",
+      "Dali::Ui::BackgroundBlurEffect::SetBlurOnce",
+      "Dali::Ui::BackgroundBlurEffect::SetBlurRadius",
+      "Dali::Ui::BackgroundBlurEffect::SetSourceActor",
+      "Dali::Ui::BackgroundBlurEffect::SetStopperActor",
+      "Dali::Ui::GaussianBlurEffect::SetBlurDownscaleFactor",
+      "Dali::Ui::GaussianBlurEffect::SetBlurOnce",
+      "Dali::Ui::GaussianBlurEffect::SetBlurRadius",
+      "Dali::Ui::MaskEffect::SetSourceMaskOnce",
+      "Dali::Ui::MaskEffect::SetTargetMaskOnce"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "id": "render-effects_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::Ui::BackgroundBlurEffect::FinishedSignal",
+      "Dali::Ui::GaussianBlurEffect::FinishedSignal"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/text/text-cutout-mask-example.cpp:35 (sample, score=0.6)
+```cpp
+private:
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xFFFFFF));
+
+    window.Add(
+      StackLayout::New(StackOrientation::VERTICAL)
+        .SetSpacing(STACK_SPACING)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .Children({
+          Label::New("Text Cutout Example"),
+
+          AbsoluteLayout::New()
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(WRAP_CONTENT)
+          .Children({
+            Label::New(BACKGROUND_TEXT)
+            .SetTextColor(UiColor(0x3A6D75))
+            .SetBackgroundColor(UiColor(0x9ED8DB))
+            .SetFontSize(10.0f)
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "MaskEffect",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/text/text-cutout-mask-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 114,
+    "snippet_start_line": 35
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui/public-api/rendering/background-blur-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/dali-ui/public-api/rendering/gaussian-blur-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui/public-api/rendering/render-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/rendering/gaussian-blur-effect.h: No such file or directory
+
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/rendering/background-blur-effect.h: No such file or directory
+
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/rendering/render-effect.h: No such file or directory
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui/public-api/rendering/mask-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/rendering/mask-effect.h: No such file or directory
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/text/text-cutout-mask-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float STACK_SPACING = 10.0f;
+constexpr float STACK_PADDING = 20.0f;
+const char* BACKGROUND_TEXT = "HELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLD";
+} // namespace
+
+class TextController : public ConnectionTracker
+{
+public:
+  explicit TextController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &TextController::OnInit);
+  }
+
+private:
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xFFFFFF));
+
+    window.Add(
+      StackLayout::New(StackOrientation::VERTICAL)
+        .SetSpacing(STACK_SPACING)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .Children({
+          Label::New("Text Cutout Example"),
+
+          AbsoluteLayout::New()
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(WRAP_CONTENT)
+          .Children({
+            Label::New(BACKGROUND_TEXT)
+            .SetTextColor(UiColor(0x3A6D75))
+            .SetBackgroundColor(UiColor(0x9ED8DB))
+            .SetFontSize(10.0f)
+            .SetMultiLine(true)
+            .SetLineHeight(0.8f)
+            .SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f))),
+
+            Label::New("Hello World")
+            .SetFontFamily("SamsungOneUI_700")
+            .SetTextColor(UiColor(0x000000).WithAlpha(0.0f))
+            .SetBackgroundColor(UiColor(0x1F2A36))
+            .SetTextFit(Text::FitRange(20, 100, 10))
+            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+            .SetVerticalTextAlignment(Text::Alignment::CENTER)
+            .SetCutoutEnabled(true)
+            .SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f)))
+            .As(mLabel),
+          }),
+
+          Label::New("Text Mask Effect Example"),
+
+          Label::New("Label::SetMaskEffect"),
+
+          Label::New("Hello Mask")
+          .SetFontFamily("SamsungOneUI_700")
+          .SetRequestedWidth(400)
+          .SetRequestedHeight(100)
+          .SetTextColor(UiColor(0xff0000))
+          .SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f))
+          .SetTextFit(Text::FitRange(20, 100, 10))
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER)
+          // This produces the same masking result as CreateLabelAsMaskSource().
+          .SetMaskEffect(
+            Label::New(BACKGROUND_TEXT)
+            .SetRequestedWidth(400)
+            .SetRequestedHeight(100)
+            .SetTextColor(UiColor(0x3A6D75))
+            .SetFontSize(10.0f)
+            .SetMultiLine(true)
+            .SetLineHeight(0.8f))
+          .As(mMaskLabel),
+
+          Label::New("View::SetRenderEffect(MaskEffect)"),
+
+          CreateLabelAsMaskTarget(),
+
+          // Manual equivalent of Label::SetMaskEffect().
+          CreateLabelAsMaskSource(),
+        }));
+  
+    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+  }
+
+  Label CreateLabelAsMaskTarget()
+  {
+    auto maskSource = Label::New(BACKGROUND_TEXT)
+      .SetRequestedWidth(400)
+      .SetRequestedHeight(100)
+      .SetTextColor(UiColor(0x3A6D75))
+      .SetFontSize(10.0f)
+      .SetMultiLine(true)
+      .SetLineHeight(0.8f);
+
+    auto target = Label::New("Hello Mask")
+      .SetFontFamily("SamsungOneUI_700")
+      .SetRequestedWidth(400)
+      .SetRequestedHeight(100)
+      .SetTextColor(UiColor(0xff0000))
+      .SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f))
+      .SetTextFit(Text::FitRange(20, 100, 10))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    target.Add(maskSource);
+    target.SetRenderEffect(MaskEffect::New(maskSource));
+
+    return target;
+  }
+
+  Label CreateLabelAsMaskSource()
+  {
+    auto maskTarget = Label::New(BACKGROUND_TEXT)
+      .SetRequestedWidth(400)
+      .SetRequestedHeight(100)
+      .SetTextColor(UiColor(0x3A6D75))
+      .SetFontSize(10.0f)
+      .SetMultiLine(true)
+      .SetLineHeight(0.8f);
+
+    auto source = Label::New("Hello Mask")
+      .SetFontFamily("SamsungOneUI_700")
+      .SetRequestedWidth(400)
+      .SetRequestedHeight(100)
+      .SetTextColor(UiColor(0xff0000))
+      .SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f))
+      .SetTextFit(Text::FitRange(20, 100, 10))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    maskTarget.Add(source);
+    maskTarget.SetRenderEffect(MaskEffect::New(source));
+
+    return maskTarget;
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::UP)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      mApplication.Quit();
+      return;
+    }
+    if(event.GetKeyName() == "1")
+    {
+      mLabel.SetCutoutEnabled(false);
+      mMaskLabel.ClearMaskEffect();
+    }
+    else if(event.GetKeyName() == "2")
+    {
+
+exec
+/bin/bash -lc "rg --files repos/dali-ui | rg '(render-effect|gaussian-blur-effect|background-blur-effect|mask-effect)\\.h"'$'"'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/render-effect.h
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.h
+
+exec
+/bin/bash -lc "sed -n '180,360p' repos/dali-ui/samples/text/text-cutout-mask-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    {
+      mLabel.SetCutoutEnabled(true);
+      mMaskLabel.SetMaskEffect(
+        Label::New(BACKGROUND_TEXT)
+        .SetRequestedWidth(400)
+        .SetRequestedHeight(100)
+        .SetTextColor(UiColor(0x3A6D75))
+        .SetFontSize(10.0f)
+        .SetMultiLine(true)
+        .SetLineHeight(0.8f));
+    }
+  }
+
+private:
+  Application& mApplication;
+  Label        mLabel;
+  Label        mMaskLabel;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+
+  TextController controller(application);
+  application.MainLoop();
+
+  return 0;
+}
+
+exec
+/bin/bash -lc 'rg "MaskEffect::New|SetRenderEffect|GaussianBlurEffect|BackgroundBlurEffect" repos/dali-ui -n' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:790:void View::SetRenderEffect(Ui::RenderEffect effect)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:792:  GetImpl(*this).SetRenderEffect(effect);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:481:   * @copydoc Ui::View::SetRenderEffect()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:483:  void SetRenderEffect(Ui::RenderEffect effect);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1813:void ViewImpl::SetRenderEffect(Ui::RenderEffect effect)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1841:  void SetRenderEffect(Ui::RenderEffect effect);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:881:   * @see Dali::Ui::View::SetRenderEffect()
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/render-effect.h:44: * Ui::View::SetRenderEffect(Ui::RenderEffect effect);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:27:GaussianBlurEffect::GaussianBlurEffect() = default;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:29:GaussianBlurEffect::GaussianBlurEffect(const GaussianBlurEffect& handle)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:34:GaussianBlurEffect::GaussianBlurEffect(Internal::GaussianBlurEffectImpl* GaussianBlurEffectImpl)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:35:: RenderEffect(GaussianBlurEffectImpl)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:39:GaussianBlurEffect::~GaussianBlurEffect() = default;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:41:GaussianBlurEffect GaussianBlurEffect::New()
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:43:  Internal::GaussianBlurEffectImplPtr internal = Internal::GaussianBlurEffectImpl::New();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:44:  return GaussianBlurEffect(internal.Get());
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:47:GaussianBlurEffect GaussianBlurEffect::New(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:49:  Internal::GaussianBlurEffectImplPtr internal = Internal::GaussianBlurEffectImpl::New(blurRadius);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:50:  return GaussianBlurEffect(internal.Get());
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:53:void GaussianBlurEffect::SetBlurOnce(bool blurOnce)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:58:bool GaussianBlurEffect::GetBlurOnce() const
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:63:void GaussianBlurEffect::SetBlurRadius(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:68:uint32_t GaussianBlurEffect::GetBlurRadius() const
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:73:void GaussianBlurEffect::SetBlurDownscaleFactor(float downscaleFactor)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:78:float GaussianBlurEffect::GetBlurDownscaleFactor() const
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:83:void GaussianBlurEffect::AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:89:void GaussianBlurEffect::AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.cpp:95:GaussianBlurEffect::FinishedSignalType& GaussianBlurEffect::FinishedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:25:BackgroundBlurEffect::BackgroundBlurEffect() = default;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:26:BackgroundBlurEffect::BackgroundBlurEffect(const BackgroundBlurEffect& handle)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:31:BackgroundBlurEffect::BackgroundBlurEffect(Internal::BackgroundBlurEffectImpl* backgroundBlurEffectImpl)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:36:BackgroundBlurEffect::~BackgroundBlurEffect() = default;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:38:BackgroundBlurEffect BackgroundBlurEffect::New()
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:40:  Internal::BackgroundBlurEffectImplPtr internal = Internal::BackgroundBlurEffectImpl::New();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:41:  return BackgroundBlurEffect(internal.Get());
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:44:BackgroundBlurEffect BackgroundBlurEffect::New(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:46:  Internal::BackgroundBlurEffectImplPtr internal = Internal::BackgroundBlurEffectImpl::New(blurRadius);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:47:  return BackgroundBlurEffect(internal.Get());
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:50:void BackgroundBlurEffect::SetBlurOnce(bool blurOnce)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:55:bool BackgroundBlurEffect::GetBlurOnce() const
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:60:void BackgroundBlurEffect::SetBlurRadius(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:65:uint32_t BackgroundBlurEffect::GetBlurRadius() const
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:70:void BackgroundBlurEffect::SetBlurDownscaleFactor(float downscaleFactor)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:75:float BackgroundBlurEffect::GetBlurDownscaleFactor() const
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:80:void BackgroundBlurEffect::AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:86:void BackgroundBlurEffect::AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:92:void BackgroundBlurEffect::SetSourceActor(Dali::Actor sourceActor)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:97:void BackgroundBlurEffect::SetStopperActor(Dali::Actor stopperActor)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.cpp:102:BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffect::FinishedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:925:  MaskEffect maskEffect = MaskEffect::New(view);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:927:  selfView.SetRenderEffect(maskEffect);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:34:class GaussianBlurEffectImpl;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:38: * @brief GaussianBlurEffect is a visual effect that blurs owner view and its children.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:41: * GaussianBlurEffect effect = GaussianBlurEffect::New();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:42: * view.SetRenderEffect(effect); // Activate
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:48:class DALI_UI_API GaussianBlurEffect : public RenderEffect
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:57:   * @brief Creates an initialized GaussianBlurEffect, with default blur radius 10u.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:60:  static GaussianBlurEffect New();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:63:   * @brief Creates an initialized GaussianBlurEffect.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:71:  static GaussianBlurEffect New(uint32_t blurRadius);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:76:  GaussianBlurEffect();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:81:  GaussianBlurEffect(const GaussianBlurEffect& handle);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:86:  ~GaussianBlurEffect();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:166:   * @param[in]  blurEffectImpl The GaussianBlurEffect implementation.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:168:  explicit DALI_INTERNAL GaussianBlurEffect(Internal::GaussianBlurEffectImpl* gaussianBlurEffectImpl);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:34:class BackgroundBlurEffectImpl;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:38: * @brief BackgroundBlurEffect is a visual effect that blurs owner view's background.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:41: * BackgroundBlurEffect effect = BackgroundBlurEffect::New();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:42: * view.SetRenderEffect(effect); // Activate
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:49: * @note Tree hierarchy matters for BackgroundBlurEffect. You should determine "what is the background".
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:51:class DALI_UI_API BackgroundBlurEffect : public RenderEffect
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:60:   * @brief Creates an initialized BackgroundBlurEffect, using default settings. As default, blur radius is set to 10u.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:63:  static BackgroundBlurEffect New();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:66:   * @brief Creates an initialized BackgroundBlurEffect.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:74:  static BackgroundBlurEffect New(uint32_t blurRadius);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:79:  BackgroundBlurEffect();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:84:  BackgroundBlurEffect(const BackgroundBlurEffect& handle);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:89:  ~BackgroundBlurEffect();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:184:   * @param[in]  blurEffectImpl The BackgroundBlurEffect implementation.
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:186:  explicit DALI_INTERNAL BackgroundBlurEffect(Internal::BackgroundBlurEffectImpl* backgroundBlurEffectImpl);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.h:41: * view.SetRenderEffect(MaskEffect::New(maskView)); // Activate
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.cpp:40:MaskEffect MaskEffect::New(Ui::View maskView)
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.cpp:66:MaskEffect MaskEffect::New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale)
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:377:  * @see Dali::Ui::View::SetRenderEffect() \
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:40:class BackgroundBlurEffectImpl;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:41:using BackgroundBlurEffectImplPtr = IntrusivePtr<BackgroundBlurEffectImpl>;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:43:class BackgroundBlurEffectImpl : public RenderEffectImpl
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:51:  static BackgroundBlurEffectImplPtr New();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:59:  static BackgroundBlurEffectImplPtr New(uint32_t blurRadius);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:72:   * @copydoc Ui::BackgroundBlurEffect::SetBlurOnce
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:77:   * @copydoc Ui::BackgroundBlurEffect::GetBlurOnce
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:82:   * @copydoc Ui::BackgroundBlurEffect::SetBlurRadius
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:87:   * @copydoc Ui::BackgroundBlurEffect::GetBlurRadius
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:92:   * @copydoc Ui::BackgroundBlurEffect::SetBlurDownscaleFactor
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:97:   * @copydoc Ui::BackgroundBlurEffect::GetBlurDownscaleFactor
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:102:   * @copydoc Ui::BackgroundBlurEffect::AddBlurStrengthAnimation
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:108:   * @copydoc Ui::BackgroundBlurEffect::AddBlurOpacityAnimation
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:114:   * @copydoc Ui::BackgroundBlurEffect::FinishedSignal
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:116:  Dali::Ui::BackgroundBlurEffect::FinishedSignalType& FinishedSignal();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:119:   * @copydoc Ui::BackgroundBlurEffect::SetSourceActor
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:124:   * @copydoc Ui::BackgroundBlurEffect::SetStopperActor
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:132:  BackgroundBlurEffectImpl();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:138:  BackgroundBlurEffectImpl(uint32_t blurRadius);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:143:  virtual ~BackgroundBlurEffectImpl();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:211:  BackgroundBlurEffectImpl(const BackgroundBlurEffectImpl&)            = delete;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:212:  BackgroundBlurEffectImpl(BackgroundBlurEffectImpl&&)                 = delete;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:213:  BackgroundBlurEffectImpl& operator=(BackgroundBlurEffectImpl&&)      = delete; // no move()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:214:  BackgroundBlurEffectImpl& operator=(const BackgroundBlurEffectImpl&) = delete; // no copy()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:217:  Dali::Ui::BackgroundBlurEffect::FinishedSignalType mFinishedSignal; // Emits when blur once is enabled
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:254:inline Ui::Internal::BackgroundBlurEffectImpl& GetImplementation(Ui::BackgroundBlurEffect& obj)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:257:  return static_cast<Ui::Internal::BackgroundBlurEffectImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:260:inline const Ui::Internal::BackgroundBlurEffectImpl& GetImplementation(const Ui::BackgroundBlurEffect& obj)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h:263:  return static_cast<const Ui::Internal::BackgroundBlurEffectImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:40:class GaussianBlurEffectImpl;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:41:using GaussianBlurEffectImplPtr = IntrusivePtr<GaussianBlurEffectImpl>;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:43:class GaussianBlurEffectImpl : public RenderEffectImpl
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:52:  static GaussianBlurEffectImplPtr New();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:60:  static GaussianBlurEffectImplPtr New(uint32_t blurRadius);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:73:   * @copydoc Ui::GaussianBlurEffect::SetBlurOnce
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:78:   * @copydoc Ui::GaussianBlurEffect::GetBlurOnce
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:83:   * @copydoc Ui::GaussianBlurEffect::SetBlurRadius
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:88:   * @copydoc Ui::GaussianBlurEffect::GetBlurRadius
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:93:   * @copydoc Ui::GaussianBlurEffect::SetBlurDownscaleFactor
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:98:   * @copydoc Ui::GaussianBlurEffect::GetBlurDownscaleFactor
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:103:   * @copydoc Ui::GaussianBlurEffect::AddBlurStrengthAnimation
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:109:   * @copydoc Ui::GaussianBlurEffect::AddBlurOpacityAnimation
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:115:   * @copydoc Ui::GaussianBlurEffect::FinishedSignal
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:117:  Dali::Ui::GaussianBlurEffect::FinishedSignalType& FinishedSignal();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:123:  GaussianBlurEffectImpl();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:129:  GaussianBlurEffectImpl(uint32_t blurRadius);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:134:  virtual ~GaussianBlurEffectImpl();
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:202:  GaussianBlurEffectImpl(const GaussianBlurEffectImpl&)            = delete;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:203:  GaussianBlurEffectImpl(GaussianBlurEffectImpl&&)                 = delete;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:204:  GaussianBlurEffectImpl& operator=(GaussianBlurEffectImpl&&)      = delete; // no move()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:205:  GaussianBlurEffectImpl& operator=(const GaussianBlurEffectImpl&) = delete; // no copy()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:208:  Dali::Ui::GaussianBlurEffect::FinishedSignalType mFinishedSignal; // Emits when blur once is enabled
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:242:inline Ui::Internal::GaussianBlurEffectImpl& GetImplementation(Ui::GaussianBlurEffect& obj)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:245:  return static_cast<Ui::Internal::GaussianBlurEffectImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:248:inline const Ui::Internal::GaussianBlurEffectImpl& GetImplementation(const Ui::GaussianBlurEffect& obj)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.h:251:  return static_cast<const Ui::Internal::GaussianBlurEffectImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:57:GaussianBlurEffectImpl::GaussianBlurEffectImpl()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:58:: GaussianBlurEffectImpl(BLUR_EFFECT_BLUR_RADIUS)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:62:GaussianBlurEffectImpl::GaussianBlurEffectImpl(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:73:GaussianBlurEffectImpl::~GaussianBlurEffectImpl()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:77:GaussianBlurEffectImplPtr GaussianBlurEffectImpl::New()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:79:  return GaussianBlurEffectImpl::New(BLUR_EFFECT_BLUR_RADIUS);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:82:GaussianBlurEffectImplPtr GaussianBlurEffectImpl::New(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:84:  GaussianBlurEffectImplPtr handle = new GaussianBlurEffectImpl(blurRadius);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:89:OffScreenRenderable::Type GaussianBlurEffectImpl::GetOffScreenRenderableType() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:94:void GaussianBlurEffectImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:113:void GaussianBlurEffectImpl::SetBlurOnce(bool blurOnce)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:132:          mVerticalBlurTask.FinishedSignal().Connect(this, &GaussianBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:139:          mVerticalBlurTask.FinishedSignal().Disconnect(this, &GaussianBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:149:bool GaussianBlurEffectImpl::GetBlurOnce() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:154:void GaussianBlurEffectImpl::SetBlurRadius(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:186:uint32_t GaussianBlurEffectImpl::GetBlurRadius() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:191:void GaussianBlurEffectImpl::SetBlurDownscaleFactor(float downscaleFactor)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:223:float GaussianBlurEffectImpl::GetBlurDownscaleFactor() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:228:void GaussianBlurEffectImpl::AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:259:void GaussianBlurEffectImpl::AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:289:void GaussianBlurEffectImpl::OnInitialize()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:319:void GaussianBlurEffectImpl::OnActivate()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:339:    "[GaussianBlurEffect:%p] OnActivated! [ID:%d][size:%fx%f] [radius:%u, scale:%f, downscaledRadius:%u=%u*%f]\n",
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:402:void GaussianBlurEffectImpl::OnDeactivate()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:418:  DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[GaussianBlurEffect:%p] OnDeactivated! [ID:%d]\n", this,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:427:void GaussianBlurEffectImpl::OnRefresh()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:482:void GaussianBlurEffectImpl::CreateFrameBuffers(const ImageDimensions downsampledSize)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:506:void GaussianBlurEffectImpl::DestroyFrameBuffers()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:513:void GaussianBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:568:    mVerticalBlurTask.FinishedSignal().Connect(this, &GaussianBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:578:void GaussianBlurEffectImpl::DestroyRenderTasks()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:594:void GaussianBlurEffectImpl::OnRenderFinished(Dali::RenderTask renderTask)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:609:void GaussianBlurEffectImpl::UpdateDownscaledBlurRadius()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:631:Dali::Ui::GaussianBlurEffect::FinishedSignalType& GaussianBlurEffectImpl::FinishedSignal()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:57:BackgroundBlurEffectImpl::BackgroundBlurEffectImpl()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:58:: BackgroundBlurEffectImpl(BLUR_EFFECT_BLUR_RADIUS)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:62:BackgroundBlurEffectImpl::BackgroundBlurEffectImpl(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:75:BackgroundBlurEffectImpl::~BackgroundBlurEffectImpl()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:79:BackgroundBlurEffectImplPtr BackgroundBlurEffectImpl::New()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:81:  return BackgroundBlurEffectImpl::New(BLUR_EFFECT_BLUR_RADIUS);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:84:BackgroundBlurEffectImplPtr BackgroundBlurEffectImpl::New(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:86:  BackgroundBlurEffectImplPtr handle = new BackgroundBlurEffectImpl(blurRadius);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:91:OffScreenRenderable::Type BackgroundBlurEffectImpl::GetOffScreenRenderableType() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:96:void BackgroundBlurEffectImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:118:void BackgroundBlurEffectImpl::SetBlurOnce(bool blurOnce)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:137:          mVerticalBlurTask.FinishedSignal().Connect(this, &BackgroundBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:144:          mVerticalBlurTask.FinishedSignal().Disconnect(this, &BackgroundBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:154:bool BackgroundBlurEffectImpl::GetBlurOnce() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:159:void BackgroundBlurEffectImpl::SetBlurRadius(uint32_t blurRadius)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:190:uint32_t BackgroundBlurEffectImpl::GetBlurRadius() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:195:void BackgroundBlurEffectImpl::SetBlurDownscaleFactor(float downscaleFactor)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:226:float BackgroundBlurEffectImpl::GetBlurDownscaleFactor() const
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:231:void BackgroundBlurEffectImpl::AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:262:void BackgroundBlurEffectImpl::AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:292:void BackgroundBlurEffectImpl::OnInitialize()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:322:void BackgroundBlurEffectImpl::OnActivate()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:342:    "[BackgroundBlurEffect:%p] OnActivated! [ID:%d][size:%fx%f] [radius:%u, scale:%f, downscaledRadius:%u=%u*%f]\n",
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:404:void BackgroundBlurEffectImpl::OnDeactivate()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:419:  DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[BackgroundBlurEffect:%p] OnDeactivated! [ID:%d]\n", this,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:428:void BackgroundBlurEffectImpl::OnRefresh()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:483:void BackgroundBlurEffectImpl::CreateFrameBuffers(const ImageDimensions downsampledSize)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:508:void BackgroundBlurEffectImpl::DestroyFrameBuffers()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:515:void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:569:    mVerticalBlurTask.FinishedSignal().Connect(this, &BackgroundBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:579:void BackgroundBlurEffectImpl::DestroyRenderTasks()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:595:void BackgroundBlurEffectImpl::OnRenderFinished(Dali::RenderTask renderTask)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:610:void BackgroundBlurEffectImpl::UpdateDownscaledBlurRadius()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:632:void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::View sourceView)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:676:Dali::Ui::BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffectImpl::FinishedSignal()
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:681:void BackgroundBlurEffectImpl::SetSourceActor(Dali::Actor sourceActor)
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:693:void BackgroundBlurEffectImpl::SetStopperActor(Dali::Actor stopperActor)
+repos/dali-ui/samples/text/text-cutout-mask-example.cpp:99:          Label::New("View::SetRenderEffect(MaskEffect)"),
+repos/dali-ui/samples/text/text-cutout-mask-example.cpp:131:    target.SetRenderEffect(MaskEffect::New(maskSource));
+repos/dali-ui/samples/text/text-cutout-mask-example.cpp:157:    maskTarget.SetRenderEffect(MaskEffect::New(source));
+
+exec
+/bin/bash -lc "sed -n '1,230p' repos/dali-ui/dali-ui-foundation/public-api/render-effects/render-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_UI_RENDER_EFFECT_H
+#define DALI_UI_RENDER_EFFECT_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/render-tasks/render-task.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Internal DALI_INTERNAL
+{
+class RenderEffectImpl;
+} // namespace Internal DALI_INTERNAL
+
+/**
+ * @brief
+ * RenderEffect is an interface for visual effects.
+ *
+ * Each effect has a single owner View.
+ *
+ * Used internal at:
+ * Ui::View::SetRenderEffect(Ui::RenderEffect effect);
+ * Ui::View::ClearRenderEffect();
+ * @note RenderEffect is interface class without constructor. Create resource by subclass.
+ */
+class DALI_UI_API RenderEffect : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an uninitialized effect.
+   */
+  RenderEffect() = default;
+
+  /**
+   * @brief Destructor.
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~RenderEffect() = default;
+
+  /**
+   * @brief Copy constructor. Creates another handle that points to the same real object.
+   */
+  RenderEffect(const RenderEffect& handle);
+
+  /**
+   * @brief Activates effect on owner View
+   */
+  void Activate();
+
+  /**
+   * @brief Deactivates effect
+   */
+  void Deactivate();
+
+  /**
+   * @brief Refreshes effect rendering
+   */
+  void Refresh();
+
+  /**
+   * @brief Get whether this effect activated or not.
+   * @return True if effect is activated. False otherwise.
+   */
+  bool IsActivated();
+
+public: // Not intended for Application developers
+  ///@cond internal
+  /**
+   * @brief Creates a handle using the Ui::Internal implementation.
+   * @param[in] renderEffectImpl The RenderEffect 4implementation.
+   */
+  explicit DALI_INTERNAL RenderEffect(Internal::RenderEffectImpl* renderEffectImpl);
+  ///@endcond
+};
+
+} // namespace Ui
+} // namespace Dali
+
+#endif // DALI_UI_RENDER_EFFECT_H
+
+exec
+/bin/bash -lc "sed -n '1,230p' repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_UI_BLUR_EFFECT_H
+#define DALI_UI_BLUR_EFFECT_H
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/animation/time-period.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Internal DALI_INTERNAL
+{
+class GaussianBlurEffectImpl;
+} // namespace Internal DALI_INTERNAL
+
+/**
+ * @brief GaussianBlurEffect is a visual effect that blurs owner view and its children.
+ *
+ * @code
+ * GaussianBlurEffect effect = GaussianBlurEffect::New();
+ * view.SetRenderEffect(effect); // Activate
+ * effect.Deactivate();
+ * effect.Activate();
+ * view.ClearRenderEffect(); // Deactivate
+ * @endcode
+ */
+class DALI_UI_API GaussianBlurEffect : public RenderEffect
+{
+public:
+  /**
+   * @brief Typedef for finished signals sent by this class.
+   */
+  typedef Signal<void()> FinishedSignalType;
+
+  /**
+   * @brief Creates an initialized GaussianBlurEffect, with default blur radius 10u.
+   * @return A handle to a newly allocated Dali resource
+   */
+  static GaussianBlurEffect New();
+
+  /**
+   * @brief Creates an initialized GaussianBlurEffect.
+   * @param[in] blurRadius The radius of Gaussian kernel.
+   * @return A handle to a newly allocated Dali resource
+   * @note Due to the downscale factor and kernel optimizations, the actual applied blur changes only in fixed
+   * increments.
+   * @note The increment size is (2 / downscaleFactor). For example, with downscaleFactor = 0.25, the effective blur
+   * radius changes in steps of 8 pixels, so small adjustments below that threshold will have no visual effect.
+   */
+  static GaussianBlurEffect New(uint32_t blurRadius);
+
+  /**
+   * @brief Creates an uninitialized blur effect.
+   */
+  GaussianBlurEffect();
+
+  /**
+   * @brief Copy constructor
+   */
+  GaussianBlurEffect(const GaussianBlurEffect& handle);
+
+  /**
+   * @brief Destructor
+   */
+  ~GaussianBlurEffect();
+
+  /**
+   * @brief Set whether to refresh effect once or every frame.
+   * @param[in] blurOnce If true, renders effect once, else updates effect rendering every frame.
+   */
+  void SetBlurOnce(bool blurOnce);
+
+  /**
+   * @brief Retrives whether effect rendering is done once(true) or every frame(false)
+   * @return Whether blur is rendered once or every frame.
+   */
+  bool GetBlurOnce() const;
+
+  /**
+   * @brief Set blur radius value.
+   * @param[in] blurRadius The radius of Gaussian kernel.
+   * @note Due to the downscale factor and kernel optimizations, the actual applied blur changes only in fixed
+   * increments.
+   * @note The increment size is (2 / downscaleFactor). For example, with downscaleFactor = 0.25, the effective blur
+   * radius changes in steps of 8 pixels, so small adjustments below that threshold will have no visual effect.
+   */
+  void SetBlurRadius(uint32_t blurRadius);
+
+  /**
+   * @brief Retrieves blur radius value.
+   * @return The blur radius.
+   */
+  uint32_t GetBlurRadius() const;
+
+  /**
+   * @brief Set blur downscale factor. The value resides between 0.0f to 1.0f.
+   * @param[in] downscaleFactor The downscale factor for input texture.
+   */
+  void SetBlurDownscaleFactor(float downscaleFactor);
+
+  /**
+   * @brief Retrives blur downscale factor.
+   * @return The blur downscale factor.
+   */
+  float GetBlurDownscaleFactor() const;
+
+  /**
+   * @brief Adds blur strength animation. Blurifies clear texture within given animation parameters.
+   * @param[in] animation Animation instance to which we add blur strength animation.
+   * @param[in] alphaFunction AlphaFunction of blur strength animation.
+   * @param[in] timePeriod TimePeriod of blur strength animation. Default value is animation's duration.
+   * @param[in] fromValue Starting value of blur strength. Must be in range of [0.0f, 1.0f]
+   * @param[in] toValue End value of blur strength. Must be in range of [0.0f, 1.0f]
+   * @note If toValue is smaller than fromValue, animation would show reversed(blurred->clarified) animation.
+   * @note When choosing alpha function, note that gaussian curve itself is innately non-linear.
+   */
+  void AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
+                                float fromValue, float toValue);
+
+  /**
+   * @brief Adds blur opacity animation. Blurifies clear texture within given animation parameters.
+   * @param[in] animation Animation instance to which we add blur opacity animation.
+   * @param[in] alphaFunction AlphaFunction of blur opacity animation.
+   * @param[in] timePeriod TimePeriod of blur opacity animation. Default value is animation's duration.
+   * @param[in] fromValue Starting value of blur opacity. Must be in range of [0.0f, 1.0f]
+   * @param[in] toValue End value of blur opacity. Must be in range of [0.0f, 1.0f]
+   * @note If toValue is smaller than fromValue, animation would show reversed(blurred->clarified) animation.
+   * @note When choosing alpha function, note that gaussian curve itself is innately non-linear.
+   */
+  void AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
+                               float fromValue, float toValue);
+
+public: // Signals
+  /**
+   * @brief If blurOnce is true and effect is activated, then connect to this signal to be notified when the
+   * target actor has been rendered.
+   * @return The finished signal
+   */
+  FinishedSignalType& FinishedSignal();
+
+public: // Not intended for use by Application developers
+  ///@cond internal
+  /**
+   * @brief Creates a handle using the Ui::Internal implementation.
+   * @param[in]  blurEffectImpl The GaussianBlurEffect implementation.
+   */
+  explicit DALI_INTERNAL GaussianBlurEffect(Internal::GaussianBlurEffectImpl* gaussianBlurEffectImpl);
+  ///@endcond
+};
+} // namespace Ui
+} // namespace Dali
+#endif // DALI_UI_BLUR_EFFECT_H
+
+exec
+/bin/bash -lc "sed -n '1,250p' repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_UI_BACKGROUND_BLUR_EFFECT_H
+#define DALI_UI_BACKGROUND_BLUR_EFFECT_H
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/animation/time-period.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Internal DALI_INTERNAL
+{
+class BackgroundBlurEffectImpl;
+} // namespace Internal DALI_INTERNAL
+
+/**
+ * @brief BackgroundBlurEffect is a visual effect that blurs owner view's background.
+ *
+ * @code
+ * BackgroundBlurEffect effect = BackgroundBlurEffect::New();
+ * view.SetRenderEffect(effect); // Activate
+ * effect.Deactivate();
+ * effect.Activate();
+ * view.ClearRenderEffect(); // Deactivate
+ * @endcode
+ *
+ * @note The owner view owns at most one render effect.
+ * @note Tree hierarchy matters for BackgroundBlurEffect. You should determine "what is the background".
+ */
+class DALI_UI_API BackgroundBlurEffect : public RenderEffect
+{
+public:
+  /**
+   * @brief Typedef for finished signals sent by this class.
+   */
+  typedef Signal<void()> FinishedSignalType;
+
+  /**
+   * @brief Creates an initialized BackgroundBlurEffect, using default settings. As default, blur radius is set to 10u.
+   * @return A handle to a newly allocated Dali resource
+   */
+  static BackgroundBlurEffect New();
+
+  /**
+   * @brief Creates an initialized BackgroundBlurEffect.
+   * @param[in] blurRadius The radius of Gaussian kernel.
+   * @return A handle to a newly allocated Dali resource
+   * @note Due to the downscale factor and kernel optimizations, the actual applied blur changes only in fixed
+   * increments.
+   * @note The increment size is (2 / downscaleFactor). For example, with downscaleFactor = 0.25, the effective blur
+   * radius changes in steps of 8 pixels, so small adjustments below that threshold will have no visual effect.
+   */
+  static BackgroundBlurEffect New(uint32_t blurRadius);
+
+  /**
+   * @brief Creates an uninitialized blur effect.
+   */
+  BackgroundBlurEffect();
+
+  /**
+   * @brief Copy constructor.
+   */
+  BackgroundBlurEffect(const BackgroundBlurEffect& handle);
+
+  /**
+   * @brief Destructor
+   */
+  ~BackgroundBlurEffect();
+
+  /**
+   * @brief Set whether to refresh effect once or every frame.
+   * @param[in] blurOnce If true, renders effect once, else updates effect rendering every frame.
+   */
+  void SetBlurOnce(bool blurOnce);
+
+  /**
+   * @brief Retrives whether effect rendering is done once(true) or every frame(false)
+   * @return Whether blur is rendered once or every frame.
+   */
+  bool GetBlurOnce() const;
+
+  /**
+   * @brief Set blur radius value.
+   * @param[in] blurRadius The radius of Gaussian kernel.
+   * @note Due to the downscale factor and kernel optimizations, the actual applied blur changes only in fixed
+   * increments.
+   * @note The increment size is (2 / downscaleFactor). For example, with downscaleFactor = 0.25, the effective blur
+   * radius changes in steps of 8 pixels, so small adjustments below that threshold will have no visual effect.
+   */
+  void SetBlurRadius(uint32_t blurRadius);
+
+  /**
+   * @brief Retrieves blur radius value.
+   * @return The blur radius.
+   */
+  uint32_t GetBlurRadius() const;
+
+  /**
+   * @brief Set blur downscale factor. The value resides between 0.0f to 1.0f.
+   * @param[in] downscaleFactor The downscale factor for input texture.
+   */
+  void SetBlurDownscaleFactor(float downscaleFactor);
+
+  /**
+   * @brief Retrives blur downscale factor.
+   * @return The blur downscale factor.
+   */
+  float GetBlurDownscaleFactor() const;
+
+  /**
+   * @brief Adds blur strength animation. Blurifies clear texture within given animation parameters.
+   * @param[in] animation Animation instance to which we add blur strength animation.
+   * @param[in] alphaFunction AlphaFunction of blur strength animation.
+   * @param[in] timePeriod TimePeriod of blur strength animation. Default value is animation's duration.
+   * @param[in] fromValue Starting value of blur strength. Must be in range of [0.0f, 1.0f]
+   * @param[in] toValue End value of blur strength. Must be in range of [0.0f, 1.0f]
+   * @note If toValue is smaller than fromValue, animation would show reversed(blurred->clarified) animation.
+   * @note When choosing alpha function, note that gaussian curve itself is innately non-linear.
+   */
+  void AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
+                                float fromValue, float toValue);
+
+  /**
+   * @brief Adds blur opacity animation. Blurifies clear texture within given animation parameters.
+   * @param[in] animation Animation instance to which we add blur opacity animation.
+   * @param[in] alphaFunction AlphaFunction of blur opacity animation.
+   * @param[in] timePeriod TimePeriod of blur opacity animation. Default value is animation's duration.
+   * @param[in] fromValue Starting value of blur opacity. Must be in range of [0.0f, 1.0f]
+   * @param[in] toValue End value of blur opacity. Must be in range of [0.0f, 1.0f]
+   * @note If toValue is smaller than fromValue, animation would show reversed(blurred->clarified) animation.
+   * @note When choosing alpha function, note that gaussian curve itself is innately non-linear.
+   */
+  void AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
+                               float fromValue, float toValue);
+
+  /**
+   * @brief Set specific source actor of background blur effects. If empty handle, works same as normal.
+   * @note If given source actor is not a parent of source view, it has no efforts.
+   * @warning RenderEffect didn't hold source actor reference.
+   * @param[in] sourceActor The source actor of background blur effects.
+   */
+  void SetSourceActor(Dali::Actor sourceActor);
+
+  /**
+   * @brief Set specific stopper actor of background blur effects. If empty handle, works same as normal.
+   * @warning RenderEffect didn't hold stopper actor reference.
+   * @param[in] stopperActor The stopper actor of background blur effects.
+   */
+  void SetStopperActor(Dali::Actor stopperActor);
+
+public: // Signals
+  /**
+   * @brief If blurOnce is true and effect is activated, then connect to this signal to be notified when the
+   * target actor has been rendered.
+   * @return The finished signal
+   */
+  FinishedSignalType& FinishedSignal();
+
+public: // Not intended for use by Application developers
+  ///@cond internal
+  /**
+   * @brief Creates a handle using the Ui::Internal implementation.
+   * @param[in]  blurEffectImpl The BackgroundBlurEffect implementation.
+   */
+  explicit DALI_INTERNAL BackgroundBlurEffect(Internal::BackgroundBlurEffectImpl* backgroundBlurEffectImpl);
+  ///@endcond
+};
+} // namespace Ui
+} // namespace Dali
+#endif // DALI_UI_BACKGROUND_BLUR_EFFECT_H
+
+exec
+/bin/bash -lc "sed -n '1,210p' repos/dali-ui/dali-ui-foundation/public-api/render-effects/mask-effect.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_UI_MASK_EFFECT_H
+#define DALI_UI_MASK_EFFECT_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Internal DALI_INTERNAL
+{
+class MaskEffectImpl;
+} // namespace Internal DALI_INTERNAL
+
+/**
+ * @brief MaskEffect is a visual effect that masks owner View.
+ * This class is a concrete class from RenderEffect interface.
+ * Add this effect to a view, clear manually to deactivate.
+ *
+ * Ui::View view = Ui::View::New();
+ * parent.Add(view);
+ * view.SetRenderEffect(MaskEffect::New(maskView)); // Activate
+ * ...
+ * view.ClearRenderEffect(); // Deactivate
+ */
+class DALI_UI_API MaskEffect : public RenderEffect
+{
+public:
+  /**
+   * @brief Enumeration for selecting how the mask source interprets pixel data.
+   */
+  enum MaskMode
+  {
+    ALPHA,     ///< Uses the alpha channel of the mask texture. (Default)
+    LUMINANCE, ///< Converts RGB to grayscale and uses the luminance as mask value.
+  };
+
+  /**
+   * @brief Creates an initialized MaskEffect with view, using default settings. The default settings are:
+   *
+   * maskMode = MaskMode::ALPHA
+   * maskPosition = Vector2(0.f, 0.f)
+   * maskScale = Vector2(1.f, 1.f)
+   *
+   * @param[in] maskView The source View to affect mask.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static MaskEffect New(Ui::View maskView);
+
+  /**
+   * @brief Creates an initialized MaskEffect.
+   *
+   * @param[in] maskView The source View to affect mask.
+   * @param[in] maskMode Defines pixel data type (alpha, luminance) used as the mask source.
+   * @param[in] maskPosition The Position of mask source.
+   * @param[in] maskScale The Scale of mask source.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static MaskEffect New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
+
+  /**
+   * @brief Creates an uninitialized mask effect.
+   */
+  MaskEffect();
+
+  /**
+   * @brief Copy constructor.
+   */
+  MaskEffect(const MaskEffect& handle);
+
+  /**
+   * @brief Destructor
+   */
+  ~MaskEffect();
+
+  /**
+   * @brief Set whether the target should be rendered once(true) or every frame(false).
+   * @param[in] targetMaskOnce If true, renders target once, else updates every frame.
+   */
+  void SetTargetMaskOnce(bool targetMaskOnce);
+
+  /**
+   * @brief Retrives whether the target should be rendered once(true) or every frame(false).
+   */
+  bool GetTargetMaskOnce() const;
+
+  /**
+   * @brief Set whether the source should be rendered once(true) or every frame(false).
+   * @param[in] sourceMaskOnce If true, renders source once, else updates every frame.
+   */
+  void SetSourceMaskOnce(bool sourceMaskOnce);
+
+  /**
+   * @brief Retrives whether the source should be rendered once(true) or every frame(false).
+   */
+  bool GetSourceMaskOnce() const;
+
+public: // Not intended for use by Application developers
+  ///@cond internal
+  /**
+   * @brief Creates a handle using the Ui::Internal implementation.
+   * @param[in] maskEffectImpl The mask effect internal implementation.
+   */
+  explicit DALI_INTERNAL MaskEffect(Internal::MaskEffectImpl* maskEffectImpl);
+  ///@endcond
+};
+} // namespace Ui
+} // namespace Dali
+
+#endif // DALI_UI_MASK_EFFECT_H
+
+exec
+/bin/bash -lc "sed -n '1820,1850p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  /// @brief AccessibilityHighlighted signal type.
+  /// @param bool highlighted true if View is highlighted, false if highlight is removed.
+  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+
+  /// @brief Visual Event signal type.
+  typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
+
+  // Background
+
+  /**
+   * @brief Clears the background.
+   */
+  void ClearBackground();
+
+  /**
+   * @brief Sets RenderEffect to this View.
+   *
+   * @param[in] effect RenderEffect to add.
+   *
+   * @note Every effect inherits RenderEffect.
+   */
+  void SetRenderEffect(Ui::RenderEffect effect);
+
+  /**
+   * @brief Retrieves View's render effect
+   * @return RenderEffect set on this View
+   */
+  Ui::RenderEffect GetRenderEffect() const;
+
+  /**
+   * @brief Clears RenderEffect of this View, if exists.
+
+exec
+/bin/bash -lc "sed -n '1850,1875p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @brief Clears RenderEffect of this View, if exists.
+   */
+  void ClearRenderEffect();
+
+  // Resources
+
+  /**
+   * @brief Query if all resources required by a View are loaded and ready.
+   *
+   * Most resources are only loaded when the View is placed on stage.
+   * @return true if the resources are loaded and ready, false otherwise
+   */
+  bool IsResourceReady() const;
+
+  /**
+   * @brief Checks whether the view is connected to the scene.
+   *
+   * @return true if the view is on scene, false otherwise
+   */
+  bool IsOnScene() const;
+
+  // Signals
+
+  /**
+   * @brief This signal is emitted after all resources required by a View are loaded and ready.
+   *
+
+exec
+/bin/bash -lc "rg \"static Animation New|Animation::New|AlphaFunction::EASE|TimePeriod\\(\" repos/dali-ui/dali-ui-foundation/public-api repos/dali-core/dali/public-api -n | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-core/dali/public-api/signals/slot-delegate.h:59: *     Animation animation = Animation::New( 1.0f );
+repos/dali-core/dali/public-api/animation/time-period.cpp:23:TimePeriod::TimePeriod(float duration)
+repos/dali-core/dali/public-api/animation/time-period.cpp:29:TimePeriod::TimePeriod(float delay, float duration)
+repos/dali-core/dali/public-api/animation/time-period.cpp:35:TimePeriod::~TimePeriod() = default;
+repos/dali-core/dali/public-api/animation/animation.cpp:37:Animation Animation::New(float durationSeconds)
+repos/dali-core/dali/public-api/animation/animation.cpp:39:  Internal::AnimationPtr internal = Dali::Internal::Animation::New(durationSeconds);
+repos/dali-core/dali/public-api/animation/animation.cpp:44:Animation Animation::New()
+repos/dali-core/dali/public-api/animation/animation.cpp:46:  return Animation::New(0.0f);
+repos/dali-core/dali/public-api/animation/time-period.h:43:  explicit TimePeriod(float durationSeconds);
+repos/dali-core/dali/public-api/animation/time-period.h:52:  TimePeriod(float delaySeconds, float durationSeconds);
+repos/dali-core/dali/public-api/animation/time-period.h:58:  ~TimePeriod();
+repos/dali-core/dali/public-api/animation/animation.h:66: * mAnimation = Animation::New(3.0f); // duration 3 seconds
+repos/dali-core/dali/public-api/animation/animation.h:84: *   Animation animation = Animation::New(2.0f); // duration 2 seconds
+repos/dali-core/dali/public-api/animation/animation.h:177:   * @brief Creates an uninitialized Animation; this can be initialized with Animation::New().
+repos/dali-core/dali/public-api/animation/animation.h:195:  static Animation New(float durationSeconds);
+repos/dali-core/dali/public-api/animation/animation.h:206:  static Animation New();
+repos/dali-core/dali/public-api/animation/animation.h:803:   * @brief This constructor is used by Animation::New() methods.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1954:   *   auto anim = Animation::New();
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:198:  mAnimation.AnimateTo(Property(mView, Label::Property::TEXT_COLOR), target.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:205:  mAnimation.AnimateBy(Property(mView, Label::Property::TEXT_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:39: *   auto anim = Animation::New();
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:44: *   auto anim = Animation::New();
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:113:  mAnimation.AnimateTo(Property(mView, Actor::Property::SCALE_X), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:120:  mAnimation.AnimateBy(Property(mView, Actor::Property::SCALE_X), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:127:  mAnimation.AnimateTo(Property(mView, Actor::Property::SCALE_Y), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:134:  mAnimation.AnimateBy(Property(mView, Actor::Property::SCALE_Y), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:141:  mAnimation.AnimateTo(Property(mView, Actor::Property::OPACITY), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:148:  mAnimation.AnimateBy(Property(mView, Actor::Property::OPACITY), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:155:  mAnimation.AnimateTo(Property(mView, View::Property::CORNER_RADIUS), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:162:  mAnimation.AnimateBy(Property(mView, View::Property::CORNER_RADIUS), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:169:  mAnimation.AnimateTo(Property(mView, View::Property::CORNER_SQUARENESS), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:176:  mAnimation.AnimateBy(Property(mView, View::Property::CORNER_SQUARENESS), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:183:  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_WIDTH), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:190:  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_WIDTH), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:197:  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_COLOR), target.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:204:  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:211:  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_OFFSET), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:218:  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_OFFSET), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1123:   *   auto anim = Animation::New();
+
+exec
+/bin/bash -lc "rg \"typedef Signal<void\\(\\)>|FinishedSignal\\(\\)\\.Connect|void On.*Finished\\(\\)\" repos/dali-ui -n | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:92:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:90:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:104:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/wiki/ScrollView.md:387:scrollView.ScrollFinishedSignal().Connect(&handler, &MyScrollHandler::OnScrollFinished);
+repos/dali-ui/wiki/ScrollView.md:390:scrollView.DragFinishedSignal().Connect(&handler, &MyScrollHandler::OnDragFinished);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:71: * scrollView.ScrollFinishedSignal().Connect(this, &MyClass::OnScrollFinished);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:88:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1797:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1800:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1803:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1806:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1809:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1812:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/wiki/ScrollView-(kr).md:396:scrollView.ScrollFinishedSignal().Connect(&handler, &MyScrollHandler::OnScrollFinished);
+repos/dali-ui/wiki/ScrollView-(kr).md:399:scrollView.DragFinishedSignal().Connect(&handler, &MyScrollHandler::OnDragFinished);
+repos/dali-ui/dali-ui-foundation/internal/text/text-scroller.cpp:350:  mScrollAnimation.FinishedSignal().Connect(this, &TextScroller::MarqueeAnimationFinished);
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:54:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:57:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:115:  typedef Signal<void()> VoidRetNoParamSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:393:    mFadeInAnimation.FinishedSignal().Connect(this, &ScrollBarImpl::OnFadeInFinished);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:723:  view.PageLoadFinishedSignal().Connect([](WebView v, const Dali::String& url) {});
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:100:typedef Signal<void()>                   EventProcessingFinishedSignalType;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:768:  scrollView.ScrollFinishedSignal().Connect(&callback, &ScrollFinishedCallback::OnScrollFinished);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:810:  scrollView.DragFinishedSignal().Connect(&callback, &DragFinishedCallback::OnDragFinished);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:37:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:40:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:43:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:46:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:49:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:52:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:137:          mVerticalBlurTask.FinishedSignal().Connect(this, &BackgroundBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:569:    mVerticalBlurTask.FinishedSignal().Connect(this, &BackgroundBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:132:          mVerticalBlurTask.FinishedSignal().Connect(this, &GaussianBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/gaussian-blur-effect-impl.cpp:568:    mVerticalBlurTask.FinishedSignal().Connect(this, &GaussianBlurEffectImpl::OnRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/mask-effect-impl.cpp:147:          mMaskTargetRenderTask.FinishedSignal().Connect(this, &MaskEffectImpl::OnTargetRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/mask-effect-impl.cpp:183:          mMaskSourceRenderTask.FinishedSignal().Connect(this, &MaskEffectImpl::OnSourceRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/mask-effect-impl.cpp:335:    mMaskTargetRenderTask.FinishedSignal().Connect(this, &MaskEffectImpl::OnTargetRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/mask-effect-impl.cpp:360:    mMaskSourceRenderTask.FinishedSignal().Connect(this, &MaskEffectImpl::OnSourceRenderFinished);
+repos/dali-ui/dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.cpp:175:  mRenderTask.FinishedSignal().Connect(this, &OffScreenRenderingImpl::OnRenderFinished);
+repos/dali-ui/samples/text/text-example.cpp:82:    mLabel.AsyncRenderFinishedSignal().Connect(this, &TextController::OnAsyncRenderFinished);
+repos/dali-ui/samples/text/text-example.cpp:83:    mLabel2.AsyncRenderFinishedSignal().Connect(this, &TextController::OnAsyncRenderFinished);
+repos/dali-ui/samples/text/text-example.cpp:84:    mLabel3.AsyncRenderFinishedSignal().Connect(this, &TextController::OnAsyncRenderFinished);
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:140:    mScrollView.ScrollFinishedSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrollFinished);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:410:    mScrollAnimation.FinishedSignal().Connect(this, &ScrollViewImpl::OnScrollAnimationFinished);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:759:  mScrollAnimation.FinishedSignal().Connect(this, &ScrollViewImpl::OnScrollAnimationFinished);
+repos/dali-ui/samples/web-view/web-view-example.cpp:96:    mWebView.PageLoadFinishedSignal().Connect(this, &WebViewSampleController::OnPageLoadFinished);
+repos/dali-ui/dali-ui-foundation/devel-api/builder/builder.h:444:  typedef Signal<void()> BuilderSignalType;
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:121:    mAnimatedImageView.AnimationFinishedSignal().Connect(this, &AnimatedImageViewSampleController::OnAnimationFinished);
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:106:    mLottieView.AnimationFinishedSignal().Connect(this, &LottieAnimationViewSampleController::OnAnimationFinished);
+
+codex
+---
+title: Render Effects
+sidebar_label: Render Effects
+category: images-visuals
+---
+
+# Render Effects
+
+Render effects let a `Dali::Ui::View` render with blur or mask processing while keeping the app-facing object model in dali-ui.
+
+## Table of Contents
+
+- [Choosing a Render Effect](#choosing-a-render-effect)
+- [Blurring a View and Its Children](#blurring-a-view-and-its-children)
+- [Blurring the Background Behind a View](#blurring-the-background-behind-a-view)
+- [Masking a View](#masking-a-view)
+- [Refreshing, Activating, and Deactivating Effects](#refreshing-activating-and-deactivating-effects)
+- [Animating Blur Strength and Opacity](#animating-blur-strength-and-opacity)
+- [Handling One-Shot Render Completion](#handling-one-shot-render-completion)
+
+## Choosing a Render Effect
+
+All render effects derive from `Dali::Ui::RenderEffect`. An effect is assigned to one owner `Dali::Ui::View`, and that owner view has at most one render effect at a time.
+
+Use `Dali::Ui::GaussianBlurEffect` when the view itself, including its children, should be blurred. Use `Dali::Ui::BackgroundBlurEffect` when the view should blur content behind it. Use `Dali::Ui::MaskEffect` when one `Dali::Ui::View` should provide the mask for another view.
+
+```cpp
+void ReplaceWithGaussianBlur(Dali::Ui::View contentView)
+{
+  Dali::Ui::GaussianBlurEffect blur = Dali::Ui::GaussianBlurEffect::New(12u);
+  contentView.SetRenderEffect(blur);
+}
+
+void ReplaceWithBackgroundBlur(Dali::Ui::View overlayView)
+{
+  Dali::Ui::BackgroundBlurEffect blur = Dali::Ui::BackgroundBlurEffect::New(16u);
+  overlayView.SetRenderEffect(blur);
+}
+
+void ReplaceWithMask(Dali::Ui::View targetView, Dali::Ui::View maskView)
+{
+  Dali::Ui::MaskEffect mask = Dali::Ui::MaskEffect::New(
+    maskView,
+    Dali::Ui::MaskEffect::ALPHA,
+    Dali::Vector2(0.0f, 0.0f),
+    Dali::Vector2(1.0f, 1.0f));
+
+  targetView.SetRenderEffect(mask);
+}
+```
+
+## Blurring a View and Its Children
+
+`Dali::Ui::GaussianBlurEffect` blurs the owner `Dali::Ui::View` and its child views. Create it with `Dali::Ui::GaussianBlurEffect::New`, then tune it with typed setters such as `Dali::Ui::GaussianBlurEffect::SetBlurRadius`, `Dali::Ui::GaussianBlurEffect::SetBlurDownscaleFactor`, and `Dali::Ui::GaussianBlurEffect::SetBlurOnce`.
+
+`Dali::Ui::GaussianBlurEffect::SetBlurRadius` sets the Gaussian kernel radius. `Dali::Ui::GaussianBlurEffect::SetBlurDownscaleFactor` sets the input texture downscale factor in the range from `0.0f` to `1.0f`. Because the implementation combines downscaling and kernel optimizations, small radius changes may not always change the visible result.
+
+```cpp
+Dali::Ui::GaussianBlurEffect ConfigureContentBlur(Dali::Ui::View contentView)
+{
+  Dali::Ui::GaussianBlurEffect blur = Dali::Ui::GaussianBlurEffect::New(18u);
+
+  blur.SetBlurDownscaleFactor(0.5f);
+  blur.SetBlurOnce(false);
+
+  contentView.SetRenderEffect(blur);
+
+  return blur;
+}
+```
+
+Use `Dali::Ui::GaussianBlurEffect::GetBlurRadius`, `Dali::Ui::GaussianBlurEffect::GetBlurDownscaleFactor`, and `Dali::Ui::GaussianBlurEffect::GetBlurOnce` when you need to preserve or inspect the current effect configuration.
+
+```cpp
+void IncreaseContentBlur(Dali::Ui::GaussianBlurEffect blur)
+{
+  const uint32_t currentRadius = blur.GetBlurRadius();
+  blur.SetBlurRadius(currentRadius + 4u);
+}
+```
+
+## Blurring the Background Behind a View
+
+`Dali::Ui::BackgroundBlurEffect` blurs the owner view's background rather than blurring the owner view's own visual content. This makes it useful for translucent panels, dialogs, sheets, and overlays where the content behind the panel should be softened.
+
+The view tree matters for `Dali::Ui::BackgroundBlurEffect`: the effect determines its background from the surrounding hierarchy. Attach the effect to the overlay or panel view that should display the blurred background.
+
+```cpp
+Dali::Ui::BackgroundBlurEffect ApplyPanelBackgroundBlur(Dali::Ui::View panelView)
+{
+  Dali::Ui::BackgroundBlurEffect blur = Dali::Ui::BackgroundBlurEffect::New(20u);
+
+  blur.SetBlurDownscaleFactor(0.25f);
+  blur.SetBlurOnce(false);
+
+  panelView.SetRenderEffect(blur);
+
+  return blur;
+}
+```
+
+For advanced hierarchy control, `Dali::Ui::BackgroundBlurEffect::SetSourceActor` can limit the source used by the background blur, and `Dali::Ui::BackgroundBlurEffect::SetStopperActor` can set a stopper in the traversal. The effect does not keep a reference to the source or stopper actor, so keep the corresponding views alive in your view tree.
+
+```cpp
+void ApplyBoundedBackgroundBlur(
+  Dali::Ui::View panelView,
+  Dali::Ui::View backgroundRoot,
+  Dali::Ui::View blurStopper)
+{
+  Dali::Ui::BackgroundBlurEffect blur = Dali::Ui::BackgroundBlurEffect::New(14u);
+
+  blur.SetSourceActor(backgroundRoot);
+  blur.SetStopperActor(blurStopper);
+  blur.SetBlurOnce(false);
+
+  panelView.SetRenderEffect(blur);
+}
+```
+
+## Masking a View
+
+`Dali::Ui::MaskEffect` masks the owner `Dali::Ui::View` using another `Dali::Ui::View` as the mask source. Create it with `Dali::Ui::MaskEffect::New`, passing the mask view, `Dali::Ui::MaskEffect::MaskMode`, mask position, and mask scale.
+
+Use `Dali::Ui::MaskEffect::ALPHA` when the mask should come from the alpha channel. Use `Dali::Ui::MaskEffect::LUMINANCE` when RGB values should be converted to grayscale and used as the mask value.
+
+```cpp
+void ApplyAlphaMask(Dali::Ui::View targetView, Dali::Ui::View maskView)
+{
+  Dali::Ui::MaskEffect mask = Dali::Ui::MaskEffect::New(
+    maskView,
+    Dali::Ui::MaskEffect::ALPHA,
+    Dali::Vector2(0.0f, 0.0f),
+    Dali::Vector2(1.0f, 1.0f));
+
+  mask.SetTargetMaskOnce(true);
+  mask.SetSourceMaskOnce(true);
+
+  targetView.SetRenderEffect(mask);
+}
+```
+
+Use `Dali::Ui::MaskEffect::SetTargetMaskOnce` and `Dali::Ui::MaskEffect::SetSourceMaskOnce` when the masked target or mask source is static. If either side changes every frame, set the matching value to `false`.
+
+```cpp
+void UseAnimatedMaskSource(Dali::Ui::View targetView, Dali::Ui::View animatedMaskView)
+{
+  Dali::Ui::MaskEffect mask = Dali::Ui::MaskEffect::New(
+    animatedMaskView,
+    Dali::Ui::MaskEffect::LUMINANCE,
+    Dali::Vector2(0.0f, 0.0f),
+    Dali::Vector2(1.0f, 1.0f));
+
+  mask.SetTargetMaskOnce(true);
+  mask.SetSourceMaskOnce(false);
+
+  targetView.SetRenderEffect(mask);
+}
+```
+
+## Refreshing, Activating, and Deactivating Effects
+
+`Dali::Ui::RenderEffect` provides common control methods for effects. `Dali::Ui::RenderEffect::Activate` activates an effect on its owner view, `Dali::Ui::RenderEffect::Deactivate` deactivates it, `Dali::Ui::RenderEffect::Refresh` refreshes the effect rendering, and `Dali::Ui::RenderEffect::IsActivated` reports whether the effect is active.
+
+```cpp
+void TemporarilyDisableBlur(Dali::Ui::GaussianBlurEffect blur)
+{
+  if(blur.IsActivated())
+  {
+    blur.Deactivate();
+  }
+}
+
+void RefreshBlur(Dali::Ui::BackgroundBlurEffect blur)
+{
+  blur.Refresh();
+
+  if(!blur.IsActivated())
+  {
+    blur.Activate();
+  }
+}
+```
+
+When the effect is no longer needed on a view, clear it from the owner view.
+
+```cpp
+void RemoveRenderEffect(Dali::Ui::View view)
+{
+  view.ClearRenderEffect();
+}
+```
+
+## Animating Blur Strength and Opacity
+
+`Dali::Ui::GaussianBlurEffect::AddBlurStrengthAnimation` and `Dali::Ui::BackgroundBlurEffect::AddBlurStrengthAnimation` animate from clear to blurred, or from blurred to clear when the target value is smaller than the start value. The strength values must be in the `0.0f` to `1.0f` range.
+
+```cpp
+Dali::Animation AnimateGaussianBlurIn(Dali::Ui::GaussianBlurEffect blur)
+{
+  Dali::Animation animation = Dali::Animation::New(0.25f);
+
+  blur.AddBlurStrengthAnimation(
+    animation,
+    Dali::AlphaFunction::EASE_IN_OUT,
+    Dali::TimePeriod(0.25f),
+    0.0f,
+    1.0f);
+
+  animation.Play();
+
+  return animation;
+}
+```
+
+`Dali::Ui::GaussianBlurEffect::AddBlurOpacityAnimation` and `Dali::Ui::BackgroundBlurEffect::AddBlurOpacityAnimation` animate the opacity of the blurred result. This is useful when you want the blur contribution to fade without changing the configured blur radius.
+
+```cpp
+Dali::Animation FadeBackgroundBlurOut(Dali::Ui::BackgroundBlurEffect blur)
+{
+  Dali::Animation animation = Dali::Animation::New(0.2f);
+
+  blur.AddBlurOpacityAnimation(
+    animation,
+    Dali::AlphaFunction::EASE_IN_OUT,
+    Dali::TimePeriod(0.2f),
+    1.0f,
+    0.0f);
+
+  animation.Play();
+
+  return animation;
+}
+```
+
+## Handling One-Shot Render Completion
+
+When `Dali::Ui::GaussianBlurEffect::SetBlurOnce` or `Dali::Ui::BackgroundBlurEffect::SetBlurOnce` is set to `true`, the effect renders once instead of refreshing every frame. In that mode, connect to `Dali::Ui::GaussianBlurEffect::FinishedSignal` or `Dali::Ui::BackgroundBlurEffect::FinishedSignal` to be notified when rendering has finished.
+
+```cpp
+class BlurController : public Dali::ConnectionTracker
+{
+public:
+  void ApplyOneShotContentBlur(Dali::Ui::View contentView)
+  {
+    mGaussianBlur = Dali::Ui::GaussianBlurEffect::New(16u);
+    mGaussianBlur.SetBlurOnce(true);
+    mGaussianBlur.FinishedSignal().Connect(this, &BlurController::OnGaussianBlurFinished);
+
+    contentView.SetRenderEffect(mGaussianBlur);
+  }
+
+  void ApplyOneShotBackgroundBlur(Dali::Ui::View panelView)
+  {
+    mBackgroundBlur = Dali::Ui::BackgroundBlurEffect::New(16u);
+    mBackgroundBlur.SetBlurOnce(true);
+    mBackgroundBlur.FinishedSignal().Connect(this, &BlurController::OnBackgroundBlurFinished);
+
+    panelView.SetRenderEffect(mBackgroundBlur);
+  }
+
+private:
+  void OnGaussianBlurFinished()
+  {
+    mGaussianBlur.Deactivate();
+  }
+
+  void OnBackgroundBlurFinished()
+  {
+    mBackgroundBlur.Deactivate();
+  }
+
+  Dali::Ui::GaussianBlurEffect   mGaussianBlur;
+  Dali::Ui::BackgroundBlurEffect mBackgroundBlur;
+};
+```
+tokens used
+32,421

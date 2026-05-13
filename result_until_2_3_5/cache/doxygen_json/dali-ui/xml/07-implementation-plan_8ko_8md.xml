@@ -1,0 +1,644 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="07-implementation-plan_8ko_8md" kind="file" language="Markdown">
+    <compoundname>07-implementation-plan.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>구현<sp/>계획</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서의<sp/>목적은<sp/>앞선<sp/>분석<sp/>문서를<sp/>바탕으로<sp/>`Dali::Ui::TextVisualizer`<sp/>실제<sp/>구현<sp/>순서를<sp/>작은<sp/>커밋<sp/>단위로<sp/>나누고,<sp/>각<sp/>단계의<sp/>검증<sp/>방법과<sp/>중단/롤백<sp/>지점을<sp/>명확히<sp/>정의하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>문서는<sp/>구현<sp/>시작<sp/>전<sp/>기준<sp/>문서로<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>작은<sp/>커밋<sp/>단위로<sp/>나누어<sp/>위험을<sp/>낮춘다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>각<sp/>커밋이<sp/>독립적으로<sp/>빌드/검증<sp/>가능해야<sp/>한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare<sp/>-&gt;<sp/>Layout<sp/>-&gt;<sp/>AtlasRenderer<sp/>Adapter`<sp/>흐름을<sp/>순차적으로<sp/>완성한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>1차<sp/>구현<sp/>범위를<sp/>넘는<sp/>기능은<sp/>의도적으로<sp/>제외한다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">애매한<sp/>내용은<sp/>추측하지<sp/>않고<sp/>`확인<sp/>필요`로<sp/>표시한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>전제</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>`View`<sp/>계열<sp/>public<sp/>handle이다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputField`의<sp/>public/internal<sp/>구조를<sp/>참고하되<sp/>editing<sp/>stack은<sp/>제외한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare`와<sp/>`Layout`은<sp/>분리한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>렌더링은<sp/>`AtlasRenderer`를<sp/>사용한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>1차<sp/>구현에서는<sp/>`style`,<sp/>`ellipsis`,<sp/>`selection`,<sp/>`cursor`,<sp/>`editing`을<sp/>제외한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>대응<sp/>multi-line<sp/>layout이<sp/>핵심<sp/>목표다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가할<sp/>파일<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>파일은<sp/>1차<sp/>구현에서<sp/>새로<sp/>추가하는<sp/>것을<sp/>권장한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>integration<sp/>API</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-properties.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>integration<sp/>API</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-property-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer-property-handler.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>internal<sp/>text<sp/>visualizer<sp/>core</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/prepared-text.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/prepared-text.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/text-preparer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/text-preparer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/layout-types.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/layout-engine.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/layout-engine.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>automated<sp/>tests</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>sample</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`samples/text/text-visualizer-example.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>자동<sp/>생성<sp/>또는<sp/>생성<sp/>결과<sp/>확인<sp/>필요<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/integration-api/text-visualizer.autogen.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>chaining<sp/>autogen이<sp/>새<sp/>public<sp/>class에<sp/>대해<sp/>자동<sp/>생성되는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>생성<sp/>결과를<sp/>저장소에<sp/>포함할지<sp/>현재<sp/>팀<sp/>관례<sp/>확인<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>수정할<sp/>파일<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>파일은<sp/>1차<sp/>구현에서<sp/>수정<sp/>가능성이<sp/>높다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>public<sp/>umbrella<sp/>/<sp/>include</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/dali-ui-foundation.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>tests<sp/>build</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/CMakeLists.txt`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>sample<sp/>build</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`samples/text/CMakeLists.txt`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>필요<sp/>시<sp/>수정<sp/>가능성<sp/>있는<sp/>공용<sp/>유틸</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/controls/text-controls/common-text-utils.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>두<sp/>파일은<sp/>가능하면<sp/>수정<sp/>범위를<sp/>최소화한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>수정하지<sp/>않아도<sp/>될<sp/>가능성이<sp/>높은<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`build/tizen/dali-ui-foundation/CMakeLists.txt`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>라이브러리<sp/>빌드는<sp/>`FILE(GLOB_RECURSE<sp/>ALL_SOURCES<sp/>&quot;*.cpp&quot;)`<sp/>방식이라<sp/>새<sp/>`*.cpp`는<sp/>자동<sp/>수집될<sp/>가능성이<sp/>높다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>구현<sp/>순서</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>구현<sp/>순서는<sp/>아래와<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>public/internal<sp/>skeleton<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>property/state<sp/>storage와<sp/>dirty<sp/>flag<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Prepare`<sp/>모델과<sp/>preparer<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>layout<sp/>data<sp/>type<sp/>및<sp/>interval<sp/>builder<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>layout<sp/>engine을<sp/>impl<sp/>lifecycle에<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>atlas<sp/>view<sp/>adapter와<sp/>renderer<sp/>host<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>exclusion<sp/>region을<sp/>실제<sp/>placement에<sp/>반영</highlight></codeline>
+<codeline><highlight class="normal">8.<sp/>automated<sp/>test<sp/>확장</highlight></codeline>
+<codeline><highlight class="normal">9.<sp/>sample<sp/>app<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>순서는<sp/>&quot;보이는<sp/>기능&quot;보다<sp/>&quot;구조<sp/>안정화&quot;를<sp/>먼저<sp/>만든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>각<sp/>커밋<sp/>단위</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>커밋<sp/>분해를<sp/>권장한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>1.<sp/>Public<sp/>/<sp/>Impl<sp/>Skeleton</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>public<sp/>handle과<sp/>internal<sp/>impl<sp/>골격<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`New()`,<sp/>`DownCast()`,<sp/>기본<sp/>lifecycle<sp/>연결</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/dali-ui-foundation.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>라이브러리<sp/>빌드<sp/>성공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>빈<sp/>`TextVisualizer::New()`가<sp/>생성<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>scene<sp/>attach<sp/>시<sp/>crash<sp/>없음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>시점은<sp/>API<sp/>skeleton만<sp/>추가된<sp/>상태라<sp/>되돌리기<sp/>가장<sp/>쉽다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>2.<sp/>Property<sp/>/<sp/>State<sp/>/<sp/>Basic<sp/>UTC</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TEXT`,<sp/>`FONT_FAMILY`,<sp/>`FONT_SIZE`,<sp/>`TEXT_COLOR`<sp/>property<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>setter/getter와<sp/>property<sp/>handler<sp/>연결</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-properties.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-property-handler.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-property-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/CMakeLists.txt`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>constructor<sp/>/<sp/>`New()`<sp/>/<sp/>`DownCast()`<sp/>UTC</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>setter/getter<sp/>UTC</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetProperty()`<sp/>/<sp/>`GetProperty()`<sp/>UTC</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>API<sp/>surface가<sp/>확정되지만<sp/>구현<sp/>의존성은<sp/>아직<sp/>낮다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>3.<sp/>Dirty<sp/>Flags<sp/>+<sp/>Prepare<sp/>API<sp/>Stub</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare()`<sp/>public<sp/>command<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>impl에<sp/>`prepare<sp/>dirty`<sp/>/<sp/>`layout<sp/>dirty`<sp/>/<sp/>`render<sp/>dirty`<sp/>분리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>storage<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare()`<sp/>호출이<sp/>crash<sp/>없이<sp/>동작</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetText()`<sp/>/<sp/>`SetFontFamily()`<sp/>/<sp/>`SetFontSize()`<sp/>후<sp/>`prepare<sp/>dirty`가<sp/>설정됨</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions()`<sp/>/<sp/>`ClearExclusionRegions()`<sp/>API<sp/>smoke<sp/>test</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>아직<sp/>text<sp/>prepare/layout<sp/>실체는<sp/>없으므로<sp/>되돌리기<sp/>쉽다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>4.<sp/>PreparedText<sp/>/<sp/>TextPreparer<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`<sp/>구조<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shaping<sp/>/<sp/>fallback<sp/>/<sp/>glyph<sp/>metrics<sp/>/<sp/>cluster<sp/>mapping<sp/>경로<sp/>연결</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/prepared-text.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/prepared-text.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/text-preparer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/text-preparer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare()`<sp/>후<sp/>prepared<sp/>cache<sp/>생성<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>empty<sp/>text<sp/>/<sp/>ASCII<sp/>/<sp/>한글<sp/>/<sp/>emoji<sp/>문자열<sp/>smoke<sp/>test</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>동일<sp/>text/font/fontSize에서<sp/>`Prepare()`<sp/>재호출<sp/>시<sp/>결과<sp/>안정성<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>automated<sp/>test에서<sp/>prepare<sp/>실행<sp/>여부를<sp/>어떤<sp/>방식으로<sp/>관측할지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>내부<sp/>debug<sp/>counter<sp/>또는<sp/>test<sp/>seam이<sp/>필요한지<sp/>검토<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>시점은<sp/>renderer<sp/>미연결<sp/>상태여도<sp/>준비<sp/>데이터만<sp/>검증<sp/>가능하다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>5.<sp/>Layout<sp/>Types<sp/>+<sp/>Interval<sp/>Builder</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AvailableInterval`,<sp/>`TextLineFragment`,<sp/>`TextLine`,<sp/>`GlyphPlacement`,<sp/>`LayoutResult`<sp/>구조<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region에서<sp/>line<sp/>interval을<sp/>만드는<sp/>순수<sp/>알고리즘<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/layout-types.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/layout-engine.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/layout-engine.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>없음<sp/>-&gt;<sp/>content<sp/>bounds<sp/>하나의<sp/>interval<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>하나<sp/>-&gt;<sp/>2개<sp/>interval<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>여러<sp/>region<sp/>겹침<sp/>-&gt;<sp/>merge<sp/>후<sp/>interval<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>band<sp/>overlap<sp/>규칙<sp/>테스트</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare와<sp/>layout<sp/>데이터<sp/>구조가<sp/>분리되어<sp/>있어<sp/>되돌리기<sp/>쉽다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>6.<sp/>Multi-line<sp/>Layout<sp/>Integration</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`를<sp/>소비하여<sp/>cluster<sp/>기준<sp/>multi-line<sp/>layout<sp/>수행</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`OnMeasure()`<sp/>/<sp/>`GetNaturalSize()`<sp/>/<sp/>`GetHeightForWidth()`와<sp/>연결</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`layout-engine.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>width<sp/>변경<sp/>시<sp/>line<sp/>수<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>반영<sp/>전<sp/>기본<sp/>multiline<sp/>placement<sp/>정상</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`WRAP_CONTENT`<sp/>측정값이<sp/>text<sp/>길이에<sp/>따라<sp/>달라짐</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare`<sp/>재실행<sp/>없이<sp/>`Layout`만<sp/>반복<sp/>수행<sp/>가능<sp/>여부<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>아직<sp/>renderer<sp/>미연결<sp/>상태여도<sp/>size/layout<sp/>검증이<sp/>가능하다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>7.<sp/>Atlas<sp/>View<sp/>Adapter<sp/>+<sp/>Renderer<sp/>Host</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult`를<sp/>`AtlasRenderer`가<sp/>읽을<sp/>수<sp/>있는<sp/>adapter로<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>plain<sp/>glyph<sp/>rendering<sp/>표시</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/atlas-view-adapter.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer/atlas-view-adapter.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`integration-api/text-visualizer-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>scene에<sp/>텍스트가<sp/>실제로<sp/>보이는지<sp/>manual<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>multiline<sp/>plain<sp/>text<sp/>표시<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>whitespace<sp/>only<sp/>text에서도<sp/>crash<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>empty<sp/>text에서도<sp/>render<sp/>actor<sp/>handling<sp/>정상</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>중요<sp/>지점</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>여기까지<sp/>오면<sp/>최소<sp/>기능<sp/>텍스트<sp/>표시<sp/>view로<sp/>사용<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>8.<sp/>Exclusion-aware<sp/>Placement<sp/>Integration</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>multi-fragment<sp/>line<sp/>placement를<sp/>실제<sp/>렌더링과<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>변경<sp/>시<sp/>layout-only<sp/>invalidation<sp/>동작</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`layout-engine.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-visualizer-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`atlas-view-adapter.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>한<sp/>줄이<sp/>여러<sp/>fragment로<sp/>나뉘는<sp/>케이스</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>추가/삭제/이동<sp/>후<sp/>relayout<sp/>결과<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>bounds만<sp/>변경할<sp/>때<sp/>`Prepare`<sp/>재실행이<sp/>발생하지<sp/>않음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>관련<sp/>회귀가<sp/>크면<sp/>Commit<sp/>7<sp/>상태까지<sp/>되돌려도<sp/>기본<sp/>text<sp/>view는<sp/>유지된다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>9.<sp/>Sample<sp/>App</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>동작을<sp/>사람이<sp/>직접<sp/>확인할<sp/>sample<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`samples/text/text-visualizer-example.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`samples/text/CMakeLists.txt`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>빌드<sp/>성공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>창<sp/>크기<sp/>변경<sp/>시<sp/>multiline<sp/>relayout<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>on/off<sp/>또는<sp/>이동<sp/>시<sp/>배치<sp/>변화<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sample은<sp/>기능<sp/>이해와<sp/>디버깅용이므로<sp/>library<sp/>구현과<sp/>분리<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>10.<sp/>UTC<sp/>확장<sp/>/<sp/>안정화</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>automated<sp/>test를<sp/>1차<sp/>구현<sp/>범위<sp/>기준으로<sp/>보강</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가/수정<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>constructor/new/downcast</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>property</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>multiline<sp/>layout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout-only<sp/>invalidation</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>empty/whitespace/emoji<sp/>smoke<sp/>test</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중단/롤백<sp/>가능<sp/>지점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>tests-only<sp/>commit이므로<sp/>기능<sp/>rollback과<sp/>분리<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>각<sp/>커밋의<sp/>검증<sp/>방법</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>검증<sp/>규칙을<sp/>각<sp/>커밋마다<sp/>공통으로<sp/>적용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>공통<sp/>검증</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`git<sp/>diff`<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>의도한<sp/>파일만<sp/>수정되었는지<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>라이브러리<sp/>빌드<sp/>또는<sp/>최소<sp/>compile<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>가능하면<sp/>관련<sp/>UTC<sp/>실행</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>권장<sp/>명령<sp/>예시</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">환경에<sp/>따라<sp/>달라질<sp/>수<sp/>있으므로<sp/>아래는<sp/>예시다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```bash</highlight></codeline>
+<codeline><highlight class="normal">cmake<sp/>--build<sp/>build/tizen<sp/>-j</highlight></codeline>
+<codeline><highlight class="normal">cmake<sp/>--build<sp/>automated-tests/src/dali-ui-foundation<sp/>-j</highlight></codeline>
+<codeline><highlight class="normal">ctest<sp/>--test-dir<sp/>automated-tests/src/dali-ui-foundation<sp/>--output-on-failure</highlight></codeline>
+<codeline><highlight class="normal">cmake<sp/>--build<sp/>samples/text<sp/>-j</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>개발<sp/>환경에서<sp/>실제<sp/>표준<sp/>빌드<sp/>명령이<sp/>무엇인지<sp/>구현<sp/>착수<sp/>시점에<sp/>맞춰<sp/>재확인<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>automated<sp/>test<sp/>계획</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>test<sp/>파일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>test<sp/>항목:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`UtcDaliTextVisualizerConstructorP`</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`UtcDaliTextVisualizerNewP`</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`UtcDaliTextVisualizerDownCastP`</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`UtcDaliTextVisualizerText`</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>`UtcDaliTextVisualizerFontFamily`</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>`UtcDaliTextVisualizerFontSize`</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>`UtcDaliTextVisualizerTextColor`</highlight></codeline>
+<codeline><highlight class="normal">8.<sp/>`UtcDaliTextVisualizerSetProperty`</highlight></codeline>
+<codeline><highlight class="normal">9.<sp/>`UtcDaliTextVisualizerGetProperty`</highlight></codeline>
+<codeline><highlight class="normal">10.<sp/>`UtcDaliTextVisualizerPrepare`</highlight></codeline>
+<codeline><highlight class="normal">11.<sp/>`UtcDaliTextVisualizerExclusionRegions`</highlight></codeline>
+<codeline><highlight class="normal">12.<sp/>`UtcDaliTextVisualizerMeasureWrapContent`</highlight></codeline>
+<codeline><highlight class="normal">13.<sp/>`UtcDaliTextVisualizerRelayoutWidthChange`</highlight></codeline>
+<codeline><highlight class="normal">14.<sp/>`UtcDaliTextVisualizerEmptyText`</highlight></codeline>
+<codeline><highlight class="normal">15.<sp/>`UtcDaliTextVisualizerEmojiText`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>test<sp/>seam<sp/>필요<sp/>가능성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>항목은<sp/>public<sp/>API만으로<sp/>검증하기<sp/>어려울<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Prepare`가<sp/>재실행되었는지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>width<sp/>변경<sp/>시<sp/>prepare<sp/>없이<sp/>layout만<sp/>다시<sp/>수행되었는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대응<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>impl<sp/>내부<sp/>debug<sp/>counter</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>test-only<sp/>accessor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>log<sp/>hook</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>부분은<sp/>`확인<sp/>필요`다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>sample<sp/>app<sp/>계획</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>sample:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`samples/text/text-visualizer-example.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">sample<sp/>목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>기본<sp/>multiline<sp/>text<sp/>표시</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>exclusion<sp/>region이<sp/>있을<sp/>때<sp/>줄이<sp/>fragment로<sp/>나뉘는<sp/>모습<sp/>표시</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>window<sp/>resize<sp/>시<sp/>relayout<sp/>반응<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>same<sp/>text<sp/>/<sp/>moved<sp/>exclusion에서<sp/>shaping<sp/>재실행<sp/>없이<sp/>layout만<sp/>바뀌는지<sp/>관찰</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>sample<sp/>구성:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>왼쪽:<sp/>exclusion<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>오른쪽:<sp/>exclusion<sp/>하나<sp/>또는<sp/>둘</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>키<sp/>입력<sp/>또는<sp/>timer로<sp/>exclusion<sp/>region<sp/>이동</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>text를<sp/>유지한<sp/>채<sp/>relayout<sp/>차이를<sp/>눈으로<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">sample<sp/>검증<sp/>포인트:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>overlap<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>bounds<sp/>내부<sp/>비워짐</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>크기<sp/>변경<sp/>시<sp/>즉시<sp/>재배치</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>crash<sp/>/<sp/>flicker<sp/>없음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>위험<sp/>요소</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>위험<sp/>1.<sp/>prepare<sp/>단계가<sp/>기존<sp/>controller와<sp/>너무<sp/>강하게<sp/>얽혀<sp/>있을<sp/>수<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">영향:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shaping/fallback<sp/>재사용<sp/>비용이<sp/>예상보다<sp/>커질<sp/>수<sp/>있다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대응:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>관련<sp/>로직을<sp/>early<sp/>commit에서<sp/>먼저<sp/>고립시켜<sp/>본다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>필요<sp/>시<sp/>1차는<sp/>최소<sp/>경로만<sp/>연결하고<sp/>나머지는<sp/>`확인<sp/>필요`로<sp/>남긴다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>위험<sp/>2.<sp/>cluster<sp/>기준<sp/>line<sp/>breaking이<sp/>예상보다<sp/>복잡할<sp/>수<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">영향:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>fragment<sp/>경계에서<sp/>줄바꿈<sp/>품질<sp/>문제가<sp/>생길<sp/>수<sp/>있다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대응:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>1차는<sp/>penalty<sp/>최적화보다<sp/>안정성<sp/>우선</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>break<sp/>candidate와<sp/>강제<sp/>배치<sp/>정책을<sp/>문서<sp/>기준으로<sp/>단순화한다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>위험<sp/>3.<sp/>AtlasRenderer<sp/>adapter<sp/>범위가<sp/>넓을<sp/>수<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">영향:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ViewInterface`<sp/>dummy<sp/>구현이<sp/>많아질<sp/>수<sp/>있다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대응:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>1차는<sp/>minimal<sp/>path만<sp/>유효<sp/>값<sp/>반환</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>나머지는<sp/>`zero<sp/>/<sp/>false<sp/>/<sp/>nullptr`<sp/>반환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>위험<sp/>4.<sp/>automated<sp/>test에서<sp/>prepare/layout<sp/>재실행<sp/>횟수<sp/>관측이<sp/>어려울<sp/>수<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">영향:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>핵심<sp/>최적화<sp/>요구사항<sp/>검증이<sp/>약해질<sp/>수<sp/>있다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대응:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>test<sp/>seam을<sp/>최소<sp/>범위로<sp/>도입하는<sp/>방안<sp/>검토</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>위험<sp/>5.<sp/>autogen/property<sp/>registration<sp/>흐름이<sp/>새<sp/>control에서<sp/>예상과<sp/>다를<sp/>수<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">영향:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>build<sp/>break<sp/>또는<sp/>generated<sp/>header<sp/>mismatch<sp/>발생<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대응:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>skeleton<sp/>commit에서<sp/>가장<sp/>먼저<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>구현<sp/>중<sp/>중단<sp/>/<sp/>롤백<sp/>가능한<sp/>지점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>지점들은<sp/>구현<sp/>중<sp/>pause<sp/>또는<sp/>rollback<sp/>기준점으로<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>지점<sp/>A.<sp/>Commit<sp/>2<sp/>완료<sp/>후</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API와<sp/>property<sp/>skeleton만<sp/>존재</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>build<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>API<sp/>surface를<sp/>먼저<sp/>리뷰받기<sp/>좋은<sp/>시점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>지점<sp/>B.<sp/>Commit<sp/>4<sp/>완료<sp/>후</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>cache는<sp/>동작</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>미연결<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shaping/fallback<sp/>reuse<sp/>가능성만<sp/>먼저<sp/>검증<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>지점<sp/>C.<sp/>Commit<sp/>6<sp/>완료<sp/>후</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>layout은<sp/>동작</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>basic<sp/>measure<sp/>/<sp/>relayout<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer는<sp/>아직<sp/>단순<sp/>또는<sp/>미연결일<sp/>수<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>engine<sp/>품질을<sp/>먼저<sp/>점검<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>지점<sp/>D.<sp/>Commit<sp/>7<sp/>완료<sp/>후</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>텍스트가<sp/>실제로<sp/>보임</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>없는<sp/>기본<sp/>TextVisualizer<sp/>사용<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>최소<sp/>usable<sp/>milestone</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>지점<sp/>E.<sp/>Commit<sp/>8<sp/>완료<sp/>후</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>핵심<sp/>feature인<sp/>exclusion-aware<sp/>multi-fragment<sp/>layout<sp/>완성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>1차<sp/>핵심<sp/>목표<sp/>달성<sp/>지점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>이번<sp/>1차<sp/>구현에서<sp/>제외할<sp/>기능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아래<sp/>기능은<sp/>1차<sp/>구현<sp/>범위에서<sp/>제외한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>selection</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>decorator</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>IME<sp/>/<sp/>editing</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>clipboard</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>interaction</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>background</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>per-character<sp/>rich<sp/>style</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hit-test<sp/>/<sp/>selection<sp/>geometry</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>non-rectangular<sp/>exclusion</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>async<sp/>render</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>`Layout()`<sp/>/<sp/>`Relayout()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>구현<sp/>완료<sp/>정의</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>계획서<sp/>기준의<sp/>1차<sp/>구현<sp/>완료는<sp/>아래를<sp/>의미한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`TextVisualizer`를<sp/>public<sp/>handle로<sp/>생성할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`Text`,<sp/>`FontFamily`,<sp/>`FontSize`,<sp/>`TextColor`를<sp/>설정할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Prepare()`를<sp/>호출할<sp/>수<sp/>있고,<sp/>내부적으로<sp/>eager<sp/>prepare가<sp/>가능하다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>exclusion<sp/>region을<sp/>설정할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>`OnRelayout()`에서<sp/>shaping<sp/>없이<sp/>layout만<sp/>반복<sp/>수행할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>atlas<sp/>renderer를<sp/>통해<sp/>plain<sp/>glyph<sp/>text를<sp/>실제로<sp/>표시할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>exclusion<sp/>region으로<sp/>인해<sp/>한<sp/>줄이<sp/>여러<sp/>fragment로<sp/>나뉘는<sp/>배치가<sp/>동작한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>확인<sp/>필요<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>generated<sp/>file(`text-visualizer.autogen.h`)를<sp/>저장소에<sp/>포함할지<sp/>팀<sp/>규칙<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare/layout<sp/>재실행<sp/>횟수<sp/>검증용<sp/>test<sp/>seam이<sp/>필요한지<sp/>확정<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>property<sp/>header를<sp/>별도<sp/>`integration-api/`<sp/>아래<sp/>두는<sp/>방식<sp/>최종<sp/>확정<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer<sp/>설계에<sp/>주는<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>구현은<sp/>한<sp/>번에<sp/>크게<sp/>들어가기보다<sp/>`API<sp/>skeleton<sp/>-&gt;<sp/>Prepare<sp/>-&gt;<sp/>Layout<sp/>-&gt;<sp/>Atlas<sp/>adapter<sp/>-&gt;<sp/>Exclusion<sp/>integration`<sp/>순으로<sp/>잘게<sp/>쪼개는<sp/>것이<sp/>맞다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>가장<sp/>먼저<sp/>안정화해야<sp/>할<sp/>것은<sp/>public<sp/>API가<sp/>아니라<sp/>`Prepare`와<sp/>`Layout`의<sp/>경계다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>1차<sp/>usable<sp/>milestone은<sp/>&quot;plain<sp/>multiline<sp/>text가<sp/>atlas<sp/>renderer로<sp/>보이는<sp/>상태&quot;이고,<sp/>핵심<sp/>목표<sp/>달성<sp/>milestone은<sp/>&quot;exclusion-aware<sp/>multi-fragment<sp/>layout이<sp/>동작하는<sp/>상태&quot;다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>rollback<sp/>기준점을<sp/>커밋<sp/>단위로<sp/>명확히<sp/>두면<sp/>구현<sp/>중<sp/>구조<sp/>변경이<sp/>생겨도<sp/>안전하게<sp/>되돌릴<sp/>수<sp/>있다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/07-implementation-plan.ko.md"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,216 @@
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Ui Scale Manager
+sidebar_label: Ui Scale Manager
+category: styling-theme-config
+---
+
+# Ui Scale Manager
+
+`Dali::Ui::UiScaleManager` gives application code access to the shared system UI scale used by `Dali::Ui::View` layout roots during measurement.
+
+## Table of Contents
+
+- [Using the Shared Scale Manager](#using-the-shared-scale-manager)
+- [Applying a UI Scale](#applying-a-ui-scale)
+- [Reading the Active Scale](#reading-the-active-scale)
+- [Handling Scale Values Safely](#handling-scale-values-safely)
+- [Working with Handles](#working-with-handles)
+
+## Using the Shared Scale Manager
+
+Use `Dali::Ui::UiScaleManager::Get()` to access the shared scale manager. The returned `Dali::Ui::UiScaleManager` is a handle to the singleton manager, created on first use.
+
+In a dali-ui application, treat this as the app-facing scale entry point for the `Dali::Ui::View` tree. Application code should not call the internal layout-root registration APIs directly.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void InitializeUiScale()
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+
+  const float initialScale = scaleManager.GetScale();
+  (void)initialScale;
+}
+```
+
+`Dali::Ui::UiScaleManager::GetScale()` returns the current scale value. The default scale is `1.0f`.
+
+## Applying a UI Scale
+
+Call `Dali::Ui::UiScaleManager::SetScale()` when your application needs to apply a new system or user-selected UI scale. The manager invalidates registered layout roots, so `Dali::Ui::View`-based layouts can be measured again with the updated effective scale.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void ApplyLargeUiScale()
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+
+  scaleManager.SetScale(1.5f);
+}
+```
+
+For preset controls, keep the application logic small and route every choice through `Dali::Ui::UiScaleManager::SetScale()`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void ApplyPresetScale(float presetScale)
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+
+  scaleManager.SetScale(presetScale);
+}
+
+void UsePresetScales()
+{
+  ApplyPresetScale(0.8f);
+  ApplyPresetScale(1.0f);
+  ApplyPresetScale(1.2f);
+  ApplyPresetScale(1.5f);
+  ApplyPresetScale(2.0f);
+}
+```
+
+## Reading the Active Scale
+
+Use `Dali::Ui::UiScaleManager::GetScale()` when application UI needs to show or compare the active scale. Read from the manager instead of caching a separate application value, because `Dali::Ui::UiScaleManager` is the shared dali-ui scale source.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+float ReadCurrentUiScale()
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+
+  return scaleManager.GetScale();
+}
+```
+
+A common pattern is to apply a scale, then read back the active value for display state owned by your app.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+float ApplyScaleAndReadBack(float scale)
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+
+  scaleManager.SetScale(scale);
+
+  return scaleManager.GetScale();
+}
+```
+
+## Handling Scale Values Safely
+
+`Dali::Ui::UiScaleManager::SetScale()` applies positive scale values. The implementation ignores `NaN`, zero, and negative values.
+
+Validate user-provided values before calling `Dali::Ui::UiScaleManager::SetScale()` so application behavior is explicit.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <cmath>
+
+bool TrySetUiScale(float scale)
+{
+  if(std::isnan(scale) || scale <= 0.0f)
+  {
+    return false;
+  }
+
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+  scaleManager.SetScale(scale);
+
+  return true;
+}
+```
+
+If the input is invalid, keep the current scale unchanged and continue using `Dali::Ui::UiScaleManager::GetScale()` as the current value. For values entered by users, apply an application-level range that fits your UI.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <cmath>
+
+float SetScaleOrKeepCurrent(float requestedScale)
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::Get();
+
+  if(!std::isnan(requestedScale) && requestedScale > 0.0f)
+  {
+    scaleManager.SetScale(requestedScale);
+  }
+
+  return scaleManager.GetScale();
+}
+```
+
+## Working with Handles
+
+`Dali::Ui::UiScaleManager` is a DALi handle type. You can copy it, pass it by value, move it, and assign it like other DALi handles.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <utility>
+
+Dali::Ui::UiScaleManager CreateScaleManagerHandle()
+{
+  return Dali::Ui::UiScaleManager::Get();
+}
+
+void StoreScaleManagerHandle()
+{
+  Dali::Ui::UiScaleManager scaleManager = CreateScaleManagerHandle();
+
+  Dali::Ui::UiScaleManager movedScaleManager = std::move(scaleManager);
+  movedScaleManager.SetScale(1.2f);
+}
+```
+
+Use `Dali::Ui::UiScaleManager::DownCast()` only when you already have a generic `Dali::BaseHandle` and need to recover the typed manager handle.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+float ReadScaleFromBaseHandle(Dali::BaseHandle handle)
+{
+  Dali::Ui::UiScaleManager scaleManager = Dali::Ui::UiScaleManager::DownCast(handle);
+
+  if(scaleManager)
+  {
+    return scaleManager.GetScale();
+  }
+
+  return 1.0f;
+}
+```
+
+For normal application code, prefer `Dali::Ui::UiScaleManager::Get()` directly. Use `Dali::Ui::View` for your app-facing UI object model, and use `Dali::Ui::UiScaleManager` only for reading and applying the shared UI scale.
+-----END_REVISED_MARKDOWN-----
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Ui Scale Manager Prose Review
+
+Changed prose:
+- Reworded the overview to say `Dali::Ui::UiScaleManager` gives access to the shared system UI scale used by `Dali::Ui::View` layout roots during measurement.
+- Changed “process-wide scale manager” to “shared scale manager” to stay closer to the public singleton API wording.
+- Changed layout-root guidance from “does not need to manage” to “should not call the internal layout-root registration APIs directly.”
+- Clarified that `SetScale()` invalidates registered layout roots and allows `Dali::Ui::View`-based layouts to be measured again.
+- Changed “authoritative dali-ui scale source” to “shared dali-ui scale source” to avoid overclaiming beyond the handle singleton behavior.
+- Corrected validation wording: the implementation ignores `NaN`, zero, and negative values. It does not explicitly reject positive infinity.
+- Added a sentence recommending an application-level range for user-entered values.
+- Added “copy it” to the handle paragraph because the public header exposes the default copy constructor and copy assignment.
+- Added `<utility>` to the move example so `std::move` is explicitly available.
+
+Source evidence:
+- `repos/dali-ui/dali-ui-foundation/public-api/ui-scale-manager.h` documents `UiScaleManager` as a handle-based singleton with `Get()`, `GetScale()`, `SetScale()`, and `DownCast()`.
+- `repos/dali-ui/dali-ui-foundation/internal/ui-scale-manager-impl.h` initializes `mScale` to `1.0f`.
+- `repos/dali-ui/dali-ui-foundation/internal/ui-scale-manager-impl.cpp` creates the singleton on first `Get()`, returns `mScale` from `GetScale()`, ignores `std::isnan(scale)` and `scale <= 0.0f`, then resets effective scale and invalidates registered roots when the scale changes.
+- `repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp` uses `UiScaleManager::Get().GetScale()` for root/inherited effective scale and registers/unregisters layout roots internally.
+- `repos/dali-ui/samples/ui-scale/ui-scale-example.cpp` uses `UiScaleManager::Get().SetScale()` and `UiScaleManager::Get().GetScale()` in an application-facing scale control flow.
+
+Remaining concerns:
+- The guide keeps simple standalone snippets and does not show a full `Dali::Ui::View` tree because the existing section structure and code blocks were preserved.
+- The public comment says `SetScale()` is called by system/vconf handlers, while the sample also uses it from UI controls. The guide therefore presents application calls as valid for app-controlled scale settings without inventing additional APIs.
+-----END_PROSE_REVIEW_REPORT-----

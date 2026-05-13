@@ -1,0 +1,1158 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_223-glyph-cache-lifecycle-design_8ko</compoundname>
+    <title>TextVisualizer Glyph Cache Lifecycle Design</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md827"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md828">
+<title>1. 목적</title>
+<para>현재 <computeroutput>TextVisualizerGlyphRenderer</computeroutput> prototype은 already-cached glyph만 처리한다.</para>
+<para>즉 <computeroutput>Render(preparedText, layoutResult, adapter, textColor)</computeroutput> 또는 adapter-only <computeroutput>Render(adapter)</computeroutput>는 <computeroutput>AtlasGlyphManager::IsCached()</computeroutput>가 성공한 glyph에 대해서만 atlas id별 mesh actor를 만들 수 있고, cache miss가 발생하면 안전하게 <computeroutput>false</computeroutput>를 반환한다.</para>
+<para>이 상태는 layout-dynamic workload에서 lightweight renderer와 geometry-only update의 가치를 확인하기에는 충분하지만, production default path로 전환하기에는 아직 부족하다. production path로 전환하려면 다음 책임이 필요하다.</para>
+<para><itemizedlist>
+<listitem><para>cache miss 시 glyph bitmap 생성</para>
+</listitem><listitem><para>atlas cache add</para>
+</listitem><listitem><para>glyph reference count 증가</para>
+</listitem><listitem><para>renderer clear / text change / fallback 시 reference count 감소</para>
+</listitem><listitem><para>render 실패 중간 상태 rollback</para>
+</listitem><listitem><para>layout-dynamic workload에서 glyph sequence가 같을 때 ref count churn 방지</para>
+</listitem></itemizedlist>
+</para>
+<para>이 문서는 <computeroutput>TextVisualizerGlyphRenderer</computeroutput>가 기존 <computeroutput>Text::AtlasRenderer</computeroutput>와 glyph cache behavior를 어떻게 공유하거나 분리할지 설계한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md829">
+<title>2. 현재 TextVisualizerGlyphRenderer 구현 상태</title>
+<para>현재 구현은 다음 상태다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerGlyphRenderer::Render()</computeroutput>는 <computeroutput>PreparedText</computeroutput>, <computeroutput>LayoutResult</computeroutput>, <computeroutput>AtlasViewAdapter</computeroutput>, single <computeroutput>textColor</computeroutput>를 입력으로 받을 수 있다.</para>
+</listitem><listitem><para>adapter-only <computeroutput>Render(const AtlasViewAdapter&amp;)</computeroutput> overload도 있다.</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter</computeroutput>의 cached renderer glyph positions를 사용한다.</para>
+</listitem><listitem><para><computeroutput>AtlasGlyphManager::IsCached()</computeroutput>와 <computeroutput>AtlasGlyphManager::GenerateMeshData()</computeroutput>로 already-cached glyph mesh를 만든다.</para>
+</listitem><listitem><para>atlas id별 pending mesh를 구성하고 L8 / BGRA atlas pixel format에 따라 shader를 선택한다.</para>
+</listitem><listitem><para>output actor 아래 mesh actor를 attach한다.</para>
+</listitem><listitem><para>already-cached glyph에 대해 reference acquire / release / rollback을 수행한다.</para>
+</listitem><listitem><para>같은 glyph cache signature에서는 ref count churn 없이 기존 glyph cache ownership을 유지한다.</para>
+</listitem><listitem><para>같은 glyph cache signature와 같은 mesh topology에서는 actor / renderer / geometry를 유지하고 <computeroutput>VertexBuffer::SetData()</computeroutput>로 geometry-only update를 시도한다.</para>
+</listitem><listitem><para><computeroutput>AtlasRendererBridge</computeroutput>의 internal compile-time flag 뒤에서 optional bridge path로 연결되어 있다.</para>
+</listitem><listitem><para>기본 flag는 <computeroutput>false</computeroutput>이므로 production 기본 경로는 기존 <computeroutput>Text::AtlasRenderer</computeroutput> path를 유지한다.</para>
+</listitem><listitem><para>flag ON 상태에서도 <computeroutput>TextVisualizerImpl</computeroutput>은 exclusion regions가 있는 TextVisualizer에만 lightweight renderer를 허용한다.</para>
+</listitem><listitem><para>cache miss / invalid glyph / invalid position / empty mesh / texture failure는 <computeroutput>false</computeroutput>로 반환하고 기존 renderer fallback을 사용한다.</para>
+</listitem><listitem><para>glyph bitmap 생성은 아직 없다.</para>
+</listitem><listitem><para>atlas cache add는 아직 없다.</para>
+</listitem></itemizedlist>
+</para>
+<para>중요한 점은 <computeroutput>AtlasGlyphManager::GenerateMeshData()</computeroutput>가 mesh data를 만들 때 atlas image reference count를 증가시키지 않는다는 것이다. <computeroutput>AtlasGlyphManager::GenerateMeshData()</computeroutput>는 내부적으로 <computeroutput>AtlasManager::GenerateMeshData(..., false)</computeroutput>를 호출한다.</para>
+<para>따라서 현재 prototype은 already-cached glyph에 대해서는 직접 references를 보유하지만, cache miss에서 glyph bitmap을 만들고 atlas에 추가하는 ownership 시작점은 아직 없다.</para>
+<para>결론:</para>
+<para><itemizedlist>
+<listitem><para>rendering 가능성과 layout-dynamic geometry-only update 가치는 확인됐다.</para>
+</listitem><listitem><para>production default path로 쓰려면 cache miss handling과 기존 <computeroutput>AtlasRenderer::CacheGlyph()</computeroutput> behavior 공유 전략이 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md830">
+<title>3. 기존 AtlasRenderer CacheGlyph / RemoveText 분석</title>
+<para><computeroutput>text-atlas-renderer.cpp</computeroutput>의 <computeroutput>AtlasRenderer::Impl</computeroutput>은 glyph cache lifecycle을 private 구현으로 보유한다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md831">
+<title>TextCacheEntry</title>
+<para>기존 renderer의 <computeroutput>TextCacheEntry</computeroutput>는 다음 정보를 저장한다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keyword">struct<sp/></highlight><highlight class="normal">TextCacheEntry</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>FontId<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mFontId;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::GlyphIndex<sp/>mIndex;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mImageId;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint16_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mOutlineWidth;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>isItalic<sp/>:<sp/>1;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>isBold<sp/>:<sp/>1;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+</programlisting></para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>fontId</computeroutput>, <computeroutput>glyphIndex</computeroutput>, outline / italic / bold style 조합이 atlas glyph identity다.</para>
+</listitem><listitem><para><computeroutput>imageId</computeroutput>는 atlas image slot이다.</para>
+</listitem><listitem><para><computeroutput>RemoveText()</computeroutput>는 이 entry를 순회해 같은 identity의 reference count를 감소시킨다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md832">
+<title>CacheGlyph()</title>
+<para><computeroutput>CacheGlyph()</computeroutput>의 책임은 단순 lookup이 아니다.</para>
+<para><table rows="12" cols="2"><row>
+<entry thead="yes"><para>단계   </para>
+</entry><entry thead="yes"><para>역할    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>default / maximum atlas size 조회   </para>
+</entry><entry thead="no"><para><computeroutput>FontClient::GetDefaultTextAtlasSize()</computeroutput>, <computeroutput>GetMaximumTextAtlasSize()</computeroutput> 사용    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>cached lookup   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasGlyphManager::IsCached(fontId, glyphIndex, style, slot)</computeroutput>    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>cache hit   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasGlyphManager::AdjustReferenceCount(..., +1)</computeroutput>    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>cache miss   </para>
+</entry><entry thead="no"><para>glyph bitmap 생성 경로로 진입    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph bitmap 생성   </para>
+</entry><entry thead="no"><para><computeroutput>FontClient::CreateBitmap()</computeroutput> 사용    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>compressed bitmap 처리   </para>
+</entry><entry thead="no"><para>필요 시 decompress 후 owned buffer로 교체    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>PixelData</computeroutput> 생성   </para>
+</entry><entry thead="no"><para>glyph buffer를 <computeroutput>PixelData::New(..., PixelData::FREE)</computeroutput>로 전달    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>block size 갱신   </para>
+</entry><entry thead="no"><para>glyph bitmap width / height에 맞춰 needed block size 확장    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>atlas size 정책   </para>
+</entry><entry thead="no"><para>default atlas size를 maximum까지 2배씩 확장 가능    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>atlas add   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasGlyphManager::SetNewAtlasSize()</computeroutput> 후 <computeroutput>AtlasGlyphManager::Add()</computeroutput>    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>initial ref count   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasGlyphManager::Add()</computeroutput>는 glyph record를 만들고 count를 <computeroutput>1</computeroutput>로 설정   </para>
+</entry></row>
+</table>
+</para>
+<para>즉 cache hit은 explicit <computeroutput>+1</computeroutput>, cache miss는 <computeroutput>Add()</computeroutput>가 initial count <computeroutput>1</computeroutput>을 만든다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md833">
+<title>GenerateMesh()</title>
+<para><computeroutput>GenerateMesh()</computeroutput>는 <computeroutput>AtlasGlyphManager::GenerateMeshData(slot.mImageId, position, mesh)</computeroutput>로 glyph quad를 만들고, vertex color를 적용한다.</para>
+<para>또한 <computeroutput>isGlyphCached == false</computeroutput>일 때 <computeroutput>TextCacheEntry</computeroutput>를 <computeroutput>newTextCache</computeroutput>에 추가한다. 현재 <computeroutput>AddGlyphs()</computeroutput> 호출 흐름에서는 일반 glyph mesh 생성 시 <computeroutput>false</computeroutput>를 넘기므로, render 결과에 포함된 glyph ref는 새 <computeroutput>mTextCache</computeroutput>가 소유하게 된다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md834">
+<title>RemoveText()</title>
+<para><computeroutput>RemoveText()</computeroutput>는 기존 <computeroutput>mTextCache</computeroutput>를 순회하며 다음을 수행한다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="normal">AtlasGlyphManager::GlyphStyle<sp/>style;</highlight></codeline>
+<codeline><highlight class="normal">style.outline<sp/><sp/>=<sp/>oldTextIter-&gt;mOutlineWidth;</highlight></codeline>
+<codeline><highlight class="normal">style.isItalic<sp/>=<sp/>oldTextIter-&gt;isItalic;</highlight></codeline>
+<codeline><highlight class="normal">style.isBold<sp/><sp/><sp/>=<sp/>oldTextIter-&gt;isBold;</highlight></codeline>
+<codeline><highlight class="normal">mGlyphManager.AdjustReferenceCount(oldTextIter-&gt;mFontId,<sp/>oldTextIter-&gt;mIndex,<sp/>style,<sp/>-1);</highlight></codeline>
+</programlisting></para>
+<para>그 뒤 <computeroutput>mTextCache.Resize(0)</computeroutput>으로 old ownership을 비운다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md835">
+<title>기존 renderer lifecycle의 핵심</title>
+<para>기존 <computeroutput>AddGlyphs()</computeroutput>는 새 text cache를 만들 때, old text cache를 바로 release하지 않는다.</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">new<sp/>glyph<sp/>refs<sp/>acquire</highlight></codeline>
+<codeline><highlight class="normal">-&gt;<sp/>RemoveText()</highlight></codeline>
+<codeline><highlight class="normal">-&gt;<sp/>mTextCache.Swap(newTextCache)</highlight></codeline>
+</programlisting></para>
+<para>이 순서는 같은 glyph sequence를 다시 렌더링할 때 old references를 먼저 제거해서 glyph가 atlas에서 사라지는 상황을 피한다. <computeroutput>TextVisualizerGlyphRenderer</computeroutput>도 failure rollback과 old cache 유지 정책을 설계할 때 이 순서를 따라야 한다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md836">
+<title>4. TextVisualizerGlyphRenderer에 필요한 cache ownership</title>
+<para>새 renderer도 자체 cache entry가 필요하다.</para>
+<para>후보:</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keyword">struct<sp/></highlight><highlight class="normal">GlyphCacheEntry</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::FontId<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>fontId{0u};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::GlyphIndex<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>glyphIndex{0u};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>AtlasGlyphManager::GlyphStyle<sp/>style;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atlasId{0u};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>imageId{0u};</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+</programlisting></para>
+<para>필요 member:</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="normal">std::vector&lt;GlyphCacheEntry&gt;<sp/>mGlyphCacheEntries;</highlight></codeline>
+<codeline><highlight class="normal">uint64_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mGlyphCacheSignature{0u};</highlight></codeline>
+</programlisting></para>
+<para>필요 method:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ClearGlyphCache()</computeroutput></para>
+</listitem><listitem><para><computeroutput>ReleaseGlyphReferences()</computeroutput></para>
+</listitem><listitem><para><computeroutput>AcquireGlyphReferences(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>HasGlyphCache()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetGlyphCacheEntryCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>CalculateGlyphCacheSignature(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Clear()</computeroutput>는 mesh / output actor뿐 아니라 glyph references도 release한다.</para>
+</listitem><listitem><para><computeroutput>Render()</computeroutput> 성공 시 renderer가 필요한 glyph references를 보유한다.</para>
+</listitem><listitem><para><computeroutput>Render()</computeroutput> 실패 시 새로 acquire한 refs는 rollback한다.</para>
+</listitem><listitem><para>old cache는 새 cache acquire와 mesh build가 성공하기 전까지 유지한다.</para>
+</listitem><listitem><para>same glyph sequence라면 ref count를 유지하고 positions / mesh update만 수행한다.</para>
+</listitem></itemizedlist>
+</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md837">
+<title>entry granularity</title>
+<para>두 가지 방식이 가능하다.</para>
+<para><table rows="3" cols="4"><row>
+<entry thead="yes"><para>방식   </para>
+</entry><entry thead="yes"><para>설명   </para>
+</entry><entry thead="yes"><para>장점   </para>
+</entry><entry thead="yes"><para>단점    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>per glyph occurrence   </para>
+</entry><entry thead="no"><para>renderable glyph occurrence마다 entry 하나 저장   </para>
+</entry><entry thead="no"><para>기존 <computeroutput>AtlasRenderer</computeroutput> lifecycle과 가장 유사   </para>
+</entry><entry thead="no"><para>repeated glyph가 많으면 entry 수 증가    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>unique glyph + count   </para>
+</entry><entry thead="no"><para>glyph identity별 count 저장   </para>
+</entry><entry thead="no"><para>cache state compact   </para>
+</entry><entry thead="no"><para>acquire / rollback 구현이 조금 복잡   </para>
+</entry></row>
+</table>
+</para>
+<para>추천은 **per glyph occurrence**다. Phase 2 primary workload에서는 glyph sequence stable이므로 entry 수는 한 번 만들어진 뒤 재사용된다. 기존 <computeroutput>AtlasRenderer</computeroutput>의 <computeroutput>TextCacheEntry</computeroutput>도 rendered glyph ownership에 가깝게 동작하므로, 처음 구현은 동일한 mental model이 안전하다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md838">
+<title>5. Layout-dynamic workload 최적화 정책</title>
+<para>Phase 2 primary workload는 다음이다.</para>
+<para><itemizedlist>
+<listitem><para>text content stable</para>
+</listitem><listitem><para>glyph sequence stable</para>
+</listitem><listitem><para>font / font size stable</para>
+</listitem><listitem><para>style stable</para>
+</listitem><listitem><para>exclusion / layout / glyph positions만 dynamic</para>
+</listitem></itemizedlist>
+</para>
+<para>따라서 매 render마다 glyph refs를 <computeroutput>-1/+1</computeroutput> 하면 안 된다. 그것은 기존 <computeroutput>AtlasRenderer::Render()</computeroutput> full rebuild와 비슷한 비용을 다시 만드는 일이다.</para>
+<para>필요한 정책:</para>
+<para><itemizedlist>
+<listitem><para>renderer가 현재 glyph cache signature를 저장한다.</para>
+</listitem><listitem><para>새 render 요청의 glyph sequence signature가 같으면 glyph cache lifecycle을 건드리지 않는다.</para>
+</listitem><listitem><para>positions-only render에서는:<itemizedlist>
+<listitem><para>no glyph cache add</para>
+</listitem><listitem><para>no ref count increase</para>
+</listitem><listitem><para>no ref count decrease</para>
+</listitem><listitem><para>mesh / vertex position update만 수행</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>text / font / fontSize / glyph sequence / style 변경으로 signature가 바뀌면:<itemizedlist>
+<listitem><para>new glyph references acquire</para>
+</listitem><listitem><para>mesh build 성공</para>
+</listitem><listitem><para>old references release</para>
+</listitem><listitem><para>new entries commit</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md839">
+<title>glyph cache signature 후보</title>
+<para>signature 입력:</para>
+<para><itemizedlist>
+<listitem><para>renderable glyph count</para>
+</listitem><listitem><para><computeroutput>fontId</computeroutput></para>
+</listitem><listitem><para><computeroutput>glyphIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>GlyphStyle::outline</computeroutput></para>
+</listitem><listitem><para><computeroutput>GlyphStyle::isItalic</computeroutput></para>
+</listitem><listitem><para><computeroutput>GlyphStyle::isBold</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>signature에 포함하지 않는 것이 좋은 값:</para>
+<para><itemizedlist>
+<listitem><para>renderer glyph position</para>
+</listitem><listitem><para>text color</para>
+</listitem><listitem><para>layout size</para>
+</listitem><listitem><para>atlas id / image id</para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>positions는 layout-dynamic workload에서 매 frame 바뀌는 값이다.</para>
+</listitem><listitem><para>text color는 glyph cache identity가 아니다.</para>
+</listitem><listitem><para>atlas id / image id는 acquire 결과이지 glyph identity 자체는 아니다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다만 geometry-only update 조건에는 별도의 **mesh topology signature**가 필요할 수 있다.</para>
+<para>mesh topology signature 후보:</para>
+<para><itemizedlist>
+<listitem><para>glyph cache signature</para>
+</listitem><listitem><para>atlas id sequence 또는 atlas page split</para>
+</listitem><listitem><para>shader type sequence</para>
+</listitem><listitem><para>mesh record count</para>
+</listitem><listitem><para>vertex / index count per mesh record</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md840">
+<title>6. Cache miss 처리 후보</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md841">
+<title>A. TextVisualizerGlyphRenderer에 CacheGlyph equivalent 제한 구현</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para>새 renderer가 <computeroutput>FontClient::CreateBitmap()</computeroutput>, <computeroutput>PixelData</computeroutput>, <computeroutput>AtlasGlyphManager::Add()</computeroutput>를 직접 사용한다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer::Impl::CacheGlyph()</computeroutput>의 최소 subset을 복제한다.</para>
+</listitem><listitem><para>unsupported style은 fallback으로 둔다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>text-atlas-renderer.*</computeroutput>를 수정하지 않는다.</para>
+</listitem><listitem><para>isolated prototype으로 빠르게 검증할 수 있다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> scope에 맞춰 single color / no decoration path를 작게 유지할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>glyph bitmap generation / atlas size policy / compressed bitmap 처리 중복이 생긴다.</para>
+</listitem><listitem><para>기존 renderer와 behavior drift 위험이 있다.</para>
+</listitem><listitem><para>color glyph / fallback font / atlas block edge case 검증이 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md842">
+<title>B. AtlasRenderer::Impl CacheGlyph helper extraction</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>CacheGlyph()</computeroutput>, <computeroutput>TextCacheEntry</computeroutput>, block size policy 등을 공용 internal helper로 추출한다.</para>
+</listitem><listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput>와 <computeroutput>TextVisualizerGlyphRenderer</computeroutput>가 같은 helper를 쓴다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>behavior drift를 줄일 수 있다.</para>
+</listitem><listitem><para>glyph cache lifecycle 정책을 공유할 수 있다.</para>
+</listitem><listitem><para>장기 유지보수에 유리하다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>text-atlas-renderer.*</computeroutput> 수정이 필요하다.</para>
+</listitem><listitem><para>기존 <computeroutput>Label</computeroutput> / <computeroutput>InputField</computeroutput> / text pipeline 회귀 위험이 있다.</para>
+</listitem><listitem><para>helper 경계가 커질 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md843">
+<title>C. AtlasGlyphManager에 EnsureGlyphCached helper 추가</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasGlyphManager</computeroutput> 또는 adjacent helper에 <computeroutput>EnsureGlyphCached()</computeroutput>를 추가한다.</para>
+</listitem><listitem><para>glyph bitmap 생성과 atlas add를 manager-level 책임으로 이동한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>renderer-neutral helper가 될 수 있다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerGlyphRenderer</computeroutput>와 기존 renderer가 함께 쓸 수 있다.</para>
+</listitem><listitem><para>glyph cache ownership API가 더 명확해진다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasGlyphManager</computeroutput> API 확장이다.</para>
+</listitem><listitem><para><computeroutput>FontClient</computeroutput>, atlas size policy, style policy까지 manager에 넣을지 경계가 애매하다.</para>
+</listitem><listitem><para>영향 범위 검토가 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md844">
+<title>D. Existing AtlasRenderer warmup에 의존</title>
+<para>내용:</para>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>Text::AtlasRenderer</computeroutput> path를 한 번 호출해 glyph를 atlas에 warmup한다.</para>
+</listitem><listitem><para>이후 <computeroutput>TextVisualizerGlyphRenderer</computeroutput>는 already-cached glyph만 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>구현이 쉽다.</para>
+</listitem><listitem><para>현재 MVP와 맞다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>ownership이 불명확하다.</para>
+</listitem><listitem><para>warmup renderer가 references를 release하면 <computeroutput>TextVisualizerGlyphRenderer</computeroutput> mesh가 stale될 수 있다.</para>
+</listitem><listitem><para>production path로 부적합하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md845">
+<title>추천</title>
+<para>단기 추천은 다음 순서다.</para>
+<para><orderedlist>
+<listitem><para><bold>already-cached glyph에 대한 reference acquire / release skeleton을 먼저 구현한다.</bold></para>
+</listitem><listitem><para>cache miss는 계속 <computeroutput>false</computeroutput>로 둔다.</para>
+</listitem><listitem><para>failure rollback과 same sequence no-ref-churn 정책을 검증한다.</para>
+</listitem><listitem><para>이후 cache miss handling은 후보 A 또는 B 중 하나로 별도 커밋에서 결정한다.</para>
+</listitem></orderedlist>
+</para>
+<para>이렇게 하면 active path 연결 전에 ownership 기반을 만들 수 있고, <computeroutput>CacheGlyph()</computeroutput> 중복 구현이라는 큰 리스크를 바로 열지 않아도 된다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md846">
+<title>7. 추천 구현 전략</title>
+<para>추천 단계:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>GlyphCacheEntry</computeroutput>와 <computeroutput>mGlyphCacheEntries</computeroutput> 추가</para>
+</listitem><listitem><para><computeroutput>ReleaseGlyphReferences()</computeroutput> 추가</para>
+</listitem><listitem><para><computeroutput>Clear()</computeroutput>에서 glyph references release</para>
+</listitem><listitem><para><computeroutput>Render()</computeroutput>에서 already-cached glyph에 대해 <computeroutput>AdjustReferenceCount(..., +1)</computeroutput> acquire</para>
+</listitem><listitem><para>cache miss는 여전히 <computeroutput>false</computeroutput></para>
+</listitem><listitem><para>render 실패 시 temporary acquired refs rollback</para>
+</listitem><listitem><para>render 성공 시 old refs release 후 new entries commit</para>
+</listitem><listitem><para>same glyph sequence면 ref count acquire / release 생략</para>
+</listitem></orderedlist>
+</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>cache miss 구현보다 작고 안전하다.</para>
+</listitem><listitem><para>active path 연결 전 ownership 정책을 검증할 수 있다.</para>
+</listitem><listitem><para>geometry-only update 전 필수 기반이다.</para>
+</listitem><listitem><para>기존 <computeroutput>Text::AtlasRenderer</computeroutput>를 수정하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>권장 다음 커밋:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Add<sp/>TextVisualizerGlyphRenderer<sp/>glyph<sp/>cache<sp/>references</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md847">
+<title>8. Failure / rollback policy</title>
+<para><computeroutput>Render()</computeroutput> 중 실패 지점은 여러 곳에 있다.</para>
+<para><itemizedlist>
+<listitem><para>adapter validation 실패</para>
+</listitem><listitem><para>glyph cache miss</para>
+</listitem><listitem><para><computeroutput>AdjustReferenceCount(+1)</computeroutput> 대상 glyph lookup 실패 가능성</para>
+</listitem><listitem><para>mesh generation 실패</para>
+</listitem><listitem><para>texture set lookup 실패</para>
+</listitem><listitem><para>shader / renderer / actor 생성 실패</para>
+</listitem></itemizedlist>
+</para>
+<para>권장 policy:</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md848">
+<title>render 시작</title>
+<para><itemizedlist>
+<listitem><para>old cache entries는 유지한다.</para>
+</listitem><listitem><para>old mesh records는 positions-only update가 아닌 full rebuild라면 clear 가능하지만, active path 전에는 old output 보존 여부를 별도 판단한다.</para>
+</listitem><listitem><para>new cache entries는 temporary vector에 쌓는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md849">
+<title>acquire 중</title>
+<para><itemizedlist>
+<listitem><para>cached glyph hit이면 <computeroutput>AdjustReferenceCount(..., +1)</computeroutput> 후 temporary entry 추가</para>
+</listitem><listitem><para>cache miss면:<itemizedlist>
+<listitem><para>temporary entries를 reverse 또는 forward 순회하며 <computeroutput>AdjustReferenceCount(..., -1)</computeroutput></para>
+</listitem><listitem><para>mesh records clear</para>
+</listitem><listitem><para>old cache 유지</para>
+</listitem><listitem><para><computeroutput>false</computeroutput> 반환</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md850">
+<title>mesh build 중 실패</title>
+<para><itemizedlist>
+<listitem><para>temporary acquired refs rollback</para>
+</listitem><listitem><para>new mesh records clear</para>
+</listitem><listitem><para>old cache 유지</para>
+</listitem><listitem><para><computeroutput>false</computeroutput> 반환</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md851">
+<title>성공</title>
+<para><itemizedlist>
+<listitem><para>old cache release</para>
+</listitem><listitem><para>temporary cache entries commit</para>
+</listitem><listitem><para>new mesh records commit</para>
+</listitem><listitem><para>new signature 저장</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md852">
+<title>same glyph sequence</title>
+<para><itemizedlist>
+<listitem><para>old cache 유지</para>
+</listitem><listitem><para>temporary acquire 없음</para>
+</listitem><listitem><para>ref count 변경 없음</para>
+</listitem><listitem><para>mesh / vertex data만 update 또는 rebuild</para>
+</listitem></itemizedlist>
+</para>
+<para>이 정책은 <computeroutput>AtlasRenderer::Impl::AddGlyphs()</computeroutput>가 old refs를 즉시 제거하지 않고 new cache를 먼저 만드는 구조와 같은 방향이다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md853">
+<title>9. Geometry-only update와의 관계</title>
+<para>glyph cache ownership이 안정되면 geometry-only update 조건을 세울 수 있다.</para>
+<para>필요 조건:</para>
+<para><itemizedlist>
+<listitem><para>same glyph cache signature</para>
+</listitem><listitem><para>same atlas page split</para>
+</listitem><listitem><para>same shader type per mesh record</para>
+</listitem><listitem><para>same mesh record count</para>
+</listitem><listitem><para>compatible vertex / index count</para>
+</listitem><listitem><para>output actor / mesh actors alive</para>
+</listitem></itemizedlist>
+</para>
+<para>가능한 update:</para>
+<para><itemizedlist>
+<listitem><para>existing <computeroutput>VertexBuffer::SetData()</computeroutput>로 vertex positions / colors update</para>
+</listitem><listitem><para>index buffer가 같으면 유지</para>
+</listitem><listitem><para><computeroutput>Geometry</computeroutput> / <computeroutput>Renderer</computeroutput> / <computeroutput>Actor</computeroutput> reuse</para>
+</listitem><listitem><para>no glyph cache reference count change</para>
+</listitem></itemizedlist>
+</para>
+<para>fallback 조건:</para>
+<para><itemizedlist>
+<listitem><para>glyph sequence changed</para>
+</listitem><listitem><para>atlas page split changed</para>
+</listitem><listitem><para>glyph cache miss</para>
+</listitem><listitem><para>color glyph / monochrome shader split changed</para>
+</listitem><listitem><para>mesh actor missing</para>
+</listitem><listitem><para>vertex/index topology incompatible</para>
+</listitem></itemizedlist>
+</para>
+<para>이 단계에서 중요한 점은 geometry-only update가 glyph cache lifecycle 위에 올라간다는 것이다. glyph cache owner가 없으면 mesh가 참조하는 atlas slot이 renderer lifetime 동안 유효하다는 보장이 없다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md854">
+<title>10. 다음 구현 커밋 후보</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md855">
+<title>1. Add TextVisualizerGlyphRenderer glyph cache references</title>
+<para>범위:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GlyphCacheEntry</computeroutput> 추가</para>
+</listitem><listitem><para><computeroutput>mGlyphCacheEntries</computeroutput> member 추가</para>
+</listitem><listitem><para><computeroutput>ClearGlyphCache()</computeroutput> / <computeroutput>ReleaseGlyphReferences()</computeroutput> 추가</para>
+</listitem><listitem><para><computeroutput>Render()</computeroutput>에서 already-cached glyph refs acquire</para>
+</listitem><listitem><para>cache miss는 <computeroutput>false</computeroutput> 유지</para>
+</listitem><listitem><para>failure rollback</para>
+</listitem><listitem><para>same glyph sequence no-ref-churn 준비</para>
+</listitem><listitem><para>active path 미연결</para>
+</listitem><listitem><para>UTC 추가</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md856">
+<title>2. Design or implement glyph cache miss handling</title>
+<para>후보:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerGlyphRenderer</computeroutput> limited <computeroutput>CacheGlyphForTextVisualizer()</computeroutput></para>
+</listitem><listitem><para>shared helper extraction 설계</para>
+</listitem><listitem><para><computeroutput>AtlasGlyphManager::EnsureGlyphCached()</computeroutput> 설계</para>
+</listitem></itemizedlist>
+</para>
+<para>이 커밋은 <computeroutput>FontClient::CreateBitmap()</computeroutput>, compressed glyph buffer, atlas size policy를 다루므로 별도 작업으로 둔다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md857">
+<title>3. Prototype TextVisualizer geometry-only update</title>
+<para>전제:</para>
+<para><itemizedlist>
+<listitem><para>glyph cache references가 안정적으로 유지된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>범위:</para>
+<para><itemizedlist>
+<listitem><para>same glyph sequence / same atlas split에서 existing <computeroutput>VertexBuffer::SetData()</computeroutput> 사용</para>
+</listitem><listitem><para>actor / renderer / geometry reuse</para>
+</listitem><listitem><para>fallback 유지</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md858">
+<title>11. Validation plan</title>
+<para>추가 UTC 후보:</para>
+<para><table rows="7" cols="2"><row>
+<entry thead="yes"><para>테스트   </para>
+</entry><entry thead="yes"><para>목적    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>empty glyph cache state   </para>
+</entry><entry thead="no"><para>초기 <computeroutput>HasGlyphCache() == false</computeroutput>, count 0    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>render cache miss false no refs   </para>
+</entry><entry thead="no"><para>cache miss 시 refs가 남지 않음    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>render after warmup acquires refs   </para>
+</entry><entry thead="no"><para>기존 renderer warmup 이후 success 가능하면 entry count 확인    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>clear releases refs   </para>
+</entry><entry thead="no"><para><computeroutput>Clear()</computeroutput> 후 cache entry count 0    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>render failure rollback smoke   </para>
+</entry><entry thead="no"><para>중간 실패 후 old cache 유지 / temporary refs rollback    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>repeated same glyph sequence   </para>
+</entry><entry thead="no"><para>cache entry count가 불필요하게 증가하지 않음   </para>
+</entry></row>
+</table>
+</para>
+<para>측정 가능성:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasGlyphManager::GetMetrics()</computeroutput>는 verbose glyph ref count 문자열을 제공한다.</para>
+</listitem><listitem><para>단, test에서 특정 glyph ref count를 강하게 assert하면 font / glyph cache 환경에 의존할 수 있다.</para>
+</listitem><listitem><para>우선은 renderer-local cache entry count와 no-crash smoke 중심으로 검증한다.</para>
+</listitem><listitem><para>ref count string은 필요 시 debug validation으로만 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md859">
+<title>12. 결론</title>
+<para>현재 <computeroutput>TextVisualizerGlyphRenderer</computeroutput> MVP는 <computeroutput>TextVisualizer</computeroutput> 전용 renderer가 atlas mesh actor를 만들 수 있음을 보여준 proof다.</para>
+<para>하지만 active path 전환 전에는 glyph ownership이 필요하다. 기존 <computeroutput>Text::AtlasRenderer</computeroutput>는 <computeroutput>CacheGlyph()</computeroutput> / <computeroutput>RemoveText()</computeroutput> / <computeroutput>mTextCache</computeroutput>로 이 문제를 private하게 해결하고 있으며, 새 renderer는 같은 개념의 ownership을 자체적으로 가져야 한다.</para>
+<para>정리:</para>
+<para><itemizedlist>
+<listitem><para>current MVP는 rendering feasibility proof다.</para>
+</listitem><listitem><para>active path 연결 전 glyph cache lifecycle이 먼저다.</para>
+</listitem><listitem><para>geometry-only update는 glyph cache references가 안정된 뒤에 가능하다.</para>
+</listitem><listitem><para>기존 <computeroutput>AtlasRenderer</computeroutput> 직접 수정 전, <computeroutput>TextVisualizerGlyphRenderer</computeroutput> isolated cache lifecycle을 먼저 만든다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 추천 작업:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Add<sp/>TextVisualizerGlyphRenderer<sp/>glyph<sp/>cache<sp/>references</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md860">
+<title>13. 진행: glyph cache references</title>
+<para><computeroutput>TextVisualizerGlyphRenderer</computeroutput>에 already-cached glyph ownership 기반을 추가했다.</para>
+<para>추가된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GlyphCacheEntry</computeroutput><itemizedlist>
+<listitem><para><computeroutput>fontId</computeroutput></para>
+</listitem><listitem><para><computeroutput>glyphIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>AtlasGlyphManager::GlyphStyle</computeroutput></para>
+</listitem><listitem><para><computeroutput>atlasId</computeroutput></para>
+</listitem><listitem><para><computeroutput>imageId</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>mGlyphCacheEntries</computeroutput></para>
+</listitem><listitem><para><computeroutput>mGlyphCacheSignature</computeroutput></para>
+</listitem><listitem><para><computeroutput>mHasGlyphCacheSignature</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>추가된 lifecycle:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Render()</computeroutput>가 새 glyph sequence signature를 계산한다.</para>
+</listitem><listitem><para>기존 signature와 같고 cache entries가 있으면 glyph reference acquire / release를 생략한다.</para>
+</listitem><listitem><para>signature가 다르면 already-cached glyph에 대해 <computeroutput>AtlasGlyphManager::AdjustReferenceCount(..., +1)</computeroutput>로 temporary refs를 acquire한다.</para>
+</listitem><listitem><para>cache miss는 여전히 <computeroutput>false</computeroutput>를 반환한다.</para>
+</listitem><listitem><para>mesh build 또는 actor creation 실패 시 temporary refs를 rollback한다.</para>
+</listitem><listitem><para>render 성공 시 old refs를 release하고 temporary entries를 commit한다.</para>
+</listitem><listitem><para><computeroutput>Clear()</computeroutput>는 mesh / output actor lifecycle과 함께 owned glyph refs를 release한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이번 단계에서 의도적으로 하지 않은 것:</para>
+<para><itemizedlist>
+<listitem><para>cache miss handling</para>
+</listitem><listitem><para><computeroutput>FontClient::CreateBitmap()</computeroutput></para>
+</listitem><listitem><para><computeroutput>AtlasGlyphManager::Add()</computeroutput></para>
+</listitem><listitem><para>glyph bitmap 생성</para>
+</listitem><listitem><para>geometry-only update</para>
+</listitem><listitem><para>active <computeroutput>AtlasRendererBridge</computeroutput> path 연결</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>current MVP는 더 이상 “남이 보유한 cached glyph slot을 읽기만 하는 smoke path”에 머물지 않고, 성공한 render에 대해서는 glyph refs를 보유할 수 있다.</para>
+</listitem><listitem><para>같은 glyph sequence render에서는 ref count churn을 피할 수 있는 기반이 생겼다.</para>
+</listitem><listitem><para>cache miss가 있으면 여전히 fallback이 필요하므로 active path 연결은 아직 하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 후보:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md861">
+<title>16. 진행: lightweight renderer benchmark diagnostics</title>
+<para>flag ON 실험을 관찰하기 위한 lightweight renderer diagnostics를 보강했다.</para>
+<para>추가된 bridge getter:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetLightweightGeometryOnlyUpdateCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLightweightFullMeshRebuildCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLightweightGlyphCacheEntryCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLightweightMeshRecordCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLightweightMeshTopologySignature()</computeroutput></para>
+</listitem><listitem><para><computeroutput>HasLightweightMeshTopologySignature()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizerImpl::LogRenderDiagnostics()</computeroutput>에는 diagnostics flag가 켜진 경우에만 다음 항목을 추가로 출력한다.</para>
+<para><itemizedlist>
+<listitem><para>lightweight attempts</para>
+</listitem><listitem><para>lightweight successes</para>
+</listitem><listitem><para>lightweight fallbacks</para>
+</listitem><listitem><para>lightweight full mesh rebuilds</para>
+</listitem><listitem><para>lightweight geometry-only updates</para>
+</listitem><listitem><para>lightweight glyph cache entry count</para>
+</listitem><listitem><para>lightweight mesh record count</para>
+</listitem><listitem><para>lightweight topology signature state</para>
+</listitem></itemizedlist>
+</para>
+<para>기본 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER</computeroutput> 기본값은 계속 <computeroutput>false</computeroutput>다.</para>
+</listitem><listitem><para><computeroutput>ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS</computeroutput> 기본값도 계속 <computeroutput>false</computeroutput>다.</para>
+</listitem><listitem><para>기본 build에서는 기존 <computeroutput>Text::AtlasRenderer</computeroutput> path와 runtime logging behavior가 그대로 유지된다.</para>
+</listitem><listitem><para>performance sample status에는 표시하지 않는다. 해당 counters는 internal bridge state라 public API 없이 sample에서 접근하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>local benchmark 절차:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>atlas-renderer-bridge.cpp</computeroutput>에서 <computeroutput>ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER</computeroutput>를 임시로 <computeroutput>true</computeroutput>로 바꾼다.</para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">text-visualizer-impl.cpp</ref></computeroutput>에서 <computeroutput>ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS</computeroutput>를 임시로 <computeroutput>true</computeroutput>로 바꾼다.</para>
+</listitem><listitem><para><computeroutput>text-visualizer-performance.example</computeroutput>을 실행한다.</para>
+</listitem><listitem><para>log에서 <computeroutput>attempts</computeroutput>, <computeroutput>successes</computeroutput>, <computeroutput>fallbacks</computeroutput>, <computeroutput>fullRebuilds</computeroutput>, <computeroutput>geometryOnly</computeroutput>, <computeroutput>glyphCacheEntries</computeroutput>, <computeroutput>meshRecords</computeroutput>를 본다.</para>
+</listitem><listitem><para>실험 후 flag 변경은 되돌리고 커밋하지 않는다.</para>
+</listitem></orderedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>이 단계는 correctness fix가 아니다.</para>
+</listitem><listitem><para>일부 glyph가 잘못 보이는 현상은 별도 glyph/atlas correctness diagnostics로 다룬다.</para>
+</listitem><listitem><para>cache miss handling은 여전히 없다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md862">
+<title>17. 진행: fallback reason diagnostics</title>
+<para>로컬에서 <computeroutput>ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER=true</computeroutput>와 <computeroutput>ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS=true</computeroutput>로 performance sample을 실행했을 때 다음 관찰이 있었다.</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">lightweight<sp/>attempts=1144<sp/>successes=0<sp/>fallbacks=1144<sp/>fullRebuilds=0<sp/>geometryOnly=0<sp/>glyphCacheEntries=0<sp/>meshRecords=0</highlight></codeline>
+</programlisting></para>
+<para>해석:</para>
+<para><itemizedlist>
+<listitem><para>lightweight renderer가 한 번도 성공하지 않았다.</para>
+</listitem><listitem><para>full mesh rebuild와 geometry-only update가 모두 0이므로 renderer backend 성능 비교는 아직 이루어진 것이 아니다.</para>
+</listitem><listitem><para>현재 성능 차이가 체감되지 않는 것은 lightweight path가 실제 render output을 만들지 못하고 기존 <computeroutput>Text::AtlasRenderer</computeroutput>로 100% fallback하기 때문일 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이번 진단에서 추가한 상태:</para>
+<para><itemizedlist>
+<listitem><para>failure reason enum</para>
+</listitem><listitem><para>failure reason별 counters</para>
+</listitem><listitem><para>last failed placement index</para>
+</listitem><listitem><para>last failed glyph placement index</para>
+</listitem><listitem><para>last failed font id</para>
+</listitem><listitem><para>last failed glyph id</para>
+</listitem><listitem><para>last failed glyph advance / width / height / bearing</para>
+</listitem></itemizedlist>
+</para>
+<para>분리해서 볼 실패 원인:</para>
+<para><itemizedlist>
+<listitem><para>empty input</para>
+</listitem><listitem><para>no renderable glyphs</para>
+</listitem><listitem><para>no renderer position cache</para>
+</listitem><listitem><para>glyph cache signature failure</para>
+</listitem><listitem><para>no glyph manager</para>
+</listitem><listitem><para>glyph placement lookup failure</para>
+</listitem><listitem><para>glyph info lookup failure</para>
+</listitem><listitem><para>renderer glyph position lookup failure</para>
+</listitem><listitem><para>glyph cache miss</para>
+</listitem><listitem><para>empty mesh</para>
+</listitem><listitem><para>no output actor</para>
+</listitem><listitem><para>no texture set</para>
+</listitem></itemizedlist>
+</para>
+<para>가장 의심되는 원인:</para>
+<para><itemizedlist>
+<listitem><para>space / zero-width / non-renderable glyph 하나가 cache miss 또는 empty mesh로 처리되어 전체 <computeroutput>Render()</computeroutput>가 <computeroutput>false</computeroutput>를 반환할 수 있다.</para>
+</listitem><listitem><para>이 경우 다음 구현은 glyph cache miss handling이 아니라 먼저 non-renderable glyph skip policy일 수 있다.</para>
+</listitem><listitem><para>반대로 실제 visible glyph가 cache miss라면 <computeroutput>CacheGlyph</computeroutput> equivalent 또는 helper extraction 설계가 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+<para>diagnostics log에서 볼 항목:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>failureCacheMiss</computeroutput></para>
+</listitem><listitem><para><computeroutput>failureEmptyMesh</computeroutput></para>
+</listitem><listitem><para><computeroutput>failurePlacement</computeroutput></para>
+</listitem><listitem><para><computeroutput>failureGlyphInfo</computeroutput></para>
+</listitem><listitem><para><computeroutput>failurePosition</computeroutput></para>
+</listitem><listitem><para><computeroutput>failureNoTexture</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailureReason</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedPlacementIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedGlyphIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedFontId</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedGlyphId</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedAdvance</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedWidth</computeroutput></para>
+</listitem><listitem><para><computeroutput>lastFailedHeight</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>기본 flag는 계속 <computeroutput>false</computeroutput>다.</para>
+</listitem><listitem><para>이 단계는 cache miss handling이 아니다.</para>
+</listitem><listitem><para><computeroutput>FontClient::CreateBitmap()</computeroutput>과 <computeroutput>AtlasGlyphManager::Add()</computeroutput>는 여전히 사용하지 않는다.</para>
+</listitem><listitem><para>glyph correctness fix도 아직 하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 후보:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Skip<sp/>TextVisualizerGlyphRenderer<sp/>non-renderable<sp/>glyphs</highlight></codeline>
+</programlisting></para>
+<para>또는 로그 결과가 visible glyph cache miss라면:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md863">
+<title>18. 진행: skip non-renderable glyphs</title>
+<para>fallback reason diagnostics로 다음 실패가 관찰됐다.</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">main<sp/>TextVisualizer:</highlight></codeline>
+<codeline><highlight class="normal">attempts=1711<sp/>successes=0<sp/>fallbacks=1711</highlight></codeline>
+<codeline><highlight class="normal">failure<sp/>cacheMiss=1</highlight></codeline>
+<codeline><highlight class="normal">lastGlyphId=3</highlight></codeline>
+<codeline><highlight class="normal">lastAdvance=5.00</highlight></codeline>
+<codeline><highlight class="normal">lastWidth=0.00</highlight></codeline>
+<codeline><highlight class="normal">lastHeight=0.00</highlight></codeline>
+</programlisting></para>
+<para>해석:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>lastWidth=0</computeroutput>, <computeroutput>lastHeight=0</computeroutput>, <computeroutput>lastAdvance=5</computeroutput>인 glyph는 space 같은 advance-only glyph로 보인다.</para>
+</listitem><listitem><para>이 glyph는 화면에 mesh로 그릴 대상이 아니므로 atlas에 없어도 정상이다.</para>
+</listitem><listitem><para>이전 prototype은 이 glyph에도 <computeroutput>AtlasGlyphManager::IsCached()</computeroutput>를 호출했고, cache miss를 전체 <computeroutput>Render()</computeroutput> 실패로 처리했다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경 정책:</para>
+<para><itemizedlist>
+<listitem><para>glyph cache signature는 기존처럼 모든 glyph identity를 포함한다.</para>
+</listitem><listitem><para>glyph sequence identity에는 space도 포함되어야 하므로 <computeroutput>&quot;ab&quot;</computeroutput>와 <computeroutput>&quot;a b&quot;</computeroutput>는 다른 signature가 된다.</para>
+</listitem><listitem><para><computeroutput>width == 0 &amp;&amp; height == 0</computeroutput>인 glyph는 non-renderable로 보고 atlas lookup / ref acquire / mesh generation 대상에서 제외한다.</para>
+</listitem><listitem><para><computeroutput>width &gt; 0 || height &gt; 0</computeroutput>인 visible glyph cache miss는 여전히 fallback한다.</para>
+</listitem><listitem><para>cache miss handling / glyph bitmap 생성 / atlas add는 여전히 구현하지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>advance-only glyph 하나 때문에 lightweight renderer 전체가 fallback하는 false negative를 줄인다.</para>
+</listitem><listitem><para>다음 flag ON 실험에서는 cache miss가 visible glyph에서 나는지, 아니면 renderer가 mesh를 실제로 만들 수 있는지 분리해서 볼 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 후보:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Enable<sp/>lightweight<sp/>renderer<sp/>flag<sp/>locally<sp/>and<sp/>inspect<sp/>fallback<sp/>diagnostics</highlight></codeline>
+</programlisting></para>
+<para>또는 already-cached 환경을 전제로:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Prototype<sp/>TextVisualizer<sp/>geometry-only<sp/>mesh<sp/>update</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md864">
+<title>14. 진행: geometry-only mesh update prototype</title>
+<para><computeroutput>TextVisualizerGlyphRenderer</computeroutput>에 같은 glyph sequence / 같은 mesh topology에서 기존 mesh actor / renderer / geometry를 유지하고 vertex data만 갱신하는 prototype path를 추가했다.</para>
+<para>추가된 상태:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mMeshTopologySignature</computeroutput></para>
+</listitem><listitem><para><computeroutput>mHasMeshTopologySignature</computeroutput></para>
+</listitem><listitem><para><computeroutput>mGeometryOnlyUpdateCount</computeroutput></para>
+</listitem><listitem><para><computeroutput>mFullMeshRebuildCount</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>geometry-only update 조건:</para>
+<para><itemizedlist>
+<listitem><para>glyph cache signature가 기존 render와 같다.</para>
+</listitem><listitem><para>mesh topology signature가 기존 render와 같다.</para>
+</listitem><listitem><para>atlas id sequence가 같다.</para>
+</listitem><listitem><para>mesh record count가 같다.</para>
+</listitem><listitem><para>각 mesh record의 actor / renderer / geometry / vertex buffer handle이 유효하다.</para>
+</listitem><listitem><para>vertex count와 index count가 기존 mesh와 같다.</para>
+</listitem><listitem><para>mesh actor가 현재 output actor 아래에 붙어 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>동작:</para>
+<para><itemizedlist>
+<listitem><para>첫 render는 기존처럼 atlas id별 mesh actor / renderer / geometry / vertex buffer를 생성한다.</para>
+</listitem><listitem><para>다음 render에서 glyph sequence와 topology가 같으면 <computeroutput>VertexBuffer::SetData()</computeroutput>로 새 vertex data만 반영한다.</para>
+</listitem><listitem><para>이 path는 vertex color도 vertex data에 포함하므로 text color가 바뀌어도 topology가 같으면 geometry-only update가 가능하다.</para>
+</listitem><listitem><para>topology가 다르거나 handle이 유효하지 않으면 full mesh rebuild로 fallback한다.</para>
+</listitem><listitem><para>cache miss handling은 여전히 없다.</para>
+</listitem><listitem><para>active <computeroutput>AtlasRendererBridge</computeroutput> path에는 연결하지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>Phase 2 primary target인 layout-dynamic workload에서 renderer object churn을 줄일 수 있는 최소 proof가 생겼다.</para>
+</listitem><listitem><para>glyph cache references와 결합되면서, 같은 glyph sequence에서는 ref count churn 없이 position/color vertex data만 갱신하는 방향을 확인했다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para>cache miss는 여전히 <computeroutput>false</computeroutput>다.</para>
+</listitem><listitem><para>glyph bitmap 생성 / atlas add lifecycle은 아직 없다.</para>
+</listitem><listitem><para>active path 연결 전에는 fallback policy와 failure 시 old output 유지 정책을 다시 정해야 한다.</para>
+</listitem><listitem><para>topology가 같아도 atlas page split이 바뀌면 full rebuild가 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 후보:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+</programlisting></para>
+<para>또는 active path 전환 준비를 위해:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Integrate<sp/>TextVisualizerGlyphRenderer<sp/>behind<sp/>internal<sp/>fallback<sp/>flag</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md865">
+<title>15. 진행: optional lightweight renderer bridge path</title>
+<para><computeroutput>AtlasRendererBridge</computeroutput>에 <computeroutput>TextVisualizerGlyphRenderer</computeroutput>를 optional internal path로 연결했다.</para>
+<para>정책:</para>
+<para><itemizedlist>
+<listitem><para>compile-time flag <computeroutput>ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER</computeroutput>의 기본값은 <computeroutput>false</computeroutput>다.</para>
+</listitem><listitem><para>기본 build에서는 기존 <computeroutput>Text::AtlasRenderer</computeroutput> path만 사용하므로 public behavior는 바뀌지 않는다.</para>
+</listitem><listitem><para>flag를 켠 경우 bridge는 lightweight renderer를 먼저 시도한다.</para>
+</listitem><listitem><para>lightweight render 또는 attach가 실패하면 기존 <computeroutput>Text::AtlasRenderer</computeroutput> path로 fallback한다.</para>
+</listitem><listitem><para>cache miss handling은 아직 없으므로 fallback은 필수다.</para>
+</listitem><listitem><para>active benchmarking은 flag를 로컬에서 켠 뒤 별도 비교로 진행한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>추가된 bridge 상태:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerGlyphRenderer mGlyphRenderer</computeroutput></para>
+</listitem><listitem><para><computeroutput>mLightweightRenderAttemptCount</computeroutput></para>
+</listitem><listitem><para><computeroutput>mLightweightRenderSuccessCount</computeroutput></para>
+</listitem><listitem><para><computeroutput>mLightweightRenderFallbackCount</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>추가된 renderer API:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerGlyphRenderer::Render(const AtlasViewAdapter&amp; adapter)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>Phase 2 prototype을 active bridge lifecycle 근처에 배치했지만 기본값을 꺼 두어 안정성을 유지했다.</para>
+</listitem><listitem><para>다음 단계에서 flag를 켜고 performance sample을 비교할 수 있는 최소 연결점이 생겼다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para>cache miss handling은 여전히 없다.</para>
+</listitem><listitem><para>flag true 상태의 성능/시각 검증은 별도 작업이다.</para>
+</listitem><listitem><para>production 전환 전에는 failure 시 old output 유지, fallback 조건, render dirty clear 정책을 다시 확인해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>다음 후보:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Enable<sp/>lightweight<sp/>renderer<sp/>flag<sp/>locally<sp/>and<sp/>benchmark<sp/>performance<sp/>sample</highlight></codeline>
+</programlisting></para>
+<para>또는:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md866">
+<title>19. 진행: preserve lightweight renderer state across adapter updates</title>
+<para>non-renderable glyph skip 이후 flag ON 로컬 실험에서 다음 로그가 관찰됐다.</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">attempts=563</highlight></codeline>
+<codeline><highlight class="normal">successes=562</highlight></codeline>
+<codeline><highlight class="normal">fallbacks=1</highlight></codeline>
+<codeline><highlight class="normal">fullRebuilds=1</highlight></codeline>
+<codeline><highlight class="normal">geometryOnly=0</highlight></codeline>
+<codeline><highlight class="normal">glyphCacheEntries=3137</highlight></codeline>
+<codeline><highlight class="normal">meshRecords=2</highlight></codeline>
+<codeline><highlight class="normal">outputSize=(0,0,0)</highlight></codeline>
+<codeline><highlight class="normal">firstChildSize=(1354,970,0)</highlight></codeline>
+</programlisting></para>
+<para>해석:</para>
+<para><itemizedlist>
+<listitem><para>lightweight renderer는 대부분 성공하므로 space / advance-only glyph fallback 문제는 크게 줄었다.</para>
+</listitem><listitem><para>하지만 <computeroutput>geometryOnly=0</computeroutput>이므로 mesh state가 render 사이에서 유지되지 않았다.</para>
+</listitem><listitem><para>원인 후보는 <computeroutput>AtlasRendererBridge::SetAdapter(non-null)</computeroutput>이 layout update마다 <computeroutput>mGlyphRenderer.Clear()</computeroutput>를 호출해 glyph cache / mesh topology / mesh records를 모두 지우는 것이었다.</para>
+</listitem><listitem><para>또한 output actor size가 <computeroutput>(0,0,0)</computeroutput>이라 child mesh actor의 transform 기준이 불안정할 수 있었다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetAdapter(nullptr)</computeroutput>와 <computeroutput>AtlasRendererBridge::Clear()</computeroutput>에서는 기존처럼 <computeroutput>TextVisualizerGlyphRenderer::Clear()</computeroutput>를 호출한다.</para>
+</listitem><listitem><para><computeroutput>SetAdapter(non-null)</computeroutput>에서는 renderer state를 clear하지 않는다.</para>
+</listitem><listitem><para>adapter가 바뀌어도 <computeroutput>TextVisualizerGlyphRenderer::Render()</computeroutput>가 glyph cache signature와 mesh topology signature로 full rebuild 또는 geometry-only update를 판단한다.</para>
+</listitem><listitem><para>text / font / fontSize 변경으로 glyph sequence가 바뀌면 signature mismatch로 old refs release + full rebuild가 가능하다.</para>
+</listitem><listitem><para><computeroutput>RenderAdapter()</computeroutput>는 output actor size를 adapter control size로 매 render마다 동기화한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>기대:</para>
+<para><itemizedlist>
+<listitem><para>flag ON 재실험에서 첫 render는 full rebuild, 이후 같은 glyph sequence / topology render는 geometry-only update가 증가해야 한다.</para>
+</listitem><listitem><para>diagnostics log의 <computeroutput>outputSize</computeroutput>가 더 이상 <computeroutput>(0,0,0)</computeroutput>에 머물지 않아야 한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 확인:</para>
+<para><itemizedlist>
+<listitem><para>glyph correctness 문제는 별도 diagnostics가 필요하다.</para>
+</listitem><listitem><para>cache miss handling은 여전히 없다.</para>
+</listitem><listitem><para>default lightweight flag는 계속 <computeroutput>false</computeroutput>다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md867">
+<title>20. 진행: fix lightweight renderer mesh actor bounds</title>
+<para>flag ON 로컬 실험에서 state 보존 이후 다음 로그가 관찰됐다.</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">attempts=483</highlight></codeline>
+<codeline><highlight class="normal">successes=482</highlight></codeline>
+<codeline><highlight class="normal">fallbacks=1</highlight></codeline>
+<codeline><highlight class="normal">fullRebuilds=1</highlight></codeline>
+<codeline><highlight class="normal">geometryOnly=481</highlight></codeline>
+<codeline><highlight class="normal">glyphCacheEntries=3137</highlight></codeline>
+<codeline><highlight class="normal">meshRecords=2</highlight></codeline>
+<codeline><highlight class="normal">renderHostSize=(1354,970,0)</highlight></codeline>
+<codeline><highlight class="normal">outputSize=(1354,970,0)</highlight></codeline>
+<codeline><highlight class="normal">firstChildSize=(1354,970,0)</highlight></codeline>
+</programlisting></para>
+<para>기존 <computeroutput>Text::AtlasRenderer</computeroutput> fallback path에서는 같은 상황에서 output / first child height가 약 <computeroutput>1152</computeroutput>까지 커졌다.</para>
+<para>해석:</para>
+<para><itemizedlist>
+<listitem><para>lightweight renderer는 output actor와 mesh actor size를 adapter control size로 사용했다.</para>
+</listitem><listitem><para>실제 layout / text content bounds는 control height보다 클 수 있다.</para>
+</listitem><listitem><para>actor bounds가 content보다 작으면 culling / clipping / transform 기준 차이로 일부 glyph가 보이지 않을 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>변경 정책:</para>
+<para><itemizedlist>
+<listitem><para>render host는 기존처럼 control size를 유지한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerGlyphRenderer</computeroutput>의 output actor와 mesh actor size는 layout size를 우선 사용한다.</para>
+</listitem><listitem><para>layout size가 0인 축은 control size로 fallback한다.</para>
+</listitem><listitem><para>layout size와 control size가 모두 유효하면 각 축별 <computeroutput>max(layoutSize, controlSize)</computeroutput>를 사용한다.</para>
+</listitem><listitem><para>geometry-only update path에서도 mesh actor size를 같은 actor size로 갱신한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>control보다 layout content가 큰 경우에도 lightweight renderer actor bounds가 content를 감쌀 수 있다.</para>
+</listitem><listitem><para>default lightweight flag와 diagnostics flag는 계속 <computeroutput>false</computeroutput>다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 확인:</para>
+<para><itemizedlist>
+<listitem><para>flag ON 재실험에서 output / first child size가 layout content bounds에 맞게 커지는지 확인해야 한다.</para>
+</listitem><listitem><para>glyph correctness 문제가 bounds 문제만으로 해결되는지는 별도 확인이 필요하다.</para>
+</listitem><listitem><para>cache miss handling은 여전히 없다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md868">
+<title>21. 진행: stabilize optional lightweight renderer experiment</title>
+<para><computeroutput>ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER=true</computeroutput>와 <computeroutput>ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS=true</computeroutput> 로컬 실험에서 성능은 좋아졌지만, <computeroutput>text-breaker.example</computeroutput>에서 <computeroutput>4</computeroutput> 키로 brick renderer를 반복 전환할 때 일부 glyph가 번쩍이거나 사라지는 현상이 관찰됐다.</para>
+<para>이번 안정화는 lightweight renderer를 production default로 켜는 작업이 아니라, flag ON 실험이 더 정확한 비교가 되도록 prototype path의 명확한 차이를 줄이는 작업이다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md869">
+<title>flag 적용 전 / 후 차이</title>
+<para>flag OFF 기본 경로:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasRendererBridge</computeroutput>는 기존 <computeroutput>Text::AtlasRenderer::Render()</computeroutput>만 호출한다.</para>
+</listitem><listitem><para>render dirty마다 기존 text renderer가 view interface를 통해 glyph / position 배열을 받고, atlas mesh actor / renderer / geometry를 generic path로 다시 구성한다.</para>
+</listitem><listitem><para>glyph cache miss 처리는 기존 <computeroutput>Text::AtlasRenderer::Impl::CacheGlyph()</computeroutput>가 담당한다.</para>
+</listitem><listitem><para>안정성은 기존 text stack과 같지만, moving exclusion처럼 glyph sequence는 같고 위치만 바뀌는 경우에도 full render update 비용이 남는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>flag ON + lightweight 허용 경로:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasRendererBridge</computeroutput>가 먼저 <computeroutput>TextVisualizerGlyphRenderer</computeroutput>를 시도한다.</para>
+</listitem><listitem><para>renderer가 성공하면 기존 <computeroutput>Text::AtlasRenderer::Render()</computeroutput>를 호출하지 않는다.</para>
+</listitem><listitem><para>첫 성공 render는 lightweight renderer가 atlas id별 mesh actor를 만든다.</para>
+</listitem><listitem><para>같은 glyph cache signature와 같은 mesh topology이면 이후 render는 actor / renderer / geometry를 유지하고 <computeroutput>VertexBuffer::SetData()</computeroutput>로 vertex data만 갱신한다.</para>
+</listitem><listitem><para>cache miss, invalid mesh, unsupported 상태에서는 기존 <computeroutput>Text::AtlasRenderer</computeroutput> path로 fallback한다.</para>
+</listitem><listitem><para>cache miss handling은 아직 없으므로 이미 atlas에 올라간 glyph만 lightweight renderer가 직접 처리한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>성능적으로는 flag ON 경로가 layout-dynamic workload에서 유리하다. 특히 text / font / glyph sequence가 안정적이고 exclusion / layout / glyph positions만 바뀌는 경우, full actor / renderer / geometry rebuild를 피하고 vertex buffer update 중심으로 움직일 수 있다. 실제 로컬 실험에서도 position/exclusion 변화가 더 부드럽게 보였다.</para>
+<para>반대로 content-dynamic workload에서는 이 경로가 아직 primary target이 아니다. 짧은 fragment, status text, brick text처럼 glyph sequence가 자주 바뀌거나 no-exclusion인 TextVisualizer는 기존 renderer path가 더 안전하다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md870">
+<title>lightweight renderer 사용 조건</title>
+<para>기본 compile-time flag는 계속 <computeroutput>false</computeroutput>다.</para>
+<para>flag를 로컬에서 <computeroutput>true</computeroutput>로 바꿔도, bridge가 무조건 lightweight renderer를 쓰지는 않는다. <computeroutput>TextVisualizerImpl</computeroutput>은 현재 exclusion regions가 있는 경우에만 internal allow flag를 켠다.</para>
+<para>즉 현재 lightweight renderer path는 다음 조건에서만 시도된다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER == true</computeroutput></para>
+</listitem><listitem><para>해당 <computeroutput>TextVisualizer</computeroutput>에 non-empty exclusion regions가 있음</para>
+</listitem><listitem><para>adapter에 renderable glyphs와 renderer glyph position cache가 있음</para>
+</listitem></itemizedlist>
+</para>
+<para>이 정책의 이유:</para>
+<para><itemizedlist>
+<listitem><para>Phase 2 primary target은 layout-dynamic text다.</para>
+</listitem><listitem><para>exclusion이 있는 TextVisualizer는 moving bounds / glyph position update가 자주 발생하는 대표 workload다.</para>
+</listitem><listitem><para>no-exclusion text, short-lived effect text, status text, brick TextVisualizer는 existing <computeroutput>Text::AtlasRenderer</computeroutput> fallback을 사용해 안정성을 우선한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md871">
+<title>확인된 문제와 패치</title>
+<para><orderedlist>
+<listitem><para>advance-only glyph fallback</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>최초 flag ON 실험에서는 attempts는 많지만 successes가 0이었다.</para>
+</listitem><listitem><para>last failed glyph는 <computeroutput>advance=5</computeroutput>, <computeroutput>width=0</computeroutput>, <computeroutput>height=0</computeroutput>인 space 계열 glyph였다.</para>
+</listitem><listitem><para>non-renderable glyph는 atlas lookup / reference acquire / mesh generation에서 제외했다.</para>
+</listitem><listitem><para>glyph cache signature에는 계속 포함해 glyph sequence identity는 유지했다.</para>
+</listitem></itemizedlist>
+<orderedlist>
+<listitem><para>adapter update마다 renderer state reset</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>non-renderable skip 후 success는 대부분 발생했지만 geometry-only count가 0이었다.</para>
+</listitem><listitem><para><computeroutput>SetAdapter(non-null)</computeroutput>에서 <computeroutput>TextVisualizerGlyphRenderer::Clear()</computeroutput>를 호출해 mesh / cache / topology state를 매 layout update마다 잃고 있었다.</para>
+</listitem><listitem><para>non-null adapter update에서는 renderer state를 유지하고, <computeroutput>Render()</computeroutput> 내부 signature / topology 판단이 full rebuild 또는 geometry-only update를 결정하도록 바꿨다.</para>
+</listitem></itemizedlist>
+<orderedlist>
+<listitem><para>output actor size 0 / bounds mismatch</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>output actor size가 <computeroutput>(0,0,0)</computeroutput> 또는 control size에 묶이는 문제가 있었다.</para>
+</listitem><listitem><para>output / mesh actor size는 layout size와 control size의 axis-wise max를 사용하도록 했다.</para>
+</listitem><listitem><para>render host는 기존 control size 정책을 유지한다.</para>
+</listitem></itemizedlist>
+<orderedlist>
+<listitem><para>glyph mesh coordinate origin mismatch</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>기존 <computeroutput>Text::AtlasRenderer</computeroutput>는 glyph position을 actor-center local coordinate로 변환한 뒤 atlas mesh를 만든다.</para>
+</listitem><listitem><para>lightweight renderer는 layout top-left coordinate를 그대로 써서 glyph가 우하단으로 밀려 보였다.</para>
+</listitem><listitem><para><computeroutput>GenerateMeshData()</computeroutput> 전에 <computeroutput>round(position.x)</computeroutput>를 적용하고 <computeroutput>halfActorSize</computeroutput>를 빼 기존 renderer와 같은 coordinate convention으로 맞췄다.</para>
+</listitem></itemizedlist>
+<orderedlist>
+<listitem><para>geometry-only texture set stale 가능성</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>geometry-only update는 기존 renderer / geometry를 유지하고 vertex buffer만 갱신했다.</para>
+</listitem><listitem><para>breaker처럼 다른 text controls가 atlas를 계속 건드리는 상황에서는 atlas texture set handle이 바뀔 수 있으므로, geometry-only update에서도 <computeroutput>renderer.SetTextures(glyphManager.GetTextures(atlasId))</computeroutput>를 다시 호출한다.</para>
+</listitem></itemizedlist>
+<orderedlist>
+<listitem><para>fallback 순간 output blank 가능성</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>lightweight render 실패 시 기존 lightweight output을 즉시 detach하면 fallback renderer가 새 output을 준비하기 전 빈 프레임이 생길 수 있었다.</para>
+</listitem><listitem><para>fallback 시 즉시 detach하지 않고, fallback render가 성공한 뒤 기존 bridge output 교체 로직이 이전 output을 정리하도록 했다.</para>
+</listitem></itemizedlist>
+<orderedlist>
+<listitem><para>shader uniform <computeroutput>uOffset</computeroutput> 누락</para>
+</listitem></orderedlist>
+<itemizedlist>
+<listitem><para>기존 <computeroutput>Text::AtlasRenderer::CreateMeshActor()</computeroutput>는 mesh actor에 <computeroutput>uOffset</computeroutput> property를 <computeroutput>Vector2::ZERO</computeroutput>로 등록한다.</para>
+</listitem><listitem><para>atlas shader vertex stage는 <computeroutput>aPosition + uOffset</computeroutput>을 사용한다.</para>
+</listitem><listitem><para>lightweight renderer mesh actor에는 <computeroutput>uOffset</computeroutput>이 없어 일부 환경에서 undefined/unstable uniform 상태가 glyph flicker 또는 missing으로 보일 수 있었다.</para>
+</listitem><listitem><para>lightweight mesh actor도 <computeroutput>uOffset</computeroutput>을 명시적으로 등록해 기존 renderer와 맞췄다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali4056233f7eaa5535366af79231527fc5_1autotoc_md872">
+<title>현재 남은 한계</title>
+<para><itemizedlist>
+<listitem><para>cache miss handling은 아직 없다.</para>
+</listitem><listitem><para><computeroutput>FontClient::CreateBitmap()</computeroutput> / <computeroutput>AtlasGlyphManager::Add()</computeroutput> equivalent는 구현하지 않았다.</para>
+</listitem><listitem><para>default flag는 계속 <computeroutput>false</computeroutput>라 기본 build behavior는 기존 renderer와 같다.</para>
+</listitem><listitem><para>flag ON 실험에서 안정성이 좋아졌지만, production 전환 전에는 glyph cache miss handling과 fallback policy를 별도 커밋으로 다뤄야 한다. </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md"/>
+  </compounddef>
+</doxygen>

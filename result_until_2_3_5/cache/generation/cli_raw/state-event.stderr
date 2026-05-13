@@ -1,0 +1,1758 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e1fcb-1525-74c0-9735-1e748a7a80cd
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: State Event (state-event)
+- Category: input-interaction
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 16
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::StateEvent | scope=primary
+- Dali::Ui::StateEvent::Added | bool Added(const ViewState &state) const | scope=primary_member
+- Dali::Ui::StateEvent::Changed | bool Changed(const ViewState &state) const | scope=primary_member
+- Dali::Ui::StateEvent::GetCause | const InputEvent & GetCause() const | scope=primary_member
+- Dali::Ui::StateEvent::GetCurrent | const ViewState & GetCurrent() const | scope=primary_member
+- Dali::Ui::StateEvent::GetInputEventType | InputEventType GetInputEventType() const | scope=primary_member
+- Dali::Ui::StateEvent::GetKeyEvent | const KeyEvent & GetKeyEvent() const | scope=primary_member
+- Dali::Ui::StateEvent::GetLongPressGesture | const LongPressGesture & GetLongPressGesture() const | scope=primary_member
+- Dali::Ui::StateEvent::GetPrev | const ViewState & GetPrev() const | scope=primary_member
+- Dali::Ui::StateEvent::GetTapGesture | const TapGesture & GetTapGesture() const | scope=primary_member
+- Dali::Ui::StateEvent::GetTouchEvent | const TouchEvent & GetTouchEvent() const | scope=primary_member
+- Dali::Ui::StateEvent::GetWheelEvent | const WheelEvent & GetWheelEvent() const | scope=primary_member
+- Dali::Ui::StateEvent::Removed | bool Removed(const ViewState &state) const | scope=primary_member
+- Dali::Ui::StateEvent::StateEvent | StateEvent()=default | scope=primary_member
+- Dali::Ui::StateEvent::operator= | StateEvent & operator=(const StateEvent &)=default | scope=primary_member
+- Dali::Ui::StateEvent::~StateEvent | ~StateEvent()=default | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:82 (utc, score=0.45)
+```cpp
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  ViewState receivedPrev, receivedCur;
+  int     callCount = 0;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+    ++callCount;
+    receivedPrev = e.GetPrev();
+    receivedCur  = e.GetCurrent();
+  });
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+```
+
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:57 (utc, score=0.4)
+```cpp
+struct StateChangedFunctor
+{
+  StateChangedFunctor(StateChangedData& data)
+  : mData(data)
+  {
+  }
+
+  void operator()(View view, const StateEvent& e)
+  {
+    ++mData.callCount;
+    mData.view = view;
+    mData.prev = e.GetPrev();
+    mData.cur  = e.GetCurrent();
+  }
+
+  StateChangedData& mData;
+};
+
+/**
+ * @brief A helper class that implements ConnectionTracker for tracking signal lifetime.
+ */
+class StateHandlerTracker : public ConnectionTracker
+{
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Added",
+      "GetCurrent",
+      "GetPrev",
+      "StateEvent"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp",
+    "relevance": "medium",
+    "score": 0.45,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 161,
+    "snippet_start_line": 82
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "GetCurrent",
+      "GetPrev",
+      "StateEvent"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 136,
+    "snippet_start_line": 57
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "rg -n \"WhenStateChanged|StateChanged|ViewState|InputEventType\" repos/dali-ui -g'*.h' -g'*.cpp'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "rg -n \"class StateEvent|struct StateEvent|StateEvent\" repos/dali-ui -g'*.h' -g'*.cpp'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:111:  void OnStateChanged(View, StateEvent e)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:90:  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1312:  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1327:   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:30:StateEvent::StateEvent(Internal::StateEventImpl* implementation)
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:35:const ViewState& StateEvent::GetPrev() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:40:const ViewState& StateEvent::GetCurrent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:45:const InputEvent& StateEvent::GetCause() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:50:InputEventType StateEvent::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:55:const TouchEvent& StateEvent::GetTouchEvent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:60:const KeyEvent& StateEvent::GetKeyEvent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:65:const TapGesture& StateEvent::GetTapGesture() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:70:const LongPressGesture& StateEvent::GetLongPressGesture() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:75:const WheelEvent& StateEvent::GetWheelEvent() const
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:163: * @param[in] func Member function with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:166:void WhenStateChanged(ViewImpl& viewImpl, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:179: * @param[in] func    Callable with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:186:    SetNamedStateHandler(viewImpl, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:223: * @param[in] func Member function with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:226:void WhenStateChanged(Ui::View view, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:239: * @param[in] func    Callable with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:246:    SetNamedStateHandler(view, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:38:class StateEventImpl;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:39:using StateEventImplPtr = IntrusivePtr<StateEventImpl>;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:42: * @brief Internal implementation of StateEvent.
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:44:class DALI_UI_API StateEventImpl : public BaseObject
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:48:   * @brief Creates a new StateEventImpl.
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:54:  StateEventImpl(ViewState prev, ViewState current, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:57:   * @brief Creates a new StateEventImpl.
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:59:  static StateEventImplPtr New(ViewState prev, ViewState current, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:62:   * @copydoc Dali::Ui::StateEvent::GetPrev
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:67:   * @copydoc Dali::Ui::StateEvent::GetCurrent
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:72:   * @copydoc Dali::Ui::StateEvent::GetCause
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:77:  virtual ~StateEventImpl() override;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:79:  StateEventImpl(const StateEventImpl&)            = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:80:  StateEventImpl(StateEventImpl&&)                 = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:81:  StateEventImpl& operator=(const StateEventImpl&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:82:  StateEventImpl& operator=(StateEventImpl&&)      = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:92:inline Internal::StateEventImpl& GetImpl(StateEvent& obj)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:95:  return static_cast<Internal::StateEventImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:98:inline const Internal::StateEventImpl& GetImpl(const StateEvent& obj)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:101:  return static_cast<const Internal::StateEventImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:36:class StateEventImpl;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:47: * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:53:class DALI_UI_API StateEvent : public BaseHandle
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:57:   * @brief Creates an uninitialized StateEvent handle.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:59:  StateEvent() = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:64:  ~StateEvent() = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:66:  StateEvent(const StateEvent&)            = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:67:  StateEvent& operator=(const StateEvent&) = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:68:  StateEvent(StateEvent&&)                 = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:69:  StateEvent& operator=(StateEvent&&)      = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:166:  explicit StateEvent(Internal::StateEventImpl* implementation);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:30:StateEventImpl::StateEventImpl(ViewState prev, ViewState current, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:38:StateEventImpl::~StateEventImpl()
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:42:StateEventImplPtr StateEventImpl::New(ViewState prev, ViewState current, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:44:  return StateEventImplPtr(new StateEventImpl(prev, current, cause));
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:47:const ViewState& StateEventImpl::GetPrev() const
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:52:const ViewState& StateEventImpl::GetCurrent() const
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:57:const InputEvent& StateEventImpl::GetCause() const
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:104:void StateHandlerTraitImpl::NotifyStateChanged(View view, StateEvent event)
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:138:  void NotifyStateChanged(View view, StateEvent event);
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:86:      Internal::StateEventImplPtr stateEventImpl = Internal::StateEventImpl::New(n.prev, n.next, n.cause);
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:87:      StateEvent                  stateEvent(stateEventImpl.Get());
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:155:   * @param[in] callback Callback with signature void(View, const StateEvent&)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:65:  void operator()(View view, const StateEvent& e)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:87:  void HandleStateChanged(View view, const StateEvent& e)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:302:  IntegrationView::WhenStateChanged(GetImpl(view), "BackgroundColor", &tracker, [&](View v, const StateEvent&) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:90:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:116:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:156:  IntegrationView::WhenStateChanged(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:160:  IntegrationView::WhenStateChanged(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:169:  IntegrationView::WhenStateChanged(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:225:  view.StateChangedSignal().Connect(&tracker, [&](View v, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:233:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:338:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:396:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:428:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:609:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:72:    mTarget.StateChangedSignal().Connect(this, &TcDisabledClearsPressed::OnStateChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:111:  void OnStateChanged(View, StateEvent e)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:116:    if(e.Removed(ViewState::PRESSED) && e.Added(ViewState::DISABLED))
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:40: * @brief Describes a single View state transition, passed to StateChangedSignal handlers.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:42: * Provides the previous and current ViewState together with ergonomic helpers for
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:47: * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:48: *   if(e.Added(ViewState::FOCUSED))   { ... } // gained focus
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:49: *   if(e.Removed(ViewState::PRESSED)) { ... } // released
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:74:  const ViewState& GetPrev() const;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:79:  const ViewState& GetCurrent() const;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:86:  bool Added(const ViewState& state) const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:96:  bool Removed(const ViewState& state) const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:104:  bool Changed(const ViewState& state) const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:113:   * state changes return an InputEvent with InputEventType::NONE.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:120:   * Convenience shortcut for GetCause().GetInputEventType().
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:121:   * Returns InputEventType::NONE if the change was programmatic or system-triggered.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:123:  InputEventType GetInputEventType() const;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:128:   * @pre GetInputEventType() == InputEventType::TOUCH_EVENT
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:135:   * @pre GetInputEventType() == InputEventType::KEY_EVENT
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:142:   * @pre GetInputEventType() == InputEventType::TAP_GESTURE
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:149:   * @pre GetInputEventType() == InputEventType::LONG_PRESS_GESTURE
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:156:   * @pre GetInputEventType() == InputEventType::WHEEL_EVENT
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:541:const ViewState& View::GetState() const
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:546:View::StateChangedSignalType& View::StateChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:548:  return GetImpl(*this).StateChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/input-event.cpp:87:InputEventType InputEvent::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/public-api/input-event.cpp:89:  return GetImpl(*this).GetInputEventType();
+repos/dali-ui/dali-ui-foundation/public-api/input-event.h:92:   * The returned event has InputEventType::NONE. Use this when emitting signals
+repos/dali-ui/dali-ui-foundation/public-api/input-event.h:104:   * with InputEventType::NONE is needed without per-call cost.
+repos/dali-ui/dali-ui-foundation/public-api/input-event.h:155:  InputEventType GetInputEventType() const;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:90:  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:186:  const ViewState& GetState() const;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:209:   * @copydoc Ui::View::StateChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:211:  StateChangedSignalType& StateChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:51:uint32_t ViewState::Register(StringView name)
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:72:  DALI_ASSERT_ALWAYS(reg.nextBit < MAX_BITS && "No more room to register a new ViewState");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:80:ViewState ViewState::Create(StringView name)
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:82:  return ViewState(Register(name));
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:85:String ViewState::ToString() const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:118:const ViewState ViewState::NORMAL{};
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:119:const ViewState ViewState::ALL{UINT32_MAX};
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:120:const ViewState ViewState::FOCUSED         = ViewState::Create("Focused");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:121:const ViewState ViewState::PRESSED         = ViewState::Create("Pressed");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:122:const ViewState ViewState::DISABLED        = ViewState::Create("Disabled");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:123:const ViewState ViewState::PSEUDO_DISABLED = ViewState::Create("PseudoDisabled");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:124:const ViewState ViewState::SELECTED        = ViewState::Create("Selected");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:128:const ViewState ViewState::SELECTED_PRESSED  = ViewState::SELECTED + ViewState::PRESSED;
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:129:const ViewState ViewState::DISABLED_SELECTED = ViewState::DISABLED + ViewState::SELECTED;
+repos/dali-ui/dali-ui-foundation/public-api/view-state.cpp:131:const ViewState ViewState::SELECTED_FOCUSED = ViewState::SELECTED + ViewState::FOCUSED;
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:35: * @brief ViewState is a value type representing one or more view states as a bitmask.
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:45: * if(state.Contains(ViewState::PRESSED)) { ... }
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:48: * auto selectedPressed = ViewState::SELECTED + ViewState::PRESSED;
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:51: * static const ViewState Loading = ViewState::Create("Loading");
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:54:class DALI_UI_API ViewState
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:60:  constexpr ViewState()
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:67:  static const ViewState ALL;             ///< Represents all possible states
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:68:  static const ViewState NORMAL;          ///< No state (0)
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:69:  static const ViewState FOCUSED;         ///< View has keyboard focus
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:70:  static const ViewState PRESSED;         ///< View is being pressed (touch or key)
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:71:  static const ViewState DISABLED;        ///< View is disabled
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:72:  static const ViewState PSEUDO_DISABLED; ///< View appears disabled but still interactive
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:73:  static const ViewState SELECTED;        ///< View is selected
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:77:  static const ViewState SELECTED_PRESSED;  ///< SELECTED + PRESSED
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:78:  static const ViewState DISABLED_SELECTED; ///< DISABLED + SELECTED
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:79:  static const ViewState SELECTED_FOCUSED;  ///< SELECTED + FOCUSED
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:88:   * @return The ViewState with the assigned bitmask
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:91:  static ViewState Create(StringView name);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:101:  bool Contains(const ViewState& other) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:112:  bool HasIntersectionWith(const ViewState& other) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:145:  // Useful with StateChangedSignal(prev, cur) to detect specific transitions.
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:150:  bool WasAdded(const ViewState& prev, const ViewState& cur) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:158:  bool WasRemoved(const ViewState& prev, const ViewState& cur) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:166:  bool WasChanged(const ViewState& prev, const ViewState& cur) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:177:  bool AnyChanged(const ViewState& prev, const ViewState& cur) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:184:  ViewState operator+(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:186:    return ViewState(mBits | rhs.mBits);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:189:  ViewState operator-(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:191:    return ViewState(mBits & ~rhs.mBits);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:194:  ViewState operator|(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:196:    return ViewState(mBits | rhs.mBits);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:199:  ViewState operator&(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:201:    return ViewState(mBits & rhs.mBits);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:204:  ViewState operator^(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:206:    return ViewState(mBits ^ rhs.mBits);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:209:  ViewState operator~() const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:211:    return ViewState(~mBits);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:214:  bool operator==(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:219:  bool operator!=(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:230:  explicit constexpr ViewState(uint32_t bits)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:802:   * adds the Disabled state and emits StateChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1006:   * ViewState::DISABLED.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1016:   * hierarchy and returns true if any ancestor View carries ViewState::FOCUSED.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1312:  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1317:   * @return The current ViewState (may contain multiple combined states)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1319:  const ViewState& GetState() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1324:   * Emitted whenever the view's ViewState changes.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1327:   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1328:   *   if(e.Added(ViewState::FOCUSED)) { ... }
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1332:   * @return The StateChangedSignal
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1334:  StateChangedSignalType& StateChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:252:  * adds the Disabled state and emits StateChangedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/input-event-type.h:27:enum class InputEventType : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:35:const ViewState& StateEvent::GetPrev() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:40:const ViewState& StateEvent::GetCurrent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:50:InputEventType StateEvent::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:52:  return GetImpl(*this).GetCause().GetInputEventType();
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:374:const ViewState& ViewImpl::GetState() const
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:391:  return Internal::ViewStateManager::Get().IsEffectivelyEnabled(*this);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:396:  return Internal::ViewStateManager::Get().IsEffectivelyFocused(*this);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:399:ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:401:  return mImpl->mStateChangedSignal;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:478:  IntegrationView::SetState(*this, ViewState::FOCUSED, focused, cause);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:2217:      IntegrationView::SetState(*this, ViewState::DISABLED, !enabled);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:35:  mEventType(InputEventType::NONE),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:42:  mEventType(InputEventType::TOUCH_EVENT),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:49:  mEventType(InputEventType::KEY_EVENT),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:56:  mEventType(InputEventType::TAP_GESTURE),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:63:  mEventType(InputEventType::LONG_PRESS_GESTURE),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:70:  mEventType(InputEventType::WHEEL_EVENT),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:109:InputEventType InputEventImpl::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:116:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::TOUCH_EVENT);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:122:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::KEY_EVENT);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:128:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::TAP_GESTURE);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:134:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::LONG_PRESS_GESTURE);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:140:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::WHEEL_EVENT);
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:104:void StateHandlerTraitImpl::NotifyStateChanged(View view, StateEvent event)
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:108:    // ViewStateManager defers re-entrant SetState calls via its own mPending queue.
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:109:    // This guard provides a secondary safety net: if NotifyStateChanged is somehow called
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:181:  GetImpl(view).StateChangedSignal().Connect(this, &StateHandlerTraitImpl::NotifyStateChanged);
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:89: * invoked when the owner View's ViewState changes. Participates in the DALi
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:106:   *                     Signature: void(View, ViewState, ViewState)
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:132:   * Called by IntegrationView::SetState when the view's ViewState changes.
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:135:   * @param[in] prev The previous ViewState
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:136:   * @param[in] cur  The current ViewState
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:138:  void NotifyStateChanged(View view, StateEvent event);
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:154:    CallbackBase*               callback;             ///< Owned. Signature: void(View, ViewState, ViewState)
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:171:  std::vector<std::string>  mKeys;     ///< Reusable snapshot buffer for NotifyStateChanged
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:173:  bool                      mNotifying{false}; ///< Re-entrancy guard for NotifyStateChanged
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.h:125:   * @copydoc Dali::Ui::InputEvent::GetInputEventType
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.h:127:  InputEventType GetInputEventType() const;
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.h:163:  InputEventType                                                                               mEventType;
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:145: * @brief Internal helper for WhenStateChanged templates.
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:150: * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:156:DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause = InputEvent::None());
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:166:void WhenStateChanged(ViewImpl& viewImpl, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:182:void WhenStateChanged(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& func)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:209: * @copydoc SetState(ViewImpl&, ViewState, bool, InputEvent)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:211:DALI_UI_API void SetState(Ui::View view, ViewState state, bool on, InputEvent cause = InputEvent::None());
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:214: * @brief Internal helper for WhenStateChanged templates (View overload).
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:226:void WhenStateChanged(Ui::View view, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:242:void WhenStateChanged(Ui::View view, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& func)
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:38:ViewStateManager& ViewStateManager::Get()
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:40:  static ViewStateManager instance;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:44:void ViewStateManager::NotifyStateChanged(Ui::View view, ViewState prev, ViewState next, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:57:    ViewStateManager& mgr;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:58:    NotifyGuard(ViewStateManager& m)
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:81:      if(impl.StateChangedSignal().Empty())
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:89:      impl.StateChangedSignal().Emit(n.view, stateEvent);
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:94:bool ViewStateManager::IsEffectivelyEnabled(const ViewImpl& viewImpl) const
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:96:  if(viewImpl.GetState().Contains(ViewState::DISABLED))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:107:      if(GetImpl(parentView).GetState().Contains(ViewState::DISABLED))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:118:bool ViewStateManager::IsEffectivelyFocused(const ViewImpl& viewImpl) const
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:120:  if(viewImpl.GetState().Contains(ViewState::FOCUSED))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:131:      if(GetImpl(parentView).GetState().Contains(ViewState::FOCUSED))
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:54:  StateEventImpl(ViewState prev, ViewState current, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:59:  static StateEventImplPtr New(ViewState prev, ViewState current, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:64:  const ViewState& GetPrev() const;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:69:  const ViewState& GetCurrent() const;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:85:  ViewState  mPrev;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:86:  ViewState  mCurrent;
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:66:void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:88:void SetState(Ui::View view, ViewState state, bool on, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:45: * When SetState() is called re-entrantly (e.g. a StateChangedSignal handler
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:53:class ViewStateManager
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:56:  static ViewStateManager& Get();
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:64:   * receive the notification through the view's StateChangedSignal.
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:71:  void NotifyStateChanged(Ui::View view, ViewState prev, ViewState next, InputEvent cause = InputEvent::None());
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:77:   * @return True if neither the view itself nor any ancestor carries ViewState::DISABLED
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:85:   * @return True if the view itself or at least one ancestor carries ViewState::FOCUSED
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:90:  ViewStateManager() = default;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:95:    ViewState  prev;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:96:    ViewState  next;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:655:void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:663:  ViewState prev = mState;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:677:      mState = mState - ViewState::PRESSED;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:688:    if(state == ViewState::FOCUSED && !mViewImpl.IsEnabled())
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:690:      mState = mState - ViewState::PRESSED + ViewState::DISABLED;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:696:    ViewStateManager::Get().NotifyStateChanged(View::DownCast(mViewImpl.Self()), prev, mState, cause);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:1969:void ViewDataImpl::EmitAccessibilityStateChanged(Accessibility::State state, int newValue)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:1997:      accessible->EmitStateChanged(state, newValue, 0);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:144:   * @brief Updates a state bit and notifies ViewStateManager if the state changed.
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:149:  void SetState(ViewState state, bool on, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:457:   * @copydoc Dali::Ui::View::EmitAccessibilityStateChanged()
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:459:  void EmitAccessibilityStateChanged(Accessibility::State state, int newValue);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:521:  Ui::ViewState                    mState;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:522:  ViewImpl::StateChangedSignalType mStateChangedSignal;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:30:StateEventImpl::StateEventImpl(ViewState prev, ViewState current, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:42:StateEventImplPtr StateEventImpl::New(ViewState prev, ViewState current, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:47:const ViewState& StateEventImpl::GetPrev() const
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:52:const ViewState& StateEventImpl::GetCurrent() const
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:37:struct StateChangedData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:39:  StateChangedData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:48:    prev      = ViewState::NORMAL;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:49:    cur       = ViewState::NORMAL;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:54:  ViewState prev;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:55:  ViewState cur;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:58:struct StateChangedFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:60:  StateChangedFunctor(StateChangedData& data)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:73:  StateChangedData& mData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:82:  StateHandlerTracker(StateChangedData& data)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:87:  void HandleStateChanged(View view, const StateEvent& e)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:95:  StateChangedData& mData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:122:// WhenStateChanged — basic registration and dispatch (member function, #2)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:125:int UtcDaliViewWhenStateChangedMemberFunctionP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:129:  StateChangedData   data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:132:  IntegrationView::WhenStateChanged(GetImpl(view), "TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:135:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:139:  DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(data.prev, data.cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:145:// WhenStateChanged — lambda form (#4)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:148:int UtcDaliViewWhenStateChangedLambdaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:152:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:155:  IntegrationView::WhenStateChanged(GetImpl(view), "TestHandler", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:157:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:160:  DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(data.prev, data.cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:166:// WhenStateChanged — method chaining returns *this
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:169:int UtcDaliViewWhenStateChangedChainingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:174:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:176:  IntegrationView::WhenStateChanged(GetImpl(view), "Handler1", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:177:  IntegrationView::WhenStateChanged(GetImpl(view), "Handler2", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:178:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:187:// WhenStateChanged — same ID replaces previous handler
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:190:int UtcDaliViewWhenStateChangedReplaceP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:195:  StateChangedData data1, data2;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:197:  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data1));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:199:  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data2));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:201:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:210:// WhenStateChanged — no dispatch when state does not change
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:213:int UtcDaliViewWhenStateChangedNoChangeN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:218:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:220:  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:223:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:224:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:240:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:242:  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:247:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:275:  StateChangedData dataA, dataB;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:277:  IntegrationView::WhenStateChanged(GetImpl(view), "HandlerA", &tracker, StateChangedFunctor(dataA));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:278:  IntegrationView::WhenStateChanged(GetImpl(view), "HandlerB", &tracker, StateChangedFunctor(dataB));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:282:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:302:  IntegrationView::WhenStateChanged(GetImpl(view), "BackgroundColor", &tracker, [&](View v, const StateEvent&) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:308:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:315:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:326:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:328:  IntegrationView::WhenStateChanged(GetImpl(view), "BackgroundColor", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:334:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:344:int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:348:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:352:    IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:354:    IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:362:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:372:int UtcDaliViewWhenStateChangedPrevCurP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:377:  StateChangedData data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:379:  IntegrationView::WhenStateChanged(GetImpl(view), "Observer", &tracker, StateChangedFunctor(data));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:381:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:382:  DALI_TEST_CHECK(!data.prev.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:383:  DALI_TEST_CHECK(data.cur.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:386:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:387:  DALI_TEST_CHECK(data.prev.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:388:  DALI_TEST_CHECK(data.cur.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:389:  DALI_TEST_CHECK(data.cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:398:int UtcDaliViewWhenStateChangedMultipleHandlersP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:403:  StateChangedData dataA, dataB, dataC;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:405:  IntegrationView::WhenStateChanged(GetImpl(view), "A", &tracker, StateChangedFunctor(dataA));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:406:  IntegrationView::WhenStateChanged(GetImpl(view), "B", &tracker, StateChangedFunctor(dataB));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:407:  IntegrationView::WhenStateChanged(GetImpl(view), "C", &tracker, StateChangedFunctor(dataC));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:409:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:419:// Named handlers and StateChangedSignal both fire
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:422:int UtcDaliViewWhenStateChangedAndSignalBothFireP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:427:  StateChangedData namedData, signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:430:  IntegrationView::WhenStateChanged(GetImpl(view), "Observer", &tracker, StateChangedFunctor(namedData));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:432:  view.StateChangedSignal().Connect(&tracker, StateChangedFunctor(signalData));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:434:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/dali-ui-foundation/integration-api/view-accessible.cpp:753:      EmitStateChanged(Accessibility::State::CHECKED, newStates[AccessibilityState::CHECKED]);
+repos/dali-ui/dali-ui-foundation/integration-api/view-accessible.cpp:761:      EmitStateChanged(Accessibility::State::SELECTED, newStates[AccessibilityState::SELECTED]);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:81:  IntegrationView::SetState(GetImpl(owner), ViewState::SELECTED, selected);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:113:    IntegrationView::SetState(GetImpl(owner), ViewState::PSEUDO_DISABLED, pseudoDisabled);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:410:    IntegrationView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:35:// A record of one StateChangedSignal (or WhenStateChanged) callback invocation.
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:39:  ViewState     prev;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:40:  ViewState     cur;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:78:// Basic: StateChangedSignal fires with correct prev/cur
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:81:int UtcDaliViewStateBasicDispatchP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:87:  ViewState receivedPrev, receivedCur;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:90:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:96:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:99:  DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:100:  DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:109:int UtcDaliViewStateNoDispatchUnchangedN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:116:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:120:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:124:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:148:int UtcDaliViewStateDeferredNotificationOrderP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:156:  IntegrationView::WhenStateChanged(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:160:  IntegrationView::WhenStateChanged(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:163:    if(e.Added(ViewState::FOCUSED))
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:165:      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:169:  IntegrationView::WhenStateChanged(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:173:  const ViewState stateA = ViewState::NORMAL;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:174:  const ViewState stateB = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:175:  const ViewState stateC = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:177:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:212:// Deferred notification: StateChangedSignal connections also participate
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:216:int UtcDaliViewStateDeferredSignalOrderP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:225:  view.StateChangedSignal().Connect(&tracker, [&](View v, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:227:    if(e.Added(ViewState::FOCUSED))
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:229:      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:233:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:237:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:243:  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:244:  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:247:  DALI_TEST_CHECK(log[1].cur.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:248:  DALI_TEST_CHECK(!log[1].cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:251:  DALI_TEST_CHECK(log[2].cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:254:  DALI_TEST_CHECK(log[3].cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:263:int UtcDaliViewStateDisabledClearsFocusedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:270:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:274:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:275:  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:284:int UtcDaliViewStateDisabledClearsPressedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:289:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:290:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:292:  IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:294:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:295:  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:305:int UtcDaliViewStateDisabledOrthogonalSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:313:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:318:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:319:  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:320:  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:329:int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:335:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:338:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:342:  IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:346:  DALI_TEST_CHECK(log[0].prev.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:347:  DALI_TEST_CHECK(!log[0].prev.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:348:  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:349:  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:358:int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:367:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:369:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:370:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:375:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:376:  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:377:  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:386:int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:393:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:396:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:404:  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:405:  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:417:int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:424:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:425:  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:428:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:434:  const ViewState& finalState = GetImpl(view).GetState();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:437:  DALI_TEST_CHECK(!finalState.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:441:  DALI_TEST_CHECK(finalState.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:444:  DALI_TEST_CHECK(finalState.Contains(ViewState::PSEUDO_DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:453:int UtcDaliViewStatePseudoDisabledKeepsFocusedN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:459:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:465:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:466:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PSEUDO_DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:554:  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:573:  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUSED, true);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:576:  DALI_TEST_CHECK(!GetImpl(child).GetState().Contains(ViewState::FOCUSED)); // own state unchanged
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:601:int UtcDaliViewStateFocusedViaFocusManagerP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:607:  ViewState receivedCur;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:609:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:617:  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:620:  DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:629:int UtcDaliViewStateFocusedViaFocusManagerClearOnMoveP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:638:  DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:639:  DALI_TEST_CHECK(!GetImpl(view2).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:643:  DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:644:  DALI_TEST_CHECK(GetImpl(view2).GetState().Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:43:int UtcDaliViewStateDefaultConstructor(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:45:  // Default-constructed ViewState should be Normal (bits == 0)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:46:  ViewState state;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:48:  DALI_TEST_CHECK(state == ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:54:int UtcDaliViewStateNormalIsZero(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:56:  // ViewState::NORMAL should have no bits set
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:57:  DALI_TEST_CHECK(ViewState::NORMAL.IsNormal());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:58:  DALI_TEST_CHECK(!static_cast<bool>(ViewState::NORMAL));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:67:int UtcDaliViewStatePredefinedStatesAreDistinct(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:70:  DALI_TEST_CHECK(ViewState::FOCUSED        != ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:71:  DALI_TEST_CHECK(ViewState::PRESSED        != ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:72:  DALI_TEST_CHECK(ViewState::DISABLED       != ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:73:  DALI_TEST_CHECK(ViewState::PSEUDO_DISABLED != ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:74:  DALI_TEST_CHECK(ViewState::SELECTED       != ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:76:  DALI_TEST_CHECK(ViewState::FOCUSED        != ViewState::PRESSED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:77:  DALI_TEST_CHECK(ViewState::FOCUSED        != ViewState::DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:78:  DALI_TEST_CHECK(ViewState::FOCUSED        != ViewState::PSEUDO_DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:79:  DALI_TEST_CHECK(ViewState::FOCUSED        != ViewState::SELECTED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:80:  DALI_TEST_CHECK(ViewState::PRESSED        != ViewState::DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:81:  DALI_TEST_CHECK(ViewState::PRESSED        != ViewState::PSEUDO_DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:82:  DALI_TEST_CHECK(ViewState::PRESSED        != ViewState::SELECTED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:83:  DALI_TEST_CHECK(ViewState::DISABLED       != ViewState::PSEUDO_DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:84:  DALI_TEST_CHECK(ViewState::DISABLED       != ViewState::SELECTED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:85:  DALI_TEST_CHECK(ViewState::PSEUDO_DISABLED != ViewState::SELECTED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:90:int UtcDaliViewStatePredefinedStatesAreNonNormal(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:92:  DALI_TEST_CHECK(!ViewState::FOCUSED.IsNormal());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:93:  DALI_TEST_CHECK(!ViewState::PRESSED.IsNormal());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:94:  DALI_TEST_CHECK(!ViewState::DISABLED.IsNormal());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:95:  DALI_TEST_CHECK(!ViewState::PSEUDO_DISABLED.IsNormal());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:96:  DALI_TEST_CHECK(!ViewState::SELECTED.IsNormal());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:101:int UtcDaliViewStateAllContainsAllPredefined(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:103:  // ViewState::ALL should contain every predefined single state
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:104:  DALI_TEST_CHECK(ViewState::ALL.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:105:  DALI_TEST_CHECK(ViewState::ALL.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:106:  DALI_TEST_CHECK(ViewState::ALL.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:107:  DALI_TEST_CHECK(ViewState::ALL.Contains(ViewState::PSEUDO_DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:108:  DALI_TEST_CHECK(ViewState::ALL.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:117:int UtcDaliViewStateCompositeSelectedPressed(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:119:  DALI_TEST_CHECK(ViewState::SELECTED_PRESSED.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:120:  DALI_TEST_CHECK(ViewState::SELECTED_PRESSED.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:121:  DALI_TEST_CHECK(!ViewState::SELECTED_PRESSED.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:126:int UtcDaliViewStateCompositeDisabledSelected(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:128:  DALI_TEST_CHECK(ViewState::DISABLED_SELECTED.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:129:  DALI_TEST_CHECK(ViewState::DISABLED_SELECTED.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:130:  DALI_TEST_CHECK(!ViewState::DISABLED_SELECTED.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:136:int UtcDaliViewStateCompositeSelectedFocused(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:138:  DALI_TEST_CHECK(ViewState::SELECTED_FOCUSED.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:139:  DALI_TEST_CHECK(ViewState::SELECTED_FOCUSED.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:140:  DALI_TEST_CHECK(!ViewState::SELECTED_FOCUSED.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:149:int UtcDaliViewStateCreateReturnsNonNormal(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:151:  ViewState custom = ViewState::Create("UtcCustomStateA");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:158:int UtcDaliViewStateCreateSameNameReturnsSameBits(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:160:  ViewState first  = ViewState::Create("UtcCustomStateB");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:161:  ViewState second = ViewState::Create("UtcCustomStateB");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:167:int UtcDaliViewStateCreateDifferentNamesReturnsDifferentBits(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:169:  ViewState stateC = ViewState::Create("UtcCustomStateC");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:170:  ViewState stateD = ViewState::Create("UtcCustomStateD");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:176:int UtcDaliViewStateCreateNormalReturnsNormal(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:178:  ViewState result = ViewState::Create("Normal");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:180:  DALI_TEST_CHECK(result == ViewState::NORMAL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:185:int UtcDaliViewStateCreateAllReturnsAll(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:187:  ViewState result = ViewState::Create("All");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:188:  DALI_TEST_CHECK(result == ViewState::ALL);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:197:int UtcDaliViewStateContainsSelf(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:199:  DALI_TEST_CHECK(ViewState::FOCUSED.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:200:  DALI_TEST_CHECK(ViewState::SELECTED_PRESSED.Contains(ViewState::SELECTED_PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:205:int UtcDaliViewStateContainsSubset(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:207:  ViewState composite = ViewState::FOCUSED + ViewState::PRESSED + ViewState::SELECTED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:208:  DALI_TEST_CHECK(composite.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:209:  DALI_TEST_CHECK(composite.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:210:  DALI_TEST_CHECK(composite.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:211:  DALI_TEST_CHECK(!composite.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:216:int UtcDaliViewStateContainsNormalAlwaysTrue(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:219:  DALI_TEST_CHECK(ViewState::NORMAL.Contains(ViewState::NORMAL));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:220:  DALI_TEST_CHECK(ViewState::FOCUSED.Contains(ViewState::NORMAL));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:221:  DALI_TEST_CHECK(ViewState::SELECTED_PRESSED.Contains(ViewState::NORMAL));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:226:int UtcDaliViewStateContainsStrictSubsetFalseForSuperset(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:229:  DALI_TEST_CHECK(!ViewState::FOCUSED.Contains(ViewState::SELECTED_FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:238:int UtcDaliViewStateHasIntersectionWithOverlapping(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:240:  ViewState composite = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:241:  DALI_TEST_CHECK(composite.HasIntersectionWith(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:242:  DALI_TEST_CHECK(composite.HasIntersectionWith(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:243:  DALI_TEST_CHECK(composite.HasIntersectionWith(ViewState::SELECTED_FOCUSED)); // shares Focused bit
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:248:int UtcDaliViewStateHasIntersectionWithDisjoint(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:250:  DALI_TEST_CHECK(!ViewState::FOCUSED.HasIntersectionWith(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:251:  DALI_TEST_CHECK(!ViewState::DISABLED.HasIntersectionWith(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:256:int UtcDaliViewStateHasIntersectionWithNormal(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:259:  DALI_TEST_CHECK(!ViewState::NORMAL.HasIntersectionWith(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:260:  DALI_TEST_CHECK(!ViewState::FOCUSED.HasIntersectionWith(ViewState::NORMAL));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:269:int UtcDaliViewStateOperatorPlus(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:271:  ViewState combined = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:272:  DALI_TEST_CHECK(combined.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:273:  DALI_TEST_CHECK(combined.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:274:  DALI_TEST_CHECK(!combined.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:279:int UtcDaliViewStateOperatorMinus(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:281:  ViewState combined = ViewState::FOCUSED + ViewState::PRESSED + ViewState::SELECTED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:282:  ViewState removed  = combined - ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:283:  DALI_TEST_CHECK(removed.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:284:  DALI_TEST_CHECK(!removed.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:285:  DALI_TEST_CHECK(removed.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:290:int UtcDaliViewStateOperatorMinusNonPresentIsNoop(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:292:  ViewState state   = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:293:  ViewState result  = state - ViewState::PRESSED; // Pressed wasn't set
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:294:  DALI_TEST_CHECK(result == ViewState::FOCUSED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:299:int UtcDaliViewStateOperatorBitwiseOr(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:301:  ViewState result = ViewState::FOCUSED | ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:302:  DALI_TEST_CHECK(result == (ViewState::FOCUSED + ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:307:int UtcDaliViewStateOperatorBitwiseAnd(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:309:  ViewState composite = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:310:  ViewState masked    = composite & ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:311:  DALI_TEST_CHECK(masked == ViewState::FOCUSED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:312:  DALI_TEST_CHECK(!masked.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:317:int UtcDaliViewStateOperatorBitwiseXor(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:319:  ViewState a      = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:320:  ViewState b      = ViewState::PRESSED + ViewState::SELECTED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:321:  ViewState result = a ^ b; // Focused and Selected remain; Pressed cancels out
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:322:  DALI_TEST_CHECK(result.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:323:  DALI_TEST_CHECK(!result.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:324:  DALI_TEST_CHECK(result.Contains(ViewState::SELECTED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:329:int UtcDaliViewStateOperatorBitwiseNot(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:331:  ViewState notNormal = ~ViewState::NORMAL;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:333:  DALI_TEST_CHECK(notNormal.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:334:  DALI_TEST_CHECK(notNormal.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:335:  DALI_TEST_CHECK(notNormal.Contains(ViewState::DISABLED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:337:  ViewState notFocused = ~ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:338:  DALI_TEST_CHECK(!notFocused.Contains(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:339:  DALI_TEST_CHECK(notFocused.Contains(ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:344:int UtcDaliViewStateOperatorEquality(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:346:  DALI_TEST_CHECK(ViewState::FOCUSED == ViewState::FOCUSED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:347:  DALI_TEST_CHECK(!(ViewState::FOCUSED == ViewState::PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:352:int UtcDaliViewStateOperatorInequality(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:354:  DALI_TEST_CHECK(ViewState::FOCUSED != ViewState::PRESSED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:355:  DALI_TEST_CHECK(!(ViewState::FOCUSED != ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:360:int UtcDaliViewStateOperatorBool(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:362:  DALI_TEST_CHECK(!static_cast<bool>(ViewState::NORMAL));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:363:  DALI_TEST_CHECK(static_cast<bool>(ViewState::FOCUSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:364:  DALI_TEST_CHECK(static_cast<bool>(ViewState::SELECTED_PRESSED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:373:int UtcDaliViewStateToStringNormal(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:375:  DALI_TEST_EQUALS(ViewState::NORMAL.ToString(), String("Normal"), TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:380:int UtcDaliViewStateToStringAll(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:382:  DALI_TEST_EQUALS(ViewState::ALL.ToString(), String("All"), TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:387:int UtcDaliViewStateToStringSingleState(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:389:  String str = ViewState::FOCUSED.ToString();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:395:int UtcDaliViewStateToStringCompositeContainsBothNames(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:397:  ViewState composite = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:409:int UtcDaliViewStateWasAdded(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:411:  ViewState prev = ViewState::NORMAL;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:412:  ViewState cur  = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:414:  DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:415:  DALI_TEST_CHECK(!ViewState::PRESSED.WasAdded(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:417:  DALI_TEST_CHECK(!ViewState::FOCUSED.WasAdded(cur, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:422:int UtcDaliViewStateWasRemoved(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:424:  ViewState prev = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:425:  ViewState cur  = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:427:  DALI_TEST_CHECK(ViewState::PRESSED.WasRemoved(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:428:  DALI_TEST_CHECK(!ViewState::FOCUSED.WasRemoved(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:429:  DALI_TEST_CHECK(!ViewState::DISABLED.WasRemoved(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:434:int UtcDaliViewStateWasChanged(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:436:  ViewState prev = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:437:  ViewState cur  = ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:440:  DALI_TEST_CHECK(ViewState::FOCUSED.WasChanged(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:442:  DALI_TEST_CHECK(ViewState::PRESSED.WasChanged(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:444:  DALI_TEST_CHECK(!ViewState::DISABLED.WasChanged(prev, cur));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:449:int UtcDaliViewStateWasChangedUnchanged(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:451:  ViewState state = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:452:  DALI_TEST_CHECK(!ViewState::FOCUSED.WasChanged(state, state));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:457:int UtcDaliViewStateAnyChangedComposite(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:459:  ViewState prev      = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:460:  ViewState cur       = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:461:  ViewState watchMask = ViewState::PRESSED + ViewState::SELECTED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:469:int UtcDaliViewStateAnyChangedNoOverlap(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:471:  ViewState prev      = ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:472:  ViewState cur       = ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:473:  ViewState watchMask = ViewState::DISABLED + ViewState::SELECTED; // no overlap with transition
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:480:int UtcDaliViewStateAnyChangedNoTransition(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:482:  ViewState state     = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:483:  ViewState watchMask = ViewState::FOCUSED + ViewState::PRESSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:494:int UtcDaliViewStateAddSameStateIsIdempotent(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:496:  ViewState result = ViewState::FOCUSED + ViewState::FOCUSED;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:497:  DALI_TEST_CHECK(result == ViewState::FOCUSED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:502:int UtcDaliViewStateRemoveSameStateGivesNormal(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState2.cpp:504:  ViewState result = ViewState::FOCUSED - ViewState::FOCUSED;
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/state-event.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Internal
+{
+class StateEventImpl;
+}
+
+/**
+ * @brief Describes a single View state transition, passed to StateChangedSignal handlers.
+ *
+ * Provides the previous and current ViewState together with ergonomic helpers for
+ * detecting specific transitions, and optional information about the input event
+ * that caused the state change.
+ *
+ * @code
+ * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
+ *   if(e.Added(ViewState::FOCUSED))   { ... } // gained focus
+ *   if(e.Removed(ViewState::PRESSED)) { ... } // released
+ * });
+ * @endcode
+ */
+class DALI_UI_API StateEvent : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an uninitialized StateEvent handle.
+   */
+  StateEvent() = default;
+
+  /**
+   * @brief Destructor.
+   */
+  ~StateEvent() = default;
+
+  StateEvent(const StateEvent&)            = default;
+  StateEvent& operator=(const StateEvent&) = default;
+  StateEvent(StateEvent&&)                 = default;
+  StateEvent& operator=(StateEvent&&)      = default;
+
+  /**
+   * @brief Returns the state before this transition.
+   */
+  const ViewState& GetPrev() const;
+
+  /**
+   * @brief Returns the state after this transition (the current state).
+   */
+  const ViewState& GetCurrent() const;
+
+  /**
+   * @brief Returns true if @a state was newly added in this transition.
+   *
+   * Equivalent to: !GetPrev().Contains(state) && GetCurrent().Contains(state)
+   */
+  bool Added(const ViewState& state) const
+  {
+    return !GetPrev().Contains(state) && GetCurrent().Contains(state);
+  }
+
+  /**
+   * @brief Returns true if @a state was removed in this transition.
+   *
+   * Equivalent to: GetPrev().Contains(state) && !GetCurrent().Contains(state)
+   */
+  bool Removed(const ViewState& state) const
+  {
+    return GetPrev().Contains(state) && !GetCurrent().Contains(state);
+  }
+
+  /**
+   * @brief Returns true if @a state was either added or removed in this transition.
+   */
+  bool Changed(const ViewState& state) const
+  {
+    return Added(state) || Removed(state);
+  }
+
+  /**
+   * @brief Returns the input event that caused this transition.
+   *
+   * Always returns a valid InputEvent. Programmatic or system-triggered
+   * state changes return an InputEvent with InputEventType::NONE.
+   */
+  const InputEvent& GetCause() const;
+
+  /**
+   * @brief Returns the type of the input event that caused this transition.
+   *
+   * Convenience shortcut for GetCause().GetInputEventType().
+   * Returns InputEventType::NONE if the change was programmatic or system-triggered.
+   */
+  InputEventType GetInputEventType() const;
+
+  /**
+   * @brief Returns the touch event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::TOUCH_EVENT
+   */
+  const TouchEvent& GetTouchEvent() const;
+
+  /**
+   * @brief Returns the key event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::KEY_EVENT
+   */
+  const KeyEvent& GetKeyEvent() const;
+
+  /**
+   * @brief Returns the tap gesture that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::TAP_GESTURE
+   */
+  const TapGesture& GetTapGesture() const;
+
+  /**
+   * @brief Returns the long-press gesture that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::LONG_PRESS_GESTURE
+   */
+  const LongPressGesture& GetLongPressGesture() const;
+
+  /**
+   * @brief Returns the wheel event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::WHEEL_EVENT
+   */
+  const WheelEvent& GetWheelEvent() const;
+
+public: // Not intended for application developers
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The implementation
+   */
+  explicit StateEvent(Internal::StateEventImpl* implementation);
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1300,1340p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   *   params.SetWidth(200.0f);
+   *   view.InvalidateMeasure();
+   * }
+   * @endcode
+   */
+  template<typename T>
+  T GetLayoutParams() const
+  {
+    return T::DownCast(GetLayoutParamsInternal(T::GetLayoutParamsType()));
+  }
+
+public: // State API (non-chaining)
+  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+
+  /**
+   * @brief Gets the current state of this View.
+   *
+   * @return The current ViewState (may contain multiple combined states)
+   */
+  const ViewState& GetState() const;
+
+  /**
+   * @brief Returns the state changed signal.
+   *
+   * Emitted whenever the view's ViewState changes.
+   *
+   * @code
+   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
+   *   if(e.Added(ViewState::FOCUSED)) { ... }
+   * });
+   * @endcode
+   *
+   * @return The StateChangedSignal
+   */
+  StateChangedSignalType& StateChangedSignal();
+
+public: // Trait accessors (non-chaining)
+  /**
+   * @brief Ensures this View has an interaction trait and returns it.
+   *
+   * If no interaction trait is set, an InteractiveTrait is attached and returned.
+
+exec
+/bin/bash -lc "sed -n '1,210p' repos/dali-ui/dali-ui-foundation/public-api/input-event.h && sed -n '1,80p' repos/dali-ui/dali-ui-foundation/public-api/input-event-type.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/events/key-event.h>
+#include <dali/public-api/events/long-press-gesture.h>
+#include <dali/public-api/events/tap-gesture.h>
+#include <dali/public-api/events/touch-event.h>
+#include <dali/public-api/events/wheel-event.h>
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/input-event-type.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Internal
+{
+class InputEventImpl;
+}
+
+/**
+ * @brief
+ */
+class DALI_UI_API InputEvent : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an uninitialized InputEvent handle.
+   */
+  InputEvent() = default;
+
+  /**
+   * @brief Destructor.
+   */
+  ~InputEvent() = default;
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  InputEvent(const InputEvent& handle) = default;
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  InputEvent(InputEvent&& rhs) noexcept = default;
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  InputEvent& operator=(const InputEvent& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  InputEvent& operator=(InputEvent&& rhs) noexcept = default;
+
+  /**
+   * @brief Creates a new InputEvent with NONE type, representing a non-input change.
+   *
+   * The returned event has InputEventType::NONE. Use this when emitting signals
+   * for changes that do not originate from a concrete user input event, including
+   * explicit API calls and framework-triggered lifecycle changes.
+   *
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New();
+
+  /**
+   * @brief Returns a shared NONE-type InputEvent instance.
+   *
+   * No heap allocation on each call. Use this wherever a valid InputEvent
+   * with InputEventType::NONE is needed without per-call cost.
+   *
+   * @return A const reference to the shared NONE InputEvent
+   */
+  static const InputEvent& None();
+
+  /**
+   * @brief Creates a new InputEvent from a touch event.
+   *
+   * @param[in] originEvent The originating touch event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const TouchEvent& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a key event.
+   *
+   * @param[in] originEvent The originating key event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const KeyEvent& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a tap gesture.
+   *
+   * @param[in] originEvent The originating tap gesture
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const TapGesture& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a long-press gesture.
+   *
+   * @param[in] originEvent The originating long-press gesture
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const LongPressGesture& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a wheel event.
+   *
+   * @param[in] originEvent The originating wheel event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const WheelEvent& originEvent);
+
+  /**
+   * @brief Get the type of this event.
+   *
+   * @return The type of the input event
+   */
+  InputEventType GetInputEventType() const;
+
+  /**
+   * @brief
+   */
+  const TouchEvent& GetTouchEvent() const;
+
+  /**
+   * @brief
+   */
+  const KeyEvent& GetKeyEvent() const;
+
+  /**
+   * @brief
+   */
+  const TapGesture& GetTapGesture() const;
+
+  /**
+   * @brief
+   */
+  const LongPressGesture& GetLongPressGesture() const;
+
+  /**
+   * @brief
+   */
+  const WheelEvent& GetWheelEvent() const;
+
+public: // Not intended for Application developers
+  /**
+   * @brief This constructor is used by InputEvent::New() methods.
+   *
+   * @param[in] impl The implementation of the input event
+   */
+  explicit InputEvent(Internal::InputEventImpl* impl);
+};
+
+} // namespace Ui
+} // namespace Dali
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <cstdint>
+
+namespace Dali::Ui
+{
+/**
+ * @brief Defines the type of input events.
+ */
+enum class InputEventType : uint32_t
+{
+  /**
+   * @brief The change did not originate from a concrete input event.
+   *
+   * This includes explicit API calls, such as programmatic state changes,
+   * and framework-triggered lifecycle changes, such as focus loss, disabling,
+   * or scene disconnection.
+   */
+  NONE = 0,
+
+  /**
+   * @brief The input event is from touch event.
+   */
+  TOUCH_EVENT = 1,
+
+  /**
+   * @brief The input event is from key event.
+   */
+  KEY_EVENT = 2,
+
+  /**
+   * @brief The input event is from tap gesture.
+   */
+  TAP_GESTURE = 3,
+
+  /**
+   * @brief The input event is from long press gesture.
+   */
+  LONG_PRESS_GESTURE = 4,
+
+  /**
+   * @brief The input event is from wheel event.
+   */
+  WHEEL_EVENT = 5,
+
+  /**
+   * @brief Reserved for future expansion.
+   */
+  RESERVED = 99
+};
+} // namespace Dali::Ui
+
+exec
+/bin/bash -lc "sed -n '210,260p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp && sed -n '380,445p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp && sed -n '100,125p' repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+// =============================================================================
+// Deferred notification: StateChangedSignal connections also participate
+// in the deferred ordering guarantee
+// =============================================================================
+
+int UtcDaliViewStateDeferredSignalOrderP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  std::vector<CallRecord> log;
+
+  // Signal connection that triggers a re-entrant state change
+  view.StateChangedSignal().Connect(&tracker, [&](View v, const StateEvent& e) {
+    log.push_back({"signal-1", e.GetPrev(), e.GetCurrent()});
+    if(e.Added(ViewState::FOCUSED))
+    {
+      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+    }
+  });
+
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal-2", e.GetPrev(), e.GetCurrent()});
+  });
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  // signal-1(A→B) → signal-2(A→B) → signal-1(B→C) → signal-2(B→C)
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 4, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(log[0].tag, std::string("signal-1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+
+  DALI_TEST_EQUALS(log[1].tag, std::string("signal-2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[1].cur.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!log[1].cur.Contains(ViewState::PRESSED));
+
+  DALI_TEST_EQUALS(log[2].tag, std::string("signal-1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[2].cur.Contains(ViewState::PRESSED));
+
+  DALI_TEST_EQUALS(log[3].tag, std::string("signal-2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[3].cur.Contains(ViewState::PRESSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: SetEnabled(false) clears Focused (via FocusManager)
+}
+
+// =============================================================================
+// Orthogonal state: InteractiveTrait.IsPressed() is false after disabling
+// =============================================================================
+
+int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+
+  std::vector<CallRecord> log;
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal", e.GetPrev(), e.GetCurrent()});
+  });
+
+  view.SetEnabled(false);
+
+  // PRESSED must be cleared in the DISABLED transition, not in a follow-up event
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::DISABLED));
+  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+
+  // InteractiveTrait internal state must also be cleaned up
+  DALI_TEST_CHECK(!trait.IsPressed());
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: PseudoDisabled clears PRESSED but keeps FOCUSED
+// =============================================================================
+
+int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+
+  std::vector<CallRecord> log;
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal", e.GetPrev(), e.GetCurrent()});
+  });
+
+  trait.SetPseudoDisabled(true);
+
+  const ViewState& finalState = GetImpl(view).GetState();
+
+  // PRESSED must be cleared
+  DALI_TEST_CHECK(!finalState.Contains(ViewState::PRESSED));
+  DALI_TEST_CHECK(!trait.IsPressed());
+
+  // FOCUSED must be kept
+  DALI_TEST_CHECK(finalState.Contains(ViewState::FOCUSED));
+
+  // PSEUDO_DISABLED must be set
+  DALI_TEST_CHECK(finalState.Contains(ViewState::PSEUDO_DISABLED));
+
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetPadding(Extents(PAD, PAD, PAD, PAD))
+      .Children({mTarget, mResetButton, mLog}));
+  }
+
+  void OnExit() override
+  {
+    mDisableTimer.Stop();
+  }
+
+private:
+  void OnStateChanged(View, StateEvent e)
+  {
+    String line = "[" + e.GetPrev().ToString() + "] -> [" + e.GetCurrent().ToString() + "]\n";
+    AppendLog(line);
+
+    if(e.Removed(ViewState::PRESSED) && e.Added(ViewState::DISABLED))
+    {
+      mTarget.SetBackgroundColor(UiColor(COLOR_FAIL));
+      AppendLog("  => PRESSED cleared by DISABLED!\n");
+    }
+  }
+
+  void OnPressedChanged(View, bool pressed, InputEvent)
+  {
+    if(pressed)
+
+codex
+---
+title: State Event
+sidebar_label: State Event
+category: input-interaction
+---
+
+# State Event
+
+`Dali::Ui::StateEvent` describes one state transition for a `Dali::Ui::View`.
+
+## Table of Contents
+
+- [Reacting to View State Transitions](#reacting-to-view-state-transitions)
+- [Detecting Added, Removed, and Changed States](#detecting-added-removed-and-changed-states)
+- [Reading the Previous and Current State](#reading-the-previous-and-current-state)
+- [Using the Input Event Cause](#using-the-input-event-cause)
+- [Keeping State Handling Local to the View](#keeping-state-handling-local-to-the-view)
+
+## Reacting to View State Transitions
+
+A `Dali::Ui::StateEvent` is delivered by the view state changed signal. In application code, treat the `Dali::Ui::View` passed to the callback as the object whose state changed, and use the `Dali::Ui::StateEvent` payload to inspect the transition.
+
+```cpp
+#include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+
+class StateAwareController : public Dali::ConnectionTracker
+{
+public:
+  void Watch(Dali::Ui::View view)
+  {
+    view.StateChangedSignal().Connect(
+      this,
+      [this](Dali::Ui::View changedView, Dali::Ui::StateEvent event)
+      {
+        OnViewStateChanged(changedView, event);
+      });
+  }
+
+private:
+  void OnViewStateChanged(Dali::Ui::View view, Dali::Ui::StateEvent event)
+  {
+    if(event.Added(Dali::Ui::ViewState::FOCUSED))
+    {
+      ShowFocusFeedback(view);
+    }
+
+    if(event.Removed(Dali::Ui::ViewState::FOCUSED))
+    {
+      HideFocusFeedback(view);
+    }
+  }
+
+  void ShowFocusFeedback(Dali::Ui::View view);
+  void HideFocusFeedback(Dali::Ui::View view);
+};
+```
+
+`Dali::Ui::StateEvent` is the owned event object for this feature. Application code normally receives it from `Dali::Ui::View::StateChangedSignal()` and then calls member functions such as `Added()`, `Removed()`, `Changed()`, `GetPrev()`, and `GetCurrent()`.
+
+## Detecting Added, Removed, and Changed States
+
+Use `Dali::Ui::StateEvent::Added()` when a state entered the current transition, `Dali::Ui::StateEvent::Removed()` when it left the transition, and `Dali::Ui::StateEvent::Changed()` when either direction is meaningful.
+
+```cpp
+void HandleInteractionState(Dali::Ui::View view, Dali::Ui::StateEvent event)
+{
+  if(event.Added(Dali::Ui::ViewState::PRESSED))
+  {
+    BeginPressedVisual(view);
+  }
+
+  if(event.Removed(Dali::Ui::ViewState::PRESSED))
+  {
+    EndPressedVisual(view);
+  }
+
+  if(event.Changed(Dali::Ui::ViewState::DISABLED))
+  {
+    UpdateEnabledPresentation(view, !event.GetCurrent().Contains(Dali::Ui::ViewState::DISABLED));
+  }
+}
+
+void BeginPressedVisual(Dali::Ui::View view);
+void EndPressedVisual(Dali::Ui::View view);
+void UpdateEnabledPresentation(Dali::Ui::View view, bool enabled);
+```
+
+`Added(state)` is equivalent to checking that `state` was absent from `GetPrev()` and present in `GetCurrent()`. `Removed(state)` checks the opposite direction. `Changed(state)` is useful for state-dependent UI refresh code where the same rendering path handles both entry and exit.
+
+## Reading the Previous and Current State
+
+`Dali::Ui::StateEvent::GetPrev()` returns the state before the transition, and `Dali::Ui::StateEvent::GetCurrent()` returns the state after the transition. Both values are `Dali::Ui::ViewState` objects and may contain multiple active states.
+
+```cpp
+void RefreshSelectionAndFocus(Dali::Ui::View view, Dali::Ui::StateEvent event)
+{
+  const Dali::Ui::ViewState& previous = event.GetPrev();
+  const Dali::Ui::ViewState& current  = event.GetCurrent();
+
+  const bool wasSelected = previous.Contains(Dali::Ui::ViewState::SELECTED);
+  const bool isSelected  = current.Contains(Dali::Ui::ViewState::SELECTED);
+
+  const bool isFocused = current.Contains(Dali::Ui::ViewState::FOCUSED);
+
+  if(wasSelected != isSelected)
+  {
+    ApplySelectedStyle(view, isSelected);
+  }
+
+  ApplyFocusStyle(view, isFocused);
+}
+
+void ApplySelectedStyle(Dali::Ui::View view, bool selected);
+void ApplyFocusStyle(Dali::Ui::View view, bool focused);
+```
+
+Prefer `Added()`, `Removed()`, and `Changed()` for simple transition tests. Use `GetPrev()` and `GetCurrent()` when the new presentation depends on a combination of states, such as selected plus focused.
+
+## Using the Input Event Cause
+
+A state transition may be caused by user input, or it may be programmatic or system-triggered. `Dali::Ui::StateEvent::GetInputEventType()` reports the cause type. `Dali::Ui::StateEvent::GetCause()` returns the underlying `Dali::Ui::InputEvent`.
+
+Only call the typed accessors when the reported `Dali::Ui::InputEventType` matches the accessor precondition.
+
+```cpp
+void HandleStateCause(Dali::Ui::View view, Dali::Ui::StateEvent event)
+{
+  switch(event.GetInputEventType())
+  {
+    case Dali::Ui::InputEventType::TOUCH_EVENT:
+    {
+      const Dali::TouchEvent& touchEvent = event.GetTouchEvent();
+      HandleTouchDrivenState(view, touchEvent);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::KEY_EVENT:
+    {
+      const Dali::KeyEvent& keyEvent = event.GetKeyEvent();
+      HandleKeyDrivenState(view, keyEvent);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::TAP_GESTURE:
+    {
+      const Dali::TapGesture& tapGesture = event.GetTapGesture();
+      HandleTapDrivenState(view, tapGesture);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::LONG_PRESS_GESTURE:
+    {
+      const Dali::LongPressGesture& longPressGesture = event.GetLongPressGesture();
+      HandleLongPressDrivenState(view, longPressGesture);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::WHEEL_EVENT:
+    {
+      const Dali::WheelEvent& wheelEvent = event.GetWheelEvent();
+      HandleWheelDrivenState(view, wheelEvent);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::NONE:
+    default:
+    {
+      HandleNonInputStateChange(view, event.GetCause());
+      break;
+    }
+  }
+}
+
+void HandleTouchDrivenState(Dali::Ui::View view, const Dali::TouchEvent& event);
+void HandleKeyDrivenState(Dali::Ui::View view, const Dali::KeyEvent& event);
+void HandleTapDrivenState(Dali::Ui::View view, const Dali::TapGesture& gesture);
+void HandleLongPressDrivenState(Dali::Ui::View view, const Dali::LongPressGesture& gesture);
+void HandleWheelDrivenState(Dali::Ui::View view, const Dali::WheelEvent& event);
+void HandleNonInputStateChange(Dali::Ui::View view, const Dali::Ui::InputEvent& cause);
+```
+
+`Dali::Ui::StateEvent::GetInputEventType()` is a convenience shortcut for the type stored in `Dali::Ui::StateEvent::GetCause()`. For programmatic or system-triggered transitions, the type is `Dali::Ui::InputEventType::NONE`.
+
+## Keeping State Handling Local to the View
+
+A state callback can update only the changed `Dali::Ui::View`, keeping input behavior local to the view tree. This is useful for reusable controls that need to respond to focus, pressed, selected, and disabled transitions without exposing raw actor-level state handling.
+
+```cpp
+class SelectableItem : public Dali::ConnectionTracker
+{
+public:
+  explicit SelectableItem(Dali::Ui::View root)
+  : mRoot(root)
+  {
+    mRoot.StateChangedSignal().Connect(
+      this,
+      [this](Dali::Ui::View view, Dali::Ui::StateEvent event)
+      {
+        if(event.Changed(Dali::Ui::ViewState::SELECTED) ||
+           event.Changed(Dali::Ui::ViewState::FOCUSED) ||
+           event.Changed(Dali::Ui::ViewState::DISABLED))
+        {
+          UpdatePresentation(view, event.GetCurrent());
+        }
+      });
+  }
+
+private:
+  void UpdatePresentation(Dali::Ui::View view, const Dali::Ui::ViewState& state)
+  {
+    const bool selected = state.Contains(Dali::Ui::ViewState::SELECTED);
+    const bool focused  = state.Contains(Dali::Ui::ViewState::FOCUSED);
+    const bool disabled = state.Contains(Dali::Ui::ViewState::DISABLED);
+
+    ApplyItemPresentation(view, selected, focused, disabled);
+  }
+
+  void ApplyItemPresentation(Dali::Ui::View view, bool selected, bool focused, bool disabled);
+
+  Dali::Ui::View mRoot;
+};
+```
+
+`Dali::Ui::StateEvent` is lightweight to pass through helper functions by value or by const reference. The important rule is to base application decisions on the transition payload: use `GetPrev()` for the old state, `GetCurrent()` for the new state, and the transition helpers when a single state bit is the only condition you need.
+tokens used
+25,488

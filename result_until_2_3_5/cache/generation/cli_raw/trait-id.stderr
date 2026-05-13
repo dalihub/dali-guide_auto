@@ -1,0 +1,918 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e1fd0-2cdf-7140-b883-423d0282c275
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Trait Id (trait-id)
+- Category: utilities
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 5
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::TraitId | scope=primary
+- Dali::Ui::TraitId::Alloc | TraitId Alloc() | scope=primary_member
+- Dali::Ui::TraitId::operator!= | bool operator!=(const TraitId &other) const | scope=primary_member
+- Dali::Ui::TraitId::operator== | bool operator==(const TraitId &other) const | scope=primary_member
+- Dali::Ui::TraitId::value | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:40 (utc, score=0.4)
+```cpp
+DummyTraitImpl()
+    : mAttachedCount(0),
+      mDetachedCount(0),
+      mBeforeAttachedCount(0),
+      mViewDestroyingCount(0)
+  {
+  }
+
+  void OnBeforeAttached(TraitId id, View& view) override
+  {
+    mBeforeAttachedCount++;
+  }
+
+  void OnAttached(TraitId id, View& view) override
+  {
+    mAttachedCount++;
+  }
+
+  void OnDetached(TraitId id, View& view) override
+  {
+    mDetachedCount++;
+  }
+
+  void OnViewDestroying(ViewImpl* viewImpl) override
+```
+
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:40 (utc, score=0.35)
+```cpp
+: mBeforeAttachedCount(0),
+      mAttachedCount(0),
+      mDetachedCount(0),
+      mViewDestroyingCount(0),
+      mLastId(0)
+  {
+  }
+
+  void OnBeforeAttached(TraitId id, View& view) override
+  {
+    mBeforeAttachedCount++;
+    mLastId = id;
+  }
+
+  void OnAttached(TraitId id, View& view) override
+  {
+    mAttachedCount++;
+    mLastId = id;
+  }
+
+  void OnDetached(TraitId id, View& view) override
+  {
+    mDetachedCount++;
+    mLastId = id;
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alloc",
+      "TraitId",
+      "value"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 119,
+    "snippet_start_line": 40
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "TraitId",
+      "value"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp",
+    "relevance": "weak",
+    "score": 0.35,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 119,
+    "snippet_start_line": 40
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui/public-api/traits/trait-id.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/traits/trait-id.h: No such file or directory
+
+exec
+/bin/bash -lc "sed -n '1,160p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-test-suite-utils.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali/public-api/actors/actor.h>
+#include <typeinfo>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
+
+namespace
+{
+// Test trait implementation for lifecycle testing
+class TestTraitImpl : public TraitImpl
+{
+public:
+  TestTraitImpl()
+    : mBeforeAttachedCount(0),
+      mAttachedCount(0),
+      mDetachedCount(0),
+      mViewDestroyingCount(0),
+      mLastId(0)
+  {
+  }
+
+  void OnBeforeAttached(TraitId id, View& view) override
+  {
+    mBeforeAttachedCount++;
+    mLastId = id;
+  }
+
+  void OnAttached(TraitId id, View& view) override
+  {
+    mAttachedCount++;
+    mLastId = id;
+  }
+
+  void OnDetached(TraitId id, View& view) override
+  {
+    mDetachedCount++;
+    mLastId = id;
+  }
+
+  void OnViewDestroying(ViewImpl* viewImpl) override
+  {
+    mViewDestroyingCount++;
+  }
+
+  int GetBeforeAttachedCount() const
+  {
+    return mBeforeAttachedCount;
+  }
+  int GetAttachedCount() const
+  {
+    return mAttachedCount;
+  }
+  int GetDetachedCount() const
+  {
+    return mDetachedCount;
+  }
+  int GetViewDestroyingCount() const
+  {
+    return mViewDestroyingCount;
+  }
+  TraitId GetLastId() const
+  {
+    return mLastId;
+  }
+
+private:
+  int mBeforeAttachedCount;
+  int mAttachedCount;
+  int mDetachedCount;
+  int mViewDestroyingCount;
+  TraitId mLastId;
+};
+
+class TestTrait : public Trait
+{
+public:
+  static TestTrait New()
+  {
+    return TestTrait(new TestTraitImpl());
+  }
+
+  TestTrait() = default;
+
+  TestTraitImpl& GetImpl()
+  {
+    return static_cast<TestTraitImpl&>(Dali::Ui::GetImpl(*this));
+  }
+
+  const TestTraitImpl& GetImpl() const
+  {
+    return static_cast<const TestTraitImpl&>(Dali::Ui::GetImpl(*this));
+  }
+
+private:
+  explicit TestTrait(TestTraitImpl* impl)
+    : Trait(impl)
+  {
+  }
+};
+
+} // namespace
+
+void utc_dali_view_trait_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_view_trait_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+int UtcDaliTraitConstructorP(void)
+{
+  UiTestApplication application;
+  Trait trait;
+  DALI_TEST_CHECK(!trait);
+  END_TEST;
+}
+
+int UtcDaliTraitNewP(void)
+{
+  UiTestApplication application;
+  TestTrait trait = TestTrait::New();
+  DALI_TEST_CHECK(trait);
+  END_TEST;
+}
+
+int UtcDaliTraitCopyConstructorP(void)
+{
+  UiTestApplication application;
+  TestTrait trait = TestTrait::New();
+  TestTrait copy(trait);
+  DALI_TEST_CHECK(copy);
+
+exec
+/bin/bash -lc "rg -n \"class TraitId|struct TraitId|TraitId::Alloc|TraitId\" repos/dali-ui -g '*.h' -g '*.cpp'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.cpp:29:TraitId TraitId::Alloc()
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.cpp:32:  return TraitId{counter.fetch_add(1u, std::memory_order_relaxed)};
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:221:  Dali::BaseHandle handle = Internal::ViewDataImpl::Get(*self).GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:236:    Internal::ViewDataImpl::Get(*self).SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:406:  Ui::InteractiveTrait existing = IntegrationView::GetTrait<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:411:    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, interaction);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:414:    if(!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT))
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:419:        IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT, defaultEffect);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:433:    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT, effect);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:437:    IntegrationView::RemoveTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:443:  return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:448:  Ui::SelectableTrait existing = IntegrationView::GetTrait<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:453:    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, selectable);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:462:  return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1699:TraitId ToTraitId(LayoutParamsType type)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1704:      return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1706:      return Integration::ReservedTraitId::STACK_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1708:      return Integration::ReservedTraitId::GRID_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1710:      return Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1713:  return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1720:  return mImpl->GetTrait(ToTraitId(type));
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1726:  mImpl->SetTrait(paramsImpl.GetTraitId(), params);
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:31: * TraitId values are allocated sequentially via TraitId::Alloc().
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:32: * Framework-reserved IDs are defined in the ReservedTraitId namespace.
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:33: * Extension or application code should allocate IDs with TraitId::Alloc()
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:38: * static const TraitId kMyScrollStateTrait = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:41:struct DALI_UI_API TraitId
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:44:   * @brief Allocates and returns the next unique TraitId.
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:49:   * @return A new unique TraitId
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:51:  static TraitId Alloc();
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:56:  bool operator==(const TraitId& other) const
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:64:  bool operator!=(const TraitId& other) const
+repos/dali-ui/dali-ui-foundation/public-api/trait-id.h:72:  explicit TraitId(uint32_t v)
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:30: * @brief Framework-reserved TraitId constants.
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:36:namespace ReservedTraitId
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:39:DALI_UI_API extern const TraitId INTERACTION_TRAIT;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:40:DALI_UI_API extern const TraitId SELECTABLE_TRAIT;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:41:DALI_UI_API extern const TraitId STATE_HANDLER_TRAIT;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:43:DALI_UI_API extern const TraitId ABSOLUTE_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:44:DALI_UI_API extern const TraitId STACK_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:45:DALI_UI_API extern const TraitId GRID_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:46:DALI_UI_API extern const TraitId FLEX_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:48:DALI_UI_API extern const TraitId LAYOUT_MANAGER;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:49:DALI_UI_API extern const TraitId LAYOUT_SIGNALS;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:51:DALI_UI_API extern const TraitId INTERACTION_EFFECT;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:52:DALI_UI_API extern const TraitId INTERACTION_EFFECT_DATA;
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h:54:} // namespace ReservedTraitId
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:28:// --- ReservedTraitId definitions ---
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:32:namespace ReservedTraitId
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:35:const TraitId INTERACTION_TRAIT   = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:36:const TraitId SELECTABLE_TRAIT    = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:37:const TraitId STATE_HANDLER_TRAIT = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:39:const TraitId ABSOLUTE_LAYOUT_PARAMS = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:40:const TraitId STACK_LAYOUT_PARAMS    = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:41:const TraitId GRID_LAYOUT_PARAMS     = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:42:const TraitId FLEX_LAYOUT_PARAMS     = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:44:const TraitId LAYOUT_MANAGER = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:45:const TraitId LAYOUT_SIGNALS = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:47:const TraitId INTERACTION_EFFECT      = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:48:const TraitId INTERACTION_EFFECT_DATA = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.cpp:50:} // namespace ReservedTraitId
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:48:  void OnBeforeAttached(TraitId id, View& view) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:54:  void OnAttached(TraitId id, View& view) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:60:  void OnDetached(TraitId id, View& view) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:87:  TraitId GetLastId() const
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:97:  TraitId mLastId;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp:299:  IntegrationView::SetTrait(viewImpl,ReservedTraitId::INTERACTION_EFFECT, trait);
+repos/dali-ui/dali-ui-foundation/internal/layouts/stack-layout-params-impl.h:60:  TraitId GetTraitId() const override
+repos/dali-ui/dali-ui-foundation/internal/layouts/stack-layout-params-impl.h:62:    return Integration::ReservedTraitId::STACK_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/internal/layouts/stack-layout-params-impl.h:100:    StackLayoutParams params = IntegrationView::GetTrait<StackLayoutParams>(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
+repos/dali-ui/dali-ui-foundation/internal/layouts/stack-layout-params-impl.h:117:    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, params);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:108:DALI_UI_API void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:117:DALI_UI_API Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:128:HandleType GetTrait(const ViewImpl& viewImpl, TraitId id)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:140:DALI_UI_API bool RemoveTrait(ViewImpl& viewImpl, TraitId id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:48:  void OnBeforeAttached(TraitId id, View& view) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:53:  void OnAttached(TraitId id, View& view) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:58:  void OnDetached(TraitId id, View& view) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:120:static const TraitId TEST_TRAIT_ID_0 = TraitId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:121:static const TraitId TEST_TRAIT_ID_1 = TraitId::Alloc();
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:178:void StateHandlerTraitImpl::OnBeforeAttached(TraitId /*id*/, View& view)
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:184:void StateHandlerTraitImpl::OnAttached(TraitId /*id*/, View& /*view*/)
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:188:void StateHandlerTraitImpl::OnDetached(TraitId /*id*/, View& /*view*/)
+repos/dali-ui/dali-ui-foundation/internal/layouts/flex-layout-params-impl.h:64:  TraitId GetTraitId() const override
+repos/dali-ui/dali-ui-foundation/internal/layouts/flex-layout-params-impl.h:66:    return Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/internal/layouts/flex-layout-params-impl.h:148:    FlexLayoutParams params = IntegrationView::GetTrait<FlexLayoutParams>(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
+repos/dali-ui/dali-ui-foundation/internal/layouts/flex-layout-params-impl.h:165:    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, params);
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:146:  void OnBeforeAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:147:  void OnAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:148:  void OnDetached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-callbacks-trait.cpp:78:void LayoutCallbacksTraitImpl::OnBeforeAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-callbacks-trait.cpp:82:void LayoutCallbacksTraitImpl::OnAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-callbacks-trait.cpp:86:void LayoutCallbacksTraitImpl::OnDetached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:253:void InteractiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:259:void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:272:void InteractiveTraitImpl::OnDetached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/exclusive-trait-impl.h:55:  void OnBeforeAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/exclusive-trait-impl.cpp:43:void ExclusiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-params-impl.h:40: * Concrete subclasses must implement GetTraitId().
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-params-impl.h:49:   * @brief Returns the ReservedTraitId for this layout params type.
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-params-impl.h:51:   * @return The TraitId for this layout params type
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-params-impl.h:53:  virtual TraitId GetTraitId() const = 0;
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:117:void SelectableTraitImpl::OnBeforeAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:123:void SelectableTraitImpl::OnAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:133:void SelectableTraitImpl::OnDetached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:173:  InteractiveTrait clickable = IntegrationView::GetTrait<InteractiveTrait>(GetImpl(owner), ReservedTraitId::INTERACTION_TRAIT);
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:66:  virtual void OnBeforeAttached(TraitId id, View& view) = 0;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:76:  virtual void OnAttached(TraitId id, View& view) = 0;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:91:  virtual void OnDetached(TraitId id, View& view) = 0;
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:97:  void OnBeforeAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:102:  void OnAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.h:107:  void OnDetached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-callbacks-trait.h:78:  void OnBeforeAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-callbacks-trait.h:79:  void OnAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-callbacks-trait.h:80:  void OnDetached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:162:  void OnBeforeAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:167:  void OnAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:172:  void OnDetached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h:57:  void OnBeforeAttached(TraitId id, View& view) override
+repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h:60:  void OnAttached(TraitId id, View& view) override
+repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h:63:  void OnDetached(TraitId id, View& view) override
+repos/dali-ui/dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h:60:  TraitId GetTraitId() const override
+repos/dali-ui/dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h:62:    return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h:128:    AbsoluteLayoutParams params = IntegrationView::GetTrait<AbsoluteLayoutParams>(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
+repos/dali-ui/dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h:145:    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, params);
+repos/dali-ui/dali-ui-foundation/internal/layouts/grid-layout-params-impl.h:68:  TraitId GetTraitId() const override
+repos/dali-ui/dali-ui-foundation/internal/layouts/grid-layout-params-impl.h:70:    return Integration::ReservedTraitId::GRID_LAYOUT_PARAMS;
+repos/dali-ui/dali-ui-foundation/internal/layouts/grid-layout-params-impl.h:172:    GridLayoutParams params = IntegrationView::GetTrait<GridLayoutParams>(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
+repos/dali-ui/dali-ui-foundation/internal/layouts/grid-layout-params-impl.h:189:    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, params);
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:49:void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:54:Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.cpp:59:bool RemoveTrait(ViewImpl& viewImpl, TraitId id)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-interface.h:37: * @c ReservedTraitId::INTERACTION_TRAIT identifier.
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-manager-trait-impl.cpp:76:void LayoutManagerTraitImpl::OnBeforeAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-manager-trait-impl.cpp:80:void LayoutManagerTraitImpl::OnAttached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-manager-trait-impl.cpp:84:void LayoutManagerTraitImpl::OnDetached(TraitId id, View& view)
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h:86:  void OnBeforeAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h:87:  void OnAttached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h:88:  void OnDetached(TraitId id, View& view) override;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-impl.h:46: * The LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER),
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:581:void ViewDataImpl::SetTrait(TraitId id, Dali::BaseHandle handle)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:586:  if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:595:                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement InteractiveTraitInterface");
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:621:Dali::BaseHandle ViewDataImpl::GetTrait(TraitId id) const
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:633:bool ViewDataImpl::RemoveTrait(TraitId id)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:635:  if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:702:  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:707:    SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:716:  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:727:  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-impl.cpp:103:  IntegrationView::SetTrait(*this, ReservedTraitId::LAYOUT_MANAGER, trait);
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-impl.cpp:108:  Internal::LayoutManagerTrait trait = IntegrationView::GetTrait<Internal::LayoutManagerTrait>(const_cast<LayoutImpl&>(*this), ReservedTraitId::LAYOUT_MANAGER);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:126:  void SetTrait(TraitId id, Dali::BaseHandle handle);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:134:  Dali::BaseHandle GetTrait(TraitId id) const;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:139:  bool RemoveTrait(TraitId id);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:544:  std::vector<std::pair<TraitId, Dali::BaseHandle>> mTraits;
+
+exec
+/bin/bash -lc "sed -n '1,140p' repos/dali-ui/dali-ui-foundation/public-api/trait-id.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <cstdint>
+
+namespace Dali
+{
+namespace Ui
+{
+
+/**
+ * @brief A lightweight handle representing a unique identifier for traits.
+ *
+ * TraitId values are allocated sequentially via TraitId::Alloc().
+ * Framework-reserved IDs are defined in the ReservedTraitId namespace.
+ * Extension or application code should allocate IDs with TraitId::Alloc()
+ * and store them in a static variable so each logical trait gets exactly one ID.
+ *
+ * @code
+ * // One-time allocation per trait type (e.g. in an anonymous namespace or as a static)
+ * static const TraitId kMyScrollStateTrait = TraitId::Alloc();
+ * @endcode
+ */
+struct DALI_UI_API TraitId
+{
+  /**
+   * @brief Allocates and returns the next unique TraitId.
+   *
+   * Uses an internal atomic counter. Thread-safe and lock-free.
+   * Call once per logical trait type and store the result statically.
+   *
+   * @return A new unique TraitId
+   */
+  static TraitId Alloc();
+
+  /**
+   * @brief Equality operator.
+   */
+  bool operator==(const TraitId& other) const
+  {
+    return value == other.value;
+  }
+
+  /**
+   * @brief Inequality operator.
+   */
+  bool operator!=(const TraitId& other) const
+  {
+    return value != other.value;
+  }
+
+  uint32_t value;
+
+private:
+  explicit TraitId(uint32_t v)
+  : value(v)
+  {
+  }
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,80p' repos/dali-ui/dali-ui-foundation/public-api/trait-id.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+// EXTERNAL INCLUDES
+#include <atomic>
+
+namespace Dali
+{
+namespace Ui
+{
+
+TraitId TraitId::Alloc()
+{
+  static std::atomic<uint32_t> counter{0};
+  return TraitId{counter.fetch_add(1u, std::memory_order_relaxed)};
+}
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '110,190p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  }
+
+private:
+  explicit DummyTrait(DummyTraitImpl* impl)
+    : Trait(impl)
+  {
+  }
+};
+
+// Test-only trait IDs (allocated once, reused across tests)
+static const TraitId TEST_TRAIT_ID_0 = TraitId::Alloc();
+static const TraitId TEST_TRAIT_ID_1 = TraitId::Alloc();
+
+} // namespace
+
+void utc_dali_view_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_view_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+int UtcDaliViewConstructorP(void)
+{
+  UiTestApplication application;
+  View view;
+  DALI_TEST_CHECK(!view);
+  END_TEST;
+}
+
+int UtcDaliViewNewP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliViewCopyConstructorP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  View copy(view);
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(view == copy);
+  END_TEST;
+}
+
+int UtcDaliViewMoveConstructor(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(1, view.GetBaseObject().ReferenceCount(), TEST_LOCATION);
+
+  View moved = std::move(view);
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_EQUALS(1, moved.GetBaseObject().ReferenceCount(), TEST_LOCATION);
+  DALI_TEST_CHECK(!view);
+  END_TEST;
+}
+
+int UtcDaliViewAssignmentOperatorP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  View copy;
+  copy = view;
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(view == copy);
+  END_TEST;
+}
+
+int UtcDaliViewMoveAssignment(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(1, view.GetBaseObject().ReferenceCount(), TEST_LOCATION);
+
+
+codex
+---
+title: Trait Id
+sidebar_label: Trait Id
+category: utilities
+---
+
+# Trait Id
+
+`Dali::Ui::TraitId` is a small identifier type used to give each dali-ui trait a stable, unique key.
+
+## Table of Contents
+
+- [Allocate One Identifier Per Trait](#allocate-one-identifier-per-trait)
+- [Compare Trait Identifiers](#compare-trait-identifiers)
+- [Use the Numeric Value Only for Diagnostics](#use-the-numeric-value-only-for-diagnostics)
+
+## Allocate One Identifier Per Trait
+
+Use `Dali::Ui::TraitId::Alloc()` once for each logical trait type that your dali-ui application or extension owns. Store the result in a static variable so every `Dali::Ui::View` that uses the same trait concept refers to the same identifier.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kCardSelectionTraitId = Dali::Ui::TraitId::Alloc();
+const Dali::Ui::TraitId kCardValidationTraitId = Dali::Ui::TraitId::Alloc();
+} // namespace
+```
+
+`Dali::Ui::TraitId::Alloc()` returns a new `Dali::Ui::TraitId`. The public header documents that allocation uses an internal atomic counter, so each call produces the next unique identifier.
+
+Prefer one static `Dali::Ui::TraitId` per trait role:
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace MyApp
+{
+namespace
+{
+const Dali::Ui::TraitId kNavigationStateTraitId = Dali::Ui::TraitId::Alloc();
+}
+
+Dali::Ui::TraitId GetNavigationStateTraitId()
+{
+  return kNavigationStateTraitId;
+}
+} // namespace MyApp
+```
+
+Avoid allocating a new `Dali::Ui::TraitId` each time you build a view. Repeated allocation creates different identifiers for the same logical trait, which prevents later code from matching that trait by ID.
+
+## Compare Trait Identifiers
+
+Use `Dali::Ui::TraitId::operator==` and `Dali::Ui::TraitId::operator!=` to test whether two IDs refer to the same trait role.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kEditableTraitId = Dali::Ui::TraitId::Alloc();
+const Dali::Ui::TraitId kFocusableTraitId = Dali::Ui::TraitId::Alloc();
+}
+
+bool IsEditableTrait(Dali::Ui::TraitId id)
+{
+  return id == kEditableTraitId;
+}
+
+bool IsNotFocusTrait(Dali::Ui::TraitId id)
+{
+  return id != kFocusableTraitId;
+}
+```
+
+Comparisons are value comparisons between `Dali::Ui::TraitId` instances. This makes them suitable for lightweight routing code around trait attachment, detachment, or app-level bookkeeping for `Dali::Ui::View` based behavior.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kPrimaryActionTraitId = Dali::Ui::TraitId::Alloc();
+const Dali::Ui::TraitId kSecondaryActionTraitId = Dali::Ui::TraitId::Alloc();
+}
+
+const char* GetActionTraitName(Dali::Ui::TraitId id)
+{
+  if(id == kPrimaryActionTraitId)
+  {
+    return "primary-action";
+  }
+
+  if(id == kSecondaryActionTraitId)
+  {
+    return "secondary-action";
+  }
+
+  return "unknown";
+}
+```
+
+## Use the Numeric Value Only for Diagnostics
+
+`Dali::Ui::TraitId::value` exposes the numeric value stored by a `Dali::Ui::TraitId`. Application code should normally compare IDs directly with `Dali::Ui::TraitId::operator==` or `Dali::Ui::TraitId::operator!=`. Use `Dali::Ui::TraitId::value` when you need a compact diagnostic value, such as logging or debug labels.
+
+```cpp
+#include <cstdint>
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kDebugOverlayTraitId = Dali::Ui::TraitId::Alloc();
+}
+
+uint32_t GetDebugOverlayTraitValue()
+{
+  return kDebugOverlayTraitId.value;
+}
+```
+
+Keep the `Dali::Ui::TraitId` itself as the source of truth. The numeric `value` is useful to inspect, but app code should not depend on a specific number being assigned to a particular trait.
+
+```cpp
+#include <cstdint>
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+struct TraitDebugRecord
+{
+  Dali::Ui::TraitId id;
+  uint32_t value;
+};
+
+namespace
+{
+const Dali::Ui::TraitId kPanelMetricsTraitId = Dali::Ui::TraitId::Alloc();
+}
+
+TraitDebugRecord MakePanelMetricsDebugRecord()
+{
+  return TraitDebugRecord{kPanelMetricsTraitId, kPanelMetricsTraitId.value};
+}
+```
+tokens used
+13,558

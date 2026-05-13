@@ -1,0 +1,2189 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e1f7d-1d0a-7450-8dc1-33c2b03d0278
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Addon Manager (addon-manager)
+- Category: platform-integration
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-core": 37
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::AddOnDispatchTable | scope=primary
+- Dali::AddOnInfo | scope=primary
+- Dali::AddOnInfo::BuildInfo | scope=primary
+- Dali::Integration::AddOnManager | scope=primary
+- Dali::AddOnDispatchTable::GetAddOnInfo | scope=primary_member
+- Dali::AddOnDispatchTable::GetGlobalProc | scope=primary_member
+- Dali::AddOnDispatchTable::GetInstanceProc | scope=primary_member
+- Dali::AddOnDispatchTable::OnPause | scope=primary_member
+- Dali::AddOnDispatchTable::OnResume | scope=primary_member
+- Dali::AddOnDispatchTable::OnStart | scope=primary_member
+- Dali::AddOnDispatchTable::OnStop | scope=primary_member
+- Dali::AddOnDispatchTable::name | scope=primary_member
+- Dali::AddOnInfo::BuildInfo::libAdaptorVersion | scope=primary_member
+- Dali::AddOnInfo::BuildInfo::libCoreVersion | scope=primary_member
+- Dali::AddOnInfo::BuildInfo::libToolkitVersion | scope=primary_member
+- Dali::AddOnInfo::buildInfo | scope=primary_member
+- Dali::AddOnInfo::name | scope=primary_member
+- Dali::AddOnInfo::next | scope=primary_member
+- Dali::AddOnInfo::type | scope=primary_member
+- Dali::AddOnInfo::version | scope=primary_member
+- Dali::Integration::AddOnManager::AddOnManager | AddOnManager() | scope=primary_member
+- Dali::Integration::AddOnManager::EnumerateAddOns | std::vector< std::string > EnumerateAddOns()=0 | scope=primary_member
+- Dali::Integration::AddOnManager::Get | AddOnManager * Get() | scope=primary_member
+- Dali::Integration::AddOnManager::GetAddOn | AddOnLibrary GetAddOn(const std::string &addonName) | scope=primary_member
+- Dali::Integration::AddOnManager::GetAddOnInfo | bool GetAddOnInfo(const std::string &name, AddOnInfo &info)=0 | scope=primary_member
+- Dali::Integration::AddOnManager::GetGlobalProc | std::function< T > GetGlobalProc(const Dali::AddOnLibrary &addonlibrary, const char *procName) | scope=primary_member
+- Dali::Integration::AddOnManager::GetInstanceProc | std::function< T > GetInstanceProc(const Dali::AddOnLibrary &addOnLibrary, const char *procName) | scope=primary_member
+- Dali::Integration::AddOnManager::InvokeGlobalProc | R InvokeGlobalProc(AddOnLibrary addOnLibrary, const char *functionName, Args &&... args) | scope=primary_member
+- Dali::Integration::AddOnManager::LoadAddOn | AddOnLibrary LoadAddOn(const std::string &addonName, const std::string &libraryName)=0 | scope=primary_member
+- Dali::Integration::AddOnManager::LoadAddOns | std::vector< AddOnLibrary > LoadAddOns(const std::vector< std::string > &addonNames)=0 | scope=primary_member
+- Dali::Integration::AddOnManager::Pause | void Pause()=0 | scope=primary_member
+- Dali::Integration::AddOnManager::RegisterAddOnDispatchTable | void RegisterAddOnDispatchTable(const AddOnDispatchTable *dispatchTable)=0 | scope=primary_member
+- Dali::Integration::AddOnManager::Resume | void Resume()=0 | scope=primary_member
+- Dali::Integration::AddOnManager::Start | void Start()=0 | scope=primary_member
+- Dali::Integration::AddOnManager::Stop | void Stop()=0 | scope=primary_member
+- Dali::Integration::AddOnManager::mSingleton | scope=primary_member
+- Dali::Integration::AddOnManager::~AddOnManager | ~AddOnManager() | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- (none)
+
+Optional source files to inspect if needed:
+[]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  },
+  {
+    "kind": "missing_examples",
+    "message": "No sample or UTC paths were available as example candidates."
+  }
+]
+exec
+/bin/bash -lc 'rg -n "class AddOnManager|struct AddOnInfo|AddOnDispatchTable|GetGlobalProc|InvokeGlobalProc" .' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+./docs/Result_Analysis_2_4_Full_Generation.md:106:- The guide uses `Dali::Integration::AddOnManager`, `Dali::AddOnInfo`, `EnumerateAddOns`, `GetAddOnInfo`, `LoadAddOns`, `GetAddOn`, and `GetGlobalProc` in ways that match `repos/dali-core/dali/integration-api/addon-manager.h`.
+
+exec
+/bin/bash -lc "rg --files . | rg 'addon|add-on|AddOn|dali|README|docs'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+./docs/Result_Analysis_2_3_3.md
+./docs/Phase_1_3_Feature_Spec_Contract.md
+./docs/Phase_2_3_5_Source_Grounded_Prose_Review.md
+./docs/Phase_1_Preprocess_DevNote.md
+./docs/Phase_1_1_Preprocess_Hardening.md
+./docs/TODO.md
+./docs/Phase_1_Preprocess.md
+./docs/Result_Analysis_2_3_1.md
+./docs/Phase_1_5_LLM_Category_And_Ownership.md
+./docs/Phase_1_6_Preprocess_Trace_And_Config_Completion.md
+./docs/design.md
+./docs/Repair_2_2_and_2_3.md
+./docs/Result_Analysis_2_3_2.md
+./docs/Phase_2_1_Generation_Config_And_Contract.md
+./docs/Phase_1_4_Preprocess_Validation_Run_State.md
+./docs/scenarios.md
+./docs/Phase_2_3_CLI_Draft_Generator.md
+./docs/Phase_1_8_Planner_Heuristic_Config_Cleanup.md
+./docs/Phase_2_4_Markdown_Validation_And_Publish.md
+./docs/Result_Analysis_2_4_1.md
+./docs/Phase_1_7_Context_Feature_Extractor.md
+./docs/Phase_1_2_Document_Planning.md
+./docs/Result_Analysis_2_4_Full_Generation.md
+./docs/Phase_2_2_Context_Pack_Builder.md
+./docs/generated/generation_report.md
+./docs/generated/generation_report.json
+./docs/generated/accessibility-highlight-overlay.md
+./docs/generated/adaptor-framework.md
+./docs/generated/evaluations/adaptor-framework_evaluation.md
+./docs/generated/evaluations/accessibility-highlight-overlay_evaluation.md
+./docs/Devnote_Phase_1.md
+./docs/Category_Proposal.md
+./docs/Repair_2_4_1_Source_Grounded_Validation.md
+./README.md
+
+exec
+/bin/bash -lc "ls -la && find . -maxdepth 3 -type d | sed -n '1,120p'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+total 116
+drwxrwxr-x 10 bshsqa bshsqa  4096 May 13 12:43 .
+drwxrwxr-x 12 bshsqa bshsqa  4096 May  6 11:38 ..
+drwxrwxr-x  8 bshsqa bshsqa  4096 May 13 12:43 .git
+drwxrwxr-x  3 bshsqa bshsqa  4096 May 12 11:50 .github
+-rw-r--r--  1 bshsqa bshsqa   447 Apr 30 19:26 .gitignore
+-rw-rw-r--  1 bshsqa bshsqa  2744 May  7 12:11 AGENTS.md
+-rw-rw-r--  1 bshsqa bshsqa 45982 May  8 21:04 README.md
+drwxrwxr-x 10 bshsqa bshsqa  4096 May 13 12:52 cache
+drwxrwxr-x  2 bshsqa bshsqa  4096 May  8 20:51 config
+drwxrwxr-x  3 bshsqa bshsqa  4096 May 13 12:55 docs
+-rw-r--r--  1 bshsqa bshsqa 15586 May 13 12:04 pipeline.py
+drwxrwxr-x  5 bshsqa bshsqa  4096 May 13 12:10 repos
+-rw-rw-r--  1 bshsqa bshsqa   154 Apr 30 15:52 requirements.txt
+drwxrwxr-x  5 bshsqa bshsqa  4096 May 13 12:43 src
+drwxrwxr-x  5 bshsqa bshsqa  4096 May 13 12:43 venv
+.
+./repos
+./repos/dali-core
+./repos/dali-core/.git
+./repos/dali-core/.github
+./repos/dali-core/packaging
+./repos/dali-core/doc
+./repos/dali-core/dali
+./repos/dali-core/automated-tests
+./repos/dali-core/docs
+./repos/dali-core/.ahub
+./repos/dali-core/build
+./repos/dali-ui
+./repos/dali-ui/.git
+./repos/dali-ui/scripts
+./repos/dali-ui/dali-ui-components
+./repos/dali-ui/samples
+./repos/dali-ui/dali-ui-foundation
+./repos/dali-ui/wiki
+./repos/dali-ui/.claude
+./repos/dali-ui/.github
+./repos/dali-ui/packaging
+./repos/dali-ui/automated-tests
+./repos/dali-ui/manual-tests
+./repos/dali-ui/docs
+./repos/dali-ui/.ahub
+./repos/dali-ui/build
+./repos/dali-adaptor
+./repos/dali-adaptor/.git
+./repos/dali-adaptor/adaptors
+./repos/dali-adaptor/third-party
+./repos/dali-adaptor/packaging
+./repos/dali-adaptor/doc
+./repos/dali-adaptor/dali
+./repos/dali-adaptor/automated-tests
+./repos/dali-adaptor/build
+./repos/dali-adaptor/plugins
+./.git
+./.git/objects
+./.git/objects/ae
+./.git/objects/1e
+./.git/objects/0e
+./.git/objects/3b
+./.git/objects/44
+./.git/objects/8c
+./.git/objects/da
+./.git/objects/f0
+./.git/objects/71
+./.git/objects/3d
+./.git/objects/f4
+./.git/objects/18
+./.git/objects/4c
+./.git/objects/72
+./.git/objects/7a
+./.git/objects/c0
+./.git/objects/5b
+./.git/objects/bb
+./.git/objects/fb
+./.git/objects/78
+./.git/objects/eb
+./.git/objects/4a
+./.git/objects/23
+./.git/objects/a2
+./.git/objects/ec
+./.git/objects/9a
+./.git/objects/b9
+./.git/objects/9b
+./.git/objects/c4
+./.git/objects/7d
+./.git/objects/93
+./.git/objects/f1
+./.git/objects/12
+./.git/objects/e4
+./.git/objects/19
+./.git/objects/61
+./.git/objects/67
+./.git/objects/01
+./.git/objects/b8
+./.git/objects/86
+./.git/objects/f8
+./.git/objects/c2
+./.git/objects/7e
+./.git/objects/d1
+./.git/objects/b1
+./.git/objects/8e
+./.git/objects/41
+./.git/objects/65
+./.git/objects/6c
+./.git/objects/05
+./.git/objects/a5
+./.git/objects/5d
+./.git/objects/9f
+./.git/objects/3f
+./.git/objects/10
+./.git/objects/fd
+./.git/objects/5a
+./.git/objects/00
+./.git/objects/69
+./.git/objects/1b
+./.git/objects/1c
+./.git/objects/34
+./.git/objects/95
+./.git/objects/88
+./.git/objects/46
+./.git/objects/32
+./.git/objects/33
+./.git/objects/b7
+./.git/objects/c7
+./.git/objects/79
+./.git/objects/a4
+./.git/objects/b2
+./.git/objects/dc
+./.git/objects/d3
+./.git/objects/e8
+./.git/objects/75
+./.git/objects/1d
+./.git/objects/b0
+./.git/objects/3e
+./.git/objects/73
+./.git/objects/06
+
+exec
+/bin/bash -lc "find /home/bshsqa/Shared/DALi_Doc_Generator -path '*addon-manager.h' -o -path '*addon-manager.cpp' -o -path '*add-on*' | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-core/dali/integration-api/addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-adaptor/dali/internal/addons/common/addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-core/dali/integration-api/addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-core/dali/integration-api/addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-adaptor/dali/internal/addons/common/addon-manager.h
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation/dali-doc-gen/repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-core/dali/integration-api/addon-manager.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_INTEGRATION_ADDON_MANAGER_H
+#define DALI_INTEGRATION_ADDON_MANAGER_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+
+// EXTERNAL EXCLUDES
+#include <cstdio>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace Dali
+{
+// Type of extensions (may be used internally)
+enum class AddOnType
+{
+  GENERIC,
+  IMAGE_LOADER
+};
+
+/**
+ * @brief Helper function building the version number as 32-bit integer.
+ * The return value should be used to encode AddOnInfo::version field.
+ *
+ * @param[in] maj Major version number [0 to 255]
+ * @param[in] min Minor version number [0 to 255]
+ * @param[in] rev Revision version number [0 to 65535]
+ * @return returns 32-bit version number
+ */
+constexpr uint32_t DALI_ADDON_VERSION(uint32_t maj, uint32_t min, uint32_t rev)
+{
+  return ((maj & 0xff) << 24) | ((min & 0xff) << 16) | ((rev & 0xffff));
+}
+
+/**
+ * Structure describes AddOn details
+ */
+struct AddOnInfo
+{
+  AddOnType type; /// may be use in order to classify extension
+  void*     next; /// holds pointer to additional data-structures
+
+  std::string name; /// Name of the extension
+  uint32_t    version;
+
+  /**
+   * Structure contains details of build
+   */
+  struct BuildInfo
+  {
+    uint32_t libCoreVersion;
+    uint32_t libAdaptorVersion;
+    uint32_t libToolkitVersion;
+  } buildInfo;
+};
+
+/**
+ * The structure contains essential function pointers which AddOnManager
+ * requires in order to use AddOns.
+ */
+struct AddOnDispatchTable
+{
+  std::string name;
+  void (*GetAddOnInfo)(Dali::AddOnInfo&) = nullptr;
+  void* (*GetGlobalProc)(const char*)    = nullptr;
+  void* (*GetInstanceProc)(const char*)  = nullptr;
+
+  // Lifecycle callbacks
+  void (*OnStart)()  = nullptr;
+  void (*OnResume)() = nullptr;
+  void (*OnPause)()  = nullptr;
+  void (*OnStop)()   = nullptr;
+};
+
+/**
+ * The AddOnLibrary type represents fully opaque object which hides
+ * the actual handle to the library and other related data.
+ */
+typedef void* AddOnLibrary;
+
+namespace Integration
+{
+/**
+ * AddOnManager class
+ *
+ * Handles DALi AddOn support. The object of AddOnManager exists as a singleton and
+ * is created by the Adaptor. The AddOnManager is used by:
+ *
+ * 1) Application - query the AddOns and obtain AddOn interfaces
+ * 2) DALi - handling lifecycle events
+ * 3) AddOn - self-registering the AddOn dispatch table
+ *
+ * It is up to the implementation how the AddOn libraries are enumerated and opened. Any
+ * caching (functions, open libraries) must be handled by the implementation.
+ */
+class DALI_CORE_API AddOnManager
+{
+protected:
+  /**
+   * @brief Constructor, initialised by the Adaptor
+   */
+  AddOnManager();
+
+public:
+  /**
+   * @brief Destructor
+   */
+  virtual ~AddOnManager();
+
+  // Functions called by the application
+public:
+  /**
+   * @brief Retrieves list of the available AddOns
+   * @return List of AddOn names
+   */
+  virtual std::vector<std::string> EnumerateAddOns() = 0;
+
+  /**
+   * @brief Returns AddOnInfo structure for specified AddOn name
+   * @param[in] name Name of AddOn
+   * @param[out]] info Output reference
+   * @return True on success, False if extension info cannot be retrieved
+   */
+  virtual bool GetAddOnInfo(const std::string& name, AddOnInfo& info) = 0;
+
+  /**
+   * @brief Loads and initialises specified extensions
+   * @param[in] extensionNames Array of extension names
+   * @return vector of initialised extension handles
+   */
+  virtual std::vector<AddOnLibrary> LoadAddOns(const std::vector<std::string>& addonNames) = 0;
+
+  /**
+   * @brief Loads the specified addon from the specified library if it's not already cached
+   * @param addonName Name of the AddOn to acquire
+   * @param libraryName Name of the library to load the AddOn from
+   * @return Returns a valid handle or nullptr
+   */
+  virtual AddOnLibrary LoadAddOn(const std::string& addonName, const std::string& libraryName) = 0;
+
+  /**
+   * @brief Loads AddOn with specified name
+   * @param[in] addOnName Name of AddOn to be acquired
+   * @return Returns a valid handle or nullptr
+   */
+  inline AddOnLibrary GetAddOn(const std::string& addonName)
+  {
+    return LoadAddOns({addonName})[0];
+  }
+
+  /**
+   * @brief Returns AddOn global function pointer
+   * @param[in] addOnLibrary valid AddOn library object
+   * @param[in] procName Name of the function to retrieve
+   * @return Pointer to the function or null if function doesn't exist
+   */
+  virtual void* GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) = 0;
+
+  /**
+   * @brief Returns addon instance function pointer
+   * @param[in] addOnLibrary valid AddOn library object
+   * @param[in] procName Name of the function to retrieve
+   * @return Pointer to the function or null if function doesn't exist
+   */
+  virtual void* GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) = 0;
+
+  /**
+   * @brief Returns addon global function of specified type
+   * @param[in] addOnLibrary valid AddOn library object
+   * @param[in] procName Name of the function to retrieve
+   * @return std::function object or null if function doesn't exist
+   */
+  template<class T>
+  DALI_INTERNAL std::function<T> GetGlobalProc(const Dali::AddOnLibrary& addonlibrary, const char* procName)
+  {
+    auto ptr = GetGlobalProc(addonlibrary, procName);
+    if(ptr)
+    {
+      return std::function<T>(*reinterpret_cast<T**>(&ptr));
+    }
+    return {};
+  };
+
+  /**
+   * @brief Returns AddOn instance function of specified type
+   * @param[in] addOnLibrary valid AddOn library object
+   * @param[in] procName Name of the function to retrieve
+   * @return std::function object or null if function doesn't exist
+   */
+  template<class T>
+  DALI_INTERNAL std::function<T> GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+  {
+    auto ptr = GetInstanceProc(addOnLibrary, procName);
+    if(ptr)
+    {
+      return std::function<T>(*reinterpret_cast<T**>(&ptr));
+    }
+    return {};
+  };
+
+  /**
+   * @brief Invokes global function by name
+   * @param[in] addOnLibrary valid AddOn library object
+   * @param[in] functionName Name of function to be called
+   * @param args[in] Arguments
+   * @return Result of called function
+   */
+  template<class R, class... Args>
+  DALI_INTERNAL R InvokeGlobalProc(AddOnLibrary addOnLibrary, const char* functionName, Args&&... args)
+  {
+    return std::move(GetGlobalProc<R(Args...)>(addOnLibrary, functionName)(args...));
+  }
+
+  // Lifecycle events, functions are called by the Adaptor
+public:
+  /**
+   * @brief Lifecycle pause function
+   */
+  virtual void Pause() = 0;
+
+  /**
+   * @brief Lifecycle resume function
+   */
+  virtual void Resume() = 0;
+
+  /**
+   * @brief Lifecycle start function
+   */
+  virtual void Start() = 0;
+
+  /**
+   * @brief Lifecycle stop function
+   */
+  virtual void Stop() = 0;
+
+  // Functions called by the AddOn
+public:
+  /**
+   * @brief Registers the dispatch table with AddOnManager.
+   *
+   * The function must be called by the AddOn in order to self-register and add
+
+exec
+/bin/bash -lc "sed -n '1,280p' repos/dali-core/dali/integration-api/addon-manager.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2020 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include "addon-manager.h"
+
+namespace Dali
+{
+namespace Integration
+{
+AddOnManager* AddOnManager::mSingleton = nullptr;
+
+AddOnManager::AddOnManager()
+{
+  mSingleton = this;
+}
+
+AddOnManager::~AddOnManager() = default;
+
+AddOnManager* AddOnManager::Get()
+{
+  return mSingleton;
+}
+} // namespace Integration
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali/internal/addons/common/addon-manager-impl.h>
+#include <dali/internal/addons/common/addon-manager.h>
+
+namespace Dali
+{
+namespace Internal
+{
+namespace AddOnManagerFactory
+{
+__attribute__((weak)) Dali::Integration::AddOnManager* CreateAddOnManager()
+{
+  return nullptr;
+}
+
+} // namespace AddOnManagerFactory
+} // namespace Internal
+
+namespace Adaptor
+{
+AddOnManager::AddOnManager(Internal::AddOnManager* impl)
+: Integration::AddOnManager()
+{
+  mImpl.reset(impl);
+}
+
+AddOnManager::~AddOnManager() = default;
+
+void AddOnManager::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+{
+  mImpl->RegisterAddOnDispatchTable(dispatchTable);
+}
+
+std::vector<std::string> AddOnManager::EnumerateAddOns()
+{
+  return mImpl->EnumerateAddOns();
+}
+
+bool AddOnManager::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+{
+  return mImpl->GetAddOnInfo(name, info);
+}
+
+std::vector<Dali::AddOnLibrary> AddOnManager::LoadAddOns(const std::vector<std::string>& addonNames)
+{
+  return mImpl->LoadAddOns(addonNames);
+}
+
+AddOnLibrary AddOnManager::LoadAddOn(const std::string& addonName, const std::string& libraryName)
+{
+  return mImpl->LoadAddOn(addonName, libraryName);
+}
+
+void* AddOnManager::GetGlobalProc(const Dali::AddOnLibrary& addonHandle, const char* procName)
+{
+  return mImpl->GetGlobalProc(addonHandle, procName);
+}
+
+void* AddOnManager::GetInstanceProc(const Dali::AddOnLibrary& addonHandle, const char* procName)
+{
+  return mImpl->GetInstanceProc(addonHandle, procName);
+}
+
+void AddOnManager::Pause()
+{
+  mImpl->Pause();
+}
+
+void AddOnManager::Resume()
+{
+  mImpl->Resume();
+}
+
+void AddOnManager::Start()
+{
+  mImpl->Start();
+}
+
+void AddOnManager::Stop()
+{
+  mImpl->Stop();
+}
+
+} // namespace Adaptor
+} // namespace Dali
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include "test-addon-manager.h"
+
+#include <dali-test-suite-utils.h>
+
+#include <dlfcn.h>
+#include <algorithm>
+#include <cstring>
+#include <memory>
+
+#ifndef ADDON_LIBS_PATH
+#define ADDON_LIBS_PATH ""
+#endif
+
+namespace Test
+{
+using namespace Dali;
+
+void AddOnManager::Initialize()
+{
+  // Only create an instance if we haven't created one already
+  if(!AddOnManager::Get())
+  {
+    static std::unique_ptr<AddOnManager> sAddonManager(new AddOnManager);
+    // Memory will be freed upon test completion
+  }
+}
+
+std::vector<std::string> AddOnManager::EnumerateAddOns()
+{
+  std::string listFileName(ADDON_LIBS_PATH);
+  listFileName += "/addons.txt";
+
+  // Read list of available test addons
+  tet_printf("Enumerating addons, file: %s\n", listFileName.c_str());
+  std::vector<std::string> addons{};
+  auto*                    fin     = fopen(listFileName.c_str(), "r");
+  char*                    lineBuf = new char[256];
+  memset(lineBuf, 0, 256);
+  size_t n = 256;
+  while(getline(&lineBuf, &n, fin) > 0)
+  {
+    char* c = lineBuf;
+    while(*c)
+    {
+      if(*c == '\n' || *c == '\r')
+      {
+        *c = 0;
+        break;
+      }
+      ++c;
+    }
+    tet_printf("Adding %s\n", lineBuf);
+    addons.emplace_back(lineBuf);
+    memset(lineBuf, 0, 256);
+  }
+  fclose(fin);
+  delete[] lineBuf;
+  std::vector<std::string> retval{};
+  // Open addons
+  for(auto& name : addons)
+  {
+    std::string path(ADDON_LIBS_PATH);
+    path += "/";
+    path += name;
+
+    mAddOnCache.emplace_back();
+    mAddOnCache.back().handle = dlopen(path.c_str(), RTLD_DEEPBIND | RTLD_LAZY);
+    if(!mAddOnCache.back().handle)
+    {
+      mAddOnCache.back().valid = false;
+      tet_printf("Can't open addon lib: %s\n", path.c_str());
+      continue;
+    }
+    // Here addon must self register
+    if(!mAddOnCache.back().valid)
+    {
+      puts("Addon invalid!");
+    }
+    else
+    {
+      tet_printf("Valid AddOn: %s\n", mAddOnCache.back().name.c_str());
+      retval.emplace_back(mAddOnCache.back().name);
+    }
+  }
+
+  return retval;
+
+  /**
+   * Check for self-registering addons
+   */
+}
+
+void AddOnManager::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+{
+  // Register the dispatch table
+  auto& entry = mAddOnCache.back();
+  entry.name  = dispatchTable->name;
+  tet_printf("Registering AddOn: %s\n", entry.name.c_str());
+  entry.GetGlobalProc   = dispatchTable->GetGlobalProc;
+  entry.GetInstanceProc = dispatchTable->GetInstanceProc;
+  entry.GetAddOnInfo    = dispatchTable->GetAddOnInfo;
+  entry.OnStart         = dispatchTable->OnStart;
+  entry.OnStop          = dispatchTable->OnStop;
+  entry.OnPause         = dispatchTable->OnPause;
+  entry.OnResume        = dispatchTable->OnResume;
+  entry.valid           = true;
+}
+
+bool AddOnManager::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+{
+  auto iter = std::find_if(mAddOnCache.begin(), mAddOnCache.end(), [name, &info](AddOnCacheEntry& entry)
+  {
+    if(entry.name == name)
+    {
+      entry.GetAddOnInfo(info);
+      return true;
+    }
+    return false;
+  });
+  return iter != mAddOnCache.end();
+}
+
+std::vector<AddOnLibrary> AddOnManager::LoadAddOns(const std::vector<std::string>& addonNames)
+{
+  if(mAddOnCache.empty())
+  {
+    EnumerateAddOns();
+  }
+
+  std::vector<AddOnLibrary> retval{};
+  for(auto& name : addonNames)
+  {
+    size_t index = 0;
+    auto   iter  = std::find_if(mAddOnCache.begin(), mAddOnCache.end(), [name, &index](AddOnCacheEntry& entry)
+       {
+      index++;
+      if(entry.name == name)
+      {
+        return true;
+      }
+      return false;
+    });
+    if(iter != mAddOnCache.end())
+    {
+      retval.emplace_back(*reinterpret_cast<void**>(&index));
+    }
+    else
+    {
+      retval.emplace_back(nullptr);
+    }
+  }
+
+  return retval;
+}
+
+AddOnLibrary AddOnManager::LoadAddOn(const std::string& addonName, const std::string& libraryName)
+{
+  AddOnLibrary addOnLibrary = nullptr;
+  size_t       index        = 0;
+  auto         iter         = std::find_if(mAddOnCache.begin(), mAddOnCache.end(), [&addonName, &index](AddOnCacheEntry& entry)
+                  {
+    index++;
+    return (entry.name == addonName);
+  });
+
+  if(iter != mAddOnCache.end())
+  {
+    addOnLibrary = reinterpret_cast<void*>(index);
+  }
+  else
+  {
+    mAddOnCache.emplace_back();
+    mAddOnCache.back().handle = dlopen(libraryName.c_str(), RTLD_LAZY); // We want to override some called methods in test code so don't do a deepbind
+    if(!mAddOnCache.back().handle)
+    {
+      mAddOnCache.back().valid = false;
+      tet_printf("Can't open addon lib: %s\n", libraryName.c_str());
+    }
+    // Here addon must self register
+    if(!mAddOnCache.back().valid)
+    {
+      puts("Addon invalid!");
+    }
+    else
+    {
+      tet_printf("Valid AddOn: %s\n", mAddOnCache.back().name.c_str());
+      addOnLibrary = reinterpret_cast<void*>(mAddOnCache.size());
+    }
+  }
+
+  return addOnLibrary;
+}
+
+void* AddOnManager::GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+{
+  auto index = *reinterpret_cast<const size_t*>(&addOnLibrary);
+  return mAddOnCache[index - 1].GetGlobalProc(procName);
+}
+
+void* AddOnManager::GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+{
+  auto index = *reinterpret_cast<const size_t*>(&addOnLibrary);
+  return mAddOnCache[index - 1].GetInstanceProc(procName);
+
+exec
+/bin/bash -lc "sed -n '220,360p' repos/dali-core/dali/integration-api/addon-manager.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  /**
+   * @brief Invokes global function by name
+   * @param[in] addOnLibrary valid AddOn library object
+   * @param[in] functionName Name of function to be called
+   * @param args[in] Arguments
+   * @return Result of called function
+   */
+  template<class R, class... Args>
+  DALI_INTERNAL R InvokeGlobalProc(AddOnLibrary addOnLibrary, const char* functionName, Args&&... args)
+  {
+    return std::move(GetGlobalProc<R(Args...)>(addOnLibrary, functionName)(args...));
+  }
+
+  // Lifecycle events, functions are called by the Adaptor
+public:
+  /**
+   * @brief Lifecycle pause function
+   */
+  virtual void Pause() = 0;
+
+  /**
+   * @brief Lifecycle resume function
+   */
+  virtual void Resume() = 0;
+
+  /**
+   * @brief Lifecycle start function
+   */
+  virtual void Start() = 0;
+
+  /**
+   * @brief Lifecycle stop function
+   */
+  virtual void Stop() = 0;
+
+  // Functions called by the AddOn
+public:
+  /**
+   * @brief Registers the dispatch table with AddOnManager.
+   *
+   * The function must be called by the AddOn in order to self-register and add
+   * the dispatch table. The platform-dependent implementation must override it
+   * in order to store the dispatch table. The way the dispatch table is stored
+   * depends on the implementation.
+   *
+   * @param[in] dispatchTable Pointer to the valid dispatch table
+   */
+  virtual void RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable) = 0;
+
+  /**
+   * @brief Retrieves AddOnManager singleton
+   * @return pointer to the AddOnManager
+   */
+  static AddOnManager* Get();
+
+protected:
+  static AddOnManager* mSingleton; ///< Singleton storing an instance of AddOnManager
+};
+} // namespace Integration
+} // namespace Dali
+
+#endif // DALI_INTEGRATION_ADDON_MANAGER
+
+exec
+/bin/bash -lc "sed -n '220,520p' repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  return mAddOnCache[index - 1].GetInstanceProc(procName);
+}
+
+void AddOnManager::Start()
+{
+  for(auto& entry : mAddOnCache)
+  {
+    if(entry.OnStart)
+    {
+      entry.OnStart();
+    }
+  }
+}
+
+void AddOnManager::Resume()
+{
+  for(auto& entry : mAddOnCache)
+  {
+    if(entry.OnResume)
+    {
+      entry.OnResume();
+    }
+  }
+}
+
+void AddOnManager::Stop()
+{
+  for(auto& entry : mAddOnCache)
+  {
+    if(entry.OnStop)
+    {
+      entry.OnStop();
+    }
+  }
+}
+
+void AddOnManager::Pause()
+{
+  for(auto& entry : mAddOnCache)
+  {
+    if(entry.OnPause)
+    {
+      entry.OnPause();
+    }
+  }
+}
+
+} // namespace Test
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef TEST_ADDON_MANAGER_H
+#define TEST_ADDON_MANAGER_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali/devel-api/common/vector-wrapper.h>
+#include <dali/integration-api/addon-manager.h>
+
+#include <string>
+
+namespace Test
+{
+class AddOnManager : public Dali::Integration::AddOnManager
+{
+public:
+  /**
+   * Initializes the test addon manager so that it can be used by DALi.
+   */
+  static void Initialize();
+
+  /**
+   * @brief Constructor, initialised by the Adaptor
+   */
+  AddOnManager() = default;
+
+  /**
+   * @brief Destructor
+   */
+  ~AddOnManager() override = default;
+
+  std::vector<std::string> EnumerateAddOns() override;
+
+  bool GetAddOnInfo(const std::string& name, Dali::AddOnInfo& info) override;
+
+  std::vector<Dali::AddOnLibrary> LoadAddOns(const std::vector<std::string>& addonNames) override;
+
+  Dali::AddOnLibrary LoadAddOn(const std::string& addonName, const std::string& libraryName) override;
+
+  void* GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+
+  void* GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+
+  void RegisterAddOnDispatchTable(const Dali::AddOnDispatchTable* dispatchTable) override;
+
+  void Start() override;
+
+  void Resume() override;
+
+  void Stop() override;
+
+  void Pause() override;
+
+  struct AddOnCacheEntry
+  {
+    std::string     name{};
+    Dali::AddOnInfo info{};
+
+    // library handle
+    void* handle{nullptr};
+
+    // main function pointers
+    void (*GetAddOnInfo)(Dali::AddOnInfo&) = nullptr; ///< Returns AddOnInfo structure
+    void* (*GetInstanceProc)(const char*)  = nullptr; ///< Returns pointer of instance function (member funtion)
+    void* (*GetGlobalProc)(const char*)    = nullptr; ///< Returns pointer of global function (non-member function)
+
+    void (*OnStart)()  = nullptr;
+    void (*OnResume)() = nullptr;
+    void (*OnPause)()  = nullptr;
+    void (*OnStop)()   = nullptr;
+
+    bool valid = false;
+  };
+
+  std::vector<AddOnCacheEntry> mAddOnCache;
+};
+} // Namespace Test
+
+#endif // TEST_ADDON_MANAGER_H
+
+exec
+/bin/bash -lc 'rg -n "AddOnDispatchTable|DALI_ADDON|GetGlobalProc|GetInstanceProc|RegisterAddOnDispatchTable|AddOnInfo" repos/dali-core repos/dali-adaptor repos/dali-ui' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-factory.h:1:#ifndef DALI_ADDON_MANAGER_FACTORY
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-factory.h:2:#define DALI_ADDON_MANAGER_FACTORY
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-factory.h:42:#endif // DALI_ADDON_MANAGER_FACTORY
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:46:void AddOnManager::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:48:  mImpl->RegisterAddOnDispatchTable(dispatchTable);
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:56:bool AddOnManager::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:58:  return mImpl->GetAddOnInfo(name, info);
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:71:void* AddOnManager::GetGlobalProc(const Dali::AddOnLibrary& addonHandle, const char* procName)
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:73:  return mImpl->GetGlobalProc(addonHandle, procName);
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:76:void* AddOnManager::GetInstanceProc(const Dali::AddOnLibrary& addonHandle, const char* procName)
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.cpp:78:  return mImpl->GetInstanceProc(addonHandle, procName);
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-impl.h:52:  virtual void RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable) = 0;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-impl.h:61:   * @brief Returns AddOnInfo structure for specified AddOn name
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-impl.h:66:  virtual bool GetAddOnInfo(const std::string& name, AddOnInfo& info) = 0;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-impl.h:86:  virtual void* GetGlobalProc(const Dali::AddOnLibrary& addonHandle, const char* procName) = 0;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager-impl.h:94:  virtual void* GetInstanceProc(const Dali::AddOnLibrary& addonHandle, const char* procName) = 0;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.h:52:  void RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable) override;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.h:61:   * @brief Returns AddOnInfo structure for specified extension name
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.h:66:  bool GetAddOnInfo(const std::string& name, AddOnInfo& info) override;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.h:87:  void* GetGlobalProc(const Dali::AddOnLibrary& addonHandle, const char* procName) override;
+repos/dali-adaptor/dali/internal/addons/common/addon-manager.h:95:  void* GetInstanceProc(const Dali::AddOnLibrary& addonHandle, const char* procName) override;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:51:void AddOnManagerLinux::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:55:  mAddOnCache.back().GetGlobalProc   = dispatchTable->GetGlobalProc;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:56:  mAddOnCache.back().GetInstanceProc = dispatchTable->GetInstanceProc;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:57:  mAddOnCache.back().GetAddOnInfo    = dispatchTable->GetAddOnInfo;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:125:          AddOnInfo info{};
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:126:          cacheEntry.GetAddOnInfo(info);
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:147:bool AddOnManagerLinux::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:250:        AddOnInfo info{};
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:251:        cacheEntry.GetAddOnInfo(info);
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:276:void* AddOnManagerLinux::GetGlobalProc(const Dali::AddOnLibrary& addonHandle, const char* procName)
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:289:    auto retval = entry.GetGlobalProc(procName);
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:298:  DALI_LOG_ERROR("AddOn: GetGlobalProc() library failed!\n");
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:302:void* AddOnManagerLinux::GetInstanceProc(const Dali::AddOnLibrary& addonHandle, const char* procName)
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:315:    auto retval = entry.GetInstanceProc(procName);
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:324:  DALI_LOG_ERROR("AddOn: GetInstanceProc() library failed!\n");
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.cpp:358:      callback.function    = reinterpret_cast<decltype(callback.function)>(entry.GetGlobalProc(callback.functionName.c_str()));
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:1:#ifndef DALI_ADDON_MANAGER_IMPL_LINUX
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:2:#define DALI_ADDON_MANAGER_IMPL_LINUX
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:52:   * @copydoc Dali::Internal::AddOnManager::RegisterAddOnDispatchTable()
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:54:  void RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable) override;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:62:   * @copydoc Dali::Internal::AddOnManager::GetAddOnInfo()
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:64:  bool GetAddOnInfo(const std::string& name, AddOnInfo& info) override;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:77:   * @copydoc Dali::Internal::AddOnManager::GetGlobalProc()
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:79:  void* GetGlobalProc(const Dali::AddOnLibrary& addonHandle, const char* procName) override;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:82:   * @copydoc Dali::Internal::AddOnManager::GetInstanceProc()
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:84:  void* GetInstanceProc(const Dali::AddOnLibrary& addonHandle, const char* procName) override;
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:149:    AddOnInfo   info{};
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:155:    void (*GetAddOnInfo)(AddOnInfo&)      = nullptr; ///< Returns AddOnInfo structure
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:156:    void* (*GetInstanceProc)(const char*) = nullptr; ///< Returns pointer of instance function (member funtion)
+repos/dali-adaptor/dali/internal/addons/linux/addon-manager-impl-linux.h:157:    void* (*GetGlobalProc)(const char*)   = nullptr; ///< Returns pointer of global function (non-member function)
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:150:    extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:1017:    PFN_vkGetInstanceProcAddr VMA_NULLABLE vkGetInstanceProcAddr;
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:2872:VmaVulkanFunctions::vkGetInstanceProcAddr and vkGetDeviceProcAddr as
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:13163:    m_VulkanFunctions.vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)vkGetInstanceProcAddr;
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:13219:    VMA_COPY_IF_NOT_NULL(vkGetInstanceProcAddr);
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:13267:    VMA_ASSERT(m_VulkanFunctions.vkGetInstanceProcAddr && m_VulkanFunctions.vkGetDeviceProcAddr &&
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:13269:        "VmaVulkanFunctions::vkGetInstanceProcAddr and vkGetDeviceProcAddr as VmaAllocatorCreateInfo::pVulkanFunctions. "
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:13275:            (functionPointerType)m_VulkanFunctions.vkGetInstanceProcAddr(m_hInstance, functionNameString);
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:16794:-# **If you want VMA to fetch pointers to Vulkan functions dynamically** using `vkGetInstanceProcAddr`,
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:16797:   - Provide pointers to these two functions via VmaVulkanFunctions::vkGetInstanceProcAddr,
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:16834:vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:18596:You can fetch them e.g. using functions `vkGetInstanceProcAddr` and `vkGetDeviceProcAddr` or
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:18600:`vkGetInstanceProcAddr` and `vkGetDeviceProcAddr` on its own.
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.h:18601:You need to only fill in VmaVulkanFunctions::vkGetInstanceProcAddr and VmaVulkanFunctions::vkGetDeviceProcAddr.
+repos/dali-ui/automated-tests/src/dali-ui-foundation/test-sample-addon.cpp:38:  void GetAddOnInfo(Dali::AddOnInfo& info) override
+repos/dali-ui/automated-tests/src/dali-ui-foundation/test-sample-addon.cpp:42:    info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/test-sample-addon.cpp:44:    tet_printf("SampleAddOn: GetAddOnInfo() : name = %s\n", info.name.c_str());
+repos/dali-adaptor/third-party/vma/vk_mem_alloc_structs.hpp:84:          PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_ = {}
+repos/dali-adaptor/third-party/vma/vk_mem_alloc_structs.hpp:124:      : vkGetInstanceProcAddr(vkGetInstanceProcAddr_)
+repos/dali-adaptor/third-party/vma/vk_mem_alloc_structs.hpp:187:      return vkGetInstanceProcAddr == rhs.vkGetInstanceProcAddr
+repos/dali-adaptor/third-party/vma/vk_mem_alloc_structs.hpp:232:    VULKAN_HPP_CONSTEXPR_14 VulkanFunctions& setVkGetInstanceProcAddr(PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_) VULKAN_HPP_NOEXCEPT {
+repos/dali-adaptor/third-party/vma/vk_mem_alloc_structs.hpp:233:      vkGetInstanceProcAddr = vkGetInstanceProcAddr_;
+repos/dali-adaptor/third-party/vma/vk_mem_alloc_structs.hpp:385:    PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = {};
+repos/dali-adaptor/third-party/vma/vk_mem_alloc.hpp:299:      instance->vkGetInstanceProcAddr,
+repos/dali-adaptor/dali/internal/system/common/environment-variables.h:152:#define DALI_ENV_ADDONS_PATH "DALI_ADDONS_PATH"
+repos/dali-adaptor/dali/internal/system/common/environment-variables.h:154:#define DALI_ENV_ADDONS_LIBS "DALI_ADDONS_LIBS"
+repos/dali-core/automated-tests/src/dali/utc-Dali-AddOn.cpp:54:  // Test AddOnInfo
+repos/dali-core/automated-tests/src/dali/utc-Dali-AddOn.cpp:55:  const auto& info = addon.GetAddOnInfo();
+repos/dali-ui/automated-tests/src/dali-ui-components/test-sample-addon.cpp:38:  void GetAddOnInfo(Dali::AddOnInfo& info) override
+repos/dali-ui/automated-tests/src/dali-ui-components/test-sample-addon.cpp:42:    info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
+repos/dali-ui/automated-tests/src/dali-ui-components/test-sample-addon.cpp:44:    tet_printf("SampleAddOn: GetAddOnInfo() : name = %s\n", info.name.c_str());
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:48:  bool GetAddOnInfo(const std::string& name, Dali::AddOnInfo& info) override;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:54:  void* GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:56:  void* GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:58:  void RegisterAddOnDispatchTable(const Dali::AddOnDispatchTable* dispatchTable) override;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:71:    Dali::AddOnInfo info{};
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:77:    void (*GetAddOnInfo)(Dali::AddOnInfo&) = nullptr; ///< Returns AddOnInfo structure
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:78:    void* (*GetInstanceProc)(const char*)  = nullptr; ///< Returns pointer of instance function (member funtion)
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.h:79:    void* (*GetGlobalProc)(const char*)    = nullptr; ///< Returns pointer of global function (non-member function)
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:110:void AddOnManager::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:116:  entry.GetGlobalProc   = dispatchTable->GetGlobalProc;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:117:  entry.GetInstanceProc = dispatchTable->GetInstanceProc;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:118:  entry.GetAddOnInfo    = dispatchTable->GetAddOnInfo;
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:126:bool AddOnManager::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:132:      entry.GetAddOnInfo(info);
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:211:void* AddOnManager::GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:214:  return mAddOnCache[index - 1].GetGlobalProc(procName);
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:217:void* AddOnManager::GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-core/automated-tests/src/dali/dali-test-suite-utils/test-addon-manager.cpp:220:  return mAddOnCache[index - 1].GetInstanceProc(procName);
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:48:  bool GetAddOnInfo(const std::string& name, Dali::AddOnInfo& info) override;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:54:  void* GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:56:  void* GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:58:  void RegisterAddOnDispatchTable(const Dali::AddOnDispatchTable* dispatchTable) override;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:71:    Dali::AddOnInfo info{};
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:77:    void (*GetAddOnInfo)(Dali::AddOnInfo&) = nullptr; ///< Returns AddOnInfo structure
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:78:    void* (*GetInstanceProc)(const char*)  = nullptr; ///< Returns pointer of instance function (member funtion)
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.h:79:    void* (*GetGlobalProc)(const char*)    = nullptr; ///< Returns pointer of global function (non-member function)
+repos/dali-core/automated-tests/src/dali/test-sample-addon.cpp:38:  void GetAddOnInfo(Dali::AddOnInfo& info) override
+repos/dali-core/automated-tests/src/dali/test-sample-addon.cpp:42:    info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
+repos/dali-core/automated-tests/src/dali/test-sample-addon.cpp:44:    tet_printf("SampleAddOn: GetAddOnInfo() : name = %s\n", info.name.c_str());
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:110:void AddOnManager::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:116:  entry.GetGlobalProc   = dispatchTable->GetGlobalProc;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:117:  entry.GetInstanceProc = dispatchTable->GetInstanceProc;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:118:  entry.GetAddOnInfo    = dispatchTable->GetAddOnInfo;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:126:bool AddOnManager::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:132:      entry.GetAddOnInfo(info);
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:211:void* AddOnManager::GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:214:  return mAddOnCache[index - 1].GetGlobalProc(procName);
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:217:void* AddOnManager::GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-addon-manager.cpp:220:  return mAddOnCache[index - 1].GetInstanceProc(procName);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:48:  bool GetAddOnInfo(const std::string& name, Dali::AddOnInfo& info) override;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:54:  void* GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:56:  void* GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) override;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:58:  void RegisterAddOnDispatchTable(const Dali::AddOnDispatchTable* dispatchTable) override;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:71:    Dali::AddOnInfo info{};
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:77:    void (*GetAddOnInfo)(Dali::AddOnInfo&) = nullptr; ///< Returns AddOnInfo structure
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:78:    void* (*GetInstanceProc)(const char*)  = nullptr; ///< Returns pointer of instance function (member funtion)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.h:79:    void* (*GetGlobalProc)(const char*)    = nullptr; ///< Returns pointer of global function (non-member function)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:110:void AddOnManager::RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:116:  entry.GetGlobalProc   = dispatchTable->GetGlobalProc;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:117:  entry.GetInstanceProc = dispatchTable->GetInstanceProc;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:118:  entry.GetAddOnInfo    = dispatchTable->GetAddOnInfo;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:126:bool AddOnManager::GetAddOnInfo(const std::string& name, AddOnInfo& info)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:132:      entry.GetAddOnInfo(info);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:211:void* AddOnManager::GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:214:  return mAddOnCache[index - 1].GetGlobalProc(procName);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:217:void* AddOnManager::GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-addon-manager.cpp:220:  return mAddOnCache[index - 1].GetInstanceProc(procName);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:28:  Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_ADDONS_PATH", ADDON_LIBS_PATH);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:29:  Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_ADDONS_LIBS", "libSampleAddOn.so");
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:55:  const auto& info = addon.GetAddOnInfo();
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:58:  DALI_TEST_EQUALS(info.version, Dali::DALI_ADDON_VERSION(1, 0, 0), TEST_LOCATION);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:107:  Dali::AddOnInfo info{};
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:108:  addonManager->GetAddOnInfo(availableAddons[0], info);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:111:  DALI_TEST_EQUALS(info.version, Dali::DALI_ADDON_VERSION(1, 0, 0), TEST_LOCATION);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:120:  auto createInstance = addonManager->GetGlobalProc<void*()>(testAddon, "CreateInstance");
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:125:  auto dummyfunction = addonManager->GetGlobalProc<void*()>(testAddon, "ThisFunctionDoesntExist");
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:130:  auto  instanceFunction = addonManager->GetInstanceProc<uint32_t(void*)>(testAddon, "InstanceCall");
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp:136:  auto GetLifecycleStatus = addonManager->GetGlobalProc<bool()>(testAddon, "GetLifecycleStatus");
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/addons/test-sample-addon.cpp:63:  void GetAddOnInfo(Dali::AddOnInfo& info) override
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/addons/test-sample-addon.cpp:67:    info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/addons/test-sample-addon.cpp:69:    tet_printf("SampleAddOn: GetAddOnInfo() : name = %s\n", info.name.c_str());
+repos/dali-core/dali/integration-api/addon-manager.h:42: * The return value should be used to encode AddOnInfo::version field.
+repos/dali-core/dali/integration-api/addon-manager.h:49:constexpr uint32_t DALI_ADDON_VERSION(uint32_t maj, uint32_t min, uint32_t rev)
+repos/dali-core/dali/integration-api/addon-manager.h:57:struct AddOnInfo
+repos/dali-core/dali/integration-api/addon-manager.h:80:struct AddOnDispatchTable
+repos/dali-core/dali/integration-api/addon-manager.h:83:  void (*GetAddOnInfo)(Dali::AddOnInfo&) = nullptr;
+repos/dali-core/dali/integration-api/addon-manager.h:84:  void* (*GetGlobalProc)(const char*)    = nullptr;
+repos/dali-core/dali/integration-api/addon-manager.h:85:  void* (*GetInstanceProc)(const char*)  = nullptr;
+repos/dali-core/dali/integration-api/addon-manager.h:138:   * @brief Returns AddOnInfo structure for specified AddOn name
+repos/dali-core/dali/integration-api/addon-manager.h:143:  virtual bool GetAddOnInfo(const std::string& name, AddOnInfo& info) = 0;
+repos/dali-core/dali/integration-api/addon-manager.h:176:  virtual void* GetGlobalProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) = 0;
+repos/dali-core/dali/integration-api/addon-manager.h:184:  virtual void* GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName) = 0;
+repos/dali-core/dali/integration-api/addon-manager.h:193:  DALI_INTERNAL std::function<T> GetGlobalProc(const Dali::AddOnLibrary& addonlibrary, const char* procName)
+repos/dali-core/dali/integration-api/addon-manager.h:195:    auto ptr = GetGlobalProc(addonlibrary, procName);
+repos/dali-core/dali/integration-api/addon-manager.h:210:  DALI_INTERNAL std::function<T> GetInstanceProc(const Dali::AddOnLibrary& addOnLibrary, const char* procName)
+repos/dali-core/dali/integration-api/addon-manager.h:212:    auto ptr = GetInstanceProc(addOnLibrary, procName);
+repos/dali-core/dali/integration-api/addon-manager.h:230:    return std::move(GetGlobalProc<R(Args...)>(addOnLibrary, functionName)(args...));
+repos/dali-core/dali/integration-api/addon-manager.h:267:  virtual void RegisterAddOnDispatchTable(const AddOnDispatchTable* dispatchTable) = 0;
+repos/dali-core/dali/devel-api/common/addon-binder.h:1:#ifndef DALI_ADDON_BINDER_H
+repos/dali-core/dali/devel-api/common/addon-binder.h:2:#define DALI_ADDON_BINDER_H
+repos/dali-core/dali/devel-api/common/addon-binder.h:77:        mAddOnManager->GetAddOnInfo(addonName, mAddOnInfo);
+repos/dali-core/dali/devel-api/common/addon-binder.h:96:        mAddOnManager->GetAddOnInfo(addonName, mAddOnInfo);
+repos/dali-core/dali/devel-api/common/addon-binder.h:116:      auto ptr = mAddOnManager->GetGlobalProc(mAddOnHandle, funcName.c_str());
+repos/dali-core/dali/devel-api/common/addon-binder.h:136:  void* GetGlobalProc(const char* name)
+repos/dali-core/dali/devel-api/common/addon-binder.h:138:    return mAddOnManager ? mAddOnManager->GetGlobalProc(mAddOnHandle, name) : nullptr;
+repos/dali-core/dali/devel-api/common/addon-binder.h:146:  void* GetInstanceProc(const char* name)
+repos/dali-core/dali/devel-api/common/addon-binder.h:148:    return mAddOnManager ? mAddOnManager->GetInstanceProc(mAddOnHandle, name) : nullptr;
+repos/dali-core/dali/devel-api/common/addon-binder.h:164:  const AddOnInfo& GetAddOnInfo() const
+repos/dali-core/dali/devel-api/common/addon-binder.h:166:    return mAddOnInfo;
+repos/dali-core/dali/devel-api/common/addon-binder.h:173:  Dali::AddOnInfo    mAddOnInfo{};          ///< Stored AddOnInfo structure
+repos/dali-core/dali/devel-api/common/addon-binder.h:189:#endif // DALI_ADDON_BINDER_H
+repos/dali-core/dali/devel-api/addons/addon-base.h:1:#ifndef DALI_ADDONS_ADDON_BASE_H
+repos/dali-core/dali/devel-api/addons/addon-base.h:2:#define DALI_ADDONS_ADDON_BASE_H
+repos/dali-core/dali/devel-api/addons/addon-base.h:55:   * @param[out] addonInfo AddOnInfo structure to fill by the function
+repos/dali-core/dali/devel-api/addons/addon-base.h:57:  virtual void GetAddOnInfo(Dali::AddOnInfo& addonInfo) = 0;
+repos/dali-core/dali/devel-api/addons/addon-base.h:124: * Fills AddOnInfo structure.
+repos/dali-core/dali/devel-api/addons/addon-base.h:125: * @param[out] info Reference to AddOnInfo structure
+repos/dali-core/dali/devel-api/addons/addon-base.h:128:void GetAddOnInfo(Dali::AddOnInfo& info)
+repos/dali-core/dali/devel-api/addons/addon-base.h:131:  addon->GetAddOnInfo(info);
+repos/dali-core/dali/devel-api/addons/addon-base.h:140:void* GetGlobalProc(const char* funcname)
+repos/dali-core/dali/devel-api/addons/addon-base.h:169:void* GetInstanceProc(const char* funcname)
+repos/dali-core/dali/devel-api/addons/addon-base.h:232:  Dali::AddOnInfo info{};
+repos/dali-core/dali/devel-api/addons/addon-base.h:233:  addon->GetAddOnInfo(info);
+repos/dali-core/dali/devel-api/addons/addon-base.h:240:  Dali::AddOnDispatchTable table;
+repos/dali-core/dali/devel-api/addons/addon-base.h:242:  table.GetAddOnInfo    = GetAddOnInfo<void>;
+repos/dali-core/dali/devel-api/addons/addon-base.h:243:  table.GetGlobalProc   = GetGlobalProc<void>;
+repos/dali-core/dali/devel-api/addons/addon-base.h:244:  table.GetInstanceProc = GetInstanceProc<void>;
+repos/dali-core/dali/devel-api/addons/addon-base.h:251:  Dali::Integration::AddOnManager::Get()->RegisterAddOnDispatchTable(&table);
+repos/dali-core/dali/devel-api/addons/addon-base.h:279:#endif // DALI_ADDON_BASE_H
+repos/dali-core/dali/devel-api/addons/addon-dispatch-table.h:1:#ifndef DALI_ADDON_DISPATCH_TABLE_H
+repos/dali-core/dali/devel-api/addons/addon-dispatch-table.h:2:#define DALI_ADDON_DISPATCH_TABLE_H
+repos/dali-core/dali/devel-api/addons/addon-dispatch-table.h:144:#endif // DALI_ADDON_DISPATCH_TABLE_H
+repos/dali-adaptor/dali/internal/window-system/gl-window/gl-window-addon.cpp:211:  void GetAddOnInfo(Dali::AddOnInfo& info) override
+repos/dali-adaptor/dali/internal/window-system/gl-window/gl-window-addon.cpp:215:    info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/automated-tests/src/dali-ui-foundation/test-sample-addon.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2020 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/addons/addon-base.h>
+
+#include <cstring>
+
+static const std::string DUMMY_ADDON_NAME = "SampleAddOn";
+
+int StringLen(const char* str)
+{
+  return strlen(str);
+}
+
+int DoSum(int a, int b)
+{
+  return a + b;
+}
+
+class TestDummyAddOn : public Dali::AddOns::AddOnBase
+{
+public:
+  void GetAddOnInfo(Dali::AddOnInfo& info) override
+  {
+    info.type    = Dali::AddOnType::GENERIC;
+    info.name    = "SampleAddOn";
+    info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
+    info.next    = nullptr;
+    tet_printf("SampleAddOn: GetAddOnInfo() : name = %s\n", info.name.c_str());
+  }
+
+  /**
+   * Dispatch table for global functions
+   * @return
+   */
+  Dali::AddOns::DispatchTable* GetGlobalDispatchTable() override
+  {
+    static Dali::AddOns::DispatchTable dispatchTable{};
+    if(dispatchTable.Empty())
+    {
+      dispatchTable["DoSum"]     = DoSum;
+      dispatchTable["StringLen"] = StringLen;
+    }
+    return &dispatchTable;
+  }
+
+  /**
+   * Lifecycle
+   */
+
+  void OnStart() override
+  {
+  }
+
+  void OnStop() override
+  {
+  }
+
+  void OnPause() override
+  {
+  }
+
+  void OnResume() override
+  {
+  }
+
+  /**
+   * Dispatch table for instance functions
+   * @return
+   */
+  Dali::AddOns::DispatchTable* GetInstanceDispatchTable() override
+  {
+    return nullptr;
+  }
+};
+
+REGISTER_ADDON_CLASS(TestDummyAddOn);
+
+exec
+/bin/bash -lc "sed -n '100,150p' repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-AddOns.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  DALI_TEST_EQUALS(result, true, TEST_LOCATION);
+
+  auto availableAddons = addonManager->EnumerateAddOns();
+
+  // must be 1 addon available
+  DALI_TEST_EQUALS(availableAddons.size(), 1u, TEST_LOCATION);
+
+  Dali::AddOnInfo info{};
+  addonManager->GetAddOnInfo(availableAddons[0], info);
+
+  // Test returned addon version and type
+  DALI_TEST_EQUALS(info.version, Dali::DALI_ADDON_VERSION(1, 0, 0), TEST_LOCATION);
+  DALI_TEST_EQUALS(info.type, Dali::AddOnType::GENERIC, TEST_LOCATION);
+
+  // Get addon handle
+  auto testAddon = addonManager->GetAddOn(availableAddons[0]);
+  result         = testAddon != 0;
+  DALI_TEST_EQUALS(result, true, TEST_LOCATION);
+
+  // Get addon global function
+  auto createInstance = addonManager->GetGlobalProc<void*()>(testAddon, "CreateInstance");
+  result              = createInstance != nullptr;
+  DALI_TEST_EQUALS(result, true, TEST_LOCATION);
+
+  // Test for false positive (queried function must not be found)
+  auto dummyfunction = addonManager->GetGlobalProc<void*()>(testAddon, "ThisFunctionDoesntExist");
+  result             = dummyfunction == nullptr;
+  DALI_TEST_EQUALS(result, true, TEST_LOCATION);
+
+  // Get Instance function and call it, expect answer 42
+  auto  instanceFunction = addonManager->GetInstanceProc<uint32_t(void*)>(testAddon, "InstanceCall");
+  auto* instance         = createInstance();
+  auto  answer           = instanceFunction(instance);
+  DALI_TEST_EQUALS(answer, 42, TEST_LOCATION);
+
+  // Test lifecycle
+  auto GetLifecycleStatus = addonManager->GetGlobalProc<bool()>(testAddon, "GetLifecycleStatus");
+  addonManager->Pause();
+
+  DALI_TEST_EQUALS(GetLifecycleStatus(), true, TEST_LOCATION);
+
+  addonManager->Resume();
+  DALI_TEST_EQUALS(GetLifecycleStatus(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-core/dali/devel-api/addons/addon-base.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_ADDONS_ADDON_BASE_H
+#define DALI_ADDONS_ADDON_BASE_H
+
+/*
+ * Copyright (c) 2020 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali/devel-api/addons/addon-dispatch-table.h>
+#include <dali/integration-api/addon-manager.h>
+#include <vector>
+
+namespace Dali
+{
+namespace AddOns
+{
+/**
+ * @class AddOnBase
+ *
+ * @brief AddOnBase is a base class for AddOns and should be used rather
+ * than writing exported functions of the AddOn directly.
+ *
+ */
+class AddOnBase
+{
+protected:
+  /**
+   * @brief Constructor
+   */
+  AddOnBase()
+  {
+    mSingleton = this;
+  }
+
+public:
+  /**
+   * @brief Destructor
+   */
+  virtual ~AddOnBase() = default;
+
+  /**
+   * @brief Retrieves AddOn info
+   * @param[out] addonInfo AddOnInfo structure to fill by the function
+   */
+  virtual void GetAddOnInfo(Dali::AddOnInfo& addonInfo) = 0;
+
+  /**
+   * @brief Returns a dispatch table for global functions.
+   * @return Valid dispatch table object or nullptr
+   */
+  virtual DispatchTable* GetGlobalDispatchTable() = 0;
+
+  /**
+   * @brief Returns a dispatch table for instance functions
+   * @return Valid dispatch table object or nullptr
+   */
+  virtual DispatchTable* GetInstanceDispatchTable() = 0;
+
+  /**
+   * @brief OnStart event.
+   * It's optional and should be implemented by the AddOn when it's required to handle the event.
+   */
+  virtual void OnStart()
+  {
+  }
+
+  /**
+   * @brief OnResume event.
+   * It's optional and should be implemented by the AddOn when it's required to handle the event.
+   */
+  virtual void OnResume()
+  {
+  }
+
+  /**
+   * @brief OnPause event.
+   * It's optional and should be implemented by the AddOn when it's required to handle the event.
+   */
+  virtual void OnPause()
+  {
+  }
+
+  /**
+   * @brief OnStop event.
+   * It's optional and should be implemented by the AddOn when it's required to handle the event.
+   */
+  virtual void OnStop()
+  {
+  }
+
+  /**
+   * @brief Getter of static singleton
+   * @return Returns valid singleton pointer
+   */
+  static AddOnBase* Get()
+  {
+    return mSingleton;
+  }
+
+private:
+  static AddOnBase* mSingleton;
+};
+
+/**
+ * @brief The function is automatically added to the AddOn code
+ * with use of REGISTER_ADDON_CLASS() macro
+ * @return The valid pointer to the AddOnBase interface
+ */
+extern Dali::AddOns::AddOnBase* CreateAddOn();
+
+/**
+ * Fills AddOnInfo structure.
+ * @param[out] info Reference to AddOnInfo structure
+ */
+template<class T>
+void GetAddOnInfo(Dali::AddOnInfo& info)
+{
+  auto* addon = Dali::AddOns::AddOnBase::Get();
+  addon->GetAddOnInfo(info);
+}
+
+/**
+ * Returns pointer to AddOn's global function
+ * @param[in] funcname Name of function
+ * @return Valid pointer or nullptr if function not found.
+ */
+template<class T>
+void* GetGlobalProc(const char* funcname)
+{
+  if(!funcname)
+  {
+    return nullptr;
+  }
+  auto* addon = Dali::AddOns::AddOnBase::Get();
+
+  // AddOn must be initialised up to this point!
+  if(!addon)
+  {
+    return nullptr;
+  }
+
+  static Dali::AddOns::DispatchTable* globalDispatchTable = addon->GetGlobalDispatchTable();
+
+  if(globalDispatchTable)
+  {
+    return globalDispatchTable->Find(funcname);
+  }
+  return nullptr;
+}
+
+/**
+ * Returns pointer to AddOn's instance function
+ * @param[in] funcname Name of function
+ * @return Valid pointer or nullptr if function not found.
+ */
+template<class T>
+void* GetInstanceProc(const char* funcname)
+{
+  if(!funcname)
+  {
+    return nullptr;
+  }
+
+  auto* addon = Dali::AddOns::AddOnBase::Get();
+
+  // AddOn must be initialised up to this point!
+  if(!addon)
+  {
+
+exec
+/bin/bash -lc "sed -n '220,260p' repos/dali-core/dali/devel-api/addons/addon-base.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+{
+  auto* addon = Dali::AddOns::AddOnBase::Get();
+  addon->OnStop();
+}
+
+/**
+ * @brief AddOn library internal constructor.
+ */
+inline void AddOnConstructorInternal()
+{
+  auto* addon = Dali::AddOns::CreateAddOn();
+
+  Dali::AddOnInfo info{};
+  addon->GetAddOnInfo(info);
+
+  // Generate dispatch tables
+  addon->GetGlobalDispatchTable();
+  addon->GetInstanceDispatchTable();
+
+  // Bind basic functions
+  Dali::AddOnDispatchTable table;
+  table.name            = info.name;
+  table.GetAddOnInfo    = GetAddOnInfo<void>;
+  table.GetGlobalProc   = GetGlobalProc<void>;
+  table.GetInstanceProc = GetInstanceProc<void>;
+  table.OnStart         = OnStart<void>;
+  table.OnStop          = OnStop<void>;
+  table.OnResume        = OnResume<void>;
+  table.OnPause         = OnPause<void>;
+
+  // Register dispatch table
+  Dali::Integration::AddOnManager::Get()->RegisterAddOnDispatchTable(&table);
+}
+
+} // namespace AddOns
+} // namespace Dali
+
+/**
+ * Macro must be used in order to auto-register AddOn with the AddOnManager.
+ * Note: The macro requires GCC/Clang compiler and currently only Linux-based environment
+ * is supported.
+
+codex
+---
+title: Addon Manager
+sidebar_label: Addon Manager
+category: platform-integration
+---
+
+# Addon Manager
+
+Addon Manager lets a dali-ui application discover available DALi add-ons, read their metadata, load them, and call functions exposed by those add-ons.
+
+## Table of Contents
+
+- [Accessing the Add-on Manager](#accessing-the-add-on-manager)
+- [Discovering Add-ons and Reading Metadata](#discovering-add-ons-and-reading-metadata)
+- [Loading Add-ons and Calling Global Functions](#loading-add-ons-and-calling-global-functions)
+- [Calling Instance Functions](#calling-instance-functions)
+- [Loading a Specific Library](#loading-a-specific-library)
+- [Lifecycle Forwarding](#lifecycle-forwarding)
+- [Registering a Dispatch Table](#registering-a-dispatch-table)
+
+## Accessing the Add-on Manager
+
+`Dali::Integration::AddOnManager` is provided by the DALi adaptor as a singleton. Application code obtains it with `Dali::Integration::AddOnManager::Get()` and should check the returned pointer before using it.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+void UseAddOnManager()
+{
+  Dali::Integration::AddOnManager* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return;
+  }
+
+  std::vector<std::string> addOnNames = manager->EnumerateAddOns();
+}
+```
+
+Application code should not create a `Dali::Integration::AddOnManager` directly. The manager instance is created by the adaptor, and `Dali::Integration::AddOnManager::Get()` returns the currently installed singleton.
+
+## Discovering Add-ons and Reading Metadata
+
+Use `Dali::Integration::AddOnManager::EnumerateAddOns()` to get the available add-on names. For each name, call `Dali::Integration::AddOnManager::GetAddOnInfo()` to fill a `Dali::AddOnInfo` structure.
+
+`Dali::AddOnInfo` describes the add-on through fields such as `Dali::AddOnInfo::name`, `Dali::AddOnInfo::version`, `Dali::AddOnInfo::type`, `Dali::AddOnInfo::next`, and `Dali::AddOnInfo::buildInfo`. The nested `Dali::AddOnInfo::BuildInfo` stores build-version values in `Dali::AddOnInfo::BuildInfo::libCoreVersion`, `Dali::AddOnInfo::BuildInfo::libAdaptorVersion`, and `Dali::AddOnInfo::BuildInfo::libToolkitVersion`.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+void PrintAvailableAddOns()
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return;
+  }
+
+  const std::vector<std::string> names = manager->EnumerateAddOns();
+
+  for(const std::string& name : names)
+  {
+    Dali::AddOnInfo info{};
+    if(manager->GetAddOnInfo(name, info))
+    {
+      const std::string addOnName = info.name;
+      const uint32_t addOnVersion = info.version;
+      const uint32_t coreVersion = info.buildInfo.libCoreVersion;
+      const uint32_t adaptorVersion = info.buildInfo.libAdaptorVersion;
+      const uint32_t toolkitVersion = info.buildInfo.libToolkitVersion;
+
+      (void)addOnName;
+      (void)addOnVersion;
+      (void)coreVersion;
+      (void)adaptorVersion;
+      (void)toolkitVersion;
+    }
+  }
+}
+```
+
+`Dali::Integration::AddOnManager::GetAddOnInfo()` returns `true` when the metadata was retrieved. Use that result before trusting the contents of `Dali::AddOnInfo`.
+
+## Loading Add-ons and Calling Global Functions
+
+After choosing an add-on name, call `Dali::Integration::AddOnManager::GetAddOn()` or `Dali::Integration::AddOnManager::LoadAddOns()` to obtain an add-on handle. Then use the typed template overload of `Dali::Integration::AddOnManager::GetGlobalProc()` to retrieve a callable `std::function`.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+int RunAddOnSum(const std::string& addOnName)
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return 0;
+  }
+
+  auto addOn = manager->GetAddOn(addOnName);
+  if(!addOn)
+  {
+    return 0;
+  }
+
+  auto doSum = manager->GetGlobalProc<int(int, int)>(addOn, "DoSum");
+  if(!doSum)
+  {
+    return 0;
+  }
+
+  return doSum(3, 4);
+}
+```
+
+For multiple add-ons, pass the selected names to `Dali::Integration::AddOnManager::LoadAddOns()`.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+void LoadOptionalAddOns()
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return;
+  }
+
+  const std::vector<std::string> names =
+  {
+    "SampleAddOn",
+    "ImagePipelineAddOn"
+  };
+
+  auto addOns = manager->LoadAddOns(names);
+
+  for(auto addOn : addOns)
+  {
+    if(!addOn)
+    {
+      continue;
+    }
+
+    auto initialize = manager->GetGlobalProc<void()>(addOn, "Initialize");
+    if(initialize)
+    {
+      initialize();
+    }
+  }
+}
+```
+
+When the function is required and you already know it exists, `Dali::Integration::AddOnManager::InvokeGlobalProc()` can load and invoke it in one expression.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+int InvokeRequiredFunction(const std::string& addOnName)
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return 0;
+  }
+
+  auto addOn = manager->GetAddOn(addOnName);
+  if(!addOn)
+  {
+    return 0;
+  }
+
+  return manager->InvokeGlobalProc<int>(addOn, "DoSum", 10, 20);
+}
+```
+
+Use `Dali::Integration::AddOnManager::GetGlobalProc()` when the function may be absent, because it lets the app check the returned callable before invoking it.
+
+## Calling Instance Functions
+
+Some add-ons expose a global creation function and separate instance functions. Retrieve the creation function with `Dali::Integration::AddOnManager::GetGlobalProc()`, then retrieve the instance entry point with `Dali::Integration::AddOnManager::GetInstanceProc()`.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+uint32_t CallAddOnInstance(const std::string& addOnName)
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return 0u;
+  }
+
+  auto addOn = manager->GetAddOn(addOnName);
+  if(!addOn)
+  {
+    return 0u;
+  }
+
+  auto createInstance = manager->GetGlobalProc<void*()>(addOn, "CreateInstance");
+  auto instanceCall = manager->GetInstanceProc<uint32_t(void*)>(addOn, "InstanceCall");
+
+  if(!createInstance || !instanceCall)
+  {
+    return 0u;
+  }
+
+  void* instance = createInstance();
+  if(!instance)
+  {
+    return 0u;
+  }
+
+  return instanceCall(instance);
+}
+```
+
+The template argument passed to `Dali::Integration::AddOnManager::GetInstanceProc()` must match the exported function signature. For example, `uint32_t(void*)` means the add-on function returns `uint32_t` and receives one `void*` instance pointer.
+
+## Loading a Specific Library
+
+Use `Dali::Integration::AddOnManager::LoadAddOn()` when the application has both the logical add-on name and the library name. The method returns a handle when the add-on can be loaded, otherwise it returns a null handle.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+bool LoadNamedLibrary()
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return false;
+  }
+
+  auto addOn = manager->LoadAddOn("SampleAddOn", "libSampleAddOn.so");
+  if(!addOn)
+  {
+    return false;
+  }
+
+  auto stringLength = manager->GetGlobalProc<int(const char*)>(addOn, "StringLen");
+  if(!stringLength)
+  {
+    return false;
+  }
+
+  return stringLength("dali-ui") == 7;
+}
+```
+
+`Dali::Integration::AddOnManager::GetAddOn()` is the shorter path when the manager already knows how to locate an add-on by name. `Dali::Integration::AddOnManager::LoadAddOn()` is useful when the caller must provide the library name explicitly.
+
+## Lifecycle Forwarding
+
+`Dali::Integration::AddOnManager::Start()`, `Dali::Integration::AddOnManager::Resume()`, `Dali::Integration::AddOnManager::Pause()`, and `Dali::Integration::AddOnManager::Stop()` forward lifecycle events to loaded add-ons that registered corresponding callbacks. In a normal dali-ui application, the adaptor owns lifecycle integration. These methods are mainly useful for platform-integration code, test harnesses, or embedded hosts that explicitly coordinate add-on lifecycle.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+void ForwardHostLifecycle(bool visible)
+{
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(!manager)
+  {
+    return;
+  }
+
+  manager->Start();
+
+  if(visible)
+  {
+    manager->Resume();
+  }
+  else
+  {
+    manager->Pause();
+  }
+
+  manager->Stop();
+}
+```
+
+Only call these lifecycle methods from code that owns the lifecycle boundary. Feature code inside a normal view-based dali-ui screen should use the add-on functions it needs and leave process lifecycle forwarding to the application or adaptor layer.
+
+## Registering a Dispatch Table
+
+`Dali::AddOnDispatchTable` is the bridge an add-on uses to expose its metadata, global functions, instance functions, and lifecycle callbacks to `Dali::Integration::AddOnManager`. The table owns the add-on-facing function pointers: `Dali::AddOnDispatchTable::name`, `Dali::AddOnDispatchTable::GetAddOnInfo`, `Dali::AddOnDispatchTable::GetGlobalProc`, `Dali::AddOnDispatchTable::GetInstanceProc`, `Dali::AddOnDispatchTable::OnStart`, `Dali::AddOnDispatchTable::OnResume`, `Dali::AddOnDispatchTable::OnPause`, and `Dali::AddOnDispatchTable::OnStop`.
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+#include <string>
+
+int DoSum(int lhs, int rhs)
+{
+  return lhs + rhs;
+}
+
+void FillAddOnInfo(Dali::AddOnInfo& info)
+{
+  info = Dali::AddOnInfo{};
+  info.name = "SampleAddOn";
+  info.version = 0x01000000u;
+  info.next = nullptr;
+  info.buildInfo.libCoreVersion = 0u;
+  info.buildInfo.libAdaptorVersion = 0u;
+  info.buildInfo.libToolkitVersion = 0u;
+}
+
+void* FindGlobalProc(const char* procName)
+{
+  if(procName && std::string(procName) == "DoSum")
+  {
+    return reinterpret_cast<void*>(&DoSum);
+  }
+
+  return nullptr;
+}
+
+void* FindInstanceProc(const char* procName)
+{
+  (void)procName;
+  return nullptr;
+}
+
+void OnStart()
+{
+}
+
+void OnResume()
+{
+}
+
+void OnPause()
+{
+}
+
+void OnStop()
+{
+}
+
+void RegisterSampleAddOn()
+{
+  Dali::AddOnDispatchTable table{};
+  table.name = "SampleAddOn";
+  table.GetAddOnInfo = &FillAddOnInfo;
+  table.GetGlobalProc = &FindGlobalProc;
+  table.GetInstanceProc = &FindInstanceProc;
+  table.OnStart = &OnStart;
+  table.OnResume = &OnResume;
+  table.OnPause = &OnPause;
+  table.OnStop = &OnStop;
+
+  auto* manager = Dali::Integration::AddOnManager::Get();
+  if(manager)
+  {
+    manager->RegisterAddOnDispatchTable(&table);
+  }
+}
+```
+
+Application developers usually consume add-ons through `Dali::Integration::AddOnManager::EnumerateAddOns()`, `Dali::Integration::AddOnManager::GetAddOnInfo()`, `Dali::Integration::AddOnManager::GetAddOn()`, `Dali::Integration::AddOnManager::GetGlobalProc()`, and `Dali::Integration::AddOnManager::GetInstanceProc()`. Add-on implementers provide a `Dali::AddOnDispatchTable` so the manager can discover and route those calls.
+tokens used
+45,946

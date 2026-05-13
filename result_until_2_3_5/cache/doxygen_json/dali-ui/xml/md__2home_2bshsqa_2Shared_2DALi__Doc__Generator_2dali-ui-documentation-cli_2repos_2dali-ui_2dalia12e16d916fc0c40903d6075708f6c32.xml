@@ -1,0 +1,649 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_206-api-design_8ko</compoundname>
+    <title>TextVisualizer Public API 설계</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md293"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md294">
+<title>목적</title>
+<para>이 문서의 목적은 <computeroutput><ref refid="classDali_1_1Ui_1_1TextVisualizer" kindref="compound">Dali::Ui::TextVisualizer</ref></computeroutput>의 public API 초안을 <ref refid="namespaceDali" kindref="compound">Dali</ref> UI 스타일에 맞게 제안하는 것이다.</para>
+<para>이번 문서에서는 다음을 명확히 정리한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="text-visualizer_8h" kindref="compound">integration-api/text-visualizer.h</ref></computeroutput> 초안</para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8h" kindref="compound">integration-api/text-visualizer-impl.h</ref></computeroutput> 초안</para>
+</listitem><listitem><para>property 제공 여부</para>
+</listitem><listitem><para>method API와 property API의 역할 분리</para>
+</listitem><listitem><para><computeroutput>Prepare()</computeroutput> naming 검토</para>
+</listitem><listitem><para><computeroutput>Layout()</computeroutput> / <computeroutput>Relayout()</computeroutput> public API 필요성 검토</para>
+</listitem><listitem><para><computeroutput>SetExclusionBounds</computeroutput> / <computeroutput>SetExclusionRegions</computeroutput> naming 검토</para>
+</listitem><listitem><para><computeroutput>ClearExclusionRegions()</computeroutput> 필요성</para>
+</listitem><listitem><para><ref refid="namespaceDali" kindref="compound">Dali</ref> coding style 관점의 naming</para>
+</listitem><listitem><para>ABI / API 안정성 고려사항</para>
+</listitem></itemizedlist>
+</para>
+<para>애매한 내용은 추측하지 않고 <computeroutput>확인 필요</computeroutput>로 표시한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md295">
+<title>참고 파일</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md296">
+<title>직접 참고한 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="input-field_8h" kindref="compound">dali-ui-foundation/public-api/input-field.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8h" kindref="compound">dali-ui-foundation/integration-api/input-field-impl.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>docs/text-visualizer/05-text-visualizer-design.ko.md</computeroutput></para>
+</listitem><listitem><para><computeroutput>docs/text-visualizer/05-layout-design.ko.md</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md297">
+<title>함께 참고한 규칙</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>View</computeroutput> 계열 public handle / internal impl 패턴</para>
+</listitem><listitem><para><computeroutput>SetX() / GetX()</computeroutput> naming</para>
+</listitem><listitem><para><computeroutput>DownCast(BaseHandle)</computeroutput> 패턴</para>
+</listitem><listitem><para>property enum + static property handler 패턴</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md298">
+<title>현재 구조 요약</title>
+<para><computeroutput>TextVisualizer</computeroutput>는 다음 전제를 갖는다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>View</computeroutput> 계열 public handle이다</para>
+</listitem><listitem><para>읽기 전용 텍스트 view이다</para>
+</listitem><listitem><para><computeroutput>Prepare</computeroutput>와 <computeroutput>Layout</computeroutput>은 내부적으로 분리된다</para>
+</listitem><listitem><para><computeroutput>Layout</computeroutput>은 view lifecycle의 <computeroutput>OnRelayout()</computeroutput>에서 자동 수행된다</para>
+</listitem><listitem><para>초기 구현에서는 <computeroutput>style</computeroutput>, <computeroutput>ellipsis</computeroutput>, <computeroutput>selection</computeroutput>, <computeroutput>cursor</computeroutput>, <computeroutput>editing</computeroutput>을 제외한다</para>
+</listitem></itemizedlist>
+</para>
+<para>따라서 public API도 이 전제에 맞게 작고 보수적으로 설계하는 것이 맞다.</para>
+<para>핵심 방향:</para>
+<para><orderedlist>
+<listitem><para>text state는 property + convenience method로 노출</para>
+</listitem><listitem><para>expensive command인 <computeroutput>Prepare()</computeroutput>는 method로만 노출</para>
+</listitem><listitem><para>exclusion region은 composite collection이므로 method 중심으로 노출</para>
+</listitem><listitem><para><computeroutput>Layout()</computeroutput> / <computeroutput>Relayout()</computeroutput>는 public API로 노출하지 않는다</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md299">
+<title>integration-api/text-visualizer.h 초안</title>
+<para>아래는 1차 구현 기준의 권장 public header 초안이다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>Copyright<sp/>(c)<sp/>2026<sp/>Samsung<sp/>Electronics<sp/>Co.,<sp/>Ltd.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>Licensed<sp/>under<sp/>the<sp/>Apache<sp/>License,<sp/>Version<sp/>2.0<sp/>(the<sp/>&quot;License&quot;);</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>you<sp/>may<sp/>not<sp/>use<sp/>this<sp/>file<sp/>except<sp/>in<sp/>compliance<sp/>with<sp/>the<sp/>License.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>You<sp/>may<sp/>obtain<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>License<sp/>at</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>http://www.apache.org/licenses/LICENSE-2.0</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>Unless<sp/>required<sp/>by<sp/>applicable<sp/>law<sp/>or<sp/>agreed<sp/>to<sp/>in<sp/>writing,<sp/>software</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>distributed<sp/>under<sp/>the<sp/>License<sp/>is<sp/>distributed<sp/>on<sp/>an<sp/>&quot;AS<sp/>IS&quot;<sp/>BASIS,</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>WITHOUT<sp/>WARRANTIES<sp/>OR<sp/>CONDITIONS<sp/>OF<sp/>ANY<sp/>KIND,<sp/>either<sp/>express<sp/>or<sp/>implied.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>See<sp/>the<sp/>License<sp/>for<sp/>the<sp/>specific<sp/>language<sp/>governing<sp/>permissions<sp/>and</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>limitations<sp/>under<sp/>the<sp/>License.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="comment">//<sp/>EXTERNAL<sp/>INCLUDES</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="dali-ui-common_8h" kindref="compound">dali-ui-foundation/public-api/dali-ui-common.h</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="view_8h" kindref="compound">dali-ui-foundation/public-api/view.h</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="ui-color_8h" kindref="compound">dali-ui-foundation/public-api/ui-color.h</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespaceDali" kindref="compound">Dali</ref></highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">Ui</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">Integration</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">TextVisualizerImpl;</highlight></codeline>
+<codeline><highlight class="normal">}</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="dali-ui-common_8h_1aef2307dd4c2caad2d52fb78f0d24a16c" kindref="member">DALI_UI_API</ref><sp/>TextVisualizer<sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/>View</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">Property</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="namespaceDali_1_1Ui_1_1TextVisual_1_1Property_1a8169c05abb6c3d47116652be05dffcd8a55d88f204557ac1f6d4b99e92c5379a7" kindref="member">TEXT</ref>,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="namespaceDali_1_1Ui_1_1Text_1_1TypingStyle_1a79a629a7513223c6c153483e59b09474ac8e44bbdcaf91b6ad604429667d5ac5b" kindref="member">FONT_FAMILY</ref>,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="namespaceDali_1_1Ui_1_1Text_1_1TypingStyle_1a79a629a7513223c6c153483e59b09474a866571c1ae204e3fb26049db1629c2d5" kindref="member">FONT_SIZE</ref>,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="namespaceDali_1_1Ui_1_1Text_1_1TypingStyle_1a79a629a7513223c6c153483e59b09474a0297ade2efc786e12e24f34a6920fb57" kindref="member">TEXT_COLOR</ref>,</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Creation<sp/>&amp;<sp/>Destruction</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>TextVisualizer<sp/>New();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>TextVisualizer&amp;<sp/>textVisualizer);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer(TextVisualizer&amp;&amp;<sp/>rhs)<sp/></highlight><highlight class="keyword">noexcept</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>~TextVisualizer();</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Operators</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer&amp;<sp/>operator=(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>TextVisualizer&amp;<sp/>handle);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer&amp;<sp/>operator=(TextVisualizer&amp;&amp;<sp/>rhs)<sp/></highlight><highlight class="keyword">noexcept</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Static<sp/>Methods</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>TextVisualizer<sp/>DownCast(BaseHandle<sp/>handle);</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Setters<sp/>for<sp/>chaining</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer&amp;<sp/>SetText(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::String&amp;<sp/>text);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/><sp/><sp/><sp/>GetText()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer&amp;<sp/>SetFontFamily(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::String&amp;<sp/>fontFamily);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/><sp/><sp/><sp/>GetFontFamily()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer&amp;<sp/>SetFontSize(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>fontSize);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>GetFontSize()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizer&amp;<sp/>SetTextColor(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>UiColor&amp;<sp/>color);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>UiColor<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>GetTextColor()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Commands</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Prepare();</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>ClearExclusionRegions();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>GetExclusionRegionCount()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">protected</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">explicit</highlight><highlight class="normal"><sp/><ref refid="dali-ui-common_8h_1aef2307dd4c2caad2d52fb78f0d24a16c" kindref="member">DALI_UI_API</ref><sp/>TextVisualizer(Integration::TextVisualizerImpl&amp;<sp/>implementation);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">explicit</highlight><highlight class="normal"><sp/><ref refid="dali-ui-common_8h_1aef2307dd4c2caad2d52fb78f0d24a16c" kindref="member">DALI_UI_API</ref><sp/>TextVisualizer(Dali::Internal::CustomActor*<sp/>internal);</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>Ui</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>Dali</highlight></codeline>
+</programlisting></para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md300">
+<title>초안 해석</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text</computeroutput>, <computeroutput>FontFamily</computeroutput>, <computeroutput>FontSize</computeroutput>, <computeroutput>TextColor</computeroutput>는 상태이므로 setter/getter를 둔다</para>
+</listitem><listitem><para><computeroutput>Prepare()</computeroutput>는 명령이므로 method로 둔다</para>
+</listitem><listitem><para>exclusion region은 collection이므로 method로 둔다</para>
+</listitem><listitem><para>public <computeroutput>Layout()</computeroutput> / <computeroutput>Relayout()</computeroutput>는 없다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md301">
+<title>integration-api/text-visualizer-impl.h 초안</title>
+<para>아래는 1차 구현 기준의 권장 impl header 초안이다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>Copyright<sp/>(c)<sp/>2026<sp/>Samsung<sp/>Electronics<sp/>Co.,<sp/>Ltd.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>Licensed<sp/>under<sp/>the<sp/>Apache<sp/>License,<sp/>Version<sp/>2.0<sp/>(the<sp/>&quot;License&quot;);</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>you<sp/>may<sp/>not<sp/>use<sp/>this<sp/>file<sp/>except<sp/>in<sp/>compliance<sp/>with<sp/>the<sp/>License.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>You<sp/>may<sp/>obtain<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>License<sp/>at</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>http://www.apache.org/licenses/LICENSE-2.0</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>Unless<sp/>required<sp/>by<sp/>applicable<sp/>law<sp/>or<sp/>agreed<sp/>to<sp/>in<sp/>writing,<sp/>software</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>distributed<sp/>under<sp/>the<sp/>License<sp/>is<sp/>distributed<sp/>on<sp/>an<sp/>&quot;AS<sp/>IS&quot;<sp/>BASIS,</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>WITHOUT<sp/>WARRANTIES<sp/>OR<sp/>CONDITIONS<sp/>OF<sp/>ANY<sp/>KIND,<sp/>either<sp/>express<sp/>or<sp/>implied.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>See<sp/>the<sp/>License<sp/>for<sp/>the<sp/>specific<sp/>language<sp/>governing<sp/>permissions<sp/>and</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*<sp/>limitations<sp/>under<sp/>the<sp/>License.</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="comment">//<sp/>EXTERNAL<sp/>INCLUDES</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="view-impl_8h" kindref="compound">dali-ui-foundation/public-api/view-impl.h</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="comment">//<sp/>INTERNAL<sp/>INCLUDES</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;dali-ui-foundation/internal/text/rendering/text-renderer.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="ui-color_8h" kindref="compound">dali-ui-foundation/public-api/ui-color.h</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespaceDali" kindref="compound">Dali</ref></highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">Ui</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">Integration</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">TextVisualizerImpl;</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="namespaceDali_1_1Ui_1_1Integration_1a3f379d9d5c2a0e9470bea620811b9e26" kindref="member">TextVisualizerImplPtr</ref><sp/>=<sp/>IntrusivePtr&lt;TextVisualizerImpl&gt;;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="dali-ui-common_8h_1aef2307dd4c2caad2d52fb78f0d24a16c" kindref="member">DALI_UI_API</ref><sp/>TextVisualizerImpl<sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/>ViewImpl</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/><ref refid="namespaceDali_1_1Ui_1_1Integration_1a3f379d9d5c2a0e9470bea620811b9e26" kindref="member">TextVisualizerImplPtr</ref><sp/>New();</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">protected</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/>~TextVisualizerImpl();</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>API</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>SetText(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::String&amp;<sp/>text);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/>GetText()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>SetFontFamily(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::String&amp;<sp/>fontFamily);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/>GetFontFamily()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/>SetFontSize(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>fontSize);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>GetFontSize()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/>SetTextColor(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>UiColor&amp;<sp/>color);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>UiColor<sp/>GetTextColor()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Prepare();</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>ClearExclusionRegions();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/>GetExclusionRegionCount()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>From<sp/>ViewImpl</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>OnInitialize()<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>OnRelayout(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Vector2&amp;<sp/>size,<sp/>RelayoutContainer&amp;<sp/>container)<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Vector3<sp/><sp/><sp/><sp/><sp/><sp/>GetNaturalSize()<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>GetHeightForWidth(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>width)<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>MeasuredSize<sp/>OnMeasure(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>widthConstraint,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>heightConstraint)<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>MeasuredSize<sp/>OnArrange(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>LayoutRect&amp;<sp/>bounds)<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>OnPropertySet(Dali::Property::Index<sp/>index,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Property::Value&amp;<sp/>propertyValue)<sp/></highlight><highlight class="keyword">override</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>Property<sp/>helpers</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>SetProperty(BaseObject*<sp/></highlight><highlight class="keywordtype">object</highlight><highlight class="normal">,<sp/>Dali::Property::Index<sp/>index,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Property::Value&amp;<sp/>value);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>Dali::Property::Value<sp/>GetProperty(BaseObject*<sp/></highlight><highlight class="keywordtype">object</highlight><highlight class="normal">,<sp/>Dali::Property::Index<sp/>index);</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>TextVisualizerImpl();</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mText;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::String<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mFontFamily;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mFontSize;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>UiColor<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mTextColor;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Dali::Vector&lt;Bounds&gt;<sp/><sp/>mExclusionRegions;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::RendererPtr<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mRenderer;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>Integration</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>Ui</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>Dali</highlight></codeline>
+</programlisting></para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md302">
+<title>초안 해석</title>
+<para><computeroutput>InputFieldImpl</computeroutput>와 달리 아래를 의도적으로 넣지 않는다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::EditableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::SelectableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::AnchorControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputMethodContext</computeroutput></para>
+</listitem><listitem><para>gesture detector</para>
+</listitem><listitem><para>decorator 관련 멤버</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, impl은 <computeroutput>ViewImpl + prepare/layout orchestration + renderer host</computeroutput>에 집중한다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md303">
+<title>property 제공 여부 검토</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md304">
+<title>제공하는 것이 좋은 property</title>
+<para>아래는 property로 제공하는 것이 적절하다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TEXT</computeroutput></para>
+</listitem><listitem><para><computeroutput>FONT_FAMILY</computeroutput></para>
+</listitem><listitem><para><computeroutput>FONT_SIZE</computeroutput></para>
+</listitem><listitem><para><computeroutput>TEXT_COLOR</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><orderedlist>
+<listitem><para>모두 &quot;지속 상태(state)&quot;다.</para>
+</listitem><listitem><para>setter/getter와 property가 자연스럽게 대응된다.</para>
+</listitem><listitem><para><ref refid="namespaceDali" kindref="compound">Dali</ref> UI의 기존 text control 스타일과 일관된다.</para>
+</listitem></orderedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md305">
+<title>1차 구현에서 property로 제공하지 않는 것이 좋은 항목</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare</computeroutput></para>
+</listitem><listitem><para>exclusion region collection</para>
+</listitem><listitem><para>layout result</para>
+</listitem><listitem><para>prepared state</para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>Prepare</computeroutput>는 상태가 아니라 명령이다.</para>
+</listitem><listitem><para>exclusion region은 collection 타입이며 변경 빈도가 높고 property로 다루기 번거롭다.</para>
+</listitem><listitem><para>prepared/layout state를 property로 노출하면 동기화 의미가 불명확해진다.</para>
+</listitem></orderedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md306">
+<title>권장 property 결론</title>
+<para>1차 구현에서는 &quot;기본 text state만 property 제공&quot;이 맞다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md307">
+<title>method API와 property API의 역할 구분</title>
+<para>권장 원칙은 아래와 같다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md308">
+<title>property API</title>
+<para><itemizedlist>
+<listitem><para>view의 지속 상태를 나타낸다</para>
+</listitem><listitem><para>property system을 통해 set/get 가능해야 한다</para>
+</listitem><listitem><para>convenience method와 1:1 대응한다</para>
+</listitem></itemizedlist>
+</para>
+<para>예:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TEXT</computeroutput></para>
+</listitem><listitem><para><computeroutput>FONT_FAMILY</computeroutput></para>
+</listitem><listitem><para><computeroutput>FONT_SIZE</computeroutput></para>
+</listitem><listitem><para><computeroutput>TEXT_COLOR</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md309">
+<title>method API</title>
+<para><itemizedlist>
+<listitem><para>명령(command) 또는 composite object update를 담당한다</para>
+</listitem><listitem><para>property와 1:1 대응하지 않아도 된다</para>
+</listitem><listitem><para>실행 시점 의미가 중요하다</para>
+</listitem></itemizedlist>
+</para>
+<para>예:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>ClearExclusionRegions()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, 이번 API 설계는 &quot;상태는 property, 명령과 컬렉션은 method&quot;로 정리하는 것이 적절하다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md310">
+<title>Prepare() naming 검토</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md311">
+<title>후보</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare()</computeroutput></para>
+</listitem><listitem><para><computeroutput>UpdatePreparedText()</computeroutput></para>
+</listitem><listitem><para><computeroutput>EnsurePrepared()</computeroutput></para>
+</listitem><listitem><para><computeroutput>BuildPreparedText()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md312">
+<title>권장안</title>
+<para><computeroutput>Prepare()</computeroutput>가 가장 적절하다.</para>
+<para>이유:</para>
+<para><orderedlist>
+<listitem><para>기존 설계 문서에서 이미 <computeroutput>Prepare / Layout</computeroutput> 2단계 용어를 사용하고 있다</para>
+</listitem><listitem><para>길이가 짧고 <ref refid="namespaceDali" kindref="compound">Dali</ref> style에 맞는다</para>
+</listitem><listitem><para>expensive preprocessing을 명시적으로 실행한다는 의미가 분명하다</para>
+</listitem></orderedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md313">
+<title>주의점</title>
+<para><computeroutput>Prepare()</computeroutput>는 public API로 노출되더라도 &quot;호출하지 않으면 동작하지 않는 API&quot;가 되면 안 된다.</para>
+<para>권장 의미:</para>
+<para><itemizedlist>
+<listitem><para>명시적으로 미리 준비를 수행하고 싶을 때 호출</para>
+</listitem><listitem><para>호출하지 않아도 내부적으로 필요 시 <computeroutput>OnRelayout()</computeroutput>에서 자동 실행</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>Prepare()</computeroutput>는 <computeroutput>optional eager command</computeroutput>로 해석하는 것이 맞다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md314">
+<title>Layout() 또는 Relayout() API 필요성 검토</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md315">
+<title>결론</title>
+<para>1차 구현에서는 public <computeroutput>Layout()</computeroutput> 또는 <computeroutput>Relayout()</computeroutput> API를 두지 않는 것이 맞다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md316">
+<title>이유</title>
+<para><orderedlist>
+<listitem><para><computeroutput>View</computeroutput> 계열은 원래 layout lifecycle이 존재한다.</para>
+</listitem><listitem><para>public <computeroutput>Layout()</computeroutput>은 parent layout system과 의미가 충돌하기 쉽다.</para>
+</listitem><listitem><para>public <computeroutput>Relayout()</computeroutput>은 <computeroutput>ViewImpl::OnRelayout()</computeroutput>와 이름이 너무 가깝고 혼동을 만든다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>가 직접 layout을 수행한다 해도, 외부에서는 결국 bounds 변경과 relayout request를 통해 동작하는 것이 자연스럽다.</para>
+</listitem></orderedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md317">
+<title>만약 추후 필요하다면</title>
+<para>추후 명시적 API가 꼭 필요할 경우 다음처럼 더 명확한 이름이 낫다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UpdateLayout()</computeroutput></para>
+</listitem><listitem><para><computeroutput>CalculateLayout()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>하지만 1차 구현에서는 public 노출을 보류하는 것이 적절하다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md318">
+<title>SetExclusionBounds / SetExclusionRegions naming 검토</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md319">
+<title>후보 비교</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md320">
+<title>&lt;tt&gt;SetExclusionBounds&lt;/tt&gt;</title>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>입력이 rectangle 배열이라는 점이 직접 드러난다</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>향후 region 형태가 rectangle 외로 확장되면 이름이 좁다</para>
+</listitem><listitem><para>&quot;bounds&quot;는 보통 view 자신의 bounds와 혼동될 수 있다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md321">
+<title>&lt;tt&gt;SetExclusionRegions&lt;/tt&gt;</title>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>의미가 더 상위 개념이다</para>
+</listitem><listitem><para>현재는 rectangle list여도, 미래에 shape / rounded region / path로 확장 가능하다</para>
+</listitem><listitem><para>&quot;텍스트를 배치하지 않을 영역 집합&quot;이라는 의미가 자연스럽다</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>현재 구현이 rectangle 기반이라는 점은 이름만으로는 드러나지 않는다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md322">
+<title>권장안</title>
+<para><computeroutput>SetExclusionRegions()</computeroutput>가 더 적절하다.</para>
+<para>단, ABI 안정성을 위해 public parameter type은 별도 public struct보다 아래처럼 단순하게 두는 것이 좋다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetExclusionRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
+</programlisting></para>
+<para>즉, naming은 <computeroutput>Regions</computeroutput>, type은 <computeroutput>Bounds</computeroutput> 집합으로 가는 것이 1차 구현에 가장 안정적이다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md323">
+<title>ClearExclusionRegions 필요성</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md324">
+<title>결론</title>
+<para><computeroutput>ClearExclusionRegions()</computeroutput>는 필요하다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md325">
+<title>이유</title>
+<para><orderedlist>
+<listitem><para>빈 vector를 전달하는 패턴보다 의도가 더 명확하다</para>
+</listitem><listitem><para>property가 아닌 method API로 exclusion region을 다룰 때 대칭 API가 된다</para>
+</listitem><listitem><para>language binding이나 script binding에서도 사용성이 좋다</para>
+</listitem></orderedlist>
+</para>
+<para>권장 시그니처:</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>ClearExclusionRegions();</highlight></codeline>
+</programlisting></para>
+<para>추가로 <computeroutput>GetExclusionRegionCount() const</computeroutput> 정도는 read-only query로 둘 수 있다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md326">
+<title>Dali coding style 관점의 naming</title>
+<para>이번 초안에서 권장하는 naming은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>타입명: <computeroutput>TextVisualizer</computeroutput></para>
+</listitem><listitem><para>impl 타입명: <computeroutput>TextVisualizerImpl</computeroutput></para>
+</listitem><listitem><para>생성: <computeroutput>New()</computeroutput></para>
+</listitem><listitem><para>downcast: <computeroutput>DownCast(BaseHandle)</computeroutput></para>
+</listitem><listitem><para>setter/getter: <computeroutput>SetText()</computeroutput>, <computeroutput>GetText()</computeroutput></para>
+</listitem><listitem><para>command: <computeroutput>Prepare()</computeroutput></para>
+</listitem><listitem><para>collection update: <computeroutput>SetExclusionRegions()</computeroutput></para>
+</listitem><listitem><para>clear: <computeroutput>ClearExclusionRegions()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md327">
+<title>피하는 것이 좋은 이름</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>DoPrepare()</computeroutput></para>
+</listitem><listitem><para><computeroutput>RunPrepare()</computeroutput></para>
+</listitem><listitem><para><computeroutput>ApplyLayout()</computeroutput></para>
+</listitem><listitem><para><computeroutput>Relayout()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetExcludedBounds()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetExclusionRects()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para><ref refid="namespaceDali" kindref="compound">Dali</ref> public API 관점에서 너무 내부 구현 지향적이거나</para>
+</listitem><listitem><para>existing lifecycle과 충돌하거나</para>
+</listitem><listitem><para>rectangle 구현 상세를 과하게 드러낸다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md328">
+<title>ABI/API 안정성 고려사항</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md329">
+<title>1. public type을 최소화한다</title>
+<para><computeroutput>PreparedText</computeroutput>, <computeroutput>LayoutResult</computeroutput>, <computeroutput>ClusterPlacement</computeroutput> 같은 내부 구조는 public API에 노출하지 않는 것이 맞다.</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>향후 layout engine 변경 시 ABI 부담이 커진다</para>
+</listitem><listitem><para>1차 구현에서 구조가 자주 바뀔 가능성이 높다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md330">
+<title>2. exclusion region용 새 public struct는 신중해야 한다</title>
+<para>public <computeroutput>struct TextExclusionRegion</computeroutput>을 노출하면 향후 필드 추가가 ABI 부담이 된다.</para>
+<para>따라서 1차 구현에서는 새 public struct보다 다음이 더 안전하다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="normal">Dali::Vector&lt;Bounds&gt;</highlight></codeline>
+</programlisting></para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md331">
+<title>3. property enum은 초기에 작게 유지한다</title>
+<para>처음부터 많은 property를 공개하면 이후 제거가 어렵다.</para>
+<para>권장:</para>
+<para><itemizedlist>
+<listitem><para>1차는 <computeroutput>TEXT</computeroutput>, <computeroutput>FONT_FAMILY</computeroutput>, <computeroutput>FONT_SIZE</computeroutput>, <computeroutput>TEXT_COLOR</computeroutput>만</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md332">
+<title>4. command API의 동기 의미를 문서화해야 한다</title>
+<para><computeroutput>Prepare()</computeroutput>는 sync인지 lazy trigger인지 사용자 입장에서 오해가 생길 수 있다.</para>
+<para>권장 문서화:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare()</computeroutput>는 현재 state 기준으로 prepared cache를 갱신한다</para>
+</listitem><listitem><para>필요 시 내부 relayout에서도 자동 호출된다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md333">
+<title>5. internal impl 의존 타입은 public에 새지 않게 한다</title>
+<para>public header에서는:</para>
+<para><itemizedlist>
+<listitem><para>renderer</para>
+</listitem><listitem><para>prepared model</para>
+</listitem><listitem><para>layout result</para>
+</listitem><listitem><para>atlas adapter</para>
+</listitem></itemizedlist>
+</para>
+<para>같은 내부 타입을 forward declare도 하지 않는 편이 안전하다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md334">
+<title>TextVisualizer에 필요한 부분</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md335">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>View</computeroutput> 계열 handle/impl 패턴</para>
+</listitem><listitem><para>minimal state property</para>
+</listitem><listitem><para>explicit <computeroutput>Prepare()</computeroutput> method</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> / <computeroutput>ClearExclusionRegions()</computeroutput> method</para>
+</listitem><listitem><para>public <computeroutput>Layout()</computeroutput> 비노출</para>
+</listitem><listitem><para>작은 API surface</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md336">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetExclusionRegionCount()</computeroutput></para>
+</listitem><listitem><para>future <computeroutput>LAYOUT_DIRECTION_MODE</computeroutput> property 추가 가능성</para>
+</listitem><listitem><para>향후 <computeroutput>font weight / width / slant</computeroutput> 추가 가능성</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md337">
+<title>버릴 부분</title>
+<para>1차 public API에서는 아래를 노출하지 않는다.</para>
+<para><itemizedlist>
+<listitem><para>selection API</para>
+</listitem><listitem><para>cursor API</para>
+</listitem><listitem><para>editable API</para>
+</listitem><listitem><para>IME / clipboard API</para>
+</listitem><listitem><para>style API</para>
+</listitem><listitem><para>ellipsis API</para>
+</listitem><listitem><para>explicit public <computeroutput>Layout()</computeroutput> / <computeroutput>Relayout()</computeroutput></para>
+</listitem><listitem><para>prepared/layout result 내부 구조</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md338">
+<title>설계 결론</title>
+<para><computeroutput>TextVisualizer</computeroutput>의 public API는 <computeroutput>InputField</computeroutput>처럼 넓게 시작하면 안 되고, <computeroutput>View</computeroutput> + minimal text state + explicit prepare command + exclusion collection API 정도로 작게 시작하는 것이 맞다.</para>
+<para>권장 public surface는 아래로 요약된다.</para>
+<para><itemizedlist>
+<listitem><para>state: <computeroutput>Text</computeroutput>, <computeroutput>FontFamily</computeroutput>, <computeroutput>FontSize</computeroutput>, <computeroutput>TextColor</computeroutput></para>
+</listitem><listitem><para>command: <computeroutput>Prepare()</computeroutput></para>
+</listitem><listitem><para>exclusion: <computeroutput>SetExclusionRegions()</computeroutput>, <computeroutput>ClearExclusionRegions()</computeroutput></para>
+</listitem><listitem><para>layout: public <computeroutput>Layout()</computeroutput> 비노출</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md339">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>TEXT_COLOR</computeroutput>를 1차 property에 포함할지, render host 완성 시점에 함께 넣을지 최종 확정 필요</para>
+</listitem><listitem><para><computeroutput>LAYOUT_DIRECTION_MODE</computeroutput>를 1차 범위에 넣을지 여부 확정 필요</para>
+</listitem><listitem><para>companion property index header를 별도 파일로 둘지 (<computeroutput><ref refid="text-visualizer-properties_8h" kindref="compound">text-visualizer-properties.h</ref></computeroutput>) 구현 시 확정 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dalia12e16d916fc0c40903d6075708f6c32_1autotoc_md340">
+<title>TextVisualizer 설계에 주는 결론</title>
+<para><orderedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>는 <computeroutput>View</computeroutput> 계열 public handle로 설계하되, API surface는 매우 작게 유지하는 것이 맞다.</para>
+</listitem><listitem><para><computeroutput>Prepare()</computeroutput>는 public method로 두되, <computeroutput>Layout()</computeroutput> / <computeroutput>Relayout()</computeroutput>는 public에 노출하지 않는 것이 적절하다.</para>
+</listitem><listitem><para>exclusion 영역은 property보다 method API가 적합하며, naming은 <computeroutput>SetExclusionRegions()</computeroutput>가 가장 자연스럽다.</para>
+</listitem><listitem><para>ABI 안정성을 위해 내부 layout/prepare 구조와 새 public composite type 노출은 최소화해야 한다. </para>
+</listitem></orderedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/06-api-design.ko.md"/>
+  </compounddef>
+</doxygen>

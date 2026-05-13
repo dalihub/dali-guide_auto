@@ -1,0 +1,267 @@
+---
+title: Ui Theme Manager
+sidebar_label: Ui Theme Manager
+category: styling-theme-config
+---
+
+# Ui Theme Manager
+
+`Dali::Ui::UiThemeManager` gives a dali-ui application access to the active UI theme identity and theme-change notifications.
+
+## Table of Contents
+
+- [Getting the Theme Manager](#getting-the-theme-manager)
+- [Reading the Current Theme ID](#reading-the-current-theme-id)
+- [Reacting to Theme Changes](#reacting-to-theme-changes)
+- [Passing and Storing the Manager Handle](#passing-and-storing-the-manager-handle)
+- [Downcasting a Generic Handle](#downcasting-a-generic-handle)
+
+## Getting the Theme Manager
+
+Use `Dali::Ui::UiThemeManager::Get` to retrieve the singleton theme manager for the application. In dali-ui application code, treat it as a global styling service for your `Dali::Ui::View` tree, not as a visual object.
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ThemeAwarePage
+{
+public:
+  ThemeAwarePage()
+  : mThemeManager(UiThemeManager::Get())
+  {
+  }
+
+  UiThemeManager GetThemeManager() const
+  {
+    return mThemeManager;
+  }
+
+private:
+  UiThemeManager mThemeManager;
+};
+```
+
+`Dali::Ui::UiThemeManager` is handle-based. Multiple calls to `Dali::Ui::UiThemeManager::Get` return handles to the same manager instance, so application components can request the manager where they need it instead of manually owning a separate theme service.
+
+```cpp
+UiThemeManager themeManager = UiThemeManager::Get();
+UiThemeManager sameThemeManager = UiThemeManager::Get();
+```
+
+## Reading the Current Theme ID
+
+Call `Dali::Ui::UiThemeManager::GetCurrentThemeId` when your app needs to branch on the currently active theme identity. The method returns the theme identifier as a string value. If no theme is active, the public API documents that the returned value can be empty.
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ThemeNameModel
+{
+public:
+  void Refresh()
+  {
+    UiThemeManager themeManager = UiThemeManager::Get();
+    mCurrentThemeId = themeManager.GetCurrentThemeId();
+  }
+
+  const String& GetCachedThemeId() const
+  {
+    return mCurrentThemeId;
+  }
+
+private:
+  String mCurrentThemeId;
+};
+```
+
+For view-based UI code, keep the theme ID as application state and apply any view updates through the relevant dali-ui view APIs used by that component. `Dali::Ui::UiThemeManager` itself is responsible for the theme-level query; it does not expose direct color or style property lookup APIs.
+
+```cpp
+class SettingsPaneThemeState
+{
+public:
+  SettingsPaneThemeState()
+  : mThemeManager(UiThemeManager::Get())
+  {
+    UpdateThemeId();
+  }
+
+  void UpdateThemeId()
+  {
+    mThemeId = mThemeManager.GetCurrentThemeId();
+  }
+
+  bool HasThemeId() const
+  {
+    return !mThemeId.empty();
+  }
+
+private:
+  UiThemeManager mThemeManager;
+  String mThemeId;
+};
+```
+
+## Reacting to Theme Changes
+
+Use `Dali::Ui::UiThemeManager::ThemeChangedSignal` to update your app when the active theme changes. The signal type is `Dali::Signal<void()>`, so the callback takes no arguments and returns `void`.
+
+`Dali::ConnectionTracker` is the usual owner for signal connections in app classes. Derive from `Dali::ConnectionTracker`, connect the signal to a member function, and refresh your `Dali::Ui::View`-backed UI state inside the callback.
+
+```cpp
+#include <dali/public-api/object/connection-tracker.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ThemeAwareController : public ConnectionTracker
+{
+public:
+  ThemeAwareController()
+  : mThemeManager(UiThemeManager::Get())
+  {
+    mThemeManager.ThemeChangedSignal().Connect(
+      this,
+      &ThemeAwareController::OnThemeChanged);
+
+    RefreshThemeState();
+  }
+
+private:
+  void OnThemeChanged()
+  {
+    RefreshThemeState();
+  }
+
+  void RefreshThemeState()
+  {
+    mThemeId = mThemeManager.GetCurrentThemeId();
+  }
+
+private:
+  UiThemeManager mThemeManager;
+  String mThemeId;
+};
+```
+
+Because `Dali::Ui::UiThemeManager::ThemeChangedSignal` is owned by `Dali::Ui::UiThemeManager`, connect through the manager handle. Do not use unrelated signal-owning helpers such as `Dali::Ui::DevelAnimatedImageVisual::Signal` or `Dali::Ui::DevelAnimatedVectorImageVisual::Signal` for theme changes; those belong to their own visual APIs.
+
+```cpp
+class ThemeChangeLogger : public ConnectionTracker
+{
+public:
+  void Start()
+  {
+    UiThemeManager themeManager = UiThemeManager::Get();
+    themeManager.ThemeChangedSignal().Connect(
+      this,
+      &ThemeChangeLogger::OnThemeChanged);
+  }
+
+private:
+  void OnThemeChanged()
+  {
+    mLastThemeId = UiThemeManager::Get().GetCurrentThemeId();
+  }
+
+private:
+  String mLastThemeId;
+};
+```
+
+## Passing and Storing the Manager Handle
+
+`Dali::Ui::UiThemeManager` can be copied as a handle. This is useful when several controllers need to consult the same theme manager while managing different parts of a `Dali::Ui::View` tree.
+
+```cpp
+class ThemeState
+{
+public:
+  explicit ThemeState(UiThemeManager themeManager)
+  : mThemeManager(themeManager)
+  {
+  }
+
+  String ReadThemeId() const
+  {
+    return mThemeManager.GetCurrentThemeId();
+  }
+
+private:
+  UiThemeManager mThemeManager;
+};
+
+UiThemeManager themeManager = UiThemeManager::Get();
+ThemeState pageThemeState(themeManager);
+ThemeState dialogThemeState(themeManager);
+```
+
+Move construction and move assignment are also supported by `Dali::Ui::UiThemeManager::UiThemeManager` and `Dali::Ui::UiThemeManager::operator=`. Use move semantics only when transferring ownership of a local handle wrapper is clearer for your component design.
+
+```cpp
+UiThemeManager CreateThemeManagerHandle()
+{
+  UiThemeManager themeManager = UiThemeManager::Get();
+  return themeManager;
+}
+
+class DeferredThemeOwner
+{
+public:
+  void SetThemeManager(UiThemeManager themeManager)
+  {
+    mThemeManager = std::move(themeManager);
+  }
+
+  String ReadThemeId() const
+  {
+    return mThemeManager.GetCurrentThemeId();
+  }
+
+private:
+  UiThemeManager mThemeManager;
+};
+
+DeferredThemeOwner owner;
+owner.SetThemeManager(CreateThemeManagerHandle());
+```
+
+The destructor `Dali::Ui::UiThemeManager::~UiThemeManager` is defaulted, so ordinary value storage is enough. Application code does not need an explicit release step for local manager handles.
+
+## Downcasting a Generic Handle
+
+Most application code should call `Dali::Ui::UiThemeManager::Get` directly. Use `Dali::Ui::UiThemeManager::DownCast` only when framework code gives you a generic handle and you need to recover the theme-manager type.
+
+```cpp
+#include <dali/public-api/object/base-handle.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+UiThemeManager AsThemeManager(BaseHandle handle)
+{
+  return UiThemeManager::DownCast(handle);
+}
+
+String ReadThemeIdFromHandle(BaseHandle handle)
+{
+  UiThemeManager themeManager = UiThemeManager::DownCast(handle);
+
+  if(themeManager)
+  {
+    return themeManager.GetCurrentThemeId();
+  }
+
+  return {};
+}
+```
+
+`Dali::Ui::UiThemeManager::DownCast` returns a `Dali::Ui::UiThemeManager` handle when the input handle contains a theme manager. If the handle is empty or contains another object type, the returned handle is uninitialized, so check it before calling `Dali::Ui::UiThemeManager::GetCurrentThemeId` or `Dali::Ui::UiThemeManager::ThemeChangedSignal`.

@@ -1,0 +1,274 @@
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Adaptor Framework
+sidebar_label: Adaptor Framework
+category: application-framework
+---
+
+# Adaptor Framework
+
+The adaptor framework connects a DALi application to the platform lifecycle and emits the point where a dali-ui app should create its `Dali::Ui::View` tree.
+
+## Table of Contents
+
+- [Starting a dali-ui Application](#starting-a-dali-ui-application)
+- [Handling Application Lifecycle Signals](#handling-application-lifecycle-signals)
+- [Reacting to Device and Locale Changes](#reacting-to-device-and-locale-changes)
+- [Rendering Without a Visible Window](#rendering-without-a-visible-window)
+
+## Starting a dali-ui Application
+
+Use `Dali::Application` as the normal entry point for a dali-ui app. Create the `Dali::Application` in `main()`, connect `InitSignal()`, and create your `Dali::Ui::View` hierarchy from that init callback. This keeps DALi object creation aligned with adaptor initialization.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+void CreateUi(Dali::Application application)
+{
+  auto window = application.GetWindow();
+
+  Dali::Ui::View root =
+    Dali::Ui::View::New()
+      .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+      .SetRequestedHeight(Dali::Ui::MATCH_PARENT)
+      .SetBackgroundColor(Dali::Ui::UiColor(0x20242AFF));
+
+  Dali::Ui::View panel =
+    Dali::Ui::View::New()
+      .SetRequestedWidth(360.0f)
+      .SetRequestedHeight(240.0f)
+      .SetRequestedPositionX(48.0f)
+      .SetRequestedPositionY(48.0f)
+      .SetBackgroundColor(Dali::Ui::UiColor(0xFFFFFFFF))
+      .SetCornerRadius(18.0f);
+
+  root.Add(panel);
+  window.Add(root);
+}
+} // namespace
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Dali::Application application = Dali::Application::New(&argc, &argv);
+  application.InitSignal().Connect(&CreateUi);
+  application.MainLoop();
+  return 0;
+}
+```
+
+`Dali::Application::New()` accepts the process argument list. The adaptor recognizes DALi window and environment options such as width, height, DPI, and help, then updates `argc` and `argv` after consuming them.
+
+## Handling Application Lifecycle Signals
+
+`Dali::Application` exposes lifecycle signals for common application state changes. Use `InitSignal()` to build the initial `Dali::Ui::View` tree, `PauseSignal()` and `ResumeSignal()` to pause and resume app-owned activity, and `TerminateSignal()` to release application-owned resources.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+Dali::Ui::View gRoot;
+
+void OnInit(Dali::Application application)
+{
+  auto window = application.GetWindow();
+
+  gRoot =
+    Dali::Ui::View::New()
+      .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+      .SetRequestedHeight(Dali::Ui::MATCH_PARENT)
+      .SetBackgroundColor(Dali::Ui::UiColor(0x101820FF));
+
+  window.Add(gRoot);
+}
+
+void OnPause(Dali::Application application)
+{
+  if(gRoot)
+  {
+    gRoot.SetOpacity(0.65f);
+  }
+}
+
+void OnResume(Dali::Application application)
+{
+  if(gRoot)
+  {
+    gRoot.SetOpacity(1.0f);
+  }
+}
+
+void OnTerminate(Dali::Application application)
+{
+  gRoot.Reset();
+}
+} // namespace
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Dali::Application application = Dali::Application::New(&argc, &argv);
+
+  application.InitSignal().Connect(&OnInit);
+  application.PauseSignal().Connect(&OnPause);
+  application.ResumeSignal().Connect(&OnResume);
+  application.TerminateSignal().Connect(&OnTerminate);
+
+  application.MainLoop();
+  return 0;
+}
+```
+
+Call `Quit()` when the app should leave its main loop. Call `Lower()` when the app should move behind other applications without fully quitting.
+
+```cpp
+void RequestClose(Dali::Application application, bool keepWarm)
+{
+  if(keepWarm)
+  {
+    application.Lower();
+  }
+  else
+  {
+    application.Quit();
+  }
+}
+```
+
+## Reacting to Device and Locale Changes
+
+The adaptor framework forwards device and locale changes through `Dali::Application`. Use `LanguageChangedSignal()` and `RegionChangedSignal()` when text, formatting, or content selection depends on the current locale. Use `LowBatterySignal()`, `LowMemorySignal()`, and `DeviceOrientationChangedSignal()` to adapt app behavior to device state.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+namespace
+{
+Dali::Ui::View gContent;
+
+void OnInit(Dali::Application application)
+{
+  auto window = application.GetWindow();
+
+  gContent =
+    Dali::Ui::View::New()
+      .SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+      .SetRequestedHeight(Dali::Ui::MATCH_PARENT)
+      .SetBackgroundColor(Dali::Ui::UiColor(0xFFFFFFFF));
+
+  window.Add(gContent);
+}
+
+void OnLanguageChanged(Dali::Application application)
+{
+  auto language = application.GetLanguage();
+  auto region   = application.GetRegion();
+
+  if(gContent)
+  {
+    gContent.InvalidateMeasure();
+    gContent.InvalidateArrange();
+  }
+}
+
+void OnLowBattery(Dali::DeviceStatus::Battery::Status status)
+{
+  if(status == Dali::DeviceStatus::Battery::CRITICALLY_LOW && gContent)
+  {
+    gContent.SetOpacity(0.8f);
+  }
+}
+
+void OnLowMemory(Dali::DeviceStatus::Memory::Status status)
+{
+  if(status == Dali::DeviceStatus::Memory::CRITICALLY_LOW && gContent)
+  {
+    gContent.RemoveAllChildren();
+  }
+}
+
+void OnOrientationChanged(Dali::DeviceStatus::Orientation::Status status)
+{
+  if(gContent)
+  {
+    gContent.InvalidateArrange();
+  }
+}
+} // namespace
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Dali::Application application = Dali::Application::New(&argc, &argv);
+
+  application.InitSignal().Connect(&OnInit);
+  application.LanguageChangedSignal().Connect(&OnLanguageChanged);
+  application.RegionChangedSignal().Connect(&OnLanguageChanged);
+  application.LowBatterySignal().Connect(&OnLowBattery);
+  application.LowMemorySignal().Connect(&OnLowMemory);
+  application.DeviceOrientationChangedSignal().Connect(&OnOrientationChanged);
+
+  application.MainLoop();
+  return 0;
+}
+```
+
+Use `Dali::Application::GetResourcePath()` to get the full path where application resources are stored.
+
+```cpp
+void LoadApplicationResources()
+{
+  auto resourcePath = Dali::Application::GetResourcePath();
+}
+```
+
+## Rendering Without a Visible Window
+
+Use `Dali::OffscreenApplication` when the app needs DALi rendering without creating a visible native window. This is useful for background rendering, testing, or frame capture workflows. Unlike `Dali::Application`, `Dali::OffscreenApplication` does not run its own event loop; the application controls event processing and rendering.
+
+```cpp
+#include <dali/devel-api/adaptor-framework/offscreen-application.h>
+
+int RenderOneOffscreenFrame(int argc, char** argv)
+{
+  Dali::OffscreenApplication application =
+    Dali::OffscreenApplication::New(
+      &argc,
+      &argv,
+      Dali::OffscreenApplication::FrameworkBackend::ECORE,
+      Dali::OffscreenApplication::RenderMode::MANUAL);
+
+  application.Start();
+
+  auto offscreenWindow = application.GetWindow();
+
+  application.RenderOnce();
+  application.Terminate();
+
+  return 0;
+}
+```
+
+Choose `Dali::OffscreenApplication::RenderMode::AUTO` when rendering should be driven continuously by the surrounding event loop. Choose `Dali::OffscreenApplication::RenderMode::MANUAL` when the app should render only after an explicit `RenderOnce()` call.
+-----END_REVISED_MARKDOWN-----
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Adaptor Framework Prose Review
+
+Changed prose:
+- Revised the opening paragraph from “owns the platform lifecycle” to “connects a DALi application to the platform lifecycle” and explicitly tied UI creation to the emitted initialization point.
+- Revised the lifecycle paragraph to say “common application state changes” and “app-owned activity,” avoiding the implication that `PauseSignal()` pauses DALi core itself.
+- Revised the `GetResourcePath()` sentence to match the public header wording: it returns the full path where application resources are stored.
+
+Source evidence:
+- `repos/dali-adaptor/dali/public-api/adaptor-framework/application.h` documents `Dali::Application` as the object every DALi app creates, states that DALi objects should be created from `InitSignal()`, lists `-w|--width`, `-h|--height`, `-d|--dpi`, and `--help`, and says consumed options are stripped from `argv` while `argc` is updated.
+- `repos/dali-adaptor/dali/internal/adaptor/common/application-impl.cpp` emits `InitSignal()`, `TerminateSignal()`, `PauseSignal()`, `ResumeSignal()`, locale signals, low battery/memory signals, and device orientation signals from framework callbacks; its pause comments state that DALi delivers the framework pause event to the app.
+- `repos/dali-adaptor/dali/public-api/adaptor-framework/application.h` and `application-impl.cpp` support `MainLoop()`, `Lower()`, `Quit()`, `GetWindow()`, `GetResourcePath()`, `GetLanguage()`, and `GetRegion()`.
+- `repos/dali-adaptor/dali/public-api/adaptor-framework/device-status.h` confirms `Dali::DeviceStatus::Battery::CRITICALLY_LOW`, `Dali::DeviceStatus::Memory::CRITICALLY_LOW`, and `Dali::DeviceStatus::Orientation::Status`.
+- `repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-application.h` confirms `Dali::OffscreenApplication`, `FrameworkBackend::ECORE`, `RenderMode::AUTO`, `RenderMode::MANUAL`, `Start()`, `GetWindow()`, `RenderOnce()`, and `Terminate()`, and states that `OffscreenApplication` has no event loop of its own.
+- `repos/dali-ui/dali-ui-foundation/public-api/view.h`, `view.cpp`, and `view.autogen.h` confirm the `Dali::Ui::View` APIs used by the examples, including fluent setters, `InvalidateMeasure()`, `InvalidateArrange()`, and `RemoveAllChildren()`.
+- `repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp` and other dali-ui samples confirm the app pattern of `Application::New(&argc, &argv)`, connecting `InitSignal()`, creating a `Dali::Ui::View` tree, adding it to `Window`, and calling `MainLoop()`.
+
+Remaining concerns:
+- The guide intentionally keeps `Dali::Application` and `Dali::OffscreenApplication` in scope because this feature is the adaptor framework; they are dali-adaptor APIs used as application setup rather than dali-ui view APIs.
+- The locale example reads `language` and `region` without applying them to real localized content. This is acceptable as a compact guide example, but a product guide could replace it with an actual text or resource refresh example when a concrete app component is available.
+-----END_PROSE_REVIEW_REPORT-----

@@ -1,0 +1,411 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_222-sorted-exclusion-cache-design_8ko</compoundname>
+    <title>TextVisualizer Sorted Exclusion Cache Design</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md811"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md812">
+<title>1. 목적</title>
+<para>현재 <computeroutput>LayoutGlyphs()</computeroutput> / <computeroutput>LayoutPlaceholder()</computeroutput>는 layout pass 시작 시 exclusion regions를 y 기준으로 정렬한다.</para>
+<para>moving bounds 상황에서는 exclusion이 자주 바뀌지만, 같은 exclusion version 안에서도 다음 상황에서는 sorted cache를 재사용할 가능성이 있다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>OnMeasure()</computeroutput>와 <computeroutput>OnRelayout()</computeroutput>이 같은 exclusion set을 사용한다.</para>
+</listitem><listitem><para>measure cache miss 이후 같은 exclusion set으로 여러 width를 측정한다.</para>
+</listitem><listitem><para>향후 partial relayout / available interval cache가 같은 exclusion set을 여러 번 조회한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이 문서는 sorted exclusion cache를 <computeroutput>TextVisualizerImpl</computeroutput>로 올릴지, <computeroutput>LayoutEngine</computeroutput> internal type으로 둘지 설계한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md813">
+<title>2. 현재 구조</title>
+<para>현재 <computeroutput>dali-ui-foundation/internal/text/text-visualizer/layout-engine.cpp</computeroutput>의 exclusion 관련 구조는 다음과 같다.</para>
+<para><table rows="8" cols="4"><row>
+<entry thead="yes"><para>항목   </para>
+</entry><entry thead="yes"><para>현재 위치   </para>
+</entry><entry thead="yes"><para>공개 범위   </para>
+</entry><entry thead="yes"><para>역할    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>SortedExclusionRegion</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>layout-engine.cpp</computeroutput> anonymous namespace   </para>
+</entry><entry thead="no"><para>cpp-local   </para>
+</entry><entry thead="no"><para><computeroutput>Bounds</computeroutput>와 <computeroutput>top</computeroutput> / <computeroutput>bottom</computeroutput> cache    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>SortedExclusionRegions</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>layout-engine.cpp</computeroutput> anonymous namespace   </para>
+</entry><entry thead="no"><para>cpp-local   </para>
+</entry><entry thead="no"><para><computeroutput>std::vector&lt;SortedExclusionRegion&gt;</computeroutput> alias    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>BuildSortedExclusionRegions()</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>layout-engine.cpp</computeroutput> anonymous namespace   </para>
+</entry><entry thead="no"><para>cpp-local   </para>
+</entry><entry thead="no"><para><computeroutput>Dali::Vector&lt;Bounds&gt;</computeroutput>를 y-sort cache로 변환    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>BuildAvailableIntervalsFromSorted()</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>layout-engine.cpp</computeroutput> anonymous namespace   </para>
+</entry><entry thead="no"><para>cpp-local   </para>
+</entry><entry thead="no"><para>sorted regions를 line y band로 scan    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>LayoutGlyphs()</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutEngine</computeroutput> public static internal API   </para>
+</entry><entry thead="no"><para>header exposed   </para>
+</entry><entry thead="no"><para>glyph placement layout    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>LayoutPlaceholder()</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutEngine</computeroutput> public static internal API   </para>
+</entry><entry thead="no"><para>header exposed   </para>
+</entry><entry thead="no"><para>placeholder cluster layout    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>BuildAvailableIntervals()</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutEngine</computeroutput> public static internal API   </para>
+</entry><entry thead="no"><para>header exposed   </para>
+</entry><entry thead="no"><para>test/helper용 vector 기반 interval build   </para>
+</entry></row>
+</table>
+</para>
+<para>현재 <computeroutput>TextVisualizerImpl</computeroutput>이 볼 수 있는 것은 <computeroutput>Dali::Vector&lt;Bounds&gt; mExclusionRegions</computeroutput>뿐이다. sorted representation은 <computeroutput>LayoutEngine</computeroutput> 안에서 layout pass마다 생성되고 사라진다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md814">
+<title>3. 현재 비용</title>
+<para>exclusion count를 <computeroutput>N</computeroutput>이라고 하면 현재 비용은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>매 layout pass마다 <computeroutput>BuildSortedExclusionRegions()</computeroutput>에서 <computeroutput>O(N log N)</computeroutput> sort</para>
+</listitem><listitem><para>각 line마다 sorted list를 y-overlap 기준으로 scan</para>
+</listitem><listitem><para>scan 이후 line-local blocked interval x-sort / merge</para>
+</listitem></itemizedlist>
+</para>
+<para>최근 measured layout cache로 <computeroutput>OnMeasure()</computeroutput> 직후 같은 width의 <computeroutput>OnRelayout()</computeroutput>은 layout 계산 자체를 재사용할 수 있다. 하지만 cache miss path에서는 여전히 layout pass마다 sort가 발생한다.</para>
+<para>performance sample에서는 orb exclusion을 ellipse bands로 세분화한다. orb 5개, band 11개면 orb만 55개 region이 생기고, 여기에 title / drop cap / fixed / overlay exclusions가 추가될 수 있다. region 수가 커질수록 sort 위치와 cache boundary가 중요해진다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md815">
+<title>4. 후보 설계</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md816">
+<title>A. LayoutEngine 내부 유지</title>
+<para>현재 구조를 유지한다.</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>API가 가장 단순하다.</para>
+</listitem><listitem><para><computeroutput>LayoutEngine</computeroutput>이 self-contained 상태를 유지한다.</para>
+</listitem><listitem><para>stale cache risk가 없다.</para>
+</listitem><listitem><para>existing UTC와 helper 사용이 그대로 유지된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>sort cache 재사용이 불가능하다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl</computeroutput>이 exclusion 변경 여부를 알고 있어도 sorted cache를 보유할 수 없다.</para>
+</listitem><listitem><para>향후 partial relayout / interval cache를 넣을 때 다시 type 경계를 바꿔야 할 가능성이 높다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md817">
+<title>B. SortedExclusionRegions type을 header로 이동</title>
+<para><computeroutput>SortedExclusionRegion</computeroutput> / <computeroutput>SortedExclusionRegions</computeroutput>를 <computeroutput><ref refid="layout-types_8h" kindref="compound">layout-types.h</ref></computeroutput> 또는 새 header로 이동한다.</para>
+<para>예상 header:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">dali-ui-foundation/internal/text/text-visualizer/exclusion-types.h</highlight></codeline>
+</programlisting></para>
+<para>예상 type:</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keyword">struct<sp/></highlight><highlight class="normal">SortedExclusionRegion</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Bounds<sp/>rect;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>top{0.0f};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>bottom{0.0f};</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SortedExclusionRegions<sp/>=<sp/>std::vector&lt;SortedExclusionRegion&gt;;</highlight></codeline>
+</programlisting></para>
+<para><computeroutput>LayoutEngine</computeroutput>에 overload를 추가한다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="normal">LayoutGlyphs(preparedText,<sp/>width,<sp/>lineHeight,<sp/>sortedExclusionRegions,<sp/>result)</highlight></codeline>
+<codeline><highlight class="normal">LayoutPlaceholder(preparedText,<sp/>width,<sp/>lineHeight,<sp/>sortedExclusionRegions,<sp/>result)</highlight></codeline>
+<codeline><highlight class="normal">BuildAvailableIntervals(layoutWidth,<sp/>lineY,<sp/>lineHeight,<sp/>sortedExclusionRegions)</highlight></codeline>
+</programlisting></para>
+<para>기존 vector API는 유지하고 내부에서 sorted cache를 만든다.</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerImpl</computeroutput>이 sorted cache를 member로 보유할 수 있다.</para>
+</listitem><listitem><para><computeroutput>OnMeasure()</computeroutput> / <computeroutput>OnRelayout()</computeroutput> / 향후 partial relayout에서 같은 sorted cache를 재사용할 수 있다.</para>
+</listitem><listitem><para>구현 diff가 비교적 작다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>std::vector</computeroutput> 기반 type이 header에 노출된다.</para>
+</listitem><listitem><para>cache invalidation 책임이 caller로 일부 이동한다.</para>
+</listitem><listitem><para>sorted cache build helper를 어디에 둘지 결정해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md818">
+<title>C. ExclusionLayoutCache class 추가</title>
+<para>internal-only <computeroutput>ExclusionLayoutCache</computeroutput> class를 추가한다.</para>
+<para>예상 책임:</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keyword">class<sp/></highlight><highlight class="normal">ExclusionLayoutCache</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Clear();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SetRegions(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Dali::Vector&lt;Bounds&gt;&amp;<sp/>regions);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>SortedExclusionRegions&amp;<sp/>GetSortedRegions()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint64_t<sp/>GetVersion()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>Empty()<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+</programlisting></para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>cache / invalidation 책임이 명확하다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl</computeroutput>이 raw sorted vector를 직접 만지지 않아도 된다.</para>
+</listitem><listitem><para>향후 static / dynamic split, y bucket, affected range cache로 확장하기 쉽다.</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> exact compare / same-count in-place update와 역할을 분리할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>새 abstraction이 추가된다.</para>
+</listitem><listitem><para>단순 sort reuse치고는 구현 범위가 커질 수 있다.</para>
+</listitem><listitem><para><computeroutput>LayoutEngine</computeroutput>이 cache class를 받을지, sorted vector만 받을지 API 경계를 정해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md819">
+<title>D. LayoutEngine callback/cache provider</title>
+<para><computeroutput>LayoutEngine</computeroutput>이 callback 또는 provider interface를 통해 line interval을 가져오게 하는 설계다.</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>향후 available interval cache / y bucket / partial relayout까지 확장 가능하다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>현재 단계에서는 과하다.</para>
+</listitem><listitem><para>layout policy와 cache policy가 강하게 섞일 수 있다.</para>
+</listitem><listitem><para>word wrap / line y progression 디버깅이 어려워진다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이번 단계에서는 보류한다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md820">
+<title>5. 추천 방향</title>
+<para>장기적으로는 C, 즉 <computeroutput>ExclusionLayoutCache</computeroutput>가 가장 낫다.</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>sorted cache는 단순 vector가 아니라 “exclusion regions의 derived layout data”다.</para>
+</listitem><listitem><para>향후 static / dynamic split, y bucket, interval cache, affected y range cache까지 같은 축으로 확장될 가능성이 높다.</para>
+</listitem><listitem><para>cache stale risk를 줄이려면 cache 소유권과 version을 한 곳에 묶는 편이 좋다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단기 구현은 C의 작은 형태를 추천한다.</para>
+<para>추천 1차 구현:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer/exclusion-layout-cache.h/cpp</computeroutput> 추가</para>
+</listitem><listitem><para><computeroutput>SortedExclusionRegion</computeroutput> / <computeroutput>SortedExclusionRegions</computeroutput>를 이 header로 이동</para>
+</listitem><listitem><para><computeroutput>ExclusionLayoutCache::SetRegions()</computeroutput>에서 sort cache rebuild</para>
+</listitem><listitem><para><computeroutput>LayoutEngine</computeroutput>에 sorted cache overload 추가</para>
+</listitem><listitem><para>기존 vector API는 유지하고 내부에서 temporary <computeroutput>ExclusionLayoutCache</computeroutput> 또는 helper를 사용</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl</computeroutput>이 <computeroutput>mExclusionLayoutCache</computeroutput>를 member로 보유</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> / <computeroutput>ClearExclusionRegions()</computeroutput>에서 cache update / clear</para>
+</listitem></orderedlist>
+</para>
+<para>이렇게 하면 public API 없이 <computeroutput>TextVisualizerImpl</computeroutput>만 optimized path를 사용할 수 있다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md821">
+<title>6. Invalidation 정책</title>
+<para>sorted exclusion cache는 rect set에만 의존한다.</para>
+<para><table rows="11" cols="2"><row>
+<entry thead="yes"><para>변화   </para>
+</entry><entry thead="yes"><para>sorted exclusion cache    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>SetExclusionRegions()</computeroutput> changed   </para>
+</entry><entry thead="no"><para>rebuild    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>SetExclusionRegions()</computeroutput> same values   </para>
+</entry><entry thead="no"><para>keep    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>same-count in-place update   </para>
+</entry><entry thead="no"><para>rebuild    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>ClearExclusionRegions()</computeroutput>   </para>
+</entry><entry thead="no"><para>clear    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>text 변경   </para>
+</entry><entry thead="no"><para>keep    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>font family 변경   </para>
+</entry><entry thead="no"><para>keep    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>font size 변경   </para>
+</entry><entry thead="no"><para>keep    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>line height 변경   </para>
+</entry><entry thead="no"><para>keep    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>text color 변경   </para>
+</entry><entry thead="no"><para>keep    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>layout width / size 변경   </para>
+</entry><entry thead="no"><para>keep   </para>
+</entry></row>
+</table>
+</para>
+<para>주의할 점:</para>
+<para><itemizedlist>
+<listitem><para>cache rebuild는 <computeroutput>AreExclusionRegionsEqual()</computeroutput>이 false인 경우에만 수행한다.</para>
+</listitem><listitem><para><computeroutput>UpdateStoredExclusionRegions()</computeroutput>가 same-count in-place update를 수행해도 sorted cache는 stale이므로 반드시 rebuild해야 한다.</para>
+</listitem><listitem><para>measured layout cache는 layout result cache이므로 exclusion 변경 시 clear한다. sorted exclusion cache는 exclusion 변경 시 rebuild한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md822">
+<title>7. API 영향</title>
+<para>public API 영향은 없다.</para>
+<para>internal API 영향:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutEngine::LayoutGlyphs()</computeroutput> / <computeroutput>LayoutPlaceholder()</computeroutput> vector overload는 유지한다.</para>
+</listitem><listitem><para>sorted cache overload가 추가된다.</para>
+</listitem><listitem><para><computeroutput>BuildAvailableIntervals()</computeroutput> vector overload는 유지한다.</para>
+</listitem><listitem><para>test helper는 기존 vector API를 계속 사용할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>파일 영향 후보:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer/exclusion-layout-cache.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/exclusion-layout-cache.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/layout-engine.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/layout-engine.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8h" kindref="compound">integration-api/text-visualizer-impl.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md823">
+<title>8. 성능 기대</title>
+<para>기대 효과:</para>
+<para><itemizedlist>
+<listitem><para>같은 exclusion set으로 여러 layout 계산이 발생할 때 <computeroutput>O(N log N)</computeroutput> sort를 한 번만 수행한다.</para>
+</listitem><listitem><para>measured layout cache miss path에서도 sorted cache는 재사용할 수 있다.</para>
+</listitem><listitem><para>moving bounds에서는 매 tick exclusion set이 바뀌므로 sort 횟수 자체는 tick마다 필요할 수 있지만, sort 비용을 layout pass 밖의 update 단계로 이동할 수 있다.</para>
+</listitem><listitem><para>향후 partial relayout / interval cache의 기반이 된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>제한:</para>
+<para><itemizedlist>
+<listitem><para>exclusion이 매 tick 바뀌면 sorted cache rebuild는 여전히 매 tick 발생한다.</para>
+</listitem><listitem><para>line-local blocked interval sort / merge는 그대로 남는다.</para>
+</listitem><listitem><para>word wrap range scan과 full relayout은 별도 병목이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md824">
+<title>9. 위험</title>
+<para>주요 위험은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>stale sorted cache로 인한 잘못된 text avoidance</para>
+</listitem><listitem><para><computeroutput>LayoutEngine</computeroutput> overload 증가로 테스트 경로가 나뉨</para>
+</listitem><listitem><para><computeroutput>std::vector</computeroutput> / <computeroutput>Dali::Vector</computeroutput> 혼합 사용에 따른 ownership 혼동</para>
+</listitem><listitem><para>sort 위치가 <computeroutput>SetExclusionRegions()</computeroutput>로 이동하면서 profiling 해석이 바뀜</para>
+</listitem><listitem><para>future static / dynamic split과 중복 설계 가능성</para>
+</listitem><listitem><para>placeholder / glyph layout 양쪽에서 같은 sorted cache를 정확히 쓰는지 검증 필요</para>
+</listitem></itemizedlist>
+</para>
+<para>위험 완화:</para>
+<para><itemizedlist>
+<listitem><para>vector overload를 유지해 fallback path 보존</para>
+</listitem><listitem><para>sorted cache와 vector path가 같은 layout signature를 만드는 UTC 추가</para>
+</listitem><listitem><para>exclusion changed / cleared invalidation UTC 추가</para>
+</listitem><listitem><para><computeroutput>ExclusionLayoutCache</computeroutput>에 version을 둬 debugging 가능성을 열어둠</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md825">
+<title>10. 다음 구현 후보</title>
+<para>추천 커밋:</para>
+<para><programlisting filename=".text"><codeline><highlight class="normal">Add<sp/>TextVisualizer<sp/>ExclusionLayoutCache</highlight></codeline>
+</programlisting></para>
+<para>권장 범위:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>ExclusionLayoutCache</computeroutput> type/header 추가</para>
+</listitem><listitem><para><computeroutput>LayoutEngine</computeroutput> sorted overload 추가</para>
+</listitem><listitem><para>기존 vector overload 유지</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl</computeroutput>만 sorted cache path 사용</para>
+</listitem><listitem><para>UTC:<itemizedlist>
+<listitem><para>vector path와 sorted cache path layout signature 동일</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> changed 시 cache rebuild smoke</para>
+</listitem><listitem><para><computeroutput>ClearExclusionRegions()</computeroutput> clear smoke</para>
+</listitem><listitem><para>placeholder path sorted cache smoke</para>
+</listitem></itemizedlist>
+</para>
+</listitem></orderedlist>
+</para>
+<para>이번 설계의 결론은 “바로 <computeroutput><ref refid="layout-types_8h" kindref="compound">layout-types.h</ref></computeroutput>에 raw sorted vector를 노출하기보다, 작은 internal <computeroutput>ExclusionLayoutCache</computeroutput>로 cache ownership을 먼저 세우는 것”이다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DALi__Doc__Generator_2dali-ui-documentation-cli_2repos_2dali-ui_2dali9e9cb6b997efdf69218fd0f856debcfd_1autotoc_md826">
+<title>11. 진행: ExclusionLayoutCache</title>
+<para>이번 구현에서 설계안 C의 작은 형태를 적용했다.</para>
+<para>추가된 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer/exclusion-layout-cache.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/exclusion-layout-cache.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>SortedExclusionRegion</computeroutput></para>
+</listitem><listitem><para><computeroutput>SortedExclusionRegions</computeroutput></para>
+</listitem><listitem><para><computeroutput>ExclusionLayoutCache</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>ExclusionLayoutCache::SetRegions()</computeroutput>는 raw <computeroutput>Dali::Vector&lt;Bounds&gt;</computeroutput>를 받아 <computeroutput>top</computeroutput> / <computeroutput>bottom</computeroutput> 값을 미리 계산하고 y 기준으로 정렬한다. <computeroutput>Clear()</computeroutput>와 <computeroutput>SetRegions()</computeroutput>는 version을 증가시켜 cache 변경 추적이 가능하게 했다.</para>
+<para><computeroutput>LayoutEngine</computeroutput>에는 다음 sorted cache overload를 추가했다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>BuildAvailableIntervals(..., const ExclusionLayoutCache&amp;)</computeroutput></para>
+</listitem><listitem><para><computeroutput>LayoutPlaceholder(..., const ExclusionLayoutCache&amp;, LayoutResult&amp;)</computeroutput></para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs(..., const ExclusionLayoutCache&amp;, LayoutResult&amp;)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>기존 vector 기반 API는 유지했다. 기존 API는 compatibility/test path로 남기고, 내부에서 temporary <computeroutput>ExclusionLayoutCache</computeroutput>를 만들어 새 overload로 위임한다. 따라서 기존 caller의 behavior는 유지된다.</para>
+<para><computeroutput>TextVisualizerImpl</computeroutput>은 <computeroutput>mExclusionLayoutCache</computeroutput>를 member로 보유한다.</para>
+<para>적용 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetExclusionRegions()</computeroutput>에서 exact compare가 false인 경우 <computeroutput>mExclusionRegions</computeroutput>를 갱신한 뒤 <computeroutput>mExclusionLayoutCache.SetRegions(mExclusionRegions)</computeroutput>를 호출한다.</para>
+</listitem><listitem><para><computeroutput>ClearExclusionRegions()</computeroutput>는 raw regions와 sorted cache를 함께 clear한다.</para>
+</listitem><listitem><para><computeroutput>UpdateLayout()</computeroutput>은 raw <computeroutput>mExclusionRegions</computeroutput> 대신 cached sorted exclusions를 사용하는 <computeroutput>LayoutEngine</computeroutput> overload를 호출한다.</para>
+</listitem><listitem><para>text / font / fontSize / lineHeight / color / layout size 변경은 sorted exclusion cache를 clear하지 않는다.</para>
+</listitem><listitem><para>measured layout cache는 기존처럼 exclusion 변경 시 clear된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>검증 방향:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ExclusionLayoutCache</computeroutput> empty / set / clear UTC</para>
+</listitem><listitem><para>unsorted input이 top 기준으로 정렬되는지 확인</para>
+</listitem><listitem><para>vector path와 sorted cache path의 available intervals가 같은지 확인</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput> vector path와 cache path의 <computeroutput>LayoutResult::CalculateSignature()</computeroutput>가 같은지 확인</para>
+</listitem><listitem><para><computeroutput>LayoutPlaceholder()</computeroutput> vector path와 cache path의 signature가 같은지 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para>moving bounds처럼 exclusion set이 매 tick 바뀌면 cache rebuild 자체는 계속 발생한다.</para>
+</listitem><listitem><para>line-local blocked interval sort / merge는 여전히 layout 중 수행된다.</para>
+</listitem><listitem><para>static / dynamic core split, y bucket cache, available interval cache는 다음 단계 후보로 남긴다. </para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/22-sorted-exclusion-cache-design.ko.md"/>
+  </compounddef>
+</doxygen>
