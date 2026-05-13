@@ -1,0 +1,833 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e2109-aa3a-7040-acb5-118461a21679
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Ui Theme Manager (ui-theme-manager)
+- Category: styling-theme-config
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-core": 3,
+    "dali-ui": 10
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::UiThemeManager | scope=primary
+- Dali::Ui::UiThemeManager::DownCast | UiThemeManager DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::UiThemeManager::Get | UiThemeManager Get() | scope=primary_member
+- Dali::Ui::UiThemeManager::GetCurrentThemeId | String GetCurrentThemeId() const | scope=primary_member
+- Dali::Ui::UiThemeManager::ThemeChangedSignal | ThemeChangedSignalType & ThemeChangedSignal() | scope=primary_member
+- Dali::Ui::UiThemeManager::UiThemeManager | UiThemeManager(UiThemeManager &&rhs) noexcept=default | scope=primary_member
+- Dali::Ui::UiThemeManager::operator= | UiThemeManager & operator=(UiThemeManager &&rhs) noexcept=default | scope=primary_member
+- Dali::Ui::UiThemeManager::~UiThemeManager | ~UiThemeManager()=default | scope=primary_member
+- Dali::ConnectionTracker | scope=context_lookup
+- Dali::ConnectionTracker::ConnectionTracker | ConnectionTracker() | scope=context_lookup
+- Dali::Signal | scope=context_lookup
+- Dali::Ui::DevelAnimatedImageVisual::Signal | scope=context_lookup
+- Dali::Ui::DevelAnimatedVectorImageVisual::Signal | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "ui-theme-manager_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker",
+      "Dali::Signal",
+      "Dali::Ui::DevelAnimatedImageVisual::Signal",
+      "Dali::Ui::DevelAnimatedVectorImageVisual::Signal",
+      "Dali::Ui::UiThemeManager::ThemeChangedSignal"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:25 (utc, score=0.6)
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+
+bool gThemeChangedCalled = false;
+
+class ThemeChangedCallback : public ConnectionTracker
+{
+public:
+  void OnThemeChanged()
+  {
+    gThemeChangedCalled = true;
+  }
+};
+
+} // namespace
+
+void utc_dali_uithememanager_startup(void)
+{
+  test_return_value    = TET_UNDEF;
+  gThemeChangedCalled  = false;
+}
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectionTracker",
+      "DownCast",
+      "Get",
+      "GetCurrentThemeId",
+      "Signal",
+      "ThemeChangedSignal",
+      "UiThemeManager"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 104,
+    "snippet_start_line": 25
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp && rg -n \"class UiThemeManager|ThemeChangedSignal|GetCurrentThemeId|UiThemeManager::Get|typedef.*ThemeChanged|using.*ThemeChanged\" repos/dali-ui -S" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+#include <dali-ui-test-suite-utils.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+
+bool gThemeChangedCalled = false;
+
+class ThemeChangedCallback : public ConnectionTracker
+{
+public:
+  void OnThemeChanged()
+  {
+    gThemeChangedCalled = true;
+  }
+};
+
+} // namespace
+
+void utc_dali_uithememanager_startup(void)
+{
+  test_return_value    = TET_UNDEF;
+  gThemeChangedCalled  = false;
+}
+
+void utc_dali_uithememanager_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// === Constructor ===
+
+int UtcDaliUiThemeManagerConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager;
+  DALI_TEST_CHECK(!manager);
+
+  END_TEST;
+}
+
+// === Get Singleton ===
+
+int UtcDaliUiThemeManagerGetP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+  DALI_TEST_CHECK(manager);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerGetSingletonP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager1 = UiThemeManager::Get();
+  UiThemeManager manager2 = UiThemeManager::Get();
+
+  DALI_TEST_CHECK(manager1);
+  DALI_TEST_CHECK(manager2);
+  DALI_TEST_CHECK(manager1 == manager2);
+
+  END_TEST;
+}
+
+// === Copy / Move ===
+
+int UtcDaliUiThemeManagerCopyConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+  UiThemeManager copy(manager);
+
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(manager == copy);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerMoveConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+  DALI_TEST_EQUALS(2, manager.GetBaseObject().ReferenceCount(), TEST_LOCATION);
+
+  UiThemeManager moved(std::move(manager));
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!manager);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerCopyAssignmentP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+  UiThemeManager copy;
+  copy = manager;
+
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(manager == copy);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerMoveAssignmentP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+
+  UiThemeManager moved;
+  moved = std::move(manager);
+
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!manager);
+
+  END_TEST;
+}
+
+// === DownCast ===
+
+int UtcDaliUiThemeManagerDownCastP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+  BaseHandle     handle(manager);
+
+  UiThemeManager downCasted = UiThemeManager::DownCast(handle);
+  DALI_TEST_CHECK(downCasted);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerDownCastN(void)
+{
+  UiTestApplication application;
+
+  BaseHandle handle;
+  UiThemeManager downCasted = UiThemeManager::DownCast(handle);
+  DALI_TEST_CHECK(!downCasted);
+
+  END_TEST;
+}
+
+// === GetCurrentThemeId ===
+
+int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
+{
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:65:UiThemeManager::Get().ThemeChangedSignal().Connect(this, &MyApp::OnThemeChanged);
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:69:  auto themeId = UiThemeManager::Get().GetCurrentThemeId();
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:104:  Dali::String GetCurrentThemeId() const override
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:109:  ThemeChangedSignalType& ThemeChangedSignal() override
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:111:    return mThemeChangedSignal;
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:118:    mThemeChangedSignal.Emit();
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:123:  ThemeChangedSignalType   mThemeChangedSignal;
+repos/dali-ui/wiki/Color-&-Theme.md:64:which listens to system events (e.g. vconf, DBus) and emits `ThemeChangedSignal`.
+repos/dali-ui/wiki/Color-&-Theme.md:69:UiThemeManager::Get().ThemeChangedSignal().Connect(this, &MyApp::OnThemeChanged);
+repos/dali-ui/wiki/Color-&-Theme.md:73:  auto themeId = UiThemeManager::Get().GetCurrentThemeId();
+repos/dali-ui/wiki/Color-&-Theme.md:108:  Dali::String GetCurrentThemeId() const override
+repos/dali-ui/wiki/Color-&-Theme.md:113:  ThemeChangedSignalType& ThemeChangedSignal() override
+repos/dali-ui/wiki/Color-&-Theme.md:115:    return mThemeChangedSignal;
+repos/dali-ui/wiki/Color-&-Theme.md:122:    mThemeChangedSignal.Emit();
+repos/dali-ui/wiki/Color-&-Theme.md:127:  ThemeChangedSignalType  mThemeChangedSignal;
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h:35:class UiThemeManagerImpl;
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h:52:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h:81:  String GetCurrentThemeId() const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h:88:  ThemeChangedSignalType& ThemeChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp:36:UiThemeManager UiThemeManager::Get()
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp:46:String UiThemeManager::GetCurrentThemeId() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp:48:  return GetImpl(*this).GetCurrentThemeId();
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp:51:UiThemeManager::ThemeChangedSignalType& UiThemeManager::ThemeChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp:53:  return GetImpl(*this).ThemeChangedSignal();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:73:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:83:  UiThemeManager manager1 = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:84:  UiThemeManager manager2 = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:99:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:112:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:126:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:140:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:157:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:177:// === GetCurrentThemeId ===
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:179:int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:183:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:184:  String themeId = manager.GetCurrentThemeId();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:192:// === ThemeChangedSignal ===
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:194:int UtcDaliUiThemeManagerThemeChangedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:198:  UiThemeManager manager = UiThemeManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp:201:  manager.ThemeChangedSignal().Connect(&callback, &ThemeChangedCallback::OnThemeChanged);
+repos/dali-ui/samples/color-controls/test-theme-loader.cpp:94:String TestThemeLoader::GetCurrentThemeId() const
+repos/dali-ui/samples/color-controls/test-theme-loader.cpp:99:TestThemeLoader::ThemeChangedSignalType& TestThemeLoader::ThemeChangedSignal()
+repos/dali-ui/samples/color-controls/test-theme-loader.cpp:101:  return mThemeChangedSignal;
+repos/dali-ui/samples/color-controls/test-theme-loader.cpp:107:  mThemeChangedSignal.Emit();
+repos/dali-ui/samples/color-controls/test-theme-loader.h:29:  Dali::String GetCurrentThemeId() const override;
+repos/dali-ui/samples/color-controls/test-theme-loader.h:30:  ThemeChangedSignalType& ThemeChangedSignal() override;
+repos/dali-ui/samples/color-controls/test-theme-loader.h:36:  ThemeChangedSignalType mThemeChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:110:    mLoader->ThemeChangedSignal().Connect(mSlotDelegate, &UiThemeManagerImpl::OnLoaderThemeChanged);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:120:String UiThemeManagerImpl::GetCurrentThemeId() const
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:124:    return mLoader->GetCurrentThemeId();
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:129:UiThemeManagerImpl::ThemeChangedSignalType& UiThemeManagerImpl::ThemeChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:131:  return mThemeChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:136:  mThemeChangedSignal.Emit();
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.h:49:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.h:82:  String GetCurrentThemeId() const;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.h:89:  ThemeChangedSignalType& ThemeChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.h:112:  ThemeChangedSignalType mThemeChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/theme-loader-interface.h:49:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/integration-api/theme-loader-interface.h:67:  virtual String GetCurrentThemeId() const = 0;
+repos/dali-ui/dali-ui-foundation/integration-api/theme-loader-interface.h:74:  virtual ThemeChangedSignalType& ThemeChangedSignal() = 0;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-manager-impl.cpp:81:  UiThemeManager themeManager = UiThemeManager::Get();
+repos/dali-ui/dali-ui-foundation/integration-api/default-theme-loader.h:70:  String GetCurrentThemeId() const override;
+repos/dali-ui/dali-ui-foundation/integration-api/default-theme-loader.h:77:  ThemeChangedSignalType& ThemeChangedSignal() override;
+repos/dali-ui/dali-ui-foundation/integration-api/default-theme-loader.h:118:  ThemeChangedSignalType                                                 mThemeChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/default-theme-loader.cpp:62:String DefaultThemeLoader::GetCurrentThemeId() const
+repos/dali-ui/dali-ui-foundation/integration-api/default-theme-loader.cpp:67:DefaultThemeLoader::ThemeChangedSignalType& DefaultThemeLoader::ThemeChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/default-theme-loader.cpp:69:  return mThemeChangedSignal;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:102:  UiThemeManager themeManager = UiThemeManager::Get();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:115:    UiThemeManager::Get().ThemeChangedSignal().Connect(mSlotDelegate, &UiColorManagerImpl::OnThemeChanged);
+
+exec
+/bin/bash -lc "sed -n '1,140p' repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h && sed -n '1,90p' repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.cpp && sed -n '179,215p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp && sed -n '56,80p' 'repos/dali-ui/wiki/Color-&-Theme.md'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/common/dali-string.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+namespace Integration
+{
+class UiThemeManagerImpl;
+}
+
+/**
+ * @brief Singleton manager that provides access to the current theme.
+ *
+ * UiThemeManager is a Handle-based singleton. Theme-level queries (theme ID,
+ * theme change notification) are exposed here. Color lookups are accessed
+ * through UiColorManager, not directly through this class.
+ *
+ * The ThemeLoaderInterface instance is created via UiConfigImpl::CreateThemeLoader()
+ * during UiConfig initialization. If CreateThemeLoader() returns nullptr,
+ * a built-in default loader is used.
+ */
+class DALI_UI_API UiThemeManager : public BaseHandle
+{
+public:
+  using ThemeChangedSignalType = Signal<void()>;
+
+  UiThemeManager();
+  ~UiThemeManager()                                        = default;
+  UiThemeManager(const UiThemeManager& handle)             = default;
+  UiThemeManager(UiThemeManager&& rhs) noexcept            = default;
+  UiThemeManager& operator=(const UiThemeManager& handle)  = default;
+  UiThemeManager& operator=(UiThemeManager&& rhs) noexcept = default;
+
+  /**
+   * @brief Returns the singleton UiThemeManager instance.
+   *
+   * @return A handle to the UiThemeManager singleton
+   */
+  static UiThemeManager Get();
+
+  /**
+   * @brief Downcasts a handle to a UiThemeManager handle.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a UiThemeManager or an uninitialized handle
+   */
+  static UiThemeManager DownCast(BaseHandle handle);
+
+  /**
+   * @brief Returns the identifier of the current theme.
+   *
+   * @return The theme identifier, or an empty string if no theme is active
+   */
+  String GetCurrentThemeId() const;
+
+  /**
+   * @brief Returns a signal that is emitted when the theme changes.
+   *
+   * @return A reference to the theme-changed signal
+   */
+  ThemeChangedSignalType& ThemeChangedSignal();
+
+public: // Not intended for application developers
+  /**
+   * @brief This constructor is used internally to wrap an implementation object.
+   *
+   * @param[in] impl A pointer to the internal UiThemeManager implementation
+   */
+  explicit UiThemeManager(Integration::UiThemeManagerImpl* impl);
+};
+
+} // namespace Ui
+} // namespace Dali
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+UiThemeManager::UiThemeManager() = default;
+
+UiThemeManager::UiThemeManager(Integration::UiThemeManagerImpl* impl)
+  : BaseHandle(impl)
+{
+}
+
+UiThemeManager UiThemeManager::Get()
+{
+  return Integration::UiThemeManagerImpl::Get();
+}
+
+UiThemeManager UiThemeManager::DownCast(BaseHandle handle)
+{
+  return UiThemeManager(dynamic_cast<Integration::UiThemeManagerImpl*>(handle.GetObjectPtr()));
+}
+
+String UiThemeManager::GetCurrentThemeId() const
+{
+  return GetImpl(*this).GetCurrentThemeId();
+}
+
+UiThemeManager::ThemeChangedSignalType& UiThemeManager::ThemeChangedSignal()
+{
+  return GetImpl(*this).ThemeChangedSignal();
+}
+
+} // namespace Ui
+} // namespace Dali
+int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+  String themeId = manager.GetCurrentThemeId();
+
+  // DefaultThemeLoader returns "default"
+  DALI_TEST_EQUALS(themeId, String("default"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === ThemeChangedSignal ===
+
+int UtcDaliUiThemeManagerThemeChangedSignalP(void)
+{
+  UiTestApplication application;
+
+  UiThemeManager manager = UiThemeManager::Get();
+
+  ThemeChangedCallback callback;
+  manager.ThemeChangedSignal().Connect(&callback, &ThemeChangedCallback::OnThemeChanged);
+
+  // Signal should be connectable without crashing
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+> Use `ScaleAlpha` / `WithAlpha` to keep the token count small.
+
+<br/>
+
+## Detecting Theme Changes
+
+dali-ui does not provide an API to switch themes directly.
+Theme changes are driven by the platform's `ThemeLoaderInterface` implementation,
+which listens to system events (e.g. vconf, DBus) and emits `ThemeChangedSignal`.
+
+To react to theme changes in your app, connect to `UiThemeManager`:
+
+```cpp
+UiThemeManager::Get().ThemeChangedSignal().Connect(this, &MyApp::OnThemeChanged);
+
+void MyApp::OnThemeChanged()
+{
+  auto themeId = UiThemeManager::Get().GetCurrentThemeId();
+  // handle theme-specific logic
+}
+```
+
+Views that have token-based `UiColor` bindings are refreshed automatically on theme change
+and do not require manual signal handling.
+
+
+codex
+---
+title: Ui Theme Manager
+sidebar_label: Ui Theme Manager
+category: styling-theme-config
+---
+
+# Ui Theme Manager
+
+`Dali::Ui::UiThemeManager` lets a dali-ui application read the active theme identifier and react when the theme changes.
+
+## Table of Contents
+
+- [Accessing the Theme Manager](#accessing-the-theme-manager)
+- [Reading the Current Theme](#reading-the-current-theme)
+- [Reacting to Theme Changes](#reacting-to-theme-changes)
+- [Using Theme State from a View-Oriented App Layer](#using-theme-state-from-a-view-oriented-app-layer)
+
+## Accessing the Theme Manager
+
+`Dali::Ui::UiThemeManager` is a handle-based singleton. Application code obtains the active manager with `Dali::Ui::UiThemeManager::Get()` and keeps the returned handle only as long as it is useful.
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+class ThemeController
+{
+public:
+  ThemeController()
+  : mThemeManager(Dali::Ui::UiThemeManager::Get())
+  {
+  }
+
+private:
+  Dali::Ui::UiThemeManager mThemeManager;
+};
+```
+
+If your code receives a generic handle from infrastructure code, `Dali::Ui::UiThemeManager::DownCast()` can be used to recover a `Dali::Ui::UiThemeManager` handle when the object is actually the theme manager.
+
+```cpp
+#include <dali/public-api/object/base-handle.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+Dali::Ui::UiThemeManager AsThemeManager(Dali::BaseHandle handle)
+{
+  return Dali::Ui::UiThemeManager::DownCast(handle);
+}
+```
+
+## Reading the Current Theme
+
+Use `Dali::Ui::UiThemeManager::GetCurrentThemeId()` when application logic needs to know which theme is active. The returned value is the current theme identifier; it can be empty when no theme is active.
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+auto ReadThemeId()
+{
+  Dali::Ui::UiThemeManager themeManager = Dali::Ui::UiThemeManager::Get();
+  return themeManager.GetCurrentThemeId();
+}
+```
+
+For short-lived checks, it is also valid to query the singleton directly.
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+auto currentThemeId = Dali::Ui::UiThemeManager::Get().GetCurrentThemeId();
+```
+
+## Reacting to Theme Changes
+
+`Dali::Ui::UiThemeManager::ThemeChangedSignal()` returns the theme-change signal owned by `Dali::Ui::UiThemeManager`. The signal type is `Dali::Signal<void()>`, so callbacks connected to it take no arguments.
+
+Use `Dali::ConnectionTracker` for receiver objects that own signal connections.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+class ThemeObserver : public Dali::ConnectionTracker
+{
+public:
+  ThemeObserver()
+  {
+    Dali::Ui::UiThemeManager themeManager = Dali::Ui::UiThemeManager::Get();
+    themeManager.ThemeChangedSignal().Connect(this, &ThemeObserver::OnThemeChanged);
+  }
+
+private:
+  void OnThemeChanged()
+  {
+    auto themeId = Dali::Ui::UiThemeManager::Get().GetCurrentThemeId();
+    ApplyThemeId(themeId);
+  }
+
+  void ApplyThemeId(const decltype(Dali::Ui::UiThemeManager::Get().GetCurrentThemeId())& themeId)
+  {
+    mLastThemeId = themeId;
+  }
+
+  decltype(Dali::Ui::UiThemeManager::Get().GetCurrentThemeId()) mLastThemeId;
+};
+```
+
+A theme-change callback should be small. Read the current identifier with `Dali::Ui::UiThemeManager::GetCurrentThemeId()`, then update the application state that drives your dali-ui views.
+
+## Using Theme State from a View-Oriented App Layer
+
+In a dali-ui application, keep theme reactions close to the code that owns the `Dali::Ui::View` tree. `Dali::Ui::UiThemeManager` is the app-facing entry point for theme state; it should not require application code to manipulate raw actors or set low-level properties.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+class MainViewThemeBinding : public Dali::ConnectionTracker
+{
+public:
+  MainViewThemeBinding()
+  : mThemeManager(Dali::Ui::UiThemeManager::Get())
+  {
+    mThemeManager.ThemeChangedSignal().Connect(this, &MainViewThemeBinding::OnThemeChanged);
+    RefreshFromTheme();
+  }
+
+private:
+  void OnThemeChanged()
+  {
+    RefreshFromTheme();
+  }
+
+  void RefreshFromTheme()
+  {
+    mCurrentThemeId = mThemeManager.GetCurrentThemeId();
+
+    // Use mCurrentThemeId to update state that your Dali::Ui::View layer consumes.
+  }
+
+  Dali::Ui::UiThemeManager mThemeManager;
+  decltype(Dali::Ui::UiThemeManager::Get().GetCurrentThemeId()) mCurrentThemeId;
+};
+```
+
+`Dali::Ui::UiThemeManager` does not expose property constants. Use `Dali::Ui::UiThemeManager::Get()`, `Dali::Ui::UiThemeManager::GetCurrentThemeId()`, and `Dali::Ui::UiThemeManager::ThemeChangedSignal()` as the public theme manager surface for application code.
+tokens used
+11,916

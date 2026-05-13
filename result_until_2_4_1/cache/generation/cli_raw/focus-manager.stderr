@@ -1,0 +1,2164 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20ba-4ad0-7ed3-8955-f46a9349143b
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Focus Manager (focus-manager)
+- Category: input-interaction
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 26
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::FocusManager | scope=primary
+- Dali::Ui::FocusManager::ClearFocus | void ClearFocus() | scope=primary_member
+- Dali::Ui::FocusManager::FocusChangedSignal | FocusChangedSignalType & FocusChangedSignal() | scope=primary_member
+- Dali::Ui::FocusManager::FocusManager | FocusManager() | scope=primary_member
+- Dali::Ui::FocusManager::Get | FocusManager Get() | scope=primary_member
+- Dali::Ui::FocusManager::GetClearFocusOnWindowFocusLost | bool GetClearFocusOnWindowFocusLost() const | scope=primary_member
+- Dali::Ui::FocusManager::GetCurrentFocusView | View GetCurrentFocusView() | scope=primary_member
+- Dali::Ui::FocusManager::GetFocusGroup | View GetFocusGroup(View view) | scope=primary_member
+- Dali::Ui::FocusManager::GetFocusIndicatorView | View GetFocusIndicatorView() | scope=primary_member
+- Dali::Ui::FocusManager::GetLastFocusChangeDevice | FocusDevice GetLastFocusChangeDevice() const | scope=primary_member
+- Dali::Ui::FocusManager::GetLastFocusChangeDeviceName | const Dali::String & GetLastFocusChangeDeviceName() const | scope=primary_member
+- Dali::Ui::FocusManager::IsFocusGroup | bool IsFocusGroup(View view) const | scope=primary_member
+- Dali::Ui::FocusManager::MoveFocus | bool MoveFocus(FocusDirection direction) | scope=primary_member
+- Dali::Ui::FocusManager::MoveFocusBackward | void MoveFocusBackward() | scope=primary_member
+- Dali::Ui::FocusManager::RequestFocus | bool RequestFocus(View view) | scope=primary_member
+- Dali::Ui::FocusManager::SetAsFocusGroup | void SetAsFocusGroup(View view, bool isFocusGroup) | scope=primary_member
+- Dali::Ui::FocusManager::SetClearFocusOnWindowFocusLost | void SetClearFocusOnWindowFocusLost(bool enabled) | scope=primary_member
+- Dali::Ui::FocusManager::SetCurrentFocusView | bool SetCurrentFocusView(View view) | scope=primary_member
+- Dali::Ui::FocusManager::SetFocusIndicatorActor | void SetFocusIndicatorActor(View indicator) | scope=primary_member
+- Dali::Ui::FocusManager::~FocusManager | ~FocusManager() | scope=primary_member
+- Dali::Ui::Layout | scope=context_lookup
+- Dali::Ui::Layout::Layout | Layout(const Layout &layout) | scope=context_lookup
+- Dali::Ui::LayoutRect | scope=context_lookup
+- Dali::Ui::LayoutRect::LayoutRect | LayoutRect() | scope=context_lookup
+- Dali::Ui::StackLayout | scope=context_lookup
+- Dali::Ui::StackLayout::StackLayout | StackLayout(const StackLayout &layout) | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "focus-manager_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::FocusManager::SetAsFocusGroup",
+      "Dali::Ui::FocusManager::SetClearFocusOnWindowFocusLost",
+      "Dali::Ui::FocusManager::SetCurrentFocusView",
+      "Dali::Ui::FocusManager::SetFocusIndicatorActor"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "id": "focus-manager_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::Ui::FocusManager::FocusChangedSignal"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:19 (utc, score=0.75)
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-test-suite-utils.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// ============================================================
+// RequestFocus — basic
+// ============================================================
+
+int UtcDaliFocusManagerRequestFocusBasicP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New().SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  bool result = FocusManager::Get().RequestFocus(view);
+  DALI_TEST_CHECK(result);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  END_TEST;
+```
+
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:692 (utc, score=0.7)
+```cpp
+DALI_TEST_EQUALS(size.GetHeight(), 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  LayoutRect bounds(10.0f, 20.0f, 100.0f, 80.0f);
+  MeasuredSize size = view.Arrange(bounds);
+  DALI_TEST_EQUALS(size.GetWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetMeasuredSizeP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  MeasuredSize desired = view.GetMeasuredSize();
+  DALI_TEST_EQUALS(desired.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(desired.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FocusManager",
+      "Get",
+      "GetCurrentFocusView",
+      "Layout",
+      "LayoutRect",
+      "MoveFocus",
+      "RequestFocus",
+      "SetAsFocusGroup",
+      "SetCurrentFocusView",
+      "StackLayout"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 98,
+    "snippet_start_line": 19
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ClearFocus",
+      "FocusChangedSignal",
+      "FocusManager",
+      "Get",
+      "GetCurrentFocusView",
+      "LayoutRect",
+      "MoveFocus",
+      "SetCurrentFocusView",
+      "StackLayout"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 771,
+    "snippet_start_line": 692
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FocusChangedSignal",
+      "StackLayout"
+    ],
+    "path": "repos/dali-ui/samples/text/text-marquee-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 116,
+    "snippet_start_line": 37
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FocusManager",
+      "Get",
+      "SetCurrentFocusView"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 594,
+    "snippet_start_line": 515
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FocusManager",
+      "Get",
+      "SetCurrentFocusView"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-SelectableTrait.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 614,
+    "snippet_start_line": 535
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FocusManager",
+      "Get",
+      "SetCurrentFocusView"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 331,
+    "snippet_start_line": 252
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdlib.h>
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-test-suite-utils.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// ============================================================
+// RequestFocus — basic
+// ============================================================
+
+int UtcDaliFocusManagerRequestFocusBasicP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New().SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  bool result = FocusManager::Get().RequestFocus(view);
+  DALI_TEST_CHECK(result);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerRequestFocusNonFocusableN(void)
+{
+  UiTestApplication application;
+
+  View view = View::New(); // focusable=false by default
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  bool result = FocusManager::Get().RequestFocus(view);
+  DALI_TEST_CHECK(!result);
+  END_TEST;
+}
+
+// ============================================================
+// RequestFocus — descendant delegation (Layout)
+// ============================================================
+
+int UtcDaliFocusManagerRequestFocusOnLayoutDelegatesToChildP(void)
+{
+  UiTestApplication application;
+
+  auto layout = Layout::New();
+  View child1 = View::New(); // not focusable
+  View child2 = View::New().SetFocusable(true);
+  layout.Add(child1);
+  layout.Add(child2);
+  application.GetScene().Add(layout);
+  application.SendNotification();
+  application.Render();
+
+  bool result = FocusManager::Get().RequestFocus(layout);
+  DALI_TEST_CHECK(result);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == child2);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerRequestFocusOnLayoutNoFocusableChildN(void)
+{
+  UiTestApplication application;
+
+  auto layout = Layout::New();
+  View child1 = View::New(); // not focusable
+  View child2 = View::New(); // not focusable
+  layout.Add(child1);
+  layout.Add(child2);
+  application.GetScene().Add(layout);
+  application.SendNotification();
+  application.Render();
+
+  // Layout itself is also not focusable by default
+  bool result = FocusManager::Get().RequestFocus(layout);
+  DALI_TEST_CHECK(!result);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerRequestFocusOnLayoutFallbackToSelfP(void)
+{
+  UiTestApplication application;
+
+  // Layout (focusable) with depth-2 tree of 6 descendants.
+  // None qualifies for focus (mix of not-focusable, disabled, invisible).
+  auto layout = Layout::New().SetFocusable(true);
+
+  View child1 = View::New();                                          // not focusable
+  View child2 = View::New().SetFocusable(true).SetEnabled(false);     // disabled
+  View child3 = View::New().SetFocusable(true).SetVisibility(false);  // invisible
+
+  auto nested = Layout::New();                                        // sub-layout, not focusable
+  View grand1 = View::New().SetFocusable(true).SetEnabled(false);     // disabled
+  View grand2 = View::New().SetFocusable(true).SetVisibility(false);  // invisible
+
+  nested.Add(grand1);
+  nested.Add(grand2);
+  layout.Add(child1);
+  layout.Add(child2);
+  layout.Add(child3);
+  layout.Add(nested);
+  application.GetScene().Add(layout);
+  application.SendNotification();
+  application.Render();
+
+  // No eligible descendant → layout itself should take focus
+  bool result = FocusManager::Get().RequestFocus(layout);
+  DALI_TEST_CHECK(result);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == layout);
+  END_TEST;
+}
+
+// ============================================================
+// DescendantFocusBlocked
+// ============================================================
+
+int UtcDaliFocusManagerDescendantFocusBlockedP(void)
+{
+  UiTestApplication application;
+
+  auto layout = Layout::New();
+  layout.SetDescendantFocusBlocked(true);
+  View child = View::New().SetFocusable(true);
+  layout.Add(child);
+  application.GetScene().Add(layout);
+  application.SendNotification();
+  application.Render();
+
+  // Child should not get focus because parent blocks descendants
+  bool result = FocusManager::Get().RequestFocus(child);
+  DALI_TEST_CHECK(!result);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerDescendantFocusBlockedGetterP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  DALI_TEST_CHECK(!view.IsDescendantFocusBlocked());
+  view.SetDescendantFocusBlocked(true);
+  DALI_TEST_CHECK(view.IsDescendantFocusBlocked());
+  view.SetDescendantFocusBlocked(false);
+  DALI_TEST_CHECK(!view.IsDescendantFocusBlocked());
+  END_TEST;
+}
+
+// ============================================================
+// FocusGroup containment
+// ============================================================
+
+int UtcDaliFocusManagerFocusGroupContainmentP(void)
+{
+  UiTestApplication application;
+
+  View group = View::New().SetFocusable(false);
+  FocusManager::Get().SetAsFocusGroup(group, true);
+  View insideA = View::New().SetFocusable(true).SetRequestedPositionY(0.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+  View insideB = View::New().SetFocusable(true).SetRequestedPositionY(60.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+  group.Add(insideA);
+  group.Add(insideB);
+
+  View outside = View::New().SetFocusable(true).SetRequestedPositionY(120.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+
+  application.GetScene().Add(group);
+  application.GetScene().Add(outside);
+  application.SendNotification();
+  application.Render();
+
+  // Focus inside group first
+  FocusManager::Get().RequestFocus(insideA);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideA);
+
+  // MoveFocus should be scoped to the focus group.
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideB);
+  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideB);
+
+  // Direct RequestFocus to outside should work (programmatic path has no containment)
+  FocusManager::Get().RequestFocus(outside);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == outside);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerFocusGroupForwardBackwardContainmentP(void)
+{
+  UiTestApplication application;
+
+  View group = View::New();
+  FocusManager::Get().SetAsFocusGroup(group, true);
+
+  View insideA = View::New().SetFocusable(true).SetRequestedPositionX(0.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+  View insideB = View::New().SetFocusable(true).SetRequestedPositionX(60.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+  View outside = View::New().SetFocusable(true).SetRequestedPositionX(120.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+
+  group.Add(insideA);
+  group.Add(insideB);
+  application.GetScene().Add(group);
+  application.GetScene().Add(outside);
+  application.SendNotification();
+  application.Render();
+
+  FocusManager::Get().RequestFocus(insideA);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideA);
+
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideB);
+  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideB);
+
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideA);
+  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == insideA);
+  END_TEST;
+}
+
+namespace
+{
+View gOuterNavigationTarget;
+int  gOuterNavigationCallbackCount = 0;
+
+View OuterNavigationCallbackFunc(View, FocusDirection)
+{
+  ++gOuterNavigationCallbackCount;
+  return gOuterNavigationTarget;
+}
+} // namespace
+
+int UtcDaliFocusManagerFocusGroupStopsParentNavigationP(void)
+{
+  UiTestApplication application;
+
+  View outer   = View::New();
+  View group   = View::New();
+  View current = View::New().SetFocusable(true).SetRequestedPositionX(0.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+  View inside  = View::New().SetFocusable(true).SetRequestedPositionX(60.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+  View outside = View::New().SetFocusable(true).SetRequestedPositionX(120.0f).SetRequestedWidth(50.0f).SetRequestedHeight(50.0f);
+
+exec
+/bin/bash -lc "rg --files repos/dali-ui | rg 'focus.*manager|FocusManager|focus-manager|view\\.h|view.*h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.md
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-npatch.cpp
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-npatch.md
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.md
+repos/dali-ui/samples/web-view/res/test.html
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp
+repos/dali-ui/samples/viewlayout/view-wrapcontent-matchparent-example.cpp
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h
+repos/dali-ui/samples/viewlayout/view-matchparent-example.cpp
+repos/dali-ui/samples/image-view/image-view-npatch-example.cpp
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp
+repos/dali-ui/dali-ui-foundation/integration-api/view-accessible.h
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h
+repos/dali-ui/samples/image-view/image-view-with-layout-example.cpp
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h
+repos/dali-ui/dali-ui-foundation/integration-api/image-view-impl.h
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.h
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.cpp
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.h
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.cpp
+repos/dali-ui/dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h
+repos/dali-ui/dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.cpp
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view-properties.h
+repos/dali-ui/dali-ui-foundation/public-api/view.h
+repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h
+repos/dali-ui/dali-ui-foundation/devel-api/view-depth-index-ranges.h
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h
+repos/dali-ui/samples/image-view/res/placeholder_image.png
+repos/dali-ui/dali-ui-foundation/internal/gles-addon/generated/gl-view-vert.h
+repos/dali-ui/dali-ui-foundation/internal/gles-addon/generated/gl-view-frag.h
+repos/dali-ui/samples/image-view/res/shape-bubble.png
+repos/dali-ui/dali-ui-foundation/internal/text/text-view.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-renderers.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-debug.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-decoration-data.h
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-view-interface.h
+repos/dali-ui/dali-ui-foundation/public-api/image-view.h
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-view-impl.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/view-model.h
+repos/dali-ui/dali-ui-foundation/public-api/view-accessibility-enums.h
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h
+repos/dali-ui/dali-ui-foundation/public-api/image-view-properties.h
+repos/dali-ui/dali-ui-foundation/public-api/web-view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h
+repos/dali-ui/dali-ui-foundation/public-api/view-types.h
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp
+
+exec
+/bin/bash -lc 'rg -n "class FocusManager|FocusChangedSignal|typedef.*FocusChanged|using.*FocusChanged|RequestFocus|SetCurrentFocusView|SetFocusIndicatorActor|FocusDirection|enum.*Focus" -S repos/dali-ui dali-ui 2>/dev/null' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+repos/dali-ui/wiki/Focus-&-Key.md:30:FocusManager::Get().RequestFocus(button);
+repos/dali-ui/wiki/Focus-&-Key.md:47:Use this when a subtree is decorative or known not to contain focusable Views. `RequestFocus()`, `SetCurrentFocusView()`, and focus navigation reject descendants under such an ancestor.
+repos/dali-ui/wiki/Focus-&-Key.md:59:focusMgr.SetCurrentFocusView(button);
+repos/dali-ui/wiki/Focus-&-Key.md:62:focusMgr.RequestFocus(containerOrButton);
+repos/dali-ui/wiki/Focus-&-Key.md:71:### SetCurrentFocusView vs RequestFocus
+repos/dali-ui/wiki/Focus-&-Key.md:73:Use `RequestFocus()` for normal application focus requests. It resolves the request like below:
+repos/dali-ui/wiki/Focus-&-Key.md:80:Use `SetCurrentFocusView()` when you intentionally want to focus exactly that View with no child delegation. If the View itself is not focusable, the call fails even if it has focusable children.
+repos/dali-ui/wiki/Focus-&-Key.md:84:focusMgr.RequestFocus(layout);
+repos/dali-ui/wiki/Focus-&-Key.md:88:focusMgr.SetCurrentFocusView(layout);
+repos/dali-ui/wiki/Focus-&-Key.md:98:focusMgr.MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/wiki/Focus-&-Key.md:99:focusMgr.MoveFocus(FocusDirection::DOWN);
+repos/dali-ui/wiki/Focus-&-Key.md:187:view.FocusChangedSignal().Connect(&tracker, [](View view, bool focused) {
+repos/dali-ui/wiki/Focus-&-Key.md:204:focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus) {
+repos/dali-ui/wiki/Focus-&-Key.md:216:View MyFocusNavigation(View currentFocusedView, FocusDirection direction)
+repos/dali-ui/wiki/Focus-&-Key.md:218:  if(direction == FocusDirection::RIGHT)
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:28:FocusManager::Get().RequestFocus(button);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:45:장식용 subtree 또는 focusable View가 없다는 것이 명확한 subtree에 사용하세요. 해당 ancestor 아래의 descendant는 `RequestFocus()`, `SetCurrentFocusView()`, focus navigation에서 거부됩니다.
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:57:focusMgr.SetCurrentFocusView(button);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:60:focusMgr.RequestFocus(containerOrButton);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:69:### SetCurrentFocusView와 RequestFocus의 차이
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:71:일반적인 application focus 요청에는 `RequestFocus()`를 사용하세요. 아래와 같은 resolve 를 수행합니다:
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:78:`SetCurrentFocusView()`는 child delegation 없이 정확히 그 View 자체에 focus를 설정하고 싶을 때 사용합니다. 해당 View 자체가 focusable이 아니면, focusable child를 가지고 있어도 실패합니다.
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:82:focusMgr.RequestFocus(layout);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:86:focusMgr.SetCurrentFocusView(layout);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:96:focusMgr.MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:97:focusMgr.MoveFocus(FocusDirection::DOWN);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:185:view.FocusChangedSignal().Connect(&tracker, [](View view, bool focused) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:202:focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:214:View MyFocusNavigation(View currentFocusedView, FocusDirection direction)
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:216:  if(direction == FocusDirection::RIGHT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:101:    FocusManager::Get().RequestFocus(mS1[2]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:210:    label.FocusChangedSignal().Connect(this, [this, idx = mAllViews.size() - 1](View view, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.md:38:- FocusChangedSignal로 포커스 변경이 정확히 통지되어야 한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:125:    FocusManager::Get().RequestFocus(mInsideA);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:151:    view.FocusChangedSignal().Connect(this, [baseColor](View changedView, bool focused)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:790:   * virtual method. The focus manager calls RequestFocusNavigation() which
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:795:  void SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:805:   * @copydoc Ui::View::FocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:807:  Ui::View::FocusChangedSignalType& FocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:820:  DALI_INTERNAL View RequestFocusNavigation(View currentFocusedView, FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:821:  DALI_INTERNAL View RequestFocus();
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:884:  virtual View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:887:   * @brief Called when focus is requested on this view via RequestFocus().
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:1082:  void                    EmitFocusChangedSignal(bool focusGained);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:836:View::FocusChangedSignalType& View::FocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:838:  return GetImpl(*this).FocusChangedSignal();
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.md:1:# Focus RequestFocus
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.md:3:RequestFocus를 Layout에 호출했을 때 첫 번째 focusable 자식으로 위임되는지 확인한다.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.md:8:- "RequestFocus on Layout" 버튼
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.md:12:## 테스트 1: Layout에 RequestFocus
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.md:14:1. "RequestFocus on Layout" 버튼을 탭한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:95:    FocusManager::Get().FocusChangedSignal().Connect(this, &TcInputFieldFocus::OnFocusChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:109:    field.FocusChangedSignal().Connect(this, [this, name](View view, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:32: * @brief Verifies FocusManager::RequestFocus delegates to focusable descendants.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:34:class TcFocusRequestFocus : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:39:    return "Focus RequestFocus";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:44:    return "RequestFocus on Layout delegates to first focusable child";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:75:                          view.FocusChangedSignal().Connect(this, [](View focusedView, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:86:    auto btnRequestFocus = Label::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:87:                             .SetText("RequestFocus on Layout")
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:96:    btnRequestFocus.TouchedSignal().Connect(this, [this](Actor, TouchEvent e) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:100:        bool ok = FocusManager::Get().RequestFocus(mLayout);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:112:        .Children({mStatusLabel, btnRequestFocus,
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:125:REGISTER_MANUAL_TEST(TcFocusRequestFocus)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.cpp:60:            .SetText("Set block state, then try RequestFocus")
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.cpp:76:          CreateButton("RequestFocus on Child", [this]() {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.cpp:77:            bool ok = FocusManager::Get().RequestFocus(mChild);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.cpp:100:                  view.FocusChangedSignal().Connect(this, [](View child, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.md:3:Label에 키 포커스를 이동하면서 KeyEventSignal과 FocusChangedSignal이 정상 동작하는지 확인한다.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.cpp:34: * @brief Verifies View::KeyEventSignal and View::FocusChangedSignal.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.cpp:53:    return "Verifies KeyEventSignal and FocusChangedSignal on focusable Views";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.cpp:93:    mLabels[index].FocusChangedSignal().Connect(this, [this, index](View, bool focused) mutable
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:104:    FocusManager::Get().RequestFocus(mViews[0]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:122:    label.FocusChangedSignal().Connect(this, [this, index](View view, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.md:10:- "RequestFocus on Child" 버튼
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.md:17:2. "RequestFocus on Child" 버튼을 탭한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.md:23:2. "RequestFocus on Child" 버튼을 탭한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.md:29:2. "RequestFocus on Child" 버튼을 탭한다
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:485:  EmitFocusChangedSignal(focused);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1873:void ViewImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1878:View ViewImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1911:View ViewImpl::RequestFocus()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1942:  return Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(Self()));
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1965:View ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1984:Ui::View::FocusChangedSignalType& ViewImpl::FocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:1986:  return mImpl->mFocusChangedSignal;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:2024:void ViewImpl::EmitFocusChangedSignal(bool focusGained)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:2043:  if(!mImpl->mFocusChangedSignal.Empty())
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:2045:    mImpl->mFocusChangedSignal.Emit(handle, focusGained);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:74: * @note Signature: View(View currentFocusedView, FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:76:using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1788:  typedef Signal<void(View, bool)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1944:  FocusChangedSignalType& FocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h:27:enum FocusDirection
+repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h:44:enum FocusDevice
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:1469:    keyboardFocusManager.SetCurrentFocusView(Ui::View::DownCast(Self()));
+repos/dali-ui/dali-ui-foundation/integration-api/view-accessible.cpp:468:  return Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(Self()));
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:30:class FocusManager;
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:49: * | focusChanged            | @ref FocusChangedSignal()          |
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:55:  typedef Signal<void(View, View)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:83:   * Use RequestFocus() if you want automatic child delegation for containers.
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:90:  bool SetCurrentFocusView(View view);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:105:  bool RequestFocus(View view);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:124:  bool MoveFocus(FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:179:  void SetFocusIndicatorActor(View indicator);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:245:  FocusChangedSignalType& FocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:258:}; // class FocusManager
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:49:bool FocusManager::SetCurrentFocusView(View view)
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:51:  return GetImpl(*this).SetCurrentFocusView(view);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:54:bool FocusManager::RequestFocus(View view)
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:56:  return GetImpl(*this).RequestFocus(view);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:64:bool FocusManager::MoveFocus(Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:89:void FocusManager::SetFocusIndicatorActor(View indicator)
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:91:  GetImpl(*this).SetFocusIndicatorActor(indicator);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:104:FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.cpp:106:  return GetImpl(*this).FocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:47:class FocusManager : public Dali::BaseObject, public ConnectionTracker
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:57:  enum FocusIndicatorState
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:64:  enum EnableFocusedIndicatorState
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:70:  enum FocusedIndicatorModeState
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:87:   * @copydoc Ui::FocusManager::SetCurrentFocusView
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:89:  bool SetCurrentFocusView(View view);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:92:   * @brief Requests focus on the given view, delegating to its RequestFocus()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:97:  bool RequestFocus(View view);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:107:  bool MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName = "");
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:112:  bool MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:135:   * @copydoc Ui::FocusManager::SetFocusIndicatorActor
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:137:  void SetFocusIndicatorActor(View indicator);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:188:   * @copydoc Ui::FocusManager::FocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:190:  Ui::FocusManager::FocusChangedSignalType& FocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:238:  View FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:244:  ParentNavigationResult FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:250:  View FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:259:  bool DoSetCurrentFocusView(View view, const FocusChangeContext& context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.h:354:  Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal; ///< The signal to notify the focus change
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-SelectableTrait.cpp:543:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h:75:DALI_UI_API bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Dali::String& deviceName);
+repos/dali-ui/dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.cpp:48:bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Dali::String& deviceName)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:134:: mFocusChangedSignal(),
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:210:bool FocusManager::SetCurrentFocusView(View view)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:212:  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:215:bool FocusManager::RequestFocus(View view)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:222:  View resolved = GetImpl(view).RequestFocus();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:225:    return DoSetCurrentFocusView(resolved, {Ui::FocusDevice::PROGRAMMATIC, ""});
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:230:bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& context)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:300:    if(!mFocusChangedSignal.Empty())
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:302:      mFocusChangedSignal.Emit(currentFocusedView, view);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:378:        // Delete pre focused view in history because it will pushed again by SetCurrentFocusView()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:380:        SetCurrentFocusView(target);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:420:bool FocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:425:bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:446:  // Apply: resolve through RequestFocus (child delegation) then commit
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:449:    View resolved = GetImpl(candidate).RequestFocus();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:452:      return DoSetCurrentFocusView(resolved, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:459:View FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:469:    case Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:472:    case Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:475:    case Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:478:    case Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:481:    case Ui::FocusDirection::CLOCKWISE:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:484:    case Ui::FocusDirection::COUNTER_CLOCKWISE:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:487:    case Ui::FocusDirection::FORWARD:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:490:    case Ui::FocusDirection::BACKWARD:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:521:FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:542:      result.candidate = GetImpl(parentView).RequestFocusNavigation(currentFocusView, direction);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:553:View FocusManager::FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:574:    if(direction == Ui::FocusDirection::FORWARD || direction == Ui::FocusDirection::BACKWARD)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:612:    if(!mFocusChangedSignal.Empty())
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:614:      mFocusChangedSignal.Emit(view, Ui::View());
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:668:void FocusManager::SetFocusIndicatorActor(View indicator)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:750:        MoveFocus(Ui::FocusDirection::LEFT, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:765:        MoveFocus(Ui::FocusDirection::RIGHT, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:780:        MoveFocus(Ui::FocusDirection::UP, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:795:        MoveFocus(Ui::FocusDirection::DOWN, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:810:        MoveFocus(Ui::FocusDirection::PAGE_UP, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:825:        MoveFocus(Ui::FocusDirection::PAGE_DOWN, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:841:        MoveFocus(event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:908:      MoveFocus(Ui::FocusDirection::RIGHT, context);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:928:    // If you touch the currently focused view again, you don't need to do SetCurrentFocusView again.
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:943:      DoSetCurrentFocusView(hitView, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:952:    Ui::FocusDirection direction = (event.GetDelta() > 0) ? Ui::FocusDirection::CLOCKWISE : Ui::FocusDirection::COUNTER_CLOCKWISE;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:1013:      SetCurrentFocusView(currentFocusedView);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:1038:Ui::FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:1040:  return mFocusChangedSignal;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp:1057:    manager->FocusChangedSignal().Connect(tracker, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:269:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:312:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:366:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:598:// FocusManager integration: SetCurrentFocusView sets FOCUSED state
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:615:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:637:  FocusManager::Get().SetCurrentFocusView(view1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:641:  FocusManager::Get().SetCurrentFocusView(view2);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.h:72:   * @copydoc KeyInputFocusManager::KeyInputFocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.h:74:  KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.h:136:  KeyInputFocusManager::KeyInputFocusChangedSignalType mKeyInputFocusChangedSignal;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.cpp:87:KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManager::KeyInputFocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.cpp:89:  return GetImpl(*this).KeyInputFocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-impl.cpp:87:      View resolved = GetImpl(child).RequestFocus();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:46:static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:50:    case Dali::Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:54:    case Dali::Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:58:    case Dali::Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:62:    case Dali::Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:78:static int MajorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:83:static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:87:    case Dali::Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:91:    case Dali::Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:95:    case Dali::Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:99:    case Dali::Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:115:static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:128:static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:132:    case Dali::Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:133:    case Dali::Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:139:    case Dali::Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:140:    case Dali::Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:171:static bool IsCandidate(Dali::Bounds srcRect, Dali::Bounds destRect, Dali::Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:175:    case Dali::Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:179:    case Dali::Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:183:    case Dali::Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:187:    case Dali::Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:205:static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Bounds src, Dali::Bounds dest)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:209:    case Dali::Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:213:    case Dali::Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:217:    case Dali::Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:221:    case Dali::Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:239:static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Bounds rect1, Dali::Bounds rect2)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:243:    case Dali::Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:244:    case Dali::Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:248:    case Dali::Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:249:    case Dali::Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:268:static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds rect1, Dali::Bounds rect2)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:287:  if((direction == Dali::Ui::FocusDirection::LEFT || direction == Dali::Ui::FocusDirection::RIGHT))
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:298:bool IsBetterCandidate(Ui::FocusDirection direction, Bounds& focusedRect, Bounds& candidateRect, Bounds& bestCandidateRect)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:345:Actor FindNextFocus(Actor& actor, Actor& focusedActor, Bounds& focusedRect, Bounds& bestCandidateRect, Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:496:View GetNextFocusableViewInOrder(Actor rootActor, View focusedView, Ui::FocusDirection direction, FocusFinderWorkspace& workspace)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:526:  if(direction == Ui::FocusDirection::FORWARD)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:545:View GetNearestFocusableView(Actor rootActor, View focusedView, Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:572:    case Ui::FocusDirection::LEFT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:577:    case Ui::FocusDirection::RIGHT:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:582:    case Ui::FocusDirection::UP:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:587:    case Ui::FocusDirection::DOWN:
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.cpp:602:View GetNextFocusableViewInOrder(Actor rootActor, View focusedView, Ui::FocusDirection direction)
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.h:41:View GetNearestFocusableView(Actor root, View focusedView, Ui::FocusDirection direction);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-finder.h:51:View GetNextFocusableViewInOrder(Actor root, View focusedView, Ui::FocusDirection direction);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1677:struct FocusChangedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1679:  FocusChangedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1697:struct FocusChangedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1699:  FocusChangedSignalFunctor(FocusChangedSignalData& data)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1711:  FocusChangedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1738:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1772:  FocusManager::Get().SetCurrentFocusView(child);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1805:  FocusManager::Get().SetCurrentFocusView(child);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1855:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1875:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1890:// FocusChangedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1893:int UtcDaliViewFocusChangedSignalGainedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1898:  FocusChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1899:  FocusChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1900:  view.FocusChangedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1902:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1911:int UtcDaliViewFocusChangedSignalLostP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1917:  FocusChangedSignalData    data1;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1918:  FocusChangedSignalFunctor functor1(data1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1919:  view1.FocusChangedSignal().Connect(&application, functor1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1922:  FocusManager::Get().SetCurrentFocusView(view1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1929:  FocusManager::Get().SetCurrentFocusView(view2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1938:int UtcDaliViewFocusChangedSignalBothViewsP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1944:  FocusChangedSignalData    data1;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1945:  FocusChangedSignalFunctor functor1(data1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1946:  view1.FocusChangedSignal().Connect(&application, functor1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1948:  FocusChangedSignalData    data2;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1949:  FocusChangedSignalFunctor functor2(data2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1950:  view2.FocusChangedSignal().Connect(&application, functor2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1953:  FocusManager::Get().SetCurrentFocusView(view1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1962:  FocusManager::Get().SetCurrentFocusView(view2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1975:int UtcDaliViewFocusChangedSignalClearFocusP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1980:  FocusChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1981:  FocusChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1982:  view.FocusChangedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:1984:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2000:int UtcDaliViewFocusChangedSignalNoConnectionN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2006:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2050:  mgr.SetCurrentFocusView(viewA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2053:  mgr.MoveFocus(FocusDirection::LEFT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2072:  mgr.SetCurrentFocusView(viewA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2074:  mgr.MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2093:  mgr.SetCurrentFocusView(viewA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2095:  mgr.MoveFocus(FocusDirection::UP);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2114:  mgr.SetCurrentFocusView(viewA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2116:  mgr.MoveFocus(FocusDirection::DOWN);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2135:  mgr.SetCurrentFocusView(viewA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2137:  mgr.MoveFocus(FocusDirection::CLOCKWISE);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2156:  mgr.SetCurrentFocusView(viewA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2158:  mgr.MoveFocus(FocusDirection::COUNTER_CLOCKWISE);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2185:  mgr.SetCurrentFocusView(center);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2186:  mgr.MoveFocus(FocusDirection::LEFT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2190:  mgr.SetCurrentFocusView(center);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2191:  mgr.MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2195:  mgr.SetCurrentFocusView(center);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2196:  mgr.MoveFocus(FocusDirection::UP);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2200:  mgr.SetCurrentFocusView(center);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2201:  mgr.MoveFocus(FocusDirection::DOWN);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h:43: * | keyInputFocusChanged | @ref KeyInputFocusChangedSignal() |
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h:49:  typedef Signal<void(View, View)> KeyInputFocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h:108:  KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.cpp:102:  if(!mKeyInputFocusChangedSignal.Empty())
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.cpp:104:    mKeyInputFocusChangedSignal.Emit(view, previousFocusView);
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.cpp:133:KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManagerImpl::KeyInputFocusChangedSignal()
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.cpp:135:  return mKeyInputFocusChangedSignal;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager-impl.cpp:211:      manager->KeyInputFocusChangedSignal().Connect(tracker, functor);
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-impl.h:90:   * Iterates visible children calling RequestFocus() on each.
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:386:      viewImpl.FocusChangedSignal().Connect(tracker, functor);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:526:  mFocusChangedSignal(),
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:591:  Ui::View::FocusChangedSignalType  mFocusChangedSignal;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:523:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:554:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:577:  FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:27:// RequestFocus — basic
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:30:int UtcDaliFocusManagerRequestFocusBasicP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:39:  bool result = FocusManager::Get().RequestFocus(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:45:int UtcDaliFocusManagerRequestFocusNonFocusableN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:54:  bool result = FocusManager::Get().RequestFocus(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:60:// RequestFocus — descendant delegation (Layout)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:63:int UtcDaliFocusManagerRequestFocusOnLayoutDelegatesToChildP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:76:  bool result = FocusManager::Get().RequestFocus(layout);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:82:int UtcDaliFocusManagerRequestFocusOnLayoutNoFocusableChildN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:96:  bool result = FocusManager::Get().RequestFocus(layout);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:101:int UtcDaliFocusManagerRequestFocusOnLayoutFallbackToSelfP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:128:  bool result = FocusManager::Get().RequestFocus(layout);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:151:  bool result = FocusManager::Get().RequestFocus(child);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:192:  FocusManager::Get().RequestFocus(insideA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:196:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:198:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:201:  // Direct RequestFocus to outside should work (programmatic path has no containment)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:202:  FocusManager::Get().RequestFocus(outside);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:225:  FocusManager::Get().RequestFocus(insideA);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:228:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:230:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:233:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:235:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:245:View OuterNavigationCallbackFunc(View, FocusDirection)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:276:  FocusManager::Get().RequestFocus(current);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:279:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:288:// SetCurrentFocusView — direct (no delegation)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:291:int UtcDaliFocusManagerSetCurrentFocusViewDirectP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:300:  // SetCurrentFocusView directly sets focus without delegation
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:301:  bool result = FocusManager::Get().SetCurrentFocusView(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:307:int UtcDaliFocusManagerSetCurrentFocusViewOnLayoutNoDelegationN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:318:  // SetCurrentFocusView does NOT delegate to children — layout is not focusable, so it fails
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:319:  bool result = FocusManager::Get().SetCurrentFocusView(layout);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:332:View FocusNavigationCallbackFunc(View, FocusDirection)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:355:  FocusManager::Get().RequestFocus(child1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:358:  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:382:View PriorityCallbackFunc(View, FocusDirection)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:422:  FocusManager::Get().RequestFocus(current);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:426:  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:457:  FocusManager::Get().RequestFocus(current);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:461:  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:488:  FocusManager::Get().RequestFocus(current);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:491:  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:510:  FocusManager::Get().RequestFocus(current);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:513:  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:536:  FocusManager::Get().RequestFocus(view1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:537:  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:563:  FocusManager::Get().RequestFocus(current);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:566:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::RIGHT));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:587:  FocusManager::Get().RequestFocus(view1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:588:  bool result = FocusManager::Get().MoveFocus(FocusDirection::FORWARD);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:606:  FocusManager::Get().RequestFocus(view2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:607:  bool result = FocusManager::Get().MoveFocus(FocusDirection::BACKWARD);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:635:  FocusManager::Get().RequestFocus(a1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:638:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:641:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:644:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:665:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:668:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:671:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:691:  FocusManager::Get().RequestFocus(v3);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:694:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:697:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:728:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:731:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:734:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:737:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:768:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:771:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:774:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:777:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:814:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:817:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:820:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:823:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:845:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:846:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:875:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:878:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:881:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:900:  FocusManager::Get().RequestFocus(v2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:904:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:922:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:926:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::BACKWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:949:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:950:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:980:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:981:  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:998:  FocusManager::Get().RequestFocus(v1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp:999:  DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
+repos/dali-ui/samples/text/text-marquee-example.cpp:144:    mLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnFocusChanged);
+repos/dali-ui/samples/text/text-marquee-example.cpp:145:    mOverflowLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnOverflowFocusChanged);
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl.h:361:  enum class ClearFocusOnEscapeState
+repos/dali-ui/samples/text/text-render-scale-example.cpp:318:    card.FocusChangedSignal().Connect(this, &TextRenderScaleController::OnFocusChanged);
+
+exec
+/bin/bash -lc "sed -n '1,280p' repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Internal DALI_INTERNAL
+{
+class FocusManager;
+}
+/**
+ * @addtogroup dali_ui_managers
+ * @{
+ */
+
+/**
+ * @brief Provides the functionality of handling focus navigation
+ * and maintaining the two dimensional focus chain.
+ *
+ * It provides functionality of setting the focus and moving the focus
+ * in four directions (i.e. Left, Right, Up and Down). It also draws a
+ * highlight for the focused view and emits a signal when the focus
+ * is changed.
+ *
+ * Signals
+ * | %Signal Name            | Method                             |
+ * |-------------------------|------------------------------------|
+ * | focusChanged            | @ref FocusChangedSignal()          |
+ */
+class DALI_UI_API FocusManager : public BaseHandle
+{
+public:
+  /// @brief Focus changed signal
+  typedef Signal<void(View, View)> FocusChangedSignalType;
+
+  /**
+   * @brief Creates a FocusManager handle; this can be initialized with FocusManager::New().
+   *
+   * Calling member functions with an uninitialized handle is not allowed.
+   */
+  FocusManager();
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~FocusManager();
+
+  /**
+   * @brief Gets the singleton of FocusManager object.
+   *
+   * @return A handle to the FocusManager view
+   */
+  static FocusManager Get();
+
+  /**
+   * @brief Sets the focus directly to the given view.
+   *
+   * The focus is set exactly to the specified view without child delegation.
+   * If the view is not focusable or not on the scene, the call fails.
+   * Use RequestFocus() if you want automatic child delegation for containers.
+   *
+   * @param view The view to be focused
+   * @return Whether the focus is successful or not
+   * @pre The FocusManager has been initialized.
+   * @pre The View has been initialized.
+   */
+  bool SetCurrentFocusView(View view);
+
+  /**
+   * @brief Requests focus on the given view with child delegation.
+   *
+   * If the view is a container, focus is delegated to a focusable
+   * descendant (child-first). If no descendant accepts focus and
+   * the view itself is focusable, it receives focus.
+   * If an ancestor has DescendantFocusBlocked set, the request is rejected.
+   *
+   * @param view The view to request focus on
+   * @return Whether the focus is successful or not
+   * @pre The FocusManager has been initialized.
+   * @pre The View has been initialized.
+   */
+  bool RequestFocus(View view);
+
+  /**
+   * @brief Gets the current focused view.
+   *
+   * @return A handle to the current focused view or an empty handle if no view is focused
+   * @pre The FocusManager has been initialized.
+   */
+  View GetCurrentFocusView();
+
+  /**
+   * @brief Moves the focus to the next focusable actor in the focus
+   * chain in the given direction (according to the focus traversal
+   * order).
+   *
+   * @param direction The direction of focus movement
+   * @return true if the movement was successful
+   * @pre The FocusManager has been initialized.
+   */
+  bool MoveFocus(FocusDirection direction);
+
+  /**
+   * @brief Clears the focus from the current focused actor if any, so
+   * that no actor is focused in the focus chain.
+   *
+   * It will emit focus changed signal without current focused actor.
+   * @pre The FocusManager has been initialized.
+   */
+  void ClearFocus();
+
+  /**
+   * @brief Sets whether a view is a focus group (focus trap).
+   *
+   * When a view is set as a focus group, keyboard focus cannot leave
+   * the view's subtree. All focus movement (arrow keys, Tab, programmatic)
+   * is contained within the focus group boundary.
+   *
+   * @param view The view to be set as a focus group
+   * @param isFocusGroup Whether to set the view as a focus group or not
+   * @pre The FocusManager has been initialized.
+   * @pre The View has been initialized.
+   */
+  void SetAsFocusGroup(View view, bool isFocusGroup);
+
+  /**
+   * @brief Checks whether the view is set as a focus group or not.
+   *
+   * @param view The view to be checked
+   * @return Whether the view is set as a focus group
+   * @pre The FocusManager has been initialized.
+   * @pre The View has been initialized.
+   */
+  bool IsFocusGroup(View view) const;
+
+  /**
+   * @brief Returns the closest ancestor of the given view that is a focus group.
+   *
+   * @param view The view to be checked for its focus group
+   * @return The focus group the given view belongs to or an empty handle if the given view
+   * doesn't belong to any focus group
+   */
+  View GetFocusGroup(View view);
+
+  /**
+   * @brief Sets the focus indicator actor.
+   *
+   * This will replace the default focus indicator actor in
+   * FocusManager and will be added to the focused actor as a
+   * highlight.
+   *
+   * @param indicator The indicator view to be added
+   * @pre The FocusManager has been initialized.
+   * @pre The indicator view has been initialized.
+   */
+  void SetFocusIndicatorActor(View indicator);
+
+  /**
+   * @brief Gets the focus indicator view.
+   *
+   * @return A handle to the focus indicator view
+   * @pre The FocusManager has been initialized.
+   */
+  View GetFocusIndicatorView();
+
+  /**
+   * @brief Move the focus to prev focused actor
+   */
+  void MoveFocusBackward();
+
+  /**
+   * @brief Gets the device of the last focus change.
+   *
+   * This method returns what caused the most recent focus change,
+   * allowing applications to differentiate between different input methods.
+   *
+   * @return The device of the last focus change
+   * @pre The FocusManager has been initialized.
+   */
+  FocusDevice GetLastFocusChangeDevice() const;
+
+  /**
+   * @brief Gets the device name that caused the last focus change.
+   *
+   * This method returns the name of the input device that caused
+   * the most recent focus change. For non-device inputs (like programmatic
+   * focus changes), an empty string may be returned.
+   *
+   * @return The device name that caused the last focus change
+   * @pre The FocusManager has been initialized.
+   */
+  const Dali::String& GetLastFocusChangeDeviceName() const;
+
+  /**
+   * @brief Sets whether to clear focus when window loses focus.
+   *
+   * By default, this is enabled.
+   * When disabled, the focus state is preserved even when the window loses focus,
+   *
+   * @param enabled Whether to clear focus when window loses focus
+   */
+  void SetClearFocusOnWindowFocusLost(bool enabled);
+
+  /**
+   * @brief Gets whether to clear focus when window loses focus.
+   *
+   * @return Whether clear focus is enabled when window loses focus
+   */
+  bool GetClearFocusOnWindowFocusLost() const;
+
+public: // Signals
+  /**
+   * @brief This signal is emitted after the current focused view has been changed.
+   *
+   * A callback of the following type may be connected:
+   * @code
+   *   void YourCallbackName(View originalFocusedView, View currentFocusedView);
+   * @endcode
+   * @return The signal to connect to
+   * @pre The Object has been initialized.
+   */
+  FocusChangedSignalType& FocusChangedSignal();
+
+  // Not intended for application developers
+
+  /// @cond internal
+  /**
+   * @brief Creates a new handle from the implementation.
+   *
+   * @param[in] impl A pointer to the object
+   */
+  explicit DALI_INTERNAL FocusManager(Internal::FocusManager* impl);
+  /// @endcond
+
+}; // class FocusManager
+
+/**
+ * @}
+ */
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_UI_VIEW_FOCUS_ENUMS_H
+#define DALI_UI_VIEW_FOCUS_ENUMS_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+namespace Dali::Ui
+{
+
+/**
+ * @brief Keyboard focus direction.
+ */
+enum FocusDirection
+{
+  LEFT,              ///< Move keyboard focus towards the left direction
+  RIGHT,             ///< Move keyboard focus towards the right direction
+  UP,                ///< Move keyboard focus towards the up direction
+  DOWN,              ///< Move keyboard focus towards the down direction
+  PAGE_UP,           ///< Move keyboard focus towards the previous page direction
+  PAGE_DOWN,         ///< Move keyboard focus towards the next page direction
+  FORWARD,           ///< Move keyboard focus towards the forward direction
+  BACKWARD,          ///< Move keyboard focus towards the backward direction
+  CLOCKWISE,         ///< Move keyboard focus towards the clockwise direction
+  COUNTER_CLOCKWISE, ///< Move keyboard focus towards the counter clockwise direction
+};
+
+/**
+ * @brief Keyboard focus device.
+ */
+enum FocusDevice
+{
+  UNKNOWN,     ///< Unknown device.
+  KEYBOARD,    ///< A regular keyboard, numberpad or attached buttons.
+  MOUSE,       ///< A mouse, trackball or touchpad relative motion device.
+  TOUCH,       ///< A touchscreen with fingers or stylus.
+  PEN,         ///< A special pen device.
+  POINTER,     ///< A pointing device based on laser, infrared or similar technology.
+  GAMEPAD,     ///< A gamepad Viewler or joystick.
+  WHEEL,       ///< A mouse device.
+  PROGRAMMATIC ///< Set to API call, not device.
+};
+} // namespace Dali::Ui
+
+#endif // DALI_UI_VIEW_FOCUS_ENUMS_H
+
+exec
+/bin/bash -lc "sed -n '200,560p' repos/dali-ui/dali-ui-foundation/internal/focus-manager/focus-manager-impl.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  auto uiConfigManager = Integration::UiConfigManager::Get();
+  if(uiConfigManager.IsInitialized())
+  {
+    mAlwaysShowIndicator = uiConfigManager.GetConfig().IsFocusIndicatorAlwaysShown() ? ALWAYS_SHOW : NONE;
+  }
+
+  mIsFocusIndicatorShown = (mAlwaysShowIndicator == ALWAYS_SHOW) ? SHOW : HIDE;
+  mClearFocusOnTouch     = (mIsFocusIndicatorShown == SHOW) ? false : true;
+}
+
+bool FocusManager::SetCurrentFocusView(View view)
+{
+  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
+}
+
+bool FocusManager::RequestFocus(View view)
+{
+  if(!view)
+  {
+    return false;
+  }
+
+  View resolved = GetImpl(view).RequestFocus();
+  if(resolved)
+  {
+    return DoSetCurrentFocusView(resolved, {Ui::FocusDevice::PROGRAMMATIC, ""});
+  }
+  return false;
+}
+
+bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& context)
+{
+  if(mIsFocusIndicatorShown == UNKNOWN)
+  {
+    GetConfiguration();
+  }
+
+  bool                           success = false;
+  Dali::Integration::SceneHolder currentWindow;
+
+  // Check whether the view is in the stage and is keyboard focusable.
+  if(view && view.IsFocusable() && view.IsEnabled() && view.IsOnScene() &&
+     (currentWindow = Dali::Integration::SceneHolder::Get(view))) ///< Note : SceneHolder might not be valid even if view is connected to scene.
+                                                                  ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
+  {
+    // If developer set focus on same view, doing nothing
+    View currentFocusedView = GetCurrentFocusView();
+    DALI_LOG_DEBUG_INFO("current focused view : [%p] new focused view : [%p]\n", currentFocusedView.GetObjectPtr(), view.GetObjectPtr());
+    if(view == currentFocusedView)
+    {
+      return true;
+    }
+
+    if(currentWindow.GetRootLayer() != mCurrentFocusedWindow.GetHandle())
+    {
+      Layer rootLayer       = currentWindow.GetRootLayer();
+      mCurrentFocusedWindow = rootLayer;
+      mCurrentWindowId      = static_cast<uint32_t>(currentWindow.GetNativeId());
+    }
+
+    if((mIsFocusIndicatorShown == SHOW) && (mEnableFocusIndicator == ENABLE))
+    {
+      view.Add(GetFocusIndicatorView());
+    }
+
+    view.OffSceneSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+
+    // Save the current focused view
+    mCurrentFocusView = view;
+
+    // Save the last focus change context
+    mLastFocusChangeContext = context;
+
+    bool focusedWindowFound = false;
+    for(unsigned int i = 0; i < mCurrentFocusViews.size(); i++)
+    {
+      if(mCurrentFocusViews[i].first == mCurrentFocusedWindow)
+      {
+        mCurrentFocusViews[i].second = view;
+        focusedWindowFound           = true;
+        break;
+      }
+    }
+    if(!focusedWindowFound)
+    {
+      // A new window gains the focus, so store the focused view in that window.
+      mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(mCurrentFocusedWindow, view));
+    }
+
+    if(currentFocusedView && currentFocusedView.IsOnScene())
+    {
+      Internal::KeyInputFocusManager::Get().RemoveFocus(currentFocusedView);
+    }
+
+    if(view && view.IsOnScene())
+    {
+      Internal::KeyInputFocusManager::Get().SetFocus(view);
+    }
+
+    // Send notification for the change of focus view
+    if(!mFocusChangedSignal.Empty())
+    {
+      mFocusChangedSignal.Emit(currentFocusedView, view);
+    }
+
+    // Push Current Focused View to FocusHistory
+    mFocusHistory.push_back(view);
+
+    // Delete first element before add new element when Stack is full.
+    if(mFocusHistory.size() > MAX_HISTORY_AMOUNT)
+    {
+      FocusStackIterator beginPos = mFocusHistory.begin();
+      mFocusHistory.erase(beginPos);
+    }
+
+    DALI_LOG_INFO(gLogFilter, Debug::General, "[%s:%d] SUCCEED\n", __FUNCTION__, __LINE__);
+    success = true;
+  }
+  else
+  {
+    DALI_LOG_WARNING("[%s:%d] FAILED\n", __FUNCTION__, __LINE__);
+  }
+
+  return success;
+}
+
+View FocusManager::GetCurrentFocusView()
+{
+  View view = mCurrentFocusView.GetHandle();
+
+  if(view && !view.IsOnScene())
+  {
+    // If the view has been removed from the stage, then it should not be focused
+    view.Reset();
+    mCurrentFocusView.Reset();
+  }
+  return view;
+}
+
+View FocusManager::GetFocusViewFromCurrentWindow()
+{
+  View         view;
+  unsigned int index;
+  for(index = 0; index < mCurrentFocusViews.size(); index++)
+  {
+    if(mCurrentFocusViews[index].first == mCurrentFocusedWindow)
+    {
+      view = mCurrentFocusViews[index].second.GetHandle();
+      break;
+    }
+  }
+
+  if(view && !view.IsOnScene())
+  {
+    // If the view has been removed from the window, then the window doesn't have any focused view
+    view.Reset();
+    mCurrentFocusViews.erase(mCurrentFocusViews.begin() + index);
+  }
+
+  return view;
+}
+
+void FocusManager::MoveFocusBackward()
+{
+  // Find Pre Focused View when the list size is more than 1
+  if(mFocusHistory.size() > 1)
+  {
+    // Delete current focused view in history
+    mFocusHistory.pop_back();
+
+    // If pre-focused views are not on stage or deleted, remove them in stack
+    while(mFocusHistory.size() > 0)
+    {
+      // Get pre focused view
+      View target = mFocusHistory[mFocusHistory.size() - 1].GetHandle();
+
+      if(target && target.IsOnScene())
+      {
+        // Delete pre focused view in history because it will pushed again by SetCurrentFocusView()
+        mFocusHistory.pop_back();
+        SetCurrentFocusView(target);
+        break;
+      }
+      else
+      {
+        // Target is empty handle or off stage. Erase from queue
+        mFocusHistory.pop_back();
+      }
+    }
+
+    // if there is no view which can get focus, then push current focus view in stack again
+    if(mFocusHistory.size() == 0)
+    {
+      View currentFocusedView = GetCurrentFocusView();
+      mFocusHistory.push_back(currentFocusedView);
+    }
+  }
+}
+
+Ui::FocusDevice FocusManager::ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const
+{
+  switch(deviceClass)
+  {
+    case Dali::Device::Class::KEYBOARD:
+      return Ui::FocusDevice::KEYBOARD;
+    case Dali::Device::Class::MOUSE:
+      return Ui::FocusDevice::MOUSE;
+    case Dali::Device::Class::TOUCH:
+      return Ui::FocusDevice::TOUCH;
+    case Dali::Device::Class::PEN:
+      return Ui::FocusDevice::PEN;
+    case Dali::Device::Class::POINTER:
+      return Ui::FocusDevice::POINTER;
+    case Dali::Device::Class::GAMEPAD:
+      return Ui::FocusDevice::GAMEPAD;
+    default:
+      return Ui::FocusDevice::UNKNOWN;
+  }
+}
+
+bool FocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName)
+{
+  return MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, deviceName});
+}
+
+bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
+{
+  View currentFocusView = GetCurrentFocusView();
+
+  // Step 1: Parent chain navigation
+  // User can stop chaining by overriding ViewImpl::OnFocusNavigationRequested
+  ParentNavigationResult parentNavigation = FindNextFocusByParentNavigation(currentFocusView, direction);
+  View                   candidate        = parentNavigation.candidate;
+
+  // Step 2: Directional Properties (explicit next-focus)
+  if(!candidate)
+  {
+    candidate = FindNextFocusByProperty(currentFocusView, direction);
+  }
+
+  // Step 3: FocusFinder (geometry or linear ordering, scoped to FocusGroup)
+  if(!candidate && mEnableDefaultAlgorithm)
+  {
+    candidate = FindNextFocusByFinder(currentFocusView, parentNavigation.focusGroupBoundary, direction);
+  }
+
+  // Apply: resolve through RequestFocus (child delegation) then commit
+  if(candidate)
+  {
+    View resolved = GetImpl(candidate).RequestFocus();
+    if(resolved && !resolved.HasAncestorBlockingFocus())
+    {
+      return DoSetCurrentFocusView(resolved, context);
+    }
+  }
+
+  return false;
+}
+
+View FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
+{
+  if(!currentFocusView)
+  {
+    return View();
+  }
+
+  Property::Index index = Property::INVALID_INDEX;
+  switch(direction)
+  {
+    case Ui::FocusDirection::LEFT:
+      index = Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::RIGHT:
+      index = Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::UP:
+      index = Ui::View::Property::UP_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::DOWN:
+      index = Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::CLOCKWISE:
+      index = Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::COUNTER_CLOCKWISE:
+      index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::FORWARD:
+      index = Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::BACKWARD:
+      index = Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID;
+      break;
+    default:
+      break;
+  }
+
+  if(index != Property::INVALID_INDEX)
+  {
+    int viewId = currentFocusView.GetProperty(index).Get<int>();
+    if(viewId != -1)
+    {
+      View found;
+      if(currentFocusView.GetParent())
+      {
+        found = View::DownCast(currentFocusView.GetParent().FindChildById(viewId));
+      }
+      if(!found)
+      {
+        Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
+        if(window)
+        {
+          found = View::DownCast(window.GetRootLayer().FindChildById(viewId));
+        }
+      }
+      return found;
+    }
+  }
+  return View();
+}
+
+FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction)
+{
+  ParentNavigationResult result;
+
+  if(!currentFocusView)
+  {
+    return result;
+  }
+
+  Actor parent = currentFocusView.GetParent();
+  while(parent)
+  {
+    View parentView = View::DownCast(parent);
+    if(parentView && IsFocusGroup(parentView))
+    {
+      result.focusGroupBoundary = parentView;
+      break;
+    }
+
+    if(parentView)
+    {
+      result.candidate = GetImpl(parentView).RequestFocusNavigation(currentFocusView, direction);
+      if(result.candidate)
+      {
+        return result;
+      }
+    }
+    parent = parent.GetParent();
+  }
+  return result;
+}
+
+View FocusManager::FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction)
+{
+  Actor rootActor = focusGroup ? Actor(focusGroup) : Actor();
+  if(!rootActor)
+  {
+    if(currentFocusView)
+    {
+      Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
+
+exec
+/bin/bash -lc "sed -n '288,380p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp && sed -n '1010,1105p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// SetCurrentFocusView — direct (no delegation)
+// ============================================================
+
+int UtcDaliFocusManagerSetCurrentFocusViewDirectP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New().SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  // SetCurrentFocusView directly sets focus without delegation
+  bool result = FocusManager::Get().SetCurrentFocusView(view);
+  DALI_TEST_CHECK(result);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerSetCurrentFocusViewOnLayoutNoDelegationN(void)
+{
+  UiTestApplication application;
+
+  auto layout = Layout::New(); // not focusable by default
+  View child = View::New().SetFocusable(true);
+  layout.Add(child);
+  application.GetScene().Add(layout);
+  application.SendNotification();
+  application.Render();
+
+  // SetCurrentFocusView does NOT delegate to children — layout is not focusable, so it fails
+  bool result = FocusManager::Get().SetCurrentFocusView(layout);
+  DALI_TEST_CHECK(!result);
+  END_TEST;
+}
+
+// ============================================================
+// FocusNavigationCallback
+// ============================================================
+
+namespace
+{
+View gCallbackTarget;
+
+View FocusNavigationCallbackFunc(View, FocusDirection)
+{
+  return gCallbackTarget;
+}
+} // namespace
+
+int UtcDaliFocusManagerFocusNavigationCallbackP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  View child1 = View::New().SetFocusable(true);
+  View child2 = View::New().SetFocusable(true);
+  parent.Add(child1);
+  parent.Add(child2);
+  application.GetScene().Add(parent);
+  application.SendNotification();
+  application.Render();
+
+  gCallbackTarget = child2;
+  parent.SetFocusNavigationCallback(
+    FocusNavigationCallback::New(&FocusNavigationCallbackFunc));
+
+  FocusManager::Get().RequestFocus(child1);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == child1);
+
+  bool result = FocusManager::Get().MoveFocus(FocusDirection::RIGHT);
+  DALI_TEST_CHECK(result);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == child2);
+
+  gCallbackTarget.Reset();
+  END_TEST;
+}
+
+// ============================================================
+// MoveFocus step priority
+// ============================================================
+// MoveFocus resolves the next focus target in this order:
+//   Step 1: Parent chain navigation (FocusNavigationCallback)
+//   Step 2: Directional property (e.g. RIGHT_FOCUSABLE_VIEW_ID)
+//   Step 3: FocusFinder (geometry-based or linear ordering)
+//
+// The following tests verify that a higher-priority step always
+// wins over lower ones, and that removing a step falls through
+// to the next.
+
+namespace
+{
+View gPriorityCallbackTarget;
+
+codex
+---
+title: Focus Manager
+sidebar_label: Focus Manager
+category: input-interaction
+---
+
+# Focus Manager
+
+`Dali::Ui::FocusManager` manages keyboard focus for `Dali::Ui::View` objects in a dali-ui application.
+
+## Table of Contents
+
+- [Getting the Focus Manager](#getting-the-focus-manager)
+- [Requesting Focus](#requesting-focus)
+- [Moving Focus](#moving-focus)
+- [Focus Groups](#focus-groups)
+- [Focus Indicator](#focus-indicator)
+- [Focus Change Signals](#focus-change-signals)
+- [Clearing and Preserving Focus](#clearing-and-preserving-focus)
+- [Inspecting the Last Focus Change Device](#inspecting-the-last-focus-change-device)
+
+## Getting the Focus Manager
+
+Use `Dali::Ui::FocusManager::Get()` to access the application-wide focus manager. The returned `Dali::Ui::FocusManager` handle is the entry point for setting focus, moving focus, listening for focus changes, and configuring focus behavior.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void ConfigureFocus()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetClearFocusOnWindowFocusLost(true);
+}
+```
+
+Avoid constructing a standalone `Dali::Ui::FocusManager` with `Dali::Ui::FocusManager::FocusManager()` for normal application work. Use the singleton returned by `Dali::Ui::FocusManager::Get()`.
+
+## Requesting Focus
+
+Use `Dali::Ui::FocusManager::RequestFocus()` for normal application focus requests. It accepts a `Dali::Ui::View` and returns `true` when focus is applied.
+
+```cpp
+bool FocusContent(Dali::Ui::View contentView)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.RequestFocus(contentView);
+}
+```
+
+`Dali::Ui::FocusManager::RequestFocus()` is the preferred call when the target may be a container view. If the requested view can delegate focus to a focusable descendant, the resolved descendant becomes the current focus view.
+
+Use `Dali::Ui::FocusManager::SetCurrentFocusView()` when you intentionally want to focus exactly the specified `Dali::Ui::View`.
+
+```cpp
+bool FocusExactView(Dali::Ui::View view)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.SetCurrentFocusView(view);
+}
+```
+
+After either request, use `Dali::Ui::FocusManager::GetCurrentFocusView()` to retrieve the focused `Dali::Ui::View`.
+
+```cpp
+Dali::Ui::View FocusAndReturnCurrent(Dali::Ui::View requestedView)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.RequestFocus(requestedView);
+
+  return focusManager.GetCurrentFocusView();
+}
+```
+
+## Moving Focus
+
+Use `Dali::Ui::FocusManager::MoveFocus()` to move focus in a direction. It returns `true` if a next focus target is found and focused.
+
+```cpp
+bool MoveFocusRight()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.MoveFocus(Dali::Ui::FocusDirection::RIGHT);
+}
+```
+
+Directional movement can be used for arrow-key style navigation.
+
+```cpp
+bool MoveFocusForArrowKey(Dali::Ui::FocusDirection direction)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.MoveFocus(direction);
+}
+```
+
+For history-style navigation, use `Dali::Ui::FocusManager::MoveFocusBackward()`. This attempts to restore a previously focused view from the focus history.
+
+```cpp
+void ReturnToPreviousFocus()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.MoveFocusBackward();
+}
+```
+
+## Focus Groups
+
+A focus group limits focus navigation within a view subtree. Mark a `Dali::Ui::View` as a group with `Dali::Ui::FocusManager::SetAsFocusGroup()`.
+
+```cpp
+void EnableFocusGroup(Dali::Ui::View panel)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetAsFocusGroup(panel, true);
+}
+```
+
+Use `Dali::Ui::FocusManager::IsFocusGroup()` to check whether a view is currently configured as a focus group.
+
+```cpp
+bool PanelTrapsFocus(Dali::Ui::View panel)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.IsFocusGroup(panel);
+}
+```
+
+Use `Dali::Ui::FocusManager::GetFocusGroup()` to find the closest focus group that contains a view.
+
+```cpp
+Dali::Ui::View FindOwningFocusGroup(Dali::Ui::View focusedChild)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.GetFocusGroup(focusedChild);
+}
+```
+
+Focus groups are most useful for modal panels, popups, and composite controls where `Dali::Ui::FocusManager::MoveFocus()` should stay inside a local section until the application explicitly moves focus elsewhere.
+
+## Focus Indicator
+
+`Dali::Ui::FocusManager` owns the focus indicator configuration. Use `Dali::Ui::FocusManager::SetFocusIndicatorActor()` to replace the focus indicator with a custom `Dali::Ui::View`.
+
+```cpp
+void InstallFocusIndicator(Dali::Ui::View indicatorView)
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetFocusIndicatorActor(indicatorView);
+}
+```
+
+Use `Dali::Ui::FocusManager::GetFocusIndicatorView()` to retrieve the current indicator view.
+
+```cpp
+Dali::Ui::View GetCurrentFocusIndicator()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.GetFocusIndicatorView();
+}
+```
+
+Although the setter name contains `Actor`, application code should still pass a `Dali::Ui::View` as the indicator object.
+
+## Focus Change Signals
+
+Use `Dali::Ui::FocusManager::FocusChangedSignal()` to observe focus changes at the manager level. The callback receives the previously focused `Dali::Ui::View` and the newly focused `Dali::Ui::View`.
+
+```cpp
+class FocusController
+{
+public:
+  void ConnectFocusSignal()
+  {
+    Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+    focusManager.FocusChangedSignal().Connect(
+      this,
+      &FocusController::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(Dali::Ui::View previousFocus, Dali::Ui::View currentFocus)
+  {
+    mPreviousFocus = previousFocus;
+    mCurrentFocus  = currentFocus;
+  }
+
+  Dali::Ui::View mPreviousFocus;
+  Dali::Ui::View mCurrentFocus;
+};
+```
+
+Use the manager-level signal when application state depends on global focus ownership, such as updating command availability or synchronizing focus-dependent UI state.
+
+## Clearing and Preserving Focus
+
+Use `Dali::Ui::FocusManager::ClearFocus()` to remove focus from the current view.
+
+```cpp
+void ClearApplicationFocus()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.ClearFocus();
+}
+```
+
+Use `Dali::Ui::FocusManager::SetClearFocusOnWindowFocusLost()` to configure whether focus is cleared when the window loses focus. Query the current setting with `Dali::Ui::FocusManager::GetClearFocusOnWindowFocusLost()`.
+
+```cpp
+bool PreserveFocusWhileWindowIsInactive()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  focusManager.SetClearFocusOnWindowFocusLost(false);
+
+  return focusManager.GetClearFocusOnWindowFocusLost();
+}
+```
+
+Enable clearing when focus should be reset after the application window loses activation. Disable it when the app should keep its previous focus state for restoration.
+
+## Inspecting the Last Focus Change Device
+
+Use `Dali::Ui::FocusManager::GetLastFocusChangeDevice()` to inspect what caused the most recent focus change. For focus changes made through public focus manager calls, the device can be `Dali::Ui::FocusDevice::PROGRAMMATIC`.
+
+```cpp
+bool LastFocusChangeWasProgrammatic()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.GetLastFocusChangeDevice() ==
+         Dali::Ui::FocusDevice::PROGRAMMATIC;
+}
+```
+
+Use `Dali::Ui::FocusManager::GetLastFocusChangeDeviceName()` when device-specific focus behavior needs the device name.
+
+```cpp
+const Dali::String& GetLastFocusDeviceName()
+{
+  Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+
+  return focusManager.GetLastFocusChangeDeviceName();
+}
+```
+tokens used
+31,740

@@ -1,0 +1,417 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="16-performance-optimization-analysis_8ko_8md" kind="file" language="Markdown">
+    <compoundname>16-performance-optimization-analysis.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>Performance<sp/>Optimization<sp/>Analysis</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>현재<sp/>`TextVisualizer`<sp/>구현을<sp/>기준으로<sp/>성능<sp/>병목<sp/>후보를<sp/>코드<sp/>레벨에서<sp/>다시<sp/>정리하고,<sp/>다음<sp/>최적화<sp/>작업을<sp/>작은<sp/>커밋<sp/>단위로<sp/>우선순위화하기<sp/>위한<sp/>분석<sp/>문서다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>문서는<sp/>구현<sp/>변경을<sp/>포함하지<sp/>않는다.<sp/>현재까지<sp/>빠르게<sp/>들어간<sp/>기능<sp/>/<sp/>품질<sp/>/<sp/>1차<sp/>성능<sp/>최적화의<sp/>의미를<sp/>정리하고,<sp/>다음<sp/>작업에서<sp/>어디를<sp/>먼저<sp/>볼지<sp/>결정하는<sp/>기준으로<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>1.<sp/>현재<sp/>Pipeline<sp/>전체<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">performance<sp/>sample에서<sp/>animation<sp/>tick이<sp/>발생하면<sp/>대략<sp/>아래<sp/>경로가<sp/>열린다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Timer<sp/>Tick]<sp/>--&gt;<sp/>B[moving<sp/>bounds<sp/>update]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[ApplyExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D{threshold<sp/>close?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;|yes|<sp/>D0[skip<sp/>SetExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;|no|<sp/>E[TextVisualizer::SetExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[MarkLayoutDirty<sp/>/<sp/>MarkPlacementRenderDirty]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[RelayoutRequest<sp/>/<sp/>InvalidateMeasure]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[OnMeasure<sp/>/<sp/>OnRelayout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[LayoutGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[GlyphLayoutCache]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>K[word<sp/>wrap<sp/>range<sp/>calculation]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>K<sp/>--&gt;<sp/>L[y-sorted<sp/>exclusion<sp/>interval<sp/>scan]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>--&gt;<sp/>M[LayoutResult]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>M<sp/>--&gt;<sp/>N[LayoutResult<sp/>signature<sp/>calculation]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>M<sp/>--&gt;<sp/>O[AtlasViewAdapter<sp/>line<sp/>metrics<sp/>cache]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>N<sp/>--&gt;<sp/>P{layout<sp/>unchanged?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>P<sp/>--&gt;|yes|<sp/>Q[skip<sp/>UpdateRenderData<sp/>/<sp/>Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>P<sp/>--&gt;|no|<sp/>R[UpdateRenderData]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>O<sp/>--&gt;<sp/>R</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>R<sp/>--&gt;<sp/>S[Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>S<sp/>--&gt;<sp/>T[output<sp/>actor<sp/>/<sp/>mesh<sp/>update]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>S<sp/>--&gt;<sp/>U[render<sp/>dirty<sp/>clear<sp/>condition]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">각<sp/>단계의<sp/>실행<sp/>조건은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>단계<sp/>|<sp/>열리는<sp/>조건<sp/>|<sp/>현재<sp/>비용<sp/>성격<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`Timer<sp/>Tick`<sp/>|<sp/>sample<sp/>timer<sp/>`16ms`<sp/>tick<sp/>|<sp/>실제<sp/>GPU<sp/>frame과<sp/>완전히<sp/>같지는<sp/>않음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>moving<sp/>bounds<sp/>update<sp/>|<sp/>animation<sp/>enabled<sp/>|<sp/>active<sp/>orb<sp/>/<sp/>overlay<sp/>text<sp/>block<sp/>수에<sp/>비례<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`ApplyExclusionRegions()`<sp/>|<sp/>animation<sp/>tick<sp/>또는<sp/>조작<sp/>key<sp/>|<sp/>title,<sp/>fixed<sp/>columns,<sp/>orb<sp/>bands,<sp/>overlay<sp/>text<sp/>bounds를<sp/>새<sp/>vector로<sp/>구성<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>sample<sp/>threshold<sp/>|<sp/>마지막<sp/>적용<sp/>regions와<sp/>새<sp/>regions<sp/>비교<sp/>|<sp/>`O(region<sp/>count)`<sp/>비교,<sp/>core<sp/>dirty를<sp/>줄이기<sp/>위한<sp/>sample-level<sp/>gate<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`SetExclusionRegions()`<sp/>|<sp/>threshold<sp/>미통과<sp/>/<sp/>강제<sp/>변경<sp/>|<sp/>core<sp/>exact<sp/>compare<sp/>후<sp/>vector<sp/>copy<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>dirty<sp/>set<sp/>|<sp/>exclusion<sp/>/<sp/>size<sp/>/<sp/>lineHeight<sp/>등<sp/>layout<sp/>placement<sp/>변화<sp/>|<sp/>layout<sp/>dirty<sp/>+<sp/>placement<sp/>render<sp/>dirty<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`OnMeasure()`<sp/>|<sp/>layout<sp/>system<sp/>measure<sp/>|<sp/>필요<sp/>시<sp/>prepare<sp/>후<sp/>임시<sp/>`LayoutResult`<sp/>계산<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`OnRelayout()`<sp/>|<sp/>relayout<sp/>request<sp/>/<sp/>size<sp/>변경<sp/>|<sp/>prepare,<sp/>layout,<sp/>render<sp/>path를<sp/>dirty<sp/>flag<sp/>기준으로<sp/>처리<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`LayoutGlyphs()`<sp/>|<sp/>layout<sp/>dirty<sp/>|<sp/>현재<sp/>전체<sp/>glyph를<sp/>처음부터<sp/>다시<sp/>배치<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>word<sp/>wrap<sp/>range<sp/>calculation<sp/>|<sp/>각<sp/>available<sp/>interval<sp/>|<sp/>`GlyphLayoutCache`를<sp/>사용하지만<sp/>interval<sp/>range<sp/>scan은<sp/>남음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>y-sorted<sp/>exclusion<sp/>scan<sp/>|<sp/>line별<sp/>available<sp/>interval<sp/>계산<sp/>|<sp/>y<sp/>기준<sp/>sorted<sp/>cache로<sp/>후보<sp/>scan<sp/>감소<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>signature<sp/>calculation<sp/>|<sp/>render<sp/>dirty<sp/>path<sp/>진입<sp/>전<sp/>|<sp/>`LayoutResult`<sp/>전체<sp/>placement<sp/>hash<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>line<sp/>metrics<sp/>cache<sp/>|<sp/>layout<sp/>result<sp/>adapter<sp/>연결<sp/>시<sp/>|<sp/>line<sp/>/<sp/>fragment<sp/>/<sp/>glyph<sp/>range<sp/>scan<sp/>가능<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`UpdateRenderData()`<sp/>|<sp/>render<sp/>dirty<sp/>+<sp/>renderable<sp/>glyphs<sp/>|<sp/>renderable<sp/>glyph<sp/>count만큼<sp/>adapter<sp/>lookup<sp/>/<sp/>vector<sp/>fill<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`Renderer::Render()`<sp/>|<sp/>render<sp/>update<sp/>필요<sp/>|<sp/>AtlasRenderer<sp/>full<sp/>render<sp/>call,<sp/>output<sp/>actor<sp/>/<sp/>mesh<sp/>update<sp/>가능<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>2.<sp/>현재<sp/>적용된<sp/>최적화와<sp/>효과</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>최적화<sp/>|<sp/>줄인<sp/>비용<sp/>|<sp/>현재<sp/>효과<sp/>|<sp/>남은<sp/>한계<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>diagnostics<sp/>/<sp/>log<sp/>cleanup<sp/>|<sp/>기본<sp/>실행<sp/>path의<sp/>log<sp/>formatting<sp/>/<sp/>release<sp/>log<sp/>출력<sp/>|<sp/>sample<sp/>관측<sp/>왜곡<sp/>감소<sp/>|<sp/>diagnostics<sp/>counter<sp/>자체는<sp/>남아<sp/>있음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>line<sp/>metrics<sp/>layout<sp/>/<sp/>baseline<sp/>적용<sp/>|<sp/>빡빡한<sp/>line<sp/>height로<sp/>인한<sp/>visible<sp/>line<sp/>증가<sp/>|<sp/>line<sp/>height<sp/>품질<sp/>개선,<sp/>visible<sp/>line<sp/>수<sp/>감소<sp/>|<sp/>PreparedText-level<sp/>metrics는<sp/>fallback<sp/>font<sp/>/<sp/>emoji<sp/>line별<sp/>차이를<sp/>충분히<sp/>반영하지<sp/>못함<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>y-sorted<sp/>exclusion<sp/>scan<sp/>|<sp/>line마다<sp/>모든<sp/>exclusion<sp/>region<sp/>scan<sp/>|<sp/>line<sp/>band와<sp/>겹칠<sp/>수<sp/>있는<sp/>후보까지만<sp/>검사<sp/>|<sp/>moving<sp/>bounds마다<sp/>sorted<sp/>cache는<sp/>다시<sp/>생성됨<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>layout<sp/>/<sp/>render<sp/>buffer<sp/>reserve<sp/>|<sp/>`Dali::Vector`<sp/>/<sp/>`std::vector`<sp/>반복<sp/>reallocation<sp/>|<sp/>긴<sp/>text<sp/>relayout<sp/>/<sp/>render<sp/>data<sp/>update에서<sp/>allocation<sp/>감소<sp/>|<sp/>`LayoutResult`<sp/>object<sp/>reuse,<sp/>renderer<sp/>내부<sp/>allocation은<sp/>남음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>render<sp/>dirty<sp/>clear<sp/>condition<sp/>|<sp/>성공<sp/>render<sp/>이후<sp/>render<sp/>path<sp/>반복<sp/>진입<sp/>|<sp/>동일<sp/>상태에서<sp/>`UpdateRenderData()`<sp/>/<sp/>`Renderer::Render()`<sp/>반복<sp/>감소<sp/>|<sp/>외부<sp/>actor<sp/>invalidation<sp/>/<sp/>async<sp/>render<sp/>정책은<sp/>추가<sp/>검토<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>performance<sp/>sample<sp/>exclusion<sp/>threshold<sp/>|<sp/>아주<sp/>작은<sp/>bounds<sp/>변화의<sp/>core<sp/>dirty<sp/>set<sp/>|<sp/>sample에서<sp/>redundant<sp/>`SetExclusionRegions()`<sp/>감소<sp/>|<sp/>threshold가<sp/>커지면<sp/>visual<sp/>fidelity<sp/>저하<sp/>가능,<sp/>core<sp/>API<sp/>정책은<sp/>그대로<sp/>exact<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>layout<sp/>unchanged<sp/>render<sp/>skip<sp/>|<sp/>layout<sp/>결과가<sp/>같을<sp/>때<sp/>render<sp/>data<sp/>/<sp/>render<sp/>call<sp/>|<sp/>placement-only<sp/>dirty에서<sp/>render<sp/>path<sp/>skip<sp/>가능<sp/>|<sp/>signature<sp/>계산<sp/>비용과<sp/>skip<sp/>이득의<sp/>균형<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>line-level<sp/>metrics<sp/>cache<sp/>|<sp/>renderer<sp/>glyph<sp/>position<sp/>baseline<sp/>fallback<sp/>scan<sp/>|<sp/>line별<sp/>baseline<sp/>품질<sp/>개선<sp/>기반<sp/>|<sp/>adapter<sp/>cache<sp/>build<sp/>/<sp/>lookup<sp/>비용,<sp/>LayoutResult<sp/>metrics와<sp/>역할<sp/>중복<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>word<sp/>wrap<sp/>lookup<sp/>cache<sp/>|<sp/>glyph마다<sp/>반복<sp/>lineBreakInfo<sp/>/<sp/>glyph<sp/>mapping<sp/>lookup<sp/>|<sp/>basic<sp/>word<sp/>wrap<sp/>품질<sp/>유지하면서<sp/>lookup<sp/>비용<sp/>감소<sp/>|<sp/>interval마다<sp/>range<sp/>scan<sp/>자체는<sp/>남음<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>3.<sp/>현재<sp/>남은<sp/>병목<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>A.<sp/>`LayoutGlyphs()`<sp/>full<sp/>relayout</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>bounds가<sp/>움직이면<sp/>전체<sp/>glyph를<sp/>처음부터<sp/>다시<sp/>배치한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>affected<sp/>line<sp/>/<sp/>affected<sp/>y<sp/>range<sp/>기반<sp/>partial<sp/>relayout은<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>word<sp/>wrap<sp/>이후<sp/>각<sp/>interval에서<sp/>glyph<sp/>range를<sp/>계산해야<sp/>하므로<sp/>긴<sp/>text일수록<sp/>relayout<sp/>비용이<sp/>커진다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line별<sp/>`BuildAvailableIntervalsFromSorted()`와<sp/>word<sp/>wrap<sp/>range<sp/>scan이<sp/>모두<sp/>전체<sp/>relayout<sp/>안에서<sp/>반복된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>B.<sp/>word<sp/>wrap<sp/>interval<sp/>scan</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">최근<sp/>`GlyphLayoutCache`로<sp/>repeated<sp/>lookup은<sp/>줄였지만,<sp/>interval별<sp/>range<sp/>scan은<sp/>남아<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>각<sp/>interval은<sp/>`glyphStart`부터<sp/>overflow<sp/>또는<sp/>break<sp/>후보까지<sp/>순차<sp/>scan한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>긴<sp/>word<sp/>/<sp/>긴<sp/>interval<sp/>/<sp/>많은<sp/>exclusion<sp/>interval<sp/>조합에서는<sp/>scan<sp/>비용이<sp/>누적될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>break<sp/>candidate<sp/>index<sp/>cache,<sp/>cluster<sp/>range<sp/>cache,<sp/>binary-searchable<sp/>advance<sp/>prefix<sp/>활용<sp/>등을<sp/>검토할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>C.<sp/>`Renderer::Render()`<sp/>full<sp/>call</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">layout이<sp/>실제로<sp/>바뀌면<sp/>여전히<sp/>`Renderer::Render()`<sp/>전체<sp/>호출이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`UpdateRenderData()`가<sp/>renderable<sp/>glyph<sp/>count만큼<sp/>데이터를<sp/>새로<sp/>채운다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AttachRendererToHost()`는<sp/>attached<sp/>상태에서도<sp/>`Renderer::Render()`를<sp/>호출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor는<sp/>stale<sp/>actor<sp/>누적<sp/>방지<sp/>정책이<sp/>있지만,<sp/>renderer<sp/>내부<sp/>mesh<sp/>/<sp/>child<sp/>actor<sp/>allocation은<sp/>아직<sp/>조사되지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-atlas-renderer.*`를<sp/>직접<sp/>수정하기<sp/>전<sp/>비용<sp/>관측이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>D.<sp/>`LayoutResult`<sp/>signature<sp/>cost</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">layout<sp/>unchanged<sp/>render<sp/>skip을<sp/>위해<sp/>`LayoutResult::CalculateSignature()`가<sp/>전체<sp/>placement를<sp/>hash한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>placement<sp/>count가<sp/>크면<sp/>signature<sp/>계산<sp/>자체가<sp/>`O(glyph<sp/>count)`<sp/>비용이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>skip으로<sp/>아끼는<sp/>비용보다<sp/>signature<sp/>cost가<sp/>커지는<sp/>구간이<sp/>있을<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>생성<sp/>중<sp/>signature를<sp/>같이<sp/>누적하거나,<sp/>placement-only<sp/>dirty<sp/>reason별로<sp/>더<sp/>싼<sp/>version<sp/>정책을<sp/>둘<sp/>수<sp/>있는지<sp/>검토가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>E.<sp/>line-level<sp/>metrics<sp/>cache<sp/>build</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`LayoutGlyphs()`가<sp/>`TextLine.metrics`를<sp/>채우고<sp/>있지만,<sp/>`AtlasViewAdapter::RebuildLineMetricsCache()`는<sp/>cache를<sp/>다시<sp/>만들고<sp/>fallback<sp/>path에서는<sp/>line<sp/>fragments의<sp/>glyph<sp/>range를<sp/>다시<sp/>scan할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>renderer<sp/>baseline<sp/>품질에는<sp/>도움이<sp/>된다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>path마다<sp/>adapter<sp/>연결이<sp/>갱신되면<sp/>cache<sp/>rebuild가<sp/>비용이<sp/>될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult`의<sp/>line<sp/>metrics를<sp/>더<sp/>직접<sp/>사용하거나,<sp/>line<sp/>index<sp/>lookup<sp/>구조를<sp/>단순화할<sp/>수<sp/>있는지<sp/>검토가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>F.<sp/>exclusion<sp/>region<sp/>count<sp/>증가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">sample<sp/>visual<sp/>quality<sp/>개선으로<sp/>orb<sp/>하나를<sp/>ellipse<sp/>band<sp/>여러<sp/>개로<sp/>나누면서<sp/>exclusion<sp/>region<sp/>수가<sp/>증가했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>y-sorted<sp/>scan으로<sp/>line별<sp/>후보<sp/>수는<sp/>줄였지만,<sp/>region<sp/>vector<sp/>build<sp/>/<sp/>threshold<sp/>compare<sp/>/<sp/>sort<sp/>비용은<sp/>region<sp/>count에<sp/>영향을<sp/>받는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>orb<sp/>count와<sp/>band<sp/>count를<sp/>늘리면<sp/>`SetExclusionRegions()`<sp/>전후<sp/>비용이<sp/>다시<sp/>커질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>spatial<sp/>index<sp/>또는<sp/>active<sp/>y<sp/>range<sp/>cache는<sp/>더<sp/>큰<sp/>bounds<sp/>수에서만<sp/>검토하는<sp/>것이<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>G.<sp/>`SetExclusionRegions()`<sp/>vector<sp/>compare<sp/>/<sp/>copy</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">core<sp/>API는<sp/>exact<sp/>compare<sp/>후<sp/>vector<sp/>copy를<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>threshold는<sp/>upstream<sp/>skip<sp/>실험이며<sp/>core<sp/>policy를<sp/>바꾸지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>epsilon<sp/>compare를<sp/>core에<sp/>넣으면<sp/>correctness<sp/>정책이<sp/>흐려질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실서비스에서는<sp/>caller가<sp/>unchanged<sp/>update를<sp/>줄이는<sp/>방향과<sp/>core-level<sp/>optional<sp/>policy를<sp/>분리해서<sp/>판단해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>H.<sp/>status<sp/>/<sp/>sample<sp/>overhead</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">performance<sp/>sample<sp/>자체도<sp/>측정을<sp/>왜곡할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>`TextVisualizer`는<sp/>일정<sp/>interval마다<sp/>`SetText()`를<sp/>호출하고<sp/>prepare<sp/>path를<sp/>연다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>toggle<sp/>`0`이<sp/>있으므로<sp/>measurement<sp/>시<sp/>on/off를<sp/>나눠<sp/>봐야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Timer<sp/>FPS는<sp/>실제<sp/>GPU<sp/>frame<sp/>FPS가<sp/>아니므로<sp/>상대<sp/>비교<sp/>지표로만<sp/>사용해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>4.<sp/>병목<sp/>후보<sp/>우선순위</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>우선순위<sp/>|<sp/>후보<sp/>|<sp/>효과<sp/>|<sp/>난이도<sp/>|<sp/>위험<sp/>|<sp/>추천<sp/>여부<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>1<sp/>|<sp/>performance<sp/>sample<sp/>stage<sp/>counters<sp/>|<sp/>높음:<sp/>병목<sp/>판단<sp/>정확도<sp/>향상<sp/>|<sp/>낮음<sp/>|<sp/>낮음:<sp/>sample-only<sp/>|<sp/>강력<sp/>추천<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>2<sp/>|<sp/>line<sp/>metrics<sp/>cache<sp/>역할<sp/>정리<sp/>/<sp/>LayoutResult<sp/>직접<sp/>사용<sp/>|<sp/>중간<sp/>|<sp/>중간<sp/>|<sp/>낮음~중간:<sp/>internal-only<sp/>|<sp/>추천<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>3<sp/>|<sp/>layout<sp/>signature<sp/>cost<sp/>감소<sp/>|<sp/>중간~높음<sp/>|<sp/>중간<sp/>|<sp/>중간:<sp/>render<sp/>skip<sp/>correctness<sp/>|<sp/>추천<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>4<sp/>|<sp/>word<sp/>wrap<sp/>range<sp/>scan<sp/>추가<sp/>최적화<sp/>|<sp/>중간<sp/>|<sp/>중간<sp/>|<sp/>중간:<sp/>line<sp/>break<sp/>회귀<sp/>가능<sp/>|<sp/>조건부<sp/>추천<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>5<sp/>|<sp/>core<sp/>redundant<sp/>exclusion<sp/>update<sp/>policy<sp/>|<sp/>중간<sp/>|<sp/>중간<sp/>|<sp/>높음:<sp/>correctness<sp/>/<sp/>API<sp/>semantics<sp/>|<sp/>보류<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>6<sp/>|<sp/>Renderer::Render<sp/>cost<sp/>조사<sp/>|<sp/>높음<sp/>|<sp/>중간~높음<sp/>|<sp/>중간:<sp/>AtlasRenderer<sp/>경계<sp/>|<sp/>조사<sp/>추천<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>7<sp/>|<sp/>geometry-only<sp/>update<sp/>/<sp/>renderer<sp/>update<sp/>API<sp/>|<sp/>매우<sp/>높음<sp/>가능<sp/>|<sp/>높음<sp/>|<sp/>높음:<sp/>`text-atlas-renderer.*`<sp/>영향<sp/>|<sp/>장기<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>8<sp/>|<sp/>affected-line<sp/>partial<sp/>relayout<sp/>|<sp/>매우<sp/>높음<sp/>가능<sp/>|<sp/>높음<sp/>|<sp/>높음:<sp/>layout<sp/>correctness<sp/>|<sp/>장기<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>5.<sp/>다음<sp/>구현<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>A.<sp/>Add<sp/>performance<sp/>sample<sp/>stage<sp/>counters</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample-level<sp/>counters로<sp/>실제<sp/>비용<sp/>경향을<sp/>관찰한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>core<sp/>구현과<sp/>public<sp/>API를<sp/>바꾸지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>후보<sp/>counters:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>tick<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>exclusion<sp/>applied<sp/>/<sp/>skipped</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>body<sp/>`SetExclusionRegions()`<sp/>call<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>status<sp/>update<sp/>count</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>rough<sp/>layout<sp/>/<sp/>render<sp/>visible<sp/>counters가<sp/>가능하면<sp/>debug-only로<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>장점:<sp/>다음<sp/>최적화의<sp/>근거를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>위험:<sp/>sample<sp/>output<sp/>자체가<sp/>성능에<sp/>영향을<sp/>줄<sp/>수<sp/>있으므로<sp/>표시<sp/>update<sp/>interval과<sp/>status<sp/>toggle을<sp/>유지해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>B.<sp/>Move<sp/>line<sp/>metrics<sp/>cache<sp/>closer<sp/>to<sp/>`LayoutResult`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutGlyphs()`는<sp/>이미<sp/>`TextLine.metrics`를<sp/>채운다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasViewAdapter`가<sp/>line<sp/>metrics를<sp/>다시<sp/>계산하지<sp/>않고<sp/>`TextLine.metrics`를<sp/>더<sp/>직접<sp/>사용하도록<sp/>정리할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>lookup도<sp/>line<sp/>top<sp/>scan<sp/>대신<sp/>line<sp/>index<sp/>/<sp/>fragment<sp/>mapping으로<sp/>바꾸면<sp/>renderer<sp/>glyph<sp/>position<sp/>비용을<sp/>줄일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>위험:<sp/>baseline<sp/>fallback<sp/>priority가<sp/>바뀌면<sp/>visual<sp/>diff가<sp/>생길<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>C.<sp/>Add<sp/>layout<sp/>result<sp/>dirty<sp/>/<sp/>version<sp/>instead<sp/>of<sp/>full<sp/>signature<sp/>hash</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`CalculateSignature()`는<sp/>render<sp/>skip<sp/>판단<sp/>때<sp/>전체<sp/>placement를<sp/>hash한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>생성<sp/>중<sp/>signature를<sp/>누적하거나,<sp/>`LayoutResult`가<sp/>version<sp/>/<sp/>cached<sp/>signature를<sp/>보유하면<sp/>별도<sp/>full<sp/>scan을<sp/>줄일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>위험:<sp/>signature<sp/>갱신<sp/>누락<sp/>시<sp/>render<sp/>skip<sp/>correctness<sp/>문제가<sp/>생긴다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>D.<sp/>Optimize<sp/>word<sp/>wrap<sp/>range<sp/>scan<sp/>with<sp/>next<sp/>break<sp/>index<sp/>cache</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`breakAllowedAfterGlyph`<sp/>cache를<sp/>기반으로<sp/>next<sp/>break<sp/>candidate를<sp/>빠르게<sp/>찾는<sp/>구조를<sp/>추가한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prefix<sp/>advance와<sp/>함께<sp/>사용하면<sp/>일부<sp/>interval에서<sp/>scan<sp/>범위를<sp/>줄일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>위험:<sp/>oversized<sp/>glyph,<sp/>mandatory<sp/>break,<sp/>interval<sp/>fragmentation과<sp/>결합할<sp/>때<sp/>behavior가<sp/>바뀌지<sp/>않도록<sp/>주의해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>E.<sp/>Keep<sp/>core<sp/>exclusion<sp/>epsilon<sp/>upstream-only,<sp/>or<sp/>design<sp/>optional<sp/>policy</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>core<sp/>`SetExclusionRegions()`에<sp/>epsilon<sp/>compare를<sp/>바로<sp/>넣는<sp/>것은<sp/>보류한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>먼저<sp/>sample<sp/>/<sp/>caller<sp/>수준<sp/>skip으로<sp/>충분한지<sp/>관찰한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>core에<sp/>넣는다면<sp/>explicit<sp/>opt-in<sp/>또는<sp/>internal<sp/>policy가<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>위험:<sp/>small<sp/>movement가<sp/>layout에<sp/>실제<sp/>영향을<sp/>줄<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>F.<sp/>Investigate<sp/>`Renderer::Render()`<sp/>cost<sp/>with<sp/>internal<sp/>counters</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`text-atlas-renderer.*`<sp/>수정<sp/>없이<sp/>bridge<sp/>/<sp/>view<sp/>interface<sp/>diagnostics로<sp/>call<sp/>count와<sp/>returned<sp/>glyph<sp/>count를<sp/>관찰한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>descendant<sp/>/<sp/>renderer<sp/>count도<sp/>참고<sp/>지표로<sp/>본다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>단계에서<sp/>geometry-only<sp/>update가<sp/>필요한지<sp/>판단한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>위험:<sp/>counter<sp/>자체가<sp/>release<sp/>path<sp/>overhead가<sp/>되지<sp/>않게<sp/>compile-time<sp/>guard<sp/>또는<sp/>sample-only<sp/>path가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>G.<sp/>Partial<sp/>relayout<sp/>prototype</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>moving<sp/>bounds의<sp/>affected<sp/>y<sp/>range를<sp/>기준으로<sp/>일부<sp/>line만<sp/>relayout하는<sp/>장기<sp/>후보.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`LayoutGlyphs()`는<sp/>sequential<sp/>word<sp/>wrap이므로<sp/>앞<sp/>line<sp/>변화가<sp/>뒤<sp/>line<sp/>전체에<sp/>전파될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>처음부터<sp/>production<sp/>path에<sp/>넣기보다<sp/>prototype<sp/>/<sp/>doc<sp/>설계가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>6.<sp/>바로<sp/>구현<sp/>추천<sp/>1순위</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>커밋으로는<sp/>**Add<sp/>performance<sp/>sample<sp/>stage<sp/>counters**를<sp/>추천한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재는<sp/>“체감<sp/>성능”과<sp/>rough<sp/>FPS<sp/>중심으로<sp/>판단하고<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이미<sp/>여러<sp/>최적화가<sp/>들어가서<sp/>다음<sp/>병목은<sp/>단일<sp/>함수<sp/>하나로<sp/>단정하기<sp/>어렵다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>core<sp/>public<sp/>API를<sp/>늘리지<sp/>않고<sp/>sample-only로<sp/>관측<sp/>지표를<sp/>추가할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Renderer::Render()`<sp/>full<sp/>call,<sp/>layout<sp/>unchanged<sp/>skip,<sp/>status<sp/>update<sp/>overhead,<sp/>exclusion<sp/>threshold<sp/>효과를<sp/>같은<sp/>화면에서<sp/>비교할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이후<sp/>`LayoutResult`<sp/>signature<sp/>cost를<sp/>줄일지,<sp/>renderer<sp/>cost를<sp/>먼저<sp/>볼지,<sp/>word<sp/>wrap<sp/>scan을<sp/>더<sp/>줄일지<sp/>결정하는<sp/>근거가<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>코드에<sp/>counters만<sp/>추가한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>update<sp/>toggle은<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stage<sp/>timing까지<sp/>넣는다면<sp/>`std::chrono`<sp/>기반<sp/>sample-only<sp/>rough<sp/>timing으로<sp/>제한한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>core<sp/>TextVisualizer에는<sp/>public<sp/>getter를<sp/>추가하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>7.<sp/>측정<sp/>계획</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>sample<sp/>조건</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>조합으로<sp/>비교한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>조건<sp/>|<sp/>값<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>paragraph<sp/>repeat<sp/>/<sp/>text<sp/>length<sp/>|<sp/>현재<sp/>text,<sp/>2x,<sp/>4x<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>orb<sp/>count<sp/>|<sp/>0,<sp/>2,<sp/>5,<sp/>6<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>exclusion<sp/>threshold<sp/>|<sp/>0.0px,<sp/>0.5px,<sp/>1.0px<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>status<sp/>updates<sp/>|<sp/>on,<sp/>off<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>font<sp/>size<sp/>|<sp/>16,<sp/>20,<sp/>24<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>line<sp/>height<sp/>|<sp/>현재<sp/>값,<sp/>+0.2,<sp/>-0.2<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>animation<sp/>|<sp/>on,<sp/>pause<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>측정<sp/>항목</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>rough<sp/>FPS</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>timer<sp/>tick<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions()`<sp/>applied<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>skipped<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>update<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>dirty<sp/>trigger<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>dirty<sp/>trigger<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>call<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>skip<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>placement<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visible<sp/>line<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>count</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>FPS는<sp/>timer<sp/>기반<sp/>rough<sp/>value이며<sp/>실제<sp/>GPU<sp/>frame<sp/>FPS가<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>그래도<sp/>같은<sp/>build<sp/>/<sp/>같은<sp/>machine<sp/>/<sp/>같은<sp/>status<sp/>setting의<sp/>상대<sp/>비교에는<sp/>사용할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>text<sp/>자체가<sp/>`SetText()`<sp/>/<sp/>prepare<sp/>비용을<sp/>만들<sp/>수<sp/>있으므로<sp/>status<sp/>on/off<sp/>결과를<sp/>반드시<sp/>분리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>8.<sp/>진행:<sp/>Label-like<sp/>Measure<sp/>Policy</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`의<sp/>기본<sp/>measure<sp/>/<sp/>relayout<sp/>정책은<sp/>`InputField`가<sp/>아니라<sp/>`Label`에<sp/>가까운<sp/>display<sp/>control<sp/>정책으로<sp/>정리했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">조사한<sp/>`LabelImpl`<sp/>기본<sp/>경로는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`OnInitialize()`에서<sp/>width는<sp/>`FILL_TO_PARENT`,<sp/>height는<sp/>`DIMENSION_DEPENDENCY`를<sp/>기본으로<sp/>둔다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fixed<sp/>requested<sp/>width<sp/>/<sp/>height는<sp/>requested<sp/>size를<sp/>우선한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`WRAP_CONTENT`<sp/>width는<sp/>text<sp/>natural<sp/>width를<sp/>기준으로<sp/>측정한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`WRAP_CONTENT`<sp/>height는<sp/>width-for-height<sp/>형태로<sp/>현재<sp/>width에서<sp/>text<sp/>layout<sp/>height를<sp/>계산한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>TextFit<sp/>/<sp/>ellipsis<sp/>/<sp/>async<sp/>rendering<sp/>/<sp/>marquee<sp/>등<sp/>특수<sp/>경로는<sp/>이번<sp/>`TextVisualizer`<sp/>정책에<sp/>포함하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizerImpl`의<sp/>현재<sp/>정책은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>항목<sp/>|<sp/>정책<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`OnInitialize()`<sp/>|<sp/>width<sp/>`FILL_TO_PARENT`,<sp/>height<sp/>`DIMENSION_DEPENDENCY`<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>fixed<sp/>width<sp/>/<sp/>fixed<sp/>height<sp/>|<sp/>requested<sp/>size를<sp/>반환<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>wrap<sp/>width<sp/>/<sp/>wrap<sp/>height<sp/>|<sp/>natural<sp/>width와<sp/>해당<sp/>width에서의<sp/>layout<sp/>height를<sp/>반환<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>match<sp/>/<sp/>fill<sp/>parent<sp/>|<sp/>positive<sp/>parent<sp/>constraint가<sp/>있으면<sp/>그<sp/>constraint를<sp/>사용<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`OnRelayout()`<sp/>|<sp/>실제<sp/>allocated<sp/>size를<sp/>우선<sp/>사용하고,<sp/>width가<sp/>0<sp/>이하이면<sp/>natural<sp/>width를<sp/>fallback으로<sp/>사용<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>empty<sp/>text<sp/>|<sp/>wrap<sp/>측정은<sp/>`0x0`,<sp/>fixed<sp/>requested<sp/>size는<sp/>유지<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`OnRelayout()`<sp/>lifecycle도<sp/>`LabelImpl`<sp/>/<sp/>`InputFieldImpl`<sp/>패턴에<sp/>맞췄다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LabelImpl::OnRelayout()`과<sp/>`InputFieldImpl::OnRelayout()`은<sp/>자체<sp/>text<sp/>layout<sp/>/<sp/>renderer<sp/>update를<sp/>수행하고<sp/>`ViewImpl::OnRelayout()`을<sp/>명시<sp/>호출하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ViewImpl::OnRelayout()`은<sp/>padding<sp/>/<sp/>margin이<sp/>있는<sp/>경우<sp/>child를<sp/>`RelayoutContainer`에<sp/>다시<sp/>넣고,<sp/>fitting<sp/>/<sp/>accessibility<sp/>관련<sp/>base<sp/>view<sp/>처리를<sp/>수행한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl`은<sp/>내부<sp/>`mRenderHost`를<sp/>`AddActorChild()`로<sp/>직접<sp/>소유하고<sp/>`SyncRenderHostSize()`로<sp/>크기를<sp/>직접<sp/>맞춘다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>따라서<sp/>`TextVisualizerImpl::OnRelayout()`도<sp/>base<sp/>`ViewImpl::OnRelayout()`<sp/>호출에<sp/>의존하지<sp/>않고,<sp/>내부<sp/>render<sp/>host와<sp/>renderer<sp/>output<sp/>lifecycle을<sp/>직접<sp/>관리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`InputField`와<sp/>다르게<sp/>처리한<sp/>점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cursor<sp/>/<sp/>selection<sp/>/<sp/>decorator<sp/>/<sp/>IME<sp/>/<sp/>placeholder<sp/>interaction은<sp/>고려하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editing<sp/>control<sp/>특유의<sp/>minimum<sp/>editing<sp/>surface나<sp/>focus<sp/>behavior를<sp/>measure에<sp/>끌어오지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>text<sp/>display<sp/>surface이므로<sp/>text<sp/>natural<sp/>size와<sp/>parent<sp/>allocation을<sp/>기준으로만<sp/>판단한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">남은<sp/>확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Label`의<sp/>`MATCH_PARENT`<sp/>측정은<sp/>parent<sp/>arrange<sp/>phase와<sp/>결합되어<sp/>더<sp/>복잡하므로,<sp/>현재<sp/>TextVisualizer의<sp/>positive<sp/>constraint<sp/>사용<sp/>정책이<sp/>장기적으로<sp/>충분한지<sp/>확인이<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`OnMeasure()`는<sp/>local<sp/>layout을<sp/>계산하므로,<sp/>반복<sp/>measure가<sp/>많아지면<sp/>별도<sp/>measure<sp/>cache가<sp/>필요할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fixed<sp/>height에서<sp/>overflow된<sp/>text는<sp/>현재<sp/>clipping<sp/>/<sp/>render<sp/>host<sp/>size<sp/>정책에<sp/>맡긴다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>9.<sp/>진행:<sp/>exclusion<sp/>region<sp/>storage<sp/>update<sp/>optimization</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`SetExclusionRegions()`의<sp/>public<sp/>동작<sp/>의미와<sp/>exact<sp/>compare<sp/>정책은<sp/>유지하면서,<sp/>내부<sp/>저장소<sp/>갱신<sp/>비용을<sp/>줄였다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기존<sp/>비용<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions()`는<sp/>moving<sp/>bounds<sp/>상황에서<sp/>매<sp/>tick<sp/>호출될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>구현은<sp/>값이<sp/>달라지면<sp/>`mExclusionRegions<sp/>=<sp/>regions`<sp/>형태로<sp/>전체<sp/>vector<sp/>assignment를<sp/>수행했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>region<sp/>count가<sp/>같고<sp/>rect<sp/>값만<sp/>움직이는<sp/>경우에도<sp/>저장소<sp/>전체<sp/>교체<sp/>경로를<sp/>탈<sp/>수<sp/>있었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>많은<sp/>region을<sp/>가진<sp/>sample<sp/>/<sp/>application에서는<sp/>compare<sp/>이후<sp/>copy<sp/>/<sp/>allocation<sp/>비용이<sp/>누적될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>저장<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>먼저<sp/>기존처럼<sp/>`AreExclusionRegionsEqual()`로<sp/>exact<sp/>compare를<sp/>수행한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>값이<sp/>같으면<sp/>아무<sp/>것도<sp/>하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>값이<sp/>다르고<sp/>region<sp/>count가<sp/>같으면<sp/>`mExclusionRegions[index]<sp/>=<sp/>regions[index]`로<sp/>in-place<sp/>update한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>값이<sp/>다르고<sp/>region<sp/>count가<sp/>다르면<sp/>`Clear()`<sp/>후<sp/>`Reserve(regions.Count())`를<sp/>수행하고<sp/>`PushBack()`으로<sp/>복사한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>dirty<sp/>정책은<sp/>기존과<sp/>동일하게<sp/>layout<sp/>dirty<sp/>+<sp/>placement<sp/>render<sp/>dirty<sp/>+<sp/>relayout<sp/>request<sp/>+<sp/>measure<sp/>invalidation을<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">유지한<sp/>범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API는<sp/>변경하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>epsilon<sp/>compare는<sp/>도입하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetExclusionRegions()`의<sp/>semantic은<sp/>변경하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>/<sp/>word<sp/>wrap<sp/>/<sp/>render<sp/>dirty<sp/>clear<sp/>조건은<sp/>변경하지<sp/>않았다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Dali::Vector::Clear()`<sp/>이후<sp/>capacity가<sp/>장기적으로<sp/>유지되는지<sp/>확인이<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>very<sp/>large<sp/>region<sp/>count에서<sp/>exact<sp/>compare<sp/>비용<sp/>자체는<sp/>여전히<sp/>남는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>core<sp/>epsilon<sp/>compare는<sp/>correctness<sp/>정책을<sp/>흐릴<sp/>수<sp/>있으므로<sp/>별도<sp/>설계<sp/>전까지<sp/>보류한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>10.<sp/>진행:<sp/>optional<sp/>debug<sp/>status<sp/>for<sp/>performance<sp/>sample</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">performance<sp/>sample은<sp/>수요일<sp/>데모용<sp/>visual<sp/>performance를<sp/>우선하기<sp/>위해<sp/>debug<sp/>status를<sp/>optional<sp/>path로<sp/>정리했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기존<sp/>비용<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>`TextVisualizer`도<sp/>`SetText()`가<sp/>호출되면<sp/>prepare<sp/>/<sp/>layout<sp/>/<sp/>render<sp/>dirty<sp/>path를<sp/>열<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>문자열을<sp/>매<sp/>interval마다<sp/>만들면<sp/>`std::chrono`,<sp/>FPS<sp/>계산,<sp/>`std::ostringstream`<sp/>formatting<sp/>비용이<sp/>sample<sp/>측정에<sp/>섞인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>데모<sp/>기본<sp/>상태에서는<sp/>status<sp/>자체가<sp/>화면<sp/>구성과<sp/>성능<sp/>관측을<sp/>모두<sp/>방해할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>debug<sp/>status<sp/>기본값은<sp/>off다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`0`<sp/>key로<sp/>debug<sp/>status를<sp/>toggle한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>debug<sp/>status<sp/>off<sp/>상태에서는<sp/>`UpdateStatusText()`가<sp/>FPS-only<sp/>문자열만<sp/>갱신한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>off<sp/>상태에서는<sp/>detailed<sp/>counters<sp/>formatting을<sp/>수행하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>debug<sp/>status<sp/>on<sp/>상태에서만<sp/>`STATUS_INTERVAL`마다<sp/>counters/details를<sp/>표시한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>debug<sp/>status를<sp/>끄면<sp/>FPS-only<sp/>표시로<sp/>돌아간다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">debug<sp/>on에서<sp/>표시하는<sp/>counters:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>rough<sp/>FPS</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>frame<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>orb<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ApplyExclusionRegions()`<sp/>call<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>`SetExclusionRegions()`<sp/>call<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>orb<sp/>position<sp/>update<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>orb<sp/>view<sp/>update<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>text<sp/>update<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>size<sp/>/<sp/>line<sp/>height<sp/>/<sp/>color<sp/>/<sp/>exclusion<sp/>state</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">유지한<sp/>범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>core<sp/>`TextVisualizer`<sp/>구현은<sp/>변경하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API는<sp/>추가하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>visual<sp/>layout<sp/>/<sp/>font<sp/>size<sp/>/<sp/>line<sp/>height<sp/>/<sp/>body<sp/>text<sp/>/<sp/>orb<sp/>positions는<sp/>변경하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>/<sp/>word<sp/>wrap<sp/>/<sp/>render<sp/>dirty<sp/>clear<sp/>조건은<sp/>변경하지<sp/>않았다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">확인<sp/>필요:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>debug<sp/>status<sp/>on<sp/>상태에서<sp/>status<sp/>text<sp/>자체가<sp/>만드는<sp/>prepare<sp/>비용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>counter<sp/>표시<sp/>길이가<sp/>데모<sp/>화면에<sp/>주는<sp/>영향</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>rough<sp/>FPS가<sp/>실제<sp/>GPU<sp/>frame<sp/>FPS가<sp/>아니라는<sp/>점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>11.<sp/>다음<sp/>커밋<sp/>금지<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">계속<sp/>유지할<sp/>원칙:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`TextController`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`TextView`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>`Label`<sp/>/<sp/>`InputField`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-atlas-renderer.*`<sp/>수정은<sp/>분석<sp/>없이<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/layouts/layout-engine.*`<sp/>수정<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API<sp/>추가<sp/>금지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>dirty<sp/>clear<sp/>조건<sp/>변경은<sp/>전용<sp/>커밋에서만</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>성능<sp/>최적화와<sp/>품질<sp/>개선을<sp/>한<sp/>커밋에<sp/>섞지<sp/>않기</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>관측용<sp/>변경과<sp/>core<sp/>최적화<sp/>변경을<sp/>한<sp/>커밋에<sp/>섞지<sp/>않기</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>12.<sp/>Compact<sp/>이후<sp/>복구<sp/>지침</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">새<sp/>세션에서는<sp/>다음<sp/>순서를<sp/>따른다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>이<sp/>문서<sp/>`docs/text-visualizer/16-performance-optimization-analysis.ko.md`를<sp/>먼저<sp/>읽는다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>그<sp/>다음<sp/>`docs/text-visualizer/15-current-optimization-status.ko.md`를<sp/>읽는다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>성능<sp/>최적화는<sp/>이<sp/>문서의<sp/>우선순위<sp/>표를<sp/>기준으로<sp/>시작한다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>작업<sp/>전<sp/>`git<sp/>status<sp/>--short`를<sp/>반드시<sp/>확인한다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>sample<sp/>file에<sp/>미커밋<sp/>사용자<sp/>변경이<sp/>있으면<sp/>core<sp/>커밋에<sp/>섞지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>push<sp/>실패는<sp/>인증<sp/>문제일<sp/>수<sp/>있으므로<sp/>코드<sp/>문제로<sp/>단정하지<sp/>않는다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/16-performance-optimization-analysis.ko.md"/>
+  </compounddef>
+</doxygen>

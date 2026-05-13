@@ -1,0 +1,3978 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20a0-23c4-7160-a2d8-bdd021762684
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Adaptor Framework (adaptor-framework)
+- Category: application-framework
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-adaptor": 180
+  }
+}
+
+Allowed symbols for code examples:
+- ApplicationLauncher | scope=primary
+- Dali::Accessibility::ActionInfo | scope=primary
+- Dali::Accessibility::ActorAccessible | scope=primary
+- Dali::Accessibility::Address | scope=primary
+- Dali::Accessibility::BitSet | scope=primary
+- Dali::Accessibility::Bridge | scope=primary
+- Dali::Accessibility::Bridge::Data | scope=primary
+- Dali::Accessibility::EnumBitSet | scope=primary
+- Dali::Accessibility::GestureInfo | scope=primary
+- Dali::Accessibility::Internal::AtspiInterfaceTypeHelper | scope=primary
+- Dali::Accessibility::Internal::BitReference | scope=primary
+- Dali::Accessibility::Point | scope=primary
+- Dali::Accessibility::ProxyAccessible | scope=primary
+- Dali::Accessibility::Range | scope=primary
+- Dali::Accessibility::Relation | scope=primary
+- Dali::Accessibility::Size | scope=primary
+- Dali::Adaptor | scope=primary
+- Dali::AnimatedImageLoading | scope=primary
+- Dali::Application | scope=primary
+- Dali::ApplicationController | scope=primary
+- Dali::AsyncTask | scope=primary
+- Dali::AsyncTaskManager | scope=primary
+- Dali::CameraPlayer | scope=primary
+- Dali::CameraPlayerPlugin | scope=primary
+- Dali::CanvasRenderer | scope=primary
+- Dali::CanvasRenderer::ColorStop | scope=primary
+- Dali::CanvasRenderer::PathCommands | scope=primary
+- Dali::Capture | scope=primary
+- Dali::Clipboard | scope=primary
+- Dali::Clipboard::ClipData | scope=primary
+- Dali::ComponentApplication | scope=primary
+- Dali::Devel::PixelBuffer | scope=primary
+- Dali::Devel::TextureUploadManager | scope=primary
+- Dali::DevelWindow::MouseInOutEvent | scope=primary
+- Dali::DevelWindow::MouseRelativeEvent | scope=primary
+- Dali::DevelWindow::PointerConstraintsEvent | scope=primary
+- Dali::DeviceStatus::Battery | scope=primary
+- Dali::DeviceStatus::Memory | scope=primary
+- Dali::DeviceStatus::Orientation | scope=primary
+- Dali::DragAndDrop | scope=primary
+- Dali::DragAndDrop::DragData | scope=primary
+- Dali::DragAndDrop::DragEvent | scope=primary
+- Dali::EglInterface | scope=primary
+- Dali::EnableBitMaskOperators< WebEngineHitTest::HitTestMode > | scope=primary
+- Dali::EnableBitMaskOperators< WebEngineHitTest::ResultContext > | scope=primary
+- Dali::EnableBitMaskOperators< WebEnginePlugin::FindOption > | scope=primary
+- Dali::EncodedImageBuffer | scope=primary
+- Dali::EventThreadCallback | scope=primary
+- Dali::EventThreadCallback::Impl | scope=primary
+- Dali::FeedbackPlayer | scope=primary
+- Dali::FeedbackPlugin | scope=primary
+- Dali::FileDownloadPlugin | scope=primary
+- Dali::FileDownloadPluginProxy | scope=primary
+- Dali::FileDownloadPluginProxy::EventThreadCallbackObserver | scope=primary
+- Dali::FileStream | scope=primary
+- Dali::GlWindow | scope=primary
+- Dali::ImageLoader::BitmapLoader | scope=primary
+- Dali::ImageLoader::Input | scope=primary
+- Dali::ImageLoader::ScalingParameters | scope=primary
+- Dali::ImageLoaderPlugin | scope=primary
+- Dali::InputMethodContext | scope=primary
+- Dali::InputMethodContext::CallbackData | scope=primary
+- Dali::InputMethodContext::EventData | scope=primary
+- Dali::InputMethodContext::PreeditAttributeData | scope=primary
+- Dali::InputMethodOptions | scope=primary
+- Dali::InputMethodOptions::Impl | scope=primary
+- Dali::Integration::AndroidFramework | scope=primary
+- Dali::Integration::RenderSurface | scope=primary
+- Dali::Integration::RenderSurfaceInterface | scope=primary
+- Dali::Integration::SceneHolder | scope=primary
+- Dali::Internal::Adaptor::SceneHolder | scope=primary
+- Dali::Internal::Adaptor::SceneHolder::SceneHolderLifeCycleObserver | scope=primary
+- Dali::Internal::Adaptor::Widget | scope=primary
+- Dali::KeyExtensionPlugin | scope=primary
+- Dali::KeyExtensionPlugin::KeyLookup | scope=primary
+- Dali::LifecycleController | scope=primary
+- Dali::LogFactoryInterface | scope=primary
+- Dali::NativeImage | scope=primary
+- Dali::NativeImageQueue | scope=primary
+- Dali::NativeImageSurface | scope=primary
+- Dali::NativeRenderSurface | scope=primary
+- Dali::OffscreenApplication | scope=primary
+- Dali::OffscreenWindow | scope=primary
+- Dali::PerformanceLogger | scope=primary
+- Dali::PhysicalKeyboard | scope=primary
+- Dali::RoundRobinContainerView | scope=primary
+- Dali::ScreenInformation | scope=primary
+- Dali::ShaderPreCompiler | scope=primary
+- Dali::ShaderPreCompiler::RawShaderData | scope=primary
+- Dali::SoundPlayer | scope=primary
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp:1 (sample, score=1.0)
+```cpp
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample: absolute pixel positioning.
+ *
+ * Children are placed at explicit (x, y) coordinates with explicit sizes.
+```
+
+- repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:1 (sample, score=1.0)
+```cpp
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample with a clickable LayoutDirection toggle.
+ *
+ * Same content as absolutelayout-example. A 100x50 yellow standalone
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "content",
+      "file",
+      "label"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "content",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-margin-padding-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-overlap-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-per-axis-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Create",
+      "GetState",
+      "GetWindow",
+      "InitSignal",
+      "KeyEventSignal",
+      "MainLoop",
+      "New",
+      "Quit",
+      "SetBackgroundColor",
+      "SetBounds",
+      "Window",
+      "file",
+      "height",
+      "width"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-wrapcontent-proportional-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Application",
+      "Bridge",
+      "Create",
+      "GetWindow",
+      "InitSignal",
+      "MainLoop",
+      "New",
+      "Play",
+      "SetBackgroundColor",
+      "SetOpacity",
+      "Window",
+      "file"
+    ],
+    "path": "repos/dali-ui/samples/animation/animation-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 80,
+    "snippet_start_line": 1
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,140p' repos/dali-ui/samples/absolutelayout/absolutelayout-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample: absolute pixel positioning.
+ *
+ * Children are placed at explicit (x, y) coordinates with explicit sizes.
+ * - Red box at top-left (20, 20)
+ * - Green box at center area (150, 200)
+ * - Blue box at bottom-right area (280, 400)
+ *
+ * Press Escape or Back to quit.
+ */
+class AbsoluteLayoutController : public ConnectionTracker
+{
+public:
+  AbsoluteLayoutController(Application& application)
+    : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AbsoluteLayoutController::Create);
+  }
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Root: AbsoluteLayout filling the window
+    AbsoluteLayout root = AbsoluteLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT);
+    // Red box: top-left corner, absolute position and size
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    redBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
+    root.Add(redBox);
+
+    // Green box: center area
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
+    root.Add(greenBox);
+
+    // Blue box: lower-right area
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
+    root.Add(blueBox);
+
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &AbsoluteLayoutController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  AbsoluteLayoutController controller(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "rg \"namespace Ui|class View|struct View|View::New|SetBounds|SetBackgroundColor|Add\\(\" -n repos/dali-ui repos/dali-adaptor repos/dali-core 2>/dev/null | head -120" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "rg \"class Application|class Window|InitSignal|MainLoop|GetWindow|Quit\\(|Application::New|DALI_APPLICATION\" -n repos dali-* 2>/dev/null | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:1:#ifndef DALI_APPLICATION_H
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:2:#define DALI_APPLICATION_H
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:43:class Application;
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:67: *     mApplication.InitSignal().Connect( this, &ExampleController::Create );
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:81: *   Application app = Application::New(&argc, &argv);
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:83: *   app.MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:107: * Dali::Application::New(int *argc, char **argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData)
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:220:  void MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:232:  void Quit();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:260:  Window GetWindow();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:291:   * @note This will only be a valid handle after the InitSignal has been emitted.
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:304:  AppSignalType& InitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:412:  AppSignalType& TaskInitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h:490:#endif // DALI_APPLICATION_H
+repos/dali-ui/build/doc/source/index.md:24:  application.GetWindow().Add(
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:34:Application Application::New(int* argc, char** argv[], Dali::StringView stylesheet)
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:38:  Internal::Adaptor::ApplicationPtr internal = Internal::Adaptor::Application::New(argc, argv, ToStdString(stylesheet), Internal::Adaptor::Framework::NORMAL, false, windowData);
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:42:Application Application::New(int* argc, char** argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData)
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:44:  Internal::Adaptor::ApplicationPtr internal = Internal::Adaptor::Application::New(argc, argv, ToStdString(stylesheet), Internal::Adaptor::Framework::NORMAL, useUiThread, windowData);
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:64:void Application::MainLoop()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:66:  Internal::Adaptor::GetImplementation(*this).MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:74:void Application::Quit()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:76:  Internal::Adaptor::GetImplementation(*this).Quit();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:84:Window Application::GetWindow()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:86:  return Internal::Adaptor::GetImplementation(*this).GetWindow();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:109:Application::AppSignalType& Application::InitSignal()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:111:  return Internal::Adaptor::GetImplementation(*this).InitSignal();
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:164:Application::AppSignalType& Application::TaskInitSignal()
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp:166:  return Internal::Adaptor::GetImplementation(*this).TaskInitSignal();
+repos/dali-adaptor/build/tizen/linker-test.cpp:38:    app.InitSignal().Connect(this, &LinkerApp::Create);
+repos/dali-adaptor/build/tizen/linker-test.cpp:53:    Application app = Application::New(&argc, &argv);
+repos/dali-adaptor/build/tizen/linker-test.cpp:56:    app.MainLoop();
+repos/dali-ui/wiki/Fluent-API-(kr).md:10:  application.GetWindow().Add(
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.h:186:  Dali::Window GetWindow() const;
+repos/dali-ui/wiki/Configuration-(kr).md:30:  Application application = Application::New(&argc, &argv);
+repos/dali-ui/wiki/Configuration-(kr).md:32:  // Apply()는 application.MainLoop() 호출 전에 호출합니다.
+repos/dali-ui/wiki/Configuration-(kr).md:39:  application.MainLoop();
+repos/dali-ui/wiki/Configuration.md:33:  Application application = Application::New(&argc, &argv);
+repos/dali-ui/wiki/Configuration.md:35:  // Apply() must be called before application.MainLoop().
+repos/dali-ui/wiki/Configuration.md:42:  application.MainLoop();
+repos/dali-ui/wiki/Fluent-API.md:12:  application.GetWindow().Add(
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.h:104:  WindowType GetWindowType() const;
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.cpp:72:WindowType WindowData::GetWindowType() const
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder-impl.cpp:653:    sceneHolderImpl                           = adaptor.GetWindow(actor);
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h:69: *     mApplication.InitSignal().Connect( this, &ExampleController::Create );
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h:89: *   WidgetApplication app = WidgetApplication::New(&argc, &argv);
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h:91: *   app.MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.cpp:31:WidgetApplication WidgetApplication::New(int* argc, char** argv[], Dali::StringView stylesheet)
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.cpp:34:  Internal::Adaptor::WidgetApplicationPtr internal = Internal::Adaptor::WidgetApplication::New(argc, argv, ToStdString(stylesheet), windowData);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:59:    mApplication.InitSignal().Connect(this, &ManualTestLauncher::OnCreate);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:69:    Window window = application.GetWindow();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:248:          mApplication.Quit();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:253:        mApplication.Quit();
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:270:  Application application = Application::New(&argc, &argv);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:273:  application.MainLoop();
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.cpp:126:Dali::Window Widget::GetWindow() const
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.cpp:130:    return mImpl->GetWindow();
+repos/dali-adaptor/dali/public-api/adaptor-framework/key-grab.h:35:class Window;
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:47:class Window;
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:61: * You can get a valid Window handle by calling Dali::Application::GetWindow().
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:103:   * This can be initialized using Dali::Application::GetWindow() or
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:726:   * @brief This constructor is used by Dali::Application::GetWindow().
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:33:enum class WindowOrientation
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:47: * Ime window type is special type. It can only set by one Application::New function.
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:53:enum class WindowType
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:67:enum class WindowNotificationLevel
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:80:enum class WindowScreenOffMode
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:90:enum class WindowEffectState
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:101:enum class WindowEffectType
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:111:enum class WindowOperationResult
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:123:enum class WindowResizeDirection
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:138:enum class WindowInsetsPartType
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:148:enum class WindowInsetsPartState
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:157:enum class WindowBlurType
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h:167:enum class WindowInsetsPartFlags
+repos/dali-core/automated-tests/src/dali/utc-Dali-KeyEvent.cpp:115:  DALI_TEST_EQUALS(0, event.GetWindowId(), TEST_LOCATION);                            // check window id
+repos/dali-core/automated-tests/src/dali/utc-Dali-KeyEvent.cpp:603:  DALI_TEST_EQUALS(0, event.GetWindowId(), TEST_LOCATION);
+repos/dali-core/automated-tests/src/dali/utc-Dali-KeyEvent.cpp:606:  DALI_TEST_EQUALS(1, event.GetWindowId(), TEST_LOCATION);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-WindowData.cpp:28:  DALI_TEST_CHECK(windowData.GetWindowType() == WindowType::NORMAL);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-WindowData.cpp:51:  // Test SetWindowType and GetWindowType
+
+ succeeded in 0ms:
+repos/dali-ui/build/doc/source/index.md:24:  application.GetWindow().Add(
+repos/dali-ui/build/doc/source/index.md:25:    View::New()
+repos/dali-ui/build/doc/source/index.md:26:      .SetBackgroundColor(Color::YELLOW)
+repos/dali-ui/build/doc/source/index.md:30:        View::New()
+repos/dali-ui/build/doc/source/index.md:31:          .SetBackgroundColor(Color::RED)
+repos/dali-ui/build/doc/source/index.md:39:        View::New()
+repos/dali-ui/build/doc/source/index.md:40:          .SetBackgroundColor(Color::BLUE)
+repos/dali-ui/docs/layout-class-diagram.puml:36:    + Add(Actor)  /' inherited from Actor '/
+repos/dali-ui/docs/layout-class-diagram.puml:98:    + SetBounds(LayoutRect) : AbsoluteLayoutParams&
+repos/dali-ui/docs/layout-class-diagram.puml:148:    + OnChildAdd(Actor&)
+repos/dali-ui/docs/layout-class-diagram.puml:200:    + SetBounds(LayoutRect)
+repos/dali-ui/docs/layout-structure.md:22:  - Child management: `Add(View)` (inherited from Actor), `Insert(index, View)`, `Remove(View)` (inherited from Actor), `RemoveAllChildren()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Children(initializer_list<View>)`.
+repos/dali-ui/docs/layout-structure.md:43:    - `view.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(rect).SetFlags(flags))`
+repos/dali-ui/manual-tests/README.md:88:    contentArea.Add(
+repos/dali-ui/manual-tests/README.md:122:- `contentArea.Add(view)` 로 자식 뷰를 추가합니다
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.cpp:100:void Window::Add(Dali::Actor actor)
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.cpp:102:  GetImplementation(*this).Add(actor);
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.cpp:110:void Window::SetBackgroundColor(const Vector4& color)
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.cpp:112:  GetImplementation(*this).SetBackgroundColor(color);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:84:    mView = AnimatedImageView::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:97:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:100:    content.Add(MakeCentered(mView));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:101:    content.Add(mStatusLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:103:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:108:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:113:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:119:    contentArea.Add(content);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:174:    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:175:    row.Add(child);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:176:    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:185:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:196:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:218:    for(auto& b : buttons) row.Add(b);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:88:      .SetBackgroundColor(UiColor(COLOR_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:91:    root.Add(mStatusLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:92:    root.Add(CreateSectionLabel("Scenario 1: Reverse-index position"));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:93:    root.Add(CreateScenario1());
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:94:    root.Add(CreateSectionLabel("Scenario 2: Nested layouts"));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:95:    root.Add(CreateScenario2());
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:96:    root.Add(CreateSectionLabel("Scenario 3: Overlapping squares"));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:97:    root.Add(CreateScenario3());
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:99:    contentArea.Add(root);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:119:    auto container = View::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:128:    container.Add(mS1[0]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:129:    container.Add(mS1[1]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:130:    container.Add(mS1[2]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:137:    auto container = View::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:142:    auto groupA = View::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:149:    groupA.Add(mS2[0]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:150:    groupA.Add(mS2[1]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:152:    auto groupB = View::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:159:    groupB.Add(mS2[2]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:160:    groupB.Add(mS2[3]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:162:    container.Add(groupA);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:163:    container.Add(groupB);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:170:    auto container = View::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:187:    container.Add(mS3[0]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:188:    container.Add(mS3[1]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:189:    container.Add(mS3[2]);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:204:      .SetBackgroundColor(UiColor(COLORS[ci]))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:214:        view.SetBackgroundColor(UiColor(COLOR_FOCUSED));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:219:        view.SetBackgroundColor(UiColor(mAllViews[idx].originalColor));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:226:  struct ViewEntry
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:70:    contentArea.Add(
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:74:        .SetBackgroundColor(UiColor(COLOR_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:107:      .SetBackgroundColor(UiColor(COLOR_FIELD_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:113:        view.SetBackgroundColor(UiColor(COLOR_FOCUSED_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:117:        view.SetBackgroundColor(UiColor(COLOR_FIELD_BG));
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:170:  void Add(Actor actor);
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h:190:  void SetBackgroundColor(const Vector4& color);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:79:    mImage = ImageView::New(IMG_A)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:94:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:97:    content.Add(MakeCentered(mImage));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:98:    content.Add(mFlagsLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:99:    content.Add(mReadyLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:101:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:105:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:109:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:113:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:117:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:123:    contentArea.Add(content);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:149:    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:150:    row.Add(child);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:151:    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:160:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:171:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:193:    for(auto& b : buttons) row.Add(b);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:81:    mView = LottieAnimationView::New(LOTTIE_WALKER)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:95:    mContainer.Add(mView);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:103:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:106:    content.Add(MakeCentered(mContainer));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:107:    content.Add(mStatusLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:108:    content.Add(mReadyLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:110:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:115:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:121:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:126:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:128:      MakeButton("Re-Add\nView",  [this] { OnReAdd(); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:131:    contentArea.Add(content);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:144:  void OnReAdd()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:148:      mContainer.Add(mView);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:185:    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:186:    row.Add(child);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:187:    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:196:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:207:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:229:    for(auto& b : buttons) row.Add(b);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:77:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:86:    mContainer.Add(mView);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:93:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:96:    content.Add(MakeCentered(mContainer));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:97:    content.Add(mStatusLabel);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:99:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:103:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:108:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:112:    content.Add(MakeButtonRow({
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:114:      MakeButton("Re-Add\nView",  [this] { OnReAdd(); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:118:    contentArea.Add(content);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:131:  void OnReAdd()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:135:      mContainer.Add(mView);
+
+exec
+/bin/bash -lc "sed -n '1,360p' repos/dali-adaptor/dali/public-api/adaptor-framework/application.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_APPLICATION_H
+#define DALI_APPLICATION_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/device-status.h>
+#include <dali/public-api/adaptor-framework/window-data.h>
+#include <dali/public-api/adaptor-framework/window.h>
+
+namespace Dali
+{
+class ObjectRegistry;
+
+/**
+ * @addtogroup dali_adaptor_framework
+ * @{
+ */
+
+namespace Internal DALI_INTERNAL
+{
+namespace Adaptor
+{
+class Application;
+}
+} //namespace Internal DALI_INTERNAL
+/**
+ * @brief An Application class object should be created by every application
+ * that wishes to use Dali.
+ *
+ * It provides a means for initializing the
+ * resources required by the Dali::Core.
+ *
+ * The Application class emits several signals which the user can
+ * connect to.  The user should not create any Dali objects in the main
+ * function and instead should connect to the Init signal of the
+ * Application and create the Dali objects in the connected callback.
+ *
+ * Applications should follow the example below:
+ *
+ * @code
+ * class ExampleController: public ConnectionTracker
+ * {
+ * public:
+ *   ExampleController( Application& application )
+ *   : mApplication( application )
+ *   {
+ *     mApplication.InitSignal().Connect( this, &ExampleController::Create );
+ *   }
+ *
+ *   void Create( Application& application )
+ *   {
+ *     // Create Dali components...
+ *   }
+ *  ...
+ * private:
+ *   Application& mApplication;
+ * };
+ *
+ * int main (int argc, char **argv)
+ * {
+ *   Application app = Application::New(&argc, &argv);
+ *   ExampleController example( app );
+ *   app.MainLoop();
+ * }
+ * @endcode
+ *
+ * If required, you can also connect class member functions to a signal:
+ *
+ * @code
+ * MyApplication app;
+ * app.ResumeSignal().Connect(&app, &MyApplication::Resume);
+ * @endcode
+ *
+ *
+ * #### UI thread
+ * There is the UI thread feature.
+ * UI thread is an additional thread that an Application object creates. The thread is for UI events.
+ *
+ * When the UI thread feature is enabled, you can use the task signals(TaskInit, TaskTerminate, TaskAppControl, TaskLanguageChanged, TaskLowBattery, and TaskLowMemory).
+ * The task signals are emitted on the main thread,
+ * and the normal signals(Init, Terminate, Pause, Resume, Reset, AppControl, LanguageChanged, Region, LowBattery, and LowMemory) are emitted on the UI thread.
+ *
+ * If you want to handle windows or actors in cases like when the memory level of the device is low, you have to use the normal signals, not the task signals.
+ * Callbacks of all signals in DALi except the task signals are emitted on the UI thread. (e.g., Timer callbacks are emitted on the UI thread.)
+ *
+ * To enable the UI Thread, you can use this method. you have to set True to the useUiThread.
+ * Dali::Application::New(int *argc, char **argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData)
+ *
+ *
+ * This class accepts command line arguments as well. The following options are supported:
+ *
+ * @code
+ *  -w|--width          Stage Width
+ *  -h|--height         Stage Height
+ *  -d|--dpi            Emulated DPI
+ *     --help           Help
+ * @endcode
+ *
+ * When the above options are found, they are stripped from argv, and argc is updated appropriately.
+ * @SINCE_1_0.0
+ */
+class DALI_ADAPTOR_API Application : public BaseHandle
+{
+public:
+  typedef Signal<void(DeviceStatus::Battery::Status)>     LowBatterySignalType;               ///< Application device signal type @SINCE_1_2.62
+  typedef Signal<void(DeviceStatus::Memory::Status)>      LowMemorySignalType;                ///< Application device signal type @SINCE_1_2.62
+  typedef Signal<void(DeviceStatus::Orientation::Status)> DeviceOrientationChangedSignalType; ///< Application device orientation changed signal type @SINCE_2_2.1
+  typedef Signal<void(Application)>                      AppSignalType;                      ///< Application lifecycle signal and system signal callback type @SINCE_1_0.0
+  typedef Signal<void(Application, void*)>               AppControlSignalType;               ///< Application control signal callback type @SINCE_1_0.0
+
+public:
+  /**
+   * @brief This is the constructor for applications.
+   *
+   * @SINCE_1_0.0
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
+   * @param[in,out]  argc        A pointer to the number of arguments
+   * @param[in,out]  argv        A pointer to the argument list
+   * @param[in]      stylesheet  The path to user defined theme file (optional)
+   * @return A handle to the Application
+   * @note If the stylesheet is not specified, then the library's default stylesheet will not be overridden.
+   */
+  static Application New(int* argc, char** argv[], Dali::StringView stylesheet = "");
+
+  /**
+   * @brief This is the constructor for applications with full window control.
+   *
+   * @SINCE_2_2.23
+   * @PRIVLEVEL_PUBLIC
+   * @PRIVILEGE_DISPLAY
+   * @param[in,out]  argc         A pointer to the number of arguments
+   * @param[in,out]  argv         A pointer to the argument list
+   * @param[in]      stylesheet   The path to user defined theme file
+   * @param[in]      useUiThread  True if the application would create a UI thread
+   * @param[in]      windowData   The window data for the application
+   * @return A handle to the Application
+   * @note If the stylesheet is not specified, then the library's default stylesheet will not be overridden.<BR>
+   * UI thread is an additional thread that DALi creates for UI events.
+   * The UI thread isn't blocked from the system events(AppControl, LanguageChanged, RegionChanged, LowMemory, LowBattery task signals).
+   */
+  static Application New(int* argc, char** argv[], Dali::StringView stylesheet, bool useUiThread, WindowData& windowData);
+
+  /**
+   * @brief Constructs an empty handle.
+   * @SINCE_1_0.0
+   */
+  Application();
+
+  /**
+   * @brief Copy Constructor.
+   * @SINCE_1_0.0
+   * @param[in] application Handle to an object
+   */
+  Application(const Application& application);
+
+  /**
+   * @brief Assignment operator.
+   * @SINCE_1_0.0
+   * @param[in] application Handle to an object
+   * @return A reference to this
+   */
+  Application& operator=(const Application& application);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   */
+  Application(Application&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   * @return A reference to this handle
+   */
+  Application& operator=(Application&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_1_0.0
+   */
+  ~Application();
+
+public:
+  /**
+   * @brief This starts the application.
+   *
+   * On platforms where context loss can occur, the application is responsible for tearing down and
+   * re-loading UI.  The application should listen to Stage::ContextLostSignal and
+   * Stage::ContextRegainedSignal.
+   *
+   * @SINCE_1_0.0
+   */
+  void MainLoop();
+
+  /**
+   * @brief This lowers the application to bottom without actually quitting it.
+   * @SINCE_1_0.0
+   */
+  void Lower();
+
+  /**
+   * @brief This quits the application.  Tizen applications should use Lower to improve re-start performance unless they need to Quit completely.
+   * @SINCE_1_0.0
+   */
+  void Quit();
+
+  /**
+   * @brief Ensures that the function passed in is called from the main loop when it is idle.
+   * @SINCE_1_0.0
+   * @param[in] callback The function to call
+   * @return @c true if added successfully, @c false otherwise
+   *
+   * @note Function must be called from main event thread only
+   *
+   * A callback of the following type may be used:
+   * @code
+   *   void MyFunction();
+   * @endcode
+   * This callback will be deleted once it is called.
+   *
+   * @note Ownership of the callback is passed onto this class.
+   */
+  bool AddIdle(CallbackBase* callback);
+
+  /**
+   * @brief Retrieves the main window used by the Application class.
+   *
+   * The application writer can use the window to change indicator and orientation
+   * properties.
+   * @SINCE_1_0.0
+   * @return A handle to the window
+   */
+  Window GetWindow();
+
+  /**
+   * @brief Get path application resources are stored at
+   *
+   * @SINCE_1_2.2
+   * @return the full path of the resources
+   */
+  static Dali::String GetResourcePath();
+
+  /**
+   * @brief This is used to get region information from device.
+   *
+   * @SINCE_1_2.62
+   * @return Region information
+   */
+  Dali::String GetRegion() const;
+
+  /**
+   * @brief This is used to get language information from device.
+   *
+   * @SINCE_1_2.62
+   * @return Language information
+   */
+  Dali::String GetLanguage() const;
+
+  /**
+   * @brief Gets the Object registry.
+   *
+   * @SINCE_1_9.21
+   * @return The object registry
+   * @note This will only be a valid handle after the InitSignal has been emitted.
+   */
+  ObjectRegistry GetObjectRegistry() const;
+
+public: // Signals
+  /**
+   * @brief The user should connect to this signal to determine when they should initialize
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& InitSignal();
+
+  /**
+   * @brief The user should connect to this signal to determine when they should terminate
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& TerminateSignal();
+
+  /**
+   * @brief The user should connect to this signal if they need to perform any special
+   * activities when the application is about to be paused.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& PauseSignal();
+
+  /**
+   * @brief The user should connect to this signal if they need to perform any special
+   * activities when the application has resumed.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& ResumeSignal();
+
+  /**
+   * @brief This signal is sent when the system requires the user to reinitialize itself.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& ResetSignal();
+
+  /**
+   * @brief This signal is emitted when another application sends a launch request to the application.
+   *
+   * When the application is launched, this signal is emitted after the main loop of the application starts up.
+   * The passed parameter describes the launch request and contains the information about why the application is launched.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppControlSignalType& AppControlSignal();
+
+  /**
+   * @brief This signal is emitted when the language is changed on the device.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-adaptor/dali/public-api/adaptor-framework/adaptor.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-adaptor/dali/public-api/adaptor-framework/adaptor.h: No such file or directory
+
+exec
+/bin/bash -lc 'rg "class View|View::New|SetRequestedWidth|SetRequestedHeight|SetBackgroundColor|SetLayoutParams" -n repos/dali-ui/dali repos/dali-ui 2>/dev/null | head -120' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/build/doc/source/index.md:25:    View::New()
+repos/dali-ui/build/doc/source/index.md:26:      .SetBackgroundColor(Color::YELLOW)
+repos/dali-ui/build/doc/source/index.md:27:      .SetRequestedWidth(200_spx)
+repos/dali-ui/build/doc/source/index.md:28:      .SetRequestedHeight(200_spx)
+repos/dali-ui/build/doc/source/index.md:30:        View::New()
+repos/dali-ui/build/doc/source/index.md:31:          .SetBackgroundColor(Color::RED)
+repos/dali-ui/build/doc/source/index.md:32:          .SetRequestedWidth(100_spx)
+repos/dali-ui/build/doc/source/index.md:33:          .SetRequestedHeight(100_spx)
+repos/dali-ui/build/doc/source/index.md:39:        View::New()
+repos/dali-ui/build/doc/source/index.md:40:          .SetBackgroundColor(Color::BLUE)
+repos/dali-ui/docs/layout-class-diagram.puml:24:    + SetRequestedWidth(float)
+repos/dali-ui/docs/layout-class-diagram.puml:25:    + SetRequestedHeight(float)
+repos/dali-ui/docs/layout-structure.md:16:  - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetMargin` / `SetPadding`, alignment, visibility, etc.
+repos/dali-ui/docs/layout-structure.md:39:  - Per-child layout parameters are set via `View::SetLayoutParams()`:
+repos/dali-ui/docs/layout-structure.md:40:    - `view.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))`
+repos/dali-ui/docs/layout-structure.md:41:    - `view.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(3).SetRowSpan(1).SetColumnSpan(2))`
+repos/dali-ui/docs/layout-structure.md:42:    - `view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0f))`
+repos/dali-ui/docs/layout-structure.md:43:    - `view.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(rect).SetFlags(flags))`
+repos/dali-ui/docs/layout-structure.md:44:  - `SetLayoutParams()` stores the params handle and invalidates the View's measure cache.
+repos/dali-ui/docs/layout-structure.md:49:  - Attached via `View::SetLayoutParams()` which stores the params handle onto the View.
+repos/dali-ui/docs/layout-structure.md:54:    viewA.SetLayoutParams(GridLayoutParams::New(base).SetColumn(0));
+repos/dali-ui/docs/layout-structure.md:55:    viewB.SetLayoutParams(GridLayoutParams::New(base).SetColumn(1));
+repos/dali-ui/docs/layout-structure.md:57:  - **Note:** `SetLayoutParams()` stores the handle as-is (no deep copy). Passing the same handle to multiple Views causes them to share state. Use `New(other)` to create an independent copy when reusing params across Views.
+repos/dali-ui/manual-tests/README.md:91:        .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/README.md:92:        .SetRequestedHeight(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/manual-test-case.h:66: *       .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/manual-test-case.h:67: *       .SetRequestedHeight(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:70:    window.SetBackgroundColor(UiColor(COLOR_APP_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:76:                       .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:77:                       .SetRequestedHeight(MATCH_PARENT);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:97:                                .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:98:                                .SetRequestedHeight(WRAP_CONTENT);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:106:          .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:107:          .SetRequestedHeight(WRAP_CONTENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:118:      ScrollView::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:120:        .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:121:        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:128:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:129:      .SetRequestedHeight(HEADER_HEIGHT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:130:      .SetBackgroundColor(UiColor(COLOR_HEADER_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:136:          .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:137:          .SetRequestedHeight(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:147:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:148:      .SetRequestedHeight(WRAP_CONTENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:149:      .SetBackgroundColor(UiColor(COLOR_ITEM_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:160:        Label::New(tc->GetName()).SetTextColor(UiColor(COLOR_ITEM_NAME)).SetFontSize(FONT_TC_NAME).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT),
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:161:        Label::New(tc->GetDescription()).SetTextColor(UiColor(COLOR_ITEM_DESC)).SetFontSize(FONT_TC_DESC).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT),
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:167:    return View::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:168:      .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:169:      .SetRequestedHeight(SEPARATOR_H)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:170:      .SetBackgroundColor(UiColor(COLOR_SEPARATOR));
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:190:        .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:191:        .SetRequestedHeight(HEADER_HEIGHT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:192:        .SetBackgroundColor(UiColor(COLOR_HEADER_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:197:            .SetRequestedWidth(WRAP_CONTENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:198:            .SetRequestedHeight(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:210:          Label::New(mActiveCase->GetName()).SetTextColor(UiColor(COLOR_HEADER_TEXT)).SetFontSize(FONT_HEADER).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT).SetVerticalTextAlignment(Text::Alignment::CENTER),
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:215:                                .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:216:                                .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-hello-world.cpp:45:        .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-hello-world.cpp:46:        .SetRequestedHeight(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:54:                     .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:55:                     .SetRequestedHeight(60.0f)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:63:                 .SetBackgroundColor(UiColor(COLOR_GROUP))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:64:                 .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:65:                 .SetRequestedHeight(60.0f)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:76:                 .SetBackgroundColor(UiColor(COLOR_GROUP))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:77:                 .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:78:                 .SetRequestedHeight(60.0f)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:87:               .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:88:               .SetRequestedHeight(132.0f)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:94:                 .SetBackgroundColor(UiColor(COLOR_DEFAULT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:95:                 .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:96:                 .SetRequestedHeight(60.0f)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:106:        .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:107:        .SetRequestedHeight(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:108:        .SetBackgroundColor(UiColor(COLOR_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:135:                 .SetBackgroundColor(UiColor(0x4285F4))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:136:                 .SetRequestedWidth(MATCH_PARENT)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:137:                 .SetRequestedHeight(44.0f)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:153:      changedView.SetBackgroundColor(UiColor(focused ? COLOR_FOCUSED : baseColor));
+repos/dali-ui/wiki/Layout-Structures-(kr).md:53:root.SetRequestedWidth(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:54:root.SetRequestedHeight(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:57:View child1 = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:58:child1.SetRequestedHeight(100.0f);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:61:View child2 = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:62:child2.SetRequestedHeight(200.0f);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:108:View topBar = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:109:topBar.SetBackgroundColor(Color::RED);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:110:topBar.SetRequestedHeight(80.0f);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:111:topBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+repos/dali-ui/wiki/Layout-Structures-(kr).md:115:View middle = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:116:middle.SetBackgroundColor(Color::GREEN);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:117:middle.SetLayoutParams(
+repos/dali-ui/wiki/Layout-Structures-(kr).md:122:View bottomBar = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:123:bottomBar.SetBackgroundColor(Color::BLUE);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:124:bottomBar.SetRequestedHeight(60.0f);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:125:bottomBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+repos/dali-ui/wiki/Layout-Structures-(kr).md:138:view.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
+repos/dali-ui/wiki/Layout-Structures-(kr).md:159:flex.SetRequestedWidth(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:160:flex.SetRequestedHeight(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:236:view.SetLayoutParams(FlexLayoutParams::New()
+repos/dali-ui/wiki/Layout-Structures-(kr).md:255:root.SetRequestedWidth(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:256:root.SetRequestedHeight(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:262:View redBox = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:263:redBox.SetBackgroundColor(Color::RED);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:264:redBox.SetRequestedWidth(100.0f);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:268:View greenBox = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:269:greenBox.SetBackgroundColor(Color::GREEN);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:270:greenBox.SetRequestedWidth(WRAP_CONTENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:271:greenBox.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
+repos/dali-ui/wiki/Layout-Structures-(kr).md:275:View blueBox = View::New();
+repos/dali-ui/wiki/Layout-Structures-(kr).md:276:blueBox.SetBackgroundColor(Color::BLUE);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:277:blueBox.SetRequestedWidth(80.0f);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:291:grid.SetRequestedWidth(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:292:grid.SetRequestedHeight(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:359:view.SetLayoutParams(GridLayoutParams::New()
+repos/dali-ui/wiki/Layout-Structures-(kr).md:383:root.SetRequestedWidth(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:384:root.SetRequestedHeight(MATCH_PARENT);
+repos/dali-ui/wiki/Layout-Structures-(kr).md:397:View cell00 = View::New();
+
+exec
+/bin/bash -lc "rg --files repos/dali-adaptor | rg '/adaptor(\\.h|-)'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/dali/public-api/adaptor-framework/timer.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-enumerations.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/ui-context.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/ui-context.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window-data.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/encoded-image-buffer.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/input-method.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/encoded-image-buffer.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/device-status.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/native-image.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/key-grab.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/native-image.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/style-change.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/timer.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/capture.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/key.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-impl.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/application.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.h
+repos/dali-adaptor/dali/public-api/adaptor-framework/window.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/widget-application.cpp
+repos/dali-adaptor/dali/public-api/adaptor-framework/capture.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/adaptor.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-render-surface-factory.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/trace-factory-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/shader-precompiler.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/trigger-event-factory.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/round-robin-container-view.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/render-surface-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/application-controller.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-render-surface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-image-surface.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/shader-precompiler.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/application-controller.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/trigger-event-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/thread-synchronization-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder-impl.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/native-image-surface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/scene-holder-impl.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/log-factory-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/egl-interface.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/android-framework.cpp
+repos/dali-adaptor/dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/android-framework.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/application-launcher.h
+repos/dali-adaptor/dali/integration-api/adaptor-framework/android/file.list
+repos/dali-adaptor/dali/internal/adaptor/tizen/adaptor-impl-tizen.cpp
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-builder-impl.cpp
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-internal-services.h
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-impl.cpp
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-builder-impl.h
+repos/dali-adaptor/dali/internal/adaptor/common/adaptor-impl.h
+repos/dali-adaptor/dali/internal/adaptor/generic/adaptor-impl-generic.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/screen-information.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/graphics-capabilities.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/texture-upload-manager.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-animation-renderer-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/virtual-keyboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/animated-image-loading.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-blur-info.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/style-monitor.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/environment-variable.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/thread-settings.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-window.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/key-devel.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/event-thread-callback.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-devel.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/animated-image-loading.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-devel.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-player.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-system-devel.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/thread-settings.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/graphics-backend.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/capture-devel.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/virtual-keyboard.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-context.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-hit-test.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-device-list-get.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-console-message.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-policy-decision.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-settings.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-security-origin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list-item.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-file-chooser-request.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-context-menu-item.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-certificate.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-user-media-permission-request.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-load-error.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-form-repost-decision.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-http-auth-handler.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-request-interceptor.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-context-menu.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/web-engine/web-engine-frame.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/gl-window.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/input-method-options.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/atspi-accessibility.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/style-monitor.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-stream.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-stream.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/clipboard.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/component-application.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/actor-accessible.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-image-renderer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loader-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/event-feeder.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-loader.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/performance-logger.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/bitmap-saver.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/application-devel.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-player.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/bitmap-saver.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/camera-player.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/pixel-buffer.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/drag-and-drop.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/key-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/environment-variable.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-application.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/tts-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/atspi-accessibility.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/physical-keyboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/tilt-sensor.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/capture-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/async-task-manager.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/application-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/performance-logger.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/input-method-context.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/proxy-accessible.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/tilt-sensor.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-loader.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/event-thread-callback.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/graphics-backend.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-player-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/camera-player-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-animation-renderer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-animation-renderer.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-blur-info.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loading.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loading.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/window-system-devel.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility-bitset.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/event-feeder.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/screen-information.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-queue.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/clipboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/image-loader-input.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/mouse-relative-event.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-queue.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/drag-and-drop.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/key-extension-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/mouse-in-out-event.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-application.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/file-download-plugin.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-source-queue.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/input-method-options.h
+repos/dali-adaptor/dali/internal/adaptor-framework/common/file-loader-impl.h
+repos/dali-adaptor/dali/internal/adaptor-framework/common/file-stream-impl.h
+repos/dali-adaptor/dali/internal/adaptor-framework/generic/file-loader-impl-generic.cpp
+repos/dali-adaptor/dali/internal/adaptor-framework/generic/file-stream-impl-generic.cpp
+repos/dali-adaptor/dali/internal/adaptor-framework/android/file-loader-impl-android.cpp
+repos/dali-adaptor/dali/internal/adaptor-framework/android/file-stream-impl-android.cpp
+repos/dali-adaptor/dali/internal/adaptor-framework/file.list
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-picture.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-gradient.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-radial-gradient.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-radial-gradient.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-gradient.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-picture.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable-group.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable-group.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/offscreen-window.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/graphics-capabilities.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/physical-keyboard.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/async-task-manager.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/sound-player.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/accessibility-bridge.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/keyboard.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/tts-player.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/gl-window.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/lifecycle-controller.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/pointer-constraints-event.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/actor-accessible.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/feedback-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/pixel-buffer.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/video-sync-mode.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/vector-image-renderer.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/sound-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/native-image-source-queue.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/lifecycle-controller.cpp
+repos/dali-adaptor/dali/devel-api/adaptor-framework/camera-player.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/texture-upload-manager.h
+repos/dali-adaptor/dali/devel-api/adaptor-framework/input-method-context.cpp
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-test-adaptor-impl.cpp
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-environment-variable.cpp
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-environment-variable.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-test-adaptor-impl.h
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/adaptor-test-application.h
+
+exec
+/bin/bash -lc "rg --files repos/dali-ui | rg 'view.*\\.h"'$|dali-ui-foundation.h$'"' | head -80" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/image-view-properties.h
+repos/dali-ui/dali-ui-foundation/public-api/web-view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view-properties.h
+repos/dali-ui/dali-ui-foundation/public-api/view.h
+repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h
+repos/dali-ui/dali-ui-foundation/devel-api/view-depth-index-ranges.h
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h
+repos/dali-ui/dali-ui-foundation/integration-api/view-accessible.h
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h
+repos/dali-ui/dali-ui-foundation/integration-api/image-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-view-impl.h
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h
+repos/dali-ui/dali-ui-foundation/public-api/view-types.h
+repos/dali-ui/dali-ui-foundation/public-api/view-accessibility-enums.h
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h
+repos/dali-ui/dali-ui-foundation/public-api/image-view.h
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h
+repos/dali-ui/dali-ui-foundation/dali-ui-foundation.h
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-renderers.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-debug.h
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-decoration-data.h
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/view-model.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-view.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-view-interface.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.h
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h
+repos/dali-ui/dali-ui-foundation/internal/gles-addon/generated/gl-view-frag.h
+repos/dali-ui/dali-ui-foundation/internal/gles-addon/generated/gl-view-vert.h
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/build/doc/source/index.md" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+# DALi UI Framework
+
+DALi UI is a high-performance UI library designed with a **Low Memory Assumption (LMA)** architecture. It provides a **Modern C++ Fluent API** with method chaining, enabling declarative and intuitive UI development for resource-constrained systems.
+
+---
+
+### Core Philosophy
+- **Low Memory Assumption**: Minimal object overhead and efficient memory management.
+- **Fluent Interface**: Method chaining for readable, declarative UI composition.
+- **Native Speed**: Zero-cost abstractions over the underlying DALi scene graph.
+
+---
+
+### Quick Start (Fluent API)
+
+Construct complex UI hierarchies with ease using our declarative method chaining:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali::UI;
+
+void Create(Application application) {
+  application.GetWindow().Add(
+    View::New()
+      .SetBackgroundColor(Color::YELLOW)
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
+      .Children({
+        View::New()
+          .SetBackgroundColor(Color::RED)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .With([](View& v) {
+            v.TouchedSignal().Connect([](Actor a, TouchEvent t) {
+              return true;
+            });
+          }),
+        View::New()
+          .SetBackgroundColor(Color::BLUE)
+          .SetPositionX(100_spx)
+          .SetPositionY(100_spx)
+      })
+  );
+}
+```
+
+---
+
+### Documentation Reference
+- [**Class List**](daliUi/annotated.md)
+- [**Namespace Overview**](daliUi/namespaces.md)
+- [**File List**](daliUi/files.md)
+
+---
+> [!NOTE]
+> This developer-centric documentation is version-controlled in `build/doc/source/index.md`.
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/actors/custom-actor.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/common/dali-string.h>
+#include <functional>
+#include <initializer_list>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+#include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/visuals/visual-base.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+class RenderEffect;
+class UiColor;
+class ViewAnimationBridge;
+class ViewAnimationSpec;
+
+// @ANIMATION_CONFIG(View)
+// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+// @ANIMATABLE_MANUAL(SizeWidth, float)
+// @ANIMATABLE_MANUAL(SizeHeight, float)
+// @ANIMATABLE_MANUAL(PositionX, float)
+// @ANIMATABLE_MANUAL(PositionY, float)
+
+class ViewImpl;
+
+/**
+ * @brief Move-only callback for custom focus navigation.
+ *
+ * @code
+ * // Member function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(this, &MyClass::OnFocusNavigation));
+ *
+ * // Static function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigationFunc));
+ * @endcode
+ *
+ * @note Signature: View(View currentFocusedView, FocusDirection direction)
+ */
+using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
+
+#include "view.autogen.h"
+/**
+ * @brief View is a base UI component class that extends CustomActor.
+ *
+ * View provides basic UI functionality and can be used as a foundation
+ * for creating custom UI components. It inherits all the capabilities
+ *
+ * View implements the layout system with Measure/Arrange passes.
+ */
+class DALI_UI_API View : public CustomActor
+{
+public:
+  // Typedefs
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized View handle.
+   *
+   * Only derived versions can be instantiated. Calling member
+   * functions with an uninitialized Dali::Object is not allowed.
+   */
+  View();
+
+  /**
+   * @brief Creates an initialized View.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static View New();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Creates another handle that points to the same real object.
+   * @param[in] view Handle to copy
+   */
+  View(const View& view);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  View(View&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~View();
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   *
+   * Changes this handle to point to another real object.
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  View& operator=(const View& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  View& operator=(View&& rhs) noexcept = default;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to View handle.
+   *
+   * If handle points to a View, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a View or an uninitialized handle
+   */
+  static View DownCast(BaseHandle handle);
+
+public: // Measure / Arrange API
+  /**
+   * @brief Measures the view with the given constraints.
+   *
+   * This method implements caching to avoid redundant calculations.
+   * It calls OnMeasure internally (Template Method pattern).
+   *
+   * @param[in] widthConstraint The width constraint for measurement
+   * @param[in] heightConstraint The height constraint for measurement
+   * @return The measured size
+   */
+  MeasuredSize Measure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @brief Arranges the view within the given bounds.
+   *
+   * This method calls OnArrange internally (Template Method pattern).
+   *
+   * @param[in] bounds The bounds to arrange the view in
+   * @return The final arranged size
+   */
+  MeasuredSize Arrange(const LayoutRect& bounds);
+
+  /**
+   * @brief Invalidates the measure of this view.
+   *
+   * This propagates to the parent layout while one exists,
+   * until the layout root is reached (no parent Layout).
+   */
+  void InvalidateMeasure();
+
+  /**
+   * @brief Invalidates the arrange of this view.
+   */
+  void InvalidateArrange();
+
+  /**
+   * @brief Gets the measured size from the last Measure() pass.
+   *
+   * @return The measured size
+   */
+  MeasuredSize GetMeasuredSize() const;
+
+  /**
+   * @brief Sets a custom measure callback for this View.
+   *
+   * When set, the callback replaces the default measurement behavior
+   * during the layout pass. Pass a default-constructed callback to remove.
+   *
+   * @param[in] callback The measure callback (ownership transferred)
+   *
+   * @code
+   * // Member function
+   * view.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));
+   *
+   * // Static function
+   * view.SetMeasureCallback(MeasureCallback::New(&MyMeasure));
+   *
+   * // Remove callback
+   * view.SetMeasureCallback({});
+   * @endcode
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// Generated by dali-ui preprocessor. Do not modify.
+#pragma once
+
+#define DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+  /** \
+  * @brief Sets the x scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  */ \
+  ChildClass& SetScaleX(float scaleX) { View::SetScaleX(scaleX); return *this; } \
+  /** \
+  * @brief Sets the UiScale participation policy for this view. \
+  * \
+  * @param[in] policy The UiScalePolicy to apply \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetUiScalePolicy(UiScalePolicy policy) { View::SetUiScalePolicy(policy); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScaleY(float scaleY) { View::SetScaleY(scaleY); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScale(float scaleX, float scaleY) { View::SetScale(scaleX, scaleY); return *this; } \
+  /** \
+  * @brief Sets the visibility of the view. \
+  * \
+  * @param[in] visibility True to make the view visible, false to hide it \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetVisibility(bool visibility) { View::SetVisibility(visibility); return *this; } \
+  /** \
+  * @brief Sets the opacity of the view. \
+  * \
+  * @param[in] opacity The opacity value to set (0.0 to 1.0) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetOpacity(float opacity) { View::SetOpacity(opacity); return *this; } \
+  /** \
+  * @brief Sets the X position requested by the user. \
+  * \
+  * This value is the layout input. The parent's Arrange pass uses it \
+  * (offset by the parent's left padding and this view's left margin) to \
+  * compute the final rendered position. The Actor::Property::POSITION_X \
+  * property is updated only by the next Arrange. \
+  * \
+  * To drive the rendered position without affecting the layout request \
+  * (e.g. for scrolling or animation that should not feed back into \
+  * layout), set Actor::Property::POSITION_X via SetProperty directly. \
+  * \
+  * @param[in] x The requested X position \
+  */ \
+  ChildClass& SetRequestedPositionX(float x) { View::SetRequestedPositionX(x); return *this; } \
+  /** \
+  * @brief Sets the Y position requested by the user. \
+  * \
+  * @param[in] y The requested Y position \
+  * @see SetRequestedPositionX \
+  */ \
+  ChildClass& SetRequestedPositionY(float y) { View::SetRequestedPositionY(y); return *this; } \
+  /** \
+  * @brief Sets the parent origin of the View. \
+  * \
+  * @param[in] point The parent origin to set \
+  */ \
+  ChildClass& SetParentOrigin(const Vector3& point) { View::SetParentOrigin(point); return *this; } \
+  /** \
+  * @brief Sets the pivot of the View. \
+  * \
+  * @param[in] point The pivot to set \
+  */ \
+  ChildClass& SetPivot(const Vector3& point) { View::SetPivot(point); return *this; } \
+  /** \
+  * @brief Sets the requested width. \
+  * \
+  * A positive value sets a fixed width. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] width The requested width \
+  */ \
+  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+  /** \
+  * @brief Sets the requested height. \
+  * \
+  * A positive value sets a fixed height. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] height The requested height \
+  */ \
+  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
+  /** \
+  * @brief Sets the minimum width. \
+  * \
+  * @param[in] width The minimum width \
+  */ \
+  ChildClass& SetMinimumWidth(float width) { View::SetMinimumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the minimum height. \
+  * \
+  * @param[in] height The minimum height \
+  */ \
+  ChildClass& SetMinimumHeight(float height) { View::SetMinimumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the maximum width. \
+  * \
+  * @param[in] width The maximum width \
+  */ \
+  ChildClass& SetMaximumWidth(float width) { View::SetMaximumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the maximum height. \
+  * \
+  * @param[in] height The maximum height \
+  */ \
+  ChildClass& SetMaximumHeight(float height) { View::SetMaximumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the view margin. \
+  * \
+  * @param[in] margin The margin to set \
+  */ \
+  ChildClass& SetMargin(const Extents& margin) { View::SetMargin(margin); return *this; } \
+  /** \
+  * @brief Sets the view padding. \
+  * \
+  * @param[in] padding The padding to set \
+  */ \
+  ChildClass& SetPadding(const Extents& padding) { View::SetPadding(padding); return *this; } \
+  /** \
+  * @brief Sets the layout mode of this View. \
+  * \
+  * LayoutMode::DEFAULT (default) lets the parent container's layout system manage \
+  * this View's size and position normally. \
+  * \
+  * LayoutMode::STANDALONE excludes this View from the parent's accumulation, \
+  * spacing and index calculations. The View's size is still measured normally \
+  * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
+  * but its position is taken from SetPositionX/SetPositionY instead of being \
+  * decided by the parent layout. This is useful for floating overlays, drag \
+  * previews, tooltips and absolute positioning inside any LayoutManager. \
+  * \
+  * Standalone children ignore the parent's padding entirely. Their measured \
+  * size is the parent's full inner size minus the child's own margin, and \
+  * their final position is SetPositionX/SetPositionY plus the child's own \
+  * margin in the parent's coordinate space. This keeps size and position \
+  * consistent: a Standalone child with MATCH_PARENT fills the parent edge \
+  * to edge regardless of parent padding, and any margin set on the child \
+  * shifts it inward in both axes. \
+  * \
+  * @param[in] mode The layout mode to set \
+  */ \
+  ChildClass& SetLayoutMode(LayoutMode mode) { View::SetLayoutMode(mode); return *this; } \
+  /** \
+  * @brief Sets whether the actor should be focusable by keyboard navigation. \
+  * \
+  * @param[in] focusable True if it is focusable \
+  */ \
+  ChildClass& SetFocusable(bool focusable) { View::SetFocusable(focusable); return *this; } \
+  /** \
+  * @brief Sets whether the actor should be focused when touched. \
+  * \
+  * @param[in] touchFocusable True if it gets focused when touched \
+  */ \
+  ChildClass& SetTouchFocusable(bool touchFocusable) { View::SetTouchFocusable(touchFocusable); return *this; } \
+  /** \
+  * @brief Sets whether descendant focus is blocked. \
+  * \
+  * When blocked, none of this View's descendants can receive keyboard focus. \
+  * Focus requests on descendants will be rejected. \
+  * \
+  * @param[in] blocked True to block descendant focus \
+  */ \
+  ChildClass& SetDescendantFocusBlocked(bool blocked) { View::SetDescendantFocusBlocked(blocked); return *this; } \
+  /** \
+  * @brief Sets the left focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating left \
+  */ \
+  ChildClass& SetLeftFocusableView(View view) { View::SetLeftFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the right focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating right \
+  */ \
+  ChildClass& SetRightFocusableView(View view) { View::SetRightFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the up focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating up \
+  */ \
+  ChildClass& SetUpFocusableView(View view) { View::SetUpFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the down focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating down \
+  */ \
+  ChildClass& SetDownFocusableView(View view) { View::SetDownFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the clockwise focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating clockwise \
+  */ \
+  ChildClass& SetClockwiseFocusableView(View view) { View::SetClockwiseFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the counter-clockwise focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating counter-clockwise \
+  */ \
+  ChildClass& SetCounterClockwiseFocusableView(View view) { View::SetCounterClockwiseFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the forward focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating forward \
+  */ \
+  ChildClass& SetForwardFocusableView(View view) { View::SetForwardFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the backward focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating backward \
+  */ \
+  ChildClass& SetBackwardFocusableView(View view) { View::SetBackwardFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the background color. \
+  * \
+  * If the UiColor has a color ID, it is resolved from the current \
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * If the UiColor has direct RGBA values, it is applied immediately \
+  * and any previous ID-based binding for this property is removed. \
+  * \
+  * @param[in] color The UiColor to apply \
+  */ \
+  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-adaptor/dali/public-api/adaptor-framework/window.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_WINDOW_H
+#define DALI_WINDOW_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/window-data.h>
+#include <dali/public-api/adaptor-framework/window-enumerations.h>
+#include <dali/public-api/math/int-pair.h>
+#include <dali/public-api/math/rect.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/any.h>
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/dali-adaptor-common.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_adaptor_framework
+ * @{
+ */
+
+typedef Dali::BoundsInteger PositionSize;
+
+namespace Internal DALI_INTERNAL
+{
+namespace Adaptor
+{
+class Window;
+}
+} //namespace Internal DALI_INTERNAL
+
+class Actor;
+class Layer;
+class RenderTaskList;
+class TouchEvent;
+class KeyEvent;
+
+/**
+ * @brief The window class is used internally for drawing.
+ *
+ * A Window has an orientation and indicator properties.
+ * You can get a valid Window handle by calling Dali::Application::GetWindow().
+ * @SINCE_1_0.0
+ */
+class DALI_ADAPTOR_API Window : public BaseHandle
+{
+public:
+  using WindowSize     = Int32Pair; ///< Window size type @SINCE_1_2.60
+  using WindowPosition = Int32Pair; ///< Window position type @SINCE_2_1.45
+
+  using FocusChangeSignalType = Signal<void(Window, bool)>;       ///< Window focus signal type @SINCE_1_4.35
+  using ResizeSignalType      = Signal<void(Window, WindowSize)>; ///< Window resized signal type @SINCE_1_4.35
+  using KeyEventSignalType    = Signal<void(Window, KeyEvent)>;   ///< Key event signal type @SINCE_1_9.21
+  using TouchEventSignalType  = Signal<void(Window, TouchEvent)>; ///< Touch signal type @SINCE_1_9.28
+
+public:
+  // Methods
+
+  /**
+   * @brief Creates an initialized handle to a new Window.
+   * @SINCE_1_0.0
+   * @param[in] windowPosition The position and size of the Window
+   * @param[in] name The Window title
+   * @param[in] isTransparent Whether Window is transparent
+   * @return A new window
+   * @note This creates an extra window in addition to the default main window
+   */
+  static Window New(PositionSize windowPosition, const Dali::String& name, bool isTransparent = false);
+
+  /**
+   * @brief Creates an initialized handle to a new Window.
+   * @SINCE_2_2.33
+   * @param[in] name The Window title
+   * @param[in] className The Window class name
+   * @param[in] windowData The window data
+   * @note This creates an extra window in addition to the default main window
+   * @return A new Window
+   */
+  static Window New(const Dali::String& name, const Dali::String& className, const WindowData& windowData);
+
+  /**
+   * @brief Creates an uninitialized handle.
+   *
+   * This can be initialized using Dali::Application::GetWindow() or
+   * Dali::Window::New().
+   * @SINCE_1_0.0
+   */
+  Window();
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_1_0.0
+   */
+  ~Window();
+
+  /**
+   * @brief This copy constructor is required for (smart) pointer semantics.
+   *
+   * @SINCE_1_0.0
+   * @param[in] handle A reference to the copied handle
+   */
+  Window(const Window& handle);
+
+  /**
+   * @brief This assignment operator is required for (smart) pointer semantics.
+   *
+   * @SINCE_1_0.0
+   * @param[in] rhs A reference to the copied handle
+   * @return A reference to this
+   */
+  Window& operator=(const Window& rhs);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   */
+  Window(Window&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @SINCE_1_9.24
+   * @param[in] rhs A reference to the moved handle
+   * @return A reference to this handle
+   */
+  Window& operator=(Window&& rhs) noexcept;
+
+  /**
+   * @brief Downcast sceneHolder to window
+   *
+   * @SINCE_2_1.46
+   * @param[in] handle The handle need to downcast
+   * @return Whether it's a valid window or not
+   */
+  static Window DownCast(BaseHandle handle);
+
+  /**
+   * @brief Adds a child Actor to the Window.
+   *
+   * The child will be referenced.
+   *
+   * @SINCE_1_4.19
+   * @param[in] actor The child
+   * @pre The actor has been initialized.
+   * @pre The actor does not have a parent.
+   */
+  void Add(Actor actor);
+
+  /**
+   * @brief Removes a child Actor from the Window.
+   *
+   * The child will be unreferenced.
+   *
+   * @SINCE_1_4.19
+   * @param[in] actor The child
+   * @pre The actor has been added to the stage.
+   */
+  void Remove(Actor actor);
+
+  /**
+   * @brief Sets the background color of the Window.
+   *
+   * @SINCE_1_4.19
+   * @param[in] color The new background color
+   * @note If this window is transparent, the color is converted premultiplied alpha format internally.
+   */
+  void SetBackgroundColor(const Vector4& color);
+
+  /**
+   * @brief Gets the background color of the Window.
+   *
+   * @SINCE_1_4.19
+   * @return The background color
+   */
+  Vector4 GetBackgroundColor() const;
+
+  /**
+   * @brief Returns the root Layer of the Window.
+   *
+   * @SINCE_1_4.19
+   * @return The root layer
+   */
+  Layer GetRootLayer() const;
+
+  /**
+   * @brief Returns the overlay Layer of the Window.
+   * If there isn't overlay layer yet, this method create overlay layer and
+   * exclusive render task internally.
+   *
+   * @SINCE_2_2.10
+   * @return The root layer
+   */
+  Layer GetOverlayLayer();
+
+  /**
+   * @brief Queries the number of on-scene layers in the Window.
+   *
+   * Note that a default layer is always provided (count >= 1).
+   *
+   * @SINCE_1_4.19
+   * @return The number of layers
+   */
+  uint32_t GetLayerCount() const;
+
+  /**
+   * @brief Retrieves the layer at a specified depth in the Window.
+   *
+   * @SINCE_1_4.19
+   * @param[in] depth The depth
+   * @return The layer found at the given depth
+   * @pre Depth is less than layer count; see GetLayerCount().
+   */
+  Layer GetLayer(uint32_t depth) const;
+
+  /**
+   * @brief Retrieves the DPI of the window.
+   *
+   * @SINCE_1_9.21
+   * @return The DPI of the window
+   */
+  Uint16Pair GetDpi() const;
+
+  /**
+   * @brief Sets the window name and class string.
+   * @SINCE_1_0.0
+   * @param[in] name The name of the window
+   * @param[in] klass The class of the window
+   */
+  void SetClass(Dali::String name, Dali::String klass);
+
+  /**
+   * @brief Raises window to the top of Window stack.
+   * @SINCE_1_0.0
+   */
+  void Raise();
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '360,520p' repos/dali-adaptor/dali/public-api/adaptor-framework/application.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& LanguageChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the region of the device is changed.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& RegionChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the battery level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_2.62
+   * @return The signal to connect to
+   */
+  LowBatterySignalType& LowBatterySignal();
+
+  /**
+   * @brief This signal is emitted when the memory level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_2.62
+   * @return The signal to connect to
+   */
+  LowMemorySignalType& LowMemorySignal();
+
+  /**
+   * @brief This signal is emitted when the device orientation is changed
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   *
+   * This signal is only used in Application, it is different to Window's orientation signal.
+   * @SINCE_2_2.1
+   * @return The signal to connect to
+   */
+  DeviceOrientationChangedSignalType& DeviceOrientationChangedSignal();
+
+  // TaskSignal
+  /**
+   * @brief The user should connect to this signal to determine when they should initialize
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskInitSignal();
+
+  /**
+   * @brief The user should connect to this signal to determine when they should terminate
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskTerminateSignal();
+
+  /**
+   * @brief This signal is emitted when another application sends a launch request to the application.
+   *
+   * When the application is launched, this signal is emitted after the main loop of the application starts up.
+   * The passed parameter describes the launch request and contains the information about why the application is launched.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppControlSignalType& TaskAppControlSignal();
+
+  /**
+   * @brief This signal is emitted when the language is changed on the device.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskLanguageChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the region of the device is changed.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  AppSignalType& TaskRegionChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the battery level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  LowBatterySignalType& TaskLowBatterySignal();
+
+  /**
+   * @brief This signal is emitted when the memory level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @return The signal to connect to
+   */
+  LowMemorySignalType& TaskLowMemorySignal();
+
+  /**
+   * @brief This signal is emitted when the device orientation is changed.
+   * Only when the user uses the UI thread, this signal is emitted on the main thread.
+   * Otherwise, it is not emitted at all.
+   * @SINCE_2_2.1
+   * @return The signal to connect to
+   */
+  DeviceOrientationChangedSignalType& TaskDeviceOrientationChangedSignal();
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Internal constructor.
+   * @SINCE_1_0.0
+   */
+  explicit DALI_INTERNAL Application(Internal::Adaptor::Application* application);
+  /// @endcond
+};
+
+/**
+ * @}
+ */
+} // namespace Dali
+
+#endif // DALI_APPLICATION_H
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-adaptor/dali/devel-api/adaptor-framework/application-devel.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_APPLICATION_DEVEL_H
+#define DALI_APPLICATION_DEVEL_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/application.h>
+#include <dali/public-api/adaptor-framework/window.h>
+#include <dali/public-api/dali-adaptor-common.h>
+#include <string>
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/signals/dali-signal.h>
+
+namespace Dali
+{
+namespace DevelApplication
+{
+using CustomCommandReceivedSignalType = Signal<void(const std::string&)>; ///< Signal signature for CustomCommandReceivedSignal
+
+/**
+ * @brief Ensures that the function passed in is called from the main loop when it is idle.
+ * @param[in] application A handle to the Application
+ * @param[in] callback The function to call
+ * @return @c true if added successfully, @c false otherwise
+ *
+ * @note Function must be called from main event thread only
+ *
+ * A callback of the following type should be used:
+ * @code
+ *   bool MyFunction();
+ * @endcode
+ * This callback will be called repeatedly as long as it returns true. A return of 0 deletes this callback.
+ *
+ * @note Ownership of the callback is passed onto this class.
+ */
+DALI_ADAPTOR_API bool AddIdleWithReturnValue(Application application, CallbackBase* callback);
+
+/**
+ * @brief Gets the absolute path to the application's data directory which is used to store private data of the application.
+ * @return The absolute path to the application's data directory
+ */
+DALI_ADAPTOR_API std::string GetDataPath();
+
+/**
+ * @brief Downcasts a ref object to Application handle
+ *
+ * If handle points to an Application object, the downcast produces valid base handle
+ * If not, the returned base handle is left uninitialized
+ *
+ * @param[in] refObject to an Application
+ * @return handle to an Application object or an uninitialized base handle
+ */
+DALI_ADAPTOR_API Application DownCast(Dali::RefObject* refObject);
+
+/**
+ * @brief This signal will be triggered when a custom command is received.
+ *
+ * For this signal to be triggered, the adaptor must be built with -DENABLE_NETWORK_LOGGING=ON
+ * and when running, DALI_NETWORK_CONTROL=1 must also be set.
+ *
+ * A callback of the following type may be connected:
+ * @code
+ *   void YourCallbackName(const std::string&);
+ * @endcode
+ *
+ * @param[in] application A handle to the Application
+ * @return The signal when a custom command is received
+ */
+DALI_ADAPTOR_API CustomCommandReceivedSignalType& CustomCommandReceivedSignal(Application application);
+
+/**
+ * @brief Gets the render thread ID of DALi.
+ *
+ * @param[in] application A handle to the Application
+ * @return The render thread ID.
+ *
+ * @note Returns a valid thread ID only if the render thread has started and the system supports
+ *       thread ID retrieval. Otherwise, returns 0.
+ */
+DALI_ADAPTOR_API int32_t GetRenderThreadId(Application application);
+
+/**
+ * @brief Gets the UI thread ID of DALi.
+ *
+ * @param[in] application A handle to the Application
+ * @return The UI thread ID.
+ *
+ * @note Returns a valid thread ID only if the adaptor has been initialized and the system supports
+ *       thread ID retrieval. Otherwise, returns 0.
+ */
+DALI_ADAPTOR_API int32_t GetUiThreadId(Application application);
+
+/**
+ * @brief Gets the main thread ID of DALi.
+ *
+ * @param[in] application A handle to the Application
+ * @return The main thread ID.
+ *
+ * @note Returns a valid thread ID only if the system supports thread ID retrieval.
+ *       Otherwise, returns 0.
+ */
+DALI_ADAPTOR_API int32_t GetMainThreadId(Application application);
+
+/**
+ * @brief Relayout the application and ensure all pending operations are flushed to the update thread.
+ * @param application A handle to the Application
+ */
+DALI_ADAPTOR_API void FlushUpdateMessages(Application application);
+
+/**
+ * @brief Set the application's language independently of the system language.
+ * @param application A handle to the Application.
+ * @param[in] locale Specifies the application's language and region in BCP 47 format (e.g., "en_US", "ko_KR").
+ */
+DALI_ADAPTOR_API void SetApplicationLocale(Application application, const std::string& locale);
+
+/**
+ * @brief Get window from pre-initialized application.
+ * @note Only available pre-initialized application case. If application already created, it will return empty handle.
+ * @return Pre initialized window, or empty handle if no pre-initialized application exist.
+ */
+DALI_ADAPTOR_API Dali::Window GetPreInitializedWindow();
+
+} // namespace DevelApplication
+
+} // namespace Dali
+
+/**
+ * @brief This is used to improve application launch performance.
+ * Initializes some functions in advance and makes a window in advance.
+ * @param[in,out]  argc A pointer to the number of arguments
+ * @param[in,out]  argv A pointer to the argument list
+ *
+ * @note Declared in C style for calling from app-launcher.
+ *
+ */
+extern "C" DALI_ADAPTOR_API void ApplicationPreInitialize(int* argc, char** argv[]);
+
+#endif // DALI_APPLICATION_DEVEL_H
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-adaptor/dali/devel-api/adaptor-framework/lifecycle-controller.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_LIFECYCLE_CONTROLLER_H
+#define DALI_LIFECYCLE_CONTROLLER_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/dali-adaptor-common.h>
+
+namespace Dali
+{
+namespace Internal DALI_INTERNAL
+{
+namespace Adaptor
+{
+class LifecycleController;
+}
+} // namespace Internal DALI_INTERNAL
+
+/**
+ * @brief Provides application lifecycle events.
+ *
+ * Connect to the signals of this class to receive notification of events in the lifecycle
+ * of the application. The following example shows how to connect to the Init signal. This
+ * could be done for example in the constructor of a singleton that is known to be created
+ * at startup.
+ *
+ * @code
+ * void MyClass::MyClass()
+ * {
+ *   LifecycleController::Get().InitSignal().Connect( this, &MyClass::OnApplicationInit );
+ * }
+ *
+ * void MyClass::OnApplicationInit()
+ * {
+ *   // ... Do something on init
+ * }
+ * @endcode
+ */
+class DALI_ADAPTOR_API LifecycleController : public BaseHandle
+{
+public:                                           // Typedefs
+  typedef Signal<void(void)> LifecycleSignalType; ///< Lifecycle Signal type
+
+public: // Creation & Destruction
+  /**
+   * @brief Create an uninitialized LifecycleController handle.
+   *
+   * Calling member functions when uninitialized is not allowed.
+   */
+  LifecycleController();
+
+  /**
+   * @brief Creates a copy of the handle.
+   *
+   * The copy will point to the same implementation as the original.
+   * @param[in]  monitor  The LifecycleController to copy from.
+   */
+  LifecycleController(const LifecycleController& monitor);
+
+  /**
+   * @brief Retrieve the initialized instance of the LifecycleController.
+   * @return Handle to LifecycleController.
+   */
+  static LifecycleController Get();
+
+  /**
+   * @brief Destructor
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~LifecycleController();
+
+public: // Signals
+  /**
+   * The user should connect to this signal before initialize their application.
+   */
+  LifecycleSignalType& PreInitSignal();
+
+  /**
+   * The user should connect to this signal to determine when they should initialise
+   * their application.
+   */
+  LifecycleSignalType& InitSignal();
+
+  /**
+   * The user should connect to this signal to determine when they should terminate
+   * their application
+   */
+  LifecycleSignalType& TerminateSignal();
+
+  /**
+   * The user should connect to this signal if they need to perform any special
+   * activities when the application is about to be paused.
+   */
+  LifecycleSignalType& PauseSignal();
+
+  /**
+   * The user should connect to this signal if they need to perform any special
+   * activities when the application has resumed.
+   */
+  LifecycleSignalType& ResumeSignal();
+
+  /**
+   * This signal is sent when the system requires the user to reinitialise itself.
+   */
+  LifecycleSignalType& ResetSignal();
+
+  /**
+   * This signal is emitted when the language is changed on the device.
+   */
+  LifecycleSignalType& LanguageChangedSignal();
+
+public: // Operators
+  /**
+   * @brief Assignment operator.
+   *
+   * The handle points to the same implementation as the one being copied from.
+   * @param[in]  controller  The LifecycleController to copy from.
+   * @return reference to this object
+   */
+  LifecycleController& operator=(const LifecycleController& controller);
+
+public: // Not intended for application developers
+  /**
+   * @brief This constructor is used internally to create a handle from an object pointer.
+   * @param [in] lifecycleController A pointer to the internal LifecycleController.
+   */
+  explicit DALI_INTERNAL LifecycleController(Internal::Adaptor::LifecycleController* lifecycleController);
+};
+
+} // namespace Dali
+
+#endif // DALI_LIFECYCLE_CONTROLLER_H
+
+exec
+/bin/bash -lc "sed -n '260,380p' repos/dali-adaptor/dali/public-api/adaptor-framework/application.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  Window GetWindow();
+
+  /**
+   * @brief Get path application resources are stored at
+   *
+   * @SINCE_1_2.2
+   * @return the full path of the resources
+   */
+  static Dali::String GetResourcePath();
+
+  /**
+   * @brief This is used to get region information from device.
+   *
+   * @SINCE_1_2.62
+   * @return Region information
+   */
+  Dali::String GetRegion() const;
+
+  /**
+   * @brief This is used to get language information from device.
+   *
+   * @SINCE_1_2.62
+   * @return Language information
+   */
+  Dali::String GetLanguage() const;
+
+  /**
+   * @brief Gets the Object registry.
+   *
+   * @SINCE_1_9.21
+   * @return The object registry
+   * @note This will only be a valid handle after the InitSignal has been emitted.
+   */
+  ObjectRegistry GetObjectRegistry() const;
+
+public: // Signals
+  /**
+   * @brief The user should connect to this signal to determine when they should initialize
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& InitSignal();
+
+  /**
+   * @brief The user should connect to this signal to determine when they should terminate
+   * their application.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& TerminateSignal();
+
+  /**
+   * @brief The user should connect to this signal if they need to perform any special
+   * activities when the application is about to be paused.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& PauseSignal();
+
+  /**
+   * @brief The user should connect to this signal if they need to perform any special
+   * activities when the application has resumed.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& ResumeSignal();
+
+  /**
+   * @brief This signal is sent when the system requires the user to reinitialize itself.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& ResetSignal();
+
+  /**
+   * @brief This signal is emitted when another application sends a launch request to the application.
+   *
+   * When the application is launched, this signal is emitted after the main loop of the application starts up.
+   * The passed parameter describes the launch request and contains the information about why the application is launched.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppControlSignalType& AppControlSignal();
+
+  /**
+   * @brief This signal is emitted when the language is changed on the device.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& LanguageChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the region of the device is changed.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_0.0
+   * @return The signal to connect to
+   */
+  AppSignalType& RegionChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the battery level of the device is low.
+   * Only when the user uses the UI thread, this signal is emitted on the UI thread.
+   * Otherwise, it is emitted on the main thread.
+   * @SINCE_1_2.62
+   * @return The signal to connect to
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-adaptor/dali/public-api/adaptor-framework/device-status.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_DEVICE_STATUS_H
+#define DALI_DEVICE_STATUS_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_adaptor_framework
+ * @{
+ */
+
+namespace DeviceStatus
+{
+/**
+ * @brief Struct for battery of the device.
+ * @SINCE_1_2.62
+ */
+struct Battery
+{
+  /**
+   * @brief Enumeration for battery status.
+   * @SINCE_1_2.62
+   */
+  enum Status
+  {
+    NORMAL,         ///< Battery is over 5% @SINCE_1_2.62
+    CRITICALLY_LOW, ///< Battery is under 5% @SINCE_1_2.62
+    POWER_OFF       ///< Battery is under 1% @SINCE_1_2.62
+  };
+};
+
+/**
+ * @brief Struct for memory of the device.
+ * @SINCE_1_2.62
+ */
+struct Memory
+{
+  /**
+   * @brief Enumeration for memory status.
+   * @SINCE_1_2.62
+   */
+  enum Status
+  {
+    NORMAL,        ///< Normal Status @SINCE_1_2.62
+    LOW,           ///< Memory is low but not critical @SINCE_1_2.62
+    CRITICALLY_LOW ///< Memory is critically low @SINCE_1_2.62
+  };
+};
+
+/**
+ * @brief Struct for orientation of the device.
+ * @SINCE_2_2.1
+ */
+struct Orientation
+{
+  /**
+   * @brief Enumeration for orientation status.
+   * @SINCE_2_2.1
+   */
+  enum Status
+  {
+    ORIENTATION_0   = 0,   ///< The device is oriented in a natural position @SINCE_2_2.1
+    ORIENTATION_90  = 90,  ///< The device's left side is at the top @SINCE_2_2.1
+    ORIENTATION_180 = 180, ///< The device is upside down @SINCE_2_2.1
+    ORIENTATION_270 = 270  ///< The device's right side is at the top @SINCE_2_2.1
+  };
+};
+
+} // namespace DeviceStatus
+
+/**
+ * @}
+ */
+} // namespace Dali
+
+#endif // DALI_DEVICE_STATUS_H
+
+exec
+/bin/bash -lc 'rg "LowMemorySignal|LowBatterySignal|PauseSignal|ResumeSignal|GetLanguage|GetRegion" -n repos/dali-adaptor/automated-tests repos/dali-ui | head -120' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:75:void LowBatterySignalCallback(Dali::DeviceStatus::Battery::Status status)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:79:void LowMemorySignalCallback(Dali::DeviceStatus::Memory::Status status)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:379:int UtcDaliApplicationPauseSignalP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:382:  application.PauseSignal().Connect(&ApplicationSignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:388:int UtcDaliApplicationPauseSignalN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:394:    application.PauseSignal().Connect(&ApplicationSignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:405:int UtcDaliApplicationResumeSignalP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:408:  application.ResumeSignal().Connect(&ApplicationSignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:414:int UtcDaliApplicationResumeSignalN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:420:    application.ResumeSignal().Connect(&ApplicationSignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:535:int UtcDaliApplicationLowBatterySignalP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:538:  application.LowBatterySignal().Connect(&LowBatterySignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:544:int UtcDaliApplicationLowBatterySignalN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:550:    application.LowBatterySignal().Connect(&LowBatterySignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:561:int UtcDaliApplicationLowMemorySignalP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:564:  application.LowMemorySignal().Connect(&LowMemorySignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:570:int UtcDaliApplicationLowMemorySignalN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:576:    application.LowMemorySignal().Connect(&LowMemorySignalCallback);
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:623:int UtcDaliApplicationGetRegionP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:627:  result = ToStdString(application.GetRegion());
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:633:int UtcDaliApplicationGetLanguageP(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:637:  result = ToStdString(application.GetLanguage());
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:767:int UtcDaliApplicationTaskLowBatterySignalN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:773:    application.TaskLowBatterySignal();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:784:int UtcDaliApplicationTaskLowMemorySignalN(void)
+repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp:790:    application.TaskLowMemorySignal();
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-reflection.h:50:  Graphics::ShaderLanguage                        GetLanguage() const override;
+repos/dali-adaptor/automated-tests/src/dali-adaptor/dali-test-suite-utils/test-graphics-reflection.cpp:405:Graphics::ShaderLanguage TestGraphicsReflection::GetLanguage() const
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-Lifecycle-Controller.cpp:166:  lifecycleController.PauseSignal().Connect(&OnPause);
+repos/dali-adaptor/automated-tests/src/dali-adaptor-internal/utc-Dali-Lifecycle-Controller.cpp:184:  lifecycleController.ResumeSignal().Connect(&OnResume);
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-graphics-reflection.h:50:  Graphics::ShaderLanguage                        GetLanguage() const override;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-graphics-reflection.cpp:405:Graphics::ShaderLanguage TestGraphicsReflection::GetLanguage() const
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-adaptor/dali/integration-api/adaptor-framework/adaptor.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_INTEGRATION_ADAPTOR_H
+#define DALI_INTEGRATION_ADAPTOR_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/devel-api/events/touch-point.h>
+#include <dali/integration-api/processor-interface.h>
+#include <dali/public-api/math/int-pair.h>
+#include <dali/public-api/math/rect.h>
+#include <dali/public-api/object/any.h>
+#include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/dali-signal.h>
+#include <string>
+
+// INTERNAL INCLUDES
+#include <dali/integration-api/adaptor-framework/log-factory-interface.h>
+#include <dali/integration-api/adaptor-framework/trace-factory-interface.h>
+#include <dali/public-api/adaptor-framework/window.h>
+#include <dali/public-api/dali-adaptor-common.h>
+
+namespace Dali
+{
+class ObjectRegistry;
+
+using WindowContainer = std::vector<Window>;
+
+namespace Integration
+{
+class SceneHolder;
+class RenderSurfaceInterface;
+} //namespace Integration
+
+using SceneHolderList = std::vector<Dali::Integration::SceneHolder>;
+
+namespace Internal
+{
+namespace Adaptor
+{
+class GraphicsFactory;
+class Adaptor;
+} // namespace Adaptor
+} // namespace Internal
+
+/**
+ * @brief An Adaptor object is used to initialize and control how Dali runs.
+ *
+ * It provides a lifecycle interface that allows the application
+ * writer to provide their own main loop and other platform related
+ * features.
+ *
+ * The Adaptor class provides a means for initialising the resources required by the Dali::Core.
+ *
+ * When dealing with platform events, the application writer MUST ensure that Dali is called in a
+ * thread-safe manner.
+ *
+ * As soon as the Adaptor class is created and started, the application writer can initialise their
+ * Dali::Actor objects straight away or as required by the main loop they intend to use (there is no
+ * need to wait for an initialise signal as per the Dali::Application class).
+ *
+ * The Adaptor does emit a Resize signal which informs the user when the surface is resized.
+ * Tizen and Linux Adaptors should follow the example below:
+ *
+ * @code
+ * void CreateProgram(DaliAdaptor& adaptor)
+ * {
+ *   // Create Dali components...
+ *   // Can instantiate adaptor here instead, if required
+ * }
+ *
+ * int main ()
+ * {
+ *   // Initialise platform
+ *   MyPlatform.Init();
+ *
+ *   // Create an 800 by 1280 window positioned at (0,0).
+ *   Dali::PositionSize positionSize(0, 0, 800, 1280);
+ *   Dali::Window window = Dali::Window::New( positionSize, "My Application" );
+ *
+ *   // Create an adaptor which uses that window for rendering
+ *   Dali::Adaptor adaptor = Dali::Adaptor::New( window );
+ *   adaptor.Start();
+ *
+ *   CreateProgram(adaptor);
+ *   // Or use this as a callback function depending on the platform initialisation sequence.
+ *
+ *   // Start Main Loop of your platform
+ *   MyPlatform.StartMainLoop();
+ *
+ *   return 0;
+ * }
+ * @endcode
+ *
+ * If required, you can also connect class member functions to a signal:
+ *
+ * @code
+ * MyApplication application;
+ * adaptor.ResizedSignal().Connect(&application, &MyApplication::Resize);
+ * @endcode
+ *
+ * @see RenderSurface
+ */
+class DALI_ADAPTOR_API Adaptor
+{
+public:
+  typedef Signal<void(Adaptor&)>                        AdaptorSignalType;       ///< Generic Type for adaptor signals
+  typedef Signal<void(Dali::Integration::SceneHolder)> WindowCreatedSignalType; ///< SceneHolder created signal type
+  typedef Signal<void(std::string)>                     LocaleChangedSignalType; ///< Locale changed signal type
+
+  using SurfaceSize = Int32Pair; ///< Surface size type
+
+public:
+  /**
+   * @brief Create a new adaptor using the window.
+   *
+   * @param[in] window The window to draw onto
+   * @return a reference to the adaptor handle
+   */
+  static Adaptor& New(Window window);
+
+  /**
+   * @brief Create a new adaptor using render surface.
+   *
+   * @param[in] window The window to draw onto
+   * @param[in] surface The surface to draw onto
+   * @return a reference to the adaptor handle
+   */
+  static Adaptor& New(Window window, const Dali::Integration::RenderSurfaceInterface& surface);
+
+  /**
+   * @brief Create a new adaptor using the SceneHolder.
+   *
+   * @param[in] sceneHolder The SceneHolder to draw onto
+   * @return a reference to the adaptor handle
+   */
+  static Adaptor& New(Dali::Integration::SceneHolder sceneHolder);
+
+  /**
+   * @brief Create a new adaptor using render surface.
+   *
+   * @param[in] sceneHolder The SceneHolder to draw onto
+   * @param[in] surface The surface to draw onto
+   * @return a reference to the adaptor handle
+   */
+  static Adaptor& New(Dali::Integration::SceneHolder sceneHolder, const Dali::Integration::RenderSurfaceInterface& surface);
+
+  /**
+   * @brief Virtual Destructor.
+   */
+  virtual ~Adaptor();
+
+public:
+  /**
+   * @brief Starts the Adaptor.
+   */
+  void Start();
+
+  /**
+   * @brief Pauses the Adaptor.
+   */
+  void Pause();
+
+  /**
+   * @brief Resumes the Adaptor, if previously paused.
+   *
+   * @note If the adaptor is not paused, this does not do anything.
+   */
+  void Resume();
+
+  /**
+   * @brief Stops the Adaptor.
+   */
+  void Stop();
+
+  /**
+   * @brief Ensures that the function passed in is called from the main loop when it is idle.
+   * @note Function must be called from the main event thread only.
+   *
+   * Callbacks of the following types may be used:
+   * @code
+   *   void MyFunction();
+   * @endcode
+   * This callback will be deleted once it is called.
+   *
+   * @code
+   *   bool MyFunction();
+   * @endcode
+   * This callback will be called repeatedly as long as it returns true. A return of 0 deletes this callback.
+   *
+   * @param[in] callback The function to call.
+   * @param[in] hasReturnValue Sould be set to true if the callback function has a return value.
+   * @return true if added successfully, false otherwise
+   *
+   * @note Ownership of the callback is passed onto this class.
+   */
+  bool AddIdle(CallbackBase* callback, bool hasReturnValue);
+
+  /**
+   * @brief Adds a new Window instance to the Adaptor
+   *
+   * @param[in]  childWindow The child window instance
+   */
+  bool AddWindow(Dali::Integration::SceneHolder childWindow);
+
+  /**
+   * @brief Removes a previously added @p callback.
+   * @note Function must be called from the main event thread only.
+   *
+   * Does nothing if the @p callback doesn't exist.
+   *
+   * @param[in] callback The callback to be removed.
+   */
+  void RemoveIdle(CallbackBase* callback);
+
+  /**
+   * @brief Processes the idle callbacks.
+   *
+   * @note This function is intended to be used in the case there is no instance of a Dali::Application i.e. DALi is used in a implementation of a plugin of an application.
+   */
+  void ProcessIdle();
+
+  /**
+   * @brief Replaces the rendering surface
+   *
+   * @param[in] window The window to replace the surface for
+   * @param[in] surface to use
+   */
+  void ReplaceSurface(Window window, Dali::Integration::RenderSurfaceInterface& surface);
+
+  /**
+   * @brief Replaces the rendering surface
+   *
+   * @param[in] sceneHolder The SceneHolder to replace the surface for
+   * @param[in] surface to use
+   */
+  void ReplaceSurface(Dali::Integration::SceneHolder sceneHolder, Dali::Integration::RenderSurfaceInterface& surface);
+
+  /**
+   * @brief Get the render surface the adaptor is using to render to.
+   *
+   * @return reference to current render surface
+   */
+  Dali::Integration::RenderSurfaceInterface& GetSurface();
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '60,95p' repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp && sed -n '535,585p' repos/dali-adaptor/automated-tests/src/dali-adaptor/utc-Dali-Application.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  // Data
+  bool         initCalled;
+  Application& application;
+};
+
+void ApplicationSignalCallback(Application app)
+{
+}
+
+void ApplicationControlSignalCallback(Application, void*)
+{
+}
+
+} // unnamed namespace
+
+void LowBatterySignalCallback(Dali::DeviceStatus::Battery::Status status)
+{
+}
+
+void LowMemorySignalCallback(Dali::DeviceStatus::Memory::Status status)
+{
+}
+
+void OnDeviceOrientationChangedSignalCallback(DeviceStatus::Orientation::Status status)
+{
+}
+
+int UtcDaliApplicationNew01(void)
+{
+  Application application = Application::New(nullptr, nullptr);
+
+  MyTestApp testApp(application);
+
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+int UtcDaliApplicationLowBatterySignalP(void)
+{
+  Application application = Application::New(nullptr, nullptr);
+  application.LowBatterySignal().Connect(&LowBatterySignalCallback);
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+}
+
+int UtcDaliApplicationLowBatterySignalN(void)
+{
+  Application application;
+
+  try
+  {
+    application.LowBatterySignal().Connect(&LowBatterySignalCallback);
+    DALI_TEST_CHECK(false); // Should not get here
+  }
+  catch(...)
+  {
+    DALI_TEST_CHECK(true);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliApplicationLowMemorySignalP(void)
+{
+  Application application = Application::New(nullptr, nullptr);
+  application.LowMemorySignal().Connect(&LowMemorySignalCallback);
+  DALI_TEST_CHECK(application);
+
+  END_TEST;
+}
+
+int UtcDaliApplicationLowMemorySignalN(void)
+{
+  Application application;
+
+  try
+  {
+    application.LowMemorySignal().Connect(&LowMemorySignalCallback);
+    DALI_TEST_CHECK(false); // Should not get here
+  }
+  catch(...)
+  {
+    DALI_TEST_CHECK(true);
+  }
+
+  END_TEST;
+}
+
+exec
+/bin/bash -lc "sed -n '80,170p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  * @brief Sets the requested width. \
+  * \
+  * A positive value sets a fixed width. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] width The requested width \
+  */ \
+  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+  /** \
+  * @brief Sets the requested height. \
+  * \
+  * A positive value sets a fixed height. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] height The requested height \
+  */ \
+  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
+  /** \
+  * @brief Sets the minimum width. \
+  * \
+  * @param[in] width The minimum width \
+  */ \
+  ChildClass& SetMinimumWidth(float width) { View::SetMinimumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the minimum height. \
+  * \
+  * @param[in] height The minimum height \
+  */ \
+  ChildClass& SetMinimumHeight(float height) { View::SetMinimumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the maximum width. \
+  * \
+  * @param[in] width The maximum width \
+  */ \
+  ChildClass& SetMaximumWidth(float width) { View::SetMaximumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the maximum height. \
+  * \
+  * @param[in] height The maximum height \
+  */ \
+  ChildClass& SetMaximumHeight(float height) { View::SetMaximumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the view margin. \
+  * \
+  * @param[in] margin The margin to set \
+  */ \
+  ChildClass& SetMargin(const Extents& margin) { View::SetMargin(margin); return *this; } \
+  /** \
+  * @brief Sets the view padding. \
+  * \
+  * @param[in] padding The padding to set \
+  */ \
+  ChildClass& SetPadding(const Extents& padding) { View::SetPadding(padding); return *this; } \
+  /** \
+  * @brief Sets the layout mode of this View. \
+  * \
+  * LayoutMode::DEFAULT (default) lets the parent container's layout system manage \
+  * this View's size and position normally. \
+  * \
+  * LayoutMode::STANDALONE excludes this View from the parent's accumulation, \
+  * spacing and index calculations. The View's size is still measured normally \
+  * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
+  * but its position is taken from SetPositionX/SetPositionY instead of being \
+  * decided by the parent layout. This is useful for floating overlays, drag \
+  * previews, tooltips and absolute positioning inside any LayoutManager. \
+  * \
+  * Standalone children ignore the parent's padding entirely. Their measured \
+  * size is the parent's full inner size minus the child's own margin, and \
+  * their final position is SetPositionX/SetPositionY plus the child's own \
+  * margin in the parent's coordinate space. This keeps size and position \
+  * consistent: a Standalone child with MATCH_PARENT fills the parent edge \
+  * to edge regardless of parent padding, and any margin set on the child \
+  * shifts it inward in both axes. \
+  * \
+  * @param[in] mode The layout mode to set \
+  */ \
+  ChildClass& SetLayoutMode(LayoutMode mode) { View::SetLayoutMode(mode); return *this; } \
+  /** \
+  * @brief Sets whether the actor should be focusable by keyboard navigation. \
+  * \
+  * @param[in] focusable True if it is focusable \
+  */ \
+  ChildClass& SetFocusable(bool focusable) { View::SetFocusable(focusable); return *this; } \
+  /** \
+  * @brief Sets whether the actor should be focused when touched. \
+  * \
+  * @param[in] touchFocusable True if it gets focused when touched \
+  */ \
+  ChildClass& SetTouchFocusable(bool touchFocusable) { View::SetTouchFocusable(touchFocusable); return *this; } \
+
+exec
+/bin/bash -lc "rg \"class UiColor|UiColor\\(\" -n repos/dali-ui/dali-ui-foundation/public-api repos/dali-ui/manual-tests/dali-ui-foundation | head -100" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:60:      .SetTextColor(UiColor(COLOR_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:74:        .SetBackgroundColor(UiColor(COLOR_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:81:            .SetTextColor(UiColor(COLOR_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:88:            .SetTextColor(UiColor(COLOR_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:104:      .SetTextColor(UiColor(COLOR_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:107:      .SetBackgroundColor(UiColor(COLOR_FIELD_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:113:        view.SetBackgroundColor(UiColor(COLOR_FOCUSED_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:117:        view.SetBackgroundColor(UiColor(COLOR_FIELD_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:103:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:195:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:196:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:207:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:211:                            .SetFontSize(11.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:93:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:180:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:181:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:192:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:196:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:109:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:167:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:168:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:178:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:182:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:61:      .SetTextColor(UiColor(COLOR_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:100:        .SetBackgroundColor(UiColor(COLOR_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:113:      .SetTextColor(UiColor(COLOR_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:118:      .SetBackgroundColor(UiColor(COLORS[index]))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:126:        view.SetBackgroundColor(UiColor(COLOR_FOCUSED));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:131:        view.SetBackgroundColor(UiColor(COLORS[index]));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:86:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:94:      MakeButton("White",      [this] { OnColor(UiColor(1.f, 1.f, 1.f, 1.f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:95:      MakeButton("Red",        [this] { OnColor(UiColor(1.f, 0.f, 0.f, 1.f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:96:      MakeButton("Blue",       [this] { OnColor(UiColor(0.f, 0.f, 1.f, 1.f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:97:      MakeButton("50%\nAlpha", [this] { OnColor(UiColor(1.f, 1.f, 1.f, 0.5f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:145:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:146:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:156:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:160:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:73:               .SetBackgroundColor(UiColor(C_IMG_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:83:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:119:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:120:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:130:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:134:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:118:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:190:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:191:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:202:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:206:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:118:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:181:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:182:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:193:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:197:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:90:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:102:        .SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:103:        .SetBackgroundColor(UiColor(C_LABEL_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:112:        .SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:113:        .SetBackgroundColor(UiColor(C_LABEL_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:213:      .SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:214:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:225:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:231:                            .SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:89:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:98:      MakeButton("White",     [this] { OnColor(UiColor(1.f, 1.f, 1.f, 1.f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:99:      MakeButton("Red",       [this] { OnColor(UiColor(1.f, 0.f, 0.f, 1.f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:100:      MakeButton("Blue",      [this] { OnColor(UiColor(0.f, 0.f, 1.f, 1.f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:101:      MakeButton("50%\nAlpha",[this] { OnColor(UiColor(1.f, 1.f, 1.f, 0.5f)); }),
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:169:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:170:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:180:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:184:                            .SetFontSize(11.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:88:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:145:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:146:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:157:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:161:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:75:              .SetBackgroundColor(UiColor(C_IMG_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:87:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:123:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:124:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:134:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:138:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:85:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:91:                          .SetBackgroundColor(UiColor(C_FRAME_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:152:      .SetFontSize(11.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:153:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:163:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:167:                            .SetFontSize(11.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:105:              .SetBackgroundColor(UiColor(C_IMG_BG));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:115:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:191:      .SetFontSize(11.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:192:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:203:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:207:                            .SetFontSize(11.0f).SetTextColor(UiColor(C_BTN_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:83:                            .SetBackgroundColor(UiColor(C_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:134:      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:135:      .SetBackgroundColor(UiColor(C_STATUS_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:146:                        .SetBackgroundColor(UiColor(C_BTN_BG))
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:150:                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+
+exec
+/bin/bash -lc 'rg "namespace Color|BLACK|WHITE|RED|GREEN|BLUE" -n repos/dali-core/dali/public-api | head -80' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-core/dali/public-api/render-tasks/render-task.h:135:      RENDERED_SCALE_FACTOR,
+repos/dali-core/dali/public-api/render-tasks/render-task.h:204:  static const Vector4  DEFAULT_CLEAR_COLOR;   ///< Color::BLACK
+repos/dali-core/dali/public-api/rendering/sampling.h:119:  MIRRORED_REPEAT ///< Mirrored repeat @SINCE_1_0.0
+repos/dali-core/dali/public-api/rendering/renderer.h:432:      MIX_COLOR_RED,
+repos/dali-core/dali/public-api/rendering/renderer.h:439:      MIX_COLOR_GREEN,
+repos/dali-core/dali/public-api/rendering/renderer.h:446:      MIX_COLOR_BLUE,
+repos/dali-core/dali/public-api/actors/actor.h:181: *         CONSUMED = HOVERED-SIGNAL( HOVER-EVENT )
+repos/dali-core/dali/public-api/actors/actor.h:459:      COLOR_RED,
+repos/dali-core/dali/public-api/actors/actor.h:466:      COLOR_GREEN,
+repos/dali-core/dali/public-api/actors/actor.h:473:      COLOR_BLUE,
+repos/dali-core/dali/public-api/actors/actor.h:516:      LEAVE_REQUIRED,
+repos/dali-core/dali/public-api/common/dali-vector-base.h:71:  constexpr static uint32_t SHRINK_REQUIRED_RATIO = 4; ///< The ratio of auto shrink to fit calling. @SINCE_2_3.22
+repos/dali-core/dali/public-api/common/dali-vector.h:661:    if(DALI_UNLIKELY(VectorBase::Count() * VectorBase::SHRINK_REQUIRED_RATIO < VectorBase::Capacity()))
+repos/dali-core/dali/public-api/common/constants.h:92:namespace Color
+repos/dali-core/dali/public-api/common/constants.h:96:static constexpr Vector4 ALICE_BLUE(240.0f / 255.0f, 248.0f / 255.0f, 1.0f, 1.0f);                         //#F0F8FF
+repos/dali-core/dali/public-api/common/constants.h:97:static constexpr Vector4 ANTIQUE_WHITE(250.0f / 255.0f, 235.0f / 255.0f, 215.0f / 255.0f, 1.0f);           //#FAEBD7
+repos/dali-core/dali/public-api/common/constants.h:103:static constexpr Vector4 BLACK(0.0f, 0.0f, 0.0f, 1.0f);                                                    //#000000
+repos/dali-core/dali/public-api/common/constants.h:105:static constexpr Vector4 BLUE(0.0f, 0.0f, 1.0f, 1.0f);                                                     //#0000FF
+repos/dali-core/dali/public-api/common/constants.h:106:static constexpr Vector4 BLUE_VIOLET(138.0f / 255.0f, 43.0f / 255.0f, 226.0f / 255.0f, 1.0f);              //#8A2BE2
+repos/dali-core/dali/public-api/common/constants.h:109:static constexpr Vector4 CADET_BLUE(95.0f / 255.0f, 158.0f / 255.0f, 160.0f / 255.0f, 1.0f);               //#5F9EA0
+repos/dali-core/dali/public-api/common/constants.h:113:static constexpr Vector4 CORNFLOWER_BLUE(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f);         //#6495ED
+repos/dali-core/dali/public-api/common/constants.h:117:static constexpr Vector4 DARK_BLUE(0.0f, 0.0f, 139.0f / 255.0f, 1.0f);                                     //#00008B
+repos/dali-core/dali/public-api/common/constants.h:121:static constexpr Vector4 DARK_GREEN(0.0f, 100.0f / 255.0f, 0.0f, 1.0f);                                    //#006400
+repos/dali-core/dali/public-api/common/constants.h:125:static constexpr Vector4 DARK_OLIVE_GREEN(85.0f / 255.0f, 107.0f / 255.0f, 47.0f / 255.0f, 1.0f);          //#556B2F
+repos/dali-core/dali/public-api/common/constants.h:128:static constexpr Vector4 DARK_RED(139.0f / 255.0f, 0.0f, 0.0f, 1.0f);                                      //#8B0000
+repos/dali-core/dali/public-api/common/constants.h:130:static constexpr Vector4 DARK_SEA_GREEN(143.0f / 255.0f, 188.0f / 255.0f, 143.0f / 255.0f, 1.0f);          //#8FBC8F
+repos/dali-core/dali/public-api/common/constants.h:131:static constexpr Vector4 DARK_SLATE_BLUE(72.0f / 255.0f, 61.0f / 255.0f, 139.0f / 255.0f, 1.0f);           //#483D8B
+repos/dali-core/dali/public-api/common/constants.h:137:static constexpr Vector4 DEEP_SKY_BLUE(0.0f, 191.0f / 255.0f, 1.0f, 1.0f);                                 //#00BFFF
+repos/dali-core/dali/public-api/common/constants.h:140:static constexpr Vector4 DODGER_BLUE(30.0f / 255.0f, 144.0f / 255.0f, 1.0f, 1.0f);                         //#1E90FF
+repos/dali-core/dali/public-api/common/constants.h:142:static constexpr Vector4 FLORAL_WHITE(1.0f, 250.0f / 255.0f, 240.0f / 255.0f, 1.0f);                       //#FFFAF0
+repos/dali-core/dali/public-api/common/constants.h:143:static constexpr Vector4 FOREST_GREEN(34.0f / 255.0f, 139.0f / 255.0f, 34.0f / 255.0f, 1.0f);              //#228B22
+repos/dali-core/dali/public-api/common/constants.h:146:static constexpr Vector4 GHOST_WHITE(248.0f / 255.0f, 248.0f / 255.0f, 1.0f, 1.0f);                        //#F8F8FF
+repos/dali-core/dali/public-api/common/constants.h:150:static constexpr Vector4 GREEN(0.0f, 1.0f, 0.0f, 1.0f);                                                    //#00FF00
+repos/dali-core/dali/public-api/common/constants.h:151:static constexpr Vector4 GREEN_YELLOW(173.0f / 255.0f, 1.0f, 47.0f / 255.0f, 1.0f);                        //#ADFF2F
+repos/dali-core/dali/public-api/common/constants.h:155:static constexpr Vector4 INDIANRED(205.0f / 255.0f, 92.0f / 255.0f, 92.0f / 255.0f, 1.0f);                 //#CD5C5C
+repos/dali-core/dali/public-api/common/constants.h:161:static constexpr Vector4 LAWN_GREEN(124.0f / 255.0f, 252.0f / 255.0f, 0.0f, 1.0f);                         //#7CFC00
+repos/dali-core/dali/public-api/common/constants.h:163:static constexpr Vector4 LIGHT_BLUE(173.0f / 255.0f, 216.0f / 255.0f, 230.0f / 255.0f, 1.0f);              //#ADD8E6
+repos/dali-core/dali/public-api/common/constants.h:168:static constexpr Vector4 LIGHT_GREEN(144.0f / 255.0f, 238.0f / 255.0f, 144.0f / 255.0f, 1.0f);             //#90EE90
+repos/dali-core/dali/public-api/common/constants.h:172:static constexpr Vector4 LIGHT_SEA_GREEN(32.0f / 255.0f, 178.0f / 255.0f, 170.0f / 255.0f, 1.0f);          //#20B2AA
+repos/dali-core/dali/public-api/common/constants.h:173:static constexpr Vector4 LIGHT_SKY_BLUE(135.0f / 255.0f, 206.0f / 255.0f, 250.0f / 255.0f, 1.0f);          //#87CEFA
+repos/dali-core/dali/public-api/common/constants.h:176:static constexpr Vector4 LIGHT_STEEL_BLUE(176.0f / 255.0f, 196.0f / 255.0f, 222.0f / 255.0f, 1.0f);        //#B0C4DE
+repos/dali-core/dali/public-api/common/constants.h:179:static constexpr Vector4 LIME_GREEN(50.0f / 255.0f, 205.0f / 255.0f, 50.0f / 255.0f, 1.0f);                //#32CD32
+repos/dali-core/dali/public-api/common/constants.h:184:static constexpr Vector4 MEDIUM_BLUE(0.0f, 0.0f, 205.0f / 255.0f, 1.0f);                                   //#0000CD
+repos/dali-core/dali/public-api/common/constants.h:187:static constexpr Vector4 MEDIUM_SEA_GREEN(60.0f / 255.0f, 179.0f / 255.0f, 113.0f / 255.0f, 1.0f);         //#3CB371
+repos/dali-core/dali/public-api/common/constants.h:188:static constexpr Vector4 MEDIUM_SLATE_BLUE(123.0f / 255.0f, 104.0f / 255.0f, 238.0f / 255.0f, 1.0f);       //#7B68EE
+repos/dali-core/dali/public-api/common/constants.h:189:static constexpr Vector4 MEDIUM_SPRING_GREEN(0.0f, 250.0f / 255.0f, 154.0f / 255.0f, 1.0f);                //#00FA9A
+repos/dali-core/dali/public-api/common/constants.h:191:static constexpr Vector4 MEDIUM_VIOLETRED(199.0f / 255.0f, 21.0f / 255.0f, 133.0f / 255.0f, 1.0f);         //#C71585
+repos/dali-core/dali/public-api/common/constants.h:192:static constexpr Vector4 MIDNIGHT_BLUE(25.0f / 255.0f, 25.0f / 255.0f, 112.0f / 255.0f, 1.0f);             //#191970
+repos/dali-core/dali/public-api/common/constants.h:196:static constexpr Vector4 NAVAJO_WHITE(1.0f, 222.0f / 255.0f, 173.0f / 255.0f, 1.0f);                       //#FFDEAD
+repos/dali-core/dali/public-api/common/constants.h:202:static constexpr Vector4 ORANGE_RED(1.0f, 69.0f / 255.0f, 0.0f, 1.0f);                                     //#FF4500
+repos/dali-core/dali/public-api/common/constants.h:205:static constexpr Vector4 PALE_GREEN(152.0f / 255.0f, 251.0f / 255.0f, 152.0f / 255.0f, 1.0f);              //#98FB98
+repos/dali-core/dali/public-api/common/constants.h:207:static constexpr Vector4 PALE_VIOLET_RED(219.0f / 255.0f, 112.0f / 255.0f, 147.0f / 255.0f, 1.0f);         //#DB7093
+repos/dali-core/dali/public-api/common/constants.h:213:static constexpr Vector4 POWDER_BLUE(176.0f / 255.0f, 224.0f / 255.0f, 230.0f / 255.0f, 1.0f);             //#B0E0E6
+repos/dali-core/dali/public-api/common/constants.h:215:static constexpr Vector4 RED(1.0f, 0.0f, 0.0f, 1.0f);                                                      //#FF0000
+repos/dali-core/dali/public-api/common/constants.h:217:static constexpr Vector4 ROYAL_BLUE(65.0f / 255.0f, 105.0f / 255.0f, 225.0f / 255.0f, 1.0f);               //#4169E1
+repos/dali-core/dali/public-api/common/constants.h:221:static constexpr Vector4 SEA_GREEN(46.0f / 255.0f, 139.0f / 255.0f, 87.0f / 255.0f, 1.0f);                 //#2E8B57
+repos/dali-core/dali/public-api/common/constants.h:225:static constexpr Vector4 SKY_BLUE(135.0f / 255.0f, 206.0f / 255.0f, 235.0f / 255.0f, 1.0f);                //#87CEEB
+repos/dali-core/dali/public-api/common/constants.h:226:static constexpr Vector4 SLATE_BLUE(106.0f / 255.0f, 90.0f / 255.0f, 205.0f / 255.0f, 1.0f);               //#6A5ACD
+repos/dali-core/dali/public-api/common/constants.h:230:static constexpr Vector4 SPRING_GREEN(0.0f, 1.0f, 127.0f / 255.0f, 1.0f);                                  //#00FF7F
+repos/dali-core/dali/public-api/common/constants.h:231:static constexpr Vector4 STEEL_BLUE(70.0f / 255.0f, 130.0f / 255.0f, 180.0f / 255.0f, 1.0f);               //#4682B4
+repos/dali-core/dali/public-api/common/constants.h:240:static constexpr Vector4 WHITE(1.0f, 1.0f, 1.0f, 1.0f);                                                    //#FFFFFF
+repos/dali-core/dali/public-api/common/constants.h:241:static constexpr Vector4 WHITE_SMOKE(245.0f / 255.0f, 245.0f / 255.0f, 245.0f / 255.0f, 1.0f);             //#F5F5F5
+repos/dali-core/dali/public-api/common/constants.h:243:static constexpr Vector4 YELLOW_GREEN(154.0f / 255.0f, 205.0f / 255.0f, 50.0f / 255.0f, 1.0f);             //#9ACD32
+repos/dali-core/dali/public-api/common/constants.h:245:} // namespace Color
+repos/dali-core/dali/public-api/common/constants.h:270:static constexpr Vector4 DEFAULT_BACKGROUND_COLOR = Color::BLACK;
+repos/dali-core/dali/public-api/events/hover-event.h:146:   * If you set Actor::Property::LEAVE_REQUIRED to true, when the hover event enters the actor, it will receive STARTED state.
+
+exec
+/bin/bash -lc 'rg "#define MATCH_PARENT|constexpr.*MATCH_PARENT|WRAP_CONTENT" -n repos/dali-ui/dali-ui-foundation/public-api | head -80' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:658:    // InvalidateMeasure (not InvalidateArrange): a WRAP_CONTENT parent's
+repos/dali-ui/dali-ui-foundation/public-api/view.h:479:   * WRAP_CONTENT (-1): sizes to content (default).
+repos/dali-ui/dali-ui-foundation/public-api/view.h:497:   * WRAP_CONTENT (-1): sizes to content (default).
+repos/dali-ui/dali-ui-foundation/public-api/view.h:603:   * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1665:       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1672:       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:842:   * @param[in] widthConstraint  Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT.
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:843:   * @param[in] heightConstraint Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT.
+repos/dali-ui/dali-ui-foundation/public-api/label.h:696:   * When width or height is WRAP_CONTENT, measurement is performed using the
+repos/dali-ui/dali-ui-foundation/public-api/label.h:714:   * When width or height is WRAP_CONTENT, measurement uses the maximum fit
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:83:  * WRAP_CONTENT (-1): sizes to content (default). \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:93:  * WRAP_CONTENT (-1): sizes to content (default). \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:143:  * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:255:  * When width or height is WRAP_CONTENT, measurement is performed using the \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:272:  * When width or height is WRAP_CONTENT, measurement uses the maximum fit \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout.h:49: *   WRAP_CONTENT (-1) uses the child's natural size.
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout.h:52: *   WRAP_CONTENT (-1) uses the child's natural size.
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:65:constexpr float WRAP_CONTENT = -1.0f;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:73:constexpr float MATCH_PARENT = -2.0f;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:84: * WRAP_CONTENT and explicit RequestedWidth/Height work as usual), but its position is
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout-params.h:133:   * @param[in] basis The flex basis value (use WRAP_CONTENT for auto)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-controller.cpp:300:   * - WRAP_CONTENT / MATCH_PARENT: RequestedWidth/Height < 0 → fall through
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.h:50: *   WRAP_CONTENT (-1) uses the child's natural size.
+
+codex
+---
+title: Adaptor Framework
+sidebar_label: Adaptor Framework
+category: application-framework
+---
+
+# Adaptor Framework
+
+The adaptor framework starts a DALi process, owns the application main loop, and delivers lifecycle and system events while your dali-ui content is built from `Dali::Ui::View`.
+
+## Table of Contents
+
+- [Starting a dali-ui Application](#starting-a-dali-ui-application)
+- [Building the Initial View Tree](#building-the-initial-view-tree)
+- [Handling Lifecycle Changes](#handling-lifecycle-changes)
+- [Reacting to Device Status](#reacting-to-device-status)
+- [Advanced Adaptor Ownership](#advanced-adaptor-ownership)
+
+## Starting a dali-ui Application
+
+Use `Dali::Application` as the normal entry point for a dali-ui app. Create it with `Dali::Application::New`, connect setup work to `InitSignal`, then enter `MainLoop`.
+
+Create DALi and dali-ui objects after `InitSignal` is emitted. At that point, `GetWindow` returns the main `Dali::Window` that can host your root `Dali::Ui::View`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+void OnInit(Application application)
+{
+  Window window = application.GetWindow();
+
+  View root = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT)
+    .SetBackgroundColor(UiColor(0.08f, 0.10f, 0.12f, 1.0f));
+
+  window.Add(root);
+}
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  application.InitSignal().Connect(&OnInit);
+  application.MainLoop();
+  return 0;
+}
+```
+
+`Dali::Application::New` accepts `argc` and `argv` by pointer because the adaptor may consume DALi command-line options before your application continues. `MainLoop` starts event processing and returns when the application exits.
+
+## Building the Initial View Tree
+
+In dali-ui applications, treat `Dali::Ui::View` as the app-facing object model. The adaptor provides the window and lifecycle; your UI content should be expressed as a `View` tree with typed setters and fluent chaining.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateContent()
+{
+  View header = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(72.0f)
+    .SetBackgroundColor(UiColor(0.12f, 0.22f, 0.35f, 1.0f));
+
+  View body = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT)
+    .SetBackgroundColor(UiColor(0.96f, 0.96f, 0.94f, 1.0f));
+
+  View root = View::New()
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT);
+
+  root.Add(header);
+  root.Add(body);
+
+  return root;
+}
+
+void OnInit(Application application)
+{
+  application.GetWindow().Add(CreateContent());
+}
+```
+
+`View::New` creates initialized view handles. `SetRequestedWidth`, `SetRequestedHeight`, and `SetBackgroundColor` are typed `View` setters, so the example avoids raw property writes. `Window::Add` attaches the root view to the main window; subsequent composition should happen through `View::Add` on parent views.
+
+## Handling Lifecycle Changes
+
+`Dali::Application` exposes lifecycle signals for app code that needs to pause work, resume work, or release resources. `PauseSignal`, `ResumeSignal`, `TerminateSignal`, `ResetSignal`, `LanguageChangedSignal`, and `RegionChangedSignal` use callbacks that receive a `Dali::Application`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+
+void OnPause(Application application)
+{
+  // Pause app-owned work that should not run in the background.
+}
+
+void OnResume(Application application)
+{
+  // Resume app-owned work and refresh state if needed.
+}
+
+void OnTerminate(Application application)
+{
+  // Release app-owned resources before shutdown.
+}
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+
+  application.PauseSignal().Connect(&OnPause);
+  application.ResumeSignal().Connect(&OnResume);
+  application.TerminateSignal().Connect(&OnTerminate);
+
+  application.MainLoop();
+  return 0;
+}
+```
+
+For application-wide locale updates, use `GetLanguage` and `GetRegion` from the signal callback when rebuilding text or locale-sensitive content.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+
+void OnLanguageChanged(Application application)
+{
+  Dali::String language = application.GetLanguage();
+  Dali::String region = application.GetRegion();
+
+  // Rebuild or refresh app text using language and region.
+}
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  application.LanguageChangedSignal().Connect(&OnLanguageChanged);
+  application.RegionChangedSignal().Connect(&OnLanguageChanged);
+  application.MainLoop();
+  return 0;
+}
+```
+
+## Reacting to Device Status
+
+The adaptor framework also reports device-level status through `LowBatterySignal`, `LowMemorySignal`, and `DeviceOrientationChangedSignal`.
+
+Use `Dali::DeviceStatus::Battery::Status`, `Dali::DeviceStatus::Memory::Status`, and `Dali::DeviceStatus::Orientation::Status` to branch on the delivered value.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+
+void OnLowMemory(DeviceStatus::Memory::Status status)
+{
+  if(status == DeviceStatus::Memory::CRITICALLY_LOW)
+  {
+    // Drop optional cached data or defer expensive app work.
+  }
+}
+
+void OnLowBattery(DeviceStatus::Battery::Status status)
+{
+  if(status == DeviceStatus::Battery::POWER_OFF)
+  {
+    // Save critical app state immediately.
+  }
+}
+
+void OnDeviceOrientationChanged(DeviceStatus::Orientation::Status status)
+{
+  if(status == DeviceStatus::Orientation::ORIENTATION_90 ||
+     status == DeviceStatus::Orientation::ORIENTATION_270)
+  {
+    // Update app layout state for a landscape device orientation.
+  }
+}
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+
+  application.LowMemorySignal().Connect(&OnLowMemory);
+  application.LowBatterySignal().Connect(&OnLowBattery);
+  application.DeviceOrientationChangedSignal().Connect(&OnDeviceOrientationChanged);
+
+  application.MainLoop();
+  return 0;
+}
+```
+
+These callbacks are useful for app-owned resources and policy decisions. Keep the visible UI represented as `Dali::Ui::View` objects, and perform view updates through `View` APIs.
+
+## Advanced Adaptor Ownership
+
+Most dali-ui applications should use `Dali::Application`. `Dali::Adaptor` is the lower-level integration object for environments that provide their own platform main loop and window ownership.
+
+With `Dali::Adaptor`, you create or receive a `Dali::Window`, create the adaptor with `Dali::Adaptor::New`, call `Start`, and then run your own platform loop. Once the adaptor is started, app code can attach a `Dali::Ui::View` tree to the window.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+void CreateUi(Window window)
+{
+  window.Add(
+    View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetBackgroundColor(UiColor(0.18f, 0.18f, 0.20f, 1.0f)));
+}
+
+void StartWithExternalLoop(Window window)
+{
+  Adaptor& adaptor = Adaptor::New(window);
+  adaptor.Start();
+
+  CreateUi(window);
+
+  // Run the platform event loop owned by the embedding environment.
+}
+```
+
+Use this model only when your application already owns the platform loop. For normal dali-ui apps, `Dali::Application` remains the simpler and preferred application-facing entry point.
+tokens used
+128,647

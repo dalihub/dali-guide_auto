@@ -1,0 +1,2559 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20c2-d068-7570-92c8-fd1b5fd2dd27
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Image (image)
+- Category: images-visuals
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-adaptor": 3,
+    "dali-core": 2,
+    "dali-ui": 9
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::LottieAnimation::DynamicPropertyInfo | scope=primary
+- Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback | scope=primary_member
+- Dali::Ui::LottieAnimation::DynamicPropertyInfo::id | scope=primary_member
+- Dali::Ui::LottieAnimation::DynamicPropertyInfo::keyPath | scope=primary_member
+- Dali::Ui::LottieAnimation::DynamicPropertyInfo::property | scope=primary_member
+- Dali::Accessibility::Application | scope=context_lookup
+- Dali::Application | scope=context_lookup
+- Dali::Application::Application | Application(Application &&rhs) noexcept | scope=context_lookup
+- Dali::ConnectionTracker | scope=context_lookup
+- Dali::ConnectionTracker::ConnectionTracker | ConnectionTracker() | scope=context_lookup
+- Dali::Ui::AnimatedImageView | scope=context_lookup
+- Dali::Ui::AnimatedImageView::AnimatedImageView | AnimatedImageView(AnimatedImageView &&rhs) noexcept | scope=context_lookup
+- Dali::Ui::StackLayoutParams | scope=context_lookup
+- Dali::Ui::StackLayoutParams::StackLayoutParams | StackLayoutParams(const StackLayoutParams &handle) | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "image_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/image-view/animated-image-view-example.cpp:18 (sample, score=0.75)
+```cpp
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali/integration-api/debug.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AnimatedImageView sample.
+ *
+ * Demonstrates:
+ *   - Play / Pause / Stop / JumpToFrame
+ *   - Change Image  (cycles through WebP, GIF×2, URL array)
+ *   - LoopCount  (infinite / 3 / 1)
+ *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)
+ *   - StopBehavior  (CURRENT / FIRST / LAST)
+ *   - SetFrameDelay  (200ms / 500ms / 1000ms / 2000ms)
+ *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
+ *   - AnimationFinishedSignal
+ *
+ * Image sources:
+ *   0. dog-anim.webp          (animated WebP)
+ *   1. dali-logo-anim.gif     (animated GIF)
+ *   2. animatedLoading.gif    (animated GIF)
+```
+
+- repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:53 (sample, score=0.75)
+```cpp
+* - One image at a time; CHANGE cycles through images for the current type
+ * - PLAY / STOP for animated types
+ * - SYNC LOADING toggle
+ * - FAST TRACK UPLOADING toggle (not applicable to Lottie)
+ * - RELEASE POLICY: DETACHED / DESTROYED / NEVER with HIDE 1s test
+ * - LOAD POLICY: ATTACHED / IMMEDIATE with TEST (loads before scene add)
+ * - Press Escape or Back to quit
+ */
+class ImageLoadingPolicyController : public ConnectionTracker
+{
+  enum class ViewType { IMAGE = 0, ANIMATED, LOTTIE, COUNT };
+  static constexpr int TYPE_COUNT = static_cast<int>(ViewType::COUNT);
+
+  struct ReleasePolicyEntry
+  {
+    const char*              label;
+    Ui::Image::ReleasePolicy policy;
+  };
+  static const ReleasePolicyEntry RELEASE_POLICIES[3];
+
+public:
+  explicit ImageLoadingPolicyController(Application& application)
+  : mApplication(application),
+    mViewType(ViewType::IMAGE),
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams",
+      "callback"
+    ],
+    "path": "repos/dali-ui/samples/image-view/animated-image-view-example.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 97,
+    "snippet_start_line": 18
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams",
+      "callback"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-loading-policy-example.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 132,
+    "snippet_start_line": 53
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams",
+      "property"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-pixel-area-example.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 112,
+    "snippet_start_line": 33
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 98,
+    "snippet_start_line": 19
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-color-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 99,
+    "snippet_start_line": 20
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 126,
+    "snippet_start_line": 47
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-placeholder-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 99,
+    "snippet_start_line": 20
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AnimatedImageView",
+      "Application",
+      "ConnectionTracker",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 101,
+    "snippet_start_line": 22
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "rg --files | rg 'animated-image-view|lottie|connection-tracker|stack-layout-params|image-loading-policy'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+docs/generated/animated-image-view.md
+docs/generated/evaluations/animated-image-view_evaluation.md
+
+exec
+/bin/bash -lc 'rg -n "struct DynamicPropertyInfo|class LottieAnimation|DynamicPropertyInfo|AnimatedImageView|AnimationFinishedSignal|class ConnectionTracker" repos/dali-ui dali-ui-foundation 2>/dev/null' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.md:1:# AnimatedImageView: ImageColor / PixelArea / FittingMode
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:73: * @brief Verifies AnimatedImageView image source API:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:91:class TcAnimatedImageViewSource : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:96:    return "AnimatedImageView: SetResourceUrl / SetResourceUrls";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:106:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:219:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:224:REGISTER_MANUAL_TEST(TcAnimatedImageViewSource)
+repos/dali-ui/wiki/Components.md:24:[AnimatedImageView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1AnimatedImageView.html) | A `View` for displaying animated image resources such as GIF files. | -
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:40: * @brief Verifies AnimatedImageView visual properties:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:61:class TcAnimatedImageViewVisual : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:66:    return "AnimatedImageView: ImageColor / PixelArea / FittingMode";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:76:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:206:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:212:REGISTER_MANUAL_TEST(TcAnimatedImageViewVisual)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:40: * @brief Verifies AnimatedImageView load/release policy:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:62:class TcAnimatedImageViewLoadPolicy : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:67:    return "AnimatedImageView: LoadPolicy / ReleasePolicy / SyncLoading";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:77:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:218:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:223:REGISTER_MANUAL_TEST(TcAnimatedImageViewLoadPolicy)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.md:1:# AnimatedImageView: Play / Pause / Stop / JumpToFrame
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.md:3:Play, Pause, Stop, JumpToFrame 제어와 GetPlayState, GetCurrentFrame, GetTotalFrame, AnimationFinishedSignal 동작을 확인한다.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.md:28:2. **기대 결과**: State: STOPPED, AnimationFinishedSignal 카운트 증가
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.md:33:- AnimationFinishedSignal이 Stop 시 발생해야 한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:51: * @brief Verifies AnimatedImageView basic playback control:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:54: *   AnimationFinishedSignal
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:61: *   5. [Stop]   -> State: STOPPED, AnimationFinishedSignal counter increments
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:65: *   AnimationFinishedSignal is fired on Stop.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:67:class TcAnimatedImageViewPlayControl : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:72:    return "AnimatedImageView: Play / Pause / Stop / JumpToFrame";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:77:    return "Verify Play/Pause/Stop/JumpToFrame behaviour and AnimationFinishedSignal firing";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:84:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:88:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:91:        Dali::String("AnimationFinishedSignal: ") +
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:96:    mFinishedLabel = MakeStatusLabel("AnimationFinishedSignal: 0");
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:99:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewPlayControl::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:193:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:200:REGISTER_MANUAL_TEST(TcAnimatedImageViewPlayControl)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:54: *   AnimationFinishedSignal / ResourceReadySignal
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:61: *   5. [Stop]    -> State: STOPPED, AnimationFinishedSignal counter increments
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:66: *   AnimationFinishedSignal fires on Stop.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:78:    return "Verify Play/Pause/Stop/JumpToFrame behaviour and AnimationFinishedSignal/ResourceReadySignal firing";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:90:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.md:1:# AnimatedImageView: FrameSpeedFactor / FrameDelay
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.md:1:# AnimatedImageView: LoopCount / StopBehavior
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.md:3:SetLoopCount / GetLoopCount, SetStopBehavior / GetStopBehavior, AnimationFinishedSignal 동작을 확인한다.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.md:17:3. **기대 결과**: 2루프 후 자동 정지, AnimationFinishedSignal 카운트 = 1
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.md:33:- LoopCount=2: 정확히 2루프 후 AnimationFinishedSignal이 발생해야 한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:51: * @brief Verifies AnimatedImageView buffer parameters:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:69:class TcAnimatedImageViewBuffer : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:74:    return "AnimatedImageView: BatchSize / CacheSize";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:84:    mView = AnimatedImageView::New()
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:91:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewBuffer::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:222:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:227:REGISTER_MANUAL_TEST(TcAnimatedImageViewBuffer)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.md:1:# AnimatedImageView: BatchSize / CacheSize
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.md:3:Play, Pause, Stop, JumpToFrame 제어와 GetPlayState, GetCurrentFrame, GetTotalFrame, AnimationFinishedSignal, ResourceReadySignal 동작을 확인한다.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.md:28:2. **기대 결과**: State: STOPPED, AnimationFinishedSignal 카운트 증가
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.md:38:- AnimationFinishedSignal이 Stop 시 발생해야 한다
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:42: * @brief Verifies AnimatedImageView alpha masking:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:62:class TcAnimatedImageViewMask : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:67:    return "AnimatedImageView: AlphaMask / CropToMask / MaskingMode";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:77:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:183:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:188:REGISTER_MANUAL_TEST(TcAnimatedImageViewMask)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:65: *   AnimationFinishedSignal (fired when a loop ends)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:69: *   1. [Loop: 2] -> [Play] -> auto-stops after 2 loops; AnimationFinishedSignal counter=1 confirmed
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:80: *   LoopCount=2: AnimationFinishedSignal fires after exactly 2 loops.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:93:    return "Verify limited LoopCount + AnimationFinishedSignal; AUTO_REVERSE ping-pong; StopBehavior frame position";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:104:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.md:1:# AnimatedImageView: LoadPolicy / ReleasePolicy / SyncLoading
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:52: * @brief Verifies AnimatedImageView loop control:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:55: *   AnimationFinishedSignal (fired when a loop ends)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:60: *   2. AnimationFinishedSignal counter = 1 confirmed
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:68: *   LoopCount=2: AnimationFinishedSignal fires after exactly 2 loops.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:71:class TcAnimatedImageViewLoop : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:76:    return "AnimatedImageView: LoopCount / StopBehavior";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:81:    return "Verify AnimationFinishedSignal fires after limited LoopCount; confirm StopBehavior frame position";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:88:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:92:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:100:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewLoop::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:223:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:229:REGISTER_MANUAL_TEST(TcAnimatedImageViewLoop)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:58: * @brief Verifies AnimatedImageView miscellaneous APIs not covered by other TCs:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:87:class TcAnimatedImageViewMisc : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:92:    return "AnimatedImageView: DepthIndex / PreMult / DesiredSize / Placeholder / Sampling";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:102:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:229:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:235:REGISTER_MANUAL_TEST(TcAnimatedImageViewMisc)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.md:1:# AnimatedImageView: SetResourceUrl / SetResourceUrls
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.md:1:# AnimatedImageView: Misc APIs
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.md:1:# AnimatedImageView: AlphaMask / CropToMask / MaskingMode
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:40: * @brief Verifies AnimatedImageView speed control:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:59:class TcAnimatedImageViewSpeed : public ManualTest::TestCase, public ConnectionTracker
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:64:    return "AnimatedImageView: FrameSpeedFactor / FrameDelay";
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:74:    mView = AnimatedImageView::New(ANIM_WEBP)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:81:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewSpeed::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:195:  AnimatedImageView mView;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:200:REGISTER_MANUAL_TEST(TcAnimatedImageViewSpeed)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-dynamic-property.cpp:125:    Ui::LottieAnimation::DynamicPropertyInfo info;
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.md:3:SetLoopCount / GetLoopCount, SetLoopingMode / GetLoopingMode, SetStopBehavior / GetStopBehavior, AnimationFinishedSignal 동작을 확인한다.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.md:18:3. **기대 결과**: 2루프 후 자동 정지, AnimationFinishedSignal 카운트 = 1
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.md:40:- LoopCount=2: 정확히 2루프 후 AnimationFinishedSignal이 발생해야 한다
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.h:531:   * Ownership of DynamicPropertyInfo::callback is transferred to the visual.
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.h:536:  LottieAnimationVisual& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.cpp:393:LottieAnimationVisual& LottieAnimationVisual::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.cpp:397:  Ui::DevelAnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:40:class LottieAnimationViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:273:  void SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info);
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:361:   * @copydoc Dali::Ui::LottieAnimationView::AnimationFinishedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:363:  Dali::Signal<void(Dali::Ui::View)>& AnimationFinishedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:453:  Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.autogen.h:169:  * Ownership of DynamicPropertyInfo::callback is transferred to the visual. \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.autogen.h:174:  ChildClass& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info) { LottieAnimationVisual::SetDynamicProperty(info); return *this; }
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:38:class AnimatedImageViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:39:using AnimatedImageViewImplPtr = IntrusivePtr<AnimatedImageViewImpl>;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:42: * @brief This is the internal implementation class for AnimatedImageView.
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:44: * @see Dali::Ui::AnimatedImageView
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:46:class DALI_UI_API AnimatedImageViewImpl : public ViewImpl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:50:   * @brief Property indices — aliased from the shared AnimatedImageViewPropertyIndex.
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:53:   * AnimatedImageViewImpl::Property::IMAGE) continues to compile unchanged,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:55:   * through AnimatedImageView::Property.
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:61:      IMAGE                     = Ui::AnimatedImageViewPropertyIndex::IMAGE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:62:      IMAGE_URLS                = Ui::AnimatedImageViewPropertyIndex::IMAGE_URLS,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:63:      LOOP_COUNT                = Ui::AnimatedImageViewPropertyIndex::LOOP_COUNT,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:64:      STOP_BEHAVIOR             = Ui::AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:65:      FRAME_SPEED_FACTOR        = Ui::AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:66:      BATCH_SIZE                = Ui::AnimatedImageViewPropertyIndex::BATCH_SIZE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:67:      CACHE_SIZE                = Ui::AnimatedImageViewPropertyIndex::CACHE_SIZE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:68:      FRAME_DELAY               = Ui::AnimatedImageViewPropertyIndex::FRAME_DELAY,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:69:      IMAGE_COLOR               = Ui::AnimatedImageViewPropertyIndex::IMAGE_COLOR,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:70:      PRE_MULTIPLIED_ALPHA      = Ui::AnimatedImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:71:      FITTING_MODE              = Ui::AnimatedImageViewPropertyIndex::FITTING_MODE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:72:      SAMPLING_MODE             = Ui::AnimatedImageViewPropertyIndex::SAMPLING_MODE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:73:      DESIRED_WIDTH             = Ui::AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:74:      DESIRED_HEIGHT            = Ui::AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:75:      LOAD_POLICY               = Ui::AnimatedImageViewPropertyIndex::LOAD_POLICY,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:76:      RELEASE_POLICY            = Ui::AnimatedImageViewPropertyIndex::RELEASE_POLICY,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:77:      SYNCHRONOUS_LOADING       = Ui::AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:78:      IMAGE_LOAD_WITH_VIEW_SIZE = Ui::AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:79:      ALPHA_MASK_URL            = Ui::AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:80:      CROP_TO_MASK              = Ui::AnimatedImageViewPropertyIndex::CROP_TO_MASK,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:81:      MASKING_MODE              = Ui::AnimatedImageViewPropertyIndex::MASKING_MODE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:82:      PLACEHOLDER_IMAGE         = Ui::AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:83:      PIXEL_AREA                = Ui::AnimatedImageViewPropertyIndex::PIXEL_AREA,
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:89:   * @brief AnimatedImageViewImpl constructor.
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:91:  AnimatedImageViewImpl();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:96:  virtual ~AnimatedImageViewImpl();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:100:   * @brief Creates a new AnimatedImageViewImpl.
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:102:   * @return An intrusive pointer to the newly allocated AnimatedImageViewImpl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:104:  static AnimatedImageViewImplPtr New();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:114:   * @copydoc Dali::Ui::AnimatedImageView::SetResourceUrl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:119:   * @copydoc Dali::Ui::AnimatedImageView::GetResourceUrl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:124:   * @copydoc Dali::Ui::AnimatedImageView::SetResourceUrls
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:129:   * @copydoc Dali::Ui::AnimatedImageView::GetResourceUrls
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:134:   * @copydoc Dali::Ui::AnimatedImageView::Play
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:139:   * @copydoc Dali::Ui::AnimatedImageView::Pause
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:144:   * @copydoc Dali::Ui::AnimatedImageView::Stop
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:149:   * @copydoc Dali::Ui::AnimatedImageView::SetLoopCount
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:154:   * @copydoc Dali::Ui::AnimatedImageView::GetLoopCount
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:159:   * @copydoc Dali::Ui::AnimatedImageView::SetImageColor
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:164:   * @copydoc Dali::Ui::AnimatedImageView::GetImageColor
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:169:   * @copydoc Dali::Ui::AnimatedImageView::SetFittingMode
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:174:   * @copydoc Dali::Ui::AnimatedImageView::GetFittingMode
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:179:   * @copydoc Dali::Ui::AnimatedImageView::SetSamplingMode
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:184:   * @copydoc Dali::Ui::AnimatedImageView::GetSamplingMode
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:189:   * @copydoc Dali::Ui::AnimatedImageView::SetImageLoadWithViewSize
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:194:   * @copydoc Dali::Ui::AnimatedImageView::IsImageLoadWithViewSizeEnabled
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:199:   * @copydoc Dali::Ui::AnimatedImageView::SetAlphaMaskUrl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:204:   * @copydoc Dali::Ui::AnimatedImageView::GetAlphaMaskUrl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:209:   * @copydoc Dali::Ui::AnimatedImageView::SetCropToMask
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:214:   * @copydoc Dali::Ui::AnimatedImageView::IsCropToMask
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:219:   * @copydoc Dali::Ui::AnimatedImageView::SetMaskingMode
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:224:   * @copydoc Dali::Ui::AnimatedImageView::GetMaskingMode
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:229:   * @copydoc Dali::Ui::AnimatedImageView::SetPlaceholderUrl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:234:   * @copydoc Dali::Ui::AnimatedImageView::GetPlaceholderUrl
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:239:   * @copydoc Dali::Ui::AnimatedImageView::JumpToFrame
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:244:   * @copydoc Dali::Ui::AnimatedImageView::SetStopBehavior
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:249:   * @copydoc Dali::Ui::AnimatedImageView::GetStopBehavior
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:254:   * @copydoc Dali::Ui::AnimatedImageView::SetFrameSpeedFactor
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:259:   * @copydoc Dali::Ui::AnimatedImageView::GetFrameSpeedFactor
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:264:   * @copydoc Dali::Ui::AnimatedImageView::SetBatchSize
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:269:   * @copydoc Dali::Ui::AnimatedImageView::GetBatchSize
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:274:   * @copydoc Dali::Ui::AnimatedImageView::SetCacheSize
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:279:   * @copydoc Dali::Ui::AnimatedImageView::GetCacheSize
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:284:   * @copydoc Dali::Ui::AnimatedImageView::SetFrameDelay
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:289:   * @copydoc Dali::Ui::AnimatedImageView::GetFrameDelay
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:294:   * @copydoc Dali::Ui::AnimatedImageView::SetPixelArea
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:299:   * @copydoc Dali::Ui::AnimatedImageView::GetPixelArea
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:304:   * @copydoc Dali::Ui::AnimatedImageView::GetPlayState
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:309:   * @copydoc Dali::Ui::AnimatedImageView::GetCurrentFrame
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:314:   * @copydoc Dali::Ui::AnimatedImageView::GetTotalFrame
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:319:   * @copydoc Dali::Ui::AnimatedImageView::SetDesiredWidth
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:324:   * @copydoc Dali::Ui::AnimatedImageView::GetDesiredWidth
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:329:   * @copydoc Dali::Ui::AnimatedImageView::SetDesiredHeight
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:334:   * @copydoc Dali::Ui::AnimatedImageView::GetDesiredHeight
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:339:   * @copydoc Dali::Ui::AnimatedImageView::SetLoadPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:344:   * @copydoc Dali::Ui::AnimatedImageView::GetLoadPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:349:   * @copydoc Dali::Ui::AnimatedImageView::SetReleasePolicy
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:354:   * @copydoc Dali::Ui::AnimatedImageView::GetReleasePolicy
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:359:   * @copydoc Dali::Ui::AnimatedImageView::SetSynchronousLoading
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:364:   * @copydoc Dali::Ui::AnimatedImageView::IsSynchronousLoading
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:369:   * @copydoc Dali::Ui::AnimatedImageView::SetPreMultipliedAlpha
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:374:   * @copydoc Dali::Ui::AnimatedImageView::IsPreMultipliedAlpha
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:379:   * @copydoc Dali::Ui::AnimatedImageView::SetDepthIndex
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:385:   * @copydoc Dali::Ui::AnimatedImageView::GetLoadingStatus
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:390:   * @copydoc Dali::Ui::AnimatedImageView::AnimationFinishedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:392:  Dali::Signal<void(Dali::Ui::View)>& AnimationFinishedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:424:   * Used to intercept ANIMATION_FINISHED and forward it as AnimationFinishedSignal.
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:437:  AnimatedImageViewImpl(const AnimatedImageViewImpl&)            = delete;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:438:  AnimatedImageViewImpl(AnimatedImageViewImpl&&)                 = delete;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:439:  AnimatedImageViewImpl& operator=(const AnimatedImageViewImpl&) = delete;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:440:  AnimatedImageViewImpl& operator=(AnimatedImageViewImpl&&)      = delete;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:475:  Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:118:  mAnimationFinishedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:768:void LottieAnimationViewImpl::SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info)
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:778:    Ui::DevelAnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:794:Dali::Signal<void(Dali::Ui::View)>& LottieAnimationViewImpl::AnimationFinishedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:796:  return mAnimationFinishedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.cpp:810:    mAnimationFinishedSignal.Emit(handle);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:29: * @brief Property index definitions for AnimatedImageView.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:33: *   - AnimatedImageView::Property  (public-api, for application code)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:34: *   - AnimatedImageViewImpl         (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:36:struct AnimatedImageViewPropertyIndex
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:48:   * @brief Enumeration for the instance of properties belonging to the AnimatedImageView class.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:59:     * @note See also: AnimatedImageView::SetResourceUrl(), AnimatedImageView::GetResourceUrl().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:66:     * @note Setting this overrides IMAGE. See also: AnimatedImageView::SetResourceUrls().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:77:     * @note See also: AnimatedImageView::SetLoopCount(), AnimatedImageView::GetLoopCount().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:84:     * @note See also: AnimatedImageView::SetStopBehavior(), AnimatedImageView::GetStopBehavior().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:91:     * @note See also: AnimatedImageView::SetFrameSpeedFactor(), AnimatedImageView::GetFrameSpeedFactor().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:98:     * @note See also: AnimatedImageView::SetBatchSize(), AnimatedImageView::GetBatchSize().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:105:     * @note See also: AnimatedImageView::SetCacheSize(), AnimatedImageView::GetCacheSize().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:112:     * @note See also: AnimatedImageView::SetFrameDelay(), AnimatedImageView::GetFrameDelay().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:123:     * @note See also: AnimatedImageView::SetImageColor(), AnimatedImageView::GetImageColor().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:130:     * @note See also: AnimatedImageView::SetPreMultipliedAlpha(), AnimatedImageView::IsPreMultipliedAlpha().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:141:     * @note See also: AnimatedImageView::SetFittingMode(), AnimatedImageView::GetFittingMode().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:148:     * @note See also: AnimatedImageView::SetSamplingMode(), AnimatedImageView::GetSamplingMode().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:159:     * @note See also: AnimatedImageView::SetDesiredWidth(), AnimatedImageView::GetDesiredWidth().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:166:     * @note See also: AnimatedImageView::SetDesiredHeight(), AnimatedImageView::GetDesiredHeight().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:173:     * @note See also: AnimatedImageView::SetLoadPolicy(), AnimatedImageView::GetLoadPolicy().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:180:     * @note See also: AnimatedImageView::SetReleasePolicy(), AnimatedImageView::GetReleasePolicy().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:187:     * @note See also: AnimatedImageView::SetSynchronousLoading(), AnimatedImageView::IsSynchronousLoading().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:194:     * @note See also: AnimatedImageView::SetImageLoadWithViewSize(), AnimatedImageView::IsImageLoadWithViewSizeEnabled().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:205:     * @note See also: AnimatedImageView::SetAlphaMaskUrl(), AnimatedImageView::GetAlphaMaskUrl().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:212:     * @note See also: AnimatedImageView::SetCropToMask(), AnimatedImageView::IsCropToMask().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:219:     * @note See also: AnimatedImageView::SetMaskingMode(), AnimatedImageView::GetMaskingMode().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:226:     * @note See also: AnimatedImageView::SetPlaceholderUrl(), AnimatedImageView::GetPlaceholderUrl().
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h:237:     * @note See also: AnimatedImageView::SetPixelArea(), AnimatedImageView::GetPixelArea().
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-LottieAnimationView.cpp:583:// AnimationFinishedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-LottieAnimationView.cpp:585:int UtcDaliLottieAnimationViewAnimationFinishedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-LottieAnimationView.cpp:591:  view.AnimationFinishedSignal();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/CMakeLists.txt:21:        utc-Dali-AnimatedImageView.cpp
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:38:int UtcDaliAnimatedImageViewConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:41:  AnimatedImageView view;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:46:int UtcDaliAnimatedImageViewNewP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:49:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:54:int UtcDaliAnimatedImageViewNewWithUrlP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:57:  AnimatedImageView view = AnimatedImageView::New("test.gif");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:63:int UtcDaliAnimatedImageViewCopyConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:66:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:67:  AnimatedImageView copy(view);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:73:int UtcDaliAnimatedImageViewMoveConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:76:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:77:  AnimatedImageView moved(std::move(view));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:82:int UtcDaliAnimatedImageViewAssignmentOperatorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:85:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:86:  AnimatedImageView copy;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:93:int UtcDaliAnimatedImageViewMoveAssignmentOperatorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:96:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:97:  AnimatedImageView moved;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:105:int UtcDaliAnimatedImageViewDownCastP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:108:  AnimatedImageView view     = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:110:  AnimatedImageView downcast = AnimatedImageView::DownCast(baseView);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:115:int UtcDaliAnimatedImageViewDownCastN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:119:  AnimatedImageView downcast = AnimatedImageView::DownCast(baseView);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:126:int UtcDaliAnimatedImageViewSetGetImageP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:129:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:135:int UtcDaliAnimatedImageViewSetImageNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:138:  AnimatedImageView view = AnimatedImageView::New("animation.gif");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:144:int UtcDaliAnimatedImageViewSetGetResourceUrlsP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:147:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:169:int UtcDaliAnimatedImageViewSetGetLoopCountP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:172:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:183:int UtcDaliAnimatedImageViewSetLoopCountNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:186:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:195:int UtcDaliAnimatedImageViewSetGetImageColorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:198:  AnimatedImageView view  = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:205:int UtcDaliAnimatedImageViewSetImageColorNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:208:  AnimatedImageView view  = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:217:int UtcDaliAnimatedImageViewPlayNoVisualP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:220:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:226:int UtcDaliAnimatedImageViewPauseNoVisualP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:229:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:235:int UtcDaliAnimatedImageViewStopNoVisualP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:238:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:246:int UtcDaliAnimatedImageViewGetLoadingStatusP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:249:  AnimatedImageView view = AnimatedImageView::New("animation.gif");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:260:int UtcDaliAnimatedImageViewSignalsP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:263:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:274:int UtcDaliAnimatedImageViewPropertyImageP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:277:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:288:int UtcDaliAnimatedImageViewChainingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:291:  AnimatedImageView view = AnimatedImageView::New()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:307:int UtcDaliAnimatedImageViewSetGetStopBehaviorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:310:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:327:int UtcDaliAnimatedImageViewSetStopBehaviorNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:330:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:339:int UtcDaliAnimatedImageViewSetGetFrameSpeedFactorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:342:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:359:int UtcDaliAnimatedImageViewSetFrameSpeedFactorNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:362:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:371:int UtcDaliAnimatedImageViewSetGetBatchSizeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:374:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:387:int UtcDaliAnimatedImageViewSetBatchSizeNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:390:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:399:int UtcDaliAnimatedImageViewSetGetCacheSizeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:402:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:415:int UtcDaliAnimatedImageViewSetCacheSizeNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:418:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:427:int UtcDaliAnimatedImageViewSetGetFrameDelayP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:430:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:447:int UtcDaliAnimatedImageViewSetFrameDelayNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:450:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:459:int UtcDaliAnimatedImageViewSetGetDesiredWidthP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:462:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:475:int UtcDaliAnimatedImageViewSetGetDesiredHeightP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:478:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:493:int UtcDaliAnimatedImageViewSetGetReleasePolicyP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:496:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:515:int UtcDaliAnimatedImageViewSetGetSynchronousLoadingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:518:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:533:int UtcDaliAnimatedImageViewSetGetPreMultipliedAlphaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:536:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:551:int UtcDaliAnimatedImageViewJumpToFrameP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:554:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:570:int UtcDaliAnimatedImageViewGetPlayStateP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:573:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:591:int UtcDaliAnimatedImageViewGetCurrentFrameP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:594:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:601:int UtcDaliAnimatedImageViewGetTotalFrameP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:604:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:611:// AnimationFinishedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:613:int UtcDaliAnimatedImageViewAnimationFinishedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:616:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:619:  view.AnimationFinishedSignal();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:626:int UtcDaliAnimatedImageViewPropertyLoopCountP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:629:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:631:  const int index = AnimatedImageView::Property::LOOP_COUNT;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:641:int UtcDaliAnimatedImageViewPropertyStopBehaviorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:644:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:646:  const int index = AnimatedImageView::Property::STOP_BEHAVIOR;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:654:int UtcDaliAnimatedImageViewPropertyFrameSpeedFactorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:657:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:659:  const int index = AnimatedImageView::Property::FRAME_SPEED_FACTOR;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:666:int UtcDaliAnimatedImageViewPropertyBatchSizeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:669:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:671:  const int index = AnimatedImageView::Property::BATCH_SIZE;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:678:int UtcDaliAnimatedImageViewPropertyCacheSizeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:681:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:683:  const int index = AnimatedImageView::Property::CACHE_SIZE;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:690:int UtcDaliAnimatedImageViewPropertyFrameDelayP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:693:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:695:  const int index = AnimatedImageView::Property::FRAME_DELAY;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:705:int UtcDaliAnimatedImageViewPropertyDesiredWidthP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:708:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:710:  const int index = AnimatedImageView::Property::DESIRED_WIDTH;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:717:int UtcDaliAnimatedImageViewPropertyDesiredHeightP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:720:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:722:  const int index = AnimatedImageView::Property::DESIRED_HEIGHT;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:729:int UtcDaliAnimatedImageViewPropertyReleasePolicyP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:732:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:734:  const int index = AnimatedImageView::Property::RELEASE_POLICY;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:742:int UtcDaliAnimatedImageViewPropertySynchronousLoadingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:745:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:747:  const int index = AnimatedImageView::Property::SYNCHRONOUS_LOADING;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:757:int UtcDaliAnimatedImageViewPropertyPreMultipliedAlphaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:760:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:762:  const int index = AnimatedImageView::Property::PRE_MULTIPLIED_ALPHA;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:774:int UtcDaliAnimatedImageViewSetGetPixelAreaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:777:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:785:int UtcDaliAnimatedImageViewPropertyPixelAreaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:788:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:790:  const int index = AnimatedImageView::Property::PIXEL_AREA;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:802:int UtcDaliAnimatedImageViewSetGetAlphaMaskUrlP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:805:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:818:int UtcDaliAnimatedImageViewSetGetCropToMaskP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:821:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:834:int UtcDaliAnimatedImageViewSetGetMaskingModeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:837:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:847:int UtcDaliAnimatedImageViewAlphaMaskNoChangeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-AnimatedImageView.cpp:850:  AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:38:class LottieAnimationViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:87:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:415:   * Ownership of DynamicPropertyInfo::callback is transferred to the visual.
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:420:  LottieAnimationView& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:578:  AnimationFinishedSignalType& AnimationFinishedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.cpp:235:LottieAnimationView& LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.cpp:340:LottieAnimationView::AnimationFinishedSignalType& LottieAnimationView::AnimationFinishedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.cpp:342:  return Ui::GetImpl(*this).AnimationFinishedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:28:inline Integration::AnimatedImageViewImpl& GetImpl(AnimatedImageView& animatedImageView)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:31:  return static_cast<Integration::AnimatedImageViewImpl&>(animatedImageView.GetImplementation());
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:34:inline const Integration::AnimatedImageViewImpl& GetImpl(const AnimatedImageView& animatedImageView)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:37:  return static_cast<const Integration::AnimatedImageViewImpl&>(animatedImageView.GetImplementation());
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:40:AnimatedImageView::AnimatedImageView()                                            = default;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:41:AnimatedImageView::~AnimatedImageView()                                           = default;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:42:AnimatedImageView::AnimatedImageView(const AnimatedImageView& rhs)                = default;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:43:AnimatedImageView::AnimatedImageView(AnimatedImageView&& rhs) noexcept            = default;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:44:AnimatedImageView& AnimatedImageView::operator=(const AnimatedImageView& rhs)     = default;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:45:AnimatedImageView& AnimatedImageView::operator=(AnimatedImageView&& rhs) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:46:AnimatedImageView  AnimatedImageView::New(const Dali::String& url)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:48:  Integration::AnimatedImageViewImplPtr impl = Integration::AnimatedImageViewImpl::New();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:49:  AnimatedImageView                     view(*impl);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:60:AnimatedImageView AnimatedImageView::DownCast(BaseHandle handle)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:62:  return Ui::View::DownCast<AnimatedImageView, Ui::Integration::AnimatedImageViewImpl>(handle);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:65:AnimatedImageView& AnimatedImageView::SetResourceUrl(const Dali::String& url)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:71:Dali::String AnimatedImageView::GetResourceUrl() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:76:AnimatedImageView& AnimatedImageView::Play()
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:82:AnimatedImageView& AnimatedImageView::Pause()
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:88:AnimatedImageView& AnimatedImageView::Stop()
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:94:AnimatedImageView& AnimatedImageView::SetLoopCount(int count)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:100:int AnimatedImageView::GetLoopCount() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:105:AnimatedImageView& AnimatedImageView::SetImageColor(const UiColor& color)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:111:UiColor AnimatedImageView::GetImageColor() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:116:AnimatedImageView& AnimatedImageView::JumpToFrame(int frame)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:122:AnimatedImageView& AnimatedImageView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:128:AnimatedImage::StopBehavior AnimatedImageView::GetStopBehavior() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:133:AnimatedImageView& AnimatedImageView::SetFrameSpeedFactor(float factor)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:139:float AnimatedImageView::GetFrameSpeedFactor() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:144:AnimatedImageView& AnimatedImageView::SetBatchSize(int size)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:150:int AnimatedImageView::GetBatchSize() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:155:AnimatedImageView& AnimatedImageView::SetCacheSize(int size)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:161:int AnimatedImageView::GetCacheSize() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:166:AnimatedImageView& AnimatedImageView::SetFrameDelay(int milliseconds)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:172:int AnimatedImageView::GetFrameDelay() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:177:Ui::AnimatedImage::PlayState AnimatedImageView::GetPlayState() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:182:int AnimatedImageView::GetCurrentFrame() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:187:int AnimatedImageView::GetTotalFrame() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:192:AnimatedImageView& AnimatedImageView::SetDesiredWidth(int width)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:198:int AnimatedImageView::GetDesiredWidth() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:203:AnimatedImageView& AnimatedImageView::SetDesiredHeight(int height)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:209:int AnimatedImageView::GetDesiredHeight() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:214:AnimatedImageView& AnimatedImageView::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:220:Ui::Image::LoadPolicy AnimatedImageView::GetLoadPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:225:AnimatedImageView& AnimatedImageView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:231:Ui::Image::ReleasePolicy AnimatedImageView::GetReleasePolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:236:AnimatedImageView& AnimatedImageView::SetSynchronousLoading(bool synchronous)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:242:bool AnimatedImageView::IsSynchronousLoading() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:247:AnimatedImageView& AnimatedImageView::SetPreMultipliedAlpha(bool preMultiplied)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:253:bool AnimatedImageView::IsPreMultipliedAlpha() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:258:AnimatedImageView& AnimatedImageView::SetFittingMode(Ui::Image::FittingMode fittingMode)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:264:Ui::Image::FittingMode AnimatedImageView::GetFittingMode() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:269:AnimatedImageView& AnimatedImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:275:Ui::Image::SamplingMode AnimatedImageView::GetSamplingMode() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:280:AnimatedImageView& AnimatedImageView::SetImageLoadWithViewSize(bool enabled)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:286:bool AnimatedImageView::IsImageLoadWithViewSizeEnabled() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:291:AnimatedImageView& AnimatedImageView::SetAlphaMaskUrl(const Dali::String& maskUrl)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:297:Dali::String AnimatedImageView::GetAlphaMaskUrl() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:302:AnimatedImageView& AnimatedImageView::SetCropToMask(bool cropToMask)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:308:bool AnimatedImageView::IsCropToMask() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:313:AnimatedImageView& AnimatedImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:319:Ui::Image::MaskingType AnimatedImageView::GetMaskingMode() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:324:AnimatedImageView& AnimatedImageView::SetPlaceholderUrl(const Dali::String& url)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:330:Dali::String AnimatedImageView::GetPlaceholderUrl() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:335:AnimatedImageView& AnimatedImageView::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:341:const Dali::Vector<Dali::String>& AnimatedImageView::GetResourceUrls() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:346:AnimatedImageView& AnimatedImageView::SetPixelArea(const Vector4& pixelArea)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:352:Vector4 AnimatedImageView::GetPixelArea() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:357:AnimatedImageView& AnimatedImageView::SetDepthIndex(int depthIndex)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:363:Ui::Visual::ResourceStatus AnimatedImageView::GetLoadingStatus() const
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:368:View::ResourceReadySignalType& AnimatedImageView::ResourceReadySignal()
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:373:AnimatedImageView::AnimationFinishedSignalType& AnimatedImageView::AnimationFinishedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:375:  return Ui::GetImpl(*this).AnimationFinishedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:378:AnimatedImageView::AnimatedImageView(Integration::AnimatedImageViewImpl& implementation)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:383:AnimatedImageView::AnimatedImageView(Dali::Internal::CustomActor* internal)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp:386:  VerifyCustomActorPointer<Integration::AnimatedImageViewImpl>(internal);
+repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-types.h:44:struct DynamicPropertyInfo
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:37:class AnimatedImageViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:41: * @brief AnimatedImageView is a View for displaying animated image resources such as GIF files.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:47: * AnimatedImageView view = AnimatedImageView::New("animation.gif");
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:52:class DALI_UI_API AnimatedImageView : public View
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:56:   * @brief Property indices for AnimatedImageView.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:64:      IMAGE                     = AnimatedImageViewPropertyIndex::IMAGE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:65:      IMAGE_URLS                = AnimatedImageViewPropertyIndex::IMAGE_URLS,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:66:      LOOP_COUNT                = AnimatedImageViewPropertyIndex::LOOP_COUNT,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:67:      STOP_BEHAVIOR             = AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:68:      FRAME_SPEED_FACTOR        = AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:69:      BATCH_SIZE                = AnimatedImageViewPropertyIndex::BATCH_SIZE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:70:      CACHE_SIZE                = AnimatedImageViewPropertyIndex::CACHE_SIZE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:71:      FRAME_DELAY               = AnimatedImageViewPropertyIndex::FRAME_DELAY,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:72:      IMAGE_COLOR               = AnimatedImageViewPropertyIndex::IMAGE_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:73:      PRE_MULTIPLIED_ALPHA      = AnimatedImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:74:      FITTING_MODE              = AnimatedImageViewPropertyIndex::FITTING_MODE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:75:      SAMPLING_MODE             = AnimatedImageViewPropertyIndex::SAMPLING_MODE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:76:      DESIRED_WIDTH             = AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:77:      DESIRED_HEIGHT            = AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:78:      LOAD_POLICY               = AnimatedImageViewPropertyIndex::LOAD_POLICY,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:79:      RELEASE_POLICY            = AnimatedImageViewPropertyIndex::RELEASE_POLICY,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:80:      SYNCHRONOUS_LOADING       = AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:81:      IMAGE_LOAD_WITH_VIEW_SIZE = AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:82:      ALPHA_MASK_URL            = AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:83:      CROP_TO_MASK              = AnimatedImageViewPropertyIndex::CROP_TO_MASK,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:84:      MASKING_MODE              = AnimatedImageViewPropertyIndex::MASKING_MODE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:85:      PLACEHOLDER_IMAGE         = AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:86:      PIXEL_AREA                = AnimatedImageViewPropertyIndex::PIXEL_AREA,
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:91:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:94:  AnimatedImageView();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:95:  ~AnimatedImageView();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:96:  AnimatedImageView(const AnimatedImageView& rhs);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:97:  AnimatedImageView(AnimatedImageView&& rhs) noexcept;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:98:  AnimatedImageView& operator=(const AnimatedImageView& rhs);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:99:  AnimatedImageView& operator=(AnimatedImageView&& rhs) noexcept;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:102:   * @brief Creates a new AnimatedImageView.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:105:   * @return A handle to the newly allocated AnimatedImageView
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:107:  static AnimatedImageView New(const Dali::String& url = "");
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:110:   * @brief Downcasts a handle to AnimatedImageView.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:113:   * @return A handle to AnimatedImageView, or an empty handle if not AnimatedImageView
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:115:  static AnimatedImageView DownCast(BaseHandle handle);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:124:  AnimatedImageView& SetResourceUrl(const Dali::String& url);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:142:  AnimatedImageView& SetResourceUrls(const Dali::Vector<Dali::String>& urls);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:157:  AnimatedImageView& SetImageLoadWithViewSize(bool enabled);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:172:  AnimatedImageView& Play();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:179:  AnimatedImageView& Pause();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:186:  AnimatedImageView& Stop();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:197:  AnimatedImageView& SetLoopCount(int count);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:213:  AnimatedImageView& JumpToFrame(int frame);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:221:  AnimatedImageView& SetStopBehavior(AnimatedImage::StopBehavior behavior);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:239:  AnimatedImageView& SetFrameSpeedFactor(float factor);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:254:  AnimatedImageView& SetBatchSize(int size);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:269:  AnimatedImageView& SetCacheSize(int size);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:286:  AnimatedImageView& SetFrameDelay(int milliseconds);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:323:  AnimatedImageView& SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:340:  AnimatedImageView& SetFittingMode(Ui::Image::FittingMode fittingMode);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:355:  AnimatedImageView& SetSamplingMode(Ui::Image::SamplingMode samplingMode);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:370:  AnimatedImageView& SetPreMultipliedAlpha(bool preMultiplied);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:385:  AnimatedImageView& SetDepthIndex(int depthIndex);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:394:  AnimatedImageView& SetDesiredWidth(int width);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:409:  AnimatedImageView& SetDesiredHeight(int height);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:424:  AnimatedImageView& SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:439:  AnimatedImageView& SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:454:  AnimatedImageView& SetSynchronousLoading(bool synchronous);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:470:  AnimatedImageView& SetAlphaMaskUrl(const Dali::String& maskUrl);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:485:  AnimatedImageView& SetCropToMask(bool cropToMask);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:500:  AnimatedImageView& SetMaskingMode(Ui::Image::MaskingType maskingMode);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:515:  AnimatedImageView& SetPlaceholderUrl(const Dali::String& url);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:533:  AnimatedImageView& SetPixelArea(const Vector4& pixelArea);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:562:  AnimationFinishedSignalType& AnimationFinishedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:569:   * @param[in] implementation The AnimatedImageView implementation
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:571:  explicit DALI_UI_API AnimatedImageView(Integration::AnimatedImageViewImpl& implementation);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:574:   * @brief Allows the creation of this AnimatedImageView from an Internal::CustomActor pointer.
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:578:  explicit DALI_UI_API AnimatedImageView(Dali::Internal::CustomActor* internal);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:582:  DALI_UI_CHAIN_VIEW_METHODS(AnimatedImageView)
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:28: * Image Placeholder sample — supports ImageView, AnimatedImageView, and LottieAnimationView.
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:109:        AnimatedImageView view = AnimatedImageView::New();
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:157:        AnimatedImageView::DownCast(mImage).SetResourceUrl(mainUrl);
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:158:        AnimatedImageView::DownCast(mImage).Play();
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:187:    else if(auto v = AnimatedImageView::DownCast(view)) status = v.GetLoadingStatus();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:55:  AnimatedImageViewImplPtr impl = AnimatedImageViewImpl::New();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:62:  DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, AnimatedImageViewPropertyIndex, Ui::Integration, AnimatedImageViewImpl, text, valueType, enumIndex)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:64:DALI_TYPE_REGISTRATION_BEGIN(AnimatedImageViewImpl, ViewImpl, Create)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:89:DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, AnimatedImageViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:96:AnimatedImageViewImpl::AnimatedImageViewImpl()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:124:  mAnimationFinishedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:128:AnimatedImageViewImpl::~AnimatedImageViewImpl() = default;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:130:Dali::String AnimatedImageViewImpl::GetResourceUrl() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:135:AnimatedImageViewImplPtr AnimatedImageViewImpl::New()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:137:  return new AnimatedImageViewImpl();
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:140:void AnimatedImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:145:    AnimatedImageViewImpl& impl = static_cast<AnimatedImageViewImpl&>(GetImpl(view));
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:148:      case AnimatedImageViewImpl::Property::IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:157:      case AnimatedImageViewImpl::Property::LOOP_COUNT:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:166:      case AnimatedImageViewImpl::Property::IMAGE_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:175:      case AnimatedImageViewImpl::Property::STOP_BEHAVIOR:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:184:      case AnimatedImageViewImpl::Property::FRAME_SPEED_FACTOR:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:193:      case AnimatedImageViewImpl::Property::BATCH_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:202:      case AnimatedImageViewImpl::Property::CACHE_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:211:      case AnimatedImageViewImpl::Property::FRAME_DELAY:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:220:      case AnimatedImageViewImpl::Property::DESIRED_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:229:      case AnimatedImageViewImpl::Property::DESIRED_HEIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:238:      case AnimatedImageViewImpl::Property::LOAD_POLICY:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:247:      case AnimatedImageViewImpl::Property::RELEASE_POLICY:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:256:      case AnimatedImageViewImpl::Property::SYNCHRONOUS_LOADING:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:265:      case AnimatedImageViewImpl::Property::PRE_MULTIPLIED_ALPHA:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:274:      case AnimatedImageViewImpl::Property::FITTING_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:283:      case AnimatedImageViewImpl::Property::SAMPLING_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:292:      case AnimatedImageViewImpl::Property::IMAGE_LOAD_WITH_VIEW_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:301:      case AnimatedImageViewImpl::Property::ALPHA_MASK_URL:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:310:      case AnimatedImageViewImpl::Property::CROP_TO_MASK:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:319:      case AnimatedImageViewImpl::Property::MASKING_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:328:      case AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:337:      case AnimatedImageViewImpl::Property::IMAGE_URLS:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:355:      case AnimatedImageViewImpl::Property::PIXEL_AREA:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:368:Dali::Property::Value AnimatedImageViewImpl::GetProperty(Dali::BaseObject* object, Dali::Property::Index index)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:374:    AnimatedImageViewImpl& impl = static_cast<AnimatedImageViewImpl&>(GetImpl(view));
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:377:      case AnimatedImageViewImpl::Property::IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:380:      case AnimatedImageViewImpl::Property::LOOP_COUNT:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:383:      case AnimatedImageViewImpl::Property::IMAGE_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:386:      case AnimatedImageViewImpl::Property::STOP_BEHAVIOR:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:389:      case AnimatedImageViewImpl::Property::FRAME_SPEED_FACTOR:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:392:      case AnimatedImageViewImpl::Property::BATCH_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:395:      case AnimatedImageViewImpl::Property::CACHE_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:398:      case AnimatedImageViewImpl::Property::FRAME_DELAY:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:401:      case AnimatedImageViewImpl::Property::DESIRED_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:404:      case AnimatedImageViewImpl::Property::DESIRED_HEIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:407:      case AnimatedImageViewImpl::Property::LOAD_POLICY:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:410:      case AnimatedImageViewImpl::Property::RELEASE_POLICY:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:413:      case AnimatedImageViewImpl::Property::SYNCHRONOUS_LOADING:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:416:      case AnimatedImageViewImpl::Property::PRE_MULTIPLIED_ALPHA:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:419:      case AnimatedImageViewImpl::Property::FITTING_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:422:      case AnimatedImageViewImpl::Property::SAMPLING_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:425:      case AnimatedImageViewImpl::Property::IMAGE_LOAD_WITH_VIEW_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:428:      case AnimatedImageViewImpl::Property::ALPHA_MASK_URL:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:431:      case AnimatedImageViewImpl::Property::CROP_TO_MASK:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:434:      case AnimatedImageViewImpl::Property::MASKING_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:437:      case AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:440:      case AnimatedImageViewImpl::Property::IMAGE_URLS:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:451:      case AnimatedImageViewImpl::Property::PIXEL_AREA:
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:459:void AnimatedImageViewImpl::OnInitialize()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:462:  Internal::ViewDataImpl::Get(*this).VisualEventSignal().Connect(this, &AnimatedImageViewImpl::OnVisualEvent);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:465:  Ui::View::DownCast(Self()).ResourceReadySignal().Connect(this, &AnimatedImageViewImpl::OnViewResourceReady);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:468:MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:529:MeasuredSize AnimatedImageViewImpl::OnArrange(const LayoutRect& bounds)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:534:void AnimatedImageViewImpl::SetResourceUrl(const Dali::String& url)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:547:void AnimatedImageViewImpl::Play()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:558:    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::PLAY, Dali::Property::Map());
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:562:void AnimatedImageViewImpl::Pause()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:572:    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::PAUSE, Dali::Property::Map());
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:576:void AnimatedImageViewImpl::Stop()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:586:    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::STOP, Dali::Property::Map());
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:590:void AnimatedImageViewImpl::JumpToFrame(int frame)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:600:    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::JUMP_TO, frame);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:604:void AnimatedImageViewImpl::SetStopBehavior(Ui::AnimatedImage::StopBehavior behavior)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:614:Ui::AnimatedImage::StopBehavior AnimatedImageViewImpl::GetStopBehavior() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:619:void AnimatedImageViewImpl::SetFrameSpeedFactor(float factor)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:629:float AnimatedImageViewImpl::GetFrameSpeedFactor() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:634:void AnimatedImageViewImpl::SetBatchSize(int size)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:638:    DALI_LOG_WARNING("AnimatedImageView: BatchSize must be >= 1 (got %d), clamped to 1\n", size);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:649:int AnimatedImageViewImpl::GetBatchSize() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:654:void AnimatedImageViewImpl::SetCacheSize(int size)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:658:    DALI_LOG_WARNING("AnimatedImageView: CacheSize must be >= 1 (got %d), clamped to 1\n", size);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:669:int AnimatedImageViewImpl::GetCacheSize() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:674:void AnimatedImageViewImpl::SetFrameDelay(int milliseconds)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:684:int AnimatedImageViewImpl::GetFrameDelay() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:689:Ui::AnimatedImage::PlayState AnimatedImageViewImpl::GetPlayState() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:703:int AnimatedImageViewImpl::GetCurrentFrame() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:717:int AnimatedImageViewImpl::GetTotalFrame() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:731:Dali::Signal<void(Dali::Ui::View)>& AnimatedImageViewImpl::AnimationFinishedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:733:  return mAnimationFinishedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:736:void AnimatedImageViewImpl::OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:738:  if(visualIndex == AnimatedImageViewImpl::Property::IMAGE &&
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:742:    mAnimationFinishedSignal.Emit(handle);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:746:void AnimatedImageViewImpl::SetLoopCount(int count)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:756:int AnimatedImageViewImpl::GetLoopCount() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:761:void AnimatedImageViewImpl::SetImageColor(const UiColor& color)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:781:UiColor AnimatedImageViewImpl::GetImageColor() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:786:void AnimatedImageViewImpl::SetPixelArea(const Vector4& pixelArea)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:800:Vector4 AnimatedImageViewImpl::GetPixelArea() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:805:void AnimatedImageViewImpl::SetDesiredWidth(int width)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:815:int AnimatedImageViewImpl::GetDesiredWidth() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:820:void AnimatedImageViewImpl::SetDesiredHeight(int height)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:830:int AnimatedImageViewImpl::GetDesiredHeight() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:835:void AnimatedImageViewImpl::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:853:Ui::Image::LoadPolicy AnimatedImageViewImpl::GetLoadPolicy() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:858:void AnimatedImageViewImpl::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:868:Ui::Image::ReleasePolicy AnimatedImageViewImpl::GetReleasePolicy() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:873:void AnimatedImageViewImpl::SetSynchronousLoading(bool synchronous)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:883:bool AnimatedImageViewImpl::IsSynchronousLoading() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:888:void AnimatedImageViewImpl::SetPreMultipliedAlpha(bool preMultiplied)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:898:bool AnimatedImageViewImpl::IsPreMultipliedAlpha() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:903:void AnimatedImageViewImpl::SetDepthIndex(int depthIndex)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:911:      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:917:void AnimatedImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:948:Ui::Image::FittingMode AnimatedImageViewImpl::GetFittingMode() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:953:void AnimatedImageViewImpl::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:963:Ui::Image::SamplingMode AnimatedImageViewImpl::GetSamplingMode() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:968:void AnimatedImageViewImpl::SetImageLoadWithViewSize(bool enabled)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:978:bool AnimatedImageViewImpl::IsImageLoadWithViewSizeEnabled() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:983:void AnimatedImageViewImpl::SetAlphaMaskUrl(const Dali::String& maskUrl)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:993:Dali::String AnimatedImageViewImpl::GetAlphaMaskUrl() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:998:void AnimatedImageViewImpl::SetCropToMask(bool cropToMask)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1008:bool AnimatedImageViewImpl::IsCropToMask() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1013:void AnimatedImageViewImpl::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1023:Ui::Image::MaskingType AnimatedImageViewImpl::GetMaskingMode() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1028:void AnimatedImageViewImpl::SetPlaceholderUrl(const Dali::String& url)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1037:Dali::String AnimatedImageViewImpl::GetPlaceholderUrl() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1042:void AnimatedImageViewImpl::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1052:const Dali::Vector<Dali::String>& AnimatedImageViewImpl::GetResourceUrls() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1057:Ui::Visual::ResourceStatus AnimatedImageViewImpl::GetLoadingStatus() const
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1059:  return Internal::ViewDataImpl::Get(*this).GetVisualResourceStatus(AnimatedImageViewImpl::Property::IMAGE);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1062:void AnimatedImageViewImpl::UpdateVisual()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1067:    viewData.UnregisterVisual(AnimatedImageViewImpl::Property::IMAGE);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1074:    DALI_LOG_ERROR("AnimatedImageView must be supplied with either a valid URL or an array of URLs.\n");
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1146:      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1151:void AnimatedImageViewImpl::UpdatePlaceholderVisual()
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1154:  viewData.UnregisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1162:  if(viewData.GetVisualResourceStatus(AnimatedImageViewImpl::Property::IMAGE) == Ui::Visual::ResourceStatus::READY)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1180:    viewData.RegisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, mDepthIndex + 1);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1184:void AnimatedImageViewImpl::OnViewResourceReady(Ui::View view)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1187:  if(viewData.GetVisualResourceStatus(AnimatedImageViewImpl::Property::IMAGE) != Ui::Visual::ResourceStatus::READY)
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.cpp:1193:  viewData.UnregisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE);
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.cpp:808:      DevelAnimatedVectorImageVisual::DynamicPropertyInfo info =
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.cpp:809:        AnyCast<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>(attributes);
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:55: * - Tests: ImageView (JPG), ImageView (GIF), AnimatedImageView (GIF), LottieAnimationView (JSON)
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:118:    // AnimatedImageView (GIF)
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:119:    AnimatedImageView::New(GIF_IMAGES[mGifIndex])
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:125:      .As(mAnimatedImageView);
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:127:    mAnimatedImageView.Play();
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:157:        CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView),
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:273:    mAnimatedImageView.SetResourceUrl(GIF_IMAGES[mGifIndex]);
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:289:    mAnimatedImageView.SetFittingMode(MODES[mActiveIndex].mode);
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:309:  AnimatedImageView   mAnimatedImageView;
+repos/dali-ui/samples/image-view/image-color-example.cpp:28: * ImageColor sample for ImageView / AnimatedImageView / LottieAnimationView:
+repos/dali-ui/samples/image-view/image-color-example.cpp:33: * - IMAGE TYPE button switches between ImageView, AnimatedImageView (GIF), and LottieAnimationView
+repos/dali-ui/samples/image-view/image-color-example.cpp:142:      case 1: // AnimatedImageView (GIF)
+repos/dali-ui/samples/image-view/image-color-example.cpp:144:        AnimatedImageView::New(IMAGE_URLS[mImageTypeIndex])
+repos/dali-ui/samples/image-view/image-color-example.cpp:151:          .As(mAnimatedImageView);
+repos/dali-ui/samples/image-view/image-color-example.cpp:152:        mImageContainer.Add(mAnimatedImageView);
+repos/dali-ui/samples/image-view/image-color-example.cpp:259:        if(mAnimatedImageView)
+repos/dali-ui/samples/image-view/image-color-example.cpp:260:          mAnimatedImageView.SetImageColor(color);
+repos/dali-ui/samples/image-view/image-color-example.cpp:291:  AnimatedImageView   mAnimatedImageView;
+repos/dali-ui/samples/image-view/image-color-example.cpp:312:  "AnimatedImageView (GIF)",
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h:63:  using DynamicPropertyType = std::vector<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>;
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:351:      view = AnimatedImageView::New(url);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:376:    if(auto v = AnimatedImageView::DownCast(view))    v.SetResourceUrl(url);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:384:    else if(auto v = AnimatedImageView::DownCast(view)) v.ResourceReadySignal().Connect(this, callback);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:390:    if(auto v = AnimatedImageView::DownCast(view))    v.Play();
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:396:    if(auto v = AnimatedImageView::DownCast(view))    v.Stop();
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:565:    else if(auto v = AnimatedImageView::DownCast(view)) status = static_cast<int>(v.GetLoadingStatus());
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:27: * AlphaMask sample — tests ImageView and AnimatedImageView:
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:30: * - IMAGE TYPE button: toggle between static (ImageView) and animated (AnimatedImageView)
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:129:    AnimatedImageView::New(ANIMATED_URL)
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:365:  AnimatedImageView mAnimatedImages[PANEL_COUNT];
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:30: * [SamplingMode section] (ImageView / AnimatedImageView only)
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:33: * - IMAGE TYPE button switches between ImageView and AnimatedImageView (GIF)
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:35: * [DesiredSize section] (ImageView / AnimatedImageView / LottieAnimationView)
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:47:  static constexpr int IMAGE_TYPE_COUNT_SAMPLING = 2; // ImageView, AnimatedImageView
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:48:  static constexpr int IMAGE_TYPE_COUNT_DESIRED   = 3; // ImageView, AnimatedImageView, LottieAnimationView
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:97:        CreateSectionLabel("SamplingMode  —  small image displayed large (ImageView / AnimatedImageView)"),
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:181:      case 1: // AnimatedImageView (GIF)
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:183:        AnimatedImageView::New(IMAGE_TYPE_URLS_SAMPLING[mImageTypeIndexSampling])
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:308:      case 1: // AnimatedImageView (GIF)
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:310:        AnimatedImageView::New(IMAGE_TYPE_URLS_DESIRED[mImageTypeIndexDesired])
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:537:  AnimatedImageView   mSamplingAnimatedImage;
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:548:  AnimatedImageView   mDesiredSizeAnimatedImage;
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:573:  "AnimatedImageView (GIF)",
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:583:  "AnimatedImageView (GIF)",
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:233:      mImage = AnimatedImageView::New(GIF_URL)
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:238:      AnimatedImageView::DownCast(mImage).Play();
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:289:    // PIXEL_AREA is an animatable property on both ImageView and AnimatedImageView
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:291:      ? static_cast<int>(AnimatedImageView::Property::PIXEL_AREA)
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:318:      AnimatedImageView::DownCast(mImage).SetPixelArea(AREAS[mActiveIndex].area);
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:346:      AnimatedImageView::DownCast(mImage).SetPixelArea(area);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:26: * AnimatedImageView sample.
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:36: *   - AnimationFinishedSignal
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:47:class AnimatedImageViewSampleController : public ConnectionTracker
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:53:  explicit AnimatedImageViewSampleController(Application& application)
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:62:    mMonitorTimer.TickSignal().Connect(this, &AnimatedImageViewSampleController::OnMonitorTimerTick);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:64:    mApplication.InitSignal().Connect(this, &AnimatedImageViewSampleController::OnInit);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:91:    window.KeyEventSignal().Connect(this, &AnimatedImageViewSampleController::OnKeyEvent);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:115:    AnimatedImageView::New("")
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:119:      .As(mAnimatedImageView);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:121:    mAnimatedImageView.AnimationFinishedSignal().Connect(this, &AnimatedImageViewSampleController::OnAnimationFinished);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:122:    mAnimatedImageView.ResourceReadySignal().Connect(this, &AnimatedImageViewSampleController::OnResourceReady);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:129:      .Children({mAnimatedImageView});
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:308:      mAnimatedImageView.SetBatchSize(4);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:309:      mAnimatedImageView.SetCacheSize(10);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:310:      mAnimatedImageView.SetFrameDelay(FRAME_DELAYS[mFrameDelayIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:311:      mAnimatedImageView.SetResourceUrls(urls);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:316:      mAnimatedImageView.SetResourceUrls(Dali::Vector<Dali::String>{});
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:317:      mAnimatedImageView.SetResourceUrl(IMAGE_URLS[mImageIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:320:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] Image changed to: %s\n", IMAGE_NAMES[mImageIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:339:    mAnimatedImageView.Play();
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:341:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] Play() — state=%d frame=%d/%d\n",
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:342:                          static_cast<int>(mAnimatedImageView.GetPlayState()),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:343:                          mAnimatedImageView.GetCurrentFrame(),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:344:                          mAnimatedImageView.GetTotalFrame());
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:349:    mAnimatedImageView.Pause();
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:351:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] Pause() — state=%d frame=%d/%d\n",
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:352:                          static_cast<int>(mAnimatedImageView.GetPlayState()),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:353:                          mAnimatedImageView.GetCurrentFrame(),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:354:                          mAnimatedImageView.GetTotalFrame());
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:359:    mAnimatedImageView.Stop();
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:361:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] Stop() — state=%d frame=%d/%d\n",
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:362:                          static_cast<int>(mAnimatedImageView.GetPlayState()),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:363:                          mAnimatedImageView.GetCurrentFrame(),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:364:                          mAnimatedImageView.GetTotalFrame());
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:369:    mAnimatedImageView.JumpToFrame(JUMP_FRAME);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:371:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] JumpToFrame(%d) — currentFrame=%d\n",
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:373:                          mAnimatedImageView.GetCurrentFrame());
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:379:    mAnimatedImageView.SetLoopCount(LOOP_COUNTS[mLoopIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:381:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] SetLoopCount(%d)\n", LOOP_COUNTS[mLoopIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:387:    mAnimatedImageView.SetFrameSpeedFactor(SPEED_FACTORS[mSpeedIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:389:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] SetFrameSpeedFactor(%.1f)\n", SPEED_FACTORS[mSpeedIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:395:    mAnimatedImageView.SetStopBehavior(STOP_BEHAVIORS[mStopBehaviorIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:397:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] SetStopBehavior(%d)\n", mStopBehaviorIndex);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:403:    mAnimatedImageView.SetFrameDelay(FRAME_DELAYS[mFrameDelayIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:405:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] SetFrameDelay(%d ms)\n", FRAME_DELAYS[mFrameDelayIndex]);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:410:    int total = mAnimatedImageView.GetTotalFrame();
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:412:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] ResourceReady — totalFrame=%d\n", total);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:418:    DALI_LOG_RELEASE_INFO("[AnimatedImageView] AnimationFinishedSignal fired\n");
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:431:    if(mAnimatedImageView && mAnimatedImageView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:433:      DALI_LOG_RELEASE_INFO("[AnimatedImageView] Monitor — frame=%d/%d state=%d\n",
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:434:                            mAnimatedImageView.GetCurrentFrame(),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:435:                            mAnimatedImageView.GetTotalFrame(),
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:436:                            static_cast<int>(mAnimatedImageView.GetPlayState()));
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:468:  AnimatedImageView mAnimatedImageView;
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:484:constexpr int   AnimatedImageViewSampleController::LOOP_COUNTS[];
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:485:constexpr float AnimatedImageViewSampleController::SPEED_FACTORS[];
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:486:constexpr int   AnimatedImageViewSampleController::FRAME_DELAYS[];
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:488:const char* AnimatedImageViewSampleController::IMAGE_NAMES[] = {
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:495:const char* AnimatedImageViewSampleController::IMAGE_URLS[] = {
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:500:const char* AnimatedImageViewSampleController::URL_ARRAY_FORMATS[] = {
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:504:const int AnimatedImageViewSampleController::URL_ARRAY_FRAME_COUNTS[] = {8, 15};
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:506:const char* AnimatedImageViewSampleController::LOOP_LABELS[]          = {"Loop: ∞", "Loop: 3", "Loop: 1"};
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:507:const char* AnimatedImageViewSampleController::SPEED_LABELS[]         = {"Speed: 0.5×", "Speed: 1.0×", "Speed: 2.0×"};
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:508:const char* AnimatedImageViewSampleController::STOP_BEHAVIOR_LABELS[] = {"StopAt: CURRENT", "StopAt: FIRST", "StopAt: LAST"};
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:509:const char* AnimatedImageViewSampleController::FRAME_DELAY_LABELS[]   = {"Delay: 200ms", "Delay: 500ms", "Delay: 1000ms", "Delay: 2000ms"};
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:511:const Ui::AnimatedImage::StopBehavior AnimatedImageViewSampleController::STOP_BEHAVIORS[] = {
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:521:  AnimatedImageViewSampleController controller(application);
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:38: *   - AnimationFinishedSignal
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:46:class LottieAnimationViewSampleController : public ConnectionTracker
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:106:    mLottieView.AnimationFinishedSignal().Connect(this, &LottieAnimationViewSampleController::OnAnimationFinished);
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:448:    DALI_LOG_RELEASE_INFO("[LottieAnimationView] AnimationFinishedSignal fired\n");
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h:78:struct DynamicPropertyInfo
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/image-view/animated-image-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui-foundation/public-api/image-view/animated-image-view.h: No such file or directory
+
+exec
+/bin/bash -lc "sed -n '480,550p' repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+  /**
+   * @brief Gets the content info of the LottieAnimationVisual.
+   *
+   * @return The content info of the LottieAnimationVisual
+   * @note This property is read-only.
+   */
+  Dali::Property::Map GetContentInfo() const;
+
+  /**
+   * @brief Gets the marker info of the LottieAnimationVisual.
+   *
+   * @return The marker info of the LottieAnimationVisual
+   * @note This property is read-only.
+   */
+  Dali::Property::Map GetMarkerInfo() const;
+
+public: // API to control play state
+  /**
+   * @brief Play animation
+   *
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationVisual& Play();
+
+  /**
+   * @brief Pause animation
+   *
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationVisual& Pause();
+
+  /**
+   * @brief Stop animation
+   *
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationVisual& Stop();
+
+  /**
+   * @brief Jump to specific frame
+   *
+   * @param[in] frame The frame to jump
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationVisual& JumpTo(int frame);
+
+public: // Advanced
+  /**
+   * @brief Sets a per-frame dynamic property callback on a specific layer/element.
+   *
+   * Ownership of DynamicPropertyInfo::callback is transferred to the visual.
+   *
+   * @param[in] info The dynamic property info
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationVisual& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
+  // @CHAIN_END
+
+public:
+  LottieAnimationVisual()                                                = default;
+  ~LottieAnimationVisual()                                               = default;
+  LottieAnimationVisual(const LottieAnimationVisual& rhs)                = default;
+  LottieAnimationVisual& operator=(const LottieAnimationVisual& rhs)     = default;
+  LottieAnimationVisual(LottieAnimationVisual&& rhs) noexcept            = default;
+  LottieAnimationVisual& operator=(LottieAnimationVisual&& rhs) noexcept = default;
+
+public: // Not intended for application developers
+  /**
+   * @brief This constructor is used by Dali New() methods.
+   *
+
+exec
+/bin/bash -lc "sed -n '70,150p' repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-dynamic-property.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+ * Expected result:
+ *   Immediately after clicking a Fill button the animation colour changes during playback.
+ *   After Clear the original colours are restored.
+ */
+class TcLottieDynamicProperty : public ManualTest::TestCase, public ConnectionTracker
+{
+public:
+  Dali::String GetName() const override
+  {
+    return "Lottie: SetDynamicProperty (FILL_COLOR)";
+  }
+
+  Dali::String GetDescription() const override
+  {
+    return "Verify per-frame callback dynamically changes the fill colour of all layers";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+    mView = LottieAnimationView::New(LOTTIE_WALKER)
+              .SetRequestedWidth(PREVIEW_SIZE)
+              .SetRequestedHeight(PREVIEW_SIZE);
+
+    mView.Play();
+
+    mStatusLabel = MakeStatusLabel("DynamicProperty: none (original colors)");
+
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(WRAP_CONTENT)
+                            .SetBackgroundColor(UiColor(C_BG))
+                            .SetPadding(Extents(8, 8, 8, 8));
+
+    content.Add(MakeCentered(mView));
+    content.Add(mStatusLabel);
+
+    content.Add(MakeButtonRow({
+      MakeButton("Play",  [this] { mView.Play(); }),
+      MakeButton("Pause", [this] { mView.Pause(); }),
+    }));
+    content.Add(MakeButtonRow({
+      MakeButton("Fill:\nRed",   [this] { OnDynamicFill(PROP_ID_RED,   "Red"); }),
+      MakeButton("Fill:\nGreen", [this] { OnDynamicFill(PROP_ID_GREEN, "Green"); }),
+      MakeButton("Fill:\nBlue",  [this] { OnDynamicFill(PROP_ID_BLUE,  "Blue"); }),
+    }));
+    content.Add(MakeButtonRow({
+      MakeButton("Clear Dynamic\n(reload)", [this] { OnClearDynamic(); }),
+    }));
+
+    contentArea.Add(content);
+  }
+
+private:
+  void OnDynamicFill(int32_t propId, const char* colorName)
+  {
+    Ui::LottieAnimation::DynamicPropertyInfo info;
+    info.id       = propId;
+    info.keyPath  = "**";
+    info.property = Ui::LottieAnimation::VectorProperty::FILL_COLOR;
+    info.callback = MakeCallback(&OnGetFillColor);
+    mView.SetDynamicProperty(info);
+
+    mStatusLabel.SetText(Dali::String("DynamicProperty: FILL_COLOR = ") + Dali::String(colorName));
+  }
+
+  void OnClearDynamic()
+  {
+    // Reset dynamic properties by reloading the URL
+    mView.SetResourceUrl(LOTTIE_WALKER);
+    mView.Play();
+    mStatusLabel.SetText("DynamicProperty: cleared (reloaded)");
+  }
+
+  View MakeCentered(View child)
+  {
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+                        .SetRequestedWidth(MATCH_PARENT)
+                        .SetRequestedHeight(PREVIEW_SIZE + 16)
+                        .SetPadding(Extents(0, 0, 8, 8));
+    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    row.Add(child);
+
+exec
+/bin/bash -lc "rg --files repos/dali-ui/dali-ui-foundation/public-api | rg 'animated-image|lottie-animation-view|lottie-animation'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.cpp
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view-properties.h
+repos/dali-ui/dali-ui-foundation/public-api/image/animated-image-enumerations.h
+repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-enumerations.h
+repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-types.h
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.cpp
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view-properties.h
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.cpp
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.h
+repos/dali-ui/dali-ui-foundation/public-api/visuals/animated-image-visual.cpp
+repos/dali-ui/dali-ui-foundation/public-api/visuals/animated-image-visual.autogen.h
+repos/dali-ui/dali-ui-foundation/public-api/visuals/animated-image-visual.h
+
+exec
+/bin/bash -lc "sed -n '150,230p' repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-dynamic-property.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    row.Add(child);
+    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    return row;
+  }
+
+  Label MakeStatusLabel(const Dali::String& text)
+  {
+    return Label::New(text)
+      .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(STATUS_H)
+      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
+      .SetBackgroundColor(UiColor(C_STATUS_BG))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  }
+
+  View MakeButton(const Dali::String& label, std::function<void()> onClick)
+  {
+    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL)
+                        .SetRequestedHeight(BTN_H)
+                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+                        .SetBackgroundColor(UiColor(C_BTN_BG))
+                        .Children({
+                          Label::New(label)
+                            .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT)
+                            .SetFontSize(12.0f).SetTextColor(UiColor(C_BTN_TEXT))
+                            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+                            .SetVerticalTextAlignment(Text::Alignment::CENTER)
+                            .SetMultiLine(true),
+                        });
+    btn.SetFocusable(true).AsInteractive([this, onClick = std::move(onClick)](InteractiveTrait& trait) {
+      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+        onClick(); return true;
+      });
+    });
+    return btn;
+  }
+
+  StackLayout MakeButtonRow(std::initializer_list<View> buttons)
+  {
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+                        .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(BTN_H)
+                        .SetPadding(Extents(0, 0, 2, 2));
+    for(auto& b : buttons) row.Add(b);
+    return row;
+  }
+
+  LottieAnimationView mView;
+  Label               mStatusLabel;
+};
+
+REGISTER_MANUAL_TEST(TcLottieDynamicProperty)
+
+exec
+/bin/bash -lc "sed -n '1,160p' repos/dali-ui/samples/image-view/animated-image-view-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali/integration-api/debug.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AnimatedImageView sample.
+ *
+ * Demonstrates:
+ *   - Play / Pause / Stop / JumpToFrame
+ *   - Change Image  (cycles through WebP, GIF×2, URL array)
+ *   - LoopCount  (infinite / 3 / 1)
+ *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)
+ *   - StopBehavior  (CURRENT / FIRST / LAST)
+ *   - SetFrameDelay  (200ms / 500ms / 1000ms / 2000ms)
+ *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
+ *   - AnimationFinishedSignal
+ *
+ * Image sources:
+ *   0. dog-anim.webp          (animated WebP)
+ *   1. dali-logo-anim.gif     (animated GIF)
+ *   2. animatedLoading.gif    (animated GIF)
+ *   3. URL Array: dog-anim-001~008.png     (8 PNG frames via SetResourceUrls)
+ *   4. URL Array: dali-logo-anim-001~015.png  (15 PNG frames via SetResourceUrls)
+ *
+ * Press Escape or Back to quit.
+ */
+class AnimatedImageViewSampleController : public ConnectionTracker
+{
+  static constexpr int JUMP_FRAME    = 5;
+  static constexpr int IMAGE_COUNT   = 5;
+
+public:
+  explicit AnimatedImageViewSampleController(Application& application)
+  : mApplication(application),
+    mImageIndex(0),
+    mLoopIndex(0),
+    mSpeedIndex(1),
+    mStopBehaviorIndex(0),
+    mFrameDelayIndex(1)
+  {
+    mMonitorTimer = Timer::New(100);
+    mMonitorTimer.TickSignal().Connect(this, &AnimatedImageViewSampleController::OnMonitorTimerTick);
+
+    mApplication.InitSignal().Connect(this, &AnimatedImageViewSampleController::OnInit);
+  }
+
+private:
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0x1A1A1A));
+
+    window.Add(
+      StackLayout::New(StackOrientation::VERTICAL)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetSpacing(4.0f)
+        .SetPadding(Extents(8, 8, 8, 8))
+        .Children({
+          CreateImageSourceLabel(),
+          CreateAnimationArea(),
+          CreateStatusLabel(),
+          CreatePlaybackRow(),
+          CreateChangeImageRow(),
+          CreateLoopRow(),
+          CreateSpeedRow(),
+          CreateStopBehaviorRow(),
+          CreateFrameDelayRow(),
+        }));
+
+    window.KeyEventSignal().Connect(this, &AnimatedImageViewSampleController::OnKeyEvent);
+
+    // Apply initial image
+    ApplyCurrentImage();
+
+    mMonitorTimer.Start();
+  }
+
+  // ── Widgets ─────────────────────────────────────────────────────────────
+
+  View CreateImageSourceLabel()
+  {
+    return Label::New(IMAGE_NAMES[mImageIndex])
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(24.0f)
+      .SetFontSize(12.0f)
+      .SetTextColor(UiColor(0x888888))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .As(mImageSourceLabel);
+  }
+
+  View CreateAnimationArea()
+  {
+    AnimatedImageView::New("")
+      .SetRequestedWidth(300.0f)
+      .SetRequestedHeight(300.0f)
+      .SetLoopCount(-1)
+      .As(mAnimatedImageView);
+
+    mAnimatedImageView.AnimationFinishedSignal().Connect(this, &AnimatedImageViewSampleController::OnAnimationFinished);
+    mAnimatedImageView.ResourceReadySignal().Connect(this, &AnimatedImageViewSampleController::OnResourceReady);
+
+    return StackLayout::New(StackOrientation::HORIZONTAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .SetBackgroundColor(UiColor(0x2A2A2A))
+      .Children({mAnimatedImageView});
+  }
+
+  View CreateStatusLabel()
+  {
+    return Label::New("Status: loading...")
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(28.0f)
+      .SetFontSize(13.0f)
+      .SetTextColor(UiColor(0xCCCCCC))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .As(mStatusLabel);
+  }
+
+  View CreatePlaybackRow()
+  {
+    return CreateButtonRow({
+      CreateButton("PLAY",   [this](View, InputEvent) { OnPlay(); }),
+      CreateButton("PAUSE",  [this](View, InputEvent) { OnPause(); }),
+      CreateButton("STOP",   [this](View, InputEvent) { OnStop(); }),
+      CreateButton("JUMP→5", [this](View, InputEvent) { OnJumpTo(); }),
+    });
+  }
+
+  View CreateChangeImageRow()
+  {
+    return CreateButtonRow({
+      CreateButton("◀ PREV", [this](View, InputEvent) { OnPrevImage(); }),
+      CreateButton("NEXT ▶", [this](View, InputEvent) { OnNextImage(); }),
+    });
+  }
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-types.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/signals/callback.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace LottieAnimation
+{
+
+/**
+ * @brief Information for setting a dynamic (per-frame callback) property.
+ *
+ * Ownership of @p callback is transferred to the visual after SetDynamicProperty() is called.
+ *
+ * @note The callback is invoked on a worker thread. Do NOT call DALi APIs from it.
+ */
+struct DynamicPropertyInfo
+{
+  int32_t        id;       ///< Unique identifier passed to the callback
+  Dali::String   keyPath;  ///< Target layer/element path (e.g. "Layer 1.Ellipse 1.Fill 1", or "**" for all)
+  VectorProperty property; ///< The LottieAnimationViewVectorProperty::Type to animate
+  CallbackBase*  callback; ///< Callback returning a Property::Value each frame
+};
+
+} // namespace LottieAnimation
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-enumerations.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace LottieAnimation
+{
+/**
+ * @brief Enumeration for what looping mode is in.
+ */
+enum class LoopingMode : uint8_t
+{
+  RESTART,     ///< When the animation arrives at the end in looping mode, the animation restarts from the beginning.
+  AUTO_REVERSE ///< When the animation arrives at the end in looping mode, the animation reverses direction and runs
+               ///< backwards again.
+};
+
+/**
+ * @brief Enumeration for animatable vector properties used with SetDynamicProperty.
+ */
+enum class VectorProperty : uint8_t
+{
+  FILL_COLOR = 0,     ///< Fill color of a shape
+  FILL_OPACITY,       ///< Fill opacity of a shape
+  STROKE_COLOR,       ///< Stroke color of a shape
+  STROKE_OPACITY,     ///< Stroke opacity of a shape
+  STROKE_WIDTH,       ///< Stroke width of a shape
+  TRANSFORM_ANCHOR,   ///< Anchor point of a layer
+  TRANSFORM_POSITION, ///< Position of a layer
+  TRANSFORM_SCALE,    ///< Scale of a layer
+  TRANSFORM_ROTATION, ///< Rotation of a layer
+  TRANSFORM_OPACITY   ///< Opacity of a layer
+};
+
+} // namespace LottieAnimation
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-foundation/public-api/animated-image-view-properties.h>
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/dali-vector.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration DALI_INTERNAL
+{
+class AnimatedImageViewImpl;
+}
+
+/**
+ * @brief AnimatedImageView is a View for displaying animated image resources such as GIF files.
+ *
+ * It supports playback control (play, pause, stop) and loop count configuration.
+ * The animation starts automatically when Play() is called after the image is loaded.
+ *
+ * @code
+ * AnimatedImageView view = AnimatedImageView::New("animation.gif");
+ * view.SetLoopCount(3);
+ * view.Play();
+ * @endcode
+ */
+class DALI_UI_API AnimatedImageView : public View
+{
+public:
+  /**
+   * @brief Property indices for AnimatedImageView.
+   *
+   * These can be used with Dali::Handle::GetProperty() and SetProperty().
+   */
+  struct Property
+  {
+    enum
+    {
+      IMAGE                     = AnimatedImageViewPropertyIndex::IMAGE,
+      IMAGE_URLS                = AnimatedImageViewPropertyIndex::IMAGE_URLS,
+      LOOP_COUNT                = AnimatedImageViewPropertyIndex::LOOP_COUNT,
+      STOP_BEHAVIOR             = AnimatedImageViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR        = AnimatedImageViewPropertyIndex::FRAME_SPEED_FACTOR,
+      BATCH_SIZE                = AnimatedImageViewPropertyIndex::BATCH_SIZE,
+      CACHE_SIZE                = AnimatedImageViewPropertyIndex::CACHE_SIZE,
+      FRAME_DELAY               = AnimatedImageViewPropertyIndex::FRAME_DELAY,
+      IMAGE_COLOR               = AnimatedImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLIED_ALPHA      = AnimatedImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+      FITTING_MODE              = AnimatedImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE             = AnimatedImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH             = AnimatedImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT            = AnimatedImageViewPropertyIndex::DESIRED_HEIGHT,
+      LOAD_POLICY               = AnimatedImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY            = AnimatedImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING       = AnimatedImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      IMAGE_LOAD_WITH_VIEW_SIZE = AnimatedImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL            = AnimatedImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK              = AnimatedImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_MODE              = AnimatedImageViewPropertyIndex::MASKING_MODE,
+      PLACEHOLDER_IMAGE         = AnimatedImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                = AnimatedImageViewPropertyIndex::PIXEL_AREA,
+    };
+  };
+
+  /// @brief Animation finished signal type. Emitted when the animation completes all loops.
+  typedef Signal<void(View)> AnimationFinishedSignalType;
+
+public: // Creation & Destruction
+  AnimatedImageView();
+  ~AnimatedImageView();
+  AnimatedImageView(const AnimatedImageView& rhs);
+  AnimatedImageView(AnimatedImageView&& rhs) noexcept;
+  AnimatedImageView& operator=(const AnimatedImageView& rhs);
+  AnimatedImageView& operator=(AnimatedImageView&& rhs) noexcept;
+
+  /**
+   * @brief Creates a new AnimatedImageView.
+   *
+   * @param[in] url Optional URL of the animated image resource (e.g. GIF file)
+   * @return A handle to the newly allocated AnimatedImageView
+   */
+  static AnimatedImageView New(const Dali::String& url = "");
+
+  /**
+   * @brief Downcasts a handle to AnimatedImageView.
+   *
+   * @param[in] handle A handle to an object
+   * @return A handle to AnimatedImageView, or an empty handle if not AnimatedImageView
+   */
+  static AnimatedImageView DownCast(BaseHandle handle);
+
+public: // Image
+  /**
+   * @brief Sets the URL of the animated image resource to display.
+   *
+   * @param[in] url The URL of the image resource
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetResourceUrl(const Dali::String& url);
+
+  /**
+   * @brief Gets the URL of the animated image resource.
+   *
+   * @return The URL of the image resource
+   */
+  Dali::String GetResourceUrl() const;
+
+  /**
+   * @brief Sets an array of image URLs for frame-by-frame animation.
+   *
+   * Setting this overrides any single URL set via SetResourceUrl().
+   * The images are played in sequence as animation frames.
+   *
+   * @param[in] urls Array of image URLs
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetResourceUrls(const Dali::Vector<Dali::String>& urls);
+
+  /**
+   * @brief Gets the array of image URLs.
+   *
+   * @return The current array of image URLs, or empty if not set
+   */
+  const Dali::Vector<Dali::String>& GetResourceUrls() const;
+
+  /**
+   * @brief Sets whether the image is loaded synchronously at the current view size.
+   *
+   * @param[in] enabled True to enable loading image with view size
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetImageLoadWithViewSize(bool enabled);
+
+  /**
+   * @brief Gets whether the image is loaded with the view size.
+   *
+   * @return True if loading image with view size is enabled
+   */
+  bool IsImageLoadWithViewSizeEnabled() const;
+
+public: // Playback Control
+  /**
+   * @brief Starts or resumes playback of the animation.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& Play();
+
+  /**
+   * @brief Pauses playback of the animation.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& Pause();
+
+
+exec
+/bin/bash -lc "sed -n '180,420p' repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+  /**
+   * @brief Stops playback of the animation and resets to the first frame.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& Stop();
+
+  /**
+   * @brief Sets the number of times the animation should loop.
+   *
+   * A value of -1 means infinite looping. A value of 0 means the animation
+   * will not play. A positive value specifies an exact loop count.
+   *
+   * @param[in] count The loop count (-1 for infinite)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetLoopCount(int count);
+
+  /**
+   * @brief Gets the current loop count.
+   *
+   * @return The loop count, or -1 for infinite looping
+   */
+  int GetLoopCount() const;
+
+public: // Frame Control
+  /**
+   * @brief Jumps to the specified frame number.
+   *
+   * @param[in] frame The frame index to jump to
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& JumpToFrame(int frame);
+
+  /**
+   * @brief Sets the behavior of the animation when it is stopped.
+   *
+   * @param[in] behavior The stop behavior (CURRENT_FRAME, FIRST_FRAME, or LAST_FRAME)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetStopBehavior(AnimatedImage::StopBehavior behavior);
+
+  /**
+   * @brief Gets the current stop behavior.
+   *
+   * @return The current stop behavior
+   */
+  AnimatedImage::StopBehavior GetStopBehavior() const;
+
+  /**
+   * @brief Sets the speed factor for animation playback.
+   *
+   * Values between [0, 1] slow down the animation; values above 1 speed it up.
+   * The actual clamping to [0.01, 100.0] is handled by the underlying animation renderer.
+   *
+   * @param[in] factor The speed multiplier (default: 1.0)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetFrameSpeedFactor(float factor);
+
+  /**
+   * @brief Gets the current frame speed factor.
+   *
+   * @return The frame speed factor
+   */
+  float GetFrameSpeedFactor() const;
+
+  /**
+   * @brief Sets the number of frames to pre-load in each batch.
+   *
+   * @param[in] size The batch size (default: 1)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetBatchSize(int size);
+
+  /**
+   * @brief Gets the current batch size.
+   *
+   * @return The batch size
+   */
+  int GetBatchSize() const;
+
+  /**
+   * @brief Sets the number of frames to keep in cache.
+   *
+   * @param[in] size The cache size (default: 1)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetCacheSize(int size);
+
+  /**
+   * @brief Gets the current cache size.
+   *
+   * @return The cache size
+   */
+  int GetCacheSize() const;
+
+  /**
+   * @brief Sets the delay in milliseconds between each frame.
+   *
+   * Overrides the frame delay embedded in the image file.
+   *
+   * @param[in] milliseconds The delay between frames in milliseconds
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetFrameDelay(int milliseconds);
+
+  /**
+   * @brief Gets the current frame delay override.
+   *
+   * @return The frame delay in milliseconds, or -1 if not overridden
+   */
+  int GetFrameDelay() const;
+
+  /**
+   * @brief Gets the current playback state of the animation.
+   *
+   * @return The current PlayState
+   */
+  Ui::AnimatedImage::PlayState GetPlayState() const;
+
+  /**
+   * @brief Gets the current frame number being displayed.
+   *
+   * @return The current frame index
+   */
+  int GetCurrentFrame() const;
+
+  /**
+   * @brief Gets the total number of frames in the animation.
+   *
+   * @return The total frame count
+   */
+  int GetTotalFrame() const;
+
+public: // Visual Appearance
+  /**
+   * @brief Sets the color applied to the image.
+   *
+   * @param[in] color The color to apply
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetImageColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color applied to the image.
+   *
+   * @return The current image color
+   */
+  UiColor GetImageColor() const;
+
+  /**
+   * @brief Sets how the image is fitted within the view bounds.
+   *
+   * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
+   *
+   * @param[in] fittingMode The fitting mode to use
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetFittingMode(Ui::Image::FittingMode fittingMode);
+
+  /**
+   * @brief Gets the fitting mode.
+   *
+   * @return The current fitting mode (default: FILL)
+   */
+  Ui::Image::FittingMode GetFittingMode() const;
+
+  /**
+   * @brief Sets the sampling mode used when scaling the image.
+   *
+   * @param[in] samplingMode The sampling mode to use
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetSamplingMode(Ui::Image::SamplingMode samplingMode);
+
+  /**
+   * @brief Gets the sampling mode.
+   *
+   * @return The current sampling mode
+   */
+  Ui::Image::SamplingMode GetSamplingMode() const;
+
+  /**
+   * @brief Sets whether the image uses pre-multiplied alpha.
+   *
+   * @param[in] preMultiplied True if the image has pre-multiplied alpha
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetPreMultipliedAlpha(bool preMultiplied);
+
+  /**
+   * @brief Gets whether pre-multiplied alpha is enabled.
+   *
+   * @return True if pre-multiplied alpha is enabled
+   */
+  bool IsPreMultipliedAlpha() const;
+
+  /**
+   * @brief Sets the depth index for the image.
+   *
+   * @param[in] depthIndex The depth index to set
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetDepthIndex(int depthIndex);
+
+public: // Loading Behavior
+  /**
+   * @brief Sets the desired image width used as a hint for the image loader.
+   *
+   * @param[in] width The desired width in pixels (0 to use natural size)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetDesiredWidth(int width);
+
+  /**
+   * @brief Gets the desired image width hint.
+   *
+   * @return The desired width in pixels, or 0 if not set
+   */
+  int GetDesiredWidth() const;
+
+  /**
+   * @brief Sets the desired image height used as a hint for the image loader.
+   *
+   * @param[in] height The desired height in pixels (0 to use natural size)
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageView& SetDesiredHeight(int height);
+
+  /**
+   * @brief Gets the desired image height hint.
+   *
+   * @return The desired height in pixels, or 0 if not set
+   */
+  int GetDesiredHeight() const;
+
+  /**
+   * @brief Sets the load policy for the image resource.
+   *
+
+exec
+/bin/bash -lc "sed -n '1,160p' repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+#include <dali-ui-foundation/public-api/lottie-animation-view-properties.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/object/property-map.h>
+#include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration DALI_INTERNAL
+{
+class LottieAnimationViewImpl;
+}
+
+/**
+ * @brief LottieAnimationView is a View for displaying Lottie vector animations.
+ *
+ * It renders JSON-based Lottie animation files and supports playback control
+ * (play, pause, stop), loop configuration, and frame-range control.
+ *
+ * @code
+ * LottieAnimationView view = LottieAnimationView::New("animation.json");
+ * view.SetLoopCount(-1); // infinite
+ * view.Play();
+ * @endcode
+ */
+class DALI_UI_API LottieAnimationView : public View
+{
+public:
+  /**
+   * @brief Property indices for LottieAnimationView.
+   *
+   * These can be used with Dali::Handle::GetProperty() and SetProperty().
+   */
+  struct Property
+  {
+    enum
+    {
+      IMAGE                      = LottieAnimationViewPropertyIndex::IMAGE,
+      LOOP_COUNT                 = LottieAnimationViewPropertyIndex::LOOP_COUNT,
+      LOOPING_MODE               = LottieAnimationViewPropertyIndex::LOOPING_MODE,
+      STOP_BEHAVIOR              = LottieAnimationViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR         = LottieAnimationViewPropertyIndex::FRAME_SPEED_FACTOR,
+      IMAGE_COLOR                = LottieAnimationViewPropertyIndex::IMAGE_COLOR,
+      DESIRED_WIDTH              = LottieAnimationViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
+      RELEASE_POLICY             = LottieAnimationViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
+      PRE_MULTIPLIED_ALPHA       = LottieAnimationViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+      REDRAW_IN_SCALING_DOWN     = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
+      REDRAW_IN_SCALING_UP       = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
+      ENABLE_FRAME_CACHE         = LottieAnimationViewPropertyIndex::ENABLE_FRAME_CACHE,
+      NOTIFY_AFTER_RASTERIZATION = LottieAnimationViewPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
+      RENDER_SCALE               = LottieAnimationViewPropertyIndex::RENDER_SCALE,
+      PLACEHOLDER_IMAGE          = LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                 = LottieAnimationViewPropertyIndex::PIXEL_AREA,
+    };
+  };
+
+  /// @brief Animation finished signal type. Emitted when the animation completes all loops.
+  typedef Signal<void(View)> AnimationFinishedSignalType;
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized LottieAnimationView handle.
+   */
+  LottieAnimationView();
+
+  /**
+   * @brief Creates an initialized LottieAnimationView.
+   *
+   * @param[in] url The URL of the Lottie JSON file. Defaults to empty string.
+   * @return A handle to a newly allocated Dali resource
+   */
+  static LottieAnimationView New(const Dali::String& url = "");
+
+  /**
+   * @brief Virtual destructor.
+   */
+  ~LottieAnimationView();
+
+  /**
+   * @brief Copy constructor.
+   * @param[in] rhs Handle to copy
+   */
+  LottieAnimationView(const LottieAnimationView& rhs);
+
+  /**
+   * @brief Move constructor.
+   * @param[in] rhs Handle to move
+   */
+  LottieAnimationView(LottieAnimationView&& rhs) noexcept;
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  LottieAnimationView& operator=(const LottieAnimationView& rhs);
+
+  /**
+   * @brief Move assignment operator.
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  LottieAnimationView& operator=(LottieAnimationView&& rhs) noexcept;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to LottieAnimationView handle.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a LottieAnimationView or an uninitialized handle
+   */
+  static LottieAnimationView DownCast(BaseHandle handle);
+
+public: // Image
+  /**
+   * @brief Sets the resource URL of the Lottie animation file.
+   *
+   * @param[in] url The URL of the Lottie JSON file
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationView& SetResourceUrl(const Dali::String& url);
+
+  /**
+   * @brief Gets the current resource URL.
+   *
+   * @return The URL of the Lottie JSON file currently set on this view
+   */
+  Dali::String GetResourceUrl() const;
+
+public: // Playback Control
+
+codex
+---
+title: Image
+sidebar_label: Image
+category: images-visuals
+---
+
+# Image
+
+Use dali-ui image views for application-facing image content, and keep image-related event handling and animation customization in the `Dali::Ui::View` layer.
+
+## Table of Contents
+
+- [Image Views in dali-ui](#image-views-in-dali-ui)
+- [Keeping Image Code in the View Layer](#keeping-image-code-in-the-view-layer)
+- [Lottie Dynamic Image Properties](#lottie-dynamic-image-properties)
+- [Connection Lifetime for Image Events](#connection-lifetime-for-image-events)
+
+## Image Views in dali-ui
+
+In a dali-ui app, image UI should be modeled as `Dali::Ui::View` content. `Dali::Ui::AnimatedImageView` is the app-facing image view type for animated image resources. Treat it as part of the view tree instead of dropping down to raw actor-style image handling.
+
+`Dali::Ui::AnimatedImageView` is a context symbol in this guide: use it as the image view object you place in UI composition, while keeping concrete image behavior to the public image view APIs available in your installed dali-ui headers.
+
+```cpp
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+namespace Ui = Dali::Ui;
+
+class ImagePanel
+{
+public:
+  void StoreImageView(Ui::AnimatedImageView imageView)
+  {
+    mImageView = imageView;
+  }
+
+  Ui::AnimatedImageView GetImageView() const
+  {
+    return mImageView;
+  }
+
+private:
+  Ui::AnimatedImageView mImageView;
+};
+```
+
+Because `Dali::Ui::AnimatedImageView` is a `Dali::Ui::View`-based type, pass it through APIs that accept view objects in your UI layer. This keeps image content aligned with the rest of the dali-ui application model.
+
+```cpp
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+namespace Ui = Dali::Ui;
+
+struct ImageSlot
+{
+  Ui::AnimatedImageView image;
+};
+
+void ReplaceImageSlot(ImageSlot& slot, Ui::AnimatedImageView nextImage)
+{
+  slot.image = nextImage;
+}
+```
+
+## Keeping Image Code in the View Layer
+
+Use `Dali::Application` only for application setup and lifecycle ownership. Image view code should remain app-facing and view-oriented. `Dali::Accessibility::Application` can be used as background application infrastructure when your app integrates accessibility, but image UI itself should still be represented through dali-ui views.
+
+```cpp
+#include <dali/public-api/adaptor-framework/application.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+namespace Ui = Dali::Ui;
+
+class ImageApplicationState
+{
+public:
+  explicit ImageApplicationState(Dali::Application application)
+  : mApplication(std::move(application))
+  {
+  }
+
+  void SetPrimaryImage(Ui::AnimatedImageView view)
+  {
+    mPrimaryImage = view;
+  }
+
+private:
+  Dali::Application    mApplication;
+  Ui::AnimatedImageView mPrimaryImage;
+};
+```
+
+When layout-specific setup is needed, `Dali::Ui::StackLayoutParams` is a context symbol for view layout metadata. Keep that layout data separate from image behavior so that image ownership, event handling, and layout remain easy to reason about.
+
+```cpp
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+
+namespace Ui = Dali::Ui;
+
+struct ImageLayoutBinding
+{
+  Ui::AnimatedImageView image;
+  Ui::StackLayoutParams layout;
+};
+
+ImageLayoutBinding MakeImageLayoutBinding(
+  Ui::AnimatedImageView image,
+  Ui::StackLayoutParams layout)
+{
+  return ImageLayoutBinding{image, layout};
+}
+```
+
+## Lottie Dynamic Image Properties
+
+`Dali::Ui::LottieAnimation::DynamicPropertyInfo` describes a dynamic, per-frame property target for Lottie image animation content. It is owned content for image animation customization because its members define the target and callback binding used by the dynamic property mechanism.
+
+Use `Dali::Ui::LottieAnimation::DynamicPropertyInfo::id` as the application-defined identifier. Use `Dali::Ui::LottieAnimation::DynamicPropertyInfo::keyPath` to address the Lottie layer or element path. Use `Dali::Ui::LottieAnimation::DynamicPropertyInfo::property` for the animated vector property selection, and `Dali::Ui::LottieAnimation::DynamicPropertyInfo::callback` for the per-frame value provider.
+
+```cpp
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+
+namespace Ui = Dali::Ui;
+
+void SetDynamicTarget(
+  Ui::LottieAnimation::DynamicPropertyInfo& info,
+  int targetId,
+  const char* keyPath)
+{
+  info.id      = targetId;
+  info.keyPath = keyPath;
+}
+```
+
+The `callback` member is invoked from the animation path, and ownership is transferred when the dynamic property is applied by the owning Lottie image API. Keep callback code independent from DALi object mutation; prepare values from data owned by your application model instead.
+
+```cpp
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+
+namespace Ui = Dali::Ui;
+
+class LottieImageDynamicTarget
+{
+public:
+  void ConfigureTarget(Ui::LottieAnimation::DynamicPropertyInfo& info)
+  {
+    info.id      = 1001;
+    info.keyPath = "**";
+  }
+
+  int GetTargetId(const Ui::LottieAnimation::DynamicPropertyInfo& info) const
+  {
+    return info.id;
+  }
+
+  const Dali::String& GetTargetPath(const Ui::LottieAnimation::DynamicPropertyInfo& info) const
+  {
+    return info.keyPath;
+  }
+};
+```
+
+For reusable image animation code, store `DynamicPropertyInfo` near the feature that owns the visual effect. That keeps `id`, `keyPath`, `property`, and `callback` together and avoids splitting the target definition across unrelated UI code.
+
+```cpp
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+
+namespace Ui = Dali::Ui;
+
+struct LottieImageEffect
+{
+  Ui::LottieAnimation::DynamicPropertyInfo dynamicProperty;
+};
+
+void AssignDynamicPropertyId(LottieImageEffect& effect, int id)
+{
+  effect.dynamicProperty.id = id;
+}
+```
+
+## Connection Lifetime for Image Events
+
+Image views commonly participate in user or resource events. Use `Dali::ConnectionTracker` as the owning base for objects that connect to public signals, so connections are tied to the lifetime of the controller object.
+
+`Dali::ConnectionTracker::ConnectionTracker` constructs the tracking base. Derive your image controller from `Dali::ConnectionTracker`, then connect signals from their owning view or trait APIs.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+namespace Ui = Dali::Ui;
+
+class ImageEventController : public Dali::ConnectionTracker
+{
+public:
+  ImageEventController()
+  : Dali::ConnectionTracker()
+  {
+  }
+
+  void SetImageView(Ui::AnimatedImageView imageView)
+  {
+    mImageView = imageView;
+  }
+
+private:
+  Ui::AnimatedImageView mImageView;
+};
+```
+
+Keep signal connections scoped to the object that owns the image behavior. This is especially useful when an image view is rebuilt, replaced, or removed as part of a dali-ui view tree update.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
+
+namespace Ui = Dali::Ui;
+
+class ImageScreenController : public Dali::ConnectionTracker
+{
+public:
+  ImageScreenController()
+  : Dali::ConnectionTracker()
+  {
+  }
+
+  void BindImage(Ui::AnimatedImageView image)
+  {
+    mImage = image;
+  }
+
+  Ui::AnimatedImageView GetBoundImage() const
+  {
+    return mImage;
+  }
+
+private:
+  Ui::AnimatedImageView mImage;
+};
+```
+tokens used
+51,862

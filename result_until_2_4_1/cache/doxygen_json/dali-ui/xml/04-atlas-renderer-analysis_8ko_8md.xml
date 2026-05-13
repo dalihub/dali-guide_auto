@@ -1,0 +1,559 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="04-atlas-renderer-analysis_8ko_8md" kind="file" language="Markdown">
+    <compoundname>04-atlas-renderer-analysis.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>AtlasRenderer<sp/>분석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서의<sp/>목적은<sp/>`AtlasRenderer`가<sp/>실제<sp/>렌더링에<sp/>필요로<sp/>하는<sp/>최소<sp/>데이터를<sp/>식별하고,<sp/>`TextVisualizer`가<sp/>기존<sp/>`Text::Controller`<sp/>전체에<sp/>의존하지<sp/>않고도<sp/>`AtlasRenderer`를<sp/>직접<sp/>사용할<sp/>수<sp/>있는지<sp/>검토하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">특히<sp/>아래를<sp/>명확히<sp/>정리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer`<sp/>생성<sp/>방식</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public/internal<sp/>API<sp/>구조</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`<sp/>호출<sp/>흐름</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>controller/view/model로부터<sp/>가져오는<sp/>데이터<sp/>목록</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>최소<sp/>glyph<sp/>/<sp/>layout<sp/>데이터</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>/<sp/>ellipsis<sp/>/<sp/>selection<sp/>없이<sp/>필요한<sp/>최소<sp/>렌더링<sp/>계약</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`용<sp/>adapter<sp/>/<sp/>interface<sp/>설계<sp/>방향</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`<sp/>수정<sp/>필요<sp/>여부와<sp/>최소<sp/>변경<sp/>방향</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">애매한<sp/>내용은<sp/>추측하지<sp/>않고<sp/>`확인<sp/>필요`로<sp/>표시한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>분석<sp/>대상<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>직접<sp/>분석한<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/text-renderer.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/text-renderer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view-interface.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/atlas-manager.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/rendering/atlas/atlas-mesh-factory.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>함께<sp/>참고한<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-model.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/visual-model-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/glyph-metrics-helper.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/graphics/shaders/text-atlas-shader.vert`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/graphics/shaders/text-atlas-l8-shader.frag`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/graphics/shaders/text-atlas-rgba-shader.frag`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>현재<sp/>구조<sp/>요약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasRenderer`는<sp/>`Text::Renderer`의<sp/>구현체이며,<sp/>입력은<sp/>`Text::ViewInterface`<sp/>하나다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>직접적으로는<sp/>`Text::Controller`를<sp/>받지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Text::Controller<sp/>/<sp/>Model]<sp/>--&gt;<sp/>B[Text::View]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[Text::ViewInterface]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[AtlasRenderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[AtlasGlyphManager]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[AtlasManager]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>G[Mesh<sp/>생성]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[Actor<sp/>/<sp/>Renderer<sp/>생성]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중요한<sp/>점은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`AtlasRenderer`는<sp/>표면적으로<sp/>`ViewInterface`만<sp/>알면<sp/>된다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>그러나<sp/>현재<sp/>`ViewInterface`<sp/>구현체인<sp/>`Text::View`는<sp/>사실상<sp/>`VisualModel`과<sp/>`LogicalModel`에<sp/>연결되어<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>따라서<sp/>controller<sp/>의존성은<sp/>직접<sp/>의존이<sp/>아니라<sp/>`Text::ViewInterface`<sp/>구현을<sp/>통해<sp/>우회적으로<sp/>들어온다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>AtlasRenderer<sp/>생성<sp/>방식</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::RendererPtr<sp/>AtlasRenderer::New()`<sp/>in<sp/>`text-atlas-renderer.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer::AtlasRenderer()`<sp/>in<sp/>`text-atlas-renderer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>생성<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">생성은<sp/>매우<sp/>단순하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`AtlasRenderer::New()`<sp/>호출</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`new<sp/>AtlasRenderer()`</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>constructor에서<sp/>`mImpl<sp/>=<sp/>new<sp/>Impl()`</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`Impl`<sp/>constructor에서<sp/>singleton/서비스<sp/>획득</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Impl`<sp/>constructor가<sp/>가져오는<sp/>핵심<sp/>dependency:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mGlyphManager<sp/>=<sp/>AtlasGlyphManager::Get()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mFontClient<sp/>=<sp/>TextAbstraction::FontClient::Get()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`AtlasRenderer`는<sp/>내부적으로<sp/>아래<sp/>두<sp/>축에<sp/>강하게<sp/>의존한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>생성:<sp/>`FontClient`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>cache<sp/>/<sp/>texture<sp/>/<sp/>mesh:<sp/>`AtlasGlyphManager`,<sp/>`AtlasManager`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>관점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasRenderer`<sp/>생성<sp/>자체는<sp/>controller와<sp/>무관하다.<sp/>따라서<sp/>`TextVisualizer`는<sp/>기존처럼<sp/>`Text::Backend::Get().NewRenderer()`<sp/>경로를<sp/>통해<sp/>만들거나,<sp/>atlas<sp/>renderer를<sp/>직접<sp/>생성하는<sp/>wrapper를<sp/>둘<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>AtlasRenderer<sp/>public/internal<sp/>API</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>public<sp/>API</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`text-atlas-renderer.h`에<sp/>드러난<sp/>외부<sp/>API는<sp/>사실상<sp/>두<sp/>개다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`static<sp/>RendererPtr<sp/>New()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Actor<sp/>Render(ViewInterface&amp;<sp/>view,<sp/>Actor<sp/>textControl,<sp/>Property::Index<sp/>animatablePropertyIndex,<sp/>float&amp;<sp/>alignmentOffset,<sp/>int<sp/>depth)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>외부<sp/>계약은<sp/>`ViewInterface`<sp/>기반<sp/>렌더링<sp/>하나뿐이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>internal<sp/>API</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Impl`<sp/>내부<sp/>주요<sp/>함수:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AddGlyphs(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CacheGlyph(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GenerateMesh(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CreateActors(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CreateMeshActor(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`StitchTextMesh(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AdjustExtents(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CalculateBlocksSize(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GenerateUnderlines(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GenerateStrikethrough(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RemoveText()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내부<sp/>역할<sp/>분해:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>캐시:<sp/>`CacheGlyph`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertex/index<sp/>생성:<sp/>`GenerateMesh`,<sp/>`StitchTextMesh`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas별<sp/>actor<sp/>생성:<sp/>`CreateActors`,<sp/>`CreateMeshActor`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>캐시<sp/>참조<sp/>수<sp/>정리:<sp/>`RemoveText`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Render<sp/>호출<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer::Render(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Impl::AddGlyphs(...)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Render()`의<sp/>핵심<sp/>코드는<sp/>아래<sp/>순서다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`UnparentAndReset(mImpl-&gt;mActor)`</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`Length<sp/>numberOfGlyphs<sp/>=<sp/>view.GetNumberOfGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>glyph<sp/>/<sp/>position<sp/>buffer<sp/>할당</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`view.GetGlyphs(...)`</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>`view.GetColors()`,<sp/>`view.GetColorIndices()`,<sp/>`view.GetTextColor()`</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>`mImpl-&gt;AddGlyphs(...)`</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>actor가<sp/>생성되지<sp/>않았으면<sp/>빈<sp/>actor<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">8.<sp/>actor<sp/>반환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>렌더링<sp/>준비<sp/>데이터는<sp/>`Render()`에서<sp/>거의<sp/>전부<sp/>`ViewInterface`에서<sp/>읽어<sp/>온다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AddGlyphs()`<sp/>내부<sp/>흐름:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Render]<sp/>--&gt;<sp/>B[GetNumberOfGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[GetGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[GetColors<sp/>/<sp/>GetColorIndices<sp/>/<sp/>GetTextColor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[AddGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[View<sp/>style/layout<sp/>getter<sp/>추가<sp/>호출]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[CacheGlyph]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[GenerateMesh]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[atlas별<sp/>mesh<sp/>병합]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[CreateActors]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Controller에서<sp/>가져오는<sp/>데이터<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">정확히<sp/>말하면<sp/>`AtlasRenderer`는<sp/>controller에서<sp/>직접<sp/>가져오지<sp/>않고<sp/>`ViewInterface`에서<sp/>가져온다.<sp/>그러나<sp/>현재<sp/>`Text::View`<sp/>구현은<sp/>controller/model이<sp/>만든<sp/>데이터를<sp/>노출하므로,<sp/>결과적으로<sp/>아래<sp/>데이터가<sp/>controller/model<sp/>계층에서<sp/>온다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>`Render()`와<sp/>`AddGlyphs()`가<sp/>실제로<sp/>호출하는<sp/>`ViewInterface`<sp/>getter</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNumberOfGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColors()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColorIndices()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetTextColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLayoutSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetShadowOffset()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetShadowColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsUnderlineEnabled()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetOutlineWidth()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetOutlineColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetOutlineOffset()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetHyphens()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetHyphenIndices()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetHyphensCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`IsStrikethroughEnabled()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetCharacterSpacing()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNumberOfUnderlineRuns()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetUnderlineRuns(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetUnderlineType()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetUnderlineColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetUnderlineHeight()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetDashedUnderlineGap()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetDashedUnderlineWidth()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNumberOfStrikethroughRuns()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetStrikethroughRuns(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetStrikethroughColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetStrikethroughHeight()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetTextBuffer()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphsToCharacters()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetStartIndexOfElidedGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetFirstMiddleIndexOfElidedGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetSecondMiddleIndexOfElidedGlyphs()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`AtlasRenderer`는<sp/>이름만<sp/>보면<sp/>glyph<sp/>renderer<sp/>같지만,<sp/>실제<sp/>구현은<sp/>아래<sp/>기능까지<sp/>직접<sp/>포함한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>glyph<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hyphen<sp/>insertion<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis<sp/>관련<sp/>index<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>character<sp/>spacing<sp/>보정</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`TextVisualizer`<sp/>1차<sp/>범위에서<sp/>style/ellipsis<sp/>등을<sp/>무시한다면,<sp/>현재<sp/>`ViewInterface`의<sp/>상당<sp/>부분은<sp/>불필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>실제로<sp/>필요한<sp/>glyph<sp/>데이터<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">style<sp/>/<sp/>ellipsis<sp/>/<sp/>selection을<sp/>제외한<sp/>최소<sp/>glyph<sp/>렌더링에<sp/>필요한<sp/>데이터는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>필수<sp/>glyph<sp/>identity<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::fontId`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::index`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::width`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::height`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::xBearing`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::yBearing`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::isItalicRequired`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::isBoldRequired`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">설명:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`fontId<sp/>+<sp/>index<sp/>+<sp/>italic/bold<sp/>+<sp/>outline`<sp/>조합으로<sp/>atlas<sp/>cache<sp/>key가<sp/>만들어진다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`width/height<sp/>==<sp/>0`이면<sp/>whitespace처럼<sp/>처리되어<sp/>mesh<sp/>생성이<sp/>생략된다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`xBearing<sp/>/<sp/>yBearing`는<sp/>최종<sp/>mesh<sp/>기준<sp/>위치<sp/>계산에<sp/>사용된다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>조건부<sp/>glyph<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphInfo::advance`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>값은<sp/>현재<sp/>구현에서<sp/>hyphen<sp/>insertion<sp/>/<sp/>character<sp/>spacing<sp/>보정<sp/>경로에서<sp/>사용된다.</highlight></codeline>
+<codeline><highlight class="normal">`TextVisualizer`<sp/>1차<sp/>범위에서<sp/>hyphen<sp/>insertion과<sp/>custom<sp/>character<sp/>spacing을<sp/>빼면<sp/>직접<sp/>필요성은<sp/>낮아질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>layout<sp/>result에서<sp/>필요한<sp/>position<sp/>데이터<sp/>목록</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">최소<sp/>layout<sp/>결과<sp/>데이터는<sp/>다음이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph별<sp/>`Vector2<sp/>position`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>전체<sp/>`layoutSize`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`alignmentOffset`<sp/>또는<sp/>그<sp/>효과가<sp/>반영된<sp/>glyph<sp/>position</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>구현에서는<sp/>`view.GetGlyphs(...)`가<sp/>다음을<sp/>한<sp/>번에<sp/>해<sp/>준다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>array<sp/>제공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>position<sp/>array<sp/>제공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>ascender<sp/>/<sp/>line<sp/>spacing<sp/>/<sp/>line<sp/>alignment<sp/>offset<sp/>반영</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis<sp/>glyph<sp/>치환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`AtlasRenderer`는<sp/>line<sp/>layout<sp/>자체를<sp/>하지<sp/>않는다.<sp/>이미<sp/>layout된<sp/>glyph<sp/>position을<sp/>소비할<sp/>뿐이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>style<sp/>/<sp/>ellipsis<sp/>/<sp/>selection<sp/>없이<sp/>최소<sp/>렌더링에<sp/>필요한<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`<sp/>1차<sp/>범위가<sp/>다음을<sp/>무시한다면:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>style</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editing</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasRenderer`가<sp/>실제로<sp/>필요한<sp/>최소<sp/>입력은<sp/>크게<sp/>줄어든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>최소<sp/>`ViewInterface`<sp/>수준<sp/>계약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNumberOfGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetTextColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColors()`<sp/>또는<sp/>`nullptr`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColorIndices()`<sp/>또는<sp/>`nullptr`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLayoutSize()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>최소<sp/>glyph/layout<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>array</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positions</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>전체<sp/>레이아웃<sp/>크기</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기본<sp/>텍스트<sp/>색상</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>사실상<sp/>불필요한<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shadow<sp/>관련<sp/>getter<sp/>전부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline<sp/>관련<sp/>getter<sp/>전부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough<sp/>관련<sp/>getter<sp/>전부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hyphen<sp/>관련<sp/>getter<sp/>전부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline<sp/>관련<sp/>getter<sp/>전부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis<sp/>관련<sp/>getter<sp/>전부</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetTextBuffer()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphsToCharacters()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetCharacterSpacing()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단,<sp/>현재<sp/>소스<sp/>코드는<sp/>이<sp/>getter들을<sp/>직접<sp/>호출하므로,<sp/>&quot;불필요&quot;하더라도<sp/>인터페이스<sp/>차원에서는<sp/>stub<sp/>구현이<sp/>필요하거나<sp/>renderer<sp/>수정이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>AtlasRenderer가<sp/>실제로<sp/>필요로<sp/>하는<sp/>최소<sp/>데이터<sp/>계약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`<sp/>입장에서<sp/>다시<sp/>정리하면<sp/>최소<sp/>계약은<sp/>아래처럼<sp/>표현할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[PreparedGlyphRun]<sp/>--&gt;<sp/>B[LaidOutGlyphRun]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[AtlasRenderer]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasViewAdapter`가<sp/>제공해야<sp/>할<sp/>핵심:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>array</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>position<sp/>array</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>color</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">선택<sp/>사항:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>per-glyph<sp/>color<sp/>array</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`TextVisualizer`가<sp/>atlas<sp/>renderer를<sp/>직접<sp/>쓰려면<sp/>controller<sp/>전체보다<sp/>`ViewInterface`의<sp/>축소<sp/>구현체가<sp/>더<sp/>중요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer에서<sp/>AtlasRenderer를<sp/>직접<sp/>쓰기<sp/>위해<sp/>필요한<sp/>adapter/interface<sp/>설계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>권장<sp/>방향<sp/>1:<sp/>`TextVisualizerAtlasView`<sp/>같은<sp/>`ViewInterface`<sp/>adapter</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가장<sp/>현실적인<sp/>1차<sp/>방법은<sp/>`Text::ViewInterface`를<sp/>구현하는<sp/>경량<sp/>adapter를<sp/>새로<sp/>두는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가칭:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerAtlasView`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>또는<sp/>`AtlasRenderViewAdapter`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>adapter의<sp/>입력:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>glyph<sp/>array</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positions</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>color</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>adapter가<sp/>하는<sp/>일:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNumberOfGlyphs()`<sp/>구현</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs(...)`<sp/>구현</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>사용하지<sp/>않는<sp/>style<sp/>getter는<sp/>zero<sp/>/<sp/>false<sp/>/<sp/>null<sp/>반환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer::Render()`를<sp/>거의<sp/>그대로<sp/>재사용<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Controller`와<sp/>`Text::View`를<sp/>직접<sp/>끌고<sp/>오지<sp/>않아도<sp/>됨</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`ViewInterface`가<sp/>너무<sp/>넓어서<sp/>stub<sp/>함수가<sp/>많다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>권장<sp/>방향<sp/>2:<sp/>`AtlasRenderer`<sp/>전용<sp/>경량<sp/>interface<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">더<sp/>구조적으로<sp/>좋은<sp/>방향은<sp/>`AtlasRenderer`가<sp/>요구하는<sp/>최소<sp/>getter만<sp/>가진<sp/>별도<sp/>interface를<sp/>두는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가칭:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderDataInterface`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">최소<sp/>메서드<sp/>예:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNumberOfGlyphs()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphs(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLayoutSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetTextColor()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColors()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetColorIndices()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>요구사항에<sp/>더<sp/>정확히<sp/>맞는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer`가<sp/>style-heavy<sp/>`ViewInterface`에<sp/>묶이지<sp/>않는다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>renderer<sp/>API<sp/>변경이<sp/>필요하다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`Text::Renderer`<sp/>추상<sp/>계층과<sp/>호환을<sp/>어떻게<sp/>둘지<sp/>추가<sp/>설계<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>기존<sp/>AtlasRenderer<sp/>수정이<sp/>필요한지<sp/>여부</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`<sp/>1차<sp/>구현을<sp/>빠르게<sp/>가져가려면<sp/>`AtlasRenderer`를<sp/>크게<sp/>수정하지<sp/>않고,<sp/>`ViewInterface`<sp/>adapter로<sp/>우회하는<sp/>방법이<sp/>가능하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">하지만<sp/>장기적으로<sp/>보면<sp/>수정<sp/>필요성이<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>현재<sp/>`AtlasRenderer`는<sp/>최소<sp/>glyph<sp/>renderer가<sp/>아니라<sp/>style<sp/>처리까지<sp/>같이<sp/>가진다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`TextVisualizer`<sp/>1차<sp/>범위에서<sp/>쓰지<sp/>않는<sp/>getter를<sp/>너무<sp/>많이<sp/>요구한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`ViewInterface`는<sp/>`AtlasRenderer`<sp/>입장에서<sp/>과도하게<sp/>넓다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>&quot;당장<sp/>반드시<sp/>수정해야<sp/>하느냐&quot;는<sp/>질문에는<sp/>`아니오`에<sp/>가깝고,<sp/>&quot;장기적으로<sp/>수정<sp/>가치가<sp/>있느냐&quot;는<sp/>질문에는<sp/>`예`에<sp/>가깝다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>수정한다면<sp/>최소<sp/>변경<sp/>방향</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>최소<sp/>변경<sp/>방향<sp/>1:<sp/>`Render()`<sp/>내부<sp/>분기<sp/>단순화</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`<sp/>1차<sp/>범위에<sp/>맞춰<sp/>아래<sp/>기능이<sp/>꺼져<sp/>있으면<sp/>관련<sp/>getter<sp/>접근을<sp/>피하는<sp/>방향으로<sp/>정리할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>underline<sp/>disabled</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough<sp/>disabled</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline<sp/>width<sp/>0</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow<sp/>offset<sp/>zero</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hyphens<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis<sp/>비활성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>character<sp/>spacing<sp/>0</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이렇게<sp/>하면<sp/>adapter가<sp/>제공해야<sp/>하는<sp/>유효<sp/>데이터도<sp/>줄어든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>최소<sp/>변경<sp/>방향<sp/>2:<sp/>`AddGlyphsMinimal(...)`<sp/>같은<sp/>경량<sp/>경로<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AddGlyphsMinimal(const<sp/>Vector&lt;Vector2&gt;&amp;<sp/>positions,<sp/>const<sp/>Vector&lt;GlyphInfo&gt;&amp;<sp/>glyphs,<sp/>const<sp/>Vector4&amp;<sp/>defaultColor,<sp/>...)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>경로는:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>hyphen<sp/>미지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline/strikethrough<sp/>미지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline/shadow<sp/>미지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>buffer<sp/>/<sp/>glyph-to-character<sp/>map<sp/>미사용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>1차<sp/>구현과<sp/>매우<sp/>잘<sp/>맞는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`를<sp/>크게<sp/>깨지<sp/>않고<sp/>확장<sp/>가능하다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>최소<sp/>변경<sp/>방향<sp/>3:<sp/>`ViewInterface`<sp/>의존<sp/>부분을<sp/>helper로<sp/>분리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ExtractAtlasRenderDataFromView(ViewInterface&amp;,<sp/>AtlasRenderData&amp;)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RenderAtlasGlyphs(const<sp/>AtlasRenderData&amp;,<sp/>...)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이렇게<sp/>하면<sp/>장기적으로<sp/>`Text::View`와<sp/>`TextVisualizer`가<sp/>같은<sp/>atlas<sp/>backend를<sp/>공유하기<sp/>쉬워진다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer에<sp/>필요한<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer::Render()`의<sp/>최소<sp/>입력<sp/>경계는<sp/>사실상<sp/>`ViewInterface`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>렌더<sp/>핵심은<sp/>glyph<sp/>array<sp/>+<sp/>glyph<sp/>positions<sp/>+<sp/>layout<sp/>size<sp/>+<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>캐시/atlas<sp/>관리<sp/>로직은<sp/>그대로<sp/>재사용<sp/>가치가<sp/>높음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>controller<sp/>대신<sp/>`ViewInterface`<sp/>adapter를<sp/>제공하는<sp/>방향이<sp/>현실적임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>참고용<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shadow<sp/>/<sp/>outline<sp/>/<sp/>underline<sp/>/<sp/>strikethrough<sp/>지원<sp/>구조</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>emoji/color<sp/>glyph<sp/>처리<sp/>방식</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>block<sp/>size<sp/>계산<sp/>및<sp/>glyph<sp/>cache<sp/>reference<sp/>count<sp/>처리<sp/>방식</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>버릴<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`<sp/>1차<sp/>범위에서는<sp/>아래를<sp/>제공하지<sp/>않아도<sp/>되는<sp/>방향이<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>underline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hyphen<sp/>insertion</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>buffer<sp/>기반<sp/>spacing<sp/>보정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>editing<sp/>관련<sp/>모든<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단,<sp/>현재<sp/>renderer를<sp/>그대로<sp/>쓸<sp/>경우에는<sp/>zero<sp/>/<sp/>false<sp/>/<sp/>null<sp/>형태의<sp/>dummy<sp/>반환은<sp/>필요할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>설계<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`AtlasRenderer`는<sp/>controller를<sp/>직접<sp/>요구하지<sp/>않는다.<sp/>대신<sp/>`Text::ViewInterface`가<sp/>제공하는<sp/>glyph/layout/style<sp/>데이터<sp/>집합을<sp/>요구한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>`TextVisualizer`는<sp/>아래<sp/>두<sp/>가지<sp/>중<sp/>하나로<sp/>atlas<sp/>renderer를<sp/>사용할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>1차<sp/>구현:<sp/>`Text::ViewInterface`를<sp/>구현하는<sp/>경량<sp/>adapter를<sp/>제공하여<sp/>기존<sp/>`AtlasRenderer`를<sp/>그대로<sp/>사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>장기<sp/>방향:<sp/>`AtlasRenderer`를<sp/>최소<sp/>glyph/layout<sp/>데이터<sp/>중심으로<sp/>리팩터링하여<sp/>`ViewInterface`<sp/>의존을<sp/>축소</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>controller<sp/>의존성은<sp/>제거<sp/>가능하다.<sp/>다만<sp/>그<sp/>자리를<sp/>대체할<sp/>`atlas<sp/>render<sp/>adapter`는<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>확인<sp/>필요<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Backend::Get().NewRenderer()`가<sp/>항상<sp/>`AtlasRenderer`를<sp/>반환하는지,<sp/>또는<sp/>backend<sp/>설정에<sp/>따라<sp/>다른<sp/>renderer가<sp/>선택되는지<sp/>추가<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CommonTextUtils::RenderText(...)`가<sp/>`TextVisualizer`의<sp/>atlas<sp/>adapter<sp/>actor와<sp/>바로<sp/>연결<sp/>가능한지<sp/>추가<sp/>확인<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>1차<sp/>범위에서<sp/>per-glyph<sp/>color도<sp/>제외할지<sp/>여부<sp/>확정<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer<sp/>설계에<sp/>주는<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`AtlasRenderer`는<sp/>controller<sp/>자체보다<sp/>`ViewInterface`<sp/>구현체를<sp/>요구한다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`TextVisualizer`는<sp/>기존<sp/>controller를<sp/>우회하고도<sp/>atlas<sp/>renderer를<sp/>사용할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>핵심은<sp/>`Prepare<sp/>+<sp/>Layout`<sp/>결과를<sp/>`ViewInterface`<sp/>형태로<sp/>노출하는<sp/>경량<sp/>adapter를<sp/>두는<sp/>것이다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>1차<sp/>구현에서는<sp/>adapter<sp/>방식이<sp/>가장<sp/>현실적이고,<sp/>장기적으로는<sp/>`AtlasRenderer`의<sp/>style-heavy<sp/>의존을<sp/>줄이는<sp/>리팩터링이<sp/>바람직하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>추가<sp/>확인:<sp/>AtlasRenderer<sp/>output<sp/>attach<sp/>전제</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`AtlasRenderer`<sp/>output<sp/>actor는<sp/>`Renderer::Render(ViewInterface&amp;<sp/>view,<sp/>Actor<sp/>textControl,<sp/>...)`<sp/>호출<sp/>결과로만<sp/>얻을<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>즉,<sp/>renderer<sp/>객체를<sp/>생성하는<sp/>것만으로는<sp/>attach<sp/>가능한<sp/>output<sp/>actor가<sp/>생기지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>`TextVisualizer`<sp/>구현에는<sp/>`Text::ViewInterface`<sp/>bridge가<sp/>없으므로,<sp/>`AtlasRenderer`<sp/>output<sp/>attach는<sp/>직접<sp/>진행할<sp/>수<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>선택지:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`TextVisualizer`용<sp/>최소<sp/>`Text::ViewInterface`<sp/>구현<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`AtlasRenderer`에<sp/>minimal<sp/>render<sp/>data<sp/>입력<sp/>API<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`TextVisualizer`<sp/>전용<sp/>lightweight<sp/>atlas<sp/>renderer<sp/>경로<sp/>검토</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>AtlasRenderer<sp/>요구<sp/>데이터<sp/>표</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>AtlasRenderer<sp/>요구<sp/>데이터<sp/>|<sp/>현재<sp/>출처<sp/>|<sp/>TextVisualizer<sp/>제공<sp/>방식<sp/>|<sp/>필수<sp/>여부<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>glyph<sp/>count<sp/>|<sp/>`Text::View::GetNumberOfGlyphs()`<sp/>-&gt;<sp/>`VisualModel::mGlyphs/mGlyphPositions`<sp/>|<sp/>layout<sp/>결과에서<sp/>직접<sp/>제공<sp/>|<sp/>필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>glyph<sp/>array<sp/>(`GlyphInfo`)<sp/>|<sp/>`Text::View::GetGlyphs()`<sp/>-&gt;<sp/>`VisualModel::GetGlyphs()`<sp/>|<sp/>prepare<sp/>결과<sp/>+<sp/>layout<sp/>결과<sp/>조합으로<sp/>제공<sp/>|<sp/>필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>glyph<sp/>positions<sp/>(`Vector2`)<sp/>|<sp/>`Text::View::GetGlyphs()`<sp/>-&gt;<sp/>`VisualModel::GetGlyphPositions()`<sp/>|<sp/>layout<sp/>결과에서<sp/>직접<sp/>제공<sp/>|<sp/>필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>layout<sp/>size<sp/>|<sp/>`Text::View::GetLayoutSize()`<sp/>-&gt;<sp/>`VisualModel::GetLayoutSize()`<sp/>|<sp/>layout<sp/>결과에서<sp/>직접<sp/>제공<sp/>|<sp/>필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>default<sp/>text<sp/>color<sp/>|<sp/>`Text::View::GetTextColor()`<sp/>-&gt;<sp/>`VisualModel`<sp/>|<sp/>property<sp/>또는<sp/>prepared<sp/>style<sp/>기본값<sp/>제공<sp/>|<sp/>필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>per-glyph<sp/>colors<sp/>|<sp/>`Text::View::GetColors()`<sp/>/<sp/>`GetColorIndices()`<sp/>|<sp/>1차<sp/>구현에서는<sp/>`nullptr`<sp/>/<sp/>`nullptr`<sp/>또는<sp/>단색<sp/>제공<sp/>|<sp/>선택<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>shadow<sp/>offset/color<sp/>|<sp/>`VisualModel`<sp/>|<sp/>zero<sp/>값<sp/>반환<sp/>adapter<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>underline<sp/>runs<sp/>/<sp/>style<sp/>|<sp/>`VisualModel`<sp/>|<sp/>disabled<sp/>/<sp/>empty<sp/>반환<sp/>adapter<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>strikethrough<sp/>runs<sp/>/<sp/>style<sp/>|<sp/>`VisualModel`<sp/>|<sp/>disabled<sp/>/<sp/>empty<sp/>반환<sp/>adapter<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>outline<sp/>width/color/offset<sp/>|<sp/>`VisualModel`<sp/>|<sp/>zero<sp/>값<sp/>반환<sp/>adapter<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>hyphen<sp/>glyph/index/count<sp/>|<sp/>`VisualModel`<sp/>|<sp/>null<sp/>/<sp/>0<sp/>반환<sp/>adapter<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>ellipsis<sp/>indices<sp/>|<sp/>`VisualModel`<sp/>|<sp/>0<sp/>또는<sp/>비활성<sp/>상태<sp/>반환<sp/>adapter<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>text<sp/>buffer<sp/>|<sp/>`LogicalModel::mText`<sp/>via<sp/>`Text::View`<sp/>|<sp/>1차<sp/>구현에서는<sp/>필요<sp/>없으므로<sp/>dummy<sp/>반환<sp/>가능<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>glyph-to-character<sp/>map<sp/>|<sp/>`VisualModel::mGlyphsToCharacters`<sp/>|<sp/>1차<sp/>구현에서는<sp/>필요<sp/>없으므로<sp/>dummy<sp/>반환<sp/>가능<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>character<sp/>spacing<sp/>|<sp/>`VisualModel::GetCharacterSpacing()`<sp/>|<sp/>0<sp/>반환<sp/>|<sp/>1차<sp/>구현<sp/>비필수<sp/>|</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/04-atlas-renderer-analysis.ko.md"/>
+  </compounddef>
+</doxygen>

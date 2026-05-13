@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="00-overview_8ko_8md" kind="file" language="Markdown">
+    <compoundname>00-overview.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>분석<sp/>개요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>`Dali::Ui::TextVisualizer`<sp/>구현을<sp/>위한<sp/>기준<sp/>문서의<sp/>출발점이다.</highlight></codeline>
+<codeline><highlight class="normal">`TextVisualizer`의<sp/>목표는<sp/>기존<sp/>`TextVisual`처럼<sp/>정적<sp/>텍스처를<sp/>만들어<sp/>붙이는<sp/>방식도<sp/>아니고,</highlight></codeline>
+<codeline><highlight class="normal">`InputField`처럼<sp/>편집기<sp/>전체<sp/>스택을<sp/>안고<sp/>가는<sp/>방식도<sp/>아닌,</highlight></codeline>
+<codeline><highlight class="normal">동적<sp/>레이아웃<sp/>변화에<sp/>강한<sp/>텍스트<sp/>전용<sp/>View를<sp/>만드는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>요구는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>부모<sp/>레이아웃<sp/>변경에<sp/>자주<sp/>반응해도<sp/>relayout<sp/>/<sp/>rerender<sp/>비용이<sp/>과도하게<sp/>커지지<sp/>않아야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>읽기<sp/>전용<sp/>표시가<sp/>기본이며,<sp/>편집기용<sp/>상태<sp/>머신과<sp/>입력<sp/>장치<sp/>의존성을<sp/>기본<sp/>탑재하지<sp/>않아야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreText`<sp/>계열이<sp/>기대하는<sp/>&quot;빠른<sp/>재측정<sp/>+<sp/>빠른<sp/>재배치<sp/>+<sp/>안정적인<sp/>표시&quot;<sp/>특성을<sp/>제공해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>Dali<sp/>text<sp/>모듈의<sp/>재사용<sp/>범위를<sp/>분명히<sp/>하고,<sp/>제거해야<sp/>할<sp/>오버헤드와<sp/>신규<sp/>구조를<sp/>명확히<sp/>정의해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>분석<sp/>범위</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>분석은<sp/>아래<sp/>축으로<sp/>나눠<sp/>진행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>현재<sp/>Dali<sp/>UI<sp/>text<sp/>pipeline<sp/>전체<sp/>구조</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`InputField`가<sp/>text<sp/>stack을<sp/>어떻게<sp/>감싸고<sp/>있는지</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Text::Controller`가<sp/>실제로<sp/>어떤<sp/>책임을<sp/>떠안고<sp/>있는지</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`AtlasRenderer`가<sp/>동적<sp/>glyph<sp/>렌더링에<sp/>어떤<sp/>장단점을<sp/>가지는지</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>위<sp/>분석을<sp/>바탕으로<sp/>`TextVisualizer`<sp/>설계안과<sp/>구현<sp/>계획</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>현재<sp/>구조에<sp/>대한<sp/>1차<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>Dali<sp/>text<sp/>모듈은<sp/>크게<sp/>두<sp/>갈래로<sp/>사용된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisual`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>비편집형<sp/>visual<sp/>중심<sp/>경로</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>relayout<sp/>후<sp/>텍스처<sp/>기반<sp/>렌더러를<sp/>갱신하는<sp/>흐름</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>비동기<sp/>렌더링과<sp/>tiling<sp/>지원이<sp/>강점</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>View<sp/>자체가<sp/>아니라<sp/>visual이므로<sp/>레이아웃<sp/>변화에<sp/>대한<sp/>제어권이<sp/>제한적이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputField`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`View`<sp/>+<sp/>`Text::Controller`<sp/>+<sp/>`Decorator`<sp/>+<sp/>gesture/IME<sp/>+<sp/>renderer<sp/>조합</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>편집/선택/커서/포커스<sp/>처리가<sp/>모두<sp/>포함된<sp/>무거운<sp/>경로</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>동적<sp/>레이아웃<sp/>대응은<sp/>가능하지만<sp/>읽기<sp/>전용<sp/>표시용<sp/>View로<sp/>쓰기에는<sp/>책임이<sp/>과도하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`TextVisualizer`는<sp/>둘<sp/>중<sp/>하나를<sp/>그대로<sp/>재사용하는<sp/>대상이<sp/>아니라,</highlight></codeline>
+<codeline><highlight class="normal">아래처럼<sp/>&quot;중간<sp/>계층&quot;으로<sp/>설계하는<sp/>것이<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>레이아웃/모델<sp/>계산은<sp/>`Text::Controller`<sp/>계열에서<sp/>재사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>편집<sp/>관련<sp/>상태와<sp/>장식(decorator),<sp/>IME,<sp/>selection<sp/>handle은<sp/>제거</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>렌더링은<sp/>동적<sp/>relayout에<sp/>유리한<sp/>경로를<sp/>선택</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>1차<sp/>후보:<sp/>`AtlasRenderer`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>대안<sp/>후보:<sp/>기존<sp/>`TextVisual`의<sp/>bitmap/tiling<sp/>경로<sp/>일부<sp/>차용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>재사용<sp/>우선순위</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>그대로<sp/>재사용<sp/>가치가<sp/>높은<sp/>영역</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Controller`의<sp/>logical/visual<sp/>model<sp/>갱신<sp/>체계</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>script<sp/>/<sp/>bidi<sp/>/<sp/>shaping<sp/>/<sp/>glyph<sp/>metrics<sp/>/<sp/>layout<sp/>engine</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>parsing<sp/>및<sp/>markup<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>background<sp/>/<sp/>underline<sp/>/<sp/>strikethrough<sp/>계산<sp/>결과</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CommonTextUtils::RenderText()`가<sp/>가진<sp/>actor<sp/>배치<sp/>보조<sp/>로직<sp/>일부</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>조건부<sp/>재사용<sp/>영역</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Controller`<sp/>자체</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>editable<sp/>기능을<sp/>끄고<sp/>사용하면<sp/>많은<sp/>코드를<sp/>재사용할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>하지만<sp/>내부<sp/>상태가<sp/>너무<sp/>넓어서<sp/>`TextVisualizer`<sp/>전용<sp/>facade가<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>텍스처<sp/>재생성보다<sp/>glyph<sp/>atlas<sp/>재사용<sp/>측면에서<sp/>유리하다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>그러나<sp/>actor/mesh<sp/>단위<sp/>구성이<sp/>세밀해서<sp/>텍스트<sp/>블록이<sp/>많을<sp/>때<sp/>scene<sp/>graph<sp/>비용이<sp/>생길<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisual`<sp/>async<sp/>pipeline</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>큰<sp/>텍스트나<sp/>비동기<sp/>size<sp/>계산에는<sp/>참고<sp/>가치가<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>다만<sp/>visual<sp/>중심<sp/>설계라<sp/>View<sp/>기준<sp/>동적<sp/>레이아웃에<sp/>바로<sp/>맞지는<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>기본<sp/>제거<sp/>대상</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>IME<sp/>연동</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>grab<sp/>handle<sp/>/<sp/>popup</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>edit<sp/>state<sp/>machine</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>input<sp/>event<sp/>queue</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hidden<sp/>input<sp/>/<sp/>password<sp/>편집<sp/>로직</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editable/selectable<sp/>control<sp/>interface<sp/>일체</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer가<sp/>가져야<sp/>할<sp/>방향</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizer`는<sp/>&quot;표시용<sp/>text<sp/>controller<sp/>wrapper<sp/>+<sp/>layout-aware<sp/>view<sp/>+<sp/>lightweight<sp/>renderer<sp/>host&quot;여야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>성질이<sp/>중요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>View가<sp/>직접<sp/>measure<sp/>/<sp/>arrange<sp/>/<sp/>relayout<sp/>lifecycle을<sp/>가진다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>텍스트가<sp/>바뀌지<sp/>않아도<sp/>width/height<sp/>제약<sp/>변경에<sp/>빠르게<sp/>반응한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>property<sp/>변경<sp/>시<sp/>어떤<sp/>단계까지<sp/>다시<sp/>계산할지<sp/>명확한<sp/>dirty<sp/>mask를<sp/>가진다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>편집<sp/>기능이<sp/>없는<sp/>만큼<sp/>actor<sp/>수,<sp/>상태<sp/>수,<sp/>signal<sp/>수를<sp/>줄인다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>문서<sp/>산출물</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>분석<sp/>작업의<sp/>최종<sp/>산출물은<sp/>아래<sp/>문서들이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`00-overview.ko.md`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`01-current-text-pipeline.ko.md`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`02-input-field-analysis.ko.md`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`03-text-controller-analysis.ko.md`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`04-atlas-renderer-analysis.ko.md`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`05-text-visualizer-design.ko.md`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`06-implementation-plan.ko.md`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>전체<sp/>구조<sp/>미리보기</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[View<sp/>or<sp/>Visual<sp/>API]<sp/>--&gt;<sp/>B[Text<sp/>Controller]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[Logical<sp/>Model]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>D[Visual<sp/>Model]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>E[Layout<sp/>Engine]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>F[Renderer<sp/>Backend]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[Scene<sp/>Graph<sp/>Actors<sp/>/<sp/>Renderers]</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H[InputField]<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I[TextVisual]<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J[TextVisualizer<sp/>목표]<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>K[Decorator<sp/>/<sp/>IME<sp/>/<sp/>Selection]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>L[Texture<sp/>/<sp/>Async<sp/>Visual<sp/>Path]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>M[Lightweight<sp/>View<sp/>+<sp/>Dynamic<sp/>Relayout]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>구현<sp/>기준<sp/>원칙</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이후<sp/>문서와<sp/>구현은<sp/>아래<sp/>원칙을<sp/>따른다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>모듈을<sp/>&quot;대체&quot;하기보다<sp/>&quot;분해해서<sp/>재조립&quot;한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`는<sp/>읽기<sp/>전용<sp/>표시<sp/>최적화가<sp/>기본값이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>편집기<sp/>스택과<sp/>visual<sp/>스택의<sp/>장점만<sp/>취하고,<sp/>서로의<sp/>과한<sp/>책임은<sp/>들고<sp/>오지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>신규<sp/>구조는<sp/>향후<sp/>`TextLabel`,<sp/>`PreText`,<sp/>`Marquee`,<sp/>`rich<sp/>text<sp/>view`에도<sp/>확장<sp/>가능해야<sp/>한다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/00-overview.ko.md"/>
+  </compounddef>
+</doxygen>

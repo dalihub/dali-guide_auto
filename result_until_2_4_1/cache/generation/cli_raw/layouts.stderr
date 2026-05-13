@@ -1,0 +1,4033 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20d9-a8d3-7220-a32e-0497ff249d54
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Layouts (layouts)
+- Category: layout-sizing
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 180
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::AbsoluteLayout | scope=primary
+- Dali::Ui::AbsoluteLayoutParams | scope=primary
+- Dali::Ui::FlexLayout | scope=primary
+- Dali::Ui::FlexLayoutParams | scope=primary
+- Dali::Ui::GridLayout | scope=primary
+- Dali::Ui::GridLayoutParams | scope=primary
+- Dali::Ui::GridLength | scope=primary
+- Dali::Ui::Integration::AbsoluteLayoutImpl | scope=primary
+- Dali::Ui::Integration::AbsoluteLayoutManager | scope=primary
+- Dali::Ui::Integration::FlexLayoutImpl | scope=primary
+- Dali::Ui::Integration::FlexLayoutManager | scope=primary
+- Dali::Ui::Integration::GridLayoutImpl | scope=primary
+- Dali::Ui::Integration::GridLayoutManager | scope=primary
+- Dali::Ui::Integration::LayoutControllerImpl | scope=primary
+- Dali::Ui::Integration::LayoutControllerImpl::LayoutRootEntry | scope=primary
+- Dali::Ui::Integration::LayoutImpl | scope=primary
+- Dali::Ui::Integration::ScrollViewLayoutManager | scope=primary
+- Dali::Ui::Integration::StackLayoutImpl | scope=primary
+- Dali::Ui::Integration::StackLayoutManager | scope=primary
+- Dali::Ui::Layout | scope=primary
+- Dali::Ui::LayoutController | scope=primary
+- Dali::Ui::LayoutManager | scope=primary
+- Dali::Ui::LayoutParams | scope=primary
+- Dali::Ui::LayoutRect | scope=primary
+- Dali::Ui::MeasuredSize | scope=primary
+- Dali::Ui::StackLayout | scope=primary
+- Dali::Ui::StackLayoutParams | scope=primary
+- Dali::Ui::AbsoluteLayout::AbsoluteLayout | AbsoluteLayout() | scope=primary_member
+- Dali::Ui::AbsoluteLayout::DownCast | AbsoluteLayout DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::AbsoluteLayout::New | AbsoluteLayout New() | scope=primary_member
+- Dali::Ui::AbsoluteLayout::operator= | AbsoluteLayout & operator=(const AbsoluteLayout &handle) | scope=primary_member
+- Dali::Ui::AbsoluteLayout::~AbsoluteLayout | ~AbsoluteLayout() | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::AbsoluteLayoutParams | AbsoluteLayoutParams(const AbsoluteLayoutParams &handle) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::DownCast | AbsoluteLayoutParams DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetBounds | LayoutRect GetBounds() const | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetFlags | AbsoluteLayoutFlags GetFlags() const | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetHeight | float GetHeight() const | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetLayoutParamsType | LayoutParamsType GetLayoutParamsType() | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetWidth | float GetWidth() const | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetX | float GetX() const | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::GetY | float GetY() const | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::New | AbsoluteLayoutParams New(const AbsoluteLayoutParams &other) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::SetBounds | AbsoluteLayoutParams & SetBounds(const LayoutRect &bounds) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::SetFlags | AbsoluteLayoutParams & SetFlags(AbsoluteLayoutFlags flags) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::SetHeight | AbsoluteLayoutParams & SetHeight(float height) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::SetWidth | AbsoluteLayoutParams & SetWidth(float width) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::SetX | AbsoluteLayoutParams & SetX(float x) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::SetY | AbsoluteLayoutParams & SetY(float y) | scope=primary_member
+- Dali::Ui::AbsoluteLayoutParams::~AbsoluteLayoutParams | ~AbsoluteLayoutParams() | scope=primary_member
+- Dali::Ui::FlexLayout::DownCast | FlexLayout DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::FlexLayout::FlexLayout | FlexLayout() | scope=primary_member
+- Dali::Ui::FlexLayout::GetAlignContent | FlexAlign GetAlignContent() const | scope=primary_member
+- Dali::Ui::FlexLayout::GetAlignItems | FlexAlign GetAlignItems() const | scope=primary_member
+- Dali::Ui::FlexLayout::GetDirection | FlexDirection GetDirection() const | scope=primary_member
+- Dali::Ui::FlexLayout::GetJustifyContent | FlexJustify GetJustifyContent() const | scope=primary_member
+- Dali::Ui::FlexLayout::GetWrap | FlexWrap GetWrap() const | scope=primary_member
+- Dali::Ui::FlexLayout::New | FlexLayout New() | scope=primary_member
+- Dali::Ui::FlexLayout::SetAlignContent | FlexLayout & SetAlignContent(FlexAlign align) | scope=primary_member
+- Dali::Ui::FlexLayout::SetAlignItems | FlexLayout & SetAlignItems(FlexAlign align) | scope=primary_member
+- Dali::Ui::FlexLayout::SetDirection | FlexLayout & SetDirection(FlexDirection direction) | scope=primary_member
+- Dali::Ui::FlexLayout::SetJustifyContent | FlexLayout & SetJustifyContent(FlexJustify justify) | scope=primary_member
+- Dali::Ui::FlexLayout::SetWrap | FlexLayout & SetWrap(FlexWrap wrap) | scope=primary_member
+- Dali::Ui::FlexLayout::operator= | FlexLayout & operator=(FlexLayout &&rhs) noexcept | scope=primary_member
+- Dali::Ui::FlexLayout::~FlexLayout | ~FlexLayout() | scope=primary_member
+- Dali::Ui::FlexLayoutParams::DownCast | FlexLayoutParams DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::FlexLayoutParams::FlexLayoutParams | FlexLayoutParams() | scope=primary_member
+- Dali::Ui::FlexLayoutParams::GetAlignSelf | FlexAlign GetAlignSelf() const | scope=primary_member
+- Dali::Ui::FlexLayoutParams::GetFlexBasis | float GetFlexBasis() const | scope=primary_member
+- Dali::Ui::FlexLayoutParams::GetFlexGrow | float GetFlexGrow() const | scope=primary_member
+- Dali::Ui::FlexLayoutParams::GetFlexShrink | float GetFlexShrink() const | scope=primary_member
+- Dali::Ui::FlexLayoutParams::GetLayoutParamsType | LayoutParamsType GetLayoutParamsType() | scope=primary_member
+- Dali::Ui::FlexLayoutParams::New | FlexLayoutParams New() | scope=primary_member
+- Dali::Ui::FlexLayoutParams::SetAlignSelf | FlexLayoutParams & SetAlignSelf(FlexAlign align) | scope=primary_member
+- Dali::Ui::FlexLayoutParams::SetFlexBasis | FlexLayoutParams & SetFlexBasis(float basis) | scope=primary_member
+- Dali::Ui::FlexLayoutParams::SetFlexGrow | FlexLayoutParams & SetFlexGrow(float grow) | scope=primary_member
+- Dali::Ui::FlexLayoutParams::SetFlexShrink | FlexLayoutParams & SetFlexShrink(float shrink) | scope=primary_member
+- Dali::Ui::FlexLayoutParams::~FlexLayoutParams | ~FlexLayoutParams() | scope=primary_member
+- Dali::Ui::GridLayout::AddColumnDefinition | void AddColumnDefinition(GridLength width) | scope=primary_member
+- Dali::Ui::GridLayout::AddRowDefinition | void AddRowDefinition(GridLength height) | scope=primary_member
+- Dali::Ui::GridLayout::ClearColumnDefinitions | void ClearColumnDefinitions() | scope=primary_member
+- Dali::Ui::GridLayout::ClearRowDefinitions | void ClearRowDefinitions() | scope=primary_member
+- Dali::Ui::GridLayout::DownCast | GridLayout DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::GridLayout::GetColumnCount | uint32_t GetColumnCount() const | scope=primary_member
+- Dali::Ui::GridLayout::GetColumnDefinitions | Dali::Vector< GridLength > GetColumnDefinitions() const | scope=primary_member
+- Dali::Ui::GridLayout::GetColumnSpacing | float GetColumnSpacing() const | scope=primary_member
+- Dali::Ui::GridLayout::GetRowCount | uint32_t GetRowCount() const | scope=primary_member
+- Dali::Ui::GridLayout::GetRowDefinitions | Dali::Vector< GridLength > GetRowDefinitions() const | scope=primary_member
+- Dali::Ui::GridLayout::GetRowSpacing | float GetRowSpacing() const | scope=primary_member
+- Dali::Ui::GridLayout::GridLayout | GridLayout() | scope=primary_member
+- Dali::Ui::GridLayout::New | GridLayout New() | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "layouts_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::AbsoluteLayout::New",
+      "Dali::Ui::AbsoluteLayoutParams::New",
+      "Dali::Ui::FlexLayout::New",
+      "Dali::Ui::FlexLayoutParams::New",
+      "Dali::Ui::AbsoluteLayoutParams::SetBounds",
+      "Dali::Ui::AbsoluteLayoutParams::SetFlags",
+      "Dali::Ui::AbsoluteLayoutParams::SetHeight",
+      "Dali::Ui::AbsoluteLayoutParams::SetWidth",
+      "Dali::Ui::AbsoluteLayoutParams::SetX",
+      "Dali::Ui::AbsoluteLayoutParams::SetY",
+      "Dali::Ui::FlexLayout::SetAlignContent",
+      "Dali::Ui::FlexLayout::SetAlignItems",
+      "Dali::Ui::FlexLayout::SetDirection",
+      "Dali::Ui::FlexLayout::SetJustifyContent",
+      "Dali::Ui::FlexLayout::SetWrap",
+      "Dali::Ui::FlexLayoutParams::SetAlignSelf"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/absolutelayout/absolutelayout-margin-padding-example.cpp:15 (sample, score=1.0)
+```cpp
+*/
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AbsoluteLayout sample: margin and padding.
+ *
+ * All margin and padding values use a uniform 25px for easy visual verification.
+ *
+ * 1. Padding: root AbsoluteLayout has 25px padding (children inset from window edges).
+ * 2. Margin: children alternate between no margin and 50px uniform margin.
+ *    - Red box: no margin (flush with padding edge).
+ *    - Green box: 50px margin all sides.
+ *    - Blue box: 50px margin all sides.
+ * 3. Nested: a child AbsoluteLayout with 25px padding, containing inner boxes
+ *    with no margin and 50px margin respectively.
+ *
+ * Press Escape or Back to quit.
+ */
+class AbsoluteLayoutMarginPaddingController : public ConnectionTracker
+{
+```
+
+- repos/dali-ui/samples/customlayout/customlayout-diagonal-layout-direction-example.cpp:17 (sample, score=1.0)
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * Custom layout sample with a clickable LayoutDirection toggle.
+ *
+ * Same content as customlayout-diagonal-example. A 100x50 yellow
+ * standalone child at the top-left toggles the root view's
+ * LayoutDirection between LEFT_TO_RIGHT and RIGHT_TO_LEFT on click.
+ *
+ * The ArrangeCallback arranges children diagonally in a LEFT_TO_RIGHT
+ * frame; the framework mirrors direct children horizontally after the
+ * callback returns when the resolved direction is RIGHT_TO_LEFT.
+ * The standalone toggle button is excluded from mirroring and stays
+ * at the top-left.
+ *
+ * Press Escape or Back to quit.
+ */
+class DiagonalLayout
+{
+public:
+  static MeasuredSize OnMeasure(View self, float widthConstraint, float heightConstraint)
+  {
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AbsoluteLayout",
+      "AbsoluteLayoutParams",
+      "LayoutRect",
+      "New",
+      "SetBounds",
+      "SetFlags",
+      "SetHeight",
+      "SetWidth",
+      "SetX",
+      "SetY"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-margin-padding-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Layout",
+      "LayoutRect",
+      "Measure",
+      "MeasuredSize",
+      "New",
+      "OnArrange",
+      "OnMeasure",
+      "height",
+      "view",
+      "width"
+    ],
+    "path": "repos/dali-ui/samples/customlayout/customlayout-diagonal-layout-direction-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 96,
+    "snippet_start_line": 17
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FlexLayout",
+      "Layout",
+      "New",
+      "SetAlignItems",
+      "SetAlignment",
+      "SetDirection",
+      "SetJustifyContent",
+      "SetSpacing",
+      "SetWeight",
+      "StackLayout",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/flexlayout/flexlayout-direction-reverse-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FlexLayout",
+      "Layout",
+      "New",
+      "SetAlignItems",
+      "SetAlignment",
+      "SetDirection",
+      "SetJustifyContent",
+      "SetSpacing",
+      "SetWeight",
+      "StackLayout",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/flexlayout/flexlayout-justify-content-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FlexLayout",
+      "FlexLayoutParams",
+      "Layout",
+      "New",
+      "SetAlignItems",
+      "SetAlignment",
+      "SetDirection",
+      "SetFlexBasis",
+      "SetFlexShrink",
+      "SetSpacing",
+      "SetWeight",
+      "SetWrap",
+      "StackLayout",
+      "StackLayoutParams",
+      "width"
+    ],
+    "path": "repos/dali-ui/samples/flexlayout/flexlayout-shrink-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "FlexLayout",
+      "FlexLayoutParams",
+      "New",
+      "SetAlignContent",
+      "SetAlignment",
+      "SetDirection",
+      "SetFlexBasis",
+      "SetFlexGrow",
+      "SetJustifyContent",
+      "SetWeight",
+      "SetWrap",
+      "StackLayout",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/flexlayout/flexlayout-wrap-grow-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Absolute",
+      "Auto",
+      "GridLayout",
+      "GridLayoutParams",
+      "GridLength",
+      "New",
+      "SetColumn",
+      "SetColumnDefinitions",
+      "SetColumnSpacing",
+      "SetRow",
+      "SetRowDefinitions",
+      "SetRowSpacing",
+      "Star",
+      "width"
+    ],
+    "path": "repos/dali-ui/samples/gridlayout/gridlayout-auto-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Absolute",
+      "AddColumnDefinition",
+      "AddRowDefinition",
+      "GridLayout",
+      "GridLayoutParams",
+      "GridLength",
+      "New",
+      "SetColumn",
+      "SetColumnSpacing",
+      "SetRow",
+      "SetRowSpacing"
+    ],
+    "path": "repos/dali-ui/samples/gridlayout/gridlayout-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 93,
+    "snippet_start_line": 14
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "rg --files | rg '("'^|/)repos/dali-ui/(dali-ui|samples|.*layout.*|.*Layout.*)|layout'"'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 1 in 0ms:
+exec
+/bin/bash -lc "pwd && rg -n \"class (AbsoluteLayout|FlexLayout|GridLayout|.*LayoutParams)|struct GridLength|enum class Flex|typedef.*Signal|SetDirection|AddColumnDefinition|SetBounds|class View\" repos/dali-ui -g '*.h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:58:class ViewAccessible;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:62:class ViewDataImpl;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:65:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/ui-scale-manager.h:32:class View;
+repos/dali-ui/dali-ui-foundation/public-api/image-loader/async-image-loader.h:100:  typedef Signal<void(uint32_t, PixelData)> ImageLoadedSignalType; ///< Image loaded signal type
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-params.h:33:class LayoutParamsImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-params.h:43:class DALI_UI_API LayoutParams : public BaseHandle
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-controller.h:34:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.h:91:  Bevel& SetDirection(const Vector2& direction);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:91:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.autogen.h:11:  ChildClass& SetDirection(FlexDirection direction) { FlexLayout::SetDirection(direction); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:37:class View;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:54:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout-params.h:33:class AbsoluteLayoutParamsImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout-params.h:44: *   .SetBounds(LayoutRect(10, 20, 100, 200))
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout-params.h:48:class DALI_UI_API AbsoluteLayoutParams : public LayoutParams
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout-params.h:104:  AbsoluteLayoutParams& SetBounds(const LayoutRect& bounds);
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.h:33:class AbsoluteLayoutImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout-params.h:33:class StackLayoutParamsImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout-params.h:46:class DALI_UI_API StackLayoutParams : public LayoutParams
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:57:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout-params.h:33:class FlexLayoutParamsImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout-params.h:50:class DALI_UI_API FlexLayoutParams : public LayoutParams
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:36:class View;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:40:class ViewAnimationSpecImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.h:34:class FlexLayoutImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.h:116:  FlexLayout& SetDirection(FlexDirection direction);
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:419:  *     .SetBounds(LayoutRect(10, 20, 100, 200)) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout-params.h:36:class GridLayoutParamsImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout-params.h:53:class DALI_UI_API GridLayoutParams : public LayoutParams
+repos/dali-ui/dali-ui-foundation/public-api/view.h:51:class ViewAnimationBridge;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:52:class ViewAnimationSpec;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:61:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1132:   *     .SetBounds(LayoutRect(10, 20, 100, 200))
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1785:  typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1788:  typedef Signal<void(View, bool)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1791:  typedef Signal<void(View)> ResourceReadySignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1794:  typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1797:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1800:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1803:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1806:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1809:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1812:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1815:  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1818:  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1822:  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1825:  typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:46:class View;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:322:  friend class View;
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:36:class View;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:34:class View;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:338:enum class FlexDirection : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:361:enum class FlexWrap : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:380:enum class FlexJustify : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:411:enum class FlexAlign : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:543:enum class AbsoluteLayoutFlags : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:601:enum class LayoutParamsType : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:87:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.h:35:class GridLayoutImpl;
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.h:118:  void AddColumnDefinition(GridLength width);
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:55:  typedef Signal<void(View, View)> FocusChangedSignalType;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:41:  typedef Signal<void(TestButton&)> PanelDownSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:42:  typedef Signal<void(TestButton&)> PanelUpSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:115:  typedef Signal<void()> VoidRetNoParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:118:  typedef Signal<void(int)> VoidRet1ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:121:  typedef Signal<void(int&)> VoidRet1RefParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:124:  typedef Signal<void(int, int)> VoidRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:127:  typedef Signal<void(int, int, int)> VoidRet3ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:130:  typedef Signal<bool(float)> BoolRet1ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:133:  typedef Signal<bool(float, int)> BoolRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:136:  typedef Signal<int(float, int)> IntRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:139:  typedef Signal<float()> FloatRet0ParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:142:  typedef Signal<float(float)> FloatRet1ParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:145:  typedef Signal<float(float, float)> FloatRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:148:  typedef Signal<float(float, float, float)> FloatRet3ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:151:  typedef Signal<void(float, float, float)> VoidSignalTypeFloatValue3;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:34:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:53:class ViewStateManager
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-upload-observer.h:43:  typedef Signal<void(TextureUploadObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/text/text-view-interface.h:52:class ViewInterface
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.h:75:class ViewDataImpl::VisualData : public Visual::EventObserver, public Visual::ConstraintObserver
+repos/dali-ui/dali-ui-foundation/internal/text/text-view.h:39:class View : public ViewInterface
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:31:class ViewDataImpl::AccessibilityData : public ConnectionTracker
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:37:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:40:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:43:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:46:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:49:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:52:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:55:  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:58:  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:61:  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:64:  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:68:  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:39:class View;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:44:class ViewAnimationSpecImpl;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:67:class ViewDataImpl : public ConnectionTracker, public Dali::Integration::Processor
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-event-receiver-interface.h:29:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-interface.h:29:class View;
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/text-typesetter-impl.h:41:class ViewModel;
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/view-model.h:41:class ViewModel : public ModelInterface
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-lifecycle-controller.h:38:  typedef Signal<void(void)> LifecycleSignalType;
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/text-typesetter.h:39:class ViewModel;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h:49:  typedef Signal<void(View, View)> KeyInputFocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/text/async-text/text-load-observer.h:40:  typedef Signal<void(TextLoadObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/text/rendering/text-renderer.h:35:class ViewInterface;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:48:typedef Signal<void(Window, bool)>      FocusChangeSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:49:typedef Signal<void(Window, Int32Pair)> ResizeSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:100:typedef Signal<void()>                   EventProcessingFinishedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:101:typedef Signal<bool(Window, KeyEvent)>   KeyEventGeneratedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:102:typedef Signal<void(Window, WheelEvent)> WheelEventSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:103:typedef Signal<bool(Window, WheelEvent)> WheelEventGeneratedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:104:typedef Signal<void(Window, bool)>       VisibilityChangedSignalType;
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:40:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/absolute-layout-impl.h:36:class AbsoluteLayoutImpl;
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-background-actor.h:31:class View;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-timer.h:45:  typedef Signal<bool()> TimerSignalType;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/grid-layout-impl.h:37:class GridLayoutImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/grid-layout-impl.h:60:  void                     AddColumnDefinition(GridLength width);
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-manager.h:32:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/layout-manager.h:33:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h:34:typedef Signal<void(uint32_t, std::vector<Devel::PixelBuffer>&)> PixelBufferLoadedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller.h:47:class View;
+repos/dali-ui/dali-ui-foundation/internal/ui-scale-manager-impl.h:36:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/flex-layout-manager.h:44:  void          SetDirection(FlexDirection direction);
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:29:class View;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:30:class ViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/trait-interface.h:34:class ViewDataImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/flex-layout-impl.h:36:class FlexLayoutImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/layouts/flex-layout-impl.h:58:  void          SetDirection(FlexDirection direction);
+repos/dali-ui/dali-ui-foundation/devel-api/builder/builder.h:444:  typedef Signal<void()> BuilderSignalType;
+repos/dali-ui/dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h:38:  typedef Signal<void(SvgLoaderObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/layouts/stack-layout-params-impl.h:40:class StackLayoutParamsImpl : public LayoutParamsImpl
+repos/dali-ui/dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h:40:class AbsoluteLayoutParamsImpl : public LayoutParamsImpl
+repos/dali-ui/dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h:69:  void SetBounds(const LayoutRect& bounds)
+repos/dali-ui/dali-ui-foundation/internal/layouts/flex-layout-params-impl.h:40:class FlexLayoutParamsImpl : public LayoutParamsImpl
+repos/dali-ui/dali-ui-foundation/internal/layouts/grid-layout-params-impl.h:40:class GridLayoutParamsImpl : public LayoutParamsImpl
+repos/dali-ui/dali-ui-foundation/internal/layouts/layout-params-impl.h:45:class LayoutParamsImpl : public BaseObject
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/layouts/layout.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Integration
+{
+class AbsoluteLayoutImpl;
+}
+
+#include "absolute-layout.autogen.h"
+/**
+ * @brief AbsoluteLayout positions its children at explicit coordinates.
+ *
+ * Children are positioned using attached properties that specify their
+ * bounds (x, y, width, height).
+ *
+ * Supports:
+ * - Absolute positioning with pixel values
+ * - Proportional positioning (0.0 to 1.0 relative to parent)
+ * - Proportional sizing (0.0 to 1.0 relative to parent)
+ *
+ * @section abs_common_props Common Property Behavior
+ *
+ * - @b RequestedWidth/RequestedHeight: Only used when the corresponding bounds
+ *   dimension is negative (auto-size). When bounds width or height is >= 0,
+ *   the bounds value takes precedence and RequestedWidth/RequestedHeight is
+ *   ignored.
+ * - @b Alignment: Not used. Position is determined solely by the bounds
+ *   x/y values and margin.
+ * - @b Margin: Applied as an offset to the bounds position.
+ */
+class DALI_UI_API AbsoluteLayout : public Layout
+{
+public:
+  /**
+   * @brief Creates an uninitialized AbsoluteLayout handle.
+   */
+  AbsoluteLayout();
+
+  /**
+   * @brief Creates a new AbsoluteLayout.
+   *
+   * @return A handle to a newly allocated AbsoluteLayout
+   */
+  static AbsoluteLayout New();
+
+  /**
+   * @brief Copy constructor.
+   */
+  AbsoluteLayout(const AbsoluteLayout& layout);
+
+  /**
+   * @brief Move constructor.
+   */
+  AbsoluteLayout(AbsoluteLayout&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~AbsoluteLayout();
+
+  /**
+   * @brief Copy assignment operator.
+   */
+  AbsoluteLayout& operator=(const AbsoluteLayout& handle);
+
+  /**
+   * @brief Move assignment operator.
+   */
+  AbsoluteLayout& operator=(AbsoluteLayout&& rhs) noexcept;
+
+  /**
+   * @brief Downcasts a handle to AbsoluteLayout handle.
+   */
+  static AbsoluteLayout DownCast(BaseHandle handle);
+
+public: // API
+  // @CHAIN_START(AbsoluteLayout, Layout)
+  // @CHAIN_END
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The Layout implementation
+   */
+  explicit DALI_UI_API AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API AbsoluteLayout(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_LAYOUT_METHODS(AbsoluteLayout)
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout-params.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Internal
+{
+class AbsoluteLayoutParamsImpl;
+}
+
+/**
+ * @brief AbsoluteLayoutParams stores per-child layout parameters for AbsoluteLayout.
+ *
+ * This handle provides direct access to bounds and flags attached to a child view.
+ * Use View::SetLayoutParams() to attach parameters to a child view.
+ *
+ * @code
+ * view.SetLayoutParams(AbsoluteLayoutParams::New()
+ *   .SetBounds(LayoutRect(10, 20, 100, 200))
+ *   .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+ * @endcode
+ */
+class DALI_UI_API AbsoluteLayoutParams : public LayoutParams
+{
+public:
+  /**
+   * @brief Creates an uninitialized handle.
+   */
+  AbsoluteLayoutParams();
+
+  /**
+   * @brief Creates a new AbsoluteLayoutParams with default values.
+   *
+   * @return A handle to a newly allocated AbsoluteLayoutParams
+   */
+  static AbsoluteLayoutParams New();
+
+  /**
+   * @brief Creates a new AbsoluteLayoutParams by copying values from an existing one.
+   *
+   * @param[in] other The params to copy from
+   * @return A handle to a newly allocated AbsoluteLayoutParams with copied values
+   */
+  static AbsoluteLayoutParams New(const AbsoluteLayoutParams& other);
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  AbsoluteLayoutParams(const AbsoluteLayoutParams& handle);
+
+  /**
+   * @brief Destructor.
+   */
+  ~AbsoluteLayoutParams();
+
+  /**
+   * @brief Downcasts a handle to AbsoluteLayoutParams.
+   *
+   * @param[in] handle Handle to an object
+   * @return A valid handle or an uninitialized handle
+   */
+  static AbsoluteLayoutParams DownCast(BaseHandle handle);
+
+  /**
+   * @brief Returns the layout params type identifier.
+   *
+   * @return LayoutParamsType::ABSOLUTE
+   */
+  static LayoutParamsType GetLayoutParamsType();
+
+  /**
+   * @brief Sets the absolute position and size of the child within the layout.
+   *
+   * @param[in] bounds The layout bounds (x, y, width, height)
+   * @return Reference to this for chaining
+   */
+  AbsoluteLayoutParams& SetBounds(const LayoutRect& bounds);
+
+  /**
+   * @brief Gets the absolute position and size of the child within the layout.
+   *
+   * @return The layout bounds
+   */
+  LayoutRect GetBounds() const;
+
+  /**
+   * @brief Sets the X position of the child within the layout.
+   *
+   * @param[in] x The X position
+   * @return Reference to this for chaining
+   */
+  AbsoluteLayoutParams& SetX(float x);
+
+  /**
+   * @brief Gets the X position of the child within the layout.
+   *
+   * @return The X position
+   */
+  float GetX() const;
+
+  /**
+   * @brief Sets the Y position of the child within the layout.
+   *
+   * @param[in] y The Y position
+   * @return Reference to this for chaining
+   */
+  AbsoluteLayoutParams& SetY(float y);
+
+  /**
+   * @brief Gets the Y position of the child within the layout.
+   *
+   * @return The Y position
+   */
+  float GetY() const;
+
+  /**
+   * @brief Sets the width of the child within the layout.
+   *
+   * @param[in] width The width (-1 means use View's own size)
+   * @return Reference to this for chaining
+   */
+  AbsoluteLayoutParams& SetWidth(float width);
+
+  /**
+   * @brief Gets the width of the child within the layout.
+   *
+   * @return The width
+   */
+  float GetWidth() const;
+
+  /**
+   * @brief Sets the height of the child within the layout.
+   *
+   * @param[in] height The height (-1 means use View's own size)
+   * @return Reference to this for chaining
+   */
+  AbsoluteLayoutParams& SetHeight(float height);
+
+  /**
+   * @brief Gets the height of the child within the layout.
+   *
+   * @return The height
+   */
+  float GetHeight() const;
+
+  /**
+   * @brief Sets the layout flags that control proportional sizing behavior.
+   *
+   * @param[in] flags The absolute layout flags
+   * @return Reference to this for chaining
+   */
+  AbsoluteLayoutParams& SetFlags(AbsoluteLayoutFlags flags);
+
+  /**
+   * @brief Gets the layout flags that control proportional sizing behavior.
+   *
+   * @return The absolute layout flags
+   */
+  AbsoluteLayoutFlags GetFlags() const;
+
+public: // Not intended for application developers
+  /// @cond internal
+  explicit AbsoluteLayoutParams(Internal::AbsoluteLayoutParamsImpl* implementation);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Integration
+{
+class FlexLayoutImpl;
+}
+
+#include "flex-layout.autogen.h"
+/**
+ * @brief FlexLayout arranges its children using the CSS Flexbox algorithm.
+ *
+ * FlexLayout provides a flexible way to lay out children in rows or columns,
+ * with support for wrapping, alignment, and flexible sizing.
+ *
+ * It supports:
+ * - Direction (Row, RowReverse, Column, ColumnReverse)
+ * - Wrap behavior (NoWrap, Wrap, WrapReverse)
+ * - Justify content (FlexStart, FlexEnd, Center, SpaceBetween, SpaceAround, SpaceEvenly)
+ * - Align items and align content
+ */
+class DALI_UI_API FlexLayout : public Layout
+{
+public:
+  /**
+   * @brief Creates an uninitialized FlexLayout handle.
+   */
+  FlexLayout();
+
+  /**
+   * @brief Creates a new FlexLayout.
+   *
+   * @return A handle to a newly allocated FlexLayout
+   */
+  static FlexLayout New();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] layout Handle to copy
+   */
+  FlexLayout(const FlexLayout& layout);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  FlexLayout(FlexLayout&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~FlexLayout();
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  FlexLayout& operator=(const FlexLayout& handle);
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  FlexLayout& operator=(FlexLayout&& rhs) noexcept;
+
+  /**
+   * @brief Downcasts a handle to FlexLayout handle.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a FlexLayout or an uninitialized handle
+   */
+  static FlexLayout DownCast(BaseHandle handle);
+
+public: // API
+  // @CHAIN_START(FlexLayout, Layout)
+
+  /**
+   * @brief Sets the flex direction.
+   *
+   * @param[in] direction The flex direction
+   */
+  FlexLayout& SetDirection(FlexDirection direction);
+
+  /**
+   * @brief Gets the flex direction.
+   *
+   * @return The flex direction
+   */
+  FlexDirection GetDirection() const;
+
+  /**
+   * @brief Sets the wrap behavior.
+   *
+   * @param[in] wrap The wrap behavior
+   */
+  FlexLayout& SetWrap(FlexWrap wrap);
+
+  /**
+   * @brief Gets the wrap behavior.
+   *
+   * @return The wrap behavior
+   */
+  FlexWrap GetWrap() const;
+
+  /**
+   * @brief Sets the justify content alignment.
+   *
+   * @param[in] justify The justify content value
+   */
+  FlexLayout& SetJustifyContent(FlexJustify justify);
+
+  /**
+   * @brief Gets the justify content alignment.
+   *
+   * @return The justify content value
+   */
+  FlexJustify GetJustifyContent() const;
+
+  /**
+   * @brief Sets the align items value.
+   *
+   * @param[in] align The align items value
+   */
+  FlexLayout& SetAlignItems(FlexAlign align);
+
+  /**
+   * @brief Gets the align items value.
+   *
+   * @return The align items value
+   */
+  FlexAlign GetAlignItems() const;
+
+  /**
+   * @brief Sets the align content value (for wrapped lines).
+   *
+   * @param[in] align The align content value
+   */
+  FlexLayout& SetAlignContent(FlexAlign align);
+
+  /**
+   * @brief Gets the align content value.
+   *
+   * @return The align content value
+   */
+  FlexAlign GetAlignContent() const;
+
+  // @CHAIN_END
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The Layout implementation
+   */
+  explicit DALI_UI_API FlexLayout(Integration::FlexLayoutImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API FlexLayout(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_LAYOUT_METHODS(FlexLayout)
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout-params.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Internal
+{
+class FlexLayoutParamsImpl;
+}
+
+/**
+ * @brief FlexLayoutParams stores per-child layout parameters for FlexLayout.
+ *
+ * This handle provides direct access to flex grow, shrink, basis, and align-self
+ * attached to a child view.
+ * Use View::SetLayoutParams() to attach parameters to a child view.
+ *
+ * @code
+ * view.SetLayoutParams(FlexLayoutParams::New()
+ *   .SetFlexGrow(1.0f)
+ *   .SetFlexShrink(0.0f)
+ *   .SetAlignSelf(FlexAlign::CENTER));
+ * @endcode
+ */
+class DALI_UI_API FlexLayoutParams : public LayoutParams
+{
+public:
+  /**
+   * @brief Creates an uninitialized handle.
+   */
+  FlexLayoutParams();
+
+  /**
+   * @brief Creates a new FlexLayoutParams with default values.
+   *
+   * @return A handle to a newly allocated FlexLayoutParams
+   */
+  static FlexLayoutParams New();
+
+  /**
+   * @brief Creates a new FlexLayoutParams by copying values from an existing one.
+   *
+   * @param[in] other The params to copy from
+   * @return A handle to a newly allocated FlexLayoutParams with copied values
+   */
+  static FlexLayoutParams New(const FlexLayoutParams& other);
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  FlexLayoutParams(const FlexLayoutParams& handle);
+
+  /**
+   * @brief Destructor.
+   */
+  ~FlexLayoutParams();
+
+  /**
+   * @brief Downcasts a handle to FlexLayoutParams.
+   *
+   * @param[in] handle Handle to an object
+   * @return A valid handle or an uninitialized handle
+   */
+  static FlexLayoutParams DownCast(BaseHandle handle);
+
+  /**
+   * @brief Returns the layout params type identifier.
+   *
+   * @return LayoutParamsType::FLEX
+   */
+  static LayoutParamsType GetLayoutParamsType();
+
+  /**
+   * @brief Sets the flex grow factor for distributing remaining space.
+   *
+   * @param[in] grow The grow factor (0 means no growing)
+   * @return Reference to this for chaining
+   */
+  FlexLayoutParams& SetFlexGrow(float grow);
+
+  /**
+   * @brief Gets the flex grow factor.
+   *
+   * @return The grow factor
+   */
+  float GetFlexGrow() const;
+
+  /**
+   * @brief Sets the flex shrink factor for distributing negative space.
+   *
+   * @param[in] shrink The shrink factor (1 means proportional shrinking)
+   * @return Reference to this for chaining
+   */
+  FlexLayoutParams& SetFlexShrink(float shrink);
+
+  /**
+   * @brief Gets the flex shrink factor.
+   *
+   * @return The shrink factor
+   */
+  float GetFlexShrink() const;
+
+  /**
+   * @brief Sets the initial main size of the flex item before grow/shrink.
+   *
+   * @param[in] basis The flex basis value (use WRAP_CONTENT for auto)
+   * @return Reference to this for chaining
+   */
+  FlexLayoutParams& SetFlexBasis(float basis);
+
+  /**
+   * @brief Gets the flex basis value.
+   *
+   * @return The flex basis
+   */
+  float GetFlexBasis() const;
+
+  /**
+   * @brief Sets the cross-axis alignment override for this child.
+   *
+   * @param[in] align The alignment (AUTO defers to parent's alignItems)
+   * @return Reference to this for chaining
+   */
+  FlexLayoutParams& SetAlignSelf(FlexAlign align);
+
+  /**
+   * @brief Gets the cross-axis alignment override for this child.
+   *
+   * @return The align-self value
+   */
+  FlexAlign GetAlignSelf() const;
+
+public: // Not intended for application developers
+  /// @cond internal
+  explicit FlexLayoutParams(Internal::FlexLayoutParamsImpl* implementation);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-vector.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Integration
+{
+class GridLayoutImpl;
+}
+
+#include "grid-layout.autogen.h"
+/**
+ * @brief GridLayout arranges its children in a grid of rows and columns.
+ *
+ * It supports:
+ * - Row and column definitions with absolute, star (*), and auto sizing
+ * - Row and column spacing
+ * - Child positioning using attached properties (Row, Column, RowSpan, ColumnSpan)
+ *
+ * @section grid_common_props Common Property Behavior
+ *
+ * - @b RequestedWidth/RequestedHeight: A positive value sets a fixed size.
+ *   WRAP_CONTENT (-1) uses the child's natural size.
+ *   MATCH_PARENT (-2) fills the parent.
+ * - @b GridLayoutParams alignment: START, CENTER, and END position the child
+ *   within the cell. FILL (the default) stretches the child to fill the
+ *   entire cell. When a child's measured size is larger than the cell, the
+ *   child is clipped to the cell bounds regardless of alignment.
+ * - @b Margin: Applied inside the cell, reducing the space available for the child.
+ */
+class DALI_UI_API GridLayout : public Layout
+{
+public:
+  /**
+   * @brief Creates an uninitialized GridLayout handle.
+   */
+  GridLayout();
+
+  /**
+   * @brief Creates a new GridLayout.
+   *
+   * @return A handle to a newly allocated GridLayout
+   */
+  static GridLayout New();
+
+  /**
+   * @brief Copy constructor.
+   */
+  GridLayout(const GridLayout& layout);
+
+  /**
+   * @brief Move constructor.
+   */
+  GridLayout(GridLayout&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~GridLayout();
+
+  /**
+   * @brief Copy assignment operator.
+   */
+  GridLayout& operator=(const GridLayout& handle);
+
+  /**
+   * @brief Move assignment operator.
+   */
+  GridLayout& operator=(GridLayout&& rhs) noexcept;
+
+  /**
+   * @brief Downcasts a handle to GridLayout handle.
+   */
+  static GridLayout DownCast(BaseHandle handle);
+
+public: // Row/Column Definition API
+  // @CHAIN_START(GridLayout, Layout)
+
+  /**
+   * @brief Adds a row definition.
+   *
+   * @param[in] height The row height specification
+   */
+  void AddRowDefinition(GridLength height);
+
+  /**
+   * @brief Adds a column definition.
+   *
+   * @param[in] width The column width specification
+   */
+  void AddColumnDefinition(GridLength width);
+
+  /**
+   * @brief Sets all row definitions at once.
+   *
+   * @param[in] rows Vector of row height specifications
+   */
+  GridLayout& SetRowDefinitions(const Dali::Vector<GridLength>& rows);
+
+  /**
+   * @brief Sets all column definitions at once.
+   *
+   * @param[in] columns Vector of column width specifications
+   */
+  GridLayout& SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
+
+  /**
+   * @brief Gets the row definitions.
+   *
+   * @return Vector of row height specifications
+   */
+  Dali::Vector<GridLength> GetRowDefinitions() const;
+
+  /**
+   * @brief Gets the column definitions.
+   *
+   * @return Vector of column width specifications
+   */
+  Dali::Vector<GridLength> GetColumnDefinitions() const;
+
+  /**
+   * @brief Gets the number of rows.
+   *
+   * @return The row count
+   */
+  uint32_t GetRowCount() const;
+
+  /**
+   * @brief Gets the number of columns.
+   *
+   * @return The column count
+   */
+  uint32_t GetColumnCount() const;
+
+  /**
+   * @brief Clears all row definitions.
+   */
+  void ClearRowDefinitions();
+
+  /**
+   * @brief Clears all column definitions.
+   */
+  void ClearColumnDefinitions();
+
+public: // Spacing API
+  /**
+   * @brief Sets the row spacing.
+   *
+   * @param[in] spacing The spacing between rows
+   */
+  GridLayout& SetRowSpacing(float spacing);
+
+  /**
+   * @brief Gets the row spacing.
+   *
+   * @return The row spacing
+   */
+  float GetRowSpacing() const;
+
+  /**
+   * @brief Sets the column spacing.
+   *
+   * @param[in] spacing The spacing between columns
+   */
+  GridLayout& SetColumnSpacing(float spacing);
+
+  /**
+   * @brief Gets the column spacing.
+   *
+   * @return The column spacing
+   */
+  float GetColumnSpacing() const;
+
+  // @CHAIN_END
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The Layout implementation
+   */
+  explicit DALI_UI_API GridLayout(Integration::GridLayoutImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API GridLayout(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_LAYOUT_METHODS(GridLayout)
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout-params.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Internal
+{
+class GridLayoutParamsImpl;
+}
+
+/**
+ * @brief GridLayoutParams stores per-child layout parameters for GridLayout.
+ *
+ * This handle provides direct access to row, column, rowSpan, and columnSpan
+ * attached to a child view.
+ * Use View::SetLayoutParams() to attach parameters to a child view.
+ *
+ * @code
+ * view.SetLayoutParams(GridLayoutParams::New()
+ *   .SetRow(1)
+ *   .SetColumn(2)
+ *   .SetColumnSpan(3));
+ * @endcode
+ */
+class DALI_UI_API GridLayoutParams : public LayoutParams
+{
+public:
+  /**
+   * @brief Creates an uninitialized handle.
+   */
+  GridLayoutParams();
+
+  /**
+   * @brief Creates a new GridLayoutParams with default values.
+   *
+   * @return A handle to a newly allocated GridLayoutParams
+   */
+  static GridLayoutParams New();
+
+  /**
+   * @brief Creates a new GridLayoutParams by copying values from an existing one.
+   *
+   * @param[in] other The params to copy from
+   * @return A handle to a newly allocated GridLayoutParams with copied values
+   */
+  static GridLayoutParams New(const GridLayoutParams& other);
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  GridLayoutParams(const GridLayoutParams& handle);
+
+  /**
+   * @brief Destructor.
+   */
+  ~GridLayoutParams();
+
+  /**
+   * @brief Downcasts a handle to GridLayoutParams.
+   *
+   * @param[in] handle Handle to an object
+   * @return A valid handle or an uninitialized handle
+   */
+  static GridLayoutParams DownCast(BaseHandle handle);
+
+  /**
+   * @brief Returns the layout params type identifier.
+   *
+   * @return LayoutParamsType::GRID
+   */
+  static LayoutParamsType GetLayoutParamsType();
+
+  /**
+   * @brief Sets the row index for this child in the grid.
+   *
+   * @param[in] row Zero-based row index
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetRow(uint32_t row);
+
+  /**
+   * @brief Gets the row index for this child in the grid.
+   *
+   * @return The row index
+   */
+  uint32_t GetRow() const;
+
+  /**
+   * @brief Sets the column index for this child in the grid.
+   *
+   * @param[in] column Zero-based column index
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetColumn(uint32_t column);
+
+  /**
+   * @brief Gets the column index for this child in the grid.
+   *
+   * @return The column index
+   */
+  uint32_t GetColumn() const;
+
+  /**
+   * @brief Sets how many rows this child spans.
+   *
+   * @param[in] span Number of rows to span (minimum 1)
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetRowSpan(uint32_t span);
+
+  /**
+   * @brief Gets how many rows this child spans.
+   *
+   * @return The row span count
+   */
+  uint32_t GetRowSpan() const;
+
+  /**
+   * @brief Sets how many columns this child spans.
+   *
+   * @param[in] span Number of columns to span (minimum 1)
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetColumnSpan(uint32_t span);
+
+  /**
+   * @brief Gets how many columns this child spans.
+   *
+   * @return The column span count
+   */
+  uint32_t GetColumnSpan() const;
+
+  /**
+   * @brief Sets the horizontal alignment within the grid cell.
+   *
+   * @param[in] alignment FILL, START, CENTER, or END
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetHorizontalAlignment(LayoutAlignment alignment);
+
+  /**
+   * @brief Gets the horizontal alignment.
+   *
+   * @return The horizontal alignment
+   */
+  LayoutAlignment GetHorizontalAlignment() const;
+
+  /**
+   * @brief Sets the vertical alignment within the grid cell.
+   *
+   * @param[in] alignment FILL, START, CENTER, or END
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetVerticalAlignment(LayoutAlignment alignment);
+
+  /**
+   * @brief Gets the vertical alignment.
+   *
+   * @return The vertical alignment
+   */
+  LayoutAlignment GetVerticalAlignment() const;
+
+public: // Not intended for application developers
+  /// @cond internal
+  explicit GridLayoutParams(Internal::GridLayoutParamsImpl* implementation);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/extents.h>
+#include <dali/public-api/math/vector2.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+class View;
+
+/**
+ * @brief Enumeration for layout alignment options.
+ */
+enum class LayoutAlignment : uint8_t
+{
+  /**
+   * @brief Fill the available space
+   */
+  FILL = 0,
+  /**
+   * @brief Align to the start (left/top)
+   */
+  START = 1,
+  /**
+   * @brief Align to the center
+   */
+  CENTER = 2,
+  /**
+   * @brief Align to the end (right/bottom)
+   */
+  END = 3
+};
+
+/**
+ * @brief Constant representing wrap-content sizing.
+ *
+ * When RequestedWidth or RequestedHeight is set to this value (the default),
+ * the View sizes to fit its content (natural size or children bounding box).
+ */
+constexpr float WRAP_CONTENT = -1.0f;
+
+/**
+ * @brief Constant representing match-parent sizing.
+ *
+ * When RequestedWidth or RequestedHeight is set to this value,
+ * the View fills the parent container's available space on that axis.
+ */
+constexpr float MATCH_PARENT = -2.0f;
+
+/**
+ * @brief Layout mode of a View.
+ *
+ * Default: the parent container's layout system manages this View's size and position
+ * (measure/arrange follow the parent's layout rules and the View participates in
+ * the parent's accumulation, spacing and index calculations).
+ *
+ * Standalone: the parent container excludes this View from its accumulation/spacing/
+ * index calculations. The View's size is still measured normally (so MATCH_PARENT,
+ * WRAP_CONTENT and explicit RequestedWidth/Height work as usual), but its position is
+ * taken from the View's own SetRequestedPositionX/SetRequestedPositionY instead of
+ * being decided by the parent's layout. Useful for floating overlays, drag previews,
+ * tooltips and absolute positioning within an arbitrary LayoutManager.
+ */
+enum class LayoutMode : uint8_t
+{
+  DEFAULT    = 0, ///< Managed by the parent container's layout (default).
+  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetRequestedPositionX/SetRequestedPositionY.
+};
+
+/**
+ * @brief Class representing measured LayoutDimensions.
+ *
+ * This class stores the measured width and height of a view.
+ */
+class DALI_UI_API MeasuredSize
+{
+public:
+  /**
+   * @brief Default constructor.
+   */
+  MeasuredSize()
+  : width(0.0f),
+    height(0.0f)
+  {
+  }
+
+  /**
+   * @brief Constructor with width and height.
+   *
+   * @param[in] w The width value
+   * @param[in] h The height value
+   */
+  MeasuredSize(float w, float h)
+  : width(w),
+    height(h)
+  {
+  }
+
+  /**
+   * @brief Gets the width.
+   * @return The width value
+   */
+  float GetWidth() const
+  {
+    return width;
+  }
+
+  /**
+   * @brief Sets the width.
+   * @param[in] w The width value
+   */
+  void SetWidth(float w)
+  {
+    width = w;
+  }
+
+  /**
+   * @brief Gets the height.
+   * @return The height value
+   */
+  float GetHeight() const
+  {
+    return height;
+  }
+
+  /**
+   * @brief Sets the height.
+   * @param[in] h The height value
+   */
+  void SetHeight(float h)
+  {
+    height = h;
+  }
+
+  /**
+   * @brief Converts to Vector2.
+   * @return Vector2 representation
+   */
+  Vector2 ToVector2() const
+  {
+    return Vector2(width, height);
+  }
+
+  float width;  ///< Measured width
+  float height; ///< Measured height
+};
+
+/**
+ * @brief Class representing a rectangle for layout positioning and sizing.
+ */
+class DALI_UI_API LayoutRect
+{
+public:
+  /**
+   * @brief Default constructor.
+   */
+  LayoutRect()
+  : x(0.0f),
+    y(0.0f),
+    width(0.0f),
+    height(0.0f)
+  {
+  }
+
+  /**
+   * @brief Constructor with position and size.
+   *
+   * @param[in] posX X position
+   * @param[in] posY Y position
+   * @param[in] w Width
+   * @param[in] h Height
+   */
+  LayoutRect(float posX, float posY, float w, float h)
+  : x(posX),
+    y(posY),
+    width(w),
+    height(h)
+  {
+  }
+
+  /**
+   * @brief Gets the X position.
+   */
+  float GetX() const
+  {
+    return x;
+  }
+
+  /**
+   * @brief Sets the X position.
+   */
+  void SetX(float posX)
+  {
+    x = posX;
+  }
+
+  /**
+   * @brief Gets the Y position.
+   */
+  float GetY() const
+  {
+    return y;
+  }
+
+  /**
+   * @brief Sets the Y position.
+   */
+  void SetY(float posY)
+  {
+    y = posY;
+  }
+
+  /**
+   * @brief Gets the width.
+   */
+  float GetWidth() const
+  {
+    return width;
+  }
+
+  /**
+   * @brief Sets the width.
+   */
+  void SetWidth(float w)
+  {
+    width = w;
+  }
+
+  /**
+   * @brief Gets the height.
+   */
+  float GetHeight() const
+  {
+    return height;
+  }
+
+exec
+/bin/bash -lc "sed -n '1080,1170p' repos/dali-ui/dali-ui-foundation/public-api/view.h && sed -n '300,460p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  {
+    SelectableTrait trait = EnsureSelectableTrait();
+    if(trait)
+    {
+      configure(trait);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Assigns this View instance to a target variable.
+   * This method is useful for capturing a reference to a View created within
+   * a declarative UI tree for later use.
+   */
+  View& As(View& self)
+  {
+    self = static_cast<View&>(*this);
+    return *this;
+  }
+
+  // @CHAIN_MANUAL_SELF
+  /**
+   * @brief Executes a custom action on this View instance.
+   *
+   * Useful for performing additional setup (e.g. signal connections,
+   * predefined style application) without breaking the method chain.
+   *
+   * @param[in] action A callable (lambda or free function) invoked with
+   *                   a reference to this instance.
+   *
+   * @return Reference to this View for fluent chaining.
+   */
+  template<typename F>
+  View& With(F&& action)
+  {
+    action(*this);
+    return *this;
+  }
+
+  /**
+   * @brief Sets layout parameters on this View.
+   *
+   * The params handle is stored on the View as-is, and the View's
+   * measure cache is invalidated.
+   *
+   * @param[in] params The layout parameters to attach to this View
+   * @return Reference to this View for fluent chaining
+   *
+   * @code
+   * child.SetLayoutParams(
+   *   AbsoluteLayoutParams::New()
+   *     .SetBounds(LayoutRect(10, 20, 100, 200))
+   *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+   * @endcode
+   */
+  View& SetLayoutParams(LayoutParams params);
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Adds a list of children to this View in a declarative way.
+   * This method allows for a hierarchical UI tree construction by passing
+   * a brace-enclosed initializer list of View objects.
+   * @param[in] children The initializer list containing child View handles to be added.
+   */
+  View& Children(std::initializer_list<View> children)
+  {
+    for(const auto& child : children)
+    {
+      Add(child);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Adds a list of visuals to this View in a declarative way.
+   * This method allows for append visuals construction by passing
+   * a brace-enclosed initializer list of VisualBase objects.
+   *
+   * Assert if too many visuals are added, or duplicated VisualBase added.
+   * Please use AddVisual() API if you need to control error cases.
+   *
+   * @param[in] containerRangeType The range of visuals to be added.
+   * @param[in] visuals The initializer list containing VisualBase handles to be added.
+   */
+  View& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals)
+  {
+    for(const auto& visual : visuals)
+    {
+      bool added = AddVisual(visual, containerRangeType);
+  * @param[in] topRight    The squareness for the top-right corner \
+  * @param[in] bottomRight The squareness for the bottom-right corner \
+  * @param[in] bottomLeft  The squareness for the bottom-left corner \
+  */ \
+  ChildClass& SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft) { View::SetCornerSquareness(topLeft, topRight, bottomRight, bottomLeft); return *this; } \
+  /** \
+  * @brief Sets corner squareness from a Vector4. \
+  * \
+  * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft) \
+  */ \
+  ChildClass& SetCornerSquareness(const Vector4& squareness) { View::SetCornerSquareness(squareness); return *this; } \
+  /** \
+  * @brief Sets the borderline width of the view. \
+  * \
+  * @param[in] width The borderline width to set \
+  */ \
+  ChildClass& SetBorderlineWidth(float width) { View::SetBorderlineWidth(width); return *this; } \
+  /** \
+  * @brief Sets the borderline color of the view. \
+  * \
+  * If the UiColor has a color ID, it is resolved from the current \
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * @param[in] color The UiColor to apply \
+  */ \
+  ChildClass& SetBorderlineColor(const UiColor& color) { View::SetBorderlineColor(color); return *this; } \
+  /** \
+  * @brief Sets the borderline offset of the view. \
+  * \
+  * @param[in] offset The borderline offset to set \
+  */ \
+  ChildClass& SetBorderlineOffset(float offset) { View::SetBorderlineOffset(offset); return *this; } \
+  /** \
+  * @brief Sets the name of this view. \
+  * \
+  * @param[in] name The name to set \
+  */ \
+  ChildClass& SetName(const Dali::String& name) { View::SetName(name); return *this; } \
+  /** \
+  * @brief Sets the layout direction of this view explicitly. \
+  * \
+  * Overrides inherited direction from the parent. To revert to inheritance, \
+  * use ClearLayoutDirection(). \
+  * \
+  * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetLayoutDirection(Dali::LayoutDirection::Type direction) { View::SetLayoutDirection(direction); return *this; } \
+  /** \
+  * @brief Attaches the interaction trait to this View. \
+  * \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& AsInteractive() { View::AsInteractive(); return *this; } \
+  /** \
+  * @brief Attaches the interaction trait to this View and configures it. \
+  * \
+  * @param[in] configure Callable with signature void(InteractiveTrait&) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  template<typename F> \
+  ChildClass& AsInteractive(F&& configure) { View::AsInteractive(configure); return *this; } \
+  /** \
+  * @brief Attaches the selectable trait to this View. \
+  * \
+  * A View can have at most one selectable trait. If the View already has a \
+  * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused. \
+  * \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& AsSelectable() { View::AsSelectable(); return *this; } \
+  /** \
+  * @brief Attaches the selectable trait to this View and configures it. \
+  * \
+  * A View can have at most one selectable trait. If the View already has a \
+  * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is \
+  * used and the configure callback is invoked with it. \
+  * \
+  * @param[in] configure Callable with signature void(SelectableTrait&) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  template<typename F> \
+  ChildClass& AsSelectable(F&& configure) { View::AsSelectable(configure); return *this; } \
+  /** \
+  * @brief Assigns this View instance to a target variable. \
+  * This method is useful for capturing a reference to a View created within \
+  * a declarative UI tree for later use. \
+  */ \
+  ChildClass& As(View& self) { View::As(self); return *this; } \
+  /** \
+  * @brief Executes a custom action on this View instance. \
+  * \
+  * Useful for performing additional setup (e.g. signal connections, \
+  * predefined style application) without breaking the method chain. \
+  * \
+  * @param[in] action A callable (lambda or free function) invoked with \
+  *                   a reference to this instance. \
+  * \
+  * @return Reference to this View for fluent chaining. \
+  */ \
+  template<typename F> \
+  ChildClass& With(F&& action) \
+  { \
+  action(*this); \
+  return *this; \
+  } \
+  /** \
+  * @brief Sets layout parameters on this View. \
+  * \
+  * The params handle is stored on the View as-is, and the View's \
+  * measure cache is invalidated. \
+  * \
+  * @param[in] params The layout parameters to attach to this View \
+  * @return Reference to this View for fluent chaining \
+  * \
+  * @code \
+  * child.SetLayoutParams( \
+  *   AbsoluteLayoutParams::New() \
+  *     .SetBounds(LayoutRect(10, 20, 100, 200)) \
+  *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)); \
+  * @endcode \
+  */ \
+  ChildClass& SetLayoutParams(LayoutParams params) { View::SetLayoutParams(params); return *this; } \
+  /** \
+  * @brief Adds a list of children to this View in a declarative way. \
+  * This method allows for a hierarchical UI tree construction by passing \
+  * a brace-enclosed initializer list of View objects. \
+  * @param[in] children The initializer list containing child View handles to be added. \
+  */ \
+  ChildClass& Children(std::initializer_list<View> children) { View::Children(children); return *this; } \
+  /** \
+  * @brief Adds a list of visuals to this View in a declarative way. \
+  * This method allows for append visuals construction by passing \
+  * a brace-enclosed initializer list of VisualBase objects. \
+  * \
+  * Assert if too many visuals are added, or duplicated VisualBase added. \
+  * Please use AddVisual() API if you need to control error cases. \
+  * \
+  * @param[in] containerRangeType The range of visuals to be added. \
+  * @param[in] visuals The initializer list containing VisualBase handles to be added. \
+  */ \
+  ChildClass& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals) { View::Visuals(containerRangeType, visuals); return *this; }
+
+exec
+/bin/bash -lc "sed -n '260,680p' repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  }
+
+  /**
+   * @brief Sets the height.
+   */
+  void SetHeight(float h)
+  {
+    height = h;
+  }
+
+  /**
+   * @brief Gets the position as Vector2.
+   */
+  Vector2 GetPosition() const
+  {
+    return Vector2(x, y);
+  }
+
+  /**
+   * @brief Gets the size as Vector2.
+   */
+  Vector2 GetSize() const
+  {
+    return Vector2(width, height);
+  }
+
+  float x;      ///< X position
+  float y;      ///< Y position
+  float width;  ///< Width
+  float height; ///< Height
+};
+
+// ============================================================================
+// Layout Callback types
+// ============================================================================
+
+/**
+ * @brief Move-only callback for custom layout measurement.
+ *
+ * @code
+ * view.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));
+ * @endcode
+ *
+ * @note Signature: MeasuredSize(View view, float widthConstraint, float heightConstraint)
+ *       Both widthConstraint and heightConstraint are visual (scale-applied) sizes,
+ *       consistent with ArrangeCallback. The return value must also be visual.
+ */
+using MeasureCallback = Callback<MeasuredSize(View, float, float)>;
+
+/**
+ * @brief Move-only callback for custom layout arrangement.
+ *
+ * @code
+ * view.SetArrangeCallback(ArrangeCallback::New(this, &MyClass::OnArrange));
+ * @endcode
+ *
+ * @note Signature: MeasuredSize(View view, const LayoutRect& bounds)
+ */
+using ArrangeCallback = Callback<MeasuredSize(View, const LayoutRect&)>;
+
+/**
+ * @brief Enumeration for stack layout orientation.
+ */
+enum class StackOrientation : uint8_t
+{
+  /**
+   * @brief Vertical stacking (top to bottom)
+   */
+  VERTICAL = 0,
+  /**
+   * @brief Horizontal stacking (left to right)
+   */
+  HORIZONTAL = 1
+};
+
+/**
+ * @brief Enumeration for flex layout direction.
+ */
+enum class FlexDirection : uint8_t
+{
+  /**
+   * @brief Left to right
+   */
+  ROW = 0,
+  /**
+   * @brief Right to left
+   */
+  ROW_REVERSE = 1,
+  /**
+   * @brief Top to bottom
+   */
+  COLUMN = 2,
+  /**
+   * @brief Bottom to top
+   */
+  COLUMN_REVERSE = 3
+};
+
+/**
+ * @brief Enumeration for flex wrap behavior.
+ */
+enum class FlexWrap : uint8_t
+{
+  /**
+   * @brief No wrapping
+   */
+  NO_WRAP = 0,
+  /**
+   * @brief Normal wrapping
+   */
+  WRAP = 1,
+  /**
+   * @brief Reverse wrapping
+   */
+  WRAP_REVERSE = 2
+};
+
+/**
+ * @brief Enumeration for flex justify content.
+ */
+enum class FlexJustify : uint8_t
+{
+  /**
+   * @brief Align to start
+   */
+  FLEX_START = 0,
+  /**
+   * @brief Align to end
+   */
+  FLEX_END = 1,
+  /**
+   * @brief Center alignment
+   */
+  CENTER = 2,
+  /**
+   * @brief Space between items
+   */
+  SPACE_BETWEEN = 3,
+  /**
+   * @brief Space around items
+   */
+  SPACE_AROUND = 4,
+  /**
+   * @brief Even spacing
+   */
+  SPACE_EVENLY = 5
+};
+
+/**
+ * @brief Enumeration for flex alignment.
+ */
+enum class FlexAlign : uint8_t
+{
+  /**
+   * @brief Auto alignment
+   */
+  AUTO = 0,
+  /**
+   * @brief Align to start
+   */
+  FLEX_START = 1,
+  /**
+   * @brief Align to end
+   */
+  FLEX_END = 2,
+  /**
+   * @brief Center alignment
+   */
+  CENTER = 3,
+  /**
+   * @brief Stretch to fill
+   */
+  STRETCH = 4,
+  /**
+   * @brief Baseline alignment
+   */
+  BASELINE = 5
+};
+
+/**
+ * @brief Enumeration for grid length types.
+ */
+enum class GridLengthType : uint8_t
+{
+  /**
+   * @brief Absolute pixel value
+   */
+  ABSOLUTE = 0,
+  /**
+   * @brief Proportional (star) value
+   */
+  STAR = 1,
+  /**
+   * @brief Auto sizing
+   */
+  AUTO = 2
+};
+
+/**
+ * @brief Class representing grid length specification.
+ */
+class DALI_UI_API GridLength
+{
+public:
+  /**
+   * @brief Default constructor (creates absolute 0).
+   */
+  GridLength()
+  : mType(GridLengthType::ABSOLUTE),
+    mValue(0.0f)
+  {
+  }
+
+  /**
+   * @brief Creates an absolute grid length.
+   *
+   * @param[in] pixels The pixel value
+   * @return GridLength instance
+   */
+  static GridLength Absolute(float pixels)
+  {
+    GridLength length;
+    length.mType  = GridLengthType::ABSOLUTE;
+    length.mValue = pixels;
+    return length;
+  }
+
+  /**
+   * @brief Creates a star (proportional) grid length.
+   *
+   * @param[in] factor The star factor (default 1.0)
+   * @return GridLength instance
+   */
+  static GridLength Star(float factor = 1.0f)
+  {
+    GridLength length;
+    length.mType  = GridLengthType::STAR;
+    length.mValue = factor;
+    return length;
+  }
+
+  /**
+   * @brief Creates an auto grid length.
+   *
+   * @return GridLength instance
+   */
+  static GridLength Auto()
+  {
+    GridLength length;
+    length.mType  = GridLengthType::AUTO;
+    length.mValue = 0.0f;
+    return length;
+  }
+
+  /**
+   * @brief Gets the type.
+   */
+  GridLengthType GetType() const
+  {
+    return mType;
+  }
+
+  /**
+   * @brief Gets the value.
+   */
+  float GetValue() const
+  {
+    return mValue;
+  }
+
+private:
+  GridLengthType mType;
+  float          mValue;
+};
+
+/**
+ * @brief Enumeration for absolute layout flags.
+ *
+ * Flags can be combined per-axis, allowing X/Y positions and Width/Height sizes
+ * to be independently specified as either absolute values or proportions of the
+ * parent's content area. The composite values POSITION_PROPORTIONAL and
+ * SIZE_PROPORTIONAL are provided for convenience.
+ */
+enum class AbsoluteLayoutFlags : uint8_t
+{
+  /**
+   * @brief No flags set
+   */
+  NONE = 0x0,
+  /**
+   * @brief X position is proportional to parent size
+   */
+  X_PROPORTIONAL = 1 << 0,
+  /**
+   * @brief Y position is proportional to parent size
+   */
+  Y_PROPORTIONAL = 1 << 1,
+  /**
+   * @brief Width is proportional to parent size
+   */
+  WIDTH_PROPORTIONAL = 1 << 2,
+  /**
+   * @brief Height is proportional to parent size
+   */
+  HEIGHT_PROPORTIONAL = 1 << 3,
+  /**
+   * @brief Both X and Y positions are proportional to parent size
+   */
+  POSITION_PROPORTIONAL = X_PROPORTIONAL | Y_PROPORTIONAL,
+  /**
+   * @brief Both width and height are proportional to parent size
+   */
+  SIZE_PROPORTIONAL = WIDTH_PROPORTIONAL | HEIGHT_PROPORTIONAL,
+  /**
+   * @brief All bits set (all current and future proportional axes)
+   */
+  ALL = static_cast<uint8_t>(~0)
+};
+
+/**
+ * @brief Bitwise OR operator for AbsoluteLayoutFlags.
+ */
+inline AbsoluteLayoutFlags operator|(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
+{
+  return static_cast<AbsoluteLayoutFlags>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+}
+
+/**
+ * @brief Bitwise AND operator for AbsoluteLayoutFlags.
+ */
+inline AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
+{
+  return static_cast<AbsoluteLayoutFlags>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+}
+
+/**
+ * @brief Enumeration for identifying layout parameter types.
+ *
+ * Used by View::GetLayoutParams<T>() and View::SetLayoutParams()
+ * to look up the correct layout parameters attached to a View.
+ */
+enum class LayoutParamsType : uint8_t
+{
+  ABSOLUTE = 0,
+  STACK    = 1,
+  GRID     = 2,
+  FLEX     = 3
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/layouts/layout.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+namespace Integration
+{
+class LayoutImpl;
+}
+
+#include "layout.autogen.h"
+/**
+ * @brief Layout is a View that arranges child views using a layout algorithm.
+ *
+ * Layout extends View and owns a LayoutManager that defines the layout algorithm.
+ * Only Layout (and its derived classes like StackLayout, GridLayout) can have
+ * a layout algorithm.
+ *
+ * To customize measure/arrange behavior, use SetMeasureCallback() and
+ * SetArrangeCallback() on View.
+ *
+ * Child management uses Actor::Add/Remove (inherited from View's base class).
+ * Insert(index, View) and RemoveAllChildren() are provided by View.
+ */
+class DALI_UI_API Layout : public View
+{
+public:
+  /**
+   * @brief Creates an uninitialized Layout handle.
+   */
+  Layout();
+
+  /**
+   * @brief Creates an initialized Layout.
+   *
+   * @return A handle to a newly allocated Layout
+   */
+  static Layout New();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] layout Handle to copy
+   */
+  Layout(const Layout& layout);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  Layout(Layout&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since Handle classes must not have virtual methods.
+   */
+  ~Layout();
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  Layout& operator=(const Layout& handle);
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  Layout& operator=(Layout&& rhs) noexcept;
+
+  /**
+   * @brief Downcasts a handle to Layout handle.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a Layout or an uninitialized handle
+   */
+  static Layout DownCast(BaseHandle handle);
+
+public:
+  // @CHAIN_START(Layout, View)
+  // @CHAIN_END
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The Layout implementation
+   */
+  explicit DALI_UI_API Layout(Integration::LayoutImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API Layout(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_VIEW_METHODS(Layout)
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-params.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+namespace Internal
+{
+class LayoutParamsImpl;
+}
+
+/**
+ * @brief LayoutParams is the base handle class for all layout parameter types.
+ *
+ * It provides a common base for AbsoluteLayoutParams, FlexLayoutParams,
+ * GridLayoutParams, and StackLayoutParams. Use with
+ * View::SetLayoutParams() and View::GetLayoutParams().
+ */
+class DALI_UI_API LayoutParams : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an uninitialized LayoutParams handle.
+   */
+  LayoutParams();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  LayoutParams(const LayoutParams& handle);
+
+  /**
+   * @brief Destructor.
+   */
+  ~LayoutParams();
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  LayoutParams& operator=(const LayoutParams& handle) = default;
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  LayoutParams(LayoutParams&& rhs) noexcept = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  LayoutParams& operator=(LayoutParams&& rhs) noexcept = default;
+
+  /**
+   * @brief Downcasts a handle to LayoutParams.
+   *
+   * @param[in] handle Handle to an object
+   * @return A valid handle or an uninitialized handle
+   */
+  static LayoutParams DownCast(BaseHandle handle);
+
+public: // Not intended for application developers
+  /// @cond internal
+  explicit LayoutParams(Internal::LayoutParamsImpl* implementation);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "rg -n \"SetLayout\\(|GetLayout\\(|Layout\\(|SetRequested(Width|Height|Position)|RequestedWidth|SetMargin|SetPadding|Add\\(\" repos/dali-ui/dali-ui-foundation/public-api/view.h repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:59:  ChildClass& SetRequestedPositionX(float x) { View::SetRequestedPositionX(x); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:64:  * @see SetRequestedPositionX \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:66:  ChildClass& SetRequestedPositionY(float y) { View::SetRequestedPositionY(y); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:88:  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:98:  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:128:  ChildClass& SetMargin(const Extents& margin) { View::SetMargin(margin); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:134:  ChildClass& SetPadding(const Extents& padding) { View::SetPadding(padding); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:143:  * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
+repos/dali-ui/dali-ui-foundation/public-api/view.h:364:   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
+repos/dali-ui/dali-ui-foundation/public-api/view.h:391:  View& SetRequestedPositionX(float x);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:397:   * SetRequestedPositionX. To read the current rendered X position
+repos/dali-ui/dali-ui-foundation/public-api/view.h:408:   * @see SetRequestedPositionX
+repos/dali-ui/dali-ui-foundation/public-api/view.h:410:  View& SetRequestedPositionY(float y);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:484:  View& SetRequestedWidth(float width);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:491:  float GetRequestedWidth() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:502:  View& SetRequestedHeight(float height);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:572:  View& SetMargin(const Extents& margin);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:586:  View& SetPadding(const Extents& padding);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:603:   * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1149:      Add(child);
+
+exec
+/bin/bash -lc "sed -n '50,130p' repos/dali-ui/samples/flexlayout/flexlayout-wrap-grow-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    // Outer vertical StackLayout to hold two sections
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(50, 50, 50, 50));
+
+    FlexLayout first = FlexLayout::New()
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
+      .SetDirection(FlexDirection::ROW)
+      .SetWrap(FlexWrap::WRAP)
+      .SetJustifyContent(FlexJustify::FLEX_START)
+      .SetAlignContent(FlexAlign::CENTER);
+
+    // Box 1: Red, basis 50, grow 1
+    View box1 = View::New();
+    box1.SetBackgroundColor(Color::RED);
+    box1.SetRequestedHeight(100.0f);
+    box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
+    first.Add(box1);
+
+    // Box 2: Green, basis 50, grow 1
+    View box2 = View::New();
+    box2.SetBackgroundColor(Color::GREEN);
+    box2.SetRequestedHeight(100.0f);
+    box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
+    first.Add(box2);
+
+    // Box 3: Blue, basis 100, grow 2
+    View box3 = View::New();
+    box3.SetBackgroundColor(Color::BLUE);
+    box3.SetRequestedHeight(100.0f);
+    box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f).SetFlexGrow(2.0f));
+    first.Add(box3);
+
+    outer.Add(first);
+
+    FlexLayout second = FlexLayout::New()
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
+      .SetDirection(FlexDirection::ROW)
+      .SetWrap(FlexWrap::WRAP)
+      .SetJustifyContent(FlexJustify::FLEX_START)
+      .SetAlignContent(FlexAlign::CENTER);
+
+    // Box 4: Yellow, basis 100, grow 1
+    View box4 = View::New();
+    box4.SetBackgroundColor(Color::YELLOW);
+    box4.SetRequestedHeight(100.0f);
+    box4.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f).SetFlexGrow(1.0f));
+    second.Add(box4);
+
+    // Box 5: Cyan, basis 100, grow 1
+    View box5 = View::New();
+    box5.SetBackgroundColor(Color::CYAN);
+    box5.SetRequestedHeight(100.0f);
+    box5.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f).SetFlexGrow(1.0f));
+    second.Add(box5);
+
+    // Box 6: Magenta, basis 200, grow 2
+    View box6 = View::New();
+    box6.SetBackgroundColor(Color::MAGENTA);
+    box6.SetRequestedHeight(100.0f);
+    box6.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(200.0f).SetFlexGrow(2.0f));
+    second.Add(box6);
+
+    outer.Add(second);
+
+    // // Box 5: Cyan, basis 100, grow 4
+    // View box8 = View::New();
+    // box8.SetBackgroundColor(Color::CYAN);
+    // box8.SetRequestedHeight(100.0f);
+    // box8.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
+    // root.Add(box8);
+
+    window.Add(outer);
+    window.KeyEventSignal().Connect(this, &FlexLayoutWrapGrowController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+
+exec
+/bin/bash -lc "sed -n '50,130p' repos/dali-ui/samples/gridlayout/gridlayout-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+      .SetColumnSpacing(10.0f);
+
+    // Define 3 rows and 2 columns with absolute sizes
+    root.AddRowDefinition(GridLength::Absolute(50.0f));
+    root.AddRowDefinition(GridLength::Absolute(100.0f));
+    root.AddRowDefinition(GridLength::Absolute(200.0f));
+    root.AddColumnDefinition(GridLength::Absolute(50.0f));
+    root.AddColumnDefinition(GridLength::Absolute(100.0f));
+
+    // Cell (0,0): Red
+    View cell00 = View::New();
+    cell00.SetBackgroundColor(Color::RED);
+    cell00.SetLayoutParams(GridLayoutParams::New());
+    root.Add(cell00);
+
+    // Cell (0,1): Green
+    View cell01 = View::New();
+    cell01.SetBackgroundColor(Color::GREEN);
+    cell01.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
+    root.Add(cell01);
+
+    // Cell (1,0): Blue
+    View cell10 = View::New();
+    cell10.SetBackgroundColor(Color::BLUE);
+    cell10.SetLayoutParams(GridLayoutParams::New().SetRow(1));
+    root.Add(cell10);
+
+    // Cell (1,1): Yellow
+    View cell11 = View::New();
+    cell11.SetBackgroundColor(Color::YELLOW);
+    cell11.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
+    root.Add(cell11);
+
+    // Cell (2,0): Cyan
+    View cell20 = View::New();
+    cell20.SetBackgroundColor(Color::CYAN);
+    cell20.SetLayoutParams(GridLayoutParams::New().SetRow(2));
+    root.Add(cell20);
+
+    // Cell (2,1): Magenta
+    View cell21 = View::New();
+    cell21.SetBackgroundColor(Color::MAGENTA);
+    cell21.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(1));
+    root.Add(cell21);
+
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &GridLayoutController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  GridLayoutController controller(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "sed -n '50,130p' repos/dali-ui/samples/absolutelayout/absolutelayout-margin-padding-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+    // Root: AbsoluteLayout with padding (content inset from window edges)
+    AbsoluteLayout root = AbsoluteLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+
+    // --- Red box: no margin (positioned at padding edge) ---
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    redBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetWidth(100.0f).SetHeight(100.0f));
+    root.Add(redBox);
+
+    // --- Green box: 50px margin all sides ---
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetMargin(Extents(50, 50, 50, 50));
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(100.0f).SetWidth(100.0f).SetHeight(50.0f));
+    root.Add(greenBox);
+
+    // --- Blue box: 50px margin all sides ---
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetMargin(Extents(50, 50, 50, 50));
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetX(100.0f).SetY(200.0f).SetWidth(100.0f).SetHeight(50.0f));
+    root.Add(blueBox);
+
+    // --- Nested AbsoluteLayout with its own padding ---
+    AbsoluteLayout nested = AbsoluteLayout::New()
+      .SetBackgroundColor(Color::GRAY)
+      .SetPadding(Extents(50, 50, 50, 50))
+      .SetMargin(Extents(50, 50, 50, 50))
+      .SetLayoutParams(AbsoluteLayoutParams::New()
+        .SetY(300.0f).SetWidth(200.0f).SetHeight(200.0f));
+
+    View innerA = View::New();
+    innerA.SetBackgroundColor(Color::MAGENTA);
+    innerA.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
+      .SetFlags(AbsoluteLayoutFlags::ALL));
+    nested.Add(innerA);
+
+    View innerB = View::New();
+    innerB.SetBackgroundColor(Color::YELLOW);
+    innerB.SetMargin(Extents(50, 50, 50, 50));
+    innerB.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetX(50.0f).SetWidth(50.0f).SetHeight(50.0f));
+    nested.Add(innerB);
+
+    View innerC = View::New();
+    innerC.SetBackgroundColor(Color::CYAN);
+    innerC.SetMargin(Extents(50, 50, 50, 50));
+    innerC.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(50.0f).SetWidth(50.0f).SetHeight(50.0f));
+    nested.Add(innerC);
+
+    root.Add(nested);
+
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &AbsoluteLayoutMarginPaddingController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+
+exec
+/bin/bash -lc "sed -n '340,620p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetVisibility(bool visibility);
+
+  /**
+   * @brief Gets the opacity of the view.
+   *
+   * @return The opacity value (0.0 to 1.0)
+   */
+  float GetOpacity() const;
+
+  // @ANIMATABLE(Actor::Property::OPACITY, float)
+  /**
+   * @brief Sets the opacity of the view.
+   *
+   * @param[in] opacity The opacity value to set (0.0 to 1.0)
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetOpacity(float opacity);
+
+  /**
+   * @brief Gets the actual rendered size of this View after layout.
+   *
+   * This is a read-only result of the layout system's Measure/Arrange passes.
+   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
+   *
+   * @return The actual size (width, height) as set by the layout system
+   */
+  MeasuredSize GetSize() const;
+
+  /**
+   * @brief Gets the current rendered size of this View.
+   *
+   * @return The current rendered size (width, height)
+   */
+  MeasuredSize GetCurrentSize() const;
+
+  /**
+   * @brief Sets the X position requested by the user.
+   *
+   * This value is the layout input. The parent's Arrange pass uses it
+   * (offset by the parent's left padding and this view's left margin) to
+   * compute the final rendered position. The Actor::Property::POSITION_X
+   * property is updated only by the next Arrange.
+   *
+   * To drive the rendered position without affecting the layout request
+   * (e.g. for scrolling or animation that should not feed back into
+   * layout), set Actor::Property::POSITION_X via SetProperty directly.
+   *
+   * @param[in] x The requested X position
+   */
+  View& SetRequestedPositionX(float x);
+
+  /**
+   * @brief Returns the user-requested X position.
+   *
+   * Independent of layout passes; returns the last value set via
+   * SetRequestedPositionX. To read the current rendered X position
+   * (Actor::Property::POSITION_X) instead, use GetPositionX().
+   *
+   * @return The requested X position
+   */
+  float GetRequestedPositionX() const;
+
+  /**
+   * @brief Sets the Y position requested by the user.
+   *
+   * @param[in] y The requested Y position
+   * @see SetRequestedPositionX
+   */
+  View& SetRequestedPositionY(float y);
+
+  /**
+   * @brief Returns the user-requested Y position.
+   *
+   * @return The requested Y position
+   * @see GetRequestedPositionX
+   */
+  float GetRequestedPositionY() const;
+
+  /**
+   * @brief Returns the current rendered X position (Actor::Property::POSITION_X).
+   *
+   * After a layout pass, this is the requested X plus the parent's left
+   * padding plus this view's left margin. Direct property writes (e.g.
+   * scroll offset animations) may also modify it.
+   *
+   * @return The current rendered X position
+   */
+  float GetPositionX() const;
+
+  /**
+   * @brief Returns the current rendered Y position (Actor::Property::POSITION_Y).
+   *
+   * @return The current rendered Y position
+   * @see GetPositionX
+   */
+  float GetPositionY() const;
+
+  /**
+   * @brief Returns the current rendered position (Actor::Property::POSITION).
+   *
+   * @return The current rendered position
+   * @see GetPositionX, GetPositionY
+   */
+  Vector2 GetCurrentPosition() const;
+
+  /**
+   * @brief Sets the parent origin of the View.
+   *
+   * @param[in] point The parent origin to set
+   */
+  View& SetParentOrigin(const Vector3& point);
+
+  /**
+   * @brief Gets the parent origin of the View.
+   *
+   * @return The parent origin of the View
+   */
+  Vector3 GetParentOrigin() const;
+
+  /**
+   * @brief Sets the pivot of the View.
+   *
+   * @param[in] point The pivot to set
+   */
+  View& SetPivot(const Vector3& point);
+
+  /**
+   * @brief Gets the pivot of the View.
+   *
+   * @return The pivot of the View
+   */
+  Vector3 GetPivot() const;
+
+  /**
+   * @brief Sets the requested width.
+   *
+   * A positive value sets a fixed width.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] width The requested width
+   */
+  View& SetRequestedWidth(float width);
+
+  /**
+   * @brief Gets the requested width.
+   *
+   * @return The requested width
+   */
+  float GetRequestedWidth() const;
+
+  /**
+   * @brief Sets the requested height.
+   *
+   * A positive value sets a fixed height.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] height The requested height
+   */
+  View& SetRequestedHeight(float height);
+
+  /**
+   * @brief Gets the requested height.
+   *
+   * @return The requested height
+   */
+  float GetRequestedHeight() const;
+
+  /**
+   * @brief Sets the minimum width.
+   *
+   * @param[in] width The minimum width
+   */
+  View& SetMinimumWidth(float width);
+
+  /**
+   * @brief Gets the minimum width.
+   *
+   * @return The minimum width
+   */
+  float GetMinimumWidth() const;
+
+  /**
+   * @brief Sets the minimum height.
+   *
+   * @param[in] height The minimum height
+   */
+  View& SetMinimumHeight(float height);
+
+  /**
+   * @brief Gets the minimum height.
+   *
+   * @return The minimum height
+   */
+  float GetMinimumHeight() const;
+
+  /**
+   * @brief Sets the maximum width.
+   *
+   * @param[in] width The maximum width
+   */
+  View& SetMaximumWidth(float width);
+
+  /**
+   * @brief Gets the maximum width.
+   *
+   * @return The maximum width
+   */
+  float GetMaximumWidth() const;
+
+  /**
+   * @brief Sets the maximum height.
+   *
+   * @param[in] height The maximum height
+   */
+  View& SetMaximumHeight(float height);
+
+  /**
+   * @brief Gets the maximum height.
+   *
+   * @return The maximum height
+   */
+  float GetMaximumHeight() const;
+
+  /**
+   * @brief Sets the view margin.
+   *
+   * @param[in] margin The margin to set
+   */
+  View& SetMargin(const Extents& margin);
+
+  /**
+   * @brief Gets the view margin.
+   *
+   * @return The view margin
+   */
+  Extents GetMargin() const;
+
+  /**
+   * @brief Sets the view padding.
+   *
+   * @param[in] padding The padding to set
+   */
+  View& SetPadding(const Extents& padding);
+
+  /**
+   * @brief Gets the view padding.
+   *
+   * @return The view padding
+   */
+  Extents GetPadding() const;
+
+  /**
+   * @brief Sets the layout mode of this View.
+   *
+   * LayoutMode::DEFAULT (default) lets the parent container's layout system manage
+   * this View's size and position normally.
+   *
+   * LayoutMode::STANDALONE excludes this View from the parent's accumulation,
+   * spacing and index calculations. The View's size is still measured normally
+   * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
+   * but its position is taken from SetPositionX/SetPositionY instead of being
+   * decided by the parent layout. This is useful for floating overlays, drag
+   * previews, tooltips and absolute positioning inside any LayoutManager.
+   *
+   * Standalone children ignore the parent's padding entirely. Their measured
+   * size is the parent's full inner size minus the child's own margin, and
+   * their final position is SetPositionX/SetPositionY plus the child's own
+   * margin in the parent's coordinate space. This keeps size and position
+   * consistent: a Standalone child with MATCH_PARENT fills the parent edge
+   * to edge regardless of parent padding, and any margin set on the child
+   * shifts it inward in both axes.
+   *
+   * @param[in] mode The layout mode to set
+   */
+  View& SetLayoutMode(LayoutMode mode);
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '620,720p' repos/dali-ui/dali-ui-foundation/public-api/view.h && sed -n '1,180p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  /**
+   * @brief Gets the layout mode of this View.
+   *
+   * @return The layout mode
+   */
+  LayoutMode GetLayoutMode() const;
+
+  /**
+   * @brief Gets whether the actor should be focusable by keyboard navigation.
+   *
+   * @return True if it is focusable
+   */
+  bool IsFocusable() const;
+
+  /**
+   * @brief Sets whether the actor should be focusable by keyboard navigation.
+   *
+   * @param[in] focusable True if it is focusable
+   */
+  View& SetFocusable(bool focusable);
+
+  /**
+   * @brief Gets whether the actor should be focused when touched.
+   *
+   * @return True if it is focused when touched
+   */
+  bool IsTouchFocusable() const;
+
+  /**
+   * @brief Sets whether the actor should be focused when touched.
+   *
+   * @param[in] touchFocusable True if it gets focused when touched
+   */
+  View& SetTouchFocusable(bool touchFocusable);
+
+  /**
+   * @brief Sets whether descendant focus is blocked.
+   *
+   * When blocked, none of this View's descendants can receive keyboard focus.
+   * Focus requests on descendants will be rejected.
+   *
+   * @param[in] blocked True to block descendant focus
+   */
+  View& SetDescendantFocusBlocked(bool blocked);
+
+  /**
+   * @brief Gets whether descendant focus is blocked.
+   *
+   * @return True if descendant focus is blocked
+   */
+  bool IsDescendantFocusBlocked() const;
+
+  /**
+   * @brief Checks whether any ancestor has descendant focus blocked.
+   *
+   * Traverses the parent chain on every call to determine if any ancestor
+   * has set SetDescendantFocusBlocked to true.
+   *
+   * @return true if an ancestor blocks descendant focus, false otherwise.
+   */
+  bool HasAncestorBlockingFocus() const;
+
+  /**
+   * @brief Sets the left focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating left
+   */
+  View& SetLeftFocusableView(View view);
+
+  /**
+   * @brief Sets the right focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating right
+   */
+  View& SetRightFocusableView(View view);
+
+  /**
+   * @brief Sets the up focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating up
+   */
+  View& SetUpFocusableView(View view);
+
+  /**
+   * @brief Sets the down focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating down
+   */
+  View& SetDownFocusableView(View view);
+
+  /**
+   * @brief Sets the clockwise focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating clockwise
+   */
+  View& SetClockwiseFocusableView(View view);
+
+  /**
+   * @brief Sets the counter-clockwise focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating counter-clockwise
+// Generated by dali-ui preprocessor. Do not modify.
+#pragma once
+
+#define DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+  /** \
+  * @brief Sets the x scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  */ \
+  ChildClass& SetScaleX(float scaleX) { View::SetScaleX(scaleX); return *this; } \
+  /** \
+  * @brief Sets the UiScale participation policy for this view. \
+  * \
+  * @param[in] policy The UiScalePolicy to apply \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetUiScalePolicy(UiScalePolicy policy) { View::SetUiScalePolicy(policy); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScaleY(float scaleY) { View::SetScaleY(scaleY); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScale(float scaleX, float scaleY) { View::SetScale(scaleX, scaleY); return *this; } \
+  /** \
+  * @brief Sets the visibility of the view. \
+  * \
+  * @param[in] visibility True to make the view visible, false to hide it \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetVisibility(bool visibility) { View::SetVisibility(visibility); return *this; } \
+  /** \
+  * @brief Sets the opacity of the view. \
+  * \
+  * @param[in] opacity The opacity value to set (0.0 to 1.0) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetOpacity(float opacity) { View::SetOpacity(opacity); return *this; } \
+  /** \
+  * @brief Sets the X position requested by the user. \
+  * \
+  * This value is the layout input. The parent's Arrange pass uses it \
+  * (offset by the parent's left padding and this view's left margin) to \
+  * compute the final rendered position. The Actor::Property::POSITION_X \
+  * property is updated only by the next Arrange. \
+  * \
+  * To drive the rendered position without affecting the layout request \
+  * (e.g. for scrolling or animation that should not feed back into \
+  * layout), set Actor::Property::POSITION_X via SetProperty directly. \
+  * \
+  * @param[in] x The requested X position \
+  */ \
+  ChildClass& SetRequestedPositionX(float x) { View::SetRequestedPositionX(x); return *this; } \
+  /** \
+  * @brief Sets the Y position requested by the user. \
+  * \
+  * @param[in] y The requested Y position \
+  * @see SetRequestedPositionX \
+  */ \
+  ChildClass& SetRequestedPositionY(float y) { View::SetRequestedPositionY(y); return *this; } \
+  /** \
+  * @brief Sets the parent origin of the View. \
+  * \
+  * @param[in] point The parent origin to set \
+  */ \
+  ChildClass& SetParentOrigin(const Vector3& point) { View::SetParentOrigin(point); return *this; } \
+  /** \
+  * @brief Sets the pivot of the View. \
+  * \
+  * @param[in] point The pivot to set \
+  */ \
+  ChildClass& SetPivot(const Vector3& point) { View::SetPivot(point); return *this; } \
+  /** \
+  * @brief Sets the requested width. \
+  * \
+  * A positive value sets a fixed width. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] width The requested width \
+  */ \
+  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+  /** \
+  * @brief Sets the requested height. \
+  * \
+  * A positive value sets a fixed height. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] height The requested height \
+  */ \
+  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
+  /** \
+  * @brief Sets the minimum width. \
+  * \
+  * @param[in] width The minimum width \
+  */ \
+  ChildClass& SetMinimumWidth(float width) { View::SetMinimumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the minimum height. \
+  * \
+  * @param[in] height The minimum height \
+  */ \
+  ChildClass& SetMinimumHeight(float height) { View::SetMinimumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the maximum width. \
+  * \
+  * @param[in] width The maximum width \
+  */ \
+  ChildClass& SetMaximumWidth(float width) { View::SetMaximumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the maximum height. \
+  * \
+  * @param[in] height The maximum height \
+  */ \
+  ChildClass& SetMaximumHeight(float height) { View::SetMaximumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the view margin. \
+  * \
+  * @param[in] margin The margin to set \
+  */ \
+  ChildClass& SetMargin(const Extents& margin) { View::SetMargin(margin); return *this; } \
+  /** \
+  * @brief Sets the view padding. \
+  * \
+  * @param[in] padding The padding to set \
+  */ \
+  ChildClass& SetPadding(const Extents& padding) { View::SetPadding(padding); return *this; } \
+  /** \
+  * @brief Sets the layout mode of this View. \
+  * \
+  * LayoutMode::DEFAULT (default) lets the parent container's layout system manage \
+  * this View's size and position normally. \
+  * \
+  * LayoutMode::STANDALONE excludes this View from the parent's accumulation, \
+  * spacing and index calculations. The View's size is still measured normally \
+  * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
+  * but its position is taken from SetPositionX/SetPositionY instead of being \
+  * decided by the parent layout. This is useful for floating overlays, drag \
+  * previews, tooltips and absolute positioning inside any LayoutManager. \
+  * \
+  * Standalone children ignore the parent's padding entirely. Their measured \
+  * size is the parent's full inner size minus the child's own margin, and \
+  * their final position is SetPositionX/SetPositionY plus the child's own \
+  * margin in the parent's coordinate space. This keeps size and position \
+  * consistent: a Standalone child with MATCH_PARENT fills the parent edge \
+  * to edge regardless of parent padding, and any margin set on the child \
+  * shifts it inward in both axes. \
+  * \
+  * @param[in] mode The layout mode to set \
+  */ \
+  ChildClass& SetLayoutMode(LayoutMode mode) { View::SetLayoutMode(mode); return *this; } \
+  /** \
+  * @brief Sets whether the actor should be focusable by keyboard navigation. \
+  * \
+  * @param[in] focusable True if it is focusable \
+  */ \
+  ChildClass& SetFocusable(bool focusable) { View::SetFocusable(focusable); return *this; } \
+  /** \
+  * @brief Sets whether the actor should be focused when touched. \
+  * \
+  * @param[in] touchFocusable True if it gets focused when touched \
+  */ \
+  ChildClass& SetTouchFocusable(bool touchFocusable) { View::SetTouchFocusable(touchFocusable); return *this; } \
+  /** \
+  * @brief Sets whether descendant focus is blocked. \
+  * \
+  * When blocked, none of this View's descendants can receive keyboard focus. \
+  * Focus requests on descendants will be rejected. \
+  * \
+  * @param[in] blocked True to block descendant focus \
+  */ \
+  ChildClass& SetDescendantFocusBlocked(bool blocked) { View::SetDescendantFocusBlocked(blocked); return *this; } \
+  /** \
+
+codex
+---
+title: Layouts
+sidebar_label: Layouts
+category: layout-sizing
+---
+
+# Layouts
+
+Layouts arrange `Dali::Ui::View` children with typed dali-ui layout objects and per-child `LayoutParams`.
+
+## Table of Contents
+
+- [Build Layout Trees with `Dali::Ui::View`](#build-layout-trees-with-daliuiview)
+- [Absolute Placement with `Dali::Ui::AbsoluteLayout`](#absolute-placement-with-daliuiabsolutelayout)
+- [Flexible Rows and Columns with `Dali::Ui::FlexLayout`](#flexible-rows-and-columns-with-daliuiflexlayout)
+- [Row and Column Sizing with `Dali::Ui::GridLayout`](#row-and-column-sizing-with-daliuigridlayout)
+
+## Build Layout Trees with `Dali::Ui::View`
+
+`Dali::Ui::Layout` is a `Dali::Ui::View` specialization that owns a layout algorithm. Application code usually creates a concrete layout such as `Dali::Ui::AbsoluteLayout`, `Dali::Ui::FlexLayout`, or `Dali::Ui::GridLayout`, then attaches child-specific `Dali::Ui::LayoutParams` to each child `Dali::Ui::View`.
+
+Use `Dali::Ui::View::SetLayoutParams()` to attach parameters. The parameter type must match the parent layout: `Dali::Ui::AbsoluteLayoutParams` for `Dali::Ui::AbsoluteLayout`, `Dali::Ui::FlexLayoutParams` for `Dali::Ui::FlexLayout`, and `Dali::Ui::GridLayoutParams` for `Dali::Ui::GridLayout`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+FlexLayout row = FlexLayout::New()
+  .SetDirection(FlexDirection::ROW)
+  .SetJustifyContent(FlexJustify::CENTER)
+  .SetAlignItems(FlexAlign::CENTER);
+
+View primary = View::New();
+primary.SetLayoutParams(
+  FlexLayoutParams::New()
+    .SetFlexGrow(1.0f)
+    .SetFlexShrink(1.0f));
+
+View secondary = View::New();
+secondary.SetLayoutParams(
+  FlexLayoutParams::New()
+    .SetFlexBasis(120.0f)
+    .SetFlexShrink(0.0f));
+
+row.Children({primary, secondary});
+```
+
+For shared code that receives a generic handle, `Dali::Ui::LayoutParams::DownCast()` can identify a layout-params handle before using a more specific downcast such as `Dali::Ui::FlexLayoutParams::DownCast()`.
+
+```cpp
+void InspectFlexParams(BaseHandle handle)
+{
+  LayoutParams params = LayoutParams::DownCast(handle);
+  FlexLayoutParams flexParams = FlexLayoutParams::DownCast(params);
+
+  if(flexParams)
+  {
+    const float grow = flexParams.GetFlexGrow();
+    const float basis = flexParams.GetFlexBasis();
+    (void)grow;
+    (void)basis;
+  }
+}
+```
+
+## Absolute Placement with `Dali::Ui::AbsoluteLayout`
+
+`Dali::Ui::AbsoluteLayout` positions children from explicit bounds. Use `Dali::Ui::AbsoluteLayoutParams::SetBounds()` when the child has a complete rectangle, or combine `SetX()`, `SetY()`, `SetWidth()`, and `SetHeight()` when you want to update individual axes.
+
+A negative width or height in `Dali::Ui::AbsoluteLayoutParams` means that axis uses the child view's own requested size. Non-negative bounds dimensions take precedence for that axis.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+AbsoluteLayout canvas = AbsoluteLayout::New();
+
+View panel = View::New();
+panel.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetBounds(LayoutRect(24.0f, 32.0f, 280.0f, 160.0f)));
+
+View badge = View::New();
+badge.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetX(256.0f)
+    .SetY(16.0f)
+    .SetWidth(48.0f)
+    .SetHeight(48.0f));
+
+canvas.Children({panel, badge});
+```
+
+Use `Dali::Ui::AbsoluteLayoutFlags` when positions or sizes should be interpreted proportionally to the parent content area. `Dali::Ui::AbsoluteLayoutFlags::POSITION_PROPORTIONAL` makes `x` and `y` proportional, and `Dali::Ui::AbsoluteLayoutFlags::SIZE_PROPORTIONAL` makes `width` and `height` proportional.
+
+```cpp
+AbsoluteLayout overlay = AbsoluteLayout::New();
+
+View centeredRegion = View::New();
+centeredRegion.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetBounds(LayoutRect(0.25f, 0.25f, 0.5f, 0.5f))
+    .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL |
+              AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
+
+overlay.Children({centeredRegion});
+```
+
+You can copy an existing `Dali::Ui::AbsoluteLayoutParams` object with `Dali::Ui::AbsoluteLayoutParams::New(const AbsoluteLayoutParams&)`, then adjust only the fields that differ.
+
+```cpp
+AbsoluteLayoutParams baseParams = AbsoluteLayoutParams::New()
+  .SetWidth(96.0f)
+  .SetHeight(96.0f);
+
+View first = View::New();
+first.SetLayoutParams(
+  AbsoluteLayoutParams::New(baseParams)
+    .SetX(16.0f)
+    .SetY(16.0f));
+
+View second = View::New();
+second.SetLayoutParams(
+  AbsoluteLayoutParams::New(baseParams)
+    .SetX(128.0f)
+    .SetY(16.0f));
+```
+
+## Flexible Rows and Columns with `Dali::Ui::FlexLayout`
+
+`Dali::Ui::FlexLayout` arranges children using flexbox-style row or column rules. Configure the container with `SetDirection()`, `SetWrap()`, `SetJustifyContent()`, `SetAlignItems()`, and `SetAlignContent()`.
+
+Use `Dali::Ui::FlexLayoutParams` on children to control flexible sizing. `SetFlexBasis()` sets the initial main-axis size, `SetFlexGrow()` distributes remaining space, `SetFlexShrink()` controls shrink behavior, and `SetAlignSelf()` overrides the parent cross-axis alignment for one child.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+FlexLayout toolbar = FlexLayout::New()
+  .SetDirection(FlexDirection::ROW)
+  .SetWrap(FlexWrap::NO_WRAP)
+  .SetJustifyContent(FlexJustify::SPACE_BETWEEN)
+  .SetAlignItems(FlexAlign::CENTER);
+
+View title = View::New();
+title.SetLayoutParams(
+  FlexLayoutParams::New()
+    .SetFlexGrow(1.0f)
+    .SetFlexShrink(1.0f)
+    .SetFlexBasis(160.0f));
+
+View action = View::New();
+action.SetLayoutParams(
+  FlexLayoutParams::New()
+    .SetFlexGrow(0.0f)
+    .SetFlexShrink(0.0f)
+    .SetFlexBasis(96.0f)
+    .SetAlignSelf(FlexAlign::CENTER));
+
+toolbar.Children({title, action});
+```
+
+For wrapped content, `Dali::Ui::FlexLayout::SetAlignContent()` controls how flex lines are aligned in the cross axis. This is separate from `Dali::Ui::FlexLayout::SetAlignItems()`, which aligns items within each line.
+
+```cpp
+FlexLayout chips = FlexLayout::New()
+  .SetDirection(FlexDirection::ROW)
+  .SetWrap(FlexWrap::WRAP)
+  .SetJustifyContent(FlexJustify::FLEX_START)
+  .SetAlignItems(FlexAlign::CENTER)
+  .SetAlignContent(FlexAlign::FLEX_START);
+
+View chipA = View::New();
+chipA.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(96.0f));
+
+View chipB = View::New();
+chipB.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(128.0f));
+
+View chipC = View::New();
+chipC.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(112.0f));
+
+chips.Children({chipA, chipB, chipC});
+```
+
+The getter methods mirror the setter methods, which is useful when a component needs to preserve or copy layout policy.
+
+```cpp
+FlexLayout source = FlexLayout::New()
+  .SetDirection(FlexDirection::COLUMN)
+  .SetWrap(FlexWrap::NO_WRAP)
+  .SetJustifyContent(FlexJustify::CENTER)
+  .SetAlignItems(FlexAlign::STRETCH);
+
+FlexLayout copy = FlexLayout::New()
+  .SetDirection(source.GetDirection())
+  .SetWrap(source.GetWrap())
+  .SetJustifyContent(source.GetJustifyContent())
+  .SetAlignItems(source.GetAlignItems());
+```
+
+## Row and Column Sizing with `Dali::Ui::GridLayout`
+
+`Dali::Ui::GridLayout` arranges children in rows and columns. Define the grid with `Dali::Ui::GridLayout::AddRowDefinition()` and `Dali::Ui::GridLayout::AddColumnDefinition()`. Each definition uses `Dali::Ui::GridLength`: `GridLength::Absolute()` for fixed pixels, `GridLength::Star()` for proportional remaining space, and `GridLength::Auto()` for content-driven sizing.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+GridLayout form = GridLayout::New()
+  .SetRowSpacing(12.0f)
+  .SetColumnSpacing(16.0f);
+
+form.AddColumnDefinition(GridLength::Absolute(120.0f));
+form.AddColumnDefinition(GridLength::Star(1.0f));
+form.AddRowDefinition(GridLength::Auto());
+form.AddRowDefinition(GridLength::Auto());
+
+View label = View::New();
+label.SetLayoutParams(
+  GridLayoutParams::New()
+    .SetRow(0u)
+    .SetColumn(0u));
+
+View field = View::New();
+field.SetLayoutParams(
+  GridLayoutParams::New()
+    .SetRow(0u)
+    .SetColumn(1u)
+    .SetHorizontalAlignment(LayoutAlignment::FILL)
+    .SetVerticalAlignment(LayoutAlignment::CENTER));
+
+form.Children({label, field});
+```
+
+Use spans when one view should occupy multiple cells. `Dali::Ui::GridLayoutParams::SetRowSpan()` and `Dali::Ui::GridLayoutParams::SetColumnSpan()` take counts, while `SetRow()` and `SetColumn()` take zero-based starting indexes.
+
+```cpp
+GridLayout dashboard = GridLayout::New()
+  .SetRowSpacing(8.0f)
+  .SetColumnSpacing(8.0f);
+
+dashboard.AddColumnDefinition(GridLength::Star(1.0f));
+dashboard.AddColumnDefinition(GridLength::Star(1.0f));
+dashboard.AddColumnDefinition(GridLength::Star(1.0f));
+dashboard.AddRowDefinition(GridLength::Absolute(80.0f));
+dashboard.AddRowDefinition(GridLength::Star(1.0f));
+
+View header = View::New();
+header.SetLayoutParams(
+  GridLayoutParams::New()
+    .SetRow(0u)
+    .SetColumn(0u)
+    .SetColumnSpan(3u)
+    .SetHorizontalAlignment(LayoutAlignment::FILL)
+    .SetVerticalAlignment(LayoutAlignment::FILL));
+
+View content = View::New();
+content.SetLayoutParams(
+  GridLayoutParams::New()
+    .SetRow(1u)
+    .SetColumn(0u)
+    .SetColumnSpan(2u));
+
+dashboard.Children({header, content});
+```
+
+When a grid needs to be rebuilt, clear its definitions before adding the new row or column model. `GetRowCount()`, `GetColumnCount()`, `GetRowSpacing()`, and `GetColumnSpacing()` let you inspect the current layout configuration.
+
+```cpp
+void ConfigureCompactGrid(GridLayout grid)
+{
+  grid.ClearRowDefinitions();
+  grid.ClearColumnDefinitions();
+
+  grid.AddColumnDefinition(GridLength::Star(1.0f));
+  grid.AddRowDefinition(GridLength::Auto());
+  grid.AddRowDefinition(GridLength::Auto());
+
+  const uint32_t rows = grid.GetRowCount();
+  const uint32_t columns = grid.GetColumnCount();
+  const float rowGap = grid.GetRowSpacing();
+  const float columnGap = grid.GetColumnSpacing();
+
+  (void)rows;
+  (void)columns;
+  (void)rowGap;
+  (void)columnGap;
+}
+```
+tokens used
+40,195

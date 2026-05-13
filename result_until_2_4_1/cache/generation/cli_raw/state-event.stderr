@@ -1,0 +1,1983 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20f5-1764-7a83-84ba-30e3f0d412a9
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: State Event (state-event)
+- Category: input-interaction
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 16
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::StateEvent | scope=primary
+- Dali::Ui::StateEvent::Added | bool Added(const ViewState &state) const | scope=primary_member
+- Dali::Ui::StateEvent::Changed | bool Changed(const ViewState &state) const | scope=primary_member
+- Dali::Ui::StateEvent::GetCause | const InputEvent & GetCause() const | scope=primary_member
+- Dali::Ui::StateEvent::GetCurrent | const ViewState & GetCurrent() const | scope=primary_member
+- Dali::Ui::StateEvent::GetInputEventType | InputEventType GetInputEventType() const | scope=primary_member
+- Dali::Ui::StateEvent::GetKeyEvent | const KeyEvent & GetKeyEvent() const | scope=primary_member
+- Dali::Ui::StateEvent::GetLongPressGesture | const LongPressGesture & GetLongPressGesture() const | scope=primary_member
+- Dali::Ui::StateEvent::GetPrev | const ViewState & GetPrev() const | scope=primary_member
+- Dali::Ui::StateEvent::GetTapGesture | const TapGesture & GetTapGesture() const | scope=primary_member
+- Dali::Ui::StateEvent::GetTouchEvent | const TouchEvent & GetTouchEvent() const | scope=primary_member
+- Dali::Ui::StateEvent::GetWheelEvent | const WheelEvent & GetWheelEvent() const | scope=primary_member
+- Dali::Ui::StateEvent::Removed | bool Removed(const ViewState &state) const | scope=primary_member
+- Dali::Ui::StateEvent::StateEvent | StateEvent()=default | scope=primary_member
+- Dali::Ui::StateEvent::operator= | StateEvent & operator=(const StateEvent &)=default | scope=primary_member
+- Dali::Ui::StateEvent::~StateEvent | ~StateEvent()=default | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:82 (utc, score=0.45)
+```cpp
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  ViewState receivedPrev, receivedCur;
+  int     callCount = 0;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+    ++callCount;
+    receivedPrev = e.GetPrev();
+    receivedCur  = e.GetCurrent();
+  });
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+```
+
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:57 (utc, score=0.4)
+```cpp
+struct StateChangedFunctor
+{
+  StateChangedFunctor(StateChangedData& data)
+  : mData(data)
+  {
+  }
+
+  void operator()(View view, const StateEvent& e)
+  {
+    ++mData.callCount;
+    mData.view = view;
+    mData.prev = e.GetPrev();
+    mData.cur  = e.GetCurrent();
+  }
+
+  StateChangedData& mData;
+};
+
+/**
+ * @brief A helper class that implements ConnectionTracker for tracking signal lifetime.
+ */
+class StateHandlerTracker : public ConnectionTracker
+{
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Added",
+      "GetCurrent",
+      "GetPrev",
+      "StateEvent"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp",
+    "relevance": "medium",
+    "score": 0.45,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 161,
+    "snippet_start_line": 82
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "GetCurrent",
+      "GetPrev",
+      "StateEvent"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 136,
+    "snippet_start_line": 57
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+
+#include <dali.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
+
+namespace
+{
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+struct StateChangedData
+{
+  StateChangedData()
+  : callCount(0)
+  {
+  }
+
+  void Reset()
+  {
+    callCount = 0;
+    view      = View();
+    prev      = ViewState::NORMAL;
+    cur       = ViewState::NORMAL;
+  }
+
+  int     callCount;
+  View    view;
+  ViewState prev;
+  ViewState cur;
+};
+
+struct StateChangedFunctor
+{
+  StateChangedFunctor(StateChangedData& data)
+  : mData(data)
+  {
+  }
+
+  void operator()(View view, const StateEvent& e)
+  {
+    ++mData.callCount;
+    mData.view = view;
+    mData.prev = e.GetPrev();
+    mData.cur  = e.GetCurrent();
+  }
+
+  StateChangedData& mData;
+};
+
+/**
+ * @brief A helper class that implements ConnectionTracker for tracking signal lifetime.
+ */
+class StateHandlerTracker : public ConnectionTracker
+{
+public:
+  StateHandlerTracker(StateChangedData& data)
+  : mData(data)
+  {
+  }
+
+  void HandleStateChanged(View view, const StateEvent& e)
+  {
+    ++mData.callCount;
+    mData.view = view;
+    mData.prev = e.GetPrev();
+    mData.cur  = e.GetCurrent();
+  }
+
+  StateChangedData& mData;
+};
+
+View CreateView(UiTestApplication& application)
+{
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  return view;
+}
+
+} // namespace
+
+void utc_dali_viewstatehandler_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_viewstatehandler_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// ============================================================================
+// WhenStateChanged — basic registration and dispatch (member function, #2)
+// ============================================================================
+
+int UtcDaliViewWhenStateChangedMemberFunctionP(void)
+{
+  UiTestApplication    application;
+  View               view = CreateView(application);
+  StateChangedData   data;
+  StateHandlerTracker tracker(data);
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
+
+  // Trigger a state change
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(data.prev, data.cur));
+
+  END_TEST;
+}
+
+// ============================================================================
+// WhenStateChanged — lambda form (#4)
+// ============================================================================
+
+int UtcDaliViewWhenStateChangedLambdaP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  StateChangedData data;
+  ConnectionTracker tracker;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "TestHandler", &tracker, StateChangedFunctor(data));
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(data.prev, data.cur));
+
+  END_TEST;
+}
+
+// ============================================================================
+// WhenStateChanged — method chaining returns *this
+// ============================================================================
+
+int UtcDaliViewWhenStateChangedChainingP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "Handler1", &tracker, StateChangedFunctor(data));
+  IntegrationView::WhenStateChanged(GetImpl(view), "Handler2", &tracker, StateChangedFunctor(data));
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  // Both handlers should fire
+
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+#include <tuple>
+#include <vector>
+
+#include <dali.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
+
+namespace
+{
+
+// A record of one StateChangedSignal (or WhenStateChanged) callback invocation.
+struct CallRecord
+{
+  std::string tag;    ///< Which handler was called (for ordering verification)
+  ViewState     prev;
+  ViewState     cur;
+};
+
+View CreateView(UiTestApplication& application)
+{
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  return view;
+}
+
+View CreateChildView(UiTestApplication& application, View& parent)
+{
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render();
+  return child;
+}
+
+} // namespace
+
+void utc_dali_viewstate_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_viewstate_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// =============================================================================
+// Basic: StateChangedSignal fires with correct prev/cur
+// =============================================================================
+
+int UtcDaliViewStateBasicDispatchP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  ViewState receivedPrev, receivedCur;
+  int     callCount = 0;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+    ++callCount;
+    receivedPrev = e.GetPrev();
+    receivedCur  = e.GetCurrent();
+  });
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// Basic: No dispatch when state does not actually change
+// =============================================================================
+
+int UtcDaliViewStateNoDispatchUnchangedN(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+  int               callCount = 0;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
+    ++callCount;
+  });
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
+
+  // Setting the same state again must not dispatch
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// =============================================================================
+// Deferred notification: handler triggering a new state change must NOT
+// interrupt the remaining handlers of the current notification.
+//
+// Scenario (3 handlers registered: "h1", "h2", "h3"):
+//   - Initial state A (Normal)
+//   - SetState(Focused, true)  →  A→B (B = Focused)
+//     - h1 receives (A, B)  ← ok
+//     - h2 receives (A, B), then calls SetState(Pressed, true)  →  B→C
+//     - h3 must still receive (A, B), NOT (B, C)   ← deferred guarantee
+//   - After A→B dispatch completes, B→C is dispatched:
+//     - h1, h2, h3 all receive (B, C)
+//
+// Without the fix the old behaviour was:
+//   h1(A,B) → h2(A,B) → [re-entrant: h1(B,C) h2(B,C) h3(B,C)] → h3(A,B)
+// which produces the wrong interleaved call order.
+// =============================================================================
+
+int UtcDaliViewStateDeferredNotificationOrderP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  std::vector<CallRecord> log;
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
+    log.push_back({"h1", e.GetPrev(), e.GetCurrent()});
+  });
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
+    log.push_back({"h2", e.GetPrev(), e.GetCurrent()});
+    // Trigger a second state change from inside the handler
+    if(e.Added(ViewState::FOCUSED))
+    {
+      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+    }
+  });
+
+  IntegrationView::WhenStateChanged(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
+    log.push_back({"h3", e.GetPrev(), e.GetCurrent()});
+  });
+
+  const ViewState stateA = ViewState::NORMAL;
+  const ViewState stateB = ViewState::FOCUSED;
+  const ViewState stateC = ViewState::FOCUSED + ViewState::PRESSED;
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  // Expect 6 records: 3 for A→B, then 3 for B→C (in registration order)
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 6, TEST_LOCATION);
+
+  // --- A→B batch: h1, h2, h3 each with (stateA, stateB) ---
+  DALI_TEST_EQUALS(log[0].tag, std::string("h1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].prev == stateA);
+  DALI_TEST_CHECK(log[0].cur == stateB);
+
+  DALI_TEST_EQUALS(log[1].tag, std::string("h2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[1].prev == stateA);
+  DALI_TEST_CHECK(log[1].cur == stateB);
+
+  DALI_TEST_EQUALS(log[2].tag, std::string("h3"), TEST_LOCATION);  // h3 must NOT be skipped
+  DALI_TEST_CHECK(log[2].prev == stateA);
+  DALI_TEST_CHECK(log[2].cur == stateB);
+
+  // --- B→C batch: h1, h2, h3 each with (stateB, stateC) ---
+  DALI_TEST_EQUALS(log[3].tag, std::string("h1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[3].prev == stateB);
+  DALI_TEST_CHECK(log[3].cur == stateC);
+
+  DALI_TEST_EQUALS(log[4].tag, std::string("h2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[4].prev == stateB);
+  DALI_TEST_CHECK(log[4].cur == stateC);
+
+  DALI_TEST_EQUALS(log[5].tag, std::string("h3"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[5].prev == stateB);
+  DALI_TEST_CHECK(log[5].cur == stateC);
+
+  END_TEST;
+}
+
+// =============================================================================
+// Deferred notification: StateChangedSignal connections also participate
+// in the deferred ordering guarantee
+// =============================================================================
+
+int UtcDaliViewStateDeferredSignalOrderP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+exec
+/bin/bash -lc "rg -n \"class StateEvent|struct StateEvent|StateEvent\" repos/dali-ui -g '*.[hch]pp' -g '*.h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:111:  void OnStateChanged(View, StateEvent e)
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:36:class StateEventImpl;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:47: * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:53:class DALI_UI_API StateEvent : public BaseHandle
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:57:   * @brief Creates an uninitialized StateEvent handle.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:59:  StateEvent() = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:64:  ~StateEvent() = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:66:  StateEvent(const StateEvent&)            = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:67:  StateEvent& operator=(const StateEvent&) = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:68:  StateEvent(StateEvent&&)                 = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:69:  StateEvent& operator=(StateEvent&&)      = default;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:166:  explicit StateEvent(Internal::StateEventImpl* implementation);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:90:  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:65:  void operator()(View view, const StateEvent& e)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:87:  void HandleStateChanged(View view, const StateEvent& e)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewStateHandler.cpp:302:  IntegrationView::WhenStateChanged(GetImpl(view), "BackgroundColor", &tracker, [&](View v, const StateEvent&) {
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.cpp:104:void StateHandlerTraitImpl::NotifyStateChanged(View view, StateEvent event)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:38:class StateEventImpl;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:39:using StateEventImplPtr = IntrusivePtr<StateEventImpl>;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:42: * @brief Internal implementation of StateEvent.
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:44:class DALI_UI_API StateEventImpl : public BaseObject
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:48:   * @brief Creates a new StateEventImpl.
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:54:  StateEventImpl(ViewState prev, ViewState current, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:57:   * @brief Creates a new StateEventImpl.
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:59:  static StateEventImplPtr New(ViewState prev, ViewState current, InputEvent cause);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:62:   * @copydoc Dali::Ui::StateEvent::GetPrev
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:67:   * @copydoc Dali::Ui::StateEvent::GetCurrent
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:72:   * @copydoc Dali::Ui::StateEvent::GetCause
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:77:  virtual ~StateEventImpl() override;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:79:  StateEventImpl(const StateEventImpl&)            = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:80:  StateEventImpl(StateEventImpl&&)                 = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:81:  StateEventImpl& operator=(const StateEventImpl&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:82:  StateEventImpl& operator=(StateEventImpl&&)      = delete;
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:92:inline Internal::StateEventImpl& GetImpl(StateEvent& obj)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:95:  return static_cast<Internal::StateEventImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:98:inline const Internal::StateEventImpl& GetImpl(const StateEvent& obj)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.h:101:  return static_cast<const Internal::StateEventImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/views/state-handler-trait.h:138:  void NotifyStateChanged(View view, StateEvent event);
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:86:      Internal::StateEventImplPtr stateEventImpl = Internal::StateEventImpl::New(n.prev, n.next, n.cause);
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:87:      StateEvent                  stateEvent(stateEventImpl.Get());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:90:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:116:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:156:  IntegrationView::WhenStateChanged(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:160:  IntegrationView::WhenStateChanged(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:169:  IntegrationView::WhenStateChanged(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:225:  view.StateChangedSignal().Connect(&tracker, [&](View v, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:233:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:338:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:396:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:428:  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp:609:  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1312:  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1327:   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:30:StateEvent::StateEvent(Internal::StateEventImpl* implementation)
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:35:const ViewState& StateEvent::GetPrev() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:40:const ViewState& StateEvent::GetCurrent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:45:const InputEvent& StateEvent::GetCause() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:50:InputEventType StateEvent::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:55:const TouchEvent& StateEvent::GetTouchEvent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:60:const KeyEvent& StateEvent::GetKeyEvent() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:65:const TapGesture& StateEvent::GetTapGesture() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:70:const LongPressGesture& StateEvent::GetLongPressGesture() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:75:const WheelEvent& StateEvent::GetWheelEvent() const
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:155:   * @param[in] callback Callback with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:30:StateEventImpl::StateEventImpl(ViewState prev, ViewState current, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:38:StateEventImpl::~StateEventImpl()
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:42:StateEventImplPtr StateEventImpl::New(ViewState prev, ViewState current, InputEvent cause)
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:44:  return StateEventImplPtr(new StateEventImpl(prev, current, cause));
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:47:const ViewState& StateEventImpl::GetPrev() const
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:52:const ViewState& StateEventImpl::GetCurrent() const
+repos/dali-ui/dali-ui-foundation/internal/state-event-impl.cpp:57:const InputEvent& StateEventImpl::GetCause() const
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:163: * @param[in] func Member function with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:166:void WhenStateChanged(ViewImpl& viewImpl, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:179: * @param[in] func    Callable with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:186:    SetNamedStateHandler(viewImpl, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:223: * @param[in] func Member function with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:226:void WhenStateChanged(Ui::View view, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:239: * @param[in] func    Callable with signature void(View, const StateEvent&)
+repos/dali-ui/dali-ui-foundation/integration-api/view-integ.h:246:    SetNamedStateHandler(view, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+
+exec
+/bin/bash -lc "sed -n '1,230p' repos/dali-ui/dali-ui-foundation/public-api/state-event.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Internal
+{
+class StateEventImpl;
+}
+
+/**
+ * @brief Describes a single View state transition, passed to StateChangedSignal handlers.
+ *
+ * Provides the previous and current ViewState together with ergonomic helpers for
+ * detecting specific transitions, and optional information about the input event
+ * that caused the state change.
+ *
+ * @code
+ * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
+ *   if(e.Added(ViewState::FOCUSED))   { ... } // gained focus
+ *   if(e.Removed(ViewState::PRESSED)) { ... } // released
+ * });
+ * @endcode
+ */
+class DALI_UI_API StateEvent : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an uninitialized StateEvent handle.
+   */
+  StateEvent() = default;
+
+  /**
+   * @brief Destructor.
+   */
+  ~StateEvent() = default;
+
+  StateEvent(const StateEvent&)            = default;
+  StateEvent& operator=(const StateEvent&) = default;
+  StateEvent(StateEvent&&)                 = default;
+  StateEvent& operator=(StateEvent&&)      = default;
+
+  /**
+   * @brief Returns the state before this transition.
+   */
+  const ViewState& GetPrev() const;
+
+  /**
+   * @brief Returns the state after this transition (the current state).
+   */
+  const ViewState& GetCurrent() const;
+
+  /**
+   * @brief Returns true if @a state was newly added in this transition.
+   *
+   * Equivalent to: !GetPrev().Contains(state) && GetCurrent().Contains(state)
+   */
+  bool Added(const ViewState& state) const
+  {
+    return !GetPrev().Contains(state) && GetCurrent().Contains(state);
+  }
+
+  /**
+   * @brief Returns true if @a state was removed in this transition.
+   *
+   * Equivalent to: GetPrev().Contains(state) && !GetCurrent().Contains(state)
+   */
+  bool Removed(const ViewState& state) const
+  {
+    return GetPrev().Contains(state) && !GetCurrent().Contains(state);
+  }
+
+  /**
+   * @brief Returns true if @a state was either added or removed in this transition.
+   */
+  bool Changed(const ViewState& state) const
+  {
+    return Added(state) || Removed(state);
+  }
+
+  /**
+   * @brief Returns the input event that caused this transition.
+   *
+   * Always returns a valid InputEvent. Programmatic or system-triggered
+   * state changes return an InputEvent with InputEventType::NONE.
+   */
+  const InputEvent& GetCause() const;
+
+  /**
+   * @brief Returns the type of the input event that caused this transition.
+   *
+   * Convenience shortcut for GetCause().GetInputEventType().
+   * Returns InputEventType::NONE if the change was programmatic or system-triggered.
+   */
+  InputEventType GetInputEventType() const;
+
+  /**
+   * @brief Returns the touch event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::TOUCH_EVENT
+   */
+  const TouchEvent& GetTouchEvent() const;
+
+  /**
+   * @brief Returns the key event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::KEY_EVENT
+   */
+  const KeyEvent& GetKeyEvent() const;
+
+  /**
+   * @brief Returns the tap gesture that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::TAP_GESTURE
+   */
+  const TapGesture& GetTapGesture() const;
+
+  /**
+   * @brief Returns the long-press gesture that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::LONG_PRESS_GESTURE
+   */
+  const LongPressGesture& GetLongPressGesture() const;
+
+  /**
+   * @brief Returns the wheel event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::WHEEL_EVENT
+   */
+  const WheelEvent& GetWheelEvent() const;
+
+public: // Not intended for application developers
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The implementation
+   */
+  explicit StateEvent(Internal::StateEventImpl* implementation);
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1300,1355p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   *   params.SetWidth(200.0f);
+   *   view.InvalidateMeasure();
+   * }
+   * @endcode
+   */
+  template<typename T>
+  T GetLayoutParams() const
+  {
+    return T::DownCast(GetLayoutParamsInternal(T::GetLayoutParamsType()));
+  }
+
+public: // State API (non-chaining)
+  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+
+  /**
+   * @brief Gets the current state of this View.
+   *
+   * @return The current ViewState (may contain multiple combined states)
+   */
+  const ViewState& GetState() const;
+
+  /**
+   * @brief Returns the state changed signal.
+   *
+   * Emitted whenever the view's ViewState changes.
+   *
+   * @code
+   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
+   *   if(e.Added(ViewState::FOCUSED)) { ... }
+   * });
+   * @endcode
+   *
+   * @return The StateChangedSignal
+   */
+  StateChangedSignalType& StateChangedSignal();
+
+public: // Trait accessors (non-chaining)
+  /**
+   * @brief Ensures this View has an interaction trait and returns it.
+   *
+   * If no interaction trait is set, an InteractiveTrait is attached and returned.
+   * If an InteractiveTrait is already attached, it is returned. If a different
+   * interaction trait is set, an assertion may fire and an empty handle is returned.
+   *
+   * @return InteractiveTrait handle, or an uninitialized handle on error
+   */
+  InteractiveTrait EnsureInteractiveTrait();
+
+  /**
+   * @brief Returns whether this View has an interaction trait attached.
+   *
+   * @return True if this View has an InteractiveTrait
+   */
+  bool IsInteractive() const;
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/state-event.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/state-event-impl.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+StateEvent::StateEvent(Internal::StateEventImpl* implementation)
+: BaseHandle(implementation)
+{
+}
+
+const ViewState& StateEvent::GetPrev() const
+{
+  return GetImpl(*this).GetPrev();
+}
+
+const ViewState& StateEvent::GetCurrent() const
+{
+  return GetImpl(*this).GetCurrent();
+}
+
+const InputEvent& StateEvent::GetCause() const
+{
+  return GetImpl(*this).GetCause();
+}
+
+InputEventType StateEvent::GetInputEventType() const
+{
+  return GetImpl(*this).GetCause().GetInputEventType();
+}
+
+const TouchEvent& StateEvent::GetTouchEvent() const
+{
+  return GetImpl(*this).GetCause().GetTouchEvent();
+}
+
+const KeyEvent& StateEvent::GetKeyEvent() const
+{
+  return GetImpl(*this).GetCause().GetKeyEvent();
+}
+
+const TapGesture& StateEvent::GetTapGesture() const
+{
+  return GetImpl(*this).GetCause().GetTapGesture();
+}
+
+const LongPressGesture& StateEvent::GetLongPressGesture() const
+{
+  return GetImpl(*this).GetCause().GetLongPressGesture();
+}
+
+const WheelEvent& StateEvent::GetWheelEvent() const
+{
+  return GetImpl(*this).GetCause().GetWheelEvent();
+}
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "rg -n \"enum class InputEventType|InputEventType|class ViewState|struct ViewState|WasAdded|Contains\" repos/dali-ui/dali-ui-foundation/public-api repos/dali-ui/dali-ui-foundation/internal -g '*.h' -g '*.cpp'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/text/font-variation/font-variation.cpp:58:bool ContainsSpace(const std::string& text)
+repos/dali-ui/dali-ui-foundation/public-api/text/font-variation/font-variation.cpp:333:    if(ContainsSpace(tag))
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:50:InputEventType StateEvent::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/public-api/state-event.cpp:52:  return GetImpl(*this).GetCause().GetInputEventType();
+repos/dali-ui/dali-ui-foundation/internal/text/visual-model-impl.h:875:  float      mCharacterSpacing;                ///< Contains the value of the character spacing.
+repos/dali-ui/dali-ui-foundation/internal/text/visual-model-impl.h:879:  HyphenInfo mHyphen;                          ///< Contains hyphen glyph info & the character index to draw hyphen after.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:84:   * Equivalent to: !GetPrev().Contains(state) && GetCurrent().Contains(state)
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:88:    return !GetPrev().Contains(state) && GetCurrent().Contains(state);
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:94:   * Equivalent to: GetPrev().Contains(state) && !GetCurrent().Contains(state)
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:98:    return GetPrev().Contains(state) && !GetCurrent().Contains(state);
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:113:   * state changes return an InputEvent with InputEventType::NONE.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:120:   * Convenience shortcut for GetCause().GetInputEventType().
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:121:   * Returns InputEventType::NONE if the change was programmatic or system-triggered.
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:123:  InputEventType GetInputEventType() const;
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:128:   * @pre GetInputEventType() == InputEventType::TOUCH_EVENT
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:135:   * @pre GetInputEventType() == InputEventType::KEY_EVENT
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:142:   * @pre GetInputEventType() == InputEventType::TAP_GESTURE
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:149:   * @pre GetInputEventType() == InputEventType::LONG_PRESS_GESTURE
+repos/dali-ui/dali-ui-foundation/public-api/state-event.h:156:   * @pre GetInputEventType() == InputEventType::WHEEL_EVENT
+repos/dali-ui/dali-ui-foundation/public-api/input-event.h:92:   * The returned event has InputEventType::NONE. Use this when emitting signals
+repos/dali-ui/dali-ui-foundation/public-api/input-event.h:104:   * with InputEventType::NONE is needed without per-call cost.
+repos/dali-ui/dali-ui-foundation/public-api/input-event.h:155:  InputEventType GetInputEventType() const;
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.h:31: * Contains all the event handling methods for Text::Controller::Impl
+repos/dali-ui/dali-ui-foundation/public-api/input-event-type.h:27:enum class InputEventType : uint32_t
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.h:125:   * @copydoc Dali::Ui::InputEvent::GetInputEventType
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.h:127:  InputEventType GetInputEventType() const;
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.h:163:  InputEventType                                                                               mEventType;
+repos/dali-ui/dali-ui-foundation/internal/text/layouts/layout-engine.cpp:1599:   * @param[in] currentParagraphRun Contains the bounded paragraph for this line layout.
+repos/dali-ui/dali-ui-foundation/internal/text/layouts/layout-engine.cpp:1617:   * @param[out] currentParagraphRun Contains the bounded paragraph if found for the characterIndex.
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl.h:882:   * @param[in] cursorInfo Contains the selection handle position in Actor's coords.
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl.h:892:   * @param[in] cursorInfo Contains the selection handle position in Actor's coords.
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:35:  mEventType(InputEventType::NONE),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:42:  mEventType(InputEventType::TOUCH_EVENT),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:49:  mEventType(InputEventType::KEY_EVENT),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:56:  mEventType(InputEventType::TAP_GESTURE),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:63:  mEventType(InputEventType::LONG_PRESS_GESTURE),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:70:  mEventType(InputEventType::WHEEL_EVENT),
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:109:InputEventType InputEventImpl::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:116:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::TOUCH_EVENT);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:122:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::KEY_EVENT);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:128:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::TAP_GESTURE);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:134:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::LONG_PRESS_GESTURE);
+repos/dali-ui/dali-ui-foundation/internal/input-event-impl.cpp:140:  DALI_ASSERT_ALWAYS(mEventType == InputEventType::WHEEL_EVENT);
+repos/dali-ui/dali-ui-foundation/public-api/input-event.cpp:87:InputEventType InputEvent::GetInputEventType() const
+repos/dali-ui/dali-ui-foundation/public-api/input-event.cpp:89:  return GetImpl(*this).GetInputEventType();
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h:28: * Contains methods for updating the models in the TextController
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:96:  if(viewImpl.GetState().Contains(ViewState::DISABLED))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:107:      if(GetImpl(parentView).GetState().Contains(ViewState::DISABLED))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:120:  if(viewImpl.GetState().Contains(ViewState::FOCUSED))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.cpp:131:      if(GetImpl(parentView).GetState().Contains(ViewState::FOCUSED))
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-relayouter.h:37: * Contains all the relayouting related methods for Text::Controller
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:41: * Contains() or HasIntersectionWith().
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:45: * if(state.Contains(ViewState::PRESSED)) { ... }
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:101:  bool Contains(const ViewState& other) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:134:    return Contains(DISABLED) || Contains(PSEUDO_DISABLED);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:150:  bool WasAdded(const ViewState& prev, const ViewState& cur) const
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:152:    return !prev.Contains(*this) && cur.Contains(*this);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:160:    return prev.Contains(*this) && !cur.Contains(*this);
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:168:    return WasAdded(prev, cur) || WasRemoved(prev, cur);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:671:    // - FOCUSED should have gone already (ASSERT(!mState.Contains(FOCUSED)))
+repos/dali-ui/dali-ui-foundation/internal/views/view-state-manager.h:53:class ViewStateManager
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/view-state.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string-view.h>
+#include <dali/public-api/common/dali-string.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+/**
+ * @brief ViewState is a value type representing one or more view states as a bitmask.
+ *
+ * Predefined states (Focused, Pressed, Disabled, etc.) are registered at static
+ * initialization time. Custom states can be created at runtime via Create().
+ *
+ * States can be combined with operator+, removed with operator-, and tested with
+ * Contains() or HasIntersectionWith().
+ *
+ * @code
+ * // Single state check
+ * if(state.Contains(ViewState::PRESSED)) { ... }
+ *
+ * // Composite state
+ * auto selectedPressed = ViewState::SELECTED + ViewState::PRESSED;
+ *
+ * // Custom state
+ * static const ViewState Loading = ViewState::Create("Loading");
+ * @endcode
+ */
+class DALI_UI_API ViewState
+{
+public:
+  /**
+   * @brief Creates a Normal state (no bits set).
+   */
+  constexpr ViewState()
+  : mBits(0u)
+  {
+  }
+
+  // --- Predefined States ---
+
+  static const ViewState ALL;             ///< Represents all possible states
+  static const ViewState NORMAL;          ///< No state (0)
+  static const ViewState FOCUSED;         ///< View has keyboard focus
+  static const ViewState PRESSED;         ///< View is being pressed (touch or key)
+  static const ViewState DISABLED;        ///< View is disabled
+  static const ViewState PSEUDO_DISABLED; ///< View appears disabled but still interactive
+  static const ViewState SELECTED;        ///< View is selected
+
+  // --- Predefined Composite States ---
+
+  static const ViewState SELECTED_PRESSED;  ///< SELECTED + PRESSED
+  static const ViewState DISABLED_SELECTED; ///< DISABLED + SELECTED
+  static const ViewState SELECTED_FOCUSED;  ///< SELECTED + FOCUSED
+
+  /**
+   * @brief Registers and creates a custom state with the given name.
+   *
+   * If the name was already registered, the same bitmask is returned.
+   * "Normal" always returns zero, "All" always returns full mask.
+   *
+   * @param[in] name The unique name for the state
+   * @return The ViewState with the assigned bitmask
+   * @throws DaliException if no more bits are available (max 32 custom states)
+   */
+  static ViewState Create(StringView name);
+
+  // --- Query ---
+
+  /**
+   * @brief Checks if this state fully contains the specified state.
+   *
+   * @param[in] other The state to check for
+   * @return True if all bits of @p other are set in this state
+   */
+  bool Contains(const ViewState& other) const
+  {
+    return (mBits & other.mBits) == other.mBits;
+  }
+
+  /**
+   * @brief Checks if there is any overlap between this and the other state.
+   *
+   * @param[in] other The state to check against
+   * @return True if any common bit is set
+   */
+  bool HasIntersectionWith(const ViewState& other) const
+  {
+    return (mBits & other.mBits) != 0u;
+  }
+
+  /**
+   * @brief Checks if this is the Normal state (no bits set).
+   *
+   * @return True if no state bits are set
+   */
+  bool IsNormal() const
+  {
+    return mBits == 0u;
+  }
+
+  /**
+   * @brief Checks if this state contains DISABLED or PSEUDO_DISABLED.
+   *
+   * @return True if either DISABLED or PSEUDO_DISABLED is set
+   */
+  bool IsAnyDisabled() const
+  {
+    return Contains(DISABLED) || Contains(PSEUDO_DISABLED);
+  }
+
+  /**
+   * @brief Returns a human-readable string representation for debugging.
+   *
+   * @return A string like "Focused, Pressed" or "Normal"
+   */
+  String ToString() const;
+
+  // --- State Change Filters ---
+  // Useful with StateChangedSignal(prev, cur) to detect specific transitions.
+
+  /**
+   * @brief Checks if this state was newly added (not in prev, present in cur).
+   */
+  bool WasAdded(const ViewState& prev, const ViewState& cur) const
+  {
+    return !prev.Contains(*this) && cur.Contains(*this);
+  }
+
+  /**
+   * @brief Checks if this state was removed (present in prev, not in cur).
+   */
+  bool WasRemoved(const ViewState& prev, const ViewState& cur) const
+  {
+    return prev.Contains(*this) && !cur.Contains(*this);
+  }
+
+  /**
+   * @brief Checks if this state was either added or removed.
+   */
+  bool WasChanged(const ViewState& prev, const ViewState& cur) const
+  {
+    return WasAdded(prev, cur) || WasRemoved(prev, cur);
+  }
+
+  /**
+   * @brief Checks if any bit in this state changed between prev and cur.
+   *
+   * Unlike WasChanged(), this works with composite states — it returns true
+   * if any constituent bit was toggled.
+   */
+  bool AnyChanged(const ViewState& prev, const ViewState& cur) const
+  {
+    return ((prev ^ cur) & *this).mBits != 0u;
+  }
+
+  // --- Operators ---
+
+  ViewState operator+(const ViewState& rhs) const
+  {
+    return ViewState(mBits | rhs.mBits);
+  }
+
+  ViewState operator-(const ViewState& rhs) const
+  {
+    return ViewState(mBits & ~rhs.mBits);
+  }
+
+  ViewState operator|(const ViewState& rhs) const
+  {
+    return ViewState(mBits | rhs.mBits);
+  }
+
+  ViewState operator&(const ViewState& rhs) const
+  {
+    return ViewState(mBits & rhs.mBits);
+  }
+
+  ViewState operator^(const ViewState& rhs) const
+  {
+    return ViewState(mBits ^ rhs.mBits);
+  }
+
+  ViewState operator~() const
+  {
+    return ViewState(~mBits);
+  }
+
+  bool operator==(const ViewState& rhs) const
+  {
+    return mBits == rhs.mBits;
+  }
+
+  bool operator!=(const ViewState& rhs) const
+  {
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/input-event-type.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <cstdint>
+
+namespace Dali::Ui
+{
+/**
+ * @brief Defines the type of input events.
+ */
+enum class InputEventType : uint32_t
+{
+  /**
+   * @brief The change did not originate from a concrete input event.
+   *
+   * This includes explicit API calls, such as programmatic state changes,
+   * and framework-triggered lifecycle changes, such as focus loss, disabling,
+   * or scene disconnection.
+   */
+  NONE = 0,
+
+  /**
+   * @brief The input event is from touch event.
+   */
+  TOUCH_EVENT = 1,
+
+  /**
+   * @brief The input event is from key event.
+   */
+  KEY_EVENT = 2,
+
+  /**
+   * @brief The input event is from tap gesture.
+   */
+  TAP_GESTURE = 3,
+
+  /**
+   * @brief The input event is from long press gesture.
+   */
+  LONG_PRESS_GESTURE = 4,
+
+  /**
+   * @brief The input event is from wheel event.
+   */
+  WHEEL_EVENT = 5,
+
+  /**
+   * @brief Reserved for future expansion.
+   */
+  RESERVED = 99
+};
+} // namespace Dali::Ui
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/input-event.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/events/key-event.h>
+#include <dali/public-api/events/long-press-gesture.h>
+#include <dali/public-api/events/tap-gesture.h>
+#include <dali/public-api/events/touch-event.h>
+#include <dali/public-api/events/wheel-event.h>
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/input-event-type.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Internal
+{
+class InputEventImpl;
+}
+
+/**
+ * @brief
+ */
+class DALI_UI_API InputEvent : public BaseHandle
+{
+public:
+  /**
+   * @brief Creates an uninitialized InputEvent handle.
+   */
+  InputEvent() = default;
+
+  /**
+   * @brief Destructor.
+   */
+  ~InputEvent() = default;
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  InputEvent(const InputEvent& handle) = default;
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  InputEvent(InputEvent&& rhs) noexcept = default;
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  InputEvent& operator=(const InputEvent& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  InputEvent& operator=(InputEvent&& rhs) noexcept = default;
+
+  /**
+   * @brief Creates a new InputEvent with NONE type, representing a non-input change.
+   *
+   * The returned event has InputEventType::NONE. Use this when emitting signals
+   * for changes that do not originate from a concrete user input event, including
+   * explicit API calls and framework-triggered lifecycle changes.
+   *
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New();
+
+  /**
+   * @brief Returns a shared NONE-type InputEvent instance.
+   *
+   * No heap allocation on each call. Use this wherever a valid InputEvent
+   * with InputEventType::NONE is needed without per-call cost.
+   *
+   * @return A const reference to the shared NONE InputEvent
+   */
+  static const InputEvent& None();
+
+  /**
+   * @brief Creates a new InputEvent from a touch event.
+   *
+   * @param[in] originEvent The originating touch event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const TouchEvent& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a key event.
+   *
+   * @param[in] originEvent The originating key event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const KeyEvent& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a tap gesture.
+   *
+   * @param[in] originEvent The originating tap gesture
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const TapGesture& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a long-press gesture.
+   *
+   * @param[in] originEvent The originating long-press gesture
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const LongPressGesture& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a wheel event.
+   *
+   * @param[in] originEvent The originating wheel event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const WheelEvent& originEvent);
+
+  /**
+   * @brief Get the type of this event.
+   *
+   * @return The type of the input event
+   */
+  InputEventType GetInputEventType() const;
+
+  /**
+   * @brief
+   */
+  const TouchEvent& GetTouchEvent() const;
+
+  /**
+   * @brief
+   */
+  const KeyEvent& GetKeyEvent() const;
+
+  /**
+   * @brief
+   */
+  const TapGesture& GetTapGesture() const;
+
+  /**
+   * @brief
+   */
+  const LongPressGesture& GetLongPressGesture() const;
+
+  /**
+   * @brief
+   */
+  const WheelEvent& GetWheelEvent() const;
+
+public: // Not intended for Application developers
+  /**
+   * @brief This constructor is used by InputEvent::New() methods.
+   *
+   * @param[in] impl The implementation of the input event
+   */
+  explicit InputEvent(Internal::InputEventImpl* impl);
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '210,255p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp && sed -n '380,445p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ViewState.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+// =============================================================================
+// Deferred notification: StateChangedSignal connections also participate
+// in the deferred ordering guarantee
+// =============================================================================
+
+int UtcDaliViewStateDeferredSignalOrderP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  std::vector<CallRecord> log;
+
+  // Signal connection that triggers a re-entrant state change
+  view.StateChangedSignal().Connect(&tracker, [&](View v, const StateEvent& e) {
+    log.push_back({"signal-1", e.GetPrev(), e.GetCurrent()});
+    if(e.Added(ViewState::FOCUSED))
+    {
+      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+    }
+  });
+
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal-2", e.GetPrev(), e.GetCurrent()});
+  });
+
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+
+  // signal-1(A→B) → signal-2(A→B) → signal-1(B→C) → signal-2(B→C)
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 4, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(log[0].tag, std::string("signal-1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+
+  DALI_TEST_EQUALS(log[1].tag, std::string("signal-2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[1].cur.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!log[1].cur.Contains(ViewState::PRESSED));
+
+  DALI_TEST_EQUALS(log[2].tag, std::string("signal-1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[2].cur.Contains(ViewState::PRESSED));
+
+  DALI_TEST_EQUALS(log[3].tag, std::string("signal-2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[3].cur.Contains(ViewState::PRESSED));
+
+}
+
+// =============================================================================
+// Orthogonal state: InteractiveTrait.IsPressed() is false after disabling
+// =============================================================================
+
+int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+
+  std::vector<CallRecord> log;
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal", e.GetPrev(), e.GetCurrent()});
+  });
+
+  view.SetEnabled(false);
+
+  // PRESSED must be cleared in the DISABLED transition, not in a follow-up event
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].cur.Contains(ViewState::DISABLED));
+  DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+
+  // InteractiveTrait internal state must also be cleaned up
+  DALI_TEST_CHECK(!trait.IsPressed());
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: PseudoDisabled clears PRESSED but keeps FOCUSED
+// =============================================================================
+
+int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+
+  std::vector<CallRecord> log;
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal", e.GetPrev(), e.GetCurrent()});
+  });
+
+  trait.SetPseudoDisabled(true);
+
+  const ViewState& finalState = GetImpl(view).GetState();
+
+  // PRESSED must be cleared
+  DALI_TEST_CHECK(!finalState.Contains(ViewState::PRESSED));
+  DALI_TEST_CHECK(!trait.IsPressed());
+
+  // FOCUSED must be kept
+  DALI_TEST_CHECK(finalState.Contains(ViewState::FOCUSED));
+
+  // PSEUDO_DISABLED must be set
+  DALI_TEST_CHECK(finalState.Contains(ViewState::PSEUDO_DISABLED));
+
+
+codex
+---
+title: State Event
+sidebar_label: State Event
+category: input-interaction
+---
+
+# State Event
+
+`Dali::Ui::StateEvent` describes one `Dali::Ui::View` state transition and gives application code the previous state, current state, and optional input cause.
+
+## Table of Contents
+
+- [Reacting to View State Transitions](#reacting-to-view-state-transitions)
+- [Detecting Added, Removed, and Changed States](#detecting-added-removed-and-changed-states)
+- [Reading the Previous and Current State Snapshots](#reading-the-previous-and-current-state-snapshots)
+- [Using the Input Event Cause](#using-the-input-event-cause)
+- [Keeping State Handlers Small](#keeping-state-handlers-small)
+
+## Reacting to View State Transitions
+
+A state event is delivered when a `Dali::Ui::View` changes state. In application code, handle the event as a short-lived callback parameter and read the transition from the `Dali::Ui::StateEvent`.
+
+```cpp
+void OnStateChanged(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+{
+  if(event.Added(Dali::Ui::ViewState::FOCUSED))
+  {
+    // The view gained focus in this transition.
+  }
+
+  if(event.Removed(Dali::Ui::ViewState::PRESSED))
+  {
+    // The view is no longer pressed.
+  }
+}
+```
+
+`Dali::Ui::StateEvent` is a handle type. It can be copied or assigned when the callback needs to pass the event to another local helper.
+
+```cpp
+void ForwardStateEvent(const Dali::Ui::StateEvent& event)
+{
+  Dali::Ui::StateEvent copiedEvent;
+  copiedEvent = event;
+
+  if(copiedEvent.Changed(Dali::Ui::ViewState::SELECTED))
+  {
+    // Selection state toggled.
+  }
+}
+```
+
+## Detecting Added, Removed, and Changed States
+
+Use `Dali::Ui::StateEvent::Added`, `Dali::Ui::StateEvent::Removed`, and `Dali::Ui::StateEvent::Changed` when you care about a specific `Dali::Ui::ViewState`.
+
+```cpp
+void UpdateFocusDecoration(const Dali::Ui::StateEvent& event)
+{
+  if(event.Added(Dali::Ui::ViewState::FOCUSED))
+  {
+    ShowFocusDecoration();
+  }
+  else if(event.Removed(Dali::Ui::ViewState::FOCUSED))
+  {
+    HideFocusDecoration();
+  }
+}
+```
+
+`Dali::Ui::StateEvent::Changed` is useful when the same update path can handle both directions of a transition.
+
+```cpp
+void RefreshPressedVisual(const Dali::Ui::StateEvent& event)
+{
+  if(!event.Changed(Dali::Ui::ViewState::PRESSED))
+  {
+    return;
+  }
+
+  const bool pressed = event.GetCurrent().Contains(Dali::Ui::ViewState::PRESSED);
+  SetPressedVisual(pressed);
+}
+```
+
+For combined states, test each state that matters to the visual or behavior.
+
+```cpp
+void RefreshSelectionAndFocus(const Dali::Ui::StateEvent& event)
+{
+  const bool selectionChanged = event.Changed(Dali::Ui::ViewState::SELECTED);
+  const bool focusChanged     = event.Changed(Dali::Ui::ViewState::FOCUSED);
+
+  if(selectionChanged || focusChanged)
+  {
+    const Dali::Ui::ViewState& current = event.GetCurrent();
+
+    SetSelectedVisual(current.Contains(Dali::Ui::ViewState::SELECTED));
+    SetFocusedVisual(current.Contains(Dali::Ui::ViewState::FOCUSED));
+  }
+}
+```
+
+## Reading the Previous and Current State Snapshots
+
+`Dali::Ui::StateEvent::GetPrev` returns the state before the transition. `Dali::Ui::StateEvent::GetCurrent` returns the state after the transition. These snapshots let one handler understand the whole state change, not only a single flag.
+
+```cpp
+void UpdateDisabledVisual(const Dali::Ui::StateEvent& event)
+{
+  const Dali::Ui::ViewState& previous = event.GetPrev();
+  const Dali::Ui::ViewState& current  = event.GetCurrent();
+
+  const bool wasDisabled = previous.Contains(Dali::Ui::ViewState::DISABLED);
+  const bool isDisabled  = current.Contains(Dali::Ui::ViewState::DISABLED);
+
+  if(wasDisabled != isDisabled)
+  {
+    SetDisabledVisual(isDisabled);
+  }
+}
+```
+
+The current state may contain more than one state at the same time. Check the `Dali::Ui::ViewState` snapshot for every state your component cares about.
+
+```cpp
+void RefreshButtonChrome(const Dali::Ui::StateEvent& event)
+{
+  const Dali::Ui::ViewState& current = event.GetCurrent();
+
+  const bool focused  = current.Contains(Dali::Ui::ViewState::FOCUSED);
+  const bool pressed  = current.Contains(Dali::Ui::ViewState::PRESSED);
+  const bool selected = current.Contains(Dali::Ui::ViewState::SELECTED);
+
+  ApplyButtonChrome(focused, pressed, selected);
+}
+```
+
+## Using the Input Event Cause
+
+A state transition may be caused by input, or it may be caused by programmatic or framework state changes. `Dali::Ui::StateEvent::GetInputEventType` reports which kind of input is available through the typed accessors.
+
+```cpp
+void DispatchStateCause(const Dali::Ui::StateEvent& event)
+{
+  switch(event.GetInputEventType())
+  {
+    case Dali::Ui::InputEventType::TOUCH_EVENT:
+    {
+      const Dali::TouchEvent& touchEvent = event.GetTouchEvent();
+      HandleTouchStateChange(touchEvent);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::KEY_EVENT:
+    {
+      const Dali::KeyEvent& keyEvent = event.GetKeyEvent();
+      HandleKeyStateChange(keyEvent);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::TAP_GESTURE:
+    {
+      const Dali::TapGesture& tapGesture = event.GetTapGesture();
+      HandleTapStateChange(tapGesture);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::LONG_PRESS_GESTURE:
+    {
+      const Dali::LongPressGesture& longPressGesture = event.GetLongPressGesture();
+      HandleLongPressStateChange(longPressGesture);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::WHEEL_EVENT:
+    {
+      const Dali::WheelEvent& wheelEvent = event.GetWheelEvent();
+      HandleWheelStateChange(wheelEvent);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::NONE:
+    case Dali::Ui::InputEventType::RESERVED:
+    {
+      HandleNonInputStateChange();
+      break;
+    }
+  }
+}
+```
+
+Use `Dali::Ui::StateEvent::GetCause` when you want to forward the generic input wrapper instead of branching immediately.
+
+```cpp
+void QueueStateTransition(const Dali::Ui::StateEvent& event)
+{
+  const Dali::Ui::InputEvent& cause = event.GetCause();
+
+  QueueStateRecord(event.GetPrev(), event.GetCurrent(), cause);
+}
+```
+
+Only call a typed getter such as `Dali::Ui::StateEvent::GetKeyEvent` after checking that `Dali::Ui::StateEvent::GetInputEventType` matches the corresponding `Dali::Ui::InputEventType`.
+
+## Keeping State Handlers Small
+
+State callbacks can be used to update visuals, trigger application behavior, or forward compact transition data. Keep the callback focused on the transition and move larger work into helper functions.
+
+```cpp
+void OnComponentStateChanged(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+{
+  if(event.Changed(Dali::Ui::ViewState::FOCUSED))
+  {
+    UpdateFocusDecoration(view, event.GetCurrent());
+  }
+
+  if(event.Changed(Dali::Ui::ViewState::PRESSED))
+  {
+    UpdatePressedFeedback(view, event.GetCurrent());
+  }
+
+  if(event.Changed(Dali::Ui::ViewState::DISABLED))
+  {
+    UpdateInputAvailability(view, event.GetCurrent());
+  }
+}
+```
+
+When one state change causes another state update, DALi dispatches state notifications as transition events. Write handlers so each call responds only to the `Dali::Ui::StateEvent` it received.
+
+```cpp
+void OnFocusableButtonStateChanged(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+{
+  if(event.Added(Dali::Ui::ViewState::FOCUSED))
+  {
+    ShowFocusDecoration(view);
+  }
+
+  if(event.Added(Dali::Ui::ViewState::PRESSED))
+  {
+    StartPressedAnimation(view);
+  }
+
+  if(event.Removed(Dali::Ui::ViewState::PRESSED))
+  {
+    StopPressedAnimation(view);
+  }
+}
+```
+tokens used
+21,652

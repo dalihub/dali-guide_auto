@@ -1,0 +1,2691 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20ed-85b1-7da3-928a-e00b4172531d
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Scroll View (scroll-view)
+- Category: views-components
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-adaptor": 3,
+    "dali-core": 2,
+    "dali-ui": 46
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::ScrollView | scope=primary
+- Dali::Ui::ScrollView::DownCast | ScrollView DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::ScrollView::DragFinishedSignal | DragFinishedSignalType & DragFinishedSignal() | scope=primary_member
+- Dali::Ui::ScrollView::DragStartedSignal | DragStartedSignalType & DragStartedSignal() | scope=primary_member
+- Dali::Ui::ScrollView::DraggingSignal | DraggingSignalType & DraggingSignal() | scope=primary_member
+- Dali::Ui::ScrollView::GetContent | View GetContent() const | scope=primary_member
+- Dali::Ui::ScrollView::GetDecelerationRate | float GetDecelerationRate() const | scope=primary_member
+- Dali::Ui::ScrollView::GetFlingSensitivity | float GetFlingSensitivity() const | scope=primary_member
+- Dali::Ui::ScrollView::GetHorizontalScrollBarVisibility | ScrollBarVisibility GetHorizontalScrollBarVisibility() const | scope=primary_member
+- Dali::Ui::ScrollView::GetMaxFlingDistance | float GetMaxFlingDistance() const | scope=primary_member
+- Dali::Ui::ScrollView::GetMaximumFlingDuration | int GetMaximumFlingDuration() const | scope=primary_member
+- Dali::Ui::ScrollView::GetMinimumFlingDuration | int GetMinimumFlingDuration() const | scope=primary_member
+- Dali::Ui::ScrollView::GetOverScrollMode | OverScrollMode GetOverScrollMode() const | scope=primary_member
+- Dali::Ui::ScrollView::GetScrollDirection | ScrollDirection GetScrollDirection() const | scope=primary_member
+- Dali::Ui::ScrollView::GetScrollPosition | Vector2 GetScrollPosition() const | scope=primary_member
+- Dali::Ui::ScrollView::GetVerticalScrollBarVisibility | ScrollBarVisibility GetVerticalScrollBarVisibility() const | scope=primary_member
+- Dali::Ui::ScrollView::IsScrolling | bool IsScrolling() const | scope=primary_member
+- Dali::Ui::ScrollView::New | ScrollView New() | scope=primary_member
+- Dali::Ui::ScrollView::ScrollFinishedSignal | ScrollFinishedSignalType & ScrollFinishedSignal() | scope=primary_member
+- Dali::Ui::ScrollView::ScrollStartedSignal | ScrollStartedSignalType & ScrollStartedSignal() | scope=primary_member
+- Dali::Ui::ScrollView::ScrollTo | void ScrollTo(const Vector2 &position, bool animation=true) | scope=primary_member
+- Dali::Ui::ScrollView::ScrollToX | void ScrollToX(float position, bool animation=true) | scope=primary_member
+- Dali::Ui::ScrollView::ScrollToY | void ScrollToY(float position, bool animation=true) | scope=primary_member
+- Dali::Ui::ScrollView::ScrollView | ScrollView() | scope=primary_member
+- Dali::Ui::ScrollView::ScrollingSignal | ScrollingSignalType & ScrollingSignal() | scope=primary_member
+- Dali::Ui::ScrollView::SetContent | ScrollView & SetContent(View content) | scope=primary_member
+- Dali::Ui::ScrollView::SetDecelerationRate | ScrollView & SetDecelerationRate(float rate) | scope=primary_member
+- Dali::Ui::ScrollView::SetFlingSensitivity | ScrollView & SetFlingSensitivity(float sensitivity) | scope=primary_member
+- Dali::Ui::ScrollView::SetHorizontalScrollBarVisibility | ScrollView & SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) | scope=primary_member
+- Dali::Ui::ScrollView::SetMaxFlingDistance | ScrollView & SetMaxFlingDistance(float distance) | scope=primary_member
+- Dali::Ui::ScrollView::SetMaximumFlingDuration | ScrollView & SetMaximumFlingDuration(int duration) | scope=primary_member
+- Dali::Ui::ScrollView::SetMinimumFlingDuration | ScrollView & SetMinimumFlingDuration(int duration) | scope=primary_member
+- Dali::Ui::ScrollView::SetOverScrollMode | ScrollView & SetOverScrollMode(OverScrollMode mode) | scope=primary_member
+- Dali::Ui::ScrollView::SetScrollDirection | ScrollView & SetScrollDirection(ScrollDirection direction) | scope=primary_member
+- Dali::Ui::ScrollView::SetScrollPosition | ScrollView & SetScrollPosition(const Vector2 &position) | scope=primary_member
+- Dali::Ui::ScrollView::SetVerticalScrollBarVisibility | ScrollView & SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) | scope=primary_member
+- Dali::Ui::ScrollView::operator= | ScrollView & operator=(ScrollView &&rhs) noexcept | scope=primary_member
+- Dali::Ui::ScrollView::~ScrollView | ~ScrollView() | scope=primary_member
+- scroll-view.autogen.h | scope=document_as_part_of_primary_feature
+- scroll-view.autogen.h::DALI_UI_CHAIN_SCROLLVIEW_METHODS | scope=document_as_part_of_primary_feature_member
+- Dali::Accessibility::Application | scope=context_lookup
+- Dali::Application | scope=context_lookup
+- Dali::Application::Application | Application(Application &&rhs) noexcept | scope=context_lookup
+- Dali::ConnectionTracker | scope=context_lookup
+- Dali::ConnectionTracker::ConnectionTracker | ConnectionTracker() | scope=context_lookup
+- Dali::Ui::ScrollBar | scope=context_lookup
+- Dali::Ui::ScrollBar::ScrollBar | ScrollBar() | scope=context_lookup
+- Dali::Ui::StackLayout | scope=context_lookup
+- Dali::Ui::StackLayout::StackLayout | StackLayout(const StackLayout &layout) | scope=context_lookup
+- Dali::Ui::StackLayoutParams | scope=context_lookup
+- Dali::Ui::StackLayoutParams::StackLayoutParams | StackLayoutParams(const StackLayoutParams &handle) | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "scroll-view_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::ScrollView::New",
+      "Dali::Ui::ScrollView::SetContent",
+      "Dali::Ui::ScrollView::SetDecelerationRate",
+      "Dali::Ui::ScrollView::SetFlingSensitivity",
+      "Dali::Ui::ScrollView::SetHorizontalScrollBarVisibility",
+      "Dali::Ui::ScrollView::SetMaxFlingDistance",
+      "Dali::Ui::ScrollView::SetMaximumFlingDuration",
+      "Dali::Ui::ScrollView::SetMinimumFlingDuration",
+      "Dali::Ui::ScrollView::SetOverScrollMode",
+      "Dali::Ui::ScrollView::SetScrollDirection",
+      "Dali::Ui::ScrollView::SetScrollPosition",
+      "Dali::Ui::ScrollView::SetVerticalScrollBarVisibility"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "id": "scroll-view_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker",
+      "Dali::Ui::ScrollView::DragFinishedSignal",
+      "Dali::Ui::ScrollView::DragStartedSignal",
+      "Dali::Ui::ScrollView::DraggingSignal",
+      "Dali::Ui::ScrollView::ScrollFinishedSignal",
+      "Dali::Ui::ScrollView::ScrollStartedSignal",
+      "Dali::Ui::ScrollView::ScrollingSignal"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/scrollview/scrollbar-example.cpp:13 (sample, score=1.0)
+```cpp
+* limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// This example shows how to use ScrollView with ScrollBar component
+class ScrollBarExampleController : public ConnectionTracker
+{
+public:
+
+  ScrollBarExampleController(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &ScrollBarExampleController::Create);
+  }
+
+  ~ScrollBarExampleController() = default;
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+```
+
+- repos/dali-ui/samples/scrollview/scrollview-example.cpp:13 (sample, score=1.0)
+```cpp
+* limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// This example shows how to use ScrollView component with pan gesture support
+class ScrollViewController : public ConnectionTracker
+{
+public:
+
+  ScrollViewController(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &ScrollViewController::Create);
+  }
+
+  ~ScrollViewController() = default;
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "New",
+      "ScrollBar",
+      "ScrollView",
+      "SetContent",
+      "SetDecelerationRate",
+      "SetFlingSensitivity",
+      "SetHorizontalScrollBarVisibility",
+      "SetMaxFlingDistance",
+      "SetMaximumFlingDuration",
+      "SetMinimumFlingDuration",
+      "SetOverScrollMode",
+      "SetScrollDirection",
+      "SetVerticalScrollBarVisibility",
+      "StackLayout"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollbar-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 92,
+    "snippet_start_line": 13
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "New",
+      "ScrollView",
+      "SetContent",
+      "SetDecelerationRate",
+      "SetFlingSensitivity",
+      "SetMaxFlingDistance",
+      "SetMaximumFlingDuration",
+      "SetMinimumFlingDuration",
+      "SetOverScrollMode",
+      "SetScrollDirection",
+      "StackLayout",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollview-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 92,
+    "snippet_start_line": 13
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "GetScrollPosition",
+      "New",
+      "ScrollFinishedSignal",
+      "ScrollStartedSignal",
+      "ScrollView",
+      "ScrollingSignal",
+      "SetContent",
+      "SetOverScrollMode",
+      "SetScrollDirection",
+      "StackLayout"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 90,
+    "snippet_start_line": 11
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "DownCast",
+      "New",
+      "ScrollView",
+      "SetContent",
+      "SetScrollDirection",
+      "StackLayout",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/text/text-input-field-example.cpp",
+    "relevance": "strong",
+    "score": 0.95,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 112,
+    "snippet_start_line": 33
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "New",
+      "ScrollView",
+      "SetContent",
+      "SetScrollDirection",
+      "StackLayout",
+      "StackLayoutParams"
+    ],
+    "path": "repos/dali-ui/samples/ui-scale/ui-scale-example.cpp",
+    "relevance": "strong",
+    "score": 0.9,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 104,
+    "snippet_start_line": 25
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "New",
+      "ScrollView",
+      "SetContent",
+      "SetScrollDirection"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollview-layout-test.cpp",
+    "relevance": "strong",
+    "score": 0.8,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 92,
+    "snippet_start_line": 13
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectionTracker",
+      "DownCast",
+      "DragFinishedSignal",
+      "DragStartedSignal",
+      "DraggingSignal",
+      "GetContent",
+      "GetDecelerationRate",
+      "GetFlingSensitivity",
+      "GetHorizontalScrollBarVisibility",
+      "GetMaxFlingDistance",
+      "GetMaximumFlingDuration",
+      "GetMinimumFlingDuration",
+      "GetOverScrollMode",
+      "GetScrollDirection",
+      "GetScrollPosition",
+      "GetVerticalScrollBarVisibility",
+      "IsScrolling",
+      "New",
+      "ScrollBar",
+      "ScrollFinishedSignal"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 101,
+    "snippet_start_line": 22
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/samples/scrollview/scrollview-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// This example shows how to use ScrollView component with pan gesture support
+class ScrollViewController : public ConnectionTracker
+{
+public:
+
+  ScrollViewController(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &ScrollViewController::Create);
+  }
+
+  ~ScrollViewController() = default;
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+  {
+    // Get a handle to the window
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Connect to key event for exit
+    window.KeyEventSignal().Connect(this, &ScrollViewController::OnKeyEvent);
+
+    // Create content view larger than scroll view
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(2400.0f);
+    content.SetSpacing(10.0f);
+    content.SetPadding(Extents(20, 20, 20, 20));
+
+    View top = View::New();
+    top.SetBackgroundColor(Color::RED);
+    top.SetRequestedWidth(MATCH_PARENT);
+    top.SetRequestedHeight(WRAP_CONTENT);
+    top.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    content.Add(top);
+
+    View middle = View::New();
+    middle.SetBackgroundColor(Color::GREEN);
+    middle.SetRequestedWidth(MATCH_PARENT);
+    middle.SetRequestedHeight(WRAP_CONTENT);
+    middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    content.Add(middle);
+
+    View bottom = View::New();
+    bottom.SetBackgroundColor(Color::BLUE);
+    bottom.SetRequestedWidth(MATCH_PARENT);
+    bottom.SetRequestedHeight(WRAP_CONTENT);
+    bottom.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    content.Add(bottom);
+
+    // Create a ScrollView with vertical scrolling using chaining methods
+    ScrollView scrollView = ScrollView::New()
+      .SetScrollDirection(ScrollDirection::Vertical)
+      .SetMaxFlingDistance(6000.0f)
+      .SetMinimumFlingDuration(1000)
+      .SetMaximumFlingDuration(2000)
+      .SetFlingSensitivity(1.0f)
+      .SetDecelerationRate(0.998f)
+      .SetOverScrollMode(OverScrollMode::ContentScrolls)
+      .SetRequestedWidth(600.0f)
+      .SetRequestedHeight(1200.0f)
+      .SetRequestedPositionX(0.0f)
+      .SetRequestedPositionY(0.0f)
+      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
+      .SetContent(content);
+
+    // Add scroll view to window
+    window.Add(scrollView);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+  ScrollView mScrollView;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  ScrollViewController test(application);
+  application.MainLoop();
+  return 0;
+}
+
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * scrollview-interactive-children.cpp
+ *
+ * Demonstrates that ScrollView correctly scrolls even when child items
+ * each consume touch via ClickableTrait.
+ *
+ * Layout (explicit pixel sizes, same pattern as scrollview-example.cpp)
+ * ──────
+ *   Window (480 x 800)
+ *   ├── Status bar  View  (0,   0)  480 x 60
+ *   └── ScrollView        (0,  60)  480 x 740
+ *       └── Content StackLayout     480 x (ITEM_COUNT * (HEIGHT+SPACING) + SPACING)
+ *           ├── Item 0  (clickable)
+ *           ├── Item 1  (clickable)
+ *           └── …
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/integration-api/debug.h>
+#include <dali/public-api/adaptor-framework/timer.h>
+#include <sstream>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// ─── tunables ────────────────────────────────────────────────────────────────
+static constexpr int   ITEM_COUNT        = 20;
+static constexpr float ITEM_HEIGHT       = 80.0f;
+static constexpr float ITEM_SPACING      = 8.0f;
+static constexpr float STATUS_BAR_HEIGHT = 60.0f;
+static constexpr float WINDOW_WIDTH      = 480.0f;
+static constexpr float WINDOW_HEIGHT     = 800.0f;
+
+static const Vector4 COLOR_ITEM_A(0.85f, 0.92f, 1.00f, 1.0f);
+static const Vector4 COLOR_ITEM_B(0.70f, 0.82f, 0.95f, 1.0f);
+static const Vector4 COLOR_PRESSED(0.40f, 0.65f, 1.00f, 1.0f);
+static const Vector4 COLOR_STATUS_BG(0.15f, 0.15f, 0.15f, 1.0f);
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Helper: log a view's size and visibility
+static void LogViewInfo(const char* tag, View view)
+{
+  float w      = view.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+  float h      = view.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+  float lx     = view.GetProperty<float>(Actor::Property::POSITION_X);
+  float ly     = view.GetProperty<float>(Actor::Property::POSITION_Y);
+  float wx     = view.GetProperty<float>(Actor::Property::WORLD_POSITION_X);
+  float wy     = view.GetProperty<float>(Actor::Property::WORLD_POSITION_Y);
+  bool  vis    = view.GetProperty<bool>(Actor::Property::VISIBLE);
+  Vector2 scr  = view.GetProperty<Vector2>(Actor::Property::SCREEN_POSITION);
+  int clip     = view.GetProperty<int>(Actor::Property::CLIPPING_MODE);
+  DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample][Layout] %-24s  size=%5.0fx%-5.0f  local=(%5.0f,%5.0f)  world=(%6.0f,%6.0f)  screen=(%5.0f,%5.0f)  vis=%s  clip=%d\n",
+                        tag, w, h, lx, ly, wx, wy, scr.x, scr.y, vis ? "Y" : "N", clip);
+}
+
+class ScrollInteractiveChildrenController : public ConnectionTracker
+{
+public:
+  explicit ScrollInteractiveChildrenController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &ScrollInteractiveChildrenController::Create);
+  }
+
+  ~ScrollInteractiveChildrenController() = default;
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+    window.KeyEventSignal().Connect(this, &ScrollInteractiveChildrenController::OnKeyEvent);
+
+    // ── Status bar (placed at top, explicit size) ─────────────────────────────
+    mStatusBar = View::New()
+      .SetBackgroundColor(COLOR_STATUS_BG)
+      .SetRequestedWidth(WINDOW_WIDTH)
+      .SetRequestedHeight(STATUS_BAR_HEIGHT)
+      .SetRequestedPositionX(0.0f)
+      .SetRequestedPositionY(0.0f);
+
+    mStatusLabel = Label::New("Tap an item or scroll the list")
+      .SetRequestedWidth(WINDOW_WIDTH - 20.0f)
+      .SetRequestedHeight(STATUS_BAR_HEIGHT)
+      .SetRequestedPositionX(10.0f)
+      .SetRequestedPositionY(0.0f);
+    mStatusBar.Add(mStatusLabel);
+    window.Add(mStatusBar);
+
+    // ── Content StackLayout (explicit height, larger than viewport) ───────────
+    // Content height is explicit because ScrollView does not pass a height
+    // constraint to its content; WRAP_CONTENT would resolve to 0.
+    const float contentHeight = ITEM_COUNT * (ITEM_HEIGHT + ITEM_SPACING) + ITEM_SPACING;
+
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(WINDOW_WIDTH)
+      .SetRequestedHeight(contentHeight)
+      .SetSpacing(ITEM_SPACING)
+      .SetPadding(Extents(0, 0, ITEM_SPACING, ITEM_SPACING));
+    mContent = content;
+
+    for(int i = 0; i < ITEM_COUNT; ++i)
+    {
+      View item = CreateItem(i);
+      content.Add(item);
+      if(i < 3)
+      {
+        mFirstItems[i] = item; // keep refs for size logging
+      }
+    }
+
+    // ── ScrollView (explicit size, below status bar) ──────────────────────────
+    const float scrollViewHeight = WINDOW_HEIGHT - STATUS_BAR_HEIGHT;
+
+    mScrollView = ScrollView::New()
+      .SetScrollDirection(ScrollDirection::Vertical)
+      .SetOverScrollMode(OverScrollMode::ContentScrolls)
+      .SetRequestedWidth(WINDOW_WIDTH)
+      .SetRequestedHeight(scrollViewHeight)
+      .SetRequestedPositionX(0.0f)
+      .SetRequestedPositionY(STATUS_BAR_HEIGHT)
+      .SetContent(content);
+
+    mScrollView.ScrollStartedSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrollStarted);
+    mScrollView.ScrollingSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrolling);
+    mScrollView.ScrollFinishedSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrollFinished);
+
+    window.Add(mScrollView);
+
+    DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] Create() done — scheduling layout dump in 1 s\n");
+
+    // Fire a one-shot timer to log actual resolved sizes after layout
+    mDebugTimer = Timer::New(1000);
+    mDebugTimer.TickSignal().Connect(this, &ScrollInteractiveChildrenController::OnDebugTimer);
+    mDebugTimer.Start();
+  }
+
+private:
+  // ── Item factory ─────────────────────────────────────────────────────────
+  View CreateItem(int index)
+  {
+    const Vector4 normalColor = index % 2 == 0 ? COLOR_ITEM_A : COLOR_ITEM_B;
+
+    View item = View::New()
+      .SetRequestedWidth(WINDOW_WIDTH)
+      .SetRequestedHeight(ITEM_HEIGHT)
+      .SetBackgroundColor(normalColor);
+
+    std::ostringstream oss;
+    oss << "Item " << index << "  (tap me)";
+    Label text = Label::New(oss.str().c_str())
+      .SetRequestedWidth(WINDOW_WIDTH - 32.0f)
+      .SetRequestedHeight(ITEM_HEIGHT)
+      .SetRequestedPositionX(16.0f)
+      .SetFocusable(true);
+    item.Add(text);
+
+    item.AsInteractive([this, index, item, normalColor](InteractiveTrait& trait) mutable {
+      trait.PressedChangedSignal().Connect(
+        this,
+        [item, normalColor](View, bool isPressed, InputEvent) mutable {
+          item.SetBackgroundColor(isPressed ? COLOR_PRESSED : normalColor);
+        });
+
+      trait.ClickedSignal().Connect(
+        this,
+        [this, index](View, InputEvent) {
+          OnItemClicked(index);
+        });
+    });
+
+    return item;
+  }
+
+  // ── Diagnostics ───────────────────────────────────────────────────────────
+  bool OnDebugTimer()
+  {
+    DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample][Layout] ── post-layout size dump ──\n");
+    LogViewInfo("StatusBar",   mStatusBar);
+    LogViewInfo("StatusLabel", mStatusLabel);
+    LogViewInfo("ScrollView",  mScrollView);
+    LogViewInfo("Content",     mContent);
+    for(int i = 0; i < 3; ++i)
+    {
+      if(mFirstItems[i])
+      {
+        std::ostringstream tag;
+        tag << "Item[" << i << "]";
+        LogViewInfo(tag.str().c_str(), mFirstItems[i]);
+      }
+    }
+    return false; // one-shot: do not repeat
+  }
+
+  // ── Signal callbacks ──────────────────────────────────────────────────────
+  void OnItemClicked(int index)
+  {
+    std::ostringstream msg;
+    msg << "Clicked: Item " << index;
+    mStatusLabel.SetText(msg.str().c_str());
+    DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] Click  - %s\n", msg.str().c_str());
+  }
+
+  void OnScrollStarted(ScrollView scrollView)
+  {
+    std::ostringstream msg;
+
+exec
+/bin/bash -lc 'rg -n "class ScrollView|enum class|enum .*Scroll|ScrollDirection|OverScrollMode|ScrollBarVisibility|typedef.*Signal|using .*Signal|ScrollStartedSignal|DragStartedSignal|DALI_UI_CHAIN_SCROLLVIEW_METHODS" repos/dali-ui -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/wiki/ScrollView-(kr).md:113:scrollView.SetScrollDirection(ScrollDirection::Vertical);
+repos/dali-ui/wiki/ScrollView-(kr).md:116:scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+repos/dali-ui/wiki/ScrollView-(kr).md:119:scrollView.SetScrollDirection(ScrollDirection::Both);
+repos/dali-ui/wiki/ScrollView-(kr).md:122:ScrollDirection dir = scrollView.GetScrollDirection();
+repos/dali-ui/wiki/ScrollView-(kr).md:127:| `ScrollDirection::Vertical` | Y축 방향으로만 팬 및 플링. 기본값. |
+repos/dali-ui/wiki/ScrollView-(kr).md:128:| `ScrollDirection::Horizontal` | X축 방향으로만 팬 및 플링. |
+repos/dali-ui/wiki/ScrollView-(kr).md:129:| `ScrollDirection::Both` | X, Y 양축 2D 스크롤. |
+repos/dali-ui/wiki/ScrollView-(kr).md:212:scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+repos/dali-ui/wiki/ScrollView-(kr).md:215:scrollView.SetOverScrollMode(OverScrollMode::Never);
+repos/dali-ui/wiki/ScrollView-(kr).md:218:scrollView.SetOverScrollMode(OverScrollMode::Always);
+repos/dali-ui/wiki/ScrollView-(kr).md:220:OverScrollMode mode = scrollView.GetOverScrollMode();
+repos/dali-ui/wiki/ScrollView-(kr).md:225:| `OverScrollMode::Never` | 경계에서 콘텐츠가 정확히 멈춥니다. |
+repos/dali-ui/wiki/ScrollView-(kr).md:226:| `OverScrollMode::Always` | 항상 오버스크롤이 허용됩니다. |
+repos/dali-ui/wiki/ScrollView-(kr).md:227:| `OverScrollMode::ContentScrolls` | 콘텐츠가 뷰포트보다 클 때만 허용됩니다. 기본값. |
+repos/dali-ui/wiki/ScrollView-(kr).md:237:scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);    // 기본값
+repos/dali-ui/wiki/ScrollView-(kr).md:238:scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/wiki/ScrollView-(kr).md:239:scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/wiki/ScrollView-(kr).md:242:scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Auto);  // 기본값
+repos/dali-ui/wiki/ScrollView-(kr).md:243:scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/wiki/ScrollView-(kr).md:244:scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/wiki/ScrollView-(kr).md:246:ScrollBarVisibility vVis = scrollView.GetVerticalScrollBarVisibility();
+repos/dali-ui/wiki/ScrollView-(kr).md:247:ScrollBarVisibility hVis = scrollView.GetHorizontalScrollBarVisibility();
+repos/dali-ui/wiki/ScrollView-(kr).md:252:| `ScrollBarVisibility::Auto` | 스크롤 중에만 표시됩니다. 기본값. |
+repos/dali-ui/wiki/ScrollView-(kr).md:253:| `ScrollBarVisibility::Always` | 항상 표시됩니다. |
+repos/dali-ui/wiki/ScrollView-(kr).md:254:| `ScrollBarVisibility::Never` | 표시되지 않습니다. |
+repos/dali-ui/wiki/ScrollView-(kr).md:264:`ScrollStartedSignal`과 `ScrollFinishedSignal` 사이, 즉 드래그 및 플링 애니메이션이 진행 중인 동안 `true`를 반환합니다.
+repos/dali-ui/wiki/ScrollView-(kr).md:341:| `ScrollStartedSignal` | `void(ScrollView)` | 스크롤 시작 (드래그 또는 플링 시작) |
+repos/dali-ui/wiki/ScrollView-(kr).md:344:| `DragStartedSignal` | `void(ScrollView)` | 팬 임계값을 넘어 드래그 시작 |
+repos/dali-ui/wiki/ScrollView-(kr).md:394:scrollView.ScrollStartedSignal().Connect(&handler, &MyScrollHandler::OnScrollStarted);
+repos/dali-ui/wiki/ScrollView-(kr).md:397:scrollView.DragStartedSignal().Connect(&handler, &MyScrollHandler::OnDragStarted);
+repos/dali-ui/wiki/ScrollView-(kr).md:411:  DragStartedSignal ──► ScrollStartedSignal
+repos/dali-ui/wiki/ScrollView-(kr).md:430:> `ScrollStartedSignal`은 한 번의 스크롤 세션에서 딱 한 번만 발생합니다. `ScrollFinishedSignal`은 드래그와 플링 애니메이션이 모두 끝난 후에 발생합니다.
+repos/dali-ui/wiki/ScrollView-(kr).md:471:    .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/wiki/ScrollView-(kr).md:477:    .SetOverScrollMode(OverScrollMode::ContentScrolls)
+repos/dali-ui/wiki/ScrollView-(kr).md:478:    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+repos/dali-ui/wiki/ScrollView-(kr).md:479:    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
+repos/dali-ui/wiki/ScrollView-(kr).md:489:| `ScrollDirection` | `Vertical` |
+repos/dali-ui/wiki/ScrollView-(kr).md:495:| `OverScrollMode` | `ContentScrolls` |
+repos/dali-ui/wiki/ScrollView-(kr).md:496:| `VerticalScrollBarVisibility` | `Auto` |
+repos/dali-ui/wiki/ScrollView-(kr).md:497:| `HorizontalScrollBarVisibility` | `Auto` |
+repos/dali-ui/wiki/ScrollView-(kr).md:510:- **스크롤바 렌더링은 플랫폼에 의존합니다.** `ScrollBarVisibility` 프로퍼티는 설정값을 저장하지만, 실제 스크롤바 렌더링은 플랫폼의 테마와 스크롤바 액터의 구현에 따라 달라집니다. 실제 동작은 대상 환경에서 확인하세요.
+repos/dali-ui/wiki/ScrollView-(kr).md:512:- **`IsScrolling()`은 드래그와 플링을 모두 포함합니다.** `ScrollStartedSignal` 발생 시 `true`로 설정되고 `ScrollFinishedSignal` 발생 시 `false`로 초기화됩니다. 따라서 사용자가 손을 뗀 후 플링 애니메이션이 진행되는 동안에도 `true`를 반환합니다.
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:119:        .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/wiki/ScrollView.md:105:scrollView.SetScrollDirection(ScrollDirection::Vertical);
+repos/dali-ui/wiki/ScrollView.md:108:scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+repos/dali-ui/wiki/ScrollView.md:111:scrollView.SetScrollDirection(ScrollDirection::Both);
+repos/dali-ui/wiki/ScrollView.md:114:ScrollDirection dir = scrollView.GetScrollDirection();
+repos/dali-ui/wiki/ScrollView.md:119:| `ScrollDirection::Vertical` | Pan and fling only on the Y axis. Default. |
+repos/dali-ui/wiki/ScrollView.md:120:| `ScrollDirection::Horizontal` | Pan and fling only on the X axis. |
+repos/dali-ui/wiki/ScrollView.md:121:| `ScrollDirection::Both` | Full 2D scrolling. |
+repos/dali-ui/wiki/ScrollView.md:204:scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+repos/dali-ui/wiki/ScrollView.md:207:scrollView.SetOverScrollMode(OverScrollMode::Never);
+repos/dali-ui/wiki/ScrollView.md:210:scrollView.SetOverScrollMode(OverScrollMode::Always);
+repos/dali-ui/wiki/ScrollView.md:212:OverScrollMode mode = scrollView.GetOverScrollMode();
+repos/dali-ui/wiki/ScrollView.md:217:| `OverScrollMode::Never` | Content stops exactly at the boundary. |
+repos/dali-ui/wiki/ScrollView.md:218:| `OverScrollMode::Always` | Over-scroll is always enabled. |
+repos/dali-ui/wiki/ScrollView.md:219:| `OverScrollMode::ContentScrolls` | Over-scroll only when content exceeds viewport. Default. |
+repos/dali-ui/wiki/ScrollView.md:229:scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);    // default
+repos/dali-ui/wiki/ScrollView.md:230:scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/wiki/ScrollView.md:231:scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/wiki/ScrollView.md:234:scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Auto);  // default
+repos/dali-ui/wiki/ScrollView.md:235:scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/wiki/ScrollView.md:236:scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/wiki/ScrollView.md:238:ScrollBarVisibility vVis = scrollView.GetVerticalScrollBarVisibility();
+repos/dali-ui/wiki/ScrollView.md:239:ScrollBarVisibility hVis = scrollView.GetHorizontalScrollBarVisibility();
+repos/dali-ui/wiki/ScrollView.md:244:| `ScrollBarVisibility::Auto` | Shown only while scrolling is in progress. Default. |
+repos/dali-ui/wiki/ScrollView.md:245:| `ScrollBarVisibility::Always` | Always visible. |
+repos/dali-ui/wiki/ScrollView.md:246:| `ScrollBarVisibility::Never` | Never shown. |
+repos/dali-ui/wiki/ScrollView.md:256:Returns `true` between `ScrollStartedSignal` and `ScrollFinishedSignal` emissions — i.e., during both drag and fling animation.
+repos/dali-ui/wiki/ScrollView.md:333:| `ScrollStartedSignal` | `void(ScrollView)` | Scrolling begins (drag or fling start) |
+repos/dali-ui/wiki/ScrollView.md:336:| `DragStartedSignal` | `void(ScrollView)` | Pan threshold crossed, drag begins |
+repos/dali-ui/wiki/ScrollView.md:385:scrollView.ScrollStartedSignal().Connect(&handler, &MyScrollHandler::OnScrollStarted);
+repos/dali-ui/wiki/ScrollView.md:388:scrollView.DragStartedSignal().Connect(&handler, &MyScrollHandler::OnDragStarted);
+repos/dali-ui/wiki/ScrollView.md:402:  DragStartedSignal ──► ScrollStartedSignal
+repos/dali-ui/wiki/ScrollView.md:421:> `ScrollStartedSignal` fires only once per scroll session. `ScrollFinishedSignal` fires when all motion (including the fling animation) has stopped.
+repos/dali-ui/wiki/ScrollView.md:462:    .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/wiki/ScrollView.md:468:    .SetOverScrollMode(OverScrollMode::ContentScrolls)
+repos/dali-ui/wiki/ScrollView.md:469:    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+repos/dali-ui/wiki/ScrollView.md:470:    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
+repos/dali-ui/wiki/ScrollView.md:480:| `ScrollDirection` | `Vertical` |
+repos/dali-ui/wiki/ScrollView.md:486:| `OverScrollMode` | `ContentScrolls` |
+repos/dali-ui/wiki/ScrollView.md:487:| `VerticalScrollBarVisibility` | `Auto` |
+repos/dali-ui/wiki/ScrollView.md:488:| `HorizontalScrollBarVisibility` | `Auto` |
+repos/dali-ui/wiki/ScrollView.md:501:- **Scroll bar rendering.** The `ScrollBarVisibility` properties store the setting but actual scroll bar rendering depends on the platform's theme and the concrete implementation of the scroll bar actor. Verify behavior in your target environment.
+repos/dali-ui/wiki/ScrollView.md:503:- **`IsScrolling()` covers both drag and fling.** The flag is set to `true` at `ScrollStartedSignal` and cleared at `ScrollFinishedSignal`, so it remains `true` during the entire fling animation phase after the user lifts their finger.
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-npatch.cpp:144:        .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:159:        .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:31:enum class WebViewScrollEdge
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:42:enum class WebViewOverScrolled
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:53:enum class WebViewFindOption : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:56:  virtual ScrollBarVisibility GetVerticalScrollBarVisibility() const = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:62:  virtual void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:68:  virtual ScrollBarVisibility GetHorizontalScrollBarVisibility() const = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:74:  virtual void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:116:ScrollBarVisibility ScrollBar::GetVerticalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:118:  return GetImpl(*this).GetVerticalScrollBarVisibility();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:121:void ScrollBar::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:123:  GetImpl(*this).SetVerticalScrollBarVisibility(visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:126:ScrollBarVisibility ScrollBar::GetHorizontalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:128:  return GetImpl(*this).GetHorizontalScrollBarVisibility();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:131:void ScrollBar::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.cpp:133:  GetImpl(*this).SetHorizontalScrollBarVisibility(visibility);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:90:  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:4:#define DALI_UI_CHAIN_SCROLLVIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:23:  ChildClass& SetScrollDirection(ScrollDirection direction) { ScrollView::SetScrollDirection(direction); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:59:  ChildClass& SetOverScrollMode(OverScrollMode mode) { ScrollView::SetOverScrollMode(mode); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:65:  ChildClass& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) { ScrollView::SetVerticalScrollBarVisibility(visibility); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:71:  ChildClass& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) { ScrollView::SetHorizontalScrollBarVisibility(visibility); return *this; }
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:87:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h:29:enum class ScrollDirection
+repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h:39:enum class ScrollBarVisibility
+repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h:49:enum class ScrollToPosition
+repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h:60:enum class OverScrollMode
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:170:  enum class Type : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:176:  enum class AlphaMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:89:  enum class BrokenImageType
+repos/dali-ui/dali-ui-foundation/public-api/text/input-filter.h:56:  enum class RejectReason : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/ui-scale-policy.h:34:enum class UiScalePolicy : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h:52:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/public-api/view-accessibility-enums.h:27:enum class AccessibilityState : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/view-accessibility-enums.h:42:enum class AccessibilityRole : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/visuals/color-visual-properties.h:68:enum class CutoutPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.h:49:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h:35:enum class FittingMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h:46:enum class MaskingType : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h:55:enum class SamplingMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h:73:enum class LoadPolicy : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h:82:enum class ReleasePolicy : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:55:  typedef Signal<void(View, View)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:139:ScrollDirection ScrollView::GetScrollDirection() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:141:  return GetImpl(*this).GetScrollDirection();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:144:ScrollView& ScrollView::SetScrollDirection(ScrollDirection direction)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:146:  GetImpl(*this).SetScrollDirection(direction);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:205:OverScrollMode ScrollView::GetOverScrollMode() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:207:  return GetImpl(*this).GetOverScrollMode();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:210:ScrollView& ScrollView::SetOverScrollMode(OverScrollMode mode)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:212:  GetImpl(*this).SetOverScrollMode(mode);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:236:ScrollBarVisibility ScrollView::GetVerticalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:238:  return GetImpl(*this).GetVerticalScrollBarVisibility();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:241:ScrollView& ScrollView::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:243:  GetImpl(*this).SetVerticalScrollBarVisibility(visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:247:ScrollBarVisibility ScrollView::GetHorizontalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:249:  return GetImpl(*this).GetHorizontalScrollBarVisibility();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:252:ScrollView& ScrollView::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:254:  GetImpl(*this).SetHorizontalScrollBarVisibility(visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:258:ScrollView::ScrollStartedSignalType& ScrollView::ScrollStartedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:260:  return GetImpl(*this).ScrollStartedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:273:ScrollView::DragStartedSignalType& ScrollView::DragStartedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:275:  return GetImpl(*this).DragStartedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/image/animated-image-enumerations.h:37:enum class PlayState : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image/animated-image-enumerations.h:47:enum class StopBehavior : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:91:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-enumerations.h:38:enum class LoopingMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image/lottie-animation-enumerations.h:48:enum class VectorProperty : uint8_t
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:75:  mVerticalVisibility(ScrollBarVisibility::Auto),
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:76:  mHorizontalVisibility(ScrollBarVisibility::Auto),
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:121:ScrollBarVisibility ScrollBarImpl::GetVerticalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:126:void ScrollBarImpl::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:128:  ScrollBarVisibility old = mVerticalVisibility;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:131:  if(visibility == ScrollBarVisibility::Never)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:137:    if(old == ScrollBarVisibility::Never)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:144:    if(visibility == ScrollBarVisibility::Always)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:151:ScrollBarVisibility ScrollBarImpl::GetHorizontalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:156:void ScrollBarImpl::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:158:  ScrollBarVisibility old = mHorizontalVisibility;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:161:  if(visibility == ScrollBarVisibility::Never)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:167:    if(old == ScrollBarVisibility::Never)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:174:    if(visibility == ScrollBarVisibility::Always)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:342:  const bool hasAutoBar = (mVerticalVisibility == ScrollBarVisibility::Auto && mVerticalBar) ||
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:343:                          (mHorizontalVisibility == ScrollBarVisibility::Auto && mHorizontalBar);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:417:  if((mVerticalVisibility == ScrollBarVisibility::Auto && mVerticalBar) ||
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:418:     (mHorizontalVisibility == ScrollBarVisibility::Auto && mHorizontalBar))
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:422:    if(mVerticalVisibility == ScrollBarVisibility::Auto && mVerticalBar)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:426:    if(mHorizontalVisibility == ScrollBarVisibility::Auto && mHorizontalBar)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:539:  if(mVerticalVisibility == ScrollBarVisibility::Never)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.cpp:596:  if(mHorizontalVisibility == ScrollBarVisibility::Never)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:99:   * @copydoc IScrollBar::GetVerticalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:101:  ScrollBarVisibility GetVerticalScrollBarVisibility() const override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:104:   * @copydoc IScrollBar::SetVerticalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:106:  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:109:   * @copydoc IScrollBar::GetHorizontalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:111:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:114:   * @copydoc IScrollBar::SetHorizontalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:116:  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) override;
+repos/dali-ui/dali-ui-foundation/public-api/text/style/underline.h:42:  enum class Type : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/image-loader/async-image-loader.h:100:  typedef Signal<void(uint32_t, PixelData)> ImageLoadedSignalType; ///< Image loaded signal type
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:81:  mScrollDirection(ScrollDirection::Vertical),
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:87:  mOverScrollMode(OverScrollMode::ContentScrolls),
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:96:  mVerticalScrollBarVisibility(ScrollBarVisibility::Auto),
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:97:  mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:134:  mScrollBar.SetVerticalScrollBarVisibility(mVerticalScrollBarVisibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:135:  mScrollBar.SetHorizontalScrollBarVisibility(mHorizontalScrollBarVisibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:249:ScrollDirection ScrollViewImpl::GetScrollDirection() const
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:251:  return mScrollDirection;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:254:void ScrollViewImpl::SetScrollDirection(ScrollDirection direction)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:256:  if(mScrollDirection == direction)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:261:  mScrollDirection = direction;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:269:    switch(mScrollDirection)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:271:      case ScrollDirection::Vertical:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:274:      case ScrollDirection::Horizontal:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:277:      case ScrollDirection::Both:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:335:OverScrollMode ScrollViewImpl::GetOverScrollMode() const
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:337:  return mOverScrollMode;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:340:void ScrollViewImpl::SetOverScrollMode(OverScrollMode mode)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:342:  mOverScrollMode = mode;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:442:    switch(mScrollDirection)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:444:      case ScrollDirection::Vertical:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:447:      case ScrollDirection::Horizontal:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:450:      case ScrollDirection::Both:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:505:ScrollBarVisibility ScrollViewImpl::GetVerticalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:507:  return mVerticalScrollBarVisibility;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:510:void ScrollViewImpl::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:512:  mVerticalScrollBarVisibility = visibility;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:513:  mScrollBar.SetVerticalScrollBarVisibility(visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:516:ScrollBarVisibility ScrollViewImpl::GetHorizontalScrollBarVisibility() const
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:518:  return mHorizontalScrollBarVisibility;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:521:void ScrollViewImpl::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:523:  mHorizontalScrollBarVisibility = visibility;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:524:  mScrollBar.SetHorizontalScrollBarVisibility(visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:527:Ui::ScrollView::ScrollStartedSignalType& ScrollViewImpl::ScrollStartedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:529:  return mScrollStartedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:542:Ui::ScrollView::DragStartedSignalType& ScrollViewImpl::DragStartedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:544:  return mDragStartedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:590:  if(mScrollDirection != ScrollDirection::Both)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:603:  if(mScrollDirection == ScrollDirection::Vertical)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:607:  else if(mScrollDirection == ScrollDirection::Horizontal)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:706:  const bool canV = CanScrollVertically(mScrollDirection);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:707:  const bool canH = CanScrollHorizontally(mScrollDirection);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:838:        switch(mScrollDirection)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:840:          case ScrollDirection::Vertical:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:843:          case ScrollDirection::Horizontal:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:846:          case ScrollDirection::Both:
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:950:  if(mScrollDirection == ScrollDirection::Horizontal)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:954:  else if(mScrollDirection == ScrollDirection::Vertical)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:993:    mScrollStartedSignal.Emit(scrollView);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1021:  mDragStartedSignal.Emit(scrollView);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1060:  mHasScrollableArea = (CanScrollHorizontally(mScrollDirection) && mScrollableWidth > mViewportWidth) ||
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1061:                       (CanScrollVertically(mScrollDirection) && mScrollableHeight > mViewportHeight);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1078:  mScrollBar.SetVerticalScrollBarVisibility(mVerticalScrollBarVisibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1079:  mScrollBar.SetHorizontalScrollBarVisibility(mHorizontalScrollBarVisibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1138:bool ScrollViewImpl::CanScrollHorizontally(ScrollDirection direction)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1140:  return direction == ScrollDirection::Horizontal || direction == ScrollDirection::Both;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1143:bool ScrollViewImpl::CanScrollVertically(ScrollDirection direction)
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.cpp:1145:  return direction == ScrollDirection::Vertical || direction == ScrollDirection::Both;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:117:enum class ProportionFlags : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:371:enum class ResourceStatus
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:382:enum class ContainerRangeType
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:39:enum class LayoutAlignment : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:89:enum class LayoutMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:323:enum class StackOrientation : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:338:enum class FlexDirection : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:361:enum class FlexWrap : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:380:enum class FlexJustify : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:411:enum class FlexAlign : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:442:enum class GridLengthType : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:543:enum class AbsoluteLayoutFlags : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:601:enum class LayoutParamsType : uint8_t
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:82:  enum class PlayRangeType
+repos/dali-ui/dali-ui-foundation/public-api/input-event-type.h:27:enum class InputEventType : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:34:enum class Alignment : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:56:enum class LineWrapMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:79:enum class LayoutDirectionMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:98:enum class LineHeightMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:124:enum class MarqueeTriggerPolicy : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:143:enum class MarqueeOrientation : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:162:enum class MarqueeStopMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:181:enum class OverflowMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:199:enum class PasswordMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:223:enum class FontWeight : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:298:enum class FontWidth : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:341:enum class FontSlant : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1312:  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1785:  typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1788:  typedef Signal<void(View, bool)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1791:  typedef Signal<void(View)> ResourceReadySignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1794:  typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1797:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1800:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1803:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1806:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1809:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1812:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1815:  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1818:  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1822:  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1825:  typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/key-click-policy.h:28:enum class KeyClickPolicy : uint32_t
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:93:  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:98:  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:103:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:108:  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:293:  ScrollBarVisibility mVerticalVisibility;   ///< Vertical scroll bar visibility
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:294:  ScrollBarVisibility mHorizontalVisibility; ///< Horizontal scroll bar visibility
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:36:class ScrollViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:69: * scrollView.ScrollStartedSignal().Connect(this, &MyClass::OnScrollStarted);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:158:  ScrollView& SetScrollDirection(ScrollDirection direction);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:165:  ScrollDirection GetScrollDirection() const;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:242:  ScrollView& SetOverScrollMode(OverScrollMode mode);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:249:  OverScrollMode GetOverScrollMode() const;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:257:  ScrollView& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:264:  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:271:  ScrollView& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:278:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:331:  using ScrollStartedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:336:  using ScrollFinishedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:341:  using ScrollingSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:346:  using DragStartedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:351:  using DragFinishedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:356:  using DraggingSignalType = Signal<void(ScrollView, float, float)>; // scrollView, deltaX, deltaY
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:361:  ScrollStartedSignalType& ScrollStartedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:376:  DragStartedSignalType& DragStartedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/view-types.h:30:enum class CornerRadiusPolicy
+repos/dali-ui/dali-ui-foundation/public-api/view-types.h:44:enum class LayoutOrderPolicy
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:82:  using PageLoadStartedSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:85:  using PageLoadInProgressSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:88:  using PageLoadFinishedSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:92:  using UrlChangedSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:96:  using FrameRenderedSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:100:  using ScrollEdgeReachedSignalType = Signal<void(WebView, WebViewScrollEdge)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:103:  using OverScrolledSignalType = Signal<void(WebView, WebViewOverScrolled)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:107:  using FullscreenEnteredSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:110:  using FullscreenExitedSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:114:  using TextFoundSignalType = Signal<void(WebView, uint32_t)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:118:  using GeolocationPermissionSignalType = Signal<bool(WebView, const Dali::String&, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:122:  using WebProcessCrashedSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:45:class ScrollViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:133:  ScrollDirection GetScrollDirection() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:138:  void SetScrollDirection(ScrollDirection direction);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:193:  OverScrollMode GetOverScrollMode() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:198:  void SetOverScrollMode(OverScrollMode mode);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:223:  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:228:  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:233:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:238:  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:245:  Ui::ScrollView::ScrollStartedSignalType& ScrollStartedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:260:  Ui::ScrollView::DragStartedSignalType& DragStartedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:410:  static bool CanScrollHorizontally(ScrollDirection direction);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:415:  static bool CanScrollVertically(ScrollDirection direction);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:450:  ScrollDirection mScrollDirection;      ///< Scroll direction
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:456:  OverScrollMode  mOverScrollMode;       ///< Over scroll mode
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:467:  ScrollBarVisibility mVerticalScrollBarVisibility;   ///< Vertical scroll bar visibility
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:468:  ScrollBarVisibility mHorizontalScrollBarVisibility; ///< Horizontal scroll bar visibility
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:491:  Ui::ScrollView::ScrollStartedSignalType  mScrollStartedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:494:  Ui::ScrollView::DragStartedSignalType    mDragStartedSignal;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:54:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:57:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/integration-api/theme-loader-interface.h:49:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:41:  typedef Signal<void(TestButton&)> PanelDownSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:42:  typedef Signal<void(TestButton&)> PanelUpSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:115:  typedef Signal<void()> VoidRetNoParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:118:  typedef Signal<void(int)> VoidRet1ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:121:  typedef Signal<void(int&)> VoidRet1RefParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:124:  typedef Signal<void(int, int)> VoidRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:127:  typedef Signal<void(int, int, int)> VoidRet3ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:130:  typedef Signal<bool(float)> BoolRet1ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:133:  typedef Signal<bool(float, int)> BoolRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:136:  typedef Signal<int(float, int)> IntRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:139:  typedef Signal<float()> FloatRet0ParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:142:  typedef Signal<float(float)> FloatRet1ParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:145:  typedef Signal<float(float, float)> FloatRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:148:  typedef Signal<float(float, float, float)> FloatRet3ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:151:  typedef Signal<void(float, float, float)> VoidSignalTypeFloatValue3;
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-properties-devel.h:175:enum class InternalContainerRangeType
+repos/dali-ui/dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h:34:typedef Signal<void(uint32_t, std::vector<Devel::PixelBuffer>&)> PixelBufferLoadedSignalType;
+repos/dali-ui/dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h:39:enum class PreMultiplyOnLoad
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visuals-container.h:67:  enum class ShadowType
+repos/dali-ui/dali-ui-foundation/devel-api/drag-drop-detector/drag-and-drop-detector.h:112:  using DragAndDropSignal = Signal<void(View, DragAndDropDetector)>; ///< Drag & Drop signal
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:548:  enum class PropertyUpdatedStatus
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:213:int UtcDaliScrollBarGetSetVerticalScrollBarVisibility(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:216:  tet_infoline(" UtcDaliScrollBarGetSetVerticalScrollBarVisibility");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:221:  DALI_TEST_EQUALS(scrollBar.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:224:  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:225:  DALI_TEST_EQUALS(scrollBar.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:230:int UtcDaliScrollBarGetSetHorizontalScrollBarVisibility(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:233:  tet_infoline(" UtcDaliScrollBarGetSetHorizontalScrollBarVisibility");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:238:  DALI_TEST_EQUALS(scrollBar.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:241:  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:242:  DALI_TEST_EQUALS(scrollBar.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/precompile-shader-option.h:97:  enum class ShaderType
+repos/dali-ui/dali-ui-foundation/devel-api/visual-factory/precompile-shader-option.h:108:  enum class Flag
+repos/dali-ui/dali-ui-foundation/integration-api/accessibility-highlight-overlay.h:30:enum class OverlayHighlightMode : uint32_t
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-timer.h:45:  typedef Signal<bool()> TimerSignalType;
+repos/dali-ui/dali-ui-foundation/devel-api/builder/builder.h:444:  typedef Signal<void()> BuilderSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp:120:  enum class RunningTaskState
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp:129:  enum class CompletedTaskState
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-lifecycle-controller.h:38:  typedef Signal<void(void)> LifecycleSignalType;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:333:  scrollView.SetScrollDirection(ScrollDirection::Both);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:352:  scrollView.SetScrollDirection(ScrollDirection::Both);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:366:// ScrollDirection Tests
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:368:int UtcDaliScrollViewSetGetScrollDirectionVerticalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:373:  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:375:  DALI_TEST_EQUALS(scrollView.GetScrollDirection(), ScrollDirection::Vertical, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:380:int UtcDaliScrollViewSetGetScrollDirectionHorizontalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:385:  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:387:  DALI_TEST_EQUALS(scrollView.GetScrollDirection(), ScrollDirection::Horizontal, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:392:int UtcDaliScrollViewSetGetScrollDirectionBothP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:397:  scrollView.SetScrollDirection(ScrollDirection::Both);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:399:  DALI_TEST_EQUALS(scrollView.GetScrollDirection(), ScrollDirection::Both, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:404:int UtcDaliScrollViewSetScrollDirectionChainingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:409:  ScrollView& result     = scrollView.SetScrollDirection(ScrollDirection::Vertical);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:551:// OverScrollMode Tests
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:553:int UtcDaliScrollViewSetGetOverScrollModeNeverP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:558:  scrollView.SetOverScrollMode(OverScrollMode::Never);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:560:  DALI_TEST_EQUALS(scrollView.GetOverScrollMode(), OverScrollMode::Never, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:565:int UtcDaliScrollViewSetGetOverScrollModeAlwaysP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:570:  scrollView.SetOverScrollMode(OverScrollMode::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:572:  DALI_TEST_EQUALS(scrollView.GetOverScrollMode(), OverScrollMode::Always, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:577:int UtcDaliScrollViewSetGetOverScrollModeContentScrollsP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:582:  scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:584:  DALI_TEST_EQUALS(scrollView.GetOverScrollMode(), OverScrollMode::ContentScrolls, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:589:int UtcDaliScrollViewSetOverScrollModeChainingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:594:  ScrollView& result     = scrollView.SetOverScrollMode(OverScrollMode::Never);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:603:int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:608:  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:610:  DALI_TEST_EQUALS(scrollView.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:615:int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityNeverP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:620:  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:622:  DALI_TEST_EQUALS(scrollView.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Never, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:627:int UtcDaliScrollViewSetVerticalScrollBarVisibilityChainingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:632:  ScrollView& result     = scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:639:int UtcDaliScrollViewSetGetHorizontalScrollBarVisibilityP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:644:  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:646:  DALI_TEST_EQUALS(scrollView.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:651:int UtcDaliScrollViewSetHorizontalScrollBarVisibilityChainingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:656:  ScrollView& result     = scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:682:  scrollView.SetScrollDirection(ScrollDirection::Both);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:705:  scrollView.SetScrollDirection(ScrollDirection::Horizontal);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:727:  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:746:int UtcDaliScrollViewScrollStartedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:753:  scrollView.ScrollStartedSignal().Connect(&callback, &ScrollStartedCallback::OnScrollStarted);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:756:  DALI_TEST_CHECK(scrollView.ScrollStartedSignal().GetConnectionCount() > 0u);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:789:int UtcDaliScrollViewDragStartedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:796:  scrollView.DragStartedSignal().Connect(&callback, &DragStartedCallback::OnDragStarted);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:798:  DALI_TEST_CHECK(scrollView.DragStartedSignal().GetConnectionCount() > 0u);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:843:                         .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:849:                         .SetOverScrollMode(OverScrollMode::ContentScrolls)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:850:                         .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:851:                         .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:856:  DALI_TEST_EQUALS(scrollView.GetScrollDirection(), ScrollDirection::Vertical, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:862:  DALI_TEST_EQUALS(scrollView.GetOverScrollMode(), OverScrollMode::ContentScrolls, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:863:  DALI_TEST_EQUALS(scrollView.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp:864:  DALI_TEST_EQUALS(scrollView.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Never, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-graphics-command-buffer.h:39:enum class CommandType : uint32_t
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/test-graphics-command-buffer.h:128:  enum class Type
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:48:typedef Signal<void(Window, bool)>      FocusChangeSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:49:typedef Signal<void(Window, Int32Pair)> ResizeSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:57:  using KeyEventSignalType   = Signal<void(Window, KeyEvent)>;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:58:  using TouchEventSignalType = Signal<void(Window, TouchEvent)>;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:59:  using ResizeSignalType     = Signal<void(Window, WindowSize)>;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:100:typedef Signal<void()>                   EventProcessingFinishedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:101:typedef Signal<bool(Window, KeyEvent)>   KeyEventGeneratedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:102:typedef Signal<void(Window, WheelEvent)> WheelEventSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:103:typedef Signal<bool(Window, WheelEvent)> WheelEventGeneratedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:104:typedef Signal<void(Window, bool)>       VisibilityChangedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/drag-drop-detector/drag-and-drop-detector-impl.h:48:  using DragAndDropSignal = Dali::Ui::DragAndDropDetector::DragAndDropSignal;
+repos/dali-ui/dali-ui-foundation/internal/feedback/feedback-style.cpp:83:typedef std::vector<SignalFeedbackInfo>             SignalFeedbackInfoContainer;
+repos/dali-ui/dali-ui-foundation/internal/feedback/feedback-style.cpp:84:typedef SignalFeedbackInfoContainer::const_iterator SignalFeedbackInfoConstIter;
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h:49:  typedef Signal<void(View, View)> KeyInputFocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:37:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:40:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:43:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:46:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:49:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:52:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:55:  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:58:  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:61:  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:64:  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:68:  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:137:  enum ScrollDirection
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:233:    mScrollDirection(SCROLL_NONE),
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:1415:        mScrollDirection = SCROLL_RIGHT;
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:1421:        mScrollDirection = SCROLL_LEFT;
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:1427:        mScrollDirection = SCROLL_TOP;
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:1434:        mScrollDirection = SCROLL_BOTTOM;
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:1982:      switch(mScrollDirection)
+repos/dali-ui/dali-ui-foundation/internal/text/decorator/text-decorator.cpp:2071:  ScrollDirection mScrollDirection; ///< The direction of the scroll.
+repos/dali-ui/dali-ui-foundation/internal/visuals/text/text-visual-shader-factory.cpp:37:enum class TextVisualRequireFlag : uint32_t
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-upload-observer.h:43:  typedef Signal<void(TextureUploadObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-upload-observer.h:45:  enum class ReturnType
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:57:enum class TriStateProperty
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-manager-type.h:165:enum class StorageType
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-manager-type.h:180:enum class LoadState
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-manager-type.h:197:enum class ReloadPolicy
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-manager-type.h:206:enum class MultiplyOnLoad
+repos/dali-ui/dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.cpp:29:enum class ImageVisualRequireFlag : uint32_t
+repos/dali-ui/dali-ui-foundation/internal/text/text-enumerations.h:53:enum class Direction : uint8_t
+repos/dali-ui/dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h:32:enum class InputCommandType
+repos/dali-ui/samples/text/text-input-field-example.cpp:223:      .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/dali-ui-foundation/internal/visuals/npatch/npatch-data.h:51:  enum class LoadingState
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:41:  enum class ViewType { IMAGE = 0, ANIMATED, LOTTIE, COUNT };
+repos/dali-ui/samples/scrollview/scrollview-layout-test.cpp:22:class ScrollViewLayoutTest : public ConnectionTracker
+repos/dali-ui/samples/scrollview/scrollview-layout-test.cpp:53:      .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/samples/scrollview/scrollview-layout-test.cpp:70:      .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/samples/scrollview/scrollbar-example.cpp:64:      .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/samples/scrollview/scrollbar-example.cpp:65:      .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+repos/dali-ui/samples/scrollview/scrollbar-example.cpp:66:      .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
+repos/dali-ui/samples/scrollview/scrollbar-example.cpp:72:      .SetOverScrollMode(OverScrollMode::ContentScrolls)
+repos/dali-ui/samples/scrollview/scrollbar-example.cpp:85:    // scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+repos/dali-ui/samples/scrollview/scrollbar-example.cpp:86:    // scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+repos/dali-ui/samples/scrollview/scrollview-example.cpp:22:class ScrollViewController : public ConnectionTracker
+repos/dali-ui/samples/scrollview/scrollview-example.cpp:75:      .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/samples/scrollview/scrollview-example.cpp:81:      .SetOverScrollMode(OverScrollMode::ContentScrolls)
+repos/dali-ui/dali-ui-foundation/internal/text/async-text/text-load-observer.h:40:  typedef Signal<void(TextLoadObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/text/hidden-text.h:58:  enum class Mode : uint8_t
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:130:      .SetScrollDirection(ScrollDirection::Vertical)
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:131:      .SetOverScrollMode(OverScrollMode::ContentScrolls)
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:138:    mScrollView.ScrollStartedSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrollStarted);
+repos/dali-ui/dali-ui-foundation/internal/visuals/svg/svg-loader.h:61:  enum class LoadState
+repos/dali-ui/dali-ui-foundation/internal/visuals/svg/svg-loader.h:73:  enum class RasterizeState
+repos/dali-ui/dali-ui-foundation/internal/text/controller/text-controller-impl.h:361:  enum class ClearFocusOnEscapeState
+repos/dali-ui/dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h:38:  typedef Signal<void(SvgLoaderObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h:53:  enum class ResourceStatus
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h:60:  using ResourceReadySignalType = Signal<void(ResourceStatus)>;
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h:385:  enum class PlayState
+repos/dali-ui/dali-ui-foundation/internal/visuals/transition-data-impl.h:41:  enum class AnimationType : uint8_t
+repos/dali-ui/dali-ui-foundation/internal/text/text-visualizer/rendering/text-visualizer-glyph-renderer.h:50:  enum class RenderFailureReason : uint32_t
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:63:  enum class ViewType { IMAGE = 0, ANIMATED, LOTTIE, COUNT };
+repos/dali-ui/samples/ui-scale/ui-scale-example.cpp:282:    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+repos/dali-ui/samples/text-visualizer/text-breaker-example.cpp:99:enum class BrickRenderMode : uint8_t
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#ifndef DALI_UI_ELEMENTS_SCROLL_VIEW_H
+#define DALI_UI_ELEMENTS_SCROLL_VIEW_H
+
+// EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/scrollable-enum.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali/public-api/math/vector2.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+// Forward declarations
+namespace Integration
+{
+class ScrollViewImpl;
+}
+
+#include "scroll-view.autogen.h"
+/**
+ * @brief ScrollView is a scrollable container that displays content larger than its viewport.
+ *
+ * ScrollView provides pan gesture support for navigating content that exceeds the view's
+ * visible area, based on OneUI Scrollable component design.
+ *
+ * Key features:
+ * - Pan gesture detection for scrolling
+ * - Configurable scroll direction (vertical/horizontal/both)
+ * - Content management
+ * - Scroll position control with animation
+ * - Fling/inertia scrolling with velocity tracking
+ * - Edge effects for over-scrolling
+ * - Scroll event signals
+ * - Drag event signals
+ *
+ * Basic usage:
+ * @code
+ * // Create a ScrollView
+ * ScrollView scrollView = ScrollView::New()
+ *     .SetSize(400.0f, 300.0f);
+ *
+ * // Create content view larger than the scroll view
+ * View content = View::New()
+ *     .SetSize(800.0f, 600.0f)
+ *     .BackgroundColor(Color::WHITE);
+ * scrollView.SetContent(content);
+ *
+ * // Connect to scroll signals
+ * scrollView.ScrollStartedSignal().Connect(this, &MyClass::OnScrollStarted);
+ * scrollView.ScrollingSignal().Connect(this, &MyClass::OnScrolling);
+ * scrollView.ScrollFinishedSignal().Connect(this, &MyClass::OnScrollFinished);
+ * @endcode
+ */
+class DALI_UI_API ScrollView : public View
+{
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized ScrollView handle.
+   */
+  ScrollView();
+
+  /**
+   * @brief Creates an initialized ScrollView.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static ScrollView New();
+
+  /**
+   * @brief Copy constructor.
+   */
+  ScrollView(const ScrollView& scrollView);
+
+  /**
+   * @brief Move constructor.
+   */
+  ScrollView(ScrollView&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~ScrollView();
+
+  /**
+   * @brief Copy assignment operator.
+   */
+  ScrollView& operator=(const ScrollView& handle);
+
+  /**
+   * @brief Move assignment operator.
+   */
+  ScrollView& operator=(ScrollView&& rhs) noexcept;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to ScrollView handle.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a Layout or an uninitialized handle
+   */
+  static ScrollView DownCast(BaseHandle handle);
+
+public: // Setters for chaining
+  // @CHAIN_START(ScrollView, View)
+  /**
+   * @brief Sets the content view to be scrolled.
+   *
+   * @param[in] content The content view
+   */
+  ScrollView& SetContent(View content);
+
+  /**
+   * @brief Gets the content view.
+   *
+   * @return The content view
+   */
+  View GetContent() const;
+
+  /**
+   * @brief Sets the scroll position.
+   *
+   * @param[in] position The scroll position to set
+   */
+  ScrollView& SetScrollPosition(const Vector2& position);
+
+  /**
+   * @brief Gets the current scroll position.
+   *
+   * @return The current scroll position
+   */
+  Vector2 GetScrollPosition() const;
+
+  /**
+   * @brief Sets the direction of the scroll.
+   *
+   * @param[in] direction The scroll direction
+   */
+  ScrollView& SetScrollDirection(ScrollDirection direction);
+
+  /**
+   * @brief Gets the direction of the scroll.
+   *
+   * @return The scroll direction
+   */
+  ScrollDirection GetScrollDirection() const;
+
+  /**
+   * @brief Sets the maximum distance by fling action.
+   *
+   * @param[in] distance The maximum fling distance
+   */
+  ScrollView& SetMaxFlingDistance(float distance);
+
+  /**
+   * @brief Gets the maximum distance by fling action.
+   *
+   * @return The maximum fling distance
+   */
+  float GetMaxFlingDistance() const;
+
+  /**
+   * @brief Sets the minimum duration of fling scroll animation.
+   *
+   * @param[in] duration The minimum fling duration
+   */
+  ScrollView& SetMinimumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the minimum duration of fling scroll animation.
+   *
+   * @return The minimum fling duration
+   */
+  int GetMinimumFlingDuration() const;
+
+  /**
+   * @brief Sets the maximum duration of fling scroll animation.
+   *
+   * @param[in] duration The maximum fling duration
+   */
+  ScrollView& SetMaximumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the maximum duration of fling scroll animation.
+   *
+   * @return The maximum fling duration
+   */
+  int GetMaximumFlingDuration() const;
+
+  /**
+   * @brief Sets the sensitivity of fling action.
+   *
+   * @param[in] sensitivity The fling sensitivity
+   */
+  ScrollView& SetFlingSensitivity(float sensitivity);
+
+  /**
+   * @brief Gets the sensitivity of fling action.
+   *
+   * @return The fling sensitivity
+   */
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#pragma once
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+/**
+ * @brief Scroll direction enumeration.
+ */
+enum class ScrollDirection
+{
+  Vertical,   ///< Vertical scrolling only
+  Horizontal, ///< Horizontal scrolling only
+  Both        ///< Both horizontal and vertical scrolling
+};
+
+/**
+ * @brief Scroll bar visibility enumeration.
+ */
+enum class ScrollBarVisibility
+{
+  Auto,   ///< Show scroll bar only when scrolling
+  Always, ///< Always show scroll bar
+  Never   ///< Never show scroll bar
+};
+
+/**
+ * @brief Scroll to position enumeration.
+ */
+enum class ScrollToPosition
+{
+  Start,      ///< Scroll to start of view
+  Center,     ///< Scroll to center of view
+  End,        ///< Scroll to end of view
+  MakeVisible ///< Scroll to make the view visible
+};
+
+/**
+ * @brief Over scroll mode enumeration.
+ */
+enum class OverScrollMode
+{
+  Never,         ///< Never allow over-scrolling
+  Always,        ///< Always allow over-scrolling
+  ContentScrolls ///< Allow over-scrolling only when content is scrollable
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '220,340p' repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    std::ostringstream msg;
+    msg << "Scroll started  pos=("
+        << static_cast<int>(scrollView.GetScrollPosition().x) << ", "
+        << static_cast<int>(scrollView.GetScrollPosition().y) << ")";
+    mStatusLabel.SetText("Scrolling...");
+    DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] %s\n", msg.str().c_str());
+  }
+
+  void OnScrolling(ScrollView scrollView)
+  {
+    DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] Scroll - pos=(%d, %d)\n",
+                          static_cast<int>(scrollView.GetScrollPosition().x),
+                          static_cast<int>(scrollView.GetScrollPosition().y));
+  }
+
+  void OnScrollFinished(ScrollView scrollView)
+  {
+    std::ostringstream msg;
+    msg << "Scroll finished  pos=("
+        << static_cast<int>(scrollView.GetScrollPosition().x) << ", "
+        << static_cast<int>(scrollView.GetScrollPosition().y) << ")";
+    mStatusLabel.SetText(msg.str().c_str());
+    DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] %s\n", msg.str().c_str());
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() == KeyEvent::DOWN)
+    {
+      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+  Application& mApplication;
+  View         mStatusBar;
+  Label        mStatusLabel;
+  ScrollView   mScrollView;
+  View         mContent;
+  View         mFirstItems[3];
+  Timer        mDebugTimer;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  ScrollInteractiveChildrenController controller(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "sed -n '1,110p' repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// Generated by dali-ui preprocessor. Do not modify.
+#pragma once
+
+#define DALI_UI_CHAIN_SCROLLVIEW_METHODS(ChildClass) \
+  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+  /** \
+  * @brief Sets the content view to be scrolled. \
+  * \
+  * @param[in] content The content view \
+  */ \
+  ChildClass& SetContent(View content) { ScrollView::SetContent(content); return *this; } \
+  /** \
+  * @brief Sets the scroll position. \
+  * \
+  * @param[in] position The scroll position to set \
+  */ \
+  ChildClass& SetScrollPosition(const Vector2& position) { ScrollView::SetScrollPosition(position); return *this; } \
+  /** \
+  * @brief Sets the direction of the scroll. \
+  * \
+  * @param[in] direction The scroll direction \
+  */ \
+  ChildClass& SetScrollDirection(ScrollDirection direction) { ScrollView::SetScrollDirection(direction); return *this; } \
+  /** \
+  * @brief Sets the maximum distance by fling action. \
+  * \
+  * @param[in] distance The maximum fling distance \
+  */ \
+  ChildClass& SetMaxFlingDistance(float distance) { ScrollView::SetMaxFlingDistance(distance); return *this; } \
+  /** \
+  * @brief Sets the minimum duration of fling scroll animation. \
+  * \
+  * @param[in] duration The minimum fling duration \
+  */ \
+  ChildClass& SetMinimumFlingDuration(int duration) { ScrollView::SetMinimumFlingDuration(duration); return *this; } \
+  /** \
+  * @brief Sets the maximum duration of fling scroll animation. \
+  * \
+  * @param[in] duration The maximum fling duration \
+  */ \
+  ChildClass& SetMaximumFlingDuration(int duration) { ScrollView::SetMaximumFlingDuration(duration); return *this; } \
+  /** \
+  * @brief Sets the sensitivity of fling action. \
+  * \
+  * @param[in] sensitivity The fling sensitivity \
+  */ \
+  ChildClass& SetFlingSensitivity(float sensitivity) { ScrollView::SetFlingSensitivity(sensitivity); return *this; } \
+  /** \
+  * @brief Sets the deceleration rate of fling. \
+  * \
+  * @param[in] rate The deceleration rate \
+  */ \
+  ChildClass& SetDecelerationRate(float rate) { ScrollView::SetDecelerationRate(rate); return *this; } \
+  /** \
+  * @brief Sets the over scroll mode. \
+  * \
+  * @param[in] mode The over scroll mode \
+  */ \
+  ChildClass& SetOverScrollMode(OverScrollMode mode) { ScrollView::SetOverScrollMode(mode); return *this; } \
+  /** \
+  * @brief Sets the visibility of the vertical scroll bar. \
+  * \
+  * @param[in] visibility The vertical scroll bar visibility \
+  */ \
+  ChildClass& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) { ScrollView::SetVerticalScrollBarVisibility(visibility); return *this; } \
+  /** \
+  * @brief Sets the visibility of the horizontal scroll bar. \
+  * \
+  * @param[in] visibility The horizontal scroll bar visibility \
+  */ \
+  ChildClass& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) { ScrollView::SetHorizontalScrollBarVisibility(visibility); return *this; }
+
+exec
+/bin/bash -lc "sed -n '120,340p' repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   */
+  static ScrollView DownCast(BaseHandle handle);
+
+public: // Setters for chaining
+  // @CHAIN_START(ScrollView, View)
+  /**
+   * @brief Sets the content view to be scrolled.
+   *
+   * @param[in] content The content view
+   */
+  ScrollView& SetContent(View content);
+
+  /**
+   * @brief Gets the content view.
+   *
+   * @return The content view
+   */
+  View GetContent() const;
+
+  /**
+   * @brief Sets the scroll position.
+   *
+   * @param[in] position The scroll position to set
+   */
+  ScrollView& SetScrollPosition(const Vector2& position);
+
+  /**
+   * @brief Gets the current scroll position.
+   *
+   * @return The current scroll position
+   */
+  Vector2 GetScrollPosition() const;
+
+  /**
+   * @brief Sets the direction of the scroll.
+   *
+   * @param[in] direction The scroll direction
+   */
+  ScrollView& SetScrollDirection(ScrollDirection direction);
+
+  /**
+   * @brief Gets the direction of the scroll.
+   *
+   * @return The scroll direction
+   */
+  ScrollDirection GetScrollDirection() const;
+
+  /**
+   * @brief Sets the maximum distance by fling action.
+   *
+   * @param[in] distance The maximum fling distance
+   */
+  ScrollView& SetMaxFlingDistance(float distance);
+
+  /**
+   * @brief Gets the maximum distance by fling action.
+   *
+   * @return The maximum fling distance
+   */
+  float GetMaxFlingDistance() const;
+
+  /**
+   * @brief Sets the minimum duration of fling scroll animation.
+   *
+   * @param[in] duration The minimum fling duration
+   */
+  ScrollView& SetMinimumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the minimum duration of fling scroll animation.
+   *
+   * @return The minimum fling duration
+   */
+  int GetMinimumFlingDuration() const;
+
+  /**
+   * @brief Sets the maximum duration of fling scroll animation.
+   *
+   * @param[in] duration The maximum fling duration
+   */
+  ScrollView& SetMaximumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the maximum duration of fling scroll animation.
+   *
+   * @return The maximum fling duration
+   */
+  int GetMaximumFlingDuration() const;
+
+  /**
+   * @brief Sets the sensitivity of fling action.
+   *
+   * @param[in] sensitivity The fling sensitivity
+   */
+  ScrollView& SetFlingSensitivity(float sensitivity);
+
+  /**
+   * @brief Gets the sensitivity of fling action.
+   *
+   * @return The fling sensitivity
+   */
+  float GetFlingSensitivity() const;
+
+  /**
+   * @brief Sets the deceleration rate of fling.
+   *
+   * @param[in] rate The deceleration rate
+   */
+  ScrollView& SetDecelerationRate(float rate);
+
+  /**
+   * @brief Gets the deceleration rate of fling.
+   *
+   * @return The deceleration rate
+   */
+  float GetDecelerationRate() const;
+
+  /**
+   * @brief Sets the over scroll mode.
+   *
+   * @param[in] mode The over scroll mode
+   */
+  ScrollView& SetOverScrollMode(OverScrollMode mode);
+
+  /**
+   * @brief Gets the over scroll mode.
+   *
+   * @return The over scroll mode
+   */
+  OverScrollMode GetOverScrollMode() const;
+
+public: // Scroll Bar Visibility
+  /**
+   * @brief Sets the visibility of the vertical scroll bar.
+   *
+   * @param[in] visibility The vertical scroll bar visibility
+   */
+  ScrollView& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+
+  /**
+   * @brief Gets the visibility of the vertical scroll bar.
+   *
+   * @return The vertical scroll bar visibility
+   */
+  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+
+  /**
+   * @brief Sets the visibility of the horizontal scroll bar.
+   *
+   * @param[in] visibility The horizontal scroll bar visibility
+   */
+  ScrollView& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+
+  /**
+   * @brief Gets the visibility of the horizontal scroll bar.
+   *
+   * @return The horizontal scroll bar visibility
+   */
+  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+
+  // @CHAIN_END
+
+public: // Non-Chainable Methods
+  /**
+   * @brief Gets a value indicating whether the scroll is currently in progress.
+   *
+   * @return True if scrolling is in progress
+   */
+  bool IsScrolling() const;
+
+  /**
+   * @brief Scrolls the content to the specified position.
+   *
+   * @param[in] position The position to scroll to
+   * @param[in] animation Whether to animate the scroll
+   */
+  void ScrollTo(const Vector2& position, bool animation = true);
+
+  /**
+   * @brief Scrolls the content to the specified child view.
+   *
+   * @param[in] child The child view to scroll to
+   * @param[in] animation Whether to animate the scroll
+   * @param[in] scrollToPosition The position to scroll the child to
+   */
+  void ScrollTo(View child, bool animation = true, ScrollToPosition scrollToPosition = ScrollToPosition::MakeVisible);
+
+  /**
+   * @brief Scrolls to the specified X position (for horizontal scrolling).
+   *
+   * @param[in] position The X position
+   * @param[in] animation Whether to animate the scroll
+   */
+  void ScrollToX(float position, bool animation = true);
+
+  /**
+   * @brief Scrolls to the specified Y position (for vertical scrolling).
+   *
+   * @param[in] position The Y position
+   * @param[in] animation Whether to animate the scroll
+   */
+  void ScrollToY(float position, bool animation = true);
+
+public:
+  // Typedefs
+  using ScrollPosition = Vector2;
+
+  // Signals
+  /**
+   * @brief Scroll started signal type.
+   */
+  using ScrollStartedSignalType = Signal<void(ScrollView)>;
+
+  /**
+   * @brief Scroll finished signal type.
+   */
+  using ScrollFinishedSignalType = Signal<void(ScrollView)>;
+
+  /**
+   * @brief Scrolling signal type.
+   */
+
+exec
+/bin/bash -lc "sed -n '340,460p' repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h && sed -n '1,320p' repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   */
+  using ScrollingSignalType = Signal<void(ScrollView)>;
+
+  /**
+   * @brief Drag started signal type.
+   */
+  using DragStartedSignalType = Signal<void(ScrollView)>;
+
+  /**
+   * @brief Drag finished signal type.
+   */
+  using DragFinishedSignalType = Signal<void(ScrollView)>;
+
+  /**
+   * @brief Dragging signal type.
+   */
+  using DraggingSignalType = Signal<void(ScrollView, float, float)>; // scrollView, deltaX, deltaY
+
+  /**
+   * @brief Signal emitted when scroll starts.
+   */
+  ScrollStartedSignalType& ScrollStartedSignal();
+
+  /**
+   * @brief Signal emitted while scrolling.
+   */
+  ScrollingSignalType& ScrollingSignal();
+
+  /**
+   * @brief Signal emitted when scroll finishes.
+   */
+  ScrollFinishedSignalType& ScrollFinishedSignal();
+
+  /**
+   * @brief Signal emitted when drag starts.
+   */
+  DragStartedSignalType& DragStartedSignal();
+
+  /**
+   * @brief Signal emitted while dragging.
+   */
+  DraggingSignalType& DraggingSignal();
+
+  /**
+   * @brief Signal emitted when drag finishes.
+   */
+  DragFinishedSignalType& DragFinishedSignal();
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle from the Integration implementation.
+   */
+  explicit DALI_UI_API ScrollView(Integration::ScrollViewImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Control from an Internal::CustomActor pointer.
+   */
+  explicit DALI_UI_API ScrollView(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_VIEW_METHODS(ScrollView)
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+#endif // DALI_UI_ELEMENTS_SCROLL_VIEW_H
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/devel-api/object/type-registry.h>
+#include <dali/public-api/actors/actor.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/public-api/scroll-view.h>
+#include <dali/integration-api/debug.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+inline Integration::ScrollViewImpl& GetImpl(ScrollView& scrollView)
+{
+  DALI_ASSERT_ALWAYS(scrollView);
+  Dali::RefObject& handle = scrollView.GetImplementation();
+  return static_cast<Integration::ScrollViewImpl&>(handle);
+}
+
+inline const Integration::ScrollViewImpl& GetImpl(const ScrollView& scrollView)
+
+{
+  DALI_ASSERT_ALWAYS(scrollView);
+  const Dali::RefObject& handle = scrollView.GetImplementation();
+  return static_cast<const Integration::ScrollViewImpl&>(handle);
+}
+
+ScrollView::ScrollView()
+{
+}
+
+ScrollView ScrollView::New()
+{
+  Integration::ScrollViewImplPtr impl = Integration::ScrollViewImpl::New();
+
+  ScrollView scrollView = ScrollView(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+  return scrollView;
+}
+
+ScrollView::ScrollView(const ScrollView& scrollView)
+: View(scrollView)
+{
+}
+
+ScrollView::ScrollView(ScrollView&& rhs) noexcept
+: View(std::move(rhs))
+{
+}
+
+ScrollView::~ScrollView()
+{
+}
+
+ScrollView& ScrollView::operator=(const ScrollView& handle)
+{
+  if(&handle != this)
+  {
+    View::operator=(handle);
+  }
+  return *this;
+}
+
+ScrollView& ScrollView::operator=(ScrollView&& rhs) noexcept
+{
+  View::operator=(std::move(rhs));
+  return *this;
+}
+
+ScrollView ScrollView::DownCast(BaseHandle handle)
+{
+  return Ui::View::DownCast<ScrollView, Integration::ScrollViewImpl>(handle);
+}
+
+ScrollView::ScrollView(Integration::ScrollViewImpl& implementation)
+: View(implementation)
+{
+}
+
+ScrollView::ScrollView(Dali::Internal::CustomActor* internal)
+: View(internal)
+{
+  VerifyCustomActorPointer<Integration::ScrollViewImpl>(internal);
+}
+
+// =============================================================================
+// Properties
+// =============================================================================
+
+ScrollView& ScrollView::SetContent(View content)
+{
+  GetImpl(*this).SetContent(content);
+  return *this;
+}
+
+View ScrollView::GetContent() const
+{
+  return GetImpl(*this).GetContent();
+}
+
+Vector2 ScrollView::GetScrollPosition() const
+{
+  return GetImpl(*this).GetScrollPosition();
+}
+
+ScrollView& ScrollView::SetScrollPosition(const Vector2& position)
+{
+  GetImpl(*this).SetScrollPosition(position);
+  return *this;
+}
+
+bool ScrollView::IsScrolling() const
+{
+  return GetImpl(*this).IsScrolling();
+}
+
+ScrollDirection ScrollView::GetScrollDirection() const
+{
+  return GetImpl(*this).GetScrollDirection();
+}
+
+ScrollView& ScrollView::SetScrollDirection(ScrollDirection direction)
+{
+  GetImpl(*this).SetScrollDirection(direction);
+  return *this;
+}
+
+float ScrollView::GetMaxFlingDistance() const
+{
+  return GetImpl(*this).GetMaxFlingDistance();
+}
+
+ScrollView& ScrollView::SetMaxFlingDistance(float distance)
+{
+  GetImpl(*this).SetMaxFlingDistance(distance);
+  return *this;
+}
+
+int ScrollView::GetMinimumFlingDuration() const
+{
+  return GetImpl(*this).GetMinimumFlingDuration();
+}
+
+ScrollView& ScrollView::SetMinimumFlingDuration(int duration)
+{
+  GetImpl(*this).SetMinimumFlingDuration(duration);
+  return *this;
+}
+
+int ScrollView::GetMaximumFlingDuration() const
+{
+  return GetImpl(*this).GetMaximumFlingDuration();
+}
+
+ScrollView& ScrollView::SetMaximumFlingDuration(int duration)
+{
+  GetImpl(*this).SetMaximumFlingDuration(duration);
+  return *this;
+}
+
+float ScrollView::GetFlingSensitivity() const
+{
+  return GetImpl(*this).GetFlingSensitivity();
+}
+
+ScrollView& ScrollView::SetFlingSensitivity(float sensitivity)
+{
+  GetImpl(*this).SetFlingSensitivity(sensitivity);
+  return *this;
+}
+
+float ScrollView::GetDecelerationRate() const
+{
+  return GetImpl(*this).GetDecelerationRate();
+}
+
+ScrollView& ScrollView::SetDecelerationRate(float rate)
+{
+  GetImpl(*this).SetDecelerationRate(rate);
+  return *this;
+}
+
+OverScrollMode ScrollView::GetOverScrollMode() const
+{
+  return GetImpl(*this).GetOverScrollMode();
+}
+
+ScrollView& ScrollView::SetOverScrollMode(OverScrollMode mode)
+{
+  GetImpl(*this).SetOverScrollMode(mode);
+  return *this;
+}
+
+void ScrollView::ScrollTo(const Vector2& position, bool animation)
+{
+  GetImpl(*this).ScrollTo(position, animation);
+}
+
+void ScrollView::ScrollTo(View child, bool animation, ScrollToPosition scrollToPosition)
+{
+  GetImpl(*this).ScrollTo(child, animation, scrollToPosition);
+}
+
+void ScrollView::ScrollToX(float position, bool animation)
+{
+  GetImpl(*this).ScrollToX(position, animation);
+}
+
+void ScrollView::ScrollToY(float position, bool animation)
+{
+  GetImpl(*this).ScrollToY(position, animation);
+}
+
+ScrollBarVisibility ScrollView::GetVerticalScrollBarVisibility() const
+{
+  return GetImpl(*this).GetVerticalScrollBarVisibility();
+}
+
+ScrollView& ScrollView::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+{
+  GetImpl(*this).SetVerticalScrollBarVisibility(visibility);
+  return *this;
+}
+
+ScrollBarVisibility ScrollView::GetHorizontalScrollBarVisibility() const
+{
+  return GetImpl(*this).GetHorizontalScrollBarVisibility();
+}
+
+ScrollView& ScrollView::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
+{
+  GetImpl(*this).SetHorizontalScrollBarVisibility(visibility);
+  return *this;
+}
+
+ScrollView::ScrollStartedSignalType& ScrollView::ScrollStartedSignal()
+{
+  return GetImpl(*this).ScrollStartedSignal();
+}
+
+ScrollView::ScrollingSignalType& ScrollView::ScrollingSignal()
+{
+  return GetImpl(*this).ScrollingSignal();
+}
+
+ScrollView::ScrollFinishedSignalType& ScrollView::ScrollFinishedSignal()
+{
+  return GetImpl(*this).ScrollFinishedSignal();
+}
+
+ScrollView::DragStartedSignalType& ScrollView::DragStartedSignal()
+{
+  return GetImpl(*this).DragStartedSignal();
+}
+
+ScrollView::DraggingSignalType& ScrollView::DraggingSignal()
+{
+  return GetImpl(*this).DraggingSignal();
+}
+
+ScrollView::DragFinishedSignalType& ScrollView::DragFinishedSignal()
+{
+  return GetImpl(*this).DragFinishedSignal();
+}
+
+} // namespace Ui
+
+} // namespace Dali
+
+codex
+---
+title: Scroll View
+sidebar_label: Scroll View
+category: views-components
+---
+
+# Scroll View
+
+`Dali::Ui::ScrollView` is a `dali-ui` view container for panning content that is larger than the visible viewport.
+
+## Table of Contents
+
+- [Create a Scroll View Around Content](#create-a-scroll-view-around-content)
+- [Choose the Scroll Direction](#choose-the-scroll-direction)
+- [Set and Read the Scroll Position](#set-and-read-the-scroll-position)
+- [Tune Fling and Over-Scroll Behavior](#tune-fling-and-over-scroll-behavior)
+- [Control Scroll Bar Visibility](#control-scroll-bar-visibility)
+- [React to Scroll and Drag Signals](#react-to-scroll-and-drag-signals)
+- [Use `ScrollView` Handles Safely](#use-scrollview-handles-safely)
+- [Fluent Chaining and Derived Components](#fluent-chaining-and-derived-components)
+
+## Create a Scroll View Around Content
+
+Create a scroll container with `Dali::Ui::ScrollView::New()`, then attach the content with `Dali::Ui::ScrollView::SetContent()`. The content is a `Dali::Ui::View`, so application code can keep the app-facing model in the `dali-ui` view tree instead of working directly with raw actor objects.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+ScrollView CreateVerticalScroller(View content)
+{
+  ScrollView scrollView = ScrollView::New()
+    .SetScrollDirection(ScrollDirection::Vertical)
+    .SetContent(content);
+
+  return scrollView;
+}
+```
+
+`Dali::Ui::ScrollView::GetContent()` returns the current content view.
+
+```cpp
+void ReplaceScrollableContent(ScrollView scrollView, View newContent)
+{
+  View previousContent = scrollView.GetContent();
+
+  scrollView
+    .SetScrollPosition(Vector2(0.0f, 0.0f))
+    .SetContent(newContent);
+}
+```
+
+## Choose the Scroll Direction
+
+Use `Dali::Ui::ScrollView::SetScrollDirection()` to constrain panning and fling movement. `ScrollDirection::Vertical` scrolls on the Y axis, `ScrollDirection::Horizontal` scrolls on the X axis, and `ScrollDirection::Both` enables two-dimensional scrolling.
+
+```cpp
+ScrollView CreateGalleryScroller(View content)
+{
+  return ScrollView::New()
+    .SetScrollDirection(ScrollDirection::Horizontal)
+    .SetContent(content);
+}
+
+ScrollView CreateCanvasScroller(View content)
+{
+  return ScrollView::New()
+    .SetScrollDirection(ScrollDirection::Both)
+    .SetContent(content);
+}
+```
+
+Read the current mode with `Dali::Ui::ScrollView::GetScrollDirection()` when a component needs to adapt its behavior to the configured axis.
+
+```cpp
+bool UsesVerticalMotion(ScrollView scrollView)
+{
+  ScrollDirection direction = scrollView.GetScrollDirection();
+
+  return direction == ScrollDirection::Vertical ||
+         direction == ScrollDirection::Both;
+}
+```
+
+## Set and Read the Scroll Position
+
+`Dali::Ui::ScrollView::SetScrollPosition()` sets the stored scroll offset directly. For command-style movement, use `Dali::Ui::ScrollView::ScrollTo()`, `Dali::Ui::ScrollView::ScrollToX()`, or `Dali::Ui::ScrollView::ScrollToY()`. The scroll-to methods take an optional `bool animation` argument, which defaults to `true`.
+
+```cpp
+void ResetImmediately(ScrollView scrollView)
+{
+  scrollView.SetScrollPosition(Vector2(0.0f, 0.0f));
+}
+
+void ScrollToTopAnimated(ScrollView scrollView)
+{
+  scrollView.ScrollToY(0.0f);
+}
+
+void ScrollToPointWithoutAnimation(ScrollView scrollView)
+{
+  scrollView.ScrollTo(Vector2(240.0f, 480.0f), false);
+}
+```
+
+Use `Dali::Ui::ScrollView::GetScrollPosition()` to query the current offset, including from scroll signal callbacks.
+
+```cpp
+Vector2 ReadCurrentOffset(ScrollView scrollView)
+{
+  return scrollView.GetScrollPosition();
+}
+
+void MoveRightByPage(ScrollView scrollView, float pageWidth)
+{
+  Vector2 position = scrollView.GetScrollPosition();
+  scrollView.ScrollToX(position.x + pageWidth);
+}
+```
+
+`Dali::Ui::ScrollView::IsScrolling()` reports whether scrolling is currently in progress.
+
+```cpp
+void SnapOnlyWhenIdle(ScrollView scrollView, float snapY)
+{
+  if(!scrollView.IsScrolling())
+  {
+    scrollView.ScrollToY(snapY);
+  }
+}
+```
+
+## Tune Fling and Over-Scroll Behavior
+
+Fling behavior is configured with typed setters on `Dali::Ui::ScrollView`. The setters return `ScrollView&`, so related configuration can be grouped in one fluent chain.
+
+```cpp
+ScrollView CreateTunedScroller(View content)
+{
+  return ScrollView::New()
+    .SetScrollDirection(ScrollDirection::Vertical)
+    .SetMaxFlingDistance(6000.0f)
+    .SetMinimumFlingDuration(1000)
+    .SetMaximumFlingDuration(2000)
+    .SetFlingSensitivity(1.0f)
+    .SetDecelerationRate(0.998f)
+    .SetOverScrollMode(OverScrollMode::ContentScrolls)
+    .SetContent(content);
+}
+```
+
+The matching getters let reusable components copy or inspect motion policy.
+
+```cpp
+void CopyFlingPolicy(ScrollView source, ScrollView target)
+{
+  target
+    .SetMaxFlingDistance(source.GetMaxFlingDistance())
+    .SetMinimumFlingDuration(source.GetMinimumFlingDuration())
+    .SetMaximumFlingDuration(source.GetMaximumFlingDuration())
+    .SetFlingSensitivity(source.GetFlingSensitivity())
+    .SetDecelerationRate(source.GetDecelerationRate())
+    .SetOverScrollMode(source.GetOverScrollMode());
+}
+```
+
+`Dali::Ui::OverScrollMode` controls whether the content may move beyond its scrollable bounds. Use `OverScrollMode::Never` to stop at the boundary, `OverScrollMode::Always` to always allow over-scroll, or `OverScrollMode::ContentScrolls` to allow it when the content is scrollable.
+
+```cpp
+void DisableEdgeOverScroll(ScrollView scrollView)
+{
+  scrollView.SetOverScrollMode(OverScrollMode::Never);
+}
+
+bool UsesContentDependentOverScroll(ScrollView scrollView)
+{
+  return scrollView.GetOverScrollMode() == OverScrollMode::ContentScrolls;
+}
+```
+
+## Control Scroll Bar Visibility
+
+Scroll bar visibility is controlled independently for each axis with `Dali::Ui::ScrollView::SetVerticalScrollBarVisibility()` and `Dali::Ui::ScrollView::SetHorizontalScrollBarVisibility()`.
+
+```cpp
+ScrollView CreateListScroller(View content)
+{
+  return ScrollView::New()
+    .SetScrollDirection(ScrollDirection::Vertical)
+    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
+    .SetContent(content);
+}
+
+ScrollView CreateAlwaysVisibleTwoAxisScroller(View content)
+{
+  return ScrollView::New()
+    .SetScrollDirection(ScrollDirection::Both)
+    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Always)
+    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always)
+    .SetContent(content);
+}
+```
+
+Use `Dali::Ui::ScrollBarVisibility::Auto` to show the scroll bar while scrolling, `Dali::Ui::ScrollBarVisibility::Always` to keep it visible, and `Dali::Ui::ScrollBarVisibility::Never` to hide it. Read the configured state with `Dali::Ui::ScrollView::GetVerticalScrollBarVisibility()` and `Dali::Ui::ScrollView::GetHorizontalScrollBarVisibility()`.
+
+```cpp
+bool HasAnyVisibleScrollBarPolicy(ScrollView scrollView)
+{
+  return scrollView.GetVerticalScrollBarVisibility() != ScrollBarVisibility::Never ||
+         scrollView.GetHorizontalScrollBarVisibility() != ScrollBarVisibility::Never;
+}
+```
+
+## React to Scroll and Drag Signals
+
+`Dali::Ui::ScrollView` exposes scroll-session signals and drag-specific signals. `Dali::Ui::ScrollView::ScrollStartedSignal()`, `Dali::Ui::ScrollView::ScrollingSignal()`, and `Dali::Ui::ScrollView::ScrollFinishedSignal()` use callbacks with the signature `void(Dali::Ui::ScrollView)`.
+
+```cpp
+class ScrollStatus : public Dali::ConnectionTracker
+{
+public:
+  ScrollStatus()
+  : Dali::ConnectionTracker()
+  {
+  }
+
+  void Attach(ScrollView scrollView)
+  {
+    scrollView.ScrollStartedSignal().Connect(this, &ScrollStatus::OnScrollStarted);
+    scrollView.ScrollingSignal().Connect(this, &ScrollStatus::OnScrolling);
+    scrollView.ScrollFinishedSignal().Connect(this, &ScrollStatus::OnScrollFinished);
+  }
+
+  void OnScrollStarted(ScrollView scrollView)
+  {
+    Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnScrolling(ScrollView scrollView)
+  {
+    Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnScrollFinished(ScrollView scrollView)
+  {
+    Vector2 position = scrollView.GetScrollPosition();
+  }
+};
+```
+
+`Dali::Ui::ScrollView::DragStartedSignal()` and `Dali::Ui::ScrollView::DragFinishedSignal()` also use `void(Dali::Ui::ScrollView)`. `Dali::Ui::ScrollView::DraggingSignal()` uses `void(Dali::Ui::ScrollView, float, float)`, where the two `float` values are the drag delta values supplied by the signal.
+
+```cpp
+class DragObserver : public Dali::ConnectionTracker
+{
+public:
+  DragObserver()
+  : Dali::ConnectionTracker()
+  {
+  }
+
+  void Attach(ScrollView scrollView)
+  {
+    scrollView.DragStartedSignal().Connect(this, &DragObserver::OnDragStarted);
+    scrollView.DraggingSignal().Connect(this, &DragObserver::OnDragging);
+    scrollView.DragFinishedSignal().Connect(this, &DragObserver::OnDragFinished);
+  }
+
+  void OnDragStarted(ScrollView scrollView)
+  {
+    Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnDragging(ScrollView scrollView, float deltaX, float deltaY)
+  {
+    Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnDragFinished(ScrollView scrollView)
+  {
+    Vector2 position = scrollView.GetScrollPosition();
+  }
+};
+```
+
+## Use `ScrollView` Handles Safely
+
+A default-constructed `Dali::Ui::ScrollView` is an uninitialized handle. Use `Dali::Ui::ScrollView::New()` when creating a usable scroll view.
+
+```cpp
+ScrollView CreateInitializedScrollView(View content)
+{
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetContent(content);
+  return scrollView;
+}
+```
+
+Use `Dali::Ui::ScrollView::DownCast()` when a component receives a generic handle and needs to work with it as a `ScrollView`.
+
+```cpp
+ScrollView AsScrollView(BaseHandle handle)
+{
+  return ScrollView::DownCast(handle);
+}
+```
+
+`Dali::Ui::ScrollView` supports move assignment through `Dali::Ui::ScrollView::operator=`, so ownership of a handle can be transferred between variables.
+
+```cpp
+void StoreScroller(ScrollView& target, ScrollView replacement)
+{
+  target = std::move(replacement);
+}
+```
+
+## Fluent Chaining and Derived Components
+
+`Dali::Ui::ScrollView` setters such as `Dali::Ui::ScrollView::SetContent()`, `Dali::Ui::ScrollView::SetScrollDirection()`, `Dali::Ui::ScrollView::SetOverScrollMode()`, and the scroll bar visibility setters return `ScrollView&`. This supports compact, typed setup without raw property access.
+
+```cpp
+ScrollView CreateConfiguredScroller(View content)
+{
+  return ScrollView::New()
+    .SetContent(content)
+    .SetScrollPosition(Vector2(0.0f, 0.0f))
+    .SetScrollDirection(ScrollDirection::Vertical)
+    .SetOverScrollMode(OverScrollMode::ContentScrolls)
+    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+}
+```
+
+The generated header `scroll-view.autogen.h` provides `DALI_UI_CHAIN_SCROLLVIEW_METHODS` for dali-ui components derived from `Dali::Ui::ScrollView`. Application developers usually consume the result as normal fluent setters on `ScrollView`; component authors can use the macro so derived classes keep returning the derived type from inherited scroll-view setters.
+
+```cpp
+class FeedScrollView : public ScrollView
+{
+public:
+  DALI_UI_CHAIN_SCROLLVIEW_METHODS(FeedScrollView)
+};
+```
+tokens used
+32,896

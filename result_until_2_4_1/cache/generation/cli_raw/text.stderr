@@ -1,0 +1,2425 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20f7-aaf7-7e32-bcd8-6f1b3f719491
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Text (text)
+- Category: text
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 180
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::Text::Bevel | scope=primary
+- Dali::Ui::Text::Bevel::Impl | scope=primary
+- Dali::Ui::Text::FitCandidate | scope=primary
+- Dali::Ui::Text::FitCandidate::Impl | scope=primary
+- Dali::Ui::Text::FitRange | scope=primary
+- Dali::Ui::Text::FitRange::Impl | scope=primary
+- Dali::Ui::Text::FontVariation | scope=primary
+- Dali::Ui::Text::FontVariationAxis | scope=primary
+- Dali::Ui::Text::FontVariationAxis::Impl | scope=primary
+- Dali::Ui::Text::InputFieldPropertyIndex | scope=primary
+- Dali::Ui::Text::InputFilter | scope=primary
+- Dali::Ui::Text::InputFilter::Impl | scope=primary
+- Dali::Ui::Text::LabelPropertyIndex | scope=primary
+- Dali::Ui::Text::LineThrough | scope=primary
+- Dali::Ui::Text::LineThrough::Impl | scope=primary
+- Dali::Ui::Text::Outline | scope=primary
+- Dali::Ui::Text::Outline::Impl | scope=primary
+- Dali::Ui::Text::Shadow | scope=primary
+- Dali::Ui::Text::Shadow::Impl | scope=primary
+- Dali::Ui::Text::Underline | scope=primary
+- Dali::Ui::Text::Underline::Impl | scope=primary
+- Dali::Ui::Text::Bevel::Bevel | Bevel() | scope=primary_member
+- Dali::Ui::Text::Bevel::GetDirection | const Vector2 & GetDirection() const | scope=primary_member
+- Dali::Ui::Text::Bevel::GetIntensity | float GetIntensity() const | scope=primary_member
+- Dali::Ui::Text::Bevel::GetLightColor | const UiColor & GetLightColor() const | scope=primary_member
+- Dali::Ui::Text::Bevel::GetShadowColor | const UiColor & GetShadowColor() const | scope=primary_member
+- Dali::Ui::Text::Bevel::Impl::Impl | Impl() | scope=primary_member
+- Dali::Ui::Text::Bevel::Impl::mDirection | scope=primary_member
+- Dali::Ui::Text::Bevel::Impl::mIntensity | scope=primary_member
+- Dali::Ui::Text::Bevel::Impl::mLightColor | scope=primary_member
+- Dali::Ui::Text::Bevel::Impl::mShadowColor | scope=primary_member
+- Dali::Ui::Text::Bevel::SetDirection | Bevel & SetDirection(const Vector2 &direction) | scope=primary_member
+- Dali::Ui::Text::Bevel::SetIntensity | Bevel & SetIntensity(float intensity) | scope=primary_member
+- Dali::Ui::Text::Bevel::SetLightColor | Bevel & SetLightColor(const UiColor &color) | scope=primary_member
+- Dali::Ui::Text::Bevel::SetShadowColor | Bevel & SetShadowColor(const UiColor &color) | scope=primary_member
+- Dali::Ui::Text::Bevel::operator= | Bevel & operator=(const Bevel &rhs) | scope=primary_member
+- Dali::Ui::Text::Bevel::~Bevel | ~Bevel() | scope=primary_member
+- Dali::Ui::Text::FitCandidate::FitCandidate | FitCandidate(FitCandidate &&rhs) noexcept | scope=primary_member
+- Dali::Ui::Text::FitCandidate::GetFontSize | float GetFontSize() const | scope=primary_member
+- Dali::Ui::Text::FitCandidate::GetLineHeight | float GetLineHeight() const | scope=primary_member
+- Dali::Ui::Text::FitCandidate::Impl::Impl | Impl() | scope=primary_member
+- Dali::Ui::Text::FitCandidate::Impl::mFontSize | scope=primary_member
+- Dali::Ui::Text::FitCandidate::Impl::mLineHeight | scope=primary_member
+- Dali::Ui::Text::FitCandidate::SetFontSize | FitCandidate & SetFontSize(float size) | scope=primary_member
+- Dali::Ui::Text::FitCandidate::SetLineHeight | FitCandidate & SetLineHeight(float height) | scope=primary_member
+- Dali::Ui::Text::FitCandidate::operator= | FitCandidate & operator=(const FitCandidate &rhs) | scope=primary_member
+- Dali::Ui::Text::FitCandidate::~FitCandidate | ~FitCandidate() | scope=primary_member
+- Dali::Ui::Text::FitRange::FitRange | FitRange(FitRange &&rhs) noexcept | scope=primary_member
+- Dali::Ui::Text::FitRange::GetFontSizeStep | float GetFontSizeStep() const | scope=primary_member
+- Dali::Ui::Text::FitRange::GetMaximumFontSize | float GetMaximumFontSize() const | scope=primary_member
+- Dali::Ui::Text::FitRange::GetMinimumFontSize | float GetMinimumFontSize() const | scope=primary_member
+- Dali::Ui::Text::FitRange::Impl::Impl | Impl(float minimumFontSize, float maximumFontSize, float fontSizeStep) | scope=primary_member
+- Dali::Ui::Text::FitRange::Impl::mFontSizeStep | scope=primary_member
+- Dali::Ui::Text::FitRange::Impl::mMaximumFontSize | scope=primary_member
+- Dali::Ui::Text::FitRange::Impl::mMinimumFontSize | scope=primary_member
+- Dali::Ui::Text::FitRange::SetFontSizeStep | FitRange & SetFontSizeStep(float step) | scope=primary_member
+- Dali::Ui::Text::FitRange::SetMaximumFontSize | FitRange & SetMaximumFontSize(float size) | scope=primary_member
+- Dali::Ui::Text::FitRange::SetMinimumFontSize | FitRange & SetMinimumFontSize(float size) | scope=primary_member
+- Dali::Ui::Text::FitRange::operator= | FitRange & operator=(const FitRange &rhs) | scope=primary_member
+- Dali::Ui::Text::FitRange::~FitRange | ~FitRange() | scope=primary_member
+- Dali::Ui::Text::FontVariation::FromString | Dali::Vector< FontVariationAxis > FromString(const Dali::String &settings) | scope=primary_member
+- Dali::Ui::Text::FontVariation::ToString | Dali::String ToString(const Dali::Vector< FontVariationAxis > &axes) | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::FontVariationAxis | FontVariationAxis(const Dali::String &tag, float value) | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::GetTag | const Dali::String & GetTag() const | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::GetValue | float GetValue() const | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::Impl::Impl | Impl(const Dali::String &tag, float value) | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::Impl::mTag | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::Impl::mValue | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::SetTag | FontVariationAxis & SetTag(const Dali::String &tag) | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::SetValue | FontVariationAxis & SetValue(float value) | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::operator= | FontVariationAxis & operator=(const FontVariationAxis &rhs) | scope=primary_member
+- Dali::Ui::Text::FontVariationAxis::~FontVariationAxis | ~FontVariationAxis() | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_COLOR | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_POSITION | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_WIDTH | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::EDITABLE | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::FONT_FAMILY | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE_SCALE | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::FONT_SLANT | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::FONT_WEIGHT | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::FONT_WIDTH | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::MARKUP_ENABLED | scope=primary_member
+- Dali::Ui::Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "text_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::Text::Bevel::SetDirection",
+      "Dali::Ui::Text::Bevel::SetIntensity",
+      "Dali::Ui::Text::Bevel::SetLightColor",
+      "Dali::Ui::Text::Bevel::SetShadowColor",
+      "Dali::Ui::Text::FitCandidate::SetFontSize",
+      "Dali::Ui::Text::FitCandidate::SetLineHeight",
+      "Dali::Ui::Text::FitRange::SetFontSizeStep",
+      "Dali::Ui::Text::FitRange::SetMaximumFontSize",
+      "Dali::Ui::Text::FitRange::SetMinimumFontSize",
+      "Dali::Ui::Text::FontVariationAxis::SetTag",
+      "Dali::Ui::Text::FontVariationAxis::SetValue",
+      "Dali::Ui::Text::InputFilter::SetAllowPattern"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/text-visualizer/text-breaker-example.cpp:245 (sample, score=1.0)
+```cpp
+return width;
+}
+
+Dali::String BuildBrickText(const char* word)
+{
+  return Dali::String(word);
+}
+
+Text::Outline BuildBrickOutline(const UiColor& color)
+{
+  return Text::Outline()
+    .SetColor(color.WithAlpha(0.48f))
+    .SetWidth(1.5f)
+    .SetBlurRadius(1.6f);
+}
+
+const char* GetBrickRenderModeName(BrickRenderMode mode)
+{
+  return (mode == BrickRenderMode::LABEL) ? "LABEL" : "TEXT_VISUALIZER";
+}
+
+bool RectsOverlap(const Bounds& a, const Bounds& b)
+{
+  return a.x < b.x + b.width &&
+```
+
+- repos/dali-ui/samples/text/text-input-field-example.cpp:34 (sample, score=1.0)
+```cpp
+constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
+constexpr uint32_t COLOR_YELLOW       = 0xFFFF00;
+constexpr uint32_t COLOR_CYAN         = 0x00FFFF;
+constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
+
+Label CreateButton(const char* text, uint32_t bgColor)
+{
+  return Label::New(text)
+    .SetFontSize(11.0f)
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetBackgroundColor(UiColor(bgColor))
+    .SetRequestedWidth(0.0f)
+    .SetRequestedHeight(BUTTON_HEIGHT)
+    .SetPadding(Extents(4, 4, 4, 4))
+    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+}
+
+View CreateButtonRow(std::initializer_list<Label> buttons)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(BUTTON_SPACING);
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "Outline",
+      "SetBlurRadius",
+      "SetColor",
+      "SetFontSize",
+      "SetLineHeight",
+      "SetWidth",
+      "TEXT",
+      "Timer",
+      "UiConfig",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/text-visualizer/text-breaker-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 324,
+    "snippet_start_line": 245
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "InputFilter",
+      "RejectReason",
+      "SetAllowPattern",
+      "SetDenyPattern",
+      "SetFontSize",
+      "Type",
+      "UiConfig",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/text/text-input-field-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 113,
+    "snippet_start_line": 34
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "Bevel",
+      "ConnectionTracker",
+      "FONT_SIZE",
+      "SetDirection",
+      "SetFontSize",
+      "SetIntensity",
+      "SetLightColor",
+      "SetShadowColor",
+      "UiConfig",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/text/text-style-bevel-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 93,
+    "snippet_start_line": 14
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "FONT_SIZE",
+      "LineThrough",
+      "Outline",
+      "SetBlurRadius",
+      "SetColor",
+      "SetDashGap",
+      "SetDashLength",
+      "SetFontSize",
+      "SetOffset",
+      "SetThickness",
+      "SetType",
+      "SetWidth",
+      "Shadow",
+      "TEXT_COLOR",
+      "Type",
+      "UiConfig",
+      "Underline",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/text/text-style-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 96,
+    "snippet_start_line": 17
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "FONT_FAMILY",
+      "FONT_SIZE",
+      "FONT_SLANT",
+      "FONT_WEIGHT",
+      "FONT_WIDTH",
+      "SetFontSize",
+      "TEXT_COLOR",
+      "ToString",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/text/text-typing-style-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 117,
+    "snippet_start_line": 38
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "SetFontSize",
+      "SetLineHeight",
+      "TEXT",
+      "Timer",
+      "Type",
+      "UiConfig",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/text-visualizer/text-visualizer-performance-example.cpp",
+    "relevance": "strong",
+    "score": 0.95,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 307,
+    "snippet_start_line": 228
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "FitRange",
+      "SetBlurRadius",
+      "SetColor",
+      "SetWidth",
+      "Shadow",
+      "UiConfig",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/visual-base/animated-image-visual-example.cpp",
+    "relevance": "strong",
+    "score": 0.95,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 116,
+    "snippet_start_line": 37
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "FitRange",
+      "SetBlurRadius",
+      "SetColor",
+      "SetWidth",
+      "Shadow",
+      "UiConfig",
+      "Window"
+    ],
+    "path": "repos/dali-ui/samples/visual-base/color-visual-example.cpp",
+    "relevance": "strong",
+    "score": 0.95,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 125,
+    "snippet_start_line": 46
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/text/text-style-bevel-example.cpp && sed -n '1,140p' repos/dali-ui/samples/text/text-input-field-example.cpp && sed -n '1,150p' repos/dali-ui/samples/text/text-typing-style-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float FONT_SIZE = 140.0f;
+} // namespace
+
+class TextController : public ConnectionTracker
+{
+public:
+  explicit TextController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &TextController::OnInit);
+  }
+
+private:
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xFFFFFF));
+    window.SetSize(Dali::Window::WindowSize(1200, 1080));
+
+    window.Add(StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .Children({
+        // Embossed Style - Light from top-left creates raised effect
+        Label::New("Embossed")
+          .SetBackgroundColor(UiColor(0x212121))
+          .SetPadding(Extents(10, 10, 10, 10))
+          .SetFontFamily("SamsungOneUI_700")
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetFontSize(FONT_SIZE)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetTextColor(UiColor(0x333333))
+          .SetBevel(Text::Bevel()
+            .SetDirection(Vector2(-1.0f, -1.0f))
+            .SetIntensity(2.0f)
+            .SetLightColor(UiColor(0x808080))
+            .SetShadowColor(UiColor(0x0D0D0D)))
+          .As(mEmbossedLabel),
+
+        // Engraved Style - Light from top-left creates sunken effect
+        Label::New("Engraved")
+          .SetBackgroundColor(UiColor(0x333333))
+          .SetPadding(Extents(10, 10, 10, 10))
+          .SetFontFamily("SamsungOneUI_700")
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetFontSize(FONT_SIZE)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetTextColor(UiColor(0x212121))
+          .SetBevel(Text::Bevel()
+            .SetDirection(Vector2(-1.0f, -1.0f))
+            .SetIntensity(2.0f)
+            .SetLightColor(UiColor(0x0D0D0D))
+            .SetShadowColor(UiColor(0x808080)))
+          .As(mEngravedLabel),
+
+        // Glass Style - Subtle bevel effect
+        Label::New("Glass")
+          .SetBackgroundColor(UiColor(0xFFFFFF))
+          .SetPadding(Extents(10, 10, 10, 10))
+          .SetFontFamily("SamsungOneUI_700")
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetFontSize(FONT_SIZE)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetTextColor(UiColor(0xF3F3F3))
+          .SetBevel(Text::Bevel()
+            .SetDirection(Vector2(-1.0f, -1.0f))
+            .SetIntensity(5.0f)
+            .SetLightColor(UiColor(0x555555))
+            .SetShadowColor(UiColor(0x666666)))
+          .As(mGlassLabel),
+
+        // Same Color Style - Text matches background
+        Label::New("Same Color")
+          .SetBackgroundColor(UiColor(0xEEF3F9))
+          .SetPadding(Extents(10, 10, 10, 10))
+          .SetFontFamily("SamsungOneUI_700")
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetFontSize(FONT_SIZE)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetTextColor(UiColor(0xEEF3F9))
+          .SetBevel(Text::Bevel()
+            .SetDirection(Vector2(1.0f, -1.0f))
+            .SetIntensity(4.0f)
+            .SetLightColor(UiColor(0xFFFFFF))
+            .SetShadowColor(UiColor(0xD8E2E9)))
+          .As(mSameColorLabel),
+
+        // Bronze Style - Decorative warm-toned metallic bevel
+        Label::New("Bronze")
+          .SetBackgroundColor(UiColor(0x6B4A34))
+          .SetPadding(Extents(20, 20, 20, 20))
+          .SetFontFamily("SamsungOneUI_700")
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetFontSize(FONT_SIZE)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetTextColor(UiColor(0x6B4A34))
+          .SetBevel(Text::Bevel()
+            .SetDirection(Vector2(-1.0f, -1.0f))
+            .SetIntensity(4.0f)
+            .SetLightColor(UiColor(0xB8845E))
+            .SetShadowColor(UiColor(0x40281C)))
+          .As(mBronzeColorLabel),
+        }));
+
+    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::UP)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      mApplication.Quit();
+      return;
+    }
+
+    // Clears bevel styles with number keys
+    if(event.GetKeyName() == "1")
+    {
+      mEmbossedLabel.ClearBevel();
+    }
+    else if(event.GetKeyName() == "2")
+    {
+      mEngravedLabel.ClearBevel();
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      mGlassLabel.ClearBevel();
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      mSameColorLabel.ClearBevel();
+    }
+    else if(event.GetKeyName() == "5")
+    {
+      mBronzeColorLabel.ClearBevel();
+    }
+  }
+
+private:
+  Application& mApplication;
+  Label        mEmbossedLabel;
+  Label        mEngravedLabel;
+  Label        mGlassLabel;
+  Label        mSameColorLabel;
+  Label        mBronzeColorLabel;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+
+  TextController controller(application);
+  application.MainLoop();
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+#include <cstdio>
+#include <string>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float STACK_SPACING   = 6.0f;
+constexpr float STACK_PADDING   = 12.0f;
+constexpr float BUTTON_HEIGHT   = 36.0f;
+constexpr float INPUT_HEIGHT    = 60.0f;
+constexpr float BUTTON_SPACING  = 4.0f;
+
+constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
+constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
+constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
+constexpr uint32_t COLOR_YELLOW       = 0xFFFF00;
+constexpr uint32_t COLOR_CYAN         = 0x00FFFF;
+constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
+
+Label CreateButton(const char* text, uint32_t bgColor)
+{
+  return Label::New(text)
+    .SetFontSize(11.0f)
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetBackgroundColor(UiColor(bgColor))
+    .SetRequestedWidth(0.0f)
+    .SetRequestedHeight(BUTTON_HEIGHT)
+    .SetPadding(Extents(4, 4, 4, 4))
+    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+}
+
+View CreateButtonRow(std::initializer_list<Label> buttons)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(BUTTON_SPACING);
+
+  for(auto& btn : buttons)
+  {
+    row.Add(btn);
+  }
+  return row;
+}
+} // namespace
+
+class InputFieldController : public ConnectionTracker
+{
+public:
+  explicit InputFieldController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &InputFieldController::OnInit);
+  }
+
+private:
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xF5F5F5));
+
+    // Target InputField
+    mInputField = InputField::New()
+      .SetPlaceholder("Type here")
+      .SetPlaceholderColor(UiColor(COLOR_DARK_GRAY))
+      .SetFontSize(20.0f)
+      .SetCursorWidth(2)
+      .SetCursorColor(UiColor(COLOR_DARK_TEXT))
+      .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
+      .SetTextHandleEnabled(true)
+      .SetTextHandleColor(UiColor(0x000080))
+      .SetMaximumLength(50)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(INPUT_HEIGHT)
+      .SetBackgroundColor(UiColor(0xFFFFFF))
+      .SetTextColor(UiColor(COLOR_DARK_TEXT))
+      .SetPadding(Extents(12, 12, 12, 12))
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .SetFocusable(true);
+
+    // Set text handle images
+    mInputField.SetCursorHandleImage(RESOURCES_DIR "cursor_handle.png");
+    mInputField.SetCursorHandlePressedImage(RESOURCES_DIR "cursor_handle_pressed.png");
+    mInputField.SetSelectionHandleImageLeft(RESOURCES_DIR "selection_handle_left.png");
+    mInputField.SetSelectionHandleImageRight(RESOURCES_DIR "selection_handle_right.png");
+    mInputField.SetSelectionHandlePressedImageLeft(RESOURCES_DIR "selection_handle_left_pressed.png");
+    mInputField.SetSelectionHandlePressedImageRight(RESOURCES_DIR "selection_handle_right_pressed.png");
+
+    // Connect signals
+    mInputField.TextChangedSignal().Connect(this, &InputFieldController::OnTextChanged);
+    mInputField.MaximumLengthReachedSignal().Connect(this, &InputFieldController::OnMaximumLengthReached);
+    mInputField.CursorPositionChangedSignal().Connect(this, &InputFieldController::OnCursorPositionChanged);
+    mInputField.SelectionStartedSignal().Connect(this, &InputFieldController::OnSelectionStarted);
+    mInputField.SelectionChangedSignal().Connect(this, &InputFieldController::OnSelectionChanged);
+    mInputField.SelectionClearedSignal().Connect(this, &InputFieldController::OnSelectionCleared);
+
+    // Status label
+    mStatusLabel = Label::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(90)
+      .SetFontSize(10.0f)
+      .SetMultiLine(true)
+      .SetBackgroundColor(UiColor(0xE8E8E8))
+      .SetPadding(Extents(8, 8, 8, 8));
+
+    UpdateStatus();
+
+    // Title
+    Label titleLabel = Label::New("InputField Test")
+      .SetFontSize(14.0f)
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .SetTextColor(UiColor(0xFFFFFF))
+      .SetBackgroundColor(UiColor(0x2C3E50))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(32);
+
+    // Cursor buttons row
+    Label btnCursorBlink = CreateButton("Cursor Blink", 0x3498DB);
+    Label btnCursorInterval = CreateButton("Blink Interval", 0x2ECC71);
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+#include <cstdio>
+#include <string>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float STACK_SPACING   = 6.0f;
+constexpr float STACK_PADDING   = 12.0f;
+constexpr float BUTTON_HEIGHT   = 36.0f;
+constexpr float INPUT_HEIGHT    = 60.0f;
+constexpr float BUTTON_SPACING  = 4.0f;
+constexpr float COLOR_PREVIEW_SIZE = 24.0f;
+
+constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
+constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
+constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
+constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
+constexpr uint32_t COLOR_BLUE         = 0x00AAFF;
+constexpr uint32_t COLOR_GREEN        = 0x00CC66;
+constexpr uint32_t COLOR_BLACK        = 0x000000;
+constexpr uint32_t COLOR_WHITE        = 0xFFFFFF;
+constexpr uint32_t COLOR_BUTTON_BG    = 0xE0E0E0;
+
+Label CreateButton(const char* text, uint32_t bgColor)
+{
+  return Label::New(text)
+    .SetFontSize(11.0f)
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetBackgroundColor(UiColor(bgColor))
+    .SetRequestedWidth(0.0f)
+    .SetRequestedHeight(BUTTON_HEIGHT)
+    .SetPadding(Extents(4, 4, 4, 4))
+    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+}
+
+View CreateButtonRow(std::initializer_list<Label> buttons)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(BUTTON_SPACING);
+
+  for(auto& btn : buttons)
+  {
+    row.Add(btn);
+  }
+  return row;
+}
+
+Label CreateSectionLabel(const char* text)
+{
+  return Label::New(text)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_GRAY))
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetPadding(Extents(0, 0, 4, 4));
+}
+
+Label CreateStateValueLabel(const char* text)
+{
+  return Label::New(text)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_TEXT))
+    .SetRequestedWidth(WRAP_CONTENT)
+    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+}
+
+View CreateStateRow(const char* title, Label valueLabel)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(8.0f)
+    .SetPadding(Extents(0, 0, 2, 2));
+
+  Label titleLabel = Label::New(title)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_GRAY))
+    .SetRequestedWidth(WRAP_CONTENT)
+    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  row.Add(titleLabel);
+
+  row.Add(valueLabel);
+  return row;
+}
+
+View CreateColorStateRow(const char* title, View colorView)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(8.0f)
+    .SetPadding(Extents(0, 0, 2, 2));
+
+  Label titleLabel = Label::New(title)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_GRAY))
+    .SetRequestedWidth(WRAP_CONTENT)
+    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  row.Add(titleLabel);
+
+  row.Add(colorView);
+  return row;
+}
+
+const char* ToString(Text::FontWeight weight)
+{
+  switch(weight)
+  {
+    case Text::FontWeight::THIN:
+      return "Thin";
+    case Text::FontWeight::EXTRA_LIGHT:
+      return "Extra Light";
+    case Text::FontWeight::LIGHT:
+      return "Light";
+    case Text::FontWeight::DEMI_LIGHT:
+      return "Demi Light";
+    case Text::FontWeight::BOOK:
+      return "Book";
+    case Text::FontWeight::NORMAL:
+      return "Normal";
+    case Text::FontWeight::MEDIUM:
+      return "Medium";
+    case Text::FontWeight::SEMI_BOLD:
+      return "Semi Bold";
+    case Text::FontWeight::BOLD:
+
+exec
+/bin/bash -lc 'rg -n "class (Bevel|FitCandidate|FitRange|FontVariationAxis|InputFilter)|struct (Bevel|FitCandidate|FitRange|FontVariationAxis|InputFilter)|namespace FontVariation|enum class InputFieldPropertyIndex|InputFieldPropertyIndex" repos/dali-ui -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/text/input-field-properties.h:29:struct InputFieldPropertyIndex
+repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-candidate.cpp:40:class FitCandidate::Impl
+repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.cpp:41:class FitRange::Impl
+repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.cpp:42:class Bevel::Impl
+repos/dali-ui/dali-ui-foundation/public-api/text/input-filter.cpp:38:class InputFilter::Impl
+repos/dali-ui/dali-ui-foundation/public-api/text/font-variation/font-variation-axis.cpp:38:class FontVariationAxis::Impl
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:79:  DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui::Text, InputFieldPropertyIndex, Ui::Integration, InputFieldImpl, text, valueType, enumIndex)
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.cpp:82:  DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL(Ui::Text, InputFieldPropertyIndex, Ui::Integration, InputFieldImpl, text, valueType, enumIndex)
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/02-input-field-analysis.ko.md:76:- property enum은 `Text::InputFieldPropertyIndex`를 그대로 노출한다
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:38:    case Text::InputFieldPropertyIndex::TEXT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:43:    case Text::InputFieldPropertyIndex::FONT_FAMILY:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:48:    case Text::InputFieldPropertyIndex::FONT_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:53:    case Text::InputFieldPropertyIndex::TEXT_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:58:    case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:67:    case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:76:    case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:85:    case Text::InputFieldPropertyIndex::PLACEHOLDER:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:90:    case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:95:    case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:100:    case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:105:    case Text::InputFieldPropertyIndex::CURSOR_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:110:    case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:115:    case Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:120:    case Text::InputFieldPropertyIndex::CURSOR_POSITION:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:125:    case Text::InputFieldPropertyIndex::SELECTION_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:130:    case Text::InputFieldPropertyIndex::SELECTION_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:135:    case Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:140:    case Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:145:    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:150:    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:155:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:160:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:165:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:170:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:175:    case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:180:    case Text::InputFieldPropertyIndex::PASSWORD_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:189:    case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:199:    case Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:209:    case Text::InputFieldPropertyIndex::EDITABLE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:214:    case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:223:    case Text::InputFieldPropertyIndex::MARKUP_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:228:    case Text::InputFieldPropertyIndex::FONT_WEIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:237:    case Text::InputFieldPropertyIndex::FONT_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:246:    case Text::InputFieldPropertyIndex::FONT_SLANT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:255:    case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:260:    case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:265:    case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:270:    case Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:275:    case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:280:    case Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:285:    case Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:290:    case Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:295:    case Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:304:    case Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:313:    case Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:334:    case Text::InputFieldPropertyIndex::TEXT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:339:    case Text::InputFieldPropertyIndex::FONT_FAMILY:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:344:    case Text::InputFieldPropertyIndex::FONT_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:349:    case Text::InputFieldPropertyIndex::TEXT_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:354:    case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:359:    case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:364:    case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:369:    case Text::InputFieldPropertyIndex::PLACEHOLDER:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:374:    case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:379:    case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:384:    case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:389:    case Text::InputFieldPropertyIndex::CURSOR_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:394:    case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:399:    case Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:404:    case Text::InputFieldPropertyIndex::CURSOR_POSITION:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:409:    case Text::InputFieldPropertyIndex::SELECTION_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:414:    case Text::InputFieldPropertyIndex::SELECTION_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:419:    case Text::InputFieldPropertyIndex::SELECTED_TEXT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:424:    case Text::InputFieldPropertyIndex::SELECTED_TEXT_START:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:429:    case Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:434:    case Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:439:    case Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:444:    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:449:    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:454:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:459:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:464:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:469:    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:474:    case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:479:    case Text::InputFieldPropertyIndex::PASSWORD_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:484:    case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:489:    case Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:494:    case Text::InputFieldPropertyIndex::EDITABLE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:499:    case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:504:    case Text::InputFieldPropertyIndex::MARKUP_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:509:    case Text::InputFieldPropertyIndex::FONT_WEIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:514:    case Text::InputFieldPropertyIndex::FONT_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:519:    case Text::InputFieldPropertyIndex::FONT_SLANT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:524:    case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:529:    case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:534:    case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:539:    case Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:544:    case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:549:    case Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:554:    case Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:559:    case Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:564:    case Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:569:    case Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-property-handler.cpp:574:    case Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:63:   * @note See Dali::Ui::Text::InputFieldPropertyIndex for the underlying property definitions.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:69:      TEXT                                 = Text::InputFieldPropertyIndex::TEXT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:70:      FONT_FAMILY                          = Text::InputFieldPropertyIndex::FONT_FAMILY,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:71:      FONT_SIZE                            = Text::InputFieldPropertyIndex::FONT_SIZE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:72:      TEXT_COLOR                           = Text::InputFieldPropertyIndex::TEXT_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:73:      HORIZONTAL_ALIGNMENT                 = Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:74:      VERTICAL_ALIGNMENT                   = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:75:      OVERFLOW_MODE                        = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:76:      PLACEHOLDER                          = Text::InputFieldPropertyIndex::PLACEHOLDER,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:77:      PLACEHOLDER_COLOR                    = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:78:      SHOW_PLACEHOLDER_ON_FOCUS            = Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:79:      CURSOR_WIDTH                         = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:80:      CURSOR_COLOR                         = Text::InputFieldPropertyIndex::CURSOR_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:81:      CURSOR_BLINK_ENABLED                 = Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:82:      CURSOR_BLINK_INTERVAL                = Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:83:      CURSOR_POSITION                      = Text::InputFieldPropertyIndex::CURSOR_POSITION,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:84:      SELECTION_ENABLED                    = Text::InputFieldPropertyIndex::SELECTION_ENABLED,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:85:      SELECTION_COLOR                      = Text::InputFieldPropertyIndex::SELECTION_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:86:      SELECTED_TEXT                        = Text::InputFieldPropertyIndex::SELECTED_TEXT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:87:      SELECTED_TEXT_START                  = Text::InputFieldPropertyIndex::SELECTED_TEXT_START,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:88:      SELECTED_TEXT_END                    = Text::InputFieldPropertyIndex::SELECTED_TEXT_END,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:89:      TEXT_HANDLE_ENABLED                  = Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:90:      TEXT_HANDLE_COLOR                    = Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:91:      CURSOR_HANDLE_IMAGE                  = Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:92:      CURSOR_HANDLE_PRESSED_IMAGE          = Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:93:      SELECTION_HANDLE_IMAGE_LEFT          = Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:94:      SELECTION_HANDLE_IMAGE_RIGHT         = Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:95:      SELECTION_HANDLE_PRESSED_IMAGE_LEFT  = Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:96:      SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:97:      MAXIMUM_LENGTH                       = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:98:      PASSWORD_MODE                        = Text::InputFieldPropertyIndex::PASSWORD_MODE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:99:      PASSWORD_MASK_CHARACTER              = Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:100:      PASSWORD_REVEAL_DURATION             = Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:101:      EDITABLE                             = Text::InputFieldPropertyIndex::EDITABLE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:102:      LAYOUT_DIRECTION_MODE                = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:103:      MARKUP_ENABLED                       = Text::InputFieldPropertyIndex::MARKUP_ENABLED,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:104:      FONT_WEIGHT                          = Text::InputFieldPropertyIndex::FONT_WEIGHT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:105:      FONT_WIDTH                           = Text::InputFieldPropertyIndex::FONT_WIDTH,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:106:      FONT_SLANT                           = Text::InputFieldPropertyIndex::FONT_SLANT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:107:      TEXT_BACKGROUND_COLOR                = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:108:      FONT_SIZE_SCALE                      = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:109:      MINIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:110:      MAXIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:111:      SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:112:      TYPING_TEXT_COLOR                    = Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:113:      TYPING_FONT_FAMILY                   = Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:114:      TYPING_FONT_SIZE                     = Text::InputFieldPropertyIndex::TYPING_FONT_SIZE,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:115:      TYPING_FONT_WEIGHT                   = Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:116:      TYPING_FONT_WIDTH                    = Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH,
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:117:      TYPING_FONT_SLANT                    = Text::InputFieldPropertyIndex::TYPING_FONT_SLANT
+repos/dali-ui/dali-ui-foundation/internal/text/input-filter-processor.h:37:class InputFilterProcessor
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <cstdint>
+
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali/public-api/math/vector2.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+
+/**
+ * @brief Describes bevel styling for text.
+ *
+ * This is a value-type object used to configure bevel appearance.
+ * Bevel creates a 3D-like effect on text using light and shadow colors.
+ */
+class DALI_UI_API Bevel
+{
+public:
+  /**
+   * @brief Creates a bevel with default values.
+   */
+  Bevel();
+
+  /**
+   * @brief Creates a bevel by copying another bevel.
+   *
+   * @param[in] rhs The bevel to copy.
+   */
+  Bevel(const Bevel& rhs);
+
+  /**
+   * @brief Creates a bevel by moving another bevel.
+   *
+   * @param[in] rhs The bevel to move.
+   */
+  Bevel(Bevel&& rhs) noexcept;
+
+  /**
+   * @brief Copies another bevel to this object.
+   *
+   * @param[in] rhs The bevel to copy.
+   * @return A reference to this bevel.
+   */
+  Bevel& operator=(const Bevel& rhs);
+
+  /**
+   * @brief Moves another bevel to this object.
+   *
+   * @param[in] rhs The bevel to move.
+   * @return A reference to this bevel.
+   */
+  Bevel& operator=(Bevel&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~Bevel();
+
+public:
+  /**
+   * @brief Sets the bevel direction.
+   *
+   * The direction vector determines the angle of the light source.
+   * Typical values are (-1.0f, -1.0f) for top-left light or (1.0f, -1.0f) for top-right light.
+   *
+   * @param[in] direction The bevel direction vector.
+   * @return A reference to this bevel.
+   */
+  Bevel& SetDirection(const Vector2& direction);
+
+  /**
+   * @brief Returns the bevel direction.
+   *
+   * @return The bevel direction vector.
+   */
+  const Vector2& GetDirection() const;
+
+  /**
+   * @brief Sets the bevel intensity.
+   *
+   * Higher values create a more pronounced bevel effect.
+   *
+   * @param[in] intensity The bevel intensity.
+   * @return A reference to this bevel.
+   */
+  Bevel& SetIntensity(float intensity);
+
+  /**
+   * @brief Returns the bevel intensity.
+   *
+   * @return The bevel intensity.
+   */
+  float GetIntensity() const;
+
+  /**
+   * @brief Sets the light color for the bevel effect.
+   *
+   * This color is applied to the highlighted side of the text.
+   *
+   * @param[in] color The light color.
+   * @return A reference to this bevel.
+   */
+  Bevel& SetLightColor(const UiColor& color);
+
+  /**
+   * @brief Returns the light color for the bevel effect.
+   *
+   * @return The light color.
+   */
+  const UiColor& GetLightColor() const;
+
+  /**
+   * @brief Sets the shadow color for the bevel effect.
+   *
+   * This color is applied to the shadowed side of the text.
+   *
+   * @param[in] color The shadow color.
+   * @return A reference to this bevel.
+   */
+  Bevel& SetShadowColor(const UiColor& color);
+
+  /**
+   * @brief Returns the shadow color for the bevel effect.
+   *
+   * @return The shadow color.
+   */
+  const UiColor& GetShadowColor() const;
+
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-candidate.h && sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/text/fit/text-fit-range.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+/**
+ * @brief Describes a text fit candidate for candidate-based text fit.
+ *
+ * Each fit candidate defines a font size and line height configuration
+ * that can be selected during text fit.
+ *
+ * Text fit selects the largest candidate that fits into the available
+ * layout space.
+ *
+ * The line height is specified as an absolute value.
+ *
+ * This object is used to configure candidate-based text fit behavior.
+ */
+class DALI_UI_API FitCandidate
+{
+public:
+  /**
+   * @brief Creates a fit candidate with default values.
+   */
+  FitCandidate();
+
+  /**
+   * @brief Creates a fit candidate with given parameters.
+   *
+   * @param[in] fontSize The font size in pixels.
+   * @param[in] lineHeight The line height in pixels.
+   */
+  FitCandidate(float fontSize, float lineHeight);
+
+  /**
+   * @brief Creates a fit candidate by copying another fit candidate.
+   *
+   * @param[in] rhs The fit candidate to copy.
+   */
+  FitCandidate(const FitCandidate& rhs);
+
+  /**
+   * @brief Creates a fit candidate by moving another fit candidate.
+   *
+   * @param[in] rhs The fit candidate to move.
+   */
+  FitCandidate(FitCandidate&& rhs) noexcept;
+
+  /**
+   * @brief Copies another fit candidate to this object.
+   *
+   * @param[in] rhs The fit candidate to copy.
+   * @return A reference to this fit candidate.
+   */
+  FitCandidate& operator=(const FitCandidate& rhs);
+
+  /**
+   * @brief Moves another fit candidate to this object.
+   *
+   * @param[in] rhs The fit candidate to move.
+   * @return A reference to this fit candidate.
+   */
+  FitCandidate& operator=(FitCandidate&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~FitCandidate();
+
+public:
+  /**
+   * @brief Sets the font size.
+   *
+   * @param[in] size The font size in pixels.
+   * @return A reference to this fit candidate.
+   */
+  FitCandidate& SetFontSize(float size);
+
+  /**
+   * @brief Returns the font size.
+   *
+   * @return The font size in pixels.
+   */
+  float GetFontSize() const;
+
+  /**
+   * @brief Sets the line height.
+   *
+   * @param[in] height The line height in pixels.
+   * @return A reference to this fit candidate.
+   */
+  FitCandidate& SetLineHeight(float height);
+
+  /**
+   * @brief Returns the line height.
+   *
+   * @return The line height in pixels.
+   */
+  float GetLineHeight() const;
+
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+/**
+ * @brief Describes a font size range for range-based text fit.
+ *
+ * Text fit selects the largest font size within the configured range
+ * that fits into the available layout space.
+ *
+ * Text fit searches within the configured range using the specified
+ * font size step to find the largest fitting size.
+ *
+ * The line height is not specified by this object. It follows the
+ * current text style configuration, including the configured line
+ * height mode and value.
+ *
+ * This object is used to configure text fit behavior.
+ */
+
+class DALI_UI_API FitRange
+{
+public:
+  /**
+   * @brief Creates a fit range with default values.
+   */
+  FitRange();
+
+  /**
+   * @brief Creates a fit range with given parameters.
+   *
+   * @param[in] minimumFontSize The minimum font size in pixels.
+   * @param[in] maximumFontSize The maximum font size in pixels.
+   * @param[in] fontSizeStep The font size step in pixels.
+   */
+  FitRange(float minimumFontSize, float maximumFontSize, float fontSizeStep);
+
+  /**
+   * @brief Creates a fit range by copying another fit range.
+   *
+   * @param[in] rhs The fit range to copy.
+   */
+  FitRange(const FitRange& rhs);
+
+  /**
+   * @brief Creates a fit range by moving another fit range.
+   *
+   * @param[in] rhs The fit range to move.
+   */
+  FitRange(FitRange&& rhs) noexcept;
+
+  /**
+   * @brief Copies another fit range to this object.
+   *
+   * @param[in] rhs The fit range to copy.
+   * @return A reference to this fit range.
+   */
+  FitRange& operator=(const FitRange& rhs);
+
+  /**
+   * @brief Moves another fit range to this object.
+   *
+   * @param[in] rhs The fit range to move.
+   * @return A reference to this fit range.
+   */
+  FitRange& operator=(FitRange&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~FitRange();
+
+public:
+  /**
+   * @brief Sets the minimum font size.
+   *
+   * @param[in] size The minimum font size in pixels.
+   * @return A reference to this fit range.
+   */
+  FitRange& SetMinimumFontSize(float size);
+
+  /**
+   * @brief Returns the minimum font size.
+   *
+   * @return The minimum font size in pixels.
+   */
+  float GetMinimumFontSize() const;
+
+  /**
+   * @brief Sets the maximum font size.
+   *
+   * @param[in] size The maximum font size in pixels.
+   * @return A reference to this fit range.
+   */
+  FitRange& SetMaximumFontSize(float size);
+
+  /**
+   * @brief Returns the maximum font size.
+   *
+   * @return The maximum font size in pixels.
+   */
+  float GetMaximumFontSize() const;
+
+  /**
+   * @brief Sets the font size step.
+   *
+   * The text fit algorithm decreases the font size by this step when
+   * searching for the largest fitting size.
+   *
+   * @param[in] step The font size step in pixels.
+   * @return A reference to this fit range.
+   */
+  FitRange& SetFontSizeStep(float step);
+
+  /**
+   * @brief Returns the font size step.
+   *
+   * @return The font size step in pixels.
+   */
+  float GetFontSizeStep() const;
+
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h && sed -n '1,180p' repos/dali-ui/dali-ui-foundation/public-api/text/font-variation/font-variation.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+/**
+ * @brief Describes a single variable font axis.
+ *
+ * A font variation axis consists of a four-character OpenType axis tag
+ * and a numeric value. Examples of axis tags include "wght", "wdth",
+ * "slnt", and "opsz".
+ *
+ * This object is used to configure font variation settings explicitly.
+ */
+class DALI_UI_API FontVariationAxis
+{
+public:
+  /**
+   * @brief Creates a font variation axis with default values.
+   */
+  FontVariationAxis();
+
+  /**
+   * @brief Creates a font variation axis with the given parameters.
+   *
+   * @param[in] tag The OpenType axis tag.
+   * @param[in] value The axis value.
+   */
+  FontVariationAxis(const Dali::String& tag, float value);
+
+  /**
+   * @brief Creates a font variation axis by copying another axis.
+   *
+   * @param[in] rhs The font variation axis to copy.
+   */
+  FontVariationAxis(const FontVariationAxis& rhs);
+
+  /**
+   * @brief Creates a font variation axis by moving another axis.
+   *
+   * @param[in] rhs The font variation axis to move.
+   */
+  FontVariationAxis(FontVariationAxis&& rhs) noexcept;
+
+  /**
+   * @brief Copies another font variation axis to this object.
+   *
+   * @param[in] rhs The font variation axis to copy.
+   * @return A reference to this font variation axis.
+   */
+  FontVariationAxis& operator=(const FontVariationAxis& rhs);
+
+  /**
+   * @brief Moves another font variation axis to this object.
+   *
+   * @param[in] rhs The font variation axis to move.
+   * @return A reference to this font variation axis.
+   */
+  FontVariationAxis& operator=(FontVariationAxis&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~FontVariationAxis();
+
+public:
+  /**
+   * @brief Sets the axis tag.
+   *
+   * @param[in] tag The OpenType axis tag.
+   * @return A reference to this font variation axis.
+   */
+  FontVariationAxis& SetTag(const Dali::String& tag);
+
+  /**
+   * @brief Returns the axis tag.
+   *
+   * @return The OpenType axis tag.
+   */
+  const Dali::String& GetTag() const;
+
+  /**
+   * @brief Sets the axis value.
+   *
+   * @param[in] value The axis value.
+   * @return A reference to this font variation axis.
+   */
+  FontVariationAxis& SetValue(float value);
+
+  /**
+   * @brief Returns the axis value.
+   *
+   * @return The axis value.
+   */
+  float GetValue() const;
+
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/dali-vector.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+/**
+ * @brief Utility functions for font variation settings.
+ *
+ * This class provides helper functions to convert between string-based
+ * font variation settings and axis-based representations.
+ *
+ * A font variation settings string consists of one or more pairs of
+ * axis tags and numeric values separated by commas.
+ *
+ * Supported formats include:
+ * - wght=700,wdth=90 (recommended)
+ * - "wght" 700, "wdth" 90
+ * - 'wght' 700, 'wdth' 90
+ *
+ * In quoted formats, the axis tag must be wrapped with single quotes
+ * (U+0027) or double quotes (U+0022).
+ *
+ * Each axis tag must contain exactly four printable ASCII characters
+ * in the range U+0020..U+007E.
+ *
+ * If duplicate axis tags are specified, the last value is used.
+ *
+ * Parsing is strict. If the input string does not conform to the expected
+ * format, an empty axis list is returned.
+ *
+ * @note Unsupported axis tags may be ignored depending on the selected font.
+ */
+class DALI_UI_API FontVariation
+{
+public:
+  /**
+   * @brief Parses a font variation settings string.
+   *
+   * The input string must follow one of the supported formats described
+   * in this class documentation.
+   *
+   * @param[in] settings The font variation settings string.
+   * @return A vector of parsed font variation axes. Returns an empty
+   *         vector if parsing fails.
+   */
+  static Dali::Vector<FontVariationAxis> FromString(const Dali::String& settings);
+
+  /**
+   * @brief Converts font variation axes to string.
+   *
+   * The returned string uses the canonical format:
+   * - wght=700,wdth=90
+   *
+   * @param[in] axes The font variation axes.
+   * @return The font variation settings string.
+   */
+  static Dali::String ToString(const Dali::Vector<FontVariationAxis>& axes);
+
+private:
+  // Prevent instantiation
+  FontVariation()  = delete;
+  ~FontVariation() = delete;
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/text/input-filter.h && sed -n '1,180p' repos/dali-ui/dali-ui-foundation/public-api/text/input-field-properties.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <cstdint>
+
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali/public-api/common/dali-string.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+
+/**
+ * @brief Describes input filtering rules for text input.
+ *
+ * This is a value-type object used to configure which input characters are
+ * allowed or denied.
+ *
+ * The allow pattern defines input that can be inserted.
+ * If it is set, input that does not match the allow pattern is rejected.
+ *
+ * The deny pattern defines input that cannot be inserted.
+ * If it is set, input that matches the deny pattern is rejected.
+ *
+ * If both patterns are set, input must match the allow pattern and must not
+ * match the deny pattern. Input is rejected if it does not match the allow
+ * pattern, or if it matches the deny pattern.
+ *
+ * The patterns follow std::regex ECMAScript grammar.
+ */
+class DALI_UI_API InputFilter
+{
+public:
+  /**
+   * @brief The reason why input was rejected by the input filter.
+   */
+  enum class RejectReason : uint8_t
+  {
+    /**
+     * @brief The input was rejected because it did not match the allow pattern.
+     */
+    NOT_ALLOWED,
+
+    /**
+     * @brief The input was rejected because it matched the deny pattern.
+     */
+    DENIED
+  };
+
+public:
+  /**
+   * @brief Creates an input filter with default values.
+   */
+  InputFilter();
+
+  /**
+   * @brief Creates an input filter by copying another input filter.
+   *
+   * @param[in] rhs The input filter to copy.
+   */
+  InputFilter(const InputFilter& rhs);
+
+  /**
+   * @brief Creates an input filter by moving another input filter.
+   *
+   * @param[in] rhs The input filter to move.
+   */
+  InputFilter(InputFilter&& rhs) noexcept;
+
+  /**
+   * @brief Copies another input filter to this object.
+   *
+   * @param[in] rhs The input filter to copy.
+   * @return A reference to this input filter.
+   */
+  InputFilter& operator=(const InputFilter& rhs);
+
+  /**
+   * @brief Moves another input filter to this object.
+   *
+   * @param[in] rhs The input filter to move.
+   * @return A reference to this input filter.
+   */
+  InputFilter& operator=(InputFilter&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~InputFilter();
+
+public:
+  /**
+   * @brief Sets the allow pattern.
+   *
+   * If set, input that does not match this pattern is rejected.
+   *
+   * @param[in] pattern A regular expression that defines allowed input.
+   * @return A reference to this input filter.
+   */
+  InputFilter& SetAllowPattern(const Dali::String& pattern);
+
+  /**
+   * @brief Returns the allow pattern.
+   *
+   * @return The allow pattern.
+   */
+  const Dali::String& GetAllowPattern() const;
+
+  /**
+   * @brief Sets the deny pattern.
+   *
+   * If set, input that matches this pattern is rejected.
+   *
+   * @param[in] pattern A regular expression that defines denied input.
+   * @return A reference to this input filter.
+   */
+  InputFilter& SetDenyPattern(const Dali::String& pattern);
+
+  /**
+   * @brief Returns the deny pattern.
+   *
+   * @return The deny pattern.
+   */
+  const Dali::String& GetDenyPattern() const;
+
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/property-index-ranges.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+struct InputFieldPropertyIndex
+{
+  /**
+   * @brief Enumeration for the start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Ui::View::VIEW_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices.
+  };
+
+  /**
+   * @brief Enumeration for the instance of properties belonging to the InputField class.
+   */
+  enum
+  {
+    ///////////////////////////////////////////////////////////////////////////////
+    // Event side (non-animatable) properties
+    ///////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @brief The text to display in UTF-8 format.
+     * @details Name "text", type Property::STRING.
+     * @see InputField::SetText(), InputField::GetText().
+     */
+    TEXT = PROPERTY_START_INDEX,
+
+    /**
+     * @brief The font family of the text.
+     * @details Name "fontFamily", type Property::STRING.
+     * @see InputField::SetFontFamily(), InputField::GetFontFamily().
+     */
+    FONT_FAMILY,
+
+    /**
+     * @brief The size of font in pixels.
+     * @details Name "fontSize", type Property::FLOAT.
+     * @see InputField::SetFontSize(), InputField::GetFontSize().
+     */
+    FONT_SIZE,
+
+    /**
+     * @brief The color of the text.
+     * @details Name "textColor", type Property::VECTOR4.
+     * @see InputField::SetTextColor(), InputField::GetTextColor().
+     */
+    TEXT_COLOR,
+
+    /**
+     * @brief The horizontal alignment.
+     * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::Alignment (Property::INTEGER).
+     * @see InputField::SetHorizontalTextAlignment(), InputField::GetHorizontalTextAlignment().
+     */
+    HORIZONTAL_ALIGNMENT,
+
+    /**
+     * @brief The vertical alignment.
+     * @details Name "verticalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::Alignment (Property::INTEGER).
+     * @see InputField::SetVerticalTextAlignment(), InputField::GetVerticalTextAlignment().
+     */
+    VERTICAL_ALIGNMENT,
+
+    /**
+     * @brief The overflow mode.
+     * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::OverflowMode (Property::INTEGER).
+     * @see InputField::SetOverflowMode(), InputField::GetOverflowMode().
+     */
+    OVERFLOW_MODE,
+
+    /**
+     * @brief The placeholder text displayed when the input field is empty.
+     * @details Name "placeholder", type Property::STRING.
+     * @see InputField::SetPlaceholder(), InputField::GetPlaceholder().
+     */
+    PLACEHOLDER,
+
+    /**
+     * @brief The color of the placeholder text.
+     * @details Name "placeholderColor", type Property::VECTOR4.
+     * @see InputField::SetPlaceholderColor(), InputField::GetPlaceholderColor().
+     */
+    PLACEHOLDER_COLOR,
+
+    /**
+     * @brief Whether the placeholder text is shown when the input field has focus.
+     * @details Name "showPlaceholderOnFocus", type Property::BOOLEAN.
+     * @see InputField::SetShowPlaceholderOnFocus(), InputField::IsPlaceholderShownOnFocus().
+     */
+    SHOW_PLACEHOLDER_ON_FOCUS,
+
+    /**
+     * @brief The width of the text cursor in pixels.
+     * @details Name "cursorWidth", type Property::INTEGER.
+     * @see InputField::SetCursorWidth(), InputField::GetCursorWidth().
+     */
+    CURSOR_WIDTH,
+
+    /**
+     * @brief The color of the text cursor.
+     * @details Name "cursorColor", type Property::VECTOR4.
+     * @see InputField::SetCursorColor(), InputField::GetCursorColor().
+     */
+    CURSOR_COLOR,
+
+    /**
+     * @brief Whether the cursor should blink.
+     * @details Name "cursorBlinkEnabled", type Property::BOOLEAN.
+     * @see InputField::SetCursorBlinkEnabled(), InputField::IsCursorBlinkEnabled().
+     */
+    CURSOR_BLINK_ENABLED,
+
+    /**
+     * @brief The time interval in seconds between cursor on and off states.
+     * @details Name "cursorBlinkInterval", type Property::FLOAT.
+     * @see InputField::SetCursorBlinkInterval(), InputField::GetCursorBlinkInterval().
+     */
+    CURSOR_BLINK_INTERVAL,
+
+    /**
+     * @brief The current cursor position.
+     * @details Name "cursorPosition", type Property::INTEGER.
+     * @see InputField::SetCursorPosition(), InputField::GetCursorPosition().
+     */
+    CURSOR_POSITION,
+
+    /**
+     * @brief Whether text selection is enabled.
+     * @details Name "selectionEnabled", type Property::BOOLEAN.
+     * @see InputField::SetSelectionEnabled(), InputField::IsSelectionEnabled().
+     */
+    SELECTION_ENABLED,
+
+    /**
+     * @brief The highlight color of the selected text region.
+     * @details Name "selectionColor", type Property::VECTOR4.
+     * @see InputField::SetSelectionColor(), InputField::GetSelectionColor().
+     */
+    SELECTION_COLOR,
+
+    /**
+     * @brief The currently selected text.
+     * @details Name "selectedText", type Property::STRING.
+     * @note This property is read-only.
+     * @see InputField::GetSelectedText().
+     */
+    SELECTED_TEXT,
+
+    /**
+     * @brief The start position of the selected text range.
+
+codex
+---
+title: Text
+sidebar_label: Text
+category: text
+---
+
+# Text
+
+Use `Dali::Ui::Text` value objects to configure text styling, fitting, font variation, and input behavior in a dali-ui `Dali::Ui::View` based interface.
+
+## Table of Contents
+
+- [Text Styling Values](#text-styling-values)
+- [Text Fit Configuration](#text-fit-configuration)
+- [Variable Font Settings](#variable-font-settings)
+- [Input Field Property Indices](#input-field-property-indices)
+- [Input Filtering](#input-filtering)
+
+## Text Styling Values
+
+`Dali::Ui::Text::Bevel` is an owned text style value. It describes a light-and-shadow bevel effect that can be prepared independently and then used by a dali-ui text view that supports bevel styling.
+
+Configure `Dali::Ui::Text::Bevel` with typed setters. The setters return `Dali::Ui::Text::Bevel&`, so fluent chaining is the preferred form.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::Text::Bevel CreateRaisedTextBevel()
+{
+  return Dali::Ui::Text::Bevel()
+    .SetDirection(Dali::Vector2(-1.0f, -1.0f))
+    .SetIntensity(2.0f)
+    .SetLightColor(Dali::Ui::UiColor(0x808080))
+    .SetShadowColor(Dali::Ui::UiColor(0x0D0D0D));
+}
+```
+
+Use the direction vector to choose the apparent light direction. For example, `Dali::Vector2(-1.0f, -1.0f)` represents light from the top-left in the public sample style setup. Swap the light and shadow colors to create a sunken-looking variant.
+
+```cpp
+Dali::Ui::Text::Bevel CreateSunkenTextBevel()
+{
+  return Dali::Ui::Text::Bevel()
+    .SetDirection(Dali::Vector2(-1.0f, -1.0f))
+    .SetIntensity(2.0f)
+    .SetLightColor(Dali::Ui::UiColor(0x0D0D0D))
+    .SetShadowColor(Dali::Ui::UiColor(0x808080));
+}
+```
+
+`Dali::Ui::Text::Bevel` also exposes getters for reading back the configured value. This is useful when a `Dali::Ui::View`-based screen keeps style presets in application state.
+
+```cpp
+float ReadBevelIntensity(const Dali::Ui::Text::Bevel& bevel)
+{
+  return bevel.GetIntensity();
+}
+
+const Dali::Vector2& ReadBevelDirection(const Dali::Ui::Text::Bevel& bevel)
+{
+  return bevel.GetDirection();
+}
+
+const Dali::Ui::UiColor& ReadBevelLightColor(const Dali::Ui::Text::Bevel& bevel)
+{
+  return bevel.GetLightColor();
+}
+
+const Dali::Ui::UiColor& ReadBevelShadowColor(const Dali::Ui::Text::Bevel& bevel)
+{
+  return bevel.GetShadowColor();
+}
+```
+
+## Text Fit Configuration
+
+`Dali::Ui::Text::FitRange` and `Dali::Ui::Text::FitCandidate` are owned text fit configuration values.
+
+Use `Dali::Ui::Text::FitRange` when the text system should search across a continuous font-size range. The range stores a minimum font size, a maximum font size, and a font-size step, all in pixels.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::Text::FitRange CreateTitleFitRange()
+{
+  return Dali::Ui::Text::FitRange()
+    .SetMinimumFontSize(18.0f)
+    .SetMaximumFontSize(36.0f)
+    .SetFontSizeStep(1.0f);
+}
+```
+
+Use the getters when application logic needs to inspect or copy a preset before applying it to a text view.
+
+```cpp
+bool HasUsableFitRange(const Dali::Ui::Text::FitRange& range)
+{
+  return range.GetMinimumFontSize() <= range.GetMaximumFontSize() &&
+         range.GetFontSizeStep() > 0.0f;
+}
+```
+
+Use `Dali::Ui::Text::FitCandidate` when your design has explicit approved text sizes. Each candidate stores a font size and an absolute line height.
+
+```cpp
+Dali::Ui::Text::FitCandidate CreateCompactCandidate()
+{
+  return Dali::Ui::Text::FitCandidate()
+    .SetFontSize(16.0f)
+    .SetLineHeight(20.0f);
+}
+
+Dali::Ui::Text::FitCandidate CreateComfortableCandidate()
+{
+  return Dali::Ui::Text::FitCandidate()
+    .SetFontSize(20.0f)
+    .SetLineHeight(26.0f);
+}
+```
+
+`Dali::Ui::Text::FitCandidate::GetFontSize` and `Dali::Ui::Text::FitCandidate::GetLineHeight` return the configured pixel values.
+
+```cpp
+float CalculateCandidateLineExtra(const Dali::Ui::Text::FitCandidate& candidate)
+{
+  return candidate.GetLineHeight() - candidate.GetFontSize();
+}
+```
+
+## Variable Font Settings
+
+`Dali::Ui::Text::FontVariationAxis` represents one OpenType variable font axis. It owns a four-character axis tag such as `"wght"` or `"wdth"` and a numeric value.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::Text::FontVariationAxis CreateWeightAxis()
+{
+  return Dali::Ui::Text::FontVariationAxis("wght", 700.0f);
+}
+
+Dali::Ui::Text::FontVariationAxis CreateWidthAxis()
+{
+  return Dali::Ui::Text::FontVariationAxis()
+    .SetTag("wdth")
+    .SetValue(90.0f);
+}
+```
+
+Read back the axis with `Dali::Ui::Text::FontVariationAxis::GetTag` and `Dali::Ui::Text::FontVariationAxis::GetValue`.
+
+```cpp
+bool IsWeightAxis(const Dali::Ui::Text::FontVariationAxis& axis)
+{
+  return axis.GetTag() == "wght";
+}
+
+float ReadAxisValue(const Dali::Ui::Text::FontVariationAxis& axis)
+{
+  return axis.GetValue();
+}
+```
+
+`Dali::Ui::Text::FontVariation` provides conversion helpers. Use `Dali::Ui::Text::FontVariation::FromString` to parse a settings string into axes, and `Dali::Ui::Text::FontVariation::ToString` to serialize axes back to the canonical string format.
+
+```cpp
+Dali::Vector<Dali::Ui::Text::FontVariationAxis> ParseFontVariation()
+{
+  return Dali::Ui::Text::FontVariation::FromString("wght=700,wdth=90");
+}
+
+Dali::String BuildFontVariationString()
+{
+  Dali::Vector<Dali::Ui::Text::FontVariationAxis> axes;
+  axes.PushBack(Dali::Ui::Text::FontVariationAxis("wght", 700.0f));
+  axes.PushBack(Dali::Ui::Text::FontVariationAxis("wdth", 90.0f));
+
+  return Dali::Ui::Text::FontVariation::ToString(axes);
+}
+```
+
+## Input Field Property Indices
+
+`Dali::Ui::Text::InputFieldPropertyIndex` owns the property index constants that describe dali-ui input field text properties. In application code, prefer typed dali-ui input field APIs when they are available. Use these property indices when you need stable property identifiers for integration with a property-oriented layer.
+
+The following constants identify common font and layout properties:
+
+- `Dali::Ui::Text::InputFieldPropertyIndex::FONT_FAMILY`
+- `Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE`
+- `Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE_SCALE`
+- `Dali::Ui::Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE`
+- `Dali::Ui::Text::InputFieldPropertyIndex::FONT_WEIGHT`
+- `Dali::Ui::Text::InputFieldPropertyIndex::FONT_WIDTH`
+- `Dali::Ui::Text::InputFieldPropertyIndex::FONT_SLANT`
+- `Dali::Ui::Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT`
+- `Dali::Ui::Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE`
+- `Dali::Ui::Text::InputFieldPropertyIndex::MARKUP_ENABLED`
+
+```cpp
+int FontSizePropertyIndex()
+{
+  return Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE;
+}
+
+int FontFamilyPropertyIndex()
+{
+  return Dali::Ui::Text::InputFieldPropertyIndex::FONT_FAMILY;
+}
+
+int HorizontalAlignmentPropertyIndex()
+{
+  return Dali::Ui::Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT;
+}
+```
+
+The cursor-related constants identify editable text cursor configuration:
+
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED`
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL`
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_COLOR`
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_WIDTH`
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_POSITION`
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE`
+- `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE`
+- `Dali::Ui::Text::InputFieldPropertyIndex::EDITABLE`
+
+```cpp
+int CursorColorPropertyIndex()
+{
+  return Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_COLOR;
+}
+
+int CursorBlinkIntervalPropertyIndex()
+{
+  return Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL;
+}
+
+int EditablePropertyIndex()
+{
+  return Dali::Ui::Text::InputFieldPropertyIndex::EDITABLE;
+}
+```
+
+## Input Filtering
+
+`Dali::Ui::Text::InputFilter` is an owned text input rule object. It stores regular expression patterns that describe which input may be inserted.
+
+Use `Dali::Ui::Text::InputFilter::SetAllowPattern` for positive filtering. If an allow pattern is set, input that does not match it is rejected.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+Dali::Ui::Text::InputFilter CreateDigitsOnlyFilter()
+{
+  return Dali::Ui::Text::InputFilter()
+    .SetAllowPattern("[0-9]+");
+}
+```
+
+Keep filters as part of the state for a `Dali::Ui::View` based input screen, then pass the configured value to the dali-ui input component that owns text entry.
+
+```cpp
+class TextEntryState
+{
+public:
+  TextEntryState()
+  : mFilter(CreateDigitsOnlyFilter())
+  {
+  }
+
+  const Dali::Ui::Text::InputFilter& GetFilter() const
+  {
+    return mFilter;
+  }
+
+private:
+  Dali::Ui::Text::InputFilter mFilter;
+};
+```
+tokens used
+34,897

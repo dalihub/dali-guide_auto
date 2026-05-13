@@ -1,0 +1,318 @@
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Label
+sidebar_label: Label
+category: views-components
+---
+
+# Label
+
+`Dali::Ui::Label` is the dali-ui view for displaying non-editable text in an application UI.
+
+## Table of Contents
+
+- [Create a Label](#create-a-label)
+- [Configure Typography](#configure-typography)
+- [Align and Lay Out Text](#align-and-lay-out-text)
+- [Scale Text for UI Density](#scale-text-for-ui-density)
+- [Use Anchors in Markup Text](#use-anchors-in-markup-text)
+- [Render Asynchronously](#render-asynchronously)
+- [Use Label Properties](#use-label-properties)
+
+## Create a Label
+
+Create text with `Dali::Ui::Label::New`. In dali-ui application code, treat the label as a `Dali::Ui::View` in your view tree while keeping the concrete `Dali::Ui::Label` handle when you need text-specific APIs.
+
+```cpp
+#include <dali-ui-foundation/public-api/label.h>
+
+Dali::Ui::Label CreateTitleLabel()
+{
+  return Dali::Ui::Label::New("Account settings")
+    .SetFontFamily("SamsungOneUI")
+    .SetFontSize(24.0f)
+    .SetFontWeight(Dali::Ui::Text::FontWeight::BOLD);
+}
+
+Dali::Ui::View CreateHeaderView()
+{
+  Dali::Ui::Label title = CreateTitleLabel();
+  return title;
+}
+```
+
+`Dali::Ui::Label` is non-editable. Use it for titles, captions, status text, helper text, and other display-only strings.
+
+## Configure Typography
+
+Use the typed setters on `Dali::Ui::Label` for font selection and style. `SetFontFamily`, `SetFontSize`, `SetFontWeight`, `SetFontWidth`, and `SetFontSlant` all return `Dali::Ui::Label&`, so they work well in fluent setup code.
+
+```cpp
+Dali::Ui::Label CreatePriceLabel()
+{
+  return Dali::Ui::Label::New("$42.00")
+    .SetFontFamily("SamsungOneUI")
+    .SetFontSize(28.0f)
+    .SetFontWeight(Dali::Ui::Text::FontWeight::SEMI_BOLD)
+    .SetFontWidth(Dali::Ui::Text::FontWidth::NORMAL)
+    .SetFontSlant(Dali::Ui::Text::FontSlant::NORMAL);
+}
+```
+
+For variable fonts, use `SetFontVariation` with a settings string, or pass a `Dali::Vector<Dali::Ui::Text::FontVariationAxis>` when your code already has parsed axis values. A settings string uses axis tags and numeric values, such as `wght=700,wdth=90`.
+
+```cpp
+Dali::Ui::Label CreateVariableFontLabel()
+{
+  return Dali::Ui::Label::New("Variable font")
+    .SetFontFamily("SamsungOneUI")
+    .SetFontSize(22.0f)
+    .SetFontVariation("wght=700,wdth=90");
+}
+```
+
+Read back the current text configuration with getters such as `GetFontFamily`, `GetFontSize`, `GetFontWeight`, `GetFontWidth`, `GetFontSlant`, and `GetFontVariation`.
+
+```cpp
+void InspectTypography(const Dali::Ui::Label& label)
+{
+  Dali::String family = label.GetFontFamily();
+  float size = label.GetFontSize();
+  Dali::Ui::Text::FontWeight weight = label.GetFontWeight();
+  Dali::Ui::Text::FontWidth width = label.GetFontWidth();
+  Dali::Ui::Text::FontSlant slant = label.GetFontSlant();
+}
+```
+
+## Align and Lay Out Text
+
+Use `SetHorizontalTextAlignment` and `SetVerticalTextAlignment` to place text inside the label view. `Dali::Ui::Text::Alignment::START`, `Dali::Ui::Text::Alignment::CENTER`, and `Dali::Ui::Text::Alignment::END` are used for both axes.
+
+```cpp
+Dali::Ui::Label CreateCenteredMessage()
+{
+  return Dali::Ui::Label::New("No results")
+    .SetFontSize(18.0f)
+    .SetHorizontalTextAlignment(Dali::Ui::Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Dali::Ui::Text::Alignment::CENTER);
+}
+```
+
+Enable multi-line layout with `SetMultiLine(true)` when a label can occupy multiple visual lines in a constrained layout, and use `SetLineWrapMode` to choose the wrapping strategy. Use `SetLineHeight` to control line spacing. In `Dali::Ui::Text::LineHeightMode::RELATIVE`, the value is a multiplier of the effective scaled font pixel size; in `Dali::Ui::Text::LineHeightMode::ABSOLUTE`, the value is treated as an absolute pixel height. The final line height is clamped so it is not smaller than the natural line height from the font metrics.
+
+```cpp
+Dali::Ui::Label CreateBodyLabel()
+{
+  return Dali::Ui::Label::New("Long body text can wrap cleanly in a dali-ui view.")
+    .SetFontFamily("SamsungOneUI")
+    .SetFontSize(16.0f)
+    .SetMultiLine(true)
+    .SetLineWrapMode(Dali::Ui::Text::LineWrapMode::WORD)
+    .SetLineHeight(1.4f)
+    .SetHorizontalTextAlignment(Dali::Ui::Text::Alignment::START);
+}
+```
+
+For direction-sensitive text, `SetLayoutDirectionMode` controls how the text layout direction is resolved.
+
+```cpp
+Dali::Ui::Label CreateLocaleAwareLabel()
+{
+  return Dali::Ui::Label::New("Localized label")
+    .SetFontSize(16.0f)
+    .SetLayoutDirectionMode(Dali::Ui::Text::LayoutDirectionMode::LOCALE);
+}
+```
+
+Use `GetLineCount` after the label width has been resolved when you need the number of lines for the current layout width. Use `GetAsyncLineCount` when you want the line count from the most recent asynchronous render or asynchronous size computation.
+
+```cpp
+void UpdateLineDependentState(Dali::Ui::Label label)
+{
+  int currentLineCount = label.GetLineCount();
+  int latestAsyncLineCount = label.GetAsyncLineCount();
+}
+```
+
+## Scale Text for UI Density
+
+`SetFontSizeScale` multiplies the current font size. `SetMinimumFontSizeScale` and `SetMaximumFontSizeScale` constrain the final adjusted scale. If system text scaling is enabled with `SetSystemFontSizeScaleEnabled`, the system scale is combined with the label scale before the min/max constraints are applied.
+
+```cpp
+Dali::Ui::Label CreateScalableLabel()
+{
+  return Dali::Ui::Label::New("Readable text")
+    .SetFontSize(18.0f)
+    .SetFontSizeScale(1.1f)
+    .SetMinimumFontSizeScale(0.85f)
+    .SetMaximumFontSizeScale(1.4f)
+    .SetSystemFontSizeScaleEnabled(true);
+}
+```
+
+Use `GetAdjustedFontSizeScale` to inspect the scale that will be used after constraints and system scaling are resolved.
+
+```cpp
+float GetEffectiveScale(Dali::Ui::Label label)
+{
+  float requestedScale = label.GetFontSizeScale();
+  float minimumScale = label.GetMinimumFontSizeScale();
+  float maximumScale = label.GetMaximumFontSizeScale();
+  float adjustedScale = label.GetAdjustedFontSizeScale();
+
+  return adjustedScale;
+}
+```
+
+## Use Anchors in Markup Text
+
+`Dali::Ui::Label` supports anchors in markup text when markup processing is enabled. Use `SetAnchorColor` and `SetAnchorClickedColor` to style anchors. Anchor handling is exposed by `AnchorClickedSignal`, whose callback receives the clicked `Dali::Ui::View` and the anchor `href`.
+
+```cpp
+class HelpController : public Dali::ConnectionTracker
+{
+public:
+  Dali::Ui::Label CreateHelpLabel()
+  {
+    Dali::Ui::Label label = Dali::Ui::Label::New(
+      "Read the <a href='privacy'>privacy policy</a>.")
+      .SetFontSize(16.0f)
+      .SetMarkupEnabled(true)
+      .SetAnchorColor(Dali::Ui::UiColor(0x1A73E8))
+      .SetAnchorClickedColor(Dali::Ui::UiColor(0x174EA6));
+
+    label.AnchorClickedSignal().Connect(this, &HelpController::OnAnchorClicked);
+    return label;
+  }
+
+private:
+  void OnAnchorClicked(Dali::Ui::View view, const Dali::String& href)
+  {
+    Dali::Ui::Label label = Dali::Ui::Label::DownCast(view);
+    Dali::String clickedHref = href;
+  }
+};
+```
+
+Use `GetAnchorColor` and `GetAnchorClickedColor` if your application needs to synchronize label styling with the current UI theme.
+
+```cpp
+void CopyAnchorColors(Dali::Ui::Label source, Dali::Ui::Label target)
+{
+  target
+    .SetAnchorColor(source.GetAnchorColor())
+    .SetAnchorClickedColor(source.GetAnchorClickedColor());
+}
+```
+
+## Render Asynchronously
+
+Enable asynchronous text rendering with `SetAsyncRendering` when a label should request asynchronous text rendering during relayout. By default, label text is rendered synchronously. The render result is reported by `AsyncRenderFinishedSignal`.
+
+```cpp
+class TextRenderController : public Dali::ConnectionTracker
+{
+public:
+  Dali::Ui::Label CreateAsyncLabel()
+  {
+    Dali::Ui::Label label = Dali::Ui::Label::New("Prepared off the main render path")
+      .SetFontSize(16.0f)
+      .SetLineHeight(1.3f)
+      .SetAsyncRendering(true)
+      .SetRenderScale(1.5f);
+
+    label.AsyncRenderFinishedSignal().Connect(
+      this,
+      &TextRenderController::OnAsyncRenderFinished);
+
+    return label;
+  }
+
+private:
+  void OnAsyncRenderFinished(Dali::Ui::View view, float width, float height)
+  {
+    Dali::Ui::Label label = Dali::Ui::Label::DownCast(view);
+    int lines = label.GetAsyncLineCount();
+  }
+};
+```
+
+Use `SetRenderScale` only with asynchronous rendering, and use a value of `1.0f` or greater. It rasterizes text at a larger scale and then downscales the result, which can improve quality when the view is visually scaled. The label layout size is not changed by `SetRenderScale`.
+
+```cpp
+Dali::Ui::Label CreateScaledRenderLabel()
+{
+  return Dali::Ui::Label::New("High quality scaled text")
+    .SetFontSize(20.0f)
+    .SetAsyncRendering(true)
+    .SetRenderScale(2.0f);
+}
+```
+
+## Use Label Properties
+
+`Dali::Ui::Label::Property` owns the property IDs for label-specific text state. Prefer typed setters such as `SetFontSize`, `SetFontFamily`, `SetLineHeight`, `SetFontSizeScale`, and `SetAsyncRendering` in application setup code. Use property IDs when integrating with APIs that require a property index.
+
+Common label property IDs include:
+
+| Property ID | Value configured |
+| --- | --- |
+| `Dali::Ui::Label::Property::TEXT` | Display text |
+| `Dali::Ui::Label::Property::FONT_FAMILY` | Font family |
+| `Dali::Ui::Label::Property::FONT_SIZE` | Font size in pixels |
+| `Dali::Ui::Label::Property::FONT_SIZE_SCALE` | Label font scale |
+| `Dali::Ui::Label::Property::MINIMUM_FONT_SIZE_SCALE` | Minimum allowed font scale |
+| `Dali::Ui::Label::Property::MAXIMUM_FONT_SIZE_SCALE` | Maximum allowed font scale |
+| `Dali::Ui::Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED` | Whether system font scaling is applied |
+| `Dali::Ui::Label::Property::HORIZONTAL_ALIGNMENT` | Horizontal text alignment |
+| `Dali::Ui::Label::Property::VERTICAL_ALIGNMENT` | Vertical text alignment |
+| `Dali::Ui::Label::Property::LINE_WRAP_MODE` | Wrapping strategy |
+| `Dali::Ui::Label::Property::LINE_HEIGHT` | Line-height value |
+| `Dali::Ui::Label::Property::LINE_HEIGHT_MODE` | Line-height interpretation |
+| `Dali::Ui::Label::Property::LAYOUT_DIRECTION_MODE` | Text direction resolution mode |
+| `Dali::Ui::Label::Property::MARKUP_ENABLED` | Markup parsing |
+| `Dali::Ui::Label::Property::ANCHOR_COLOR` | Anchor text color |
+| `Dali::Ui::Label::Property::ANCHOR_CLICKED_COLOR` | Clicked anchor color |
+| `Dali::Ui::Label::Property::ASYNC_RENDERING` | Asynchronous rendering |
+| `Dali::Ui::Label::Property::RENDER_SCALE` | Async text render scale |
+| `Dali::Ui::Label::Property::CUTOUT_ENABLED` | Cutout text rendering |
+| `Dali::Ui::Label::Property::TEXT_BACKGROUND_COLOR` | Background rendered behind glyphs |
+| `Dali::Ui::Label::Property::TEXT_COLOR` | Text color |
+
+The equivalent typed setup is clearer and keeps receiver types explicit:
+
+```cpp
+Dali::Ui::Label CreateStatusLabel()
+{
+  return Dali::Ui::Label::New("Connected")
+    .SetFontFamily("SamsungOneUI")
+    .SetFontSize(14.0f)
+    .SetFontWeight(Dali::Ui::Text::FontWeight::MEDIUM)
+    .SetFontSizeScale(1.0f)
+    .SetLineHeight(1.2f)
+    .SetAsyncRendering(false);
+}
+```
+-----END_REVISED_MARKDOWN-----
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Label Prose Review
+
+Changed prose:
+- Clarified `SetFontVariation` settings-string format and avoided implying that every parsed axis is necessarily applied by the selected font.
+- Corrected multi-line layout guidance to mention `SetMultiLine(true)` before `SetLineWrapMode`, and updated the wrapping code block with `SetMultiLine(true)`.
+- Expanded line-height prose to match `LineHeightMode::RELATIVE`, `LineHeightMode::ABSOLUTE`, `fontSizeScale`, and natural-line-height clamping.
+- Tightened `GetLineCount` guidance to say the label width must be resolved, and clarified that `GetAsyncLineCount` comes from the most recent async render or async size computation.
+- Clarified anchor prose so anchors are tied to markup processing through `SetMarkupEnabled(true)`.
+- Replaced the speculative async-rendering motivation with header-grounded behavior: `SetAsyncRendering` requests async text rendering during relayout, synchronous rendering is the default, and `AsyncRenderFinishedSignal` reports render completion.
+- Added the documented `SetRenderScale` constraint that it is valid only with async rendering and must be `1.0f` or greater.
+
+Source evidence:
+- `repos/dali-ui/dali-ui-foundation/public-api/label.h`: `Label` is a non-editable `View`; `New`, typed fluent setters, `SetMultiLine`, `SetLineWrapMode`, `SetLineHeight`, `SetLayoutDirectionMode`, scale getters, `SetMarkupEnabled`, anchor colors, async rendering, render scale, line-count APIs, and signals are public.
+- `repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h`: fluent setters return the child class handle, documents font variation string formats, line-height behavior, async rendering default, and render-scale constraints.
+- `repos/dali-ui/dali-ui-foundation/public-api/text/label-properties.h`: confirms `Label::Property` IDs and property meanings, including `RENDER_SCALE`, `ASYNC_RENDERING`, `MARKUP_ENABLED`, and text color properties.
+- `repos/dali-ui/samples/text/text-example.cpp`, `text-markup-example.cpp`, `text-scale-example.cpp`, and `text-render-scale-example.cpp`: confirm common app-facing usage with `Label::New`, fluent setters, `SetMultiLine(true)`, async signals, anchor signal callbacks, and render-scale samples.
+
+Remaining concerns:
+- Code snippets were reviewed against public API shape but were not compiled in this read-only review pass.
+- The guide does not cover marquee, text fit, outline/shadow/underline, mask, or cutout examples beyond property mentions; that is acceptable for a localized prose review but may be expanded in a separate feature-depth pass.
+-----END_PROSE_REVIEW_REPORT-----

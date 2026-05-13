@@ -1,0 +1,3030 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e20d2-ba74-7053-a547-789b5360488a
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Interactive View (interactive-view)
+- Category: views-components
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-core": 1,
+    "dali-ui": 24
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::InteractiveView | scope=primary
+- Dali::Ui::InteractiveView::ClickedSignal | Signal< void(View, InputEvent)> & ClickedSignal() | scope=primary_member
+- Dali::Ui::InteractiveView::ConnectClickedSignal | InteractiveView & ConnectClickedSignal(T *obj, Func func) | scope=primary_member
+- Dali::Ui::InteractiveView::ConnectLongPressedSignal | InteractiveView & ConnectLongPressedSignal(T *obj, Func func) | scope=primary_member
+- Dali::Ui::InteractiveView::ConnectPressedChangedSignal | InteractiveView & ConnectPressedChangedSignal(T *obj, Func func) | scope=primary_member
+- Dali::Ui::InteractiveView::DownCast | InteractiveView DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::InteractiveView::GetKeyClickPolicy | KeyClickPolicy GetKeyClickPolicy() const | scope=primary_member
+- Dali::Ui::InteractiveView::InteractiveView | InteractiveView(InteractiveView &&rhs) noexcept | scope=primary_member
+- Dali::Ui::InteractiveView::IsClickable | bool IsClickable() const | scope=primary_member
+- Dali::Ui::InteractiveView::IsPressed | bool IsPressed() const | scope=primary_member
+- Dali::Ui::InteractiveView::IsPseudoDisabled | bool IsPseudoDisabled() const | scope=primary_member
+- Dali::Ui::InteractiveView::LongPressedSignal | Signal< bool(View, InputEvent)> & LongPressedSignal() | scope=primary_member
+- Dali::Ui::InteractiveView::New | InteractiveView New() | scope=primary_member
+- Dali::Ui::InteractiveView::PressedChangedSignal | Signal< void(View, bool, InputEvent)> & PressedChangedSignal() | scope=primary_member
+- Dali::Ui::InteractiveView::PseudoDisabledChangedSignal | Signal< void(View, bool)> & PseudoDisabledChangedSignal() | scope=primary_member
+- Dali::Ui::InteractiveView::SetClickable | InteractiveView & SetClickable(bool clickable) | scope=primary_member
+- Dali::Ui::InteractiveView::SetKeyClickPolicy | InteractiveView & SetKeyClickPolicy(KeyClickPolicy policy) | scope=primary_member
+- Dali::Ui::InteractiveView::SetPseudoDisabled | InteractiveView & SetPseudoDisabled(bool pseudoDisabled) | scope=primary_member
+- Dali::Ui::InteractiveView::operator= | InteractiveView & operator=(const InteractiveView &handle)=default | scope=primary_member
+- Dali::Ui::InteractiveView::~InteractiveView | ~InteractiveView() | scope=primary_member
+- interactive-view.autogen.h | scope=document_as_part_of_primary_feature
+- interactive-view.autogen.h::DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS | scope=document_as_part_of_primary_feature_member
+- Dali::Signal | scope=context_lookup
+- Dali::Ui::InputEvent | scope=context_lookup
+- Dali::Ui::InputEvent::InputEvent | InputEvent(Internal::InputEventImpl *impl) | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "id": "interactive-view_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::InteractiveView::New",
+      "Dali::Ui::InteractiveView::SetClickable",
+      "Dali::Ui::InteractiveView::SetKeyClickPolicy",
+      "Dali::Ui::InteractiveView::SetPseudoDisabled"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "id": "interactive-view_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::Signal",
+      "Dali::Ui::InteractiveView::ClickedSignal",
+      "Dali::Ui::InteractiveView::ConnectClickedSignal",
+      "Dali::Ui::InteractiveView::ConnectLongPressedSignal",
+      "Dali::Ui::InteractiveView::ConnectPressedChangedSignal",
+      "Dali::Ui::InteractiveView::LongPressedSignal",
+      "Dali::Ui::InteractiveView::PressedChangedSignal",
+      "Dali::Ui::InteractiveView::PseudoDisabledChangedSignal"
+    ],
+    "property_values": [],
+    "source": "static_api_shape",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:30 (utc, score=0.75)
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
+
+namespace
+{
+
+// ============================================================================
+// Signal callback helpers
+// ============================================================================
+
+struct ClickedSignalData
+{
+  ClickedSignalData()
+  : called(false)
+  {
+  }
+
+  void Reset()
+  {
+    called = false;
+    view   = View();
+  }
+```
+
+- repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:39 (sample, score=0.7)
+```cpp
+}
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Root: AbsoluteLayout filling the window
+    mRoot = AbsoluteLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT);
+    // Red box: top-left corner, absolute position and size
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    redBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
+    mRoot.Add(redBox);
+
+    // Green box: center area
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
+    mRoot.Add(greenBox);
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ClickedSignal",
+      "ConnectClickedSignal",
+      "ConnectLongPressedSignal",
+      "ConnectPressedChangedSignal",
+      "DownCast",
+      "GetKeyClickPolicy",
+      "InputEvent",
+      "InteractiveView",
+      "IsClickable",
+      "IsPressed",
+      "IsPseudoDisabled",
+      "LongPressedSignal",
+      "New",
+      "PressedChangedSignal",
+      "SetClickable",
+      "SetKeyClickPolicy",
+      "SetPseudoDisabled",
+      "Signal"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 109,
+    "snippet_start_line": 30
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 118,
+    "snippet_start_line": 39
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/animation/animation-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 100,
+    "snippet_start_line": 40
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/customlayout/customlayout-diagonal-layout-direction-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 168,
+    "snippet_start_line": 89
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/flexlayout/flexlayout-layout-direction-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 118,
+    "snippet_start_line": 39
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/gridlayout/gridlayout-layout-direction-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 118,
+    "snippet_start_line": 39
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/hello-world/hello-world-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 78,
+    "snippet_start_line": 35
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectClickedSignal",
+      "InputEvent",
+      "InteractiveView",
+      "New"
+    ],
+    "path": "repos/dali-ui/samples/stacklayout/stacklayout-layout-direction-example.cpp",
+    "relevance": "medium",
+    "score": 0.7,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 119,
+    "snippet_start_line": 40
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/interactive-view-impl.h>
+#include <dali/devel-api/object/type-registry.h>
+#include <dali-ui-test-suite-utils.h>
+#include <test-gesture-generator.h>
+#include <dali/integration-api/events/key-event-integ.h>
+#include <dali/integration-api/events/touch-event-integ.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
+
+namespace
+{
+
+// ============================================================================
+// Signal callback helpers
+// ============================================================================
+
+struct ClickedSignalData
+{
+  ClickedSignalData()
+  : called(false)
+  {
+  }
+
+  void Reset()
+  {
+    called = false;
+    view   = View();
+  }
+
+  bool called;
+  View view;
+};
+
+struct ClickedSignalFunctor
+{
+  ClickedSignalFunctor(ClickedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, InputEvent event)
+  {
+    signalData.called = true;
+    signalData.view   = view;
+  }
+
+  ClickedSignalData& signalData;
+};
+
+struct PressedChangedSignalData
+{
+  PressedChangedSignalData()
+  : called(false),
+    pressed(false)
+  {
+  }
+
+  void Reset()
+  {
+    called  = false;
+    pressed = false;
+    view    = View();
+  }
+
+  bool called;
+  bool pressed;
+  View view;
+};
+
+struct PressedChangedSignalFunctor
+{
+  PressedChangedSignalFunctor(PressedChangedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, bool pressed, InputEvent event)
+  {
+    signalData.called  = true;
+    signalData.pressed = pressed;
+    signalData.view    = view;
+  }
+
+  PressedChangedSignalData& signalData;
+};
+
+struct LongPressedSignalData
+{
+  LongPressedSignalData()
+  : called(false),
+    consumed(false)
+  {
+  }
+
+  void Reset()
+  {
+    called   = false;
+    consumed = false;
+    view     = View();
+  }
+
+  bool called;
+  bool consumed;
+  View view;
+};
+
+struct LongPressedSignalFunctor
+{
+  LongPressedSignalFunctor(LongPressedSignalData& data, bool consume = false)
+  : signalData(data)
+  {
+    signalData.consumed = consume;
+  }
+
+  bool operator()(View view, InputEvent event)
+  {
+    signalData.called = true;
+    signalData.view   = view;
+    return signalData.consumed;
+  }
+
+  LongPressedSignalData& signalData;
+};
+
+// ============================================================================
+// InteractiveEventReceiverInterface test subclass
+// ============================================================================
+
+class TestInteractiveViewImpl : public InteractiveViewImpl
+{
+public:
+  static IntrusivePtr<TestInteractiveViewImpl> New()
+  {
+    return new TestInteractiveViewImpl();
+  }
+
+  bool clickedCalled{false};
+  bool pressedChangedCalled{false};
+  bool pressedValue{false};
+  bool longPressedCalled{false};
+  bool longPressedConsumed{false};
+
+  void ResetFlags()
+  {
+    clickedCalled        = false;
+    pressedChangedCalled = false;
+    pressedValue         = false;
+    longPressedCalled    = false;
+  }
+
+  void OnInitialize() override
+  {
+    InteractiveViewImpl::OnInitialize();
+    EnableLongPressDetection();
+  }
+
+protected:
+  void OnClicked(View view, const InputEvent& event) override
+  {
+    clickedCalled = true;
+  }
+
+  void OnPressedChanged(View view, bool pressed, const InputEvent& event) override
+  {
+    pressedChangedCalled = true;
+    pressedValue         = pressed;
+  }
+
+  bool OnLongPressed(View view, const InputEvent& event) override
+  {
+    longPressedCalled = true;
+    return longPressedConsumed;
+  }
+};
+
+// Register TestInteractiveViewImpl so that DALi TypeInfo lookup can walk
+// the chain TestInteractiveViewImpl -> InteractiveViewImpl -> ViewImpl -> View
+// and find View-registered properties (REQUESTED_WIDTH, etc.).
+Dali::TypeRegistration testInteractiveViewTypeReg(typeid(TestInteractiveViewImpl), typeid(InteractiveViewImpl), nullptr);
+
+InteractiveView CreateTestInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
+{
+  InteractiveView view = InteractiveView::New();
+  view.SetRequestedWidth(width);
+  view.SetRequestedHeight(height);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  return view;
+}
+
+InteractiveView CreateTestInteractiveViewFromImpl(TestApplication& application, IntrusivePtr<TestInteractiveViewImpl> impl)
+{
+  // Handle must be created BEFORE Initialize() — wrapping in CustomActor makes Self() valid
+  InteractiveView view(*impl);
+  impl->Initialize();
+
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  return view;
+}
+
+} // namespace
+
+void utc_dali_interactiveview_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_interactiveview_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// ============================================================================
+// Construction / Handle tests
+// ============================================================================
+
+int UtcDaliInteractiveViewNewP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = InteractiveView::New();
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+exec
+/bin/bash -lc 'rg -n "class InteractiveView|InteractiveView::|enum class KeyClickPolicy|KeyClickPolicy|ClickedSignal|LongPressedSignal|PressedChangedSignal|PseudoDisabledChangedSignal|DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS" repos/dali-ui -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:154:      trait.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:204:      trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:177:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:217:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:202:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:207:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-pixel-area.cpp:266:      trait.ClickedSignal().Connect(this, [this, index](View, const InputEvent&) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-pixel-area.cpp:292:      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
+repos/dali-ui/wiki/Configuration-(kr).md:68:| Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Clicked 이벤트 발생이 key press 시점인지 release 시점인지 설정 |
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:188:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-color-pixel.cpp:159:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Configuration.md:71:| Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-load-policy.cpp:201:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:156:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-url.cpp:166:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:166:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-npatch.cpp:238:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:167:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:212:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-render-quality.cpp:181:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:206:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:144:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Focus-&-Key.md:232:`InteractiveView` converts key events into high-level interactions (click, long-press, pressed state). It is focusable by default and provides `ClickedSignal`, `LongPressedSignal`, and other signals directly:
+repos/dali-ui/wiki/Focus-&-Key.md:235:InteractiveView view = InteractiveView::New();
+repos/dali-ui/wiki/Focus-&-Key.md:238:view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);    // Fire Clicked signal on key-down
+repos/dali-ui/wiki/Focus-&-Key.md:241:view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/wiki/Focus-&-Key.md:255:  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/wiki/Focus-&-Key.md:271:| `SetKeyClickPolicy` | Default key-click timing (ON_RELEASE / ON_PRESS / DISABLED) |
+repos/dali-ui/wiki/Focus-&-Key.md:282:  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // Fire clicked signal when the key is released
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:237:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:213:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:179:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:230:`InteractiveView`는 키 이벤트를 고수준 인터랙션(클릭, 롱프레스, 눌림 상태)으로 변환합니다. 기본적으로 focusable이 활성화되어 있으며, `ClickedSignal`, `LongPressedSignal` 등의 시그널을 직접 제공합니다:
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:233:InteractiveView view = InteractiveView::New();
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:236:view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS); // 키 다운 시 클릭 시그널 발동
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:238:// ClickedSignal
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:239:view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:251:  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:267:| `SetKeyClickPolicy` | 기본 키 클릭 발동 시점 (ON_RELEASE / ON_PRESS / DISABLED) |
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:278:  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // 키를 뗄 때 클릭 시그널 발동
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:181:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-frame-range.cpp:178:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-info.cpp:183:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sampling.cpp:174:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-dynamic-property.cpp:180:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-fitting.cpp:118:        trait.ClickedSignal().Connect(this, [this, idx](View, InputEvent) -> bool {
+repos/dali-ui/samples/text/text-markup-example.cpp:59:    mAnchorLabel.AnchorClickedSignal().Connect(this, &TextController::OnAnchorClicked);
+repos/dali-ui/samples/text/text-markup-example.cpp:60:    mAnchorColorLabel.AnchorClickedSignal().Connect(this, &TextController::OnAnchorClicked);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:66:    mTarget = InteractiveView::New();
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:73:    mTarget.PressedChangedSignal().Connect(this, &TcDisabledClearsPressed::OnPressedChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:79:    mResetButton = InteractiveView::New();
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:84:      .ConnectClickedSignal(this, [this](View, InputEvent) -> bool {
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:173:      trait.PressedChangedSignal().Connect(
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:179:      trait.ClickedSignal().Connect(
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:140:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:203:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:173:      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:190:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:73:    InteractiveView toggleBtn = InteractiveView::New();
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:87:    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/hello-world/hello-world-example.cpp:48:        InteractiveView::New() // Red child
+repos/dali-ui/samples/hello-world/hello-world-example.cpp:52:          .ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/color-controls/color-controls-example.cpp:56:            trait.ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/animation/animation-example.cpp:50:        InteractiveView::New()
+repos/dali-ui/samples/animation/animation-example.cpp:54:          .ConnectClickedSignal(this, &AnimationExample::OnRedClicked)
+repos/dali-ui/samples/animation/animation-example.cpp:56:        InteractiveView::New()
+repos/dali-ui/samples/animation/animation-example.cpp:62:          .ConnectClickedSignal(this, &AnimationExample::OnBlueClicked)
+repos/dali-ui/samples/ui-scale/ui-scale-example.cpp:223:      btn.ConnectClickedSignal(this, [this, capturedScale](View, const InputEvent&) {
+repos/dali-ui/samples/ui-scale/ui-scale-example.cpp:252:    applyBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+repos/dali-ui/samples/ui-scale/ui-scale-example.cpp:512:    InteractiveView btn = InteractiveView::New();
+repos/dali-ui/samples/flexlayout/flexlayout-layout-direction-example.cpp:75:    InteractiveView toggleBtn = InteractiveView::New();
+repos/dali-ui/samples/flexlayout/flexlayout-layout-direction-example.cpp:89:    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/gridlayout/gridlayout-layout-direction-example.cpp:99:    InteractiveView toggleBtn = InteractiveView::New();
+repos/dali-ui/samples/gridlayout/gridlayout-layout-direction-example.cpp:113:    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:292:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:313:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+repos/dali-ui/samples/stacklayout/stacklayout-layout-direction-example.cpp:76:    InteractiveView toggleBtn = InteractiveView::New();
+repos/dali-ui/samples/stacklayout/stacklayout-layout-direction-example.cpp:90:    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/image-view/image-view-sizing-example.cpp:151:    toggleButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewSizingController::OnSyncSizeToggleClicked);
+repos/dali-ui/samples/image-view/image-view-sizing-example.cpp:167:    reloadButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewSizingController::OnSyncReloadClicked);
+repos/dali-ui/samples/image-view/image-view-sizing-example.cpp:227:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewSizingController::OnOrientationToggleClicked);
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:82:    mTypeButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImagePlaceholderController::OnTypeToggleClicked);
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:89:    reloadButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImagePlaceholderController::OnReloadClicked);
+repos/dali-ui/samples/customlayout/customlayout-diagonal-layout-direction-example.cpp:122:    InteractiveView toggleBtn = InteractiveView::New();
+repos/dali-ui/samples/customlayout/customlayout-diagonal-layout-direction-example.cpp:136:    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:127:      mTypeButtons[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnTypeClicked);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:209:    mSyncBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnSyncClicked);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:212:    mFastTrackBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnFastTrackClicked);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:235:      mReleaseBtns[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, CBS[i]);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:239:    hideBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnHideClicked);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:259:      mLoadBtns[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, CBS[i]);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:263:    testBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnLoadTestClicked);
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:318:      btn.EnsureInteractiveTrait().ClickedSignal().Connect(this, callbacks[i]);
+repos/dali-ui/samples/image-view/image-view-npatch-example.cpp:140:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewNPatchController::OnBorderOnlyClicked);
+repos/dali-ui/samples/image-view/image-view-npatch-example.cpp:161:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewNPatchController::OnSizeButtonClicked);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:263:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:284:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:202:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnMaskButtonClicked);
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:225:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnImageTypeToggleClicked);
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:247:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnModeToggleClicked);
+repos/dali-ui/samples/viewlayout/view-layout-direction-example.cpp:93:    InteractiveView toggleBtn = InteractiveView::New();
+repos/dali-ui/samples/viewlayout/view-layout-direction-example.cpp:107:    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:145:    typeButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageSamplingController::OnSamplingImageTypeClicked);
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:244:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageSamplingController::OnSamplingButtonClicked);
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:273:    typeButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageSamplingController::OnDesiredSizeImageTypeClicked);
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:382:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageSamplingController::OnDesiredSizeButtonClicked);
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:158:    gifButton.EnsureInteractiveTrait().ClickedSignal().Connect(
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:178:    animButton.EnsureInteractiveTrait().ClickedSignal().Connect(
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:206:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImagePixelAreaController::OnAreaButtonClicked);
+repos/dali-ui/samples/image-view/image-view-fit-size-to-image-example.cpp:127:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewFitSizeController::OnFitSizeToggleClicked);
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:223:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageFittingModeController::OnModeButtonClicked);
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:247:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageFittingModeController::OnSwapButtonClicked);
+repos/dali-ui/samples/image-view/image-color-example.cpp:106:    typeButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageColorController::OnImageTypeClicked);
+repos/dali-ui/samples/image-view/image-color-example.cpp:215:    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageColorController::OnColorButtonClicked);
+repos/dali-ui/samples/visual-base/animated-image-visual-example.cpp:212:                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+repos/dali-ui/samples/visual-base/animated-image-visual-example.cpp:234:                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+repos/dali-ui/samples/visual-base/image-visual-example.cpp:206:                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+repos/dali-ui/samples/visual-base/image-visual-example.cpp:228:                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+repos/dali-ui/dali-ui-foundation/public-api/selectable-trait.h:146:   * When enabled, the SelectableTrait listens to the owner View's ClickedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:41:struct ClickedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:43:  ClickedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:58:struct ClickedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:60:  ClickedSignalFunctor(ClickedSignalData& data)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:71:  ClickedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:74:struct PressedChangedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:76:  PressedChangedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:94:struct PressedChangedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:96:  PressedChangedSignalFunctor(PressedChangedSignalData& data)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:108:  PressedChangedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:111:struct LongPressedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:113:  LongPressedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:131:struct LongPressedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:133:  LongPressedSignalFunctor(LongPressedSignalData& data, bool consume = false)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:146:  LongPressedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:207:  InteractiveView view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:257:  InteractiveView   view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:265:  InteractiveView   view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:275:  InteractiveView   view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:285:  InteractiveView   view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:287:  InteractiveView   downcast = InteractiveView::DownCast(handle);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:296:  InteractiveView   downcast = InteractiveView::DownCast(handle);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:308:  InteractiveView   view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:350:int UtcDaliInteractiveViewKeyClickPolicyP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:355:  view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:356:  DALI_TEST_EQUALS(static_cast<uint32_t>(view.GetKeyClickPolicy()),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:357:                   static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:363:// ClickedSignal via tap
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:366:int UtcDaliInteractiveViewClickedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:371:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:372:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:373:  view.ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:383:// PressedChangedSignal via touch
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:386:int UtcDaliInteractiveViewPressedChangedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:391:  PressedChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:392:  PressedChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:393:  view.PressedChangedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:436:  PressedChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:437:  PressedChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:438:  view.PressedChangedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:468:// LongPressedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:471:int UtcDaliInteractiveViewLongPressedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:476:  LongPressedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:477:  LongPressedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:478:  view.LongPressedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:488:// ConnectClickedSignal chain helper
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:491:int UtcDaliInteractiveViewConnectClickedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:495:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:496:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:498:  InteractiveView view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:503:      .ConnectClickedSignal(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:515:int UtcDaliInteractiveViewConnectClickedSignalAccumulatesP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:519:  ClickedSignalData    data1;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:520:  ClickedSignalFunctor functor1(data1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:521:  ClickedSignalData    data2;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:522:  ClickedSignalFunctor functor2(data2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:525:  view.ConnectClickedSignal(&application, functor1);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:526:  view.ConnectClickedSignal(&application, functor2);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:536:// ConnectPressedChangedSignal chain helper
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:539:int UtcDaliInteractiveViewConnectPressedChangedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:543:  PressedChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:544:  PressedChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:546:  InteractiveView view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:551:      .ConnectPressedChangedSignal(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:575:// ConnectLongPressedSignal chain helper
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:578:int UtcDaliInteractiveViewConnectLongPressedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:582:  LongPressedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:583:  LongPressedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:585:  InteractiveView view = InteractiveView::New();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:590:      .ConnectLongPressedSignal(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:668:  ClickedSignalData    clickData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:669:  ClickedSignalFunctor clickFunctor(clickData);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:670:  view.ClickedSignal().Connect(&application, clickFunctor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:692:  ClickedSignalData    signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:693:  ClickedSignalFunctor signalFunctor(signalData);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:694:  view.ClickedSignal().Connect(&application, signalFunctor);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:101:UiConfig& UiConfig::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:103:  GetImpl(*this).SetKeyClickPolicy(policy);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:107:KeyClickPolicy UiConfig::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:109:  return GetImpl(*this).GetKeyClickPolicy();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:30:InteractiveView::InteractiveView()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:34:InteractiveView InteractiveView::New()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:45:InteractiveView InteractiveView::DownCast(BaseHandle handle)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:50:InteractiveView::InteractiveView(const InteractiveView& view) = default;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:52:InteractiveView::InteractiveView(InteractiveView&& rhs) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:54:InteractiveView::~InteractiveView()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:58:InteractiveView::InteractiveView(Integration::InteractiveViewImpl& implementation)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:63:InteractiveView::InteractiveView(Dali::Internal::CustomActor* internal)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:73:Signal<void(View, bool, InputEvent)>& InteractiveView::PressedChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:75:  return GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:78:Signal<void(View, bool)>& InteractiveView::PseudoDisabledChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:80:  return GetImpl(*this).GetInteractiveTrait().PseudoDisabledChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:83:Signal<void(View, InputEvent)>& InteractiveView::ClickedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:85:  return GetImpl(*this).GetInteractiveTrait().ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:88:Signal<bool(View, InputEvent)>& InteractiveView::LongPressedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:90:  return GetImpl(*this).GetInteractiveTrait().LongPressedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:97:bool InteractiveView::IsPressed() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:102:bool InteractiveView::IsPseudoDisabled() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:107:InteractiveView& InteractiveView::SetPseudoDisabled(bool pseudoDisabled)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:113:bool InteractiveView::IsClickable() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:118:InteractiveView& InteractiveView::SetClickable(bool clickable)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:124:KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:126:  return GetImpl(*this).GetInteractiveTrait().GetKeyClickPolicy();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:129:InteractiveView& InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:131:  GetImpl(*this).GetInteractiveTrait().SetKeyClickPolicy(policy);
+repos/dali-ui/samples/visual-base/color-visual-example.cpp:195:                  trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
+repos/dali-ui/samples/visual-base/color-visual-example.cpp:217:                  trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:4:#define DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:12:  ChildClass& SetPseudoDisabled(bool pseudoDisabled) { InteractiveView::SetPseudoDisabled(pseudoDisabled); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:19:  ChildClass& SetClickable(bool clickable) { InteractiveView::SetClickable(clickable); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:23:  * @param[in] policy The KeyClickPolicy to apply \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:24:  * @see InteractiveTrait::SetKeyClickPolicy \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:26:  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { InteractiveView::SetKeyClickPolicy(policy); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:28:  * @brief Connects a handler to ClickedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:36:  * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked); \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:37:  * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... }); \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:45:  ChildClass& ConnectClickedSignal(T* obj, Func func) { InteractiveView::ConnectClickedSignal(obj, func); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:47:  * @brief Connects a handler to PressedChangedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:58:  ChildClass& ConnectPressedChangedSignal(T* obj, Func func) { InteractiveView::ConnectPressedChangedSignal(obj, func); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:60:  * @brief Connects a handler to LongPressedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:64:  * Press release is reported separately via PressedChangedSignal. \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:76:  ChildClass& ConnectLongPressedSignal(T* obj, Func func) { InteractiveView::ConnectLongPressedSignal(obj, func); return *this; }
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-SelectableTrait.cpp:506:  view.EnsureInteractiveTrait().ClickedSignal().Connect(
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-SelectableTrait.cpp:538:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:654:Signal<void(View, const Dali::String&)>& Label::AnchorClickedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:656:  return GetImpl(*this).AnchorClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:32:  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { UiConfig::SetKeyClickPolicy(policy); return *this; } \
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:40:struct ClickedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:42:  ClickedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:60:struct ClickedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:62:  ClickedSignalFunctor(ClickedSignalData& data, bool consume = false)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:75:  ClickedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:78:struct PressedChangedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:80:  PressedChangedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:98:struct PressedChangedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:100:  PressedChangedSignalFunctor(PressedChangedSignalData& data)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:112:  PressedChangedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:115:struct LongPressedSignalData
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:117:  LongPressedSignalData()
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:135:struct LongPressedSignalFunctor
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:137:  LongPressedSignalFunctor(LongPressedSignalData& data, bool consume = false)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:150:  LongPressedSignalData& signalData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:250:    trait.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:257:  DALI_TEST_EQUALS(static_cast<uint32_t>(clickable.GetKeyClickPolicy()),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:258:                   static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:349:int UtcDaliInteractiveTraitKeyClickPolicyDefaultP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:355:  KeyClickPolicy policy = clickable.GetKeyClickPolicy();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:356:  DALI_TEST_CHECK(static_cast<uint32_t>(policy) <= static_cast<uint32_t>(KeyClickPolicy::RESERVED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:360:int UtcDaliInteractiveTraitSetKeyClickPolicyP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:365:  clickable.SetKeyClickPolicy(KeyClickPolicy::DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:366:  DALI_TEST_EQUALS(static_cast<uint32_t>(clickable.GetKeyClickPolicy()),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:367:                   static_cast<uint32_t>(KeyClickPolicy::DISABLED),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:373:// Tap gesture → ClickedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:376:int UtcDaliInteractiveTraitTapClickedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:381:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:382:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:383:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:398:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:399:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:400:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:415:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:416:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:417:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:426:// PressedChangedSignal via touch
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:429:int UtcDaliInteractiveTraitPressedChangedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:434:  PressedChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:435:  PressedChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:436:  view.EnsureInteractiveTrait().PressedChangedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:477:  PressedChangedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:478:  PressedChangedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:479:  view.EnsureInteractiveTrait().PressedChangedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:509:// Key event → ClickedSignal (ON_RELEASE policy)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:516:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:518:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:519:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:520:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:548:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:550:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:551:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:552:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:571:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:573:  ClickedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:574:  ClickedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:575:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:594:// LongPressedSignal
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:597:int UtcDaliInteractiveTraitLongPressedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:602:  LongPressedSignalData    data;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:603:  LongPressedSignalFunctor functor(data);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:604:  view.EnsureInteractiveTrait().LongPressedSignal().Connect(&application, functor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:618:  LongPressedSignalData    lpData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:619:  LongPressedSignalFunctor lpFunctor(lpData, true); // consume the long press
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:620:  view.EnsureInteractiveTrait().LongPressedSignal().Connect(&application, lpFunctor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:622:  ClickedSignalData    clickData;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:623:  ClickedSignalFunctor clickFunctor(clickData);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:624:  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, clickFunctor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:651:    trait.ClickedSignal().Connect(&application, [&clicked](View v, InputEvent e) -> bool {
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:106:  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:117:  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:129:  Signal<void(View, InputEvent)>& ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:142:  Signal<bool(View, InputEvent)>& LongPressedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:187:   * @return The active KeyClickPolicy for this button.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:189:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:194:   * @param policy The KeyClickPolicy to be applied (OnRelease, OnPress, or Disabled).
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:196:  void SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:199:   * @brief Connects a handler to ClickedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:207:   * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:208:   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:216:  void ConnectClickedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:218:    ClickedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:223:   * @brief Connects a handler to PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:234:  void ConnectPressedChangedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:236:    PressedChangedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:241:   * @brief Connects a handler to LongPressedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:245:   * Press release is reported separately via PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:257:  void ConnectLongPressedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:259:    LongPressedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:238:  UiConfig& SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:245:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:60:Signal<void(View, bool, InputEvent)>& InteractiveTrait::PressedChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:62:  return GetImpl(*this).PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:65:Signal<void(View, bool)>& InteractiveTrait::PseudoDisabledChangedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:67:  return GetImpl(*this).PseudoDisabledChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:70:Signal<void(View, InputEvent)>& InteractiveTrait::ClickedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:72:  return GetImpl(*this).ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:75:Signal<bool(View, InputEvent)>& InteractiveTrait::LongPressedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:77:  return GetImpl(*this).LongPressedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:105:KeyClickPolicy InteractiveTrait::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:107:  return GetImpl(*this).GetKeyClickPolicy();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:110:void InteractiveTrait::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:112:  GetImpl(*this).SetKeyClickPolicy(policy);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1054:  Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:33:class InteractiveViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:119:   * @see InteractiveTrait::PressedChangedSignal
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:121:  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:127:   * @see InteractiveTrait::PseudoDisabledChangedSignal
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:129:  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:135:   * @see InteractiveTrait::ClickedSignal
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:137:  Signal<void(View, InputEvent)>& ClickedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:143:   * @see InteractiveTrait::LongPressedSignal
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:145:  Signal<bool(View, InputEvent)>& LongPressedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:193:   * @return The active KeyClickPolicy
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:194:   * @see InteractiveTrait::GetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:196:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:201:   * @param[in] policy The KeyClickPolicy to apply
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:202:   * @see InteractiveTrait::SetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:204:  InteractiveView& SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:209:   * @brief Connects a handler to ClickedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:217:   * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:218:   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:226:  InteractiveView& ConnectClickedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:228:    ClickedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:234:   * @brief Connects a handler to PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:245:  InteractiveView& ConnectPressedChangedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:247:    PressedChangedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:253:   * @brief Connects a handler to LongPressedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:257:   * Press release is reported separately via PressedChangedSignal.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:269:  InteractiveView& ConnectLongPressedSignal(T* obj, Func func)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:271:    LongPressedSignal().Connect(obj, func);
+repos/dali-ui/dali-ui-foundation/public-api/key-click-policy.h:28:enum class KeyClickPolicy : uint32_t
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:145:  void SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:152:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:486:  KeyClickPolicy           mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:69:  mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:143:void UiConfigImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:146:  mKeyClickPolicy = policy;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:149:KeyClickPolicy UiConfigImpl::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:151:  return mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1134:Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1136:  return mAnchorClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.cpp:1634:  mAnchorClickedSignal.Emit(handle, ToDaliString(href));
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:161:    clickable.ClickedSignal().Connect(this, &SelectableTraitImpl::OnClickedForToggle);
+repos/dali-ui/dali-ui-foundation/integration-api/selectable-trait-impl.cpp:176:    clickable.ClickedSignal().Disconnect(this, &SelectableTraitImpl::OnClickedForToggle);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-view-impl.cpp:41:  return InteractiveView::New();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:61:   * This is also called automatically when LongPressedSignal() is accessed.
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:67:   * @copydoc Dali::Ui::InteractiveTrait::PressedChangedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:69:  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:72:   * @copydoc Dali::Ui::InteractiveTrait::PseudoDisabledChangedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:74:  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:77:   * @copydoc Dali::Ui::InteractiveTrait::ClickedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:79:  Signal<void(View, InputEvent)>& ClickedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:82:   * @copydoc Dali::Ui::InteractiveTrait::LongPressedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:84:  Signal<bool(View, InputEvent)>& LongPressedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:113:   * @copydoc Dali::Ui::InteractiveTrait::GetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:115:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:118:   * @copydoc Dali::Ui::InteractiveTrait::SetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:120:  void SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:227:  Signal<void(View, bool, InputEvent)> mPressedChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:228:  Signal<void(View, bool)>             mPseudoDisabledChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:229:  Signal<void(View, InputEvent)>       mClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:230:  Signal<bool(View, InputEvent)>       mLongPressedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:231:  KeyClickPolicy                       mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:37:  mPressedChangedSignal(),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:38:  mPseudoDisabledChangedSignal(),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:39:  mKeyClickPolicy(UiConfigManager::Get().GetConfig().GetKeyClickPolicy()),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:71:Signal<void(View, bool, InputEvent)>& InteractiveTraitImpl::PressedChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:73:  return mPressedChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:76:Signal<void(View, bool)>& InteractiveTraitImpl::PseudoDisabledChangedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:78:  return mPseudoDisabledChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:81:Signal<void(View, InputEvent)>& InteractiveTraitImpl::ClickedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:83:  return mClickedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:86:Signal<bool(View, InputEvent)>& InteractiveTraitImpl::LongPressedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:89:  return mLongPressedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:121:  mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:134:KeyClickPolicy InteractiveTraitImpl::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:136:  return mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:139:void InteractiveTraitImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:141:  mKeyClickPolicy = policy;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:328:  mPressedChangedSignal.Emit(view, mPressed, inputEvent);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:337:  mClickedSignal.Emit(view, inputEvent);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:347:  bool signalResult = mLongPressedSignal.Emit(view, inputEvent);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:423:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE && !mClickBlockedByKey;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:428:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_PRESS && (mPressedExecutionKeyCount == 1);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:433:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:618:   * @copydoc Dali::Ui::Label::AnchorClickedSignal()
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:620:  Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:1036:  Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
+
+exec
+/bin/bash -lc "sed -n '1,330p' repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/key-click-policy.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Integration
+{
+class InteractiveViewImpl;
+}
+
+#include "interactive-view.autogen.h"
+/**
+ * @brief InteractiveView is a View subclass with interactive behavior built in.
+ *
+ * InteractiveView guarantees that an InteractiveTrait is attached for the
+ * lifetime of the view. It exposes the InteractiveTrait API directly, so
+ * callers do not need to go through EnsureInteractiveTrait().
+ *
+ * InteractiveView is intended as a base class for clickable UI components
+ * such as Button and Checkbox. It can also be instantiated directly when
+ * a plain interactive container is needed.
+ *
+ * @see InteractiveTrait
+ */
+class DALI_UI_API InteractiveView : public View
+{
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized InteractiveView handle.
+   */
+  InteractiveView();
+
+  /**
+   * @brief Creates an initialized InteractiveView.
+   *
+   * @return A handle to a newly allocated InteractiveView
+   */
+  static InteractiveView New();
+
+  /**
+   * @brief Downcasts a handle to an InteractiveView handle.
+   *
+   * If the handle refers to an InteractiveView, the downcast produces a valid handle.
+   * Otherwise the returned handle is uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to an InteractiveView or an uninitialized handle
+   */
+  static InteractiveView DownCast(BaseHandle handle);
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] view Handle to copy
+   */
+  InteractiveView(const InteractiveView& view);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  InteractiveView(InteractiveView&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~InteractiveView();
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  InteractiveView& operator=(const InteractiveView& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  InteractiveView& operator=(InteractiveView&& rhs) noexcept = default;
+
+public: // Signals
+  /**
+   * @brief Emitted when the pressed state changes.
+   *
+   * @return The pressed changed signal
+   * @see InteractiveTrait::PressedChangedSignal
+   */
+  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+
+  /**
+   * @brief Emitted when the pseudo disabled state changes.
+   *
+   * @return The pseudo disabled changed signal
+   * @see InteractiveTrait::PseudoDisabledChangedSignal
+   */
+  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
+
+  /**
+   * @brief Emitted when the view is clicked.
+   *
+   * @return The clicked signal
+   * @see InteractiveTrait::ClickedSignal
+   */
+  Signal<void(View, InputEvent)>& ClickedSignal();
+
+  /**
+   * @brief Emitted when the view receives a long press gesture.
+   *
+   * @return The long pressed signal
+   * @see InteractiveTrait::LongPressedSignal
+   */
+  Signal<bool(View, InputEvent)>& LongPressedSignal();
+
+public: // API
+  // @CHAIN_START(InteractiveView, View)
+
+  /**
+   * @brief Returns whether the view is currently in the pressed state.
+   *
+   * @return True if pressed
+   * @see InteractiveTrait::IsPressed
+   */
+  bool IsPressed() const;
+
+  /**
+   * @brief Returns whether the view is in the pseudo disabled state.
+   *
+   * @return True if pseudo disabled
+   * @see InteractiveTrait::IsPseudoDisabled
+   */
+  bool IsPseudoDisabled() const;
+
+  /**
+   * @brief Sets the pseudo disabled state.
+   *
+   * @param[in] pseudoDisabled True to set pseudo disabled
+   * @see InteractiveTrait::SetPseudoDisabled
+   */
+  InteractiveView& SetPseudoDisabled(bool pseudoDisabled);
+
+  /**
+   * @brief Returns whether clicking is currently allowed.
+   *
+   * @return True if clicking is allowed
+   * @see InteractiveTrait::IsClickable
+   */
+  bool IsClickable() const;
+
+  /**
+   * @brief Sets whether clicking is allowed.
+   *
+   * @param[in] clickable True to allow clicking
+   * @see InteractiveTrait::SetClickable
+   */
+  InteractiveView& SetClickable(bool clickable);
+
+  /**
+   * @brief Returns the current key click policy.
+   *
+   * @return The active KeyClickPolicy
+   * @see InteractiveTrait::GetKeyClickPolicy
+   */
+  KeyClickPolicy GetKeyClickPolicy() const;
+
+  /**
+   * @brief Sets the key click policy.
+   *
+   * @param[in] policy The KeyClickPolicy to apply
+   * @see InteractiveTrait::SetKeyClickPolicy
+   */
+  InteractiveView& SetKeyClickPolicy(KeyClickPolicy policy);
+
+public: // Signal connection helpers
+  // @CHAIN_MANUAL
+  /**
+   * @brief Connects a handler to ClickedSignal.
+   *
+   * Multiple calls accumulate — each call adds an additional handler.
+   * If @p obj implements ConnectionTrackerInterface (e.g. inherits ConnectionTracker),
+   * the connection is automatically removed when @p obj is destroyed.
+   *
+   * Supports member functions and stateless lambdas:
+   * @code
+   * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
+   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
+   * @endcode
+   *
+   * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
+   * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
+   * @return Reference to this for method chaining
+   */
+  template<typename T, typename Func>
+  InteractiveView& ConnectClickedSignal(T* obj, Func func)
+  {
+    ClickedSignal().Connect(obj, func);
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Connects a handler to PressedChangedSignal.
+   *
+   * Multiple calls accumulate — each call adds an additional handler.
+   * The handler is called with @c pressed=true on press-down and @c pressed=false on release.
+   * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
+   *
+   * @param[in] obj  The object to connect to
+   * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
+   * @return Reference to this for method chaining
+   */
+  template<typename T, typename Func>
+  InteractiveView& ConnectPressedChangedSignal(T* obj, Func func)
+  {
+    PressedChangedSignal().Connect(obj, func);
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Connects a handler to LongPressedSignal.
+   *
+   * Multiple calls accumulate — each call adds an additional handler.
+   * Long press fires once when the gesture is detected (on press-down after the time threshold).
+   * Press release is reported separately via PressedChangedSignal.
+   *
+   * The handler must return bool: return @c true to suppress the subsequent click event,
+   * or @c false to allow it.
+   *
+   * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
+   *
+   * @param[in] obj  The object to connect to
+   * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
+   * @return Reference to this for method chaining
+   */
+  template<typename T, typename Func>
+  InteractiveView& ConnectLongPressedSignal(T* obj, Func func)
+  {
+    LongPressedSignal().Connect(obj, func);
+    return *this;
+  }
+
+  // @CHAIN_END
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The InteractiveView implementation
+   */
+  explicit DALI_UI_API InteractiveView(Integration::InteractiveViewImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this InteractiveView from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API InteractiveView(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_VIEW_METHODS(InteractiveView)
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,100p' repos/dali-ui/dali-ui-foundation/public-api/key-click-policy.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <cstdint>
+
+namespace Dali::Ui
+{
+/**
+ * @brief Defines the policy for when a click event is triggered via key input.
+ * This policy is specifically for D-Pad, Remote, or Keyboard interactions.
+ */
+enum class KeyClickPolicy : uint32_t
+{
+  /**
+   * @brief Trigger click when the key is released.
+   */
+  ON_RELEASE = 0,
+
+  /**
+   * @brief Trigger click immediately when the key is pressed.
+   */
+  ON_PRESS = 1,
+
+  /**
+   * @brief Disables click events from key inputs.
+   */
+  DISABLED = 2,
+
+  /**
+   * @brief Reserved for future expansion.
+   */
+  RESERVED = 99
+};
+} // namespace Dali::Ui
+
+exec
+/bin/bash -lc "sed -n '1,160p' repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/interactive-view.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/interactive-view-impl.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+InteractiveView::InteractiveView()
+{
+}
+
+InteractiveView InteractiveView::New()
+{
+  Integration::InteractiveViewImplPtr impl = Integration::InteractiveViewImpl::New();
+
+  InteractiveView handle(*impl);
+
+  impl->Initialize();
+
+  return handle;
+}
+
+InteractiveView InteractiveView::DownCast(BaseHandle handle)
+{
+  return View::DownCast<InteractiveView, Integration::InteractiveViewImpl>(handle);
+}
+
+InteractiveView::InteractiveView(const InteractiveView& view) = default;
+
+InteractiveView::InteractiveView(InteractiveView&& rhs) noexcept = default;
+
+InteractiveView::~InteractiveView()
+{
+}
+
+InteractiveView::InteractiveView(Integration::InteractiveViewImpl& implementation)
+: View(implementation)
+{
+}
+
+InteractiveView::InteractiveView(Dali::Internal::CustomActor* internal)
+: View(internal)
+{
+  VerifyCustomActorPointer<Integration::InteractiveViewImpl>(internal);
+}
+
+// =============================================================================
+// Signals
+// =============================================================================
+
+Signal<void(View, bool, InputEvent)>& InteractiveView::PressedChangedSignal()
+{
+  return GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
+}
+
+Signal<void(View, bool)>& InteractiveView::PseudoDisabledChangedSignal()
+{
+  return GetImpl(*this).GetInteractiveTrait().PseudoDisabledChangedSignal();
+}
+
+Signal<void(View, InputEvent)>& InteractiveView::ClickedSignal()
+{
+  return GetImpl(*this).GetInteractiveTrait().ClickedSignal();
+}
+
+Signal<bool(View, InputEvent)>& InteractiveView::LongPressedSignal()
+{
+  return GetImpl(*this).GetInteractiveTrait().LongPressedSignal();
+}
+
+// =============================================================================
+// API
+// =============================================================================
+
+bool InteractiveView::IsPressed() const
+{
+  return GetImpl(*this).GetInteractiveTrait().IsPressed();
+}
+
+bool InteractiveView::IsPseudoDisabled() const
+{
+  return GetImpl(*this).GetInteractiveTrait().IsPseudoDisabled();
+}
+
+InteractiveView& InteractiveView::SetPseudoDisabled(bool pseudoDisabled)
+{
+  GetImpl(*this).GetInteractiveTrait().SetPseudoDisabled(pseudoDisabled);
+  return *this;
+}
+
+bool InteractiveView::IsClickable() const
+{
+  return GetImpl(*this).GetInteractiveTrait().IsClickable();
+}
+
+InteractiveView& InteractiveView::SetClickable(bool clickable)
+{
+  GetImpl(*this).GetInteractiveTrait().SetClickable(clickable);
+  return *this;
+}
+
+KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
+{
+  return GetImpl(*this).GetInteractiveTrait().GetKeyClickPolicy();
+}
+
+InteractiveView& InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
+{
+  GetImpl(*this).GetInteractiveTrait().SetKeyClickPolicy(policy);
+  return *this;
+}
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// Generated by dali-ui preprocessor. Do not modify.
+#pragma once
+
+#define DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(ChildClass) \
+  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+  /** \
+  * @brief Sets the pseudo disabled state. \
+  * \
+  * @param[in] pseudoDisabled True to set pseudo disabled \
+  * @see InteractiveTrait::SetPseudoDisabled \
+  */ \
+  ChildClass& SetPseudoDisabled(bool pseudoDisabled) { InteractiveView::SetPseudoDisabled(pseudoDisabled); return *this; } \
+  /** \
+  * @brief Sets whether clicking is allowed. \
+  * \
+  * @param[in] clickable True to allow clicking \
+  * @see InteractiveTrait::SetClickable \
+  */ \
+  ChildClass& SetClickable(bool clickable) { InteractiveView::SetClickable(clickable); return *this; } \
+  /** \
+  * @brief Sets the key click policy. \
+  * \
+  * @param[in] policy The KeyClickPolicy to apply \
+  * @see InteractiveTrait::SetKeyClickPolicy \
+  */ \
+  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { InteractiveView::SetKeyClickPolicy(policy); return *this; } \
+  /** \
+  * @brief Connects a handler to ClickedSignal. \
+  * \
+  * Multiple calls accumulate — each call adds an additional handler. \
+  * If @p obj implements ConnectionTrackerInterface (e.g. inherits ConnectionTracker), \
+  * the connection is automatically removed when @p obj is destroyed. \
+  * \
+  * Supports member functions and stateless lambdas: \
+  * @code \
+  * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked); \
+  * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... }); \
+  * @endcode \
+  * \
+  * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect) \
+  * @param[in] func Member function pointer or functor with signature void(View, InputEvent) \
+  * @return Reference to this for method chaining \
+  */ \
+  template<typename T, typename Func> \
+  ChildClass& ConnectClickedSignal(T* obj, Func func) { InteractiveView::ConnectClickedSignal(obj, func); return *this; } \
+  /** \
+  * @brief Connects a handler to PressedChangedSignal. \
+  * \
+  * Multiple calls accumulate — each call adds an additional handler. \
+  * The handler is called with @c pressed=true on press-down and @c pressed=false on release. \
+  * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction. \
+  * \
+  * @param[in] obj  The object to connect to \
+  * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent) \
+  * @return Reference to this for method chaining \
+  */ \
+  template<typename T, typename Func> \
+  ChildClass& ConnectPressedChangedSignal(T* obj, Func func) { InteractiveView::ConnectPressedChangedSignal(obj, func); return *this; } \
+  /** \
+  * @brief Connects a handler to LongPressedSignal. \
+  * \
+  * Multiple calls accumulate — each call adds an additional handler. \
+  * Long press fires once when the gesture is detected (on press-down after the time threshold). \
+  * Press release is reported separately via PressedChangedSignal. \
+  * \
+  * The handler must return bool: return @c true to suppress the subsequent click event, \
+  * or @c false to allow it. \
+  * \
+  * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction. \
+  * \
+  * @param[in] obj  The object to connect to \
+  * @param[in] func Member function pointer or functor with signature bool(View, InputEvent) \
+  * @return Reference to this for method chaining \
+  */ \
+  template<typename T, typename Func> \
+  ChildClass& ConnectLongPressedSignal(T* obj, Func func) { InteractiveView::ConnectLongPressedSignal(obj, func); return *this; }
+
+exec
+/bin/bash -lc "sed -n '200,320p' 'repos/dali-ui/wiki/Focus-&-Key.md'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+### Global Signal (FocusManager)
+
+```cpp
+focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus) {
+  // Focus moved from oldFocus to newFocus
+});
+```
+
+<br/>
+
+### Custom Focus Navigation
+
+Override focus navigation for a View subtree by installing a focus navigation callback:
+
+```cpp
+View MyFocusNavigation(View currentFocusedView, FocusDirection direction)
+{
+  if(direction == FocusDirection::RIGHT)
+  {
+    return FindCustomRightTarget(currentFocusedView);
+  }
+  return View(); // Empty handle lets parent/default navigation continue.
+}
+
+view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigation));
+```
+
+<br/>
+
+## InteractiveView: Clicked & LongPressed signals from Keys
+
+`InteractiveView` converts key events into high-level interactions (click, long-press, pressed state). It is focusable by default and provides `ClickedSignal`, `LongPressedSignal`, and other signals directly:
+
+```cpp
+InteractiveView view = InteractiveView::New();
+
+// Control when key-click fires
+view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);    // Fire Clicked signal on key-down
+
+// Clicked signal — fires on Enter/Return key release (by default)
+view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+  // Clicked (via touch tap or execution key Enter)
+});
+```
+
+<br/>
+
+### Making a Plain View Interactive
+
+Even without `InteractiveView`, you can give any `View` the same interaction capabilities by calling `AsInteractive()`. This also enables focusable automatically:
+
+```cpp
+View view = View::New();
+view.AsInteractive([&](InteractiveTrait trait) {
+  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+    // Clicked (via touch tap or execution key Enter)
+  });
+});
+```
+
+If no configuration is needed, simply call `view.AsInteractive()` without a callback.
+
+<br/>
+
+### Global Defaults via UiConfig
+
+`UiConfig` allows you to set default behavior for all interactive views:
+
+| Setting | Description |
+|---|---|
+| `SetKeyClickPolicy` | Default key-click timing (ON_RELEASE / ON_PRESS / DISABLED) |
+| `SetExecutionKeyPredicate` | Function that determines which keys trigger clicked/long-pressed execution (default: "Return") |
+| `SetKeyLongPressThreshold` | Minimum threshold for recognizing a key long-press (number of consecutive key-pressed events) |
+
+```cpp
+bool MyKeyPredicate(const Dali::String& keyName)
+{
+  return keyName == "Return" || keyName == "KP_Enter";
+}
+
+UiConfig::New()
+  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // Fire clicked signal when the key is released
+  .SetExecutionKeyPredicate(MyKeyPredicate)        // Treat Return and KP_Enter as click keys
+  .SetKeyLongPressThreshold(3)                     // Recognize as long-press when 3+ consecutive key-pressed events are detected
+  .Apply();
+```
+
+> [!WARNING]
+> `SetExecutionKeyPredicate` only accepts a plain function pointer (no capturing lambdas). Pass `nullptr` to restore the default ("Return").
+
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+
+exec
+/bin/bash -lc "sed -n '300,470p' repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    }
+    default:
+    {
+      break;
+    }
+  }
+  return false;
+}
+
+void InteractiveTraitImpl::OnTap(View view, TapGesture tap)
+{
+  // NOTE Using TapGestureDetector.HandleEvent() in OnTouch handler can detect tap gesture,
+  // but Clicked event should be triggered after the all registered touch event handlers are called.
+  // So, we need to detect tap gesture without using OnTouch + HandleEvent.
+  if(ShouldTapTriggerClicked())
+  {
+    InputEvent inputEvent = InputEvent::New(tap);
+    OnClicked(view, inputEvent);
+  }
+  mClickBlockedByTouch = false;
+}
+
+void InteractiveTraitImpl::OnPressedChanged(View view, InputEvent inputEvent)
+{
+  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
+  {
+    receiver->OnPressedChanged(view, mPressed, inputEvent);
+  }
+  mPressedChangedSignal.Emit(view, mPressed, inputEvent);
+}
+
+void InteractiveTraitImpl::OnClicked(View view, InputEvent inputEvent)
+{
+  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
+  {
+    receiver->OnClicked(view, inputEvent);
+  }
+  mClickedSignal.Emit(view, inputEvent);
+}
+
+bool InteractiveTraitImpl::OnLongPressed(View view, InputEvent inputEvent)
+{
+  bool consumed = false;
+  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
+  {
+    consumed = receiver->OnLongPressed(view, inputEvent);
+  }
+  bool signalResult = mLongPressedSignal.Emit(view, inputEvent);
+  return consumed || signalResult;
+}
+
+bool InteractiveTraitImpl::IsExecutionKey(const Dali::String& keyName) const
+{
+  return UiConfigManager::Get().GetConfig().GetExecutionKeyPredicate()(keyName);
+}
+
+bool InteractiveTraitImpl::OnTouchInternal(Actor actor, TouchEvent touchEvent)
+{
+  return OnTouch(View::DownCast(actor), touchEvent);
+}
+
+void InteractiveTraitImpl::OnTapInternal(Actor actor, TapGesture event)
+{
+  OnTap(View::DownCast(actor), event);
+}
+
+void InteractiveTraitImpl::OnLongPressedInternal(Actor actor, LongPressGesture event)
+{
+  // NOTE OnLongPressedInternal will invoke this method twice: once for Start and once for Finished.
+  if(event.GetState() == GestureState::STARTED)
+  {
+    InputEvent inputEvent = InputEvent::New(event);
+    mClickBlockedByTouch  = OnLongPressed(View::DownCast(actor), inputEvent);
+  }
+}
+
+void InteractiveTraitImpl::RecordPressedExecutionKey(const Dali::String& keyName)
+{
+  if(!mPressedExecutionKey || *mPressedExecutionKey == keyName)
+  {
+    if(!mPressedExecutionKey)
+    {
+      mPressedExecutionKey = MakeUnique<Dali::String>(keyName);
+    }
+    else
+    {
+      *mPressedExecutionKey = keyName;
+    }
+    mPressedExecutionKeyCount++;
+  }
+}
+
+void InteractiveTraitImpl::ClearKeyPressedHistory()
+{
+  mPressedExecutionKey.Reset();
+  mPressedExecutionKeyCount = 0;
+}
+
+void InteractiveTraitImpl::SetPressedInternal(bool value, InputEvent event)
+{
+  if(value == mPressed)
+  {
+    return;
+  }
+
+  mPressed = value;
+
+  View owner = mOwner.GetHandle();
+  if(owner)
+  {
+    IntegrationView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
+  }
+
+  OnPressedChanged(owner, event);
+}
+
+bool InteractiveTraitImpl::ShouldTapTriggerClicked() const
+{
+  return mClickable && !mClickBlockedByTouch;
+}
+
+bool InteractiveTraitImpl::ShouldKeyReleaseTriggerClicked() const
+{
+  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE && !mClickBlockedByKey;
+}
+
+bool InteractiveTraitImpl::ShouldKeyPressTriggerClicked() const
+{
+  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_PRESS && (mPressedExecutionKeyCount == 1);
+}
+
+bool InteractiveTraitImpl::ShouldKeyPressTriggerLongPressed() const
+{
+  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
+         (mPressedExecutionKeyCount >= UiConfigManager::Get().GetConfig().GetKeyLongPressThreshold());
+}
+
+} // namespace Dali::Ui::Integration
+
+exec
+/bin/bash -lc "sed -n '330,680p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  view.SetClickable(true);
+  DALI_TEST_CHECK(view.IsClickable());
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewPseudoDisabledP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  DALI_TEST_CHECK(!view.IsPseudoDisabled());
+
+  view.SetPseudoDisabled(true);
+  DALI_TEST_CHECK(view.IsPseudoDisabled());
+
+  view.SetPseudoDisabled(false);
+  DALI_TEST_CHECK(!view.IsPseudoDisabled());
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewKeyClickPolicyP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(view.GetKeyClickPolicy()),
+                   static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+// ============================================================================
+// ClickedSignal via tap
+// ============================================================================
+
+int UtcDaliInteractiveViewClickedSignalP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  ClickedSignalData    data;
+  ClickedSignalFunctor functor(data);
+  view.ClickedSignal().Connect(&application, functor);
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  END_TEST;
+}
+
+// ============================================================================
+// PressedChangedSignal via touch
+// ============================================================================
+
+int UtcDaliInteractiveViewPressedChangedSignalP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  view.PressedChangedSignal().Connect(&application, functor);
+
+  // Touch down
+  Dali::Integration::TouchEvent touchDown;
+  Dali::Integration::Point      point;
+  point.SetState(PointState::DOWN);
+  point.SetScreenPosition(Vector2(50.0f, 50.0f));
+  point.SetDeviceId(1);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchDown.points.push_back(point);
+  touchDown.time = 100;
+  application.ProcessEvent(touchDown);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.pressed);
+  DALI_TEST_CHECK(view.IsPressed());
+
+  data.Reset();
+
+  // Touch up
+  Dali::Integration::TouchEvent touchUp;
+  Dali::Integration::Point      pointUp;
+  pointUp.SetState(PointState::FINISHED);
+  pointUp.SetScreenPosition(Vector2(50.0f, 50.0f));
+  pointUp.SetDeviceId(1);
+  pointUp.SetDeviceClass(Device::Class::TOUCH);
+  pointUp.SetDeviceSubclass(Device::Subclass::NONE);
+  touchUp.points.push_back(pointUp);
+  touchUp.time = 120;
+  application.ProcessEvent(touchUp);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(!view.IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewSceneDisconnectionClearsPressedP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  view.PressedChangedSignal().Connect(&application, functor);
+
+  Dali::Integration::TouchEvent touchDown;
+  Dali::Integration::Point      point;
+  point.SetState(PointState::DOWN);
+  point.SetScreenPosition(Vector2(50.0f, 50.0f));
+  point.SetDeviceId(1);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchDown.points.push_back(point);
+  touchDown.time = 100;
+  application.ProcessEvent(touchDown);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.pressed);
+  DALI_TEST_CHECK(view.IsPressed());
+
+  data.Reset();
+
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(!view.IsPressed());
+  END_TEST;
+}
+
+// ============================================================================
+// LongPressedSignal
+// ============================================================================
+
+int UtcDaliInteractiveViewLongPressedSignalP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  LongPressedSignalData    data;
+  LongPressedSignalFunctor functor(data);
+  view.LongPressedSignal().Connect(&application, functor);
+
+  TestGenerateLongPress(application, 50.0f, 50.0f);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  END_TEST;
+}
+
+// ============================================================================
+// ConnectClickedSignal chain helper
+// ============================================================================
+
+int UtcDaliInteractiveViewConnectClickedSignalP(void)
+{
+  UiTestApplication application;
+
+  ClickedSignalData    data;
+  ClickedSignalFunctor functor(data);
+
+  InteractiveView view = InteractiveView::New();
+  view.SetRequestedWidth(100.0f)
+      .SetRequestedHeight(100.0f)
+      .SetPivot(Pivot::TOP_LEFT)
+      .SetParentOrigin(ParentOrigin::TOP_LEFT)
+      .ConnectClickedSignal(&application, functor);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  DALI_TEST_CHECK(data.called);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewConnectClickedSignalAccumulatesP(void)
+{
+  UiTestApplication application;
+
+  ClickedSignalData    data1;
+  ClickedSignalFunctor functor1(data1);
+  ClickedSignalData    data2;
+  ClickedSignalFunctor functor2(data2);
+
+  InteractiveView view = CreateTestInteractiveView(application);
+  view.ConnectClickedSignal(&application, functor1);
+  view.ConnectClickedSignal(&application, functor2);
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  DALI_TEST_CHECK(data1.called);
+  DALI_TEST_CHECK(data2.called);
+  END_TEST;
+}
+
+// ============================================================================
+// ConnectPressedChangedSignal chain helper
+// ============================================================================
+
+int UtcDaliInteractiveViewConnectPressedChangedSignalP(void)
+{
+  UiTestApplication application;
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+
+  InteractiveView view = InteractiveView::New();
+  view.SetRequestedWidth(100.0f)
+      .SetRequestedHeight(100.0f)
+      .SetPivot(Pivot::TOP_LEFT)
+      .SetParentOrigin(ParentOrigin::TOP_LEFT)
+      .ConnectPressedChangedSignal(&application, functor);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  // Touch down
+  Dali::Integration::TouchEvent touchDown;
+  Dali::Integration::Point      point;
+  point.SetState(PointState::DOWN);
+  point.SetScreenPosition(Vector2(50.0f, 50.0f));
+  point.SetDeviceId(1);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchDown.points.push_back(point);
+  touchDown.time = 100;
+  application.ProcessEvent(touchDown);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.pressed);
+  END_TEST;
+}
+
+// ============================================================================
+// ConnectLongPressedSignal chain helper
+// ============================================================================
+
+int UtcDaliInteractiveViewConnectLongPressedSignalP(void)
+{
+  UiTestApplication application;
+
+  LongPressedSignalData    data;
+  LongPressedSignalFunctor functor(data);
+
+  InteractiveView view = InteractiveView::New();
+  view.SetRequestedWidth(100.0f)
+      .SetRequestedHeight(100.0f)
+      .SetPivot(Pivot::TOP_LEFT)
+      .SetParentOrigin(ParentOrigin::TOP_LEFT)
+      .ConnectLongPressedSignal(&application, functor);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  TestGenerateLongPress(application, 50.0f, 50.0f);
+
+  DALI_TEST_CHECK(data.called);
+  END_TEST;
+}
+
+// ============================================================================
+// InteractiveEventReceiverInterface virtual dispatch tests
+// ============================================================================
+
+int UtcDaliInteractiveViewOnClickedVirtualP(void)
+{
+  UiTestApplication application;
+
+  auto impl = TestInteractiveViewImpl::New();
+
+  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  DALI_TEST_CHECK(impl->clickedCalled);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewOnPressedChangedVirtualP(void)
+{
+  UiTestApplication application;
+
+  auto impl = TestInteractiveViewImpl::New();
+
+  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+
+  // Touch down
+  Dali::Integration::TouchEvent touchDown;
+  Dali::Integration::Point      point;
+  point.SetState(PointState::DOWN);
+  point.SetScreenPosition(Vector2(50.0f, 50.0f));
+  point.SetDeviceId(1);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchDown.points.push_back(point);
+  touchDown.time = 100;
+  application.ProcessEvent(touchDown);
+
+  DALI_TEST_CHECK(impl->pressedChangedCalled);
+  DALI_TEST_CHECK(impl->pressedValue);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewOnLongPressedVirtualP(void)
+{
+  UiTestApplication application;
+
+  auto impl = TestInteractiveViewImpl::New();
+
+  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+
+  TestGenerateLongPress(application, 50.0f, 50.0f);
+
+  DALI_TEST_CHECK(impl->longPressedCalled);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewOnLongPressedSuppressesClickP(void)
+{
+  UiTestApplication application;
+
+  auto impl             = TestInteractiveViewImpl::New();
+  impl->longPressedConsumed = true;
+
+  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+
+  ClickedSignalData    clickData;
+  ClickedSignalFunctor clickFunctor(clickData);
+  view.ClickedSignal().Connect(&application, clickFunctor);
+
+  TestGenerateLongPress(application, 50.0f, 50.0f);
+  TestEndLongPress(application, 50.0f, 50.0f);
+
+  DALI_TEST_CHECK(impl->longPressedCalled);
+  DALI_TEST_CHECK(!clickData.called);
+  END_TEST;
+}
+
+// ============================================================================
+
+exec
+/bin/bash -lc "sed -n '680,900p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// ============================================================================
+// Virtual + Signal both called
+// ============================================================================
+
+int UtcDaliInteractiveViewVirtualAndSignalBothCalledP(void)
+{
+  UiTestApplication application;
+
+  auto impl = TestInteractiveViewImpl::New();
+
+  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+
+  ClickedSignalData    signalData;
+  ClickedSignalFunctor signalFunctor(signalData);
+  view.ClickedSignal().Connect(&application, signalFunctor);
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  // Both virtual and signal should be called
+  DALI_TEST_CHECK(impl->clickedCalled);
+  DALI_TEST_CHECK(signalData.called);
+  END_TEST;
+}
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/samples/animation/animation-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using Dali::Ui::View;
+
+/**
+ * Demonstrates the typed animation API with both Bridge and Spec patterns.
+ *
+ * - Tap the red box: fade out using View-first Bridge pattern
+ * - Tap the blue box: fade in using Spec-first pattern
+ */
+class AnimationExample : public ConnectionTracker
+{
+public:
+  AnimationExample(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AnimationExample::Create);
+  }
+
+  ~AnimationExample() = default;
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Build a reusable fade-in spec
+    mFadeInSpec = View::NewAnimationSpec()
+      .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
+
+    window.Add(Layout::New()
+      .Children({
+        InteractiveView::New()
+          .SetBackgroundColor(UiColor(0xFF0000))
+          .SetRequestedWidth(200_spx)
+          .SetRequestedHeight(200_spx)
+          .ConnectClickedSignal(this, &AnimationExample::OnRedClicked)
+          .As(mRedBox),
+        InteractiveView::New()
+          .SetBackgroundColor(UiColor(0x0000FF))
+          .SetOpacity(0.3f)
+          .SetRequestedWidth(200_spx)
+          .SetRequestedHeight(200_spx)
+          .SetRequestedPositionX(220_spx)
+          .ConnectClickedSignal(this, &AnimationExample::OnBlueClicked)
+          .As(mBlueBox),
+      }));
+  }
+
+  void OnRedClicked(View view, InputEvent e)
+  {
+    // View-first: Bridge pattern (stack-allocated, zero heap)
+    auto anim = Animation::New();
+    view.Animate(anim)
+      .BackgroundColor(UiColor::PRIMARY, 500_ms)
+      .PositionY(50.0f, 300_ms, AlphaFunction::EASE_OUT);
+
+    anim.Play();
+  }
+
+  void OnBlueClicked(View view, InputEvent e)
+  {
+    // Spec-first: reusable spec applied to Animation
+    auto anim = Animation::New();
+    mFadeInSpec.ApplyTo(anim, view);
+    anim.Play();
+  }
+
+private:
+  Application&       mApplication;
+  View               mRedBox;
+  View               mBlueBox;
+  ViewAnimationSpec  mFadeInSpec;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  AnimationExample example(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "sed -n '60,105p' repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
+    mRoot.Add(greenBox);
+
+    // Blue box: lower-right area
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
+    mRoot.Add(blueBox);
+
+    // Toggle button: 200x50 translucent-black standalone child at top-left
+    // with a centered white "Change LayoutDirection" label.
+    InteractiveView toggleBtn = InteractiveView::New();
+    toggleBtn.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.5f));
+    toggleBtn.SetRequestedWidth(200.0f);
+    toggleBtn.SetRequestedHeight(50.0f);
+    toggleBtn.SetRequestedPositionX(0.0f);
+    toggleBtn.SetRequestedPositionY(0.0f);
+    toggleBtn.SetLayoutMode(LayoutMode::STANDALONE);
+    toggleBtn.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
+    toggleBtn.Add(Label::New("Change LayoutDirection")
+      .SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER));
+    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+      mIsRtl = !mIsRtl;
+      mRoot.SetLayoutDirection(mIsRtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);
+      return true;
+    });
+    mRoot.Add(toggleBtn);
+
+    window.Add(mRoot);
+    window.KeyEventSignal().Connect(this, &AbsoluteLayoutDirectionController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+
+exec
+/bin/bash -lc "sed -n '250,340p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// ============================================================================
+// Construction / Handle tests
+// ============================================================================
+
+int UtcDaliInteractiveViewNewP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = InteractiveView::New();
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewCopyConstructorP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = InteractiveView::New();
+  InteractiveView   copy(view);
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(copy == view);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewMoveConstructorP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = InteractiveView::New();
+  InteractiveView   moved(std::move(view));
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!view); // NOLINT(bugprone-use-after-move)
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewDownCastP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = InteractiveView::New();
+  BaseHandle        handle(view);
+  InteractiveView   downcast = InteractiveView::DownCast(handle);
+  DALI_TEST_CHECK(downcast);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewDownCastN(void)
+{
+  UiTestApplication application;
+  BaseHandle        handle;
+  InteractiveView   downcast = InteractiveView::DownCast(handle);
+  DALI_TEST_CHECK(!downcast);
+  END_TEST;
+}
+
+// ============================================================================
+// InteractiveView has InteractiveTrait by default
+// ============================================================================
+
+int UtcDaliInteractiveViewIsInteractiveByDefaultP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = InteractiveView::New();
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(view.IsClickable());
+  DALI_TEST_CHECK(!view.IsPressed());
+  END_TEST;
+}
+
+// ============================================================================
+// API delegation tests
+// ============================================================================
+
+int UtcDaliInteractiveViewSetClickableP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  view.SetClickable(false);
+  DALI_TEST_CHECK(!view.IsClickable());
+
+  view.SetClickable(true);
+  DALI_TEST_CHECK(view.IsClickable());
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewPseudoDisabledP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  DALI_TEST_CHECK(!view.IsPseudoDisabled());
+
+exec
+/bin/bash -lc 'rg -n "mPseudoDisabled|SetPseudoDisabled|IsPseudoDisabled|mClickable|SetClickable" repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.*' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:93:   * @copydoc Dali::Ui::InteractiveTrait::IsPseudoDisabled
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:95:  bool IsPseudoDisabled() const;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:98:   * @copydoc Dali::Ui::InteractiveTrait::SetPseudoDisabled
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:100:  void SetPseudoDisabled(bool pseudoDisabled);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:108:   * @copydoc Dali::Ui::InteractiveTrait::SetClickable
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:110:  void SetClickable(bool clickable);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:228:  Signal<void(View, bool)>             mPseudoDisabledChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:234:  bool                                 mPseudoDisabled : 1;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:236:  bool                                 mClickable : 1;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:38:  mPseudoDisabledChangedSignal(),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:42:  mPseudoDisabled(false),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:44:  mClickable(true),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:78:  return mPseudoDisabledChangedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:97:bool InteractiveTraitImpl::IsPseudoDisabled() const
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:99:  return mPseudoDisabled;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:102:void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:104:  if(mPseudoDisabled == pseudoDisabled)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:108:  mPseudoDisabled = pseudoDisabled;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:116:  if(mPseudoDisabled && mPressed)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:121:  mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:126:  return mClickable;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:129:void InteractiveTraitImpl::SetClickable(bool clickable)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:131:  mClickable = clickable;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:418:  return mClickable && !mClickBlockedByTouch;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:423:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE && !mClickBlockedByKey;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:428:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_PRESS && (mPressedExecutionKeyCount == 1);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:433:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
+
+exec
+/bin/bash -lc "sed -n '30,150p' repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+namespace Dali::Ui::Integration
+{
+
+InteractiveTraitImpl::InteractiveTraitImpl()
+: TraitImpl(),
+  mTapGestureDetector(TapGestureDetector::New()),
+  mPressedChangedSignal(),
+  mPseudoDisabledChangedSignal(),
+  mKeyClickPolicy(UiConfigManager::Get().GetConfig().GetKeyClickPolicy()),
+  mPressedExecutionKey(),
+  mPressedExecutionKeyCount(0),
+  mPseudoDisabled(false),
+  mPressed(false),
+  mClickable(true),
+  mClickBlockedByTouch(false),
+  mClickBlockedByKey(false)
+{
+  Dali::Integration::SetTapRecognizerTime(UiConfigManager::Get().GetConfig().GetTapRecognizerTime());
+
+  mTapGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnTapInternal);
+}
+
+InteractiveTraitImpl::~InteractiveTraitImpl()
+{
+}
+
+void InteractiveTraitImpl::EnableLongPressDetection()
+{
+  if(!mLongPressGestureDetector)
+  {
+    mLongPressGestureDetector = LongPressGestureDetector::New();
+    mLongPressGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnLongPressedInternal);
+    View owner = mOwner.GetHandle();
+    if(owner)
+    {
+      mLongPressGestureDetector.Attach(owner);
+    }
+  }
+}
+
+Signal<void(View, bool, InputEvent)>& InteractiveTraitImpl::PressedChangedSignal()
+{
+  return mPressedChangedSignal;
+}
+
+Signal<void(View, bool)>& InteractiveTraitImpl::PseudoDisabledChangedSignal()
+{
+  return mPseudoDisabledChangedSignal;
+}
+
+Signal<void(View, InputEvent)>& InteractiveTraitImpl::ClickedSignal()
+{
+  return mClickedSignal;
+}
+
+Signal<bool(View, InputEvent)>& InteractiveTraitImpl::LongPressedSignal()
+{
+  EnableLongPressDetection();
+  return mLongPressedSignal;
+}
+
+bool InteractiveTraitImpl::IsPressed() const
+{
+  return mPressed;
+}
+
+bool InteractiveTraitImpl::IsPseudoDisabled() const
+{
+  return mPseudoDisabled;
+}
+
+void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
+{
+  if(mPseudoDisabled == pseudoDisabled)
+  {
+    return;
+  }
+  mPseudoDisabled = pseudoDisabled;
+
+  View owner = mOwner.GetHandle();
+  if(owner)
+  {
+    IntegrationView::SetState(GetImpl(owner), ViewState::PSEUDO_DISABLED, pseudoDisabled);
+  }
+
+  if(mPseudoDisabled && mPressed)
+  {
+    SetPressedInternal(false, InputEvent::None());
+  }
+
+  mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
+}
+
+bool InteractiveTraitImpl::IsClickable() const
+{
+  return mClickable;
+}
+
+void InteractiveTraitImpl::SetClickable(bool clickable)
+{
+  mClickable = clickable;
+}
+
+KeyClickPolicy InteractiveTraitImpl::GetKeyClickPolicy() const
+{
+  return mKeyClickPolicy;
+}
+
+void InteractiveTraitImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+{
+  mKeyClickPolicy = policy;
+}
+
+void InteractiveTraitImpl::OnFocusedChanged(View view, bool focused)
+{
+  mClickBlockedByTouch = false;
+
+  if(!focused)
+  {
+    ClearKeyPressedHistory();
+
+codex
+---
+title: Interactive View
+sidebar_label: Interactive View
+category: views-components
+---
+
+# Interactive View
+
+`Dali::Ui::InteractiveView` is the dali-ui `View` type for clickable, press-aware UI surfaces.
+
+## Table of Contents
+
+- [Create an Interactive Surface](#create-an-interactive-surface)
+- [Handle Clicks](#handle-clicks)
+- [Control Keyboard Click Timing](#control-keyboard-click-timing)
+- [Track Pressed and Pseudo Disabled State](#track-pressed-and-pseudo-disabled-state)
+- [Handle Long Press](#handle-long-press)
+- [Use InteractiveView in Typed Handles](#use-interactiveview-in-typed-handles)
+
+## Create an Interactive Surface
+
+Use `Dali::Ui::InteractiveView::New()` when a plain dali-ui `View` should receive interaction events directly. `Dali::Ui::InteractiveView` is already clickable by default, and `SetClickable()` lets you enable or suppress click generation without changing the object model.
+
+```cpp
+#include <dali-ui-foundation/public-api/interactive-view.h>
+
+class PanelController
+{
+public:
+  void Create()
+  {
+    Dali::Ui::InteractiveView panel =
+      Dali::Ui::InteractiveView::New()
+        .SetClickable(true)
+        .SetPseudoDisabled(false)
+        .SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_RELEASE);
+
+    const bool canClick = panel.IsClickable();
+    const bool disabled = panel.IsPseudoDisabled();
+
+    (void)canClick;
+    (void)disabled;
+  }
+};
+```
+
+`SetClickable(false)` prevents click activation while keeping the `Dali::Ui::InteractiveView` handle and its configured signals intact.
+
+```cpp
+void SetBusy(Dali::Ui::InteractiveView view, bool busy)
+{
+  view
+    .SetClickable(!busy)
+    .SetPseudoDisabled(busy);
+}
+```
+
+## Handle Clicks
+
+`ClickedSignal()` returns a `Dali::Signal` with callback shape `void(Dali::Ui::View, Dali::Ui::InputEvent)`. The first argument is the source `Dali::Ui::View`, so handlers can stay written against the app-facing view model.
+
+For concise setup, prefer `ConnectClickedSignal()` on `Dali::Ui::InteractiveView`. It returns the same `Dali::Ui::InteractiveView`, so it fits fluent construction.
+
+```cpp
+class ClickController
+{
+public:
+  void Create()
+  {
+    mButton =
+      Dali::Ui::InteractiveView::New()
+        .SetClickable(true)
+        .ConnectClickedSignal(this, &ClickController::OnClicked);
+  }
+
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    ++mClickCount;
+
+    (void)view;
+    (void)event;
+  }
+
+private:
+  Dali::Ui::InteractiveView mButton;
+  int                       mClickCount{0};
+};
+```
+
+You can also connect directly to `ClickedSignal()` when you want to work with the returned signal object.
+
+```cpp
+class DirectSignalController
+{
+public:
+  void Create()
+  {
+    mButton = Dali::Ui::InteractiveView::New();
+
+    mButton.ClickedSignal().Connect(
+      this,
+      &DirectSignalController::OnClicked);
+  }
+
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    mLastClicked = view;
+    (void)event;
+  }
+
+private:
+  Dali::Ui::InteractiveView mButton;
+  Dali::Ui::View            mLastClicked;
+};
+```
+
+## Control Keyboard Click Timing
+
+`SetKeyClickPolicy()` controls how key input becomes a click. Use `Dali::Ui::KeyClickPolicy::ON_RELEASE` to emit clicked on release, `Dali::Ui::KeyClickPolicy::ON_PRESS` to emit clicked on press, or `Dali::Ui::KeyClickPolicy::DISABLED` to prevent key input from producing click events.
+
+```cpp
+class KeyClickController
+{
+public:
+  void UseReleaseActivation()
+  {
+    mActionView.SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_RELEASE);
+  }
+
+  void UseImmediateActivation()
+  {
+    mActionView.SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_PRESS);
+  }
+
+  void DisableKeyActivation()
+  {
+    mActionView.SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::DISABLED);
+  }
+
+  bool IsImmediateActivation() const
+  {
+    return mActionView.GetKeyClickPolicy() == Dali::Ui::KeyClickPolicy::ON_PRESS;
+  }
+
+private:
+  Dali::Ui::InteractiveView mActionView{Dali::Ui::InteractiveView::New()};
+};
+```
+
+Keyboard policy and pointer clickability are separate controls. A view can remain pointer-clickable while key-triggered clicks are disabled.
+
+```cpp
+Dali::Ui::InteractiveView MakePointerOnlyAction()
+{
+  return Dali::Ui::InteractiveView::New()
+    .SetClickable(true)
+    .SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::DISABLED);
+}
+```
+
+## Track Pressed and Pseudo Disabled State
+
+`PressedChangedSignal()` reports transitions into and out of pressed state with callback shape `void(Dali::Ui::View, bool, Dali::Ui::InputEvent)`. Use `IsPressed()` when later code needs the current state.
+
+```cpp
+class PressController
+{
+public:
+  void Create()
+  {
+    mSurface =
+      Dali::Ui::InteractiveView::New()
+        .ConnectPressedChangedSignal(this, &PressController::OnPressedChanged);
+  }
+
+  void OnPressedChanged(
+    Dali::Ui::View       view,
+    bool                 pressed,
+    Dali::Ui::InputEvent event)
+  {
+    mPressed = pressed;
+
+    const bool currentState = mSurface.IsPressed();
+
+    (void)view;
+    (void)event;
+    (void)currentState;
+  }
+
+private:
+  Dali::Ui::InteractiveView mSurface;
+  bool                      mPressed{false};
+};
+```
+
+`SetPseudoDisabled()` changes the pseudo disabled state and `PseudoDisabledChangedSignal()` reports that state with callback shape `void(Dali::Ui::View, bool)`. When pseudo disabled is set while the view is pressed, the pressed state is cleared.
+
+```cpp
+class DisabledStateController
+{
+public:
+  void Create()
+  {
+    mSurface = Dali::Ui::InteractiveView::New();
+
+    mSurface.PseudoDisabledChangedSignal().Connect(
+      this,
+      &DisabledStateController::OnPseudoDisabledChanged);
+  }
+
+  void SetUnavailable(bool unavailable)
+  {
+    mSurface.SetPseudoDisabled(unavailable);
+  }
+
+  void OnPseudoDisabledChanged(Dali::Ui::View view, bool pseudoDisabled)
+  {
+    mUnavailable = pseudoDisabled;
+
+    (void)view;
+  }
+
+private:
+  Dali::Ui::InteractiveView mSurface;
+  bool                      mUnavailable{false};
+};
+```
+
+## Handle Long Press
+
+`LongPressedSignal()` uses callback shape `bool(Dali::Ui::View, Dali::Ui::InputEvent)`. Return `true` when the long press consumes the interaction and should suppress the later click. Return `false` when the click may still be emitted.
+
+```cpp
+class LongPressController
+{
+public:
+  void Create()
+  {
+    mSurface =
+      Dali::Ui::InteractiveView::New()
+        .ConnectClickedSignal(this, &LongPressController::OnClicked)
+        .ConnectLongPressedSignal(this, &LongPressController::OnLongPressed);
+  }
+
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    ++mClickCount;
+
+    (void)view;
+    (void)event;
+  }
+
+  bool OnLongPressed(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    ++mLongPressCount;
+
+    (void)view;
+    (void)event;
+
+    return true;
+  }
+
+private:
+  Dali::Ui::InteractiveView mSurface;
+  int                       mClickCount{0};
+  int                       mLongPressCount{0};
+};
+```
+
+If your long-press action is supplemental rather than exclusive, return `false`.
+
+```cpp
+bool ShowPreviewWithoutConsuming(
+  Dali::Ui::View       view,
+  Dali::Ui::InputEvent event)
+{
+  (void)view;
+  (void)event;
+
+  return false;
+}
+```
+
+## Use InteractiveView in Typed Handles
+
+`Dali::Ui::InteractiveView::DownCast()` converts a compatible base handle back to `Dali::Ui::InteractiveView`. Use it when a generic handle is known to come from an interactive view-producing API.
+
+```cpp
+Dali::Ui::InteractiveView AsInteractiveView(Dali::BaseHandle handle)
+{
+  Dali::Ui::InteractiveView view =
+    Dali::Ui::InteractiveView::DownCast(handle);
+
+  if(view)
+  {
+    view.SetClickable(true);
+  }
+
+  return view;
+}
+```
+
+The generated header `interactive-view.autogen.h` provides `DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS` for dali-ui handle types that derive from `Dali::Ui::InteractiveView`. It forwards interactive setters and signal helpers so derived handles can keep their own fluent return type.
+
+```cpp
+class ToolbarAction : public Dali::Ui::InteractiveView
+{
+public:
+  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(ToolbarAction)
+};
+```
+
+Application code normally consumes the resulting typed fluent API through the concrete handle. The inherited methods still map to the `Dali::Ui::InteractiveView` behavior.
+
+```cpp
+void ConfigureToolbarAction(ToolbarAction action)
+{
+  action
+    .SetClickable(true)
+    .SetPseudoDisabled(false)
+    .SetKeyClickPolicy(Dali::Ui::KeyClickPolicy::ON_RELEASE);
+}
+```
+tokens used
+38,847
