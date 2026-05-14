@@ -6,98 +6,70 @@ category: views-components
 
 # Trait Id
 
-TraitId is a lightweight identifier used to uniquely distinguish trait types attached to a View. Each trait type receives a unique ID via `TraitId::Alloc()`, enabling the framework to manage trait lifecycle and attachment.
+`TraitId` is a lightweight handle representing a unique identifier for traits attached to `View` objects. Each trait type requires a unique `TraitId` to distinguish it from other traits on the same view.
 
 ## Table of Contents
 
-- [Allocating Trait IDs](#allocating-trait-ids)
-- [Comparing Trait IDs](#comparing-trait-ids)
-- [Using Trait IDs with Traits](#using-trait-ids-with-traits)
+- [Allocating Trait Identifiers](#allocating-trait-identifiers)
+- [Comparing TraitId Values](#comparing-traitid-values)
+- [Reserved Trait IDs](#reserved-trait-ids)
 
-## Allocating Trait IDs
+## Allocating Trait Identifiers
 
-The `TraitId::Alloc()` static method allocates a new unique identifier. This method is thread-safe and lock-free, using an internal atomic counter. Allocate IDs once per logical trait type and store them statically.
-
-```cpp
-// Allocate a unique ID for a custom trait (typically in an anonymous namespace or as a static)
-static const TraitId kMyScrollStateTrait = TraitId::Alloc();
-```
-
-Each call to `TraitId::Alloc()` returns a new unique `TraitId`. The framework guarantees that allocated IDs do not conflict with each other.
+Use `TraitId::Alloc()` to allocate a unique identifier for each custom trait type. Call this method once per trait type and store the result in a static variable to ensure consistent identification throughout the application lifetime.
 
 ```cpp
-// Each trait type gets its own unique ID
-static const TraitId kInputValidationTrait = TraitId::Alloc();
-static const TraitId kAnimationStateTrait = TraitId::Alloc();
-
-// These will have different values
-DALI_ASSERT_ALWAYS(kInputValidationTrait != kAnimationStateTrait);
+// Allocate a unique ID for a custom trait (typically in an anonymous namespace)
+static const TraitId kMyCustomTrait = TraitId::Alloc();
 ```
 
-## Comparing Trait IDs
+The `TraitId::Alloc()` method is thread-safe and lock-free, using an internal atomic counter. Each call returns a new unique `TraitId` value.
 
-`TraitId` provides equality and inequality operators for comparing identifiers. Use these to check if a given ID matches an expected trait type.
+## Comparing TraitId Values
+
+`TraitId` provides equality and inequality operators for comparing identifier values. Use these to verify trait identity when working with trait identifiers.
 
 ```cpp
 TraitId id1 = TraitId::Alloc();
 TraitId id2 = TraitId::Alloc();
-TraitId id1Copy = id1;
+TraitId id3 = id1;
 
-// Equality comparison
-if (id1 == id1Copy)
+// Compare for equality
+if (id1 == id3)
 {
-  // Same ID value
+  // id1 and id3 have the same value
 }
 
-// Inequality comparison
+// Compare for inequality
 if (id1 != id2)
 {
-  // Different IDs
+  // id1 and id2 have different values (each Alloc() returns a unique ID)
 }
 ```
 
-The `value` member provides direct access to the underlying `uint32_t` value, primarily for debugging or logging purposes.
+Access the underlying numeric value through the `value` member when logging or debugging:
 
 ```cpp
 TraitId id = TraitId::Alloc();
-uint32_t rawValue = id.value;  // Access the raw numeric value
+uint32_t numericValue = id.value;
 ```
 
-## Using Trait IDs with Traits
+## Reserved Trait IDs
 
-`TraitId` is passed to trait lifecycle callbacks when a `Trait` is attached to or detached from a `View`. This allows trait implementations to identify which trait type triggered the callback.
+The framework reserves a set of predefined `TraitId` constants in the `Dali::Ui::Integration::ReservedTraitId` namespace for internal use. These identifiers support built-in framework features such as layout parameters and interaction handling.
 
-```cpp
-class MyTraitImpl : public Dali::Ui::Integration::TraitImpl
-{
-public:
-  void OnAttached(Dali::Ui::TraitId id, Dali::Ui::View& view) override
-  {
-    // The id parameter identifies this trait's unique identifier
-    if (id == kMyCustomTrait)
-    {
-      // Perform attachment logic
-    }
-  }
+Framework-reserved identifiers include:
 
-  void OnDetached(Dali::Ui::TraitId id, Dali::Ui::View& view) override
-  {
-    // Handle detachment
-  }
-};
-```
+- `Dali::Ui::Integration::ReservedTraitId::INTERACTION_TRAIT` — Interaction behavior trait
+- `Dali::Ui::Integration::ReservedTraitId::SELECTABLE_TRAIT` — Selection state trait
+- `Dali::Ui::Integration::ReservedTraitId::STATE_HANDLER_TRAIT` — State handling trait
+- `Dali::Ui::Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS` — Absolute layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::STACK_LAYOUT_PARAMS` — Stack layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::GRID_LAYOUT_PARAMS` — Grid layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS` — Flex layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::LAYOUT_MANAGER` — Layout manager trait
+- `Dali::Ui::Integration::ReservedTraitId::LAYOUT_SIGNALS` — Layout signal trait
+- `Dali::Ui::Integration::ReservedTraitId::INTERACTION_EFFECT` — Interaction effect trait
+- `Dali::Ui::Integration::ReservedTraitId::INTERACTION_EFFECT_DATA` — Interaction effect data
 
-Framework-reserved trait IDs are defined in the `Dali::Ui::Integration::ReservedTraitId` namespace. Application code should allocate custom IDs using `TraitId::Alloc()` rather than using reserved IDs.
-
-```cpp
-// Example: Framework-reserved IDs defined in ReservedTraitId namespace
-// (Do not use these for custom traits; allocate your own with TraitId::Alloc())
-namespace Dali::Ui::Integration::ReservedTraitId
-{
-  extern const TraitId INTERACTION_TRAIT;
-  extern const TraitId SELECTABLE_TRAIT;
-  extern const TraitId STATE_HANDLER_TRAIT;
-  extern const TraitId LAYOUT_MANAGER;
-  // ... and others
-}
-```
+Application code should allocate custom `TraitId` values via `TraitId::Alloc()` rather than using reserved identifiers.

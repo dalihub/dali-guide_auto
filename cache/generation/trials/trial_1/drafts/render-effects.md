@@ -6,186 +6,263 @@ category: images-visuals
 
 # Render Effects
 
-Render effects apply real-time visual effects such as blur and masking to views in your dali-ui application. Each effect inherits from `RenderEffect` and is attached to a `View` using `SetRenderEffect()`.
+Render effects provide real-time visual effects that can be applied to `Dali::Ui::View` objects. The dali-ui framework offers blur effects and masking capabilities through a unified `RenderEffect` interface.
 
 ## Table of Contents
 
-- [Applying Render Effects](#applying-render-effects)
+- [Applying Render Effects to Views](#applying-render-effects-to-views)
 - [Gaussian Blur Effect](#gaussian-blur-effect)
 - [Background Blur Effect](#background-blur-effect)
 - [Mask Effect](#mask-effect)
 - [Animating Blur Effects](#animating-blur-effects)
-- [Effect Lifecycle](#effect-lifecycle)
+- [Activation and Refresh](#activation-and-refresh)
 
-## Applying Render Effects
+---
 
-A `View` can have at most one render effect attached at a time. Use `SetRenderEffect()` to attach an effect, `GetRenderEffect()` to retrieve it, and `ClearRenderEffect()` to remove it.
+## Applying Render Effects to Views
+
+All render effects inherit from `Dali::Ui::RenderEffect`. A view can have at most one render effect at a time. Use `SetRenderEffect()` to apply an effect, and `ClearRenderEffect()` to remove it.
 
 ```cpp
-// Create and attach a blur effect
-auto blurEffect = Dali::Ui::GaussianBlurEffect::New(20);
+// Create a view
+Ui::View view = Ui::View::New();
+view.SetRequestedWidth(200.0f);
+view.SetRequestedHeight(200.0f);
+view.SetBackgroundColor(UiColor(0x3A6D75));
+
+// Apply a render effect
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(60u);
 view.SetRenderEffect(blurEffect);
 
-// Later, clear the effect
+// Remove the effect
 view.ClearRenderEffect();
 ```
 
-When you call `SetRenderEffect()`, the effect is automatically activated. Calling `ClearRenderEffect()` deactivates the effect.
+The effect activates automatically when set on a view. You can manually control activation using `Activate()` and `Deactivate()`:
+
+```cpp
+Ui::GaussianBlurEffect effect = Ui::GaussianBlurEffect::New(30u);
+view.SetRenderEffect(effect);
+
+// Temporarily disable the effect
+effect.Deactivate();
+
+// Re-enable the effect
+effect.Activate();
+
+// Check activation state
+if (effect.IsActivated())
+{
+  // Effect is active
+}
+```
+
+---
 
 ## Gaussian Blur Effect
 
-`GaussianBlurEffect` applies a Gaussian blur to the owner view and all its children. The effect renders the view content to an offscreen buffer and applies a two-pass blur algorithm.
+`Dali::Ui::GaussianBlurEffect` applies a Gaussian blur to the owner view and all its children. This is useful for creating frosted glass appearances or focus-based visual states.
 
-### Creating a Gaussian Blur
+### Creating a Gaussian Blur Effect
 
-Create a blur effect with a specific radius:
-
-```cpp
-// Create with default radius (10 units)
-auto defaultBlur = Dali::Ui::GaussianBlurEffect::New();
-
-// Create with custom radius
-auto blurEffect = Dali::Ui::GaussianBlurEffect::New(25);
-view.SetRenderEffect(blurEffect);
-```
-
-### Configuring Blur Parameters
-
-Control the blur intensity and performance with radius and downscale factor:
+Create with a default radius of 10 pixels:
 
 ```cpp
-auto blurEffect = Dali::Ui::GaussianBlurEffect::New(30);
-
-// Adjust blur radius at runtime
-blurEffect.SetBlurRadius(40);
-
-// Improve performance by downscaling (0.0f to 1.0f)
-blurEffect.SetBlurDownscaleFactor(0.5f);
-
-view.SetRenderEffect(blurEffect);
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New();
 ```
 
-The downscale factor reduces the internal render target size. A value of `0.5f` renders at half resolution, improving performance at the cost of blur quality. Due to kernel optimizations, the effective blur radius changes in fixed increments based on the downscale factor.
+Or specify a custom blur radius:
 
-### One-Time Rendering
+```cpp
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(60u);
+```
+
+### Configuring Blur Properties
+
+Control the blur intensity with `SetBlurRadius()`:
+
+```cpp
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(30u);
+
+// Increase blur radius
+blurEffect.SetBlurRadius(80u);
+
+// Get current radius
+uint32_t currentRadius = blurEffect.GetBlurRadius();
+```
+
+Optimize performance with downscale factor. Lower values reduce rendering quality but improve performance:
+
+```cpp
+blurEffect.SetBlurDownscaleFactor(0.25f);  // Render at 1/4 resolution
+float factor = blurEffect.GetBlurDownscaleFactor();
+```
 
 For static content, enable `SetBlurOnce()` to render the blur only once instead of every frame:
 
 ```cpp
-auto blurEffect = Dali::Ui::GaussianBlurEffect::New(20);
 blurEffect.SetBlurOnce(true);
-view.SetRenderEffect(blurEffect);
-
-// Connect to finished signal to know when rendering completes
-blurEffect.FinishedSignal().Connect(this, &MyClass::OnBlurFinished);
+bool isOnce = blurEffect.GetBlurOnce();
 ```
+
+### Complete Example
+
+```cpp
+Ui::View containerView = Ui::View::New();
+containerView.SetRequestedWidth(300.0f);
+containerView.SetRequestedHeight(200.0f);
+containerView.SetCornerRadius(20.0f);
+containerView.SetBackgroundColor(UiColor(0x1A1A2E));
+
+// Add child views
+containerView.Children({
+  Ui::View::New()
+    .SetRequestedWidth(100.0f)
+    .SetRequestedHeight(100.0f)
+    .SetBackgroundColor(UiColor(0xE53935)),
+  Ui::View::New()
+    .SetRequestedWidth(100.0f)
+    .SetRequestedHeight(100.0f)
+    .SetBackgroundColor(UiColor(0x43A047)),
+});
+
+// Apply Gaussian blur
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(60u);
+blurEffect.SetBlurDownscaleFactor(0.5f);
+containerView.SetRenderEffect(blurEffect);
+```
+
+---
 
 ## Background Blur Effect
 
-`BackgroundBlurEffect` blurs the content behind a view, creating a frosted glass effect. Unlike `GaussianBlurEffect`, which blurs the view itself, this effect blurs the view's background region.
+`Dali::Ui::BackgroundBlurEffect` blurs the background behind the owner view, creating a backdrop blur similar to system-level glass effects. This effect captures content from parent views rather than the view itself.
 
-### Creating a Background Blur
+### Creating a Background Blur Effect
+
+Create with a default radius of 10 pixels:
 
 ```cpp
-auto bgBlur = Dali::Ui::BackgroundBlurEffect::New(15);
-overlayView.SetRenderEffect(bgBlur);
+Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New();
 ```
 
-### Defining the Blur Source
-
-By default, `BackgroundBlurEffect` captures content from the parent hierarchy. Use `SetSourceActor()` to limit the blur to a specific ancestor:
+Or specify a custom blur radius:
 
 ```cpp
-auto bgBlur = Dali::Ui::BackgroundBlurEffect::New(20);
+Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New(60u);
+```
 
-// Only blur content from this specific parent
+### Specifying Source and Stopper Actors
+
+Control which part of the scene tree contributes to the blur:
+
+```cpp
+Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New(40u);
+
+// Set a specific parent as the blur source
 bgBlur.SetSourceActor(parentContainer);
 
-// Stop capturing at a certain point in the hierarchy
+// Set a stopper actor to limit blur capture depth
 bgBlur.SetStopperActor(stopperView);
-
-overlayView.SetRenderEffect(bgBlur);
-```
-
-The source actor must be a parent of the view for the effect to work correctly.
-
-### Background Blur Properties
-
-```cpp
-auto bgBlur = Dali::Ui::BackgroundBlurEffect::New();
-
-// Configure blur intensity
-bgBlur.SetBlurRadius(25);
-bgBlur.SetBlurDownscaleFactor(0.25f);
-
-// Render once for static backgrounds
-bgBlur.SetBlurOnce(true);
 
 view.SetRenderEffect(bgBlur);
 ```
 
-## Mask Effect
+**Note:** The source actor must be a parent of the view for `SetSourceActor()` to take effect. The `RenderEffect` does not hold references to source or stopper actors, so you must ensure they remain valid for the effect's lifetime.
 
-`MaskEffect` uses one view's content to mask another view. The mask can use alpha channel or luminance values to determine visibility.
+### Background Blur Properties
 
-### Basic Masking
-
-Create a mask effect by providing a mask view:
+Like Gaussian blur, you can configure radius, downscale factor, and single-frame rendering:
 
 ```cpp
-// Create the mask source
-auto maskView = Dali::Ui::Label::New("MASK")
-  .SetRequestedWidth(200)
-  .SetRequestedHeight(100)
-  .SetTextColor(Dali::Ui::UiColor(0xFFFFFF));
+Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New();
 
-// Create the target to be masked
-auto targetView = Dali::Ui::Label::New("Hello World")
-  .SetRequestedWidth(200)
-  .SetRequestedHeight(100)
-  .SetTextColor(Dali::Ui::UiColor(0xFF0000));
+bgBlur.SetBlurRadius(50u);
+bgBlur.SetBlurDownscaleFactor(0.25f);
+bgBlur.SetBlurOnce(true);
 
-// Add mask as child and apply effect
-targetView.Add(maskView);
-targetView.SetRenderEffect(Dali::Ui::MaskEffect::New(maskView));
+uint32_t radius = bgBlur.GetBlurRadius();
+float factor = bgBlur.GetBlurDownscaleFactor();
+bool once = bgBlur.GetBlurOnce();
+```
+
+### Example with Semi-Transparent Overlay
+
+```cpp
+Ui::View container = Ui::View::New();
+container.SetRequestedWidth(400.0f);
+container.SetRequestedHeight(300.0f);
+
+// Add background content
+container.Children({
+  Ui::Label::New("Background content text")
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT),
+  
+  // Semi-transparent overlay with background blur
+  Ui::View::New()
+    .SetRequestedWidth(200.0f)
+    .SetRequestedHeight(100.0f)
+    .SetCornerRadius(16.0f)
+    .SetBackgroundColor(UiColor(0xFFFFFF).WithAlpha(0.3f))
+    .With([this](Ui::View& v) {
+      Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New(40u);
+      v.SetRenderEffect(bgBlur);
+    }),
+});
+```
+
+---
+
+## Mask Effect
+
+`Dali::Ui::MaskEffect` uses one view's content to mask another view. This enables text cutouts, shape masks, and complex transparency effects.
+
+### Creating a Mask Effect
+
+Create a mask with a source view using the default alpha channel:
+
+```cpp
+Ui::View maskSource = Ui::View::New();
+maskSource.SetRequestedWidth(200.0f);
+maskSource.SetRequestedHeight(200.0f);
+maskSource.SetBackgroundColor(UiColor(0xFFFFFF));
+maskSource.SetCornerRadius(20.0f);
+
+Ui::View targetView = Ui::View::New();
+targetView.SetRequestedWidth(200.0f);
+targetView.SetRequestedHeight(200.0f);
+targetView.SetBackgroundColor(UiColor(0x1F2A36));
+
+// Apply mask effect
+Ui::MaskEffect maskEffect = Ui::MaskEffect::New(maskSource);
+targetView.SetRenderEffect(maskEffect);
+targetView.Add(maskSource);  // Mask source must be a child
 ```
 
 ### Mask Modes
 
-`MaskEffect` supports two mask modes:
-
-- `MaskMode::ALPHA` — Uses the alpha channel of the mask (default)
-- `MaskMode::LUMINANCE` — Converts RGB to grayscale and uses luminance
+Use `MaskMode` to control how the mask source is interpreted:
 
 ```cpp
-auto maskEffect = Dali::Ui::MaskEffect::New(
+// ALPHA: Use the alpha channel (default)
+Ui::MaskEffect alphaMask = Ui::MaskEffect::New(maskView);
+
+// LUMINANCE: Convert RGB to grayscale and use luminance
+Ui::MaskEffect luminanceMask = Ui::MaskEffect::New(
   maskView,
-  Dali::Ui::MaskEffect::MaskMode::LUMINANCE,
-  Dali::Vector2(0.0f, 0.0f),  // mask position
-  Dali::Vector2(1.0f, 1.0f)   // mask scale
-);
-targetView.SetRenderEffect(maskEffect);
-```
-
-### Positioning and Scaling the Mask
-
-Adjust the mask position and scale to align it with the target content:
-
-```cpp
-auto maskEffect = Dali::Ui::MaskEffect::New(
-  maskView,
-  Dali::Ui::MaskEffect::MaskMode::ALPHA,
-  Dali::Vector2(10.0f, 5.0f),   // offset position
-  Dali::Vector2(1.5f, 1.5f)     // scale up mask
+  Ui::MaskEffect::MaskMode::LUMINANCE,
+  Vector2(0.0f, 0.0f),  // mask position
+  Vector2(1.0f, 1.0f)   // mask scale
 );
 ```
 
-### One-Time Mask Rendering
+### Optimizing Mask Rendering
 
-For static masks, enable one-time rendering to improve performance:
+For static mask content, enable single-frame rendering:
 
 ```cpp
-auto maskEffect = Dali::Ui::MaskEffect::New(maskView);
+Ui::MaskEffect maskEffect = Ui::MaskEffect::New(maskView);
 
 // Render target only once
 maskEffect.SetTargetMaskOnce(true);
@@ -193,128 +270,149 @@ maskEffect.SetTargetMaskOnce(true);
 // Render mask source only once
 maskEffect.SetSourceMaskOnce(true);
 
-view.SetRenderEffect(maskEffect);
+bool targetOnce = maskEffect.GetTargetMaskOnce();
+bool sourceOnce = maskEffect.GetSourceMaskOnce();
 ```
+
+### Text Mask Example
+
+```cpp
+// Create a label to use as mask source
+Ui::Label maskLabel = Ui::Label::New("MASK TEXT");
+maskLabel.SetRequestedWidth(400.0f);
+maskLabel.SetRequestedHeight(100.0f);
+maskLabel.SetTextColor(UiColor(0xFFFFFF));
+maskLabel.SetFontSize(40.0f);
+
+// Create target view with background
+Ui::Label targetLabel = Ui::Label::New("Hello World");
+targetLabel.SetRequestedWidth(400.0f);
+targetLabel.SetRequestedHeight(100.0f);
+targetLabel.SetTextColor(UiColor(0xFF0000));
+targetLabel.SetBackgroundColor(UiColor(0x1F2A36));
+
+// Apply mask effect
+targetLabel.Add(maskLabel);
+Ui::MaskEffect maskEffect = Ui::MaskEffect::New(maskLabel);
+targetLabel.SetRenderEffect(maskEffect);
+```
+
+---
 
 ## Animating Blur Effects
 
-Both `GaussianBlurEffect` and `BackgroundBlurEffect` support animated blur strength and opacity transitions.
+Both `GaussianBlurEffect` and `BackgroundBlurEffect` support animated blur strength and opacity through `AddBlurStrengthAnimation()` and `AddBlurOpacityAnimation()`.
 
-### Blur Strength Animation
-
-Animate the blur intensity from clear to blurred (or vice versa):
+### Animating Blur Strength
 
 ```cpp
-auto blurEffect = Dali::Ui::GaussianBlurEffect::New(30);
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(60u);
 view.SetRenderEffect(blurEffect);
 
 // Create animation
-auto animation = Dali::Animation::New(1000);  // 1 second
+Dali::Animation animation = Dali::Animation::New(1000.0f);  // 1 second
 
-// Animate from clear (0.0) to fully blurred (1.0)
+// Animate blur strength from 0 to 1
 blurEffect.AddBlurStrengthAnimation(
   animation,
-  Dali::AlphaFunction::EASE_IN_OUT,
+  Dali::AlphaFunction::EASE_IN_OUT_SINE,
   Dali::TimePeriod(0.0f, 1000.0f),
-  0.0f,  // from: clear
-  1.0f   // to: fully blurred
+  0.0f,  // from: no blur
+  1.0f   // to: full blur
 );
 
 animation.Play();
 ```
 
-### Blur Opacity Animation
-
-Animate the visibility of the blur overlay:
+### Animating Blur Opacity
 
 ```cpp
-auto blurEffect = Dali::Ui::BackgroundBlurEffect::New(20);
-view.SetRenderEffect(blurEffect);
+Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New(40u);
+view.SetRenderEffect(bgBlur);
 
-auto animation = Dali::Animation::New(500);
+Dali::Animation animation = Dali::Animation::New(500.0f);
 
-// Fade in the blur effect
-blurEffect.AddBlurOpacityAnimation(
+// Fade blur in
+bgBlur.AddBlurOpacityAnimation(
   animation,
   Dali::AlphaFunction::EASE_IN,
   Dali::TimePeriod(0.0f, 500.0f),
-  0.0f,  // from: invisible
+  0.0f,  // from: transparent
   1.0f   // to: visible
 );
 
 animation.Play();
 ```
 
-### Reversing Blur Animations
+### Reversed Animation
 
-To animate from blurred to clear, swap the from and to values:
+Animate from blurred to clear by swapping from and to values:
 
 ```cpp
-// Animate from blurred to clear
 blurEffect.AddBlurStrengthAnimation(
   animation,
   Dali::AlphaFunction::EASE_OUT,
   Dali::TimePeriod(0.0f, 800.0f),
-  1.0f,  // from: fully blurred
-  0.0f   // to: clear
+  1.0f,  // from: full blur
+  0.0f   // to: no blur
 );
 ```
 
-## Effect Lifecycle
+---
 
-### Manual Activation and Deactivation
+## Activation and Refresh
 
-While `SetRenderEffect()` and `ClearRenderEffect()` manage activation automatically, you can also control the effect manually:
+### Manual Activation Control
+
+Effects activate automatically when applied to a view. Use `Deactivate()` to pause rendering:
 
 ```cpp
-auto blurEffect = Dali::Ui::GaussianBlurEffect::New(20);
-view.SetRenderEffect(blurEffect);
+Ui::GaussianBlurEffect effect = Ui::GaussianBlurEffect::New(30u);
+view.SetRenderEffect(effect);
 
-// Effect is now active
-bool isActive = blurEffect.IsActivated();  // true
+// Pause the effect
+effect.Deactivate();
 
-// Temporarily deactivate without removing
-blurEffect.Deactivate();
+// Resume the effect
+effect.Activate();
 
-// Reactivate later
-blurEffect.Activate();
+// Check state
+if (effect.IsActivated())
+{
+  // Effect is rendering
+}
 ```
 
-### Refreshing the Effect
+### Refreshing Effect Output
 
-Force a re-render of the effect when content changes:
+Call `Refresh()` to re-render the effect when content changes:
 
 ```cpp
-// Update the view content
-view.SetBackgroundColor(Dali::Ui::UiColor(0xFF0000));
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(40u);
+blurEffect.SetBlurOnce(true);  // Static content optimization
+view.SetRenderEffect(blurEffect);
 
-// Refresh the blur effect to capture new content
-auto effect = view.GetRenderEffect();
-effect.Refresh();
+// When content changes, refresh the blur
+blurEffect.Refresh();
 ```
 
 ### Finished Signal
 
-Connect to the `FinishedSignal()` to be notified when one-time rendering completes:
+Connect to `FinishedSignal()` to be notified when a single-frame blur completes:
 
 ```cpp
-class MyController : public Dali::ConnectionTracker
+Ui::GaussianBlurEffect blurEffect = Ui::GaussianBlurEffect::New(50u);
+blurEffect.SetBlurOnce(true);
+
+blurEffect.FinishedSignal().Connect(this, &MyClass::OnBlurFinished);
+
+view.SetRenderEffect(blurEffect);
+
+// Handler
+void OnBlurFinished()
 {
-  void SetupBlur()
-  {
-    mBlurEffect = Dali::Ui::GaussianBlurEffect::New(25);
-    mBlurEffect.SetBlurOnce(true);
-    mBlurEffect.FinishedSignal().Connect(this, &MyController::OnBlurFinished);
-    mView.SetRenderEffect(mBlurEffect);
-  }
-
-  void OnBlurFinished()
-  {
-    // Blur rendering complete, safe to show or animate
-  }
-
-private:
-  Dali::Ui::GaussianBlurEffect mBlurEffect;
-  Dali::Ui::View mView;
-};
+  // Blur rendering completed
+}
 ```
+
+This signal is useful for coordinating UI updates after static blur effects finish rendering.

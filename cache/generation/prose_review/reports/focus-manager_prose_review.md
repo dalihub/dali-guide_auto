@@ -2,71 +2,71 @@
 
 ## Summary
 
-Reviewed the Focus Manager guide draft against public headers (`focus-manager.h`, `view.h`, `view-focus-enums.h`, `layout.h`) and UTC test files. The draft was largely accurate. Made localized corrections for API accuracy and code consistency.
+The draft was reviewed against the following source files:
+- `repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h` - FocusManager class definition
+- `repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h` - FocusDirection and FocusDevice enums
+- `repos/dali-ui/dali-ui-foundation/public-api/view.h` - View class focus-related methods
+- `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp` - UTC tests for usage patterns
 
 ## Changes Made
 
-### 1. Include Path Correction
-- **Location**: "Getting the Focus Manager" section
-- **Before**: `#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>`
-- **After**: `#include <dali-ui-foundation/dali-ui-foundation.h>`
-- **Source Evidence**: UTC files use the umbrella header `<dali-ui-foundation/dali-ui-foundation.h>` (utc-Dali-FocusManager.cpp line 9)
+### 1. Fixed Truncated Code Block (Line 226)
+**Issue:** The original draft ended abruptly without closing the final code block with triple backticks.
 
-### 2. Variable Scope Fix in Focus Groups Example
-- **Location**: "Focus Groups" → "Creating a Focus Group" code block
-- **Before**: `manager.MoveFocus(FocusDirection::DOWN);`
-- **After**: `FocusManager::Get().MoveFocus(FocusDirection::DOWN);`
-- **Reason**: The variable `manager` was not defined in this scope. Used the singleton accessor consistently.
+**Fix:** Added closing ````cpp` backticks to the final code example in "Getting the Device Name" section.
 
-### 3. Chaining Indentation Consistency
-- **Location**: "Directional Focus Properties" → chaining example
-- **Before**: Single-line chaining without alignment
-- **After**: Multi-line chaining with consistent indentation
-- **Reason**: Improves readability and matches common dali-ui code style
-
-### 4. Minor Prose Clarifications
-- Added blank lines between code blocks and following prose for readability
-- Ensured consistent punctuation in list items
+**Source Evidence:** The original draft had `const Dali::String& deviceName = FocusManager::Get().GetLastFocusChangeDeviceName();` without closing backticks.
 
 ## Verified Accurate Content
 
-The following sections were verified against source and found accurate:
+The following content was verified against public headers and UTC tests:
 
-1. **API Signatures**: All method names, return types, and parameter types match public headers
-   - `SetCurrentFocusView()` returns `bool` (focus-manager.h line 76)
-   - `RequestFocus()` returns `bool` (focus-manager.h line 89)
-   - `MoveFocus()` returns `bool` (focus-manager.h line 104)
-   - `MoveFocusBackward()` returns `void` (focus-manager.h line 157)
-   - `ClearFocus()` returns `void` (focus-manager.h line 111)
+### API Signatures (All Correct)
+- `FocusManager::Get()` - Returns singleton handle ✓
+- `FocusManager::SetCurrentFocusView(View view)` - Returns bool ✓
+- `FocusManager::RequestFocus(View view)` - Returns bool, supports child delegation ✓
+- `FocusManager::GetCurrentFocusView()` - Returns View ✓
+- `FocusManager::ClearFocus()` - Returns void ✓
+- `FocusManager::MoveFocus(FocusDirection direction)` - Returns bool ✓
+- `FocusManager::MoveFocusBackward()` - Returns void ✓
+- `FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)` - Returns void ✓
+- `FocusManager::IsFocusGroup(View view) const` - Returns bool ✓
+- `FocusManager::GetFocusGroup(View view)` - Returns View ✓
+- `FocusManager::SetFocusIndicatorActor(View indicator)` - Returns void ✓
+- `FocusManager::GetFocusIndicatorView()` - Returns View ✓
+- `FocusManager::FocusChangedSignal()` - Returns `FocusChangedSignalType&` ✓
+- `FocusManager::SetClearFocusOnWindowFocusLost(bool enabled)` - Returns void ✓
+- `FocusManager::GetClearFocusOnWindowFocusLost() const` - Returns bool ✓
+- `FocusManager::GetLastFocusChangeDevice() const` - Returns FocusDevice ✓
+- `FocusManager::GetLastFocusChangeDeviceName() const` - Returns `const Dali::String&` ✓
 
-2. **FocusDirection Enum Values**: All listed directions match `view-focus-enums.h`
-   - LEFT, RIGHT, UP, DOWN, PAGE_UP, PAGE_DOWN, FORWARD, BACKWARD, CLOCKWISE, COUNTER_CLOCKWISE
+### Enum Values (All Correct)
+- `FocusDirection` enum values match `view-focus-enums.h` exactly ✓
+- `FocusDevice` enum values match `view-focus-enums.h` exactly ✓
 
-3. **FocusDevice Enum**: Values match `view-focus-enums.h`
-   - UNKNOWN, KEYBOARD, MOUSE, TOUCH, PEN, POINTER, GAMEPAD, WHEEL, PROGRAMMATIC
+### Signal Callback Signature (Correct)
+- `FocusChangedSignalType` is `Signal<void(View, View)>` - matches header documentation ✓
 
-4. **View Focus Methods**: All directional setters exist and return `View&` for chaining (view.h lines 545-586)
+### Code Examples (All Correct)
+- Use `View::New().SetFocusable(true)` fluent chaining pattern ✓
+- Use `Dali::Ui` namespace appropriately ✓
+- Use `scene.Add(view)` for scene addition ✓
 
-5. **FocusNavigationCallback**: Signature `View(View, FocusDirection)` matches view.h line 68
+### Prose Descriptions (All Accurate)
+- Child delegation behavior of `RequestFocus()` matches header documentation ✓
+- Direct focus behavior of `SetCurrentFocusView()` matches header documentation ✓
+- Focus group containment behavior matches UTC test evidence ✓
+- Default value for `SetClearFocusOnWindowFocusLost` is enabled (per header comment) ✓
 
-6. **Signal Types**:
-   - `FocusManager::FocusChangedSignal()` returns `Signal<void(View, View)>` (focus-manager.h line 42)
-   - `View::FocusChangedSignal()` returns `Signal<void(View, bool)>` (view.h line 919)
+## Remaining Concerns
 
-7. **Focus Group Behavior**: UTC tests confirm `MoveFocus()` is contained within focus groups, but `RequestFocus()` can escape programmatically (utc-Dali-FocusManager.cpp lines 193-229)
+None. The document is accurate and complete after the single fix for the truncated code block.
 
-8. **MoveFocus Priority Order**: UTC tests confirm the three-step resolution (callback → directional property → FocusFinder) (utc-Dali-FocusManager.cpp lines 298-410)
+## Review Methodology
 
-9. **DescendantFocusBlocked**: UTC tests confirm blocked descendants cannot receive focus (utc-Dali-FocusManager.cpp lines 133-152)
-
-## Remaining Considerations
-
-1. **PAGE_UP/PAGE_DOWN**: The `FocusDirection` enum includes `PAGE_UP` and `PAGE_DOWN`, but the draft does not mention them. This is acceptable as they are less commonly used and the draft is not a comprehensive API reference.
-
-2. **FocusManager::New()**: The header shows a default constructor and `Get()` static method, but no `New()` method. The draft correctly uses `Get()` throughout.
-
-3. **Layout Focusability**: The draft correctly notes that `Layout` is not focusable by default, matching UTC test behavior (utc-Dali-FocusManager.cpp line 56).
-
-## No Invented APIs
-
-All APIs mentioned in the guide exist in the public headers. No speculative or internal APIs were added.
+1. Read all public API headers for FocusManager, View, and focus-related enums
+2. Verified every method signature against header declarations
+3. Verified every enum value against enum definitions
+4. Cross-referenced UTC tests for usage patterns and behavior validation
+5. Checked code examples for correct fluent chaining idioms
+6. Verified signal callback signatures match header typedefs

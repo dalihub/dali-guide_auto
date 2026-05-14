@@ -1,0 +1,74 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+--- title: View State sidebar_label: View State category: views-components --- # View State `ViewState` represents the interactive state of a `View` as a composable bitmask. Views use states such as `NORMAL`, `FOCUSED`, `PRESSED`, `SELECTED`, and `DISABLED` to drive visual feedback and behavior. ## Table of Contents - [Understanding View States](#understanding-view-states) - [Checking and Combining States](#checking-and-combining-states) - [Detecting State Transitions](#detecting-state-transitions) - [Responding to State Changes](#responding-to-state-changes) - [Custom States](#custom-states) ## Understanding View States A `ViewState` is a lightweight value type that represents zero or more state flags as a bitmask. The default-constructed state is `NORMAL`, which has no bits set: ```cpp ViewState state; // Normal by default if (state.IsNormal()) { // state has no flags set } ``` `ViewState` provides predefined single-state constants: | Constant | Meaning | |----------|---------| | `ViewState::NORMAL` | Default state with no flags (zero bits) | | `ViewState::FOCUSED` | View has input focus | | `ViewState::PRESSED` | View is being pressed (touch or key) | | `ViewState::SELECTED` | View is in selected state | | `ViewState::DISABLED` | View is disabled and non-interactive | | `ViewState::PSEUDO_DISABLED` | View appears disabled but remains interactive | Composite states combine multiple flags: ```cpp ViewState::SELECTED_PRESSED // SELECTED + PRESSED ViewState::SELECTED_FOCUSED // SELECTED + FOCUSED ViewState::DISABLED_SELECTED // DISABLED + SELECTED ``` `ViewState::ALL` is a mask containing all predefined single states: ```cpp if (ViewState::ALL.Contains(ViewState::FOCUSED)) { // Always true } ``` ## Checking and Combining States ### Testing State Contents Use `Contains()` to check if a state includes a specific flag: ```cpp ViewState state = ViewState::FOCUSED + ViewState::PRESSED; if (state.Contains(ViewState::FOCUSED)) { // Focused flag is set } if (state.Contains(ViewState::DISABLED)) { // Disabled flag is set } ``` Use `HasIntersectionWith()` to test for any overlapping flags: ```cpp ViewState composite = ViewState::FOCUSED + ViewState::PRESSED; if (composite.HasIntersectionWith(ViewState::SELECTED_FOCUSED)) { // True — both share FOCUSED flag } ``` `IsNormal()` returns true only for the zero-bit state: ```cpp if (ViewState::NORMAL.IsNormal()) { // True — no flags set } if (ViewState::FOCUSED.IsNormal()) { // False — FOCUSED has a bit set } ``` `IsAnyDisabled()` checks for either `DISABLED` or `PSEUDO_DISABLED`: ```cpp if (state.IsAnyDisabled()) { // View is effectively disabled } ``` ### Combining States with Operators `ViewState` supports bitwise and arithmetic operators for composition: ```cpp // Add states ViewState combined = ViewState::FOCUSED + ViewState::PRESSED; // Remove states ViewState removed = combined - ViewState::PRESSED; // FOCUSED only // Bitwise OR (equivalent to +) ViewState orResult = ViewState::FOCUSED | ViewState::SELECTED; // Bitwise AND (mask) ViewState masked = combined & ViewState::FOCUSED; // FOCUSED only // Bitwise XOR (toggle) ViewState toggled = combined ^ ViewState::SELECTED; // Adds SELECTED // Bitwise NOT ViewState notFocused = ~ViewState::FOCUSED; // All except FOCUSED ``` Adding the same state is idempotent: ```cpp ViewState result = ViewState::FOCUSED + ViewState::FOCUSED; // result == ViewState::FOCUSED ``` Removing a state that is not present has no effect: ```cpp ViewState result = ViewState::FOCUSED - ViewState::PRESSED; // result == ViewState::FOCUSED ``` ### Equality and Boolean Conversion Compare states with `==` and `!=`: ```cpp if (state == ViewState::FOCUSED) { // Exact match } if (state != ViewState::NORMAL) { // State has at least one flag } ``` The `operator bool()` returns `true` if any flag is set: ```cpp if (ViewState::NORMAL) { // False — no flags } if (ViewState::FOCUSED) { // True — has a flag } ``` ### String Representation `ToString()` returns a human-readable string for debugging: ```cpp String str = ViewState::FOCUSED.ToString(); // str contains "Focused" ViewState composite = ViewState::FOCUSED + ViewState::PRESSED; String str = composite.ToString(); // str contains both "Focused" and "Pressed" ``` ## Detecting State Transitions When handling state changes, you often need to know which specific flags were added or removed. `ViewState` provides transition detection methods that compare previous and current states. ### Checking Individual Flag Changes `WasAdded()` returns true if this specific flag was added in the transition: ```cpp ViewState prev = ViewState::NORMAL; ViewState cur = ViewState::FOCUSED; if (ViewState::FOCUSED.WasAdded(prev, cur)) { // FOCUSED was added } if (ViewState::PRESSED.WasAdded(prev, cur)) { // PRESSED was not added } ``` `WasRemoved()` returns true if this specific flag was removed: ```cpp ViewState prev = ViewState::FOCUSED + ViewState::PRESSED; ViewState cur = ViewState::FOCUSED; if (ViewState::PRESSED.WasRemoved(prev, cur)) { // PRESSED was removed } ``` `WasChanged()` returns true if this flag was either added or removed: ```cpp ViewState prev = ViewState::FOCUSED; ViewState cur = ViewState::PRESSED; if (ViewState::FOCUSED.WasChanged(prev, cur)) { // FOCUSED was removed — changed } if (ViewState::PRESSED.WasChanged(prev, cur)) { // PRESSED was added — changed } ``` ### Checking Multiple Flags at Once `AnyChanged()` tests whether any flag in a mask changed during a transition: ```cpp ViewState prev = ViewState::FOCUSED; ViewState cur = ViewState::FOCUSED + ViewState::PRESSED; ViewState watchMask = ViewState::PRESSED + ViewState::SELECTED; if (watchMask.AnyChanged(prev, cur)) { // At least one flag in watchMask changed } ``` This is useful when you want to react to changes in a subset of states: ```cpp ViewState focusOrPress = ViewState::FOCUSED + ViewState::PRESSED; if (focusOrPress.AnyChanged(prevState, curState)) { // Either FOCUSED or PRESSED changed } ``` ## Responding to State Changes Views notify state changes through `StateChangedSignal()`. Connect a callback to react to user interactions: ```cpp View view = View::New(); ConnectionTracker tracker; view.StateChangedSignal().Connect(&tracker, [](View view, const StateEvent& e) { if (e.Added(ViewState::FOCUSED)) { // View gained focus — update visual appearance } if (e.Removed(ViewState::PRESSED)) { // View was released — handle click } }); ``` The `StateEvent` passed to callbacks provides `GetPrev()` and `GetCurrent()` for the transition, plus convenience methods `Added()`, `Removed()`, and `Changed()` for detecting specific state changes. You can also use `ViewState` transition methods directly: ```cpp view.StateChangedSignal().Connect(&tracker, [](View view, const StateEvent& e) { ViewState prev = e.GetPrev(); ViewState cur = e.GetCurrent(); if (ViewState::FOCUSED.WasAdded(prev, cur)) { // View gained focus } }); ``` ### Multiple Handlers Multiple handlers can be connected to the same view. They fire in registration order: ```cpp view.StateChangedSignal().Connect(&tracker, [](View view, const StateEvent& e) { // First handler }); view.StateChangedSignal().Connect(&tracker, [](View view, const StateEvent& e) { // Second handler }); ``` ### Deferred Notification When a handler triggers a new state change during its callback, the framework defers the second notification until all handlers for the first transition complete. This guarantees consistent ordering: ```cpp view.StateChangedSignal().Connect(&tracker, [](View v, const StateEvent& e) { if (e.Added(ViewState::FOCUSED)) { // Trigger another state change from within the handler // This will be deferred until all current handlers finish } }); ``` ### Connection Lifetime Signal connections are automatically disconnected when the `ConnectionTracker` is destroyed: ```cpp { ConnectionTracker tracker; view.StateChangedSignal().Connect(&tracker, &OnStateChanged); // Handler active } // Handler automatically disconnected when tracker went out of scope ``` ## Custom States Create application-specific states with `ViewState::Create()`: ```cpp ViewState customState = ViewState::Create("MyCustomState"); if (!customState.IsNormal()) { // Custom states are non-normal by definition } ``` Calling `Create()` with the same name returns the same state: ```cpp ViewState first = ViewState::Create("CustomA"); ViewState second = ViewState::Create("CustomA"); if (first == second) { // Same name produces identical states } ``` Different names produce distinct states: ```cpp ViewState stateA = ViewState::Create("CustomA"); ViewState stateB = ViewState::Create("CustomB"); if (stateA != stateB) { // Different names produce different states } ``` Special names are handled explicitly: ```cpp ViewState normalResult = ViewState::Create("Normal"); // Returns NORMAL ViewState allResult = ViewState::Create("All"); // Returns ALL ``` Custom states can be combined with predefined states: ```cpp ViewState combined = ViewState::FOCUSED + ViewState::Create("CustomA"); if (combined.Contains(ViewState::FOCUSED)) { // Combined state contains FOCUSED }
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# View State Prose Review
+
+## Summary
+The draft was largely accurate against the verified public API headers. Minor improvements were made to improve the developer experience by highlighting the more ergonomic `StateEvent` methods.
+
+## Changes Made
+
+### Section: Responding to State Changes
+
+**Change 1: Updated signal callback example to use StateEvent convenience methods**
+
+- **Before:** Example used `ViewState::FOCUSED.WasAdded(prev, cur)` pattern inside the signal callback
+- **After:** Example uses `e.Added(ViewState::FOCUSED)` which is more ergonomic
+- **Source Evidence:** `StateEvent` class in `repos/dali-ui/dali-ui-foundation/public-api/state-event.h` provides:
+  - `bool Added(const ViewState& state) const` - Returns true if state was newly added
+  - `bool Removed(const ViewState& state) const` - Returns true if state was removed
+  - `bool Changed(const ViewState& state) const` - Returns true if state was either added or removed
+- **Rationale:** The `StateEvent` convenience methods are cleaner than extracting prev/cur and calling ViewState methods. The header documentation example shows: `if(e.Added(ViewState::FOCUSED)) { ... }`
+
+**Change 2: Added paragraph explaining StateEvent convenience methods**
+
+- **Added:** "The `StateEvent` passed to callbacks provides `GetPrev()` and `GetCurrent()` for the transition, plus convenience methods `Added()`, `Removed()`, and `Changed()` for detecting specific state changes."
+- **Source Evidence:** `StateEvent` header shows both the raw accessors (`GetPrev()`, `GetCurrent()`) and convenience methods (`Added()`, `Removed()`, `Changed()`)
+
+**Change 3: Added alternative example showing ViewState transition methods**
+
+- **Added:** A second code block showing how to use `ViewState::WasAdded()` etc. with `e.GetPrev()` and `e.GetCurrent()` for developers who prefer that pattern
+- **Rationale:** Both patterns are valid; showing both gives developers flexibility
+
+**Change 4: Updated Deferred Notification example**
+
+- **Before:** Used `ViewState::FOCUSED.WasAdded(e.GetPrev(), e.GetCurrent())`
+- **After:** Uses `e.Added(ViewState::FOCUSED)`
+- **Rationale:** Consistency with the primary example pattern
+
+## Verified Accurate (No Changes Needed)
+
+### ViewState Class API
+- All predefined states (`NORMAL`, `FOCUSED`, `PRESSED`, `SELECTED`, `DISABLED`, `PSEUDO_DISABLED`) verified in header
+- Composite states (`SELECTED_PRESSED`, `SELECTED_FOCUSED`, `DISABLED_SELECTED`) verified as static constants
+- `ALL` constant verified as containing all predefined states
+- All operators (`+`, `-`, `|`, `&`, `^`, `~`, `==`, `!=`) verified with correct signatures
+- `operator bool()` verified as `explicit`
+- All query methods (`Contains()`, `HasIntersectionWith()`, `IsNormal()`, `IsAnyDisabled()`, `ToString()`) verified
+- All transition detection methods (`WasAdded()`, `WasRemoved()`, `WasChanged()`, `AnyChanged()`) verified
+
+### View Class Integration
+- `StateChangedSignal()` returns `Signal<void(View, StateEvent)>` - verified
+- `GetState()` returns `const ViewState&` - verified
+- Signal connection pattern with `ConnectionTracker` verified in UTC tests
+
+### Custom States
+- `ViewState::Create(StringView name)` signature verified
+- Special name handling ("Normal" → NORMAL, "All" → ALL) verified in UTC tests
+- Same name returns same state (idempotent) verified in UTC tests
+
+### Deferred Notification Behavior
+- UTC test `UtcDaliViewStateDeferredNotificationOrderP` confirms deferred notification behavior
+- UTC test `UtcDaliViewStateDeferredSignalOrderP` confirms signal connections also participate in deferred ordering
+
+## Remaining Considerations
+
+1. **StateEvent additional methods:** The `StateEvent` class also provides `GetCause()`, `GetInputEventType()`, `GetTouchEvent()`, `GetKeyEvent()`, etc. for accessing the input event that caused the state change. These are not documented in this guide but could be added if needed for completeness.
+
+2. **FocusManager integration:** The UTC tests show `FocusManager::Get().SetCurrentFocusView(view)` sets the `FOCUSED` state. This integration is mentioned in the guide but could be expanded if a separate FocusManager guide exists.
+
+3. **Disabled state behavior:** UTC tests confirm that becoming `DISABLED` clears `FOCUSED` and `PRESSED` states atomically. This behavior is implied but not explicitly stated in the guide. Consider adding a note if this is important for developers to know.
+-----END_PROSE_REVIEW_REPORT-----

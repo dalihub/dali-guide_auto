@@ -9,4 +9,4 @@
 
 ## Human Review
 
-CLI response did not contain a usable revised Markdown block; raw draft was preserved.
+Reviewed content did not look like a complete Markdown guide; raw draft was preserved.

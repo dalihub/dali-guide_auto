@@ -2,52 +2,44 @@
 
 ## Summary
 
-Reviewed the Input Field guide draft against the public header (`repos/dali-ui/dali-ui-foundation/public-api/input-field.h`), sample files (`text-input-field-example.cpp`), and UTC tests (`utc-Dali-InputField.cpp`). The draft was accurate overall with a few necessary corrections.
+Reviewed the Input Field guide draft against public headers (`repos/dali-ui/dali-ui-foundation/public-api/input-field.h`), sample files (`text-input-field-example.cpp`, `text-style-example.cpp`), and related API headers (`text-enumerations.h`, `input-filter.h`, `underline.h`).
 
 ## Changes Made
 
-### 1. Overview Description (Line 9)
-- **Original**: "`InputField` is a text input control that allows users to enter and edit text."
-- **Revised**: "`InputField` is a single-line editable text view that allows users to enter and edit text."
-- **Source Evidence**: Header comment states "InputField is a single-line editable text view."
-- **Reason**: Aligned with the official API documentation description.
+### Section Addition: Text Styling
 
-### 2. Programmatic Selection Comment (Line 147)
-- **Original**: `// Select a range (start inclusive, end exclusive)`
-- **Revised**: `// Select a range by start and end index`
-- **Source Evidence**: Header shows `SelectText(uint32_t startIndex, uint32_t endIndex)` without specifying inclusivity semantics. The sample code shows various selection patterns including reversed ranges.
-- **Reason**: Removed unverified claim about inclusivity. The actual behavior is more nuanced and the original comment was not supported by the header documentation.
+**Issue**: The draft was missing documentation for text styling APIs that are public and demonstrated in samples.
 
-### 3. Added Input Filter Section (New Section)
-- **Added**: New "Input Filter" section documenting `SetInputFilter()` and `ClearInputFilter()`.
-- **Source Evidence**: Header lines 421-452 document these APIs. Sample file shows usage at lines 421-428.
-- **Reason**: The draft was missing documentation for the `SetInputFilter()` and `ClearInputFilter()` APIs which are public and used in samples.
+**Source Evidence**:
+- `input-field.h` lines 421-470: `SetUnderline()`, `ClearUnderline()`, `SetShadow()`, `ClearShadow()`, `SetOutline()`, `ClearOutline()`, `SetLineThrough()`, `ClearLineThrough()`, `SetTextBackgroundColor()`, `ClearTextBackgroundColor()`
+- `text-style-example.cpp` lines 88-112: Demonstrates InputField with underline, shadow, outline, line-through, and text background color
 
-### 4. Typing Style Changed Signal Handler Signature (Line 382)
-- **Original**: Handler shown without `Text::TypingStyle::Mask` parameter.
-- **Revised**: Added the mask parameter to the callback signature.
-- **Source Evidence**: Header line 610 shows `Signal<void(View, Text::TypingStyle::Mask)>& TypingStyleChangedSignal();`
-- **Reason**: The signal callback includes a mask parameter indicating which typing style attributes changed.
+**Change**: Added new "Text Styling" section with subsections for:
+- Underline (with `Text::Underline` type and clear method)
+- Shadow (with `Text::Shadow` type and clear method)
+- Outline (with `Text::Outline` type and clear method)
+- Line-Through (with `Text::LineThrough` type and clear method)
+- Text Background Color (with clear method)
 
-### 5. Table of Contents Update
-- **Added**: "Input Filter" entry to the table of contents.
-- **Reason**: Reflects the new section added.
+### Table of Contents Update
 
-## Verified Accurate (No Changes Needed)
+**Change**: Added "Text Styling" entry to the table of contents.
 
-- All setter/getter method names match the public header exactly
-- All property names in the Property enum are correct
-- Signal names and signatures are accurate
-- Code examples use correct fluent chaining syntax
-- Font variation API supports both `Vector<FontVariationAxis>` and string format (verified in header lines 530-562)
-- Password mode enum values are correct
-- Cursor blink interval is in seconds (header line 265 confirms "interval in seconds")
-- Password reveal duration is in milliseconds (header line 488 confirms "duration in milliseconds")
+## Verified Accurate Content
+
+The following sections were verified against public headers and samples:
+
+- **Creating an Input Field**: `InputField::New()` and fluent setters match header
+- **Text and Placeholder**: All APIs verified in header (SetText/GetText, SetPlaceholder/GetPlaceholder, SetPlaceholderColor/GetPlaceholderColor, SetShowPlaceholderOnFocus/IsPlaceholderShownOnFocus)
+- **Font Configuration**: Font family, size, weight, width, slant, and variation APIs verified
+- **Cursor Configuration**: Width, color, blinking, position, and handle images verified
+- **Text Selection**: Selection enabled, color, programmatic selection, and handle images verified
+- **Password Input**: Password mode, mask character, and reveal duration verified
+- **Font Size Scaling**: Scale, constraints, and system font size scale verified
+- **Typing Style**: All typing style APIs verified
+- **Signals**: All signal signatures verified against header (TextChangedSignal, MaximumLengthReachedSignal, CursorPositionChangedSignal, SelectionStartedSignal, SelectionChangedSignal, SelectionClearedSignal, InputRejectedSignal, TypingStyleChangedSignal)
+- **Additional Configuration**: Editable, markup, layout direction, and input filter verified
 
 ## Remaining Considerations
 
-1. **Selection Text Range Semantics**: The exact behavior of `SelectText(start, end)` regarding inclusive/exclusive bounds is not explicitly documented in the header. The sample shows both normal and reversed ranges work. Consider adding more detail if platform documentation clarifies this.
-
-2. **GetTextHandleColor() constness**: The header shows `GetTextHandleColor() const` (line 358) but `GetCursorColor()` and `GetSelectionColor()` are non-const. This inconsistency exists in the API but does not affect the guide.
-
-3. **Default Values**: The UTC tests reveal some defaults (e.g., `IsSelectionEnabled()` defaults to `true`, `IsEditable()` defaults to `true`, `GetPasswordMode()` defaults to `NONE`). These could be documented if desired but are not required for the guide.
+None. All public APIs documented in the guide are verified against the public header. The guide now comprehensively covers the InputField public API surface.

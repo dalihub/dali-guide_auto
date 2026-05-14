@@ -6,7 +6,7 @@ category: views-components
 
 # Scroll Bar
 
-The `ScrollBar` control provides visual feedback for scroll position within scrollable content. It can be used standalone or integrated with `ScrollView` to indicate the current viewport position relative to the total content size.
+The Scroll Bar component provides visual feedback for scrollable content position and allows users to navigate through scrollable views.
 
 ## Table of Contents
 
@@ -18,217 +18,144 @@ The `ScrollBar` control provides visual feedback for scroll position within scro
 
 ## Creating a Scroll Bar
 
-Create a `ScrollBar` instance using the static `New()` method. The scroll bar inherits from `AbsoluteLayout`, allowing you to position and size it within your view hierarchy.
+Create a `ScrollBar` instance using the static `New()` method:
 
 ```cpp
 #include <dali-ui-foundation/public-api/scroll-bar.h>
 
 using namespace Dali::Ui;
 
-// Create a new scroll bar
 ScrollBar scrollBar = ScrollBar::New();
-
-// Add to your view hierarchy
-parentView.Add(scrollBar);
 ```
 
-You can downcast a `BaseHandle` to a `ScrollBar` using `DownCast()`:
+The `ScrollBar` class inherits from `AbsoluteLayout`, so you can position and size it like any other view. To downcast a base handle to a `ScrollBar`, use `ScrollBar::DownCast()`:
 
 ```cpp
 BaseHandle handle = scrollBar;
 ScrollBar casted = ScrollBar::DownCast(handle);
-
 if (casted)
 {
-  // Successfully downcasted
+  // Successfully downcast
 }
 ```
 
 ## Configuring Bar Appearance
 
-The `ScrollBar` provides several properties to customize its visual appearance.
+### Thickness and Color
 
-### Bar Thickness
-
-Set the width of the scroll bar using `SetBarThickness()`. The default thickness is 4.0f.
+Set the scroll bar thickness using `SetBarThickness()`:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
-
-// Set a thicker scroll bar
-scrollBar.SetBarThickness(12.0f);
-
-// Get current thickness
-float thickness = scrollBar.GetBarThickness(); // Returns 12.0f
+scrollBar.SetBarThickness(10.0f);
+float thickness = scrollBar.GetBarThickness(); // Returns 10.0f
 ```
 
-### Bar Color
-
-Customize the scroll bar color using `SetBarColor()`. The default color is a light gray (0.8, 0.8, 0.8, 1.0).
+Set the scroll bar color using `SetBarColor()`:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
-
-// Set a blue scroll bar
-scrollBar.SetBarColor(Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-
-// Get current color
+scrollBar.SetBarColor(Vector4(0.2f, 0.4f, 0.8f, 1.0f)); // RGBA
 Vector4 color = scrollBar.GetBarColor();
 ```
 
-### Bar Corner Radius
+### Corner Radius
 
-Apply rounded corners to the scroll bar using `SetBarCornerRadius()`. You can set a uniform radius for all corners or specify individual values.
+Apply rounded corners to the scroll bar. You can set the same radius for all corners or specify individual values:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
+// Same radius for all corners
+scrollBar.SetBarCornerRadius(4.0f);
 
-// Set uniform corner radius for all corners
-scrollBar.SetBarCornerRadius(3.0f);
+// Individual radius for each corner (topLeft, topRight, bottomRight, bottomLeft)
+scrollBar.SetBarCornerRadius(Vector4(2.0f, 4.0f, 4.0f, 2.0f));
 
-// Set individual corner radii (topLeft, topRight, bottomRight, bottomLeft)
-scrollBar.SetBarCornerRadius(Vector4(2.0f, 4.0f, 2.0f, 4.0f));
-
-// Get current corner radius
 Vector4 radius = scrollBar.GetBarCornerRadius();
 ```
 
-### Bar Offset
+### Minimum Size and Offset
 
-Control the gap between the scroll bar and the container edges using `SetBarOffset()`. The default offset is 2.0f.
+Set a minimum size to ensure the scroll bar remains visible even when content is large:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
-
-// Set a larger offset from edges
-scrollBar.SetBarOffset(5.0f);
-
-// Get current offset
-float offset = scrollBar.GetBarOffset(); // Returns 5.0f
+scrollBar.SetBarMinSize(20.0f);
+float minSize = scrollBar.GetBarMinSize();
 ```
 
-### Minimum Bar Size
-
-Ensure the scroll bar remains visible even with large content by setting a minimum size using `SetBarMinSize()`.
+Set the offset to create a gap between the bar and the container edges:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
-
-// Ensure bar is always at least 20 pixels
-scrollBar.SetBarMinSize(20.0f);
-
-// Get minimum size
-float minSize = scrollBar.GetBarMinSize();
+scrollBar.SetBarOffset(5.0f);
+float offset = scrollBar.GetBarOffset();
 ```
 
 ## Controlling Visibility
 
-The `ScrollBar` supports three visibility modes defined by the `ScrollBarVisibility` enum:
+The `ScrollBarVisibility` enum controls when scroll bars appear:
 
-| Value | Description |
-|-------|-------------|
-| `ScrollBarVisibility::Auto` | Shows the scroll bar only during scrolling (default) |
-| `ScrollBarVisibility::Always` | Always shows the scroll bar |
-| `ScrollBarVisibility::Never` | Never shows the scroll bar |
+- `ScrollBarVisibility::Auto` — Show only during scrolling
+- `ScrollBarVisibility::Always` — Always visible
+- `ScrollBarVisibility::Never` — Never visible
 
 Control vertical and horizontal scroll bar visibility independently:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
-
-// Always show vertical scroll bar
-scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
-
-// Never show horizontal scroll bar
+scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
 scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
 
-// Query current visibility
 ScrollBarVisibility vVisibility = scrollBar.GetVerticalScrollBarVisibility();
 ScrollBarVisibility hVisibility = scrollBar.GetHorizontalScrollBarVisibility();
 ```
 
-To hide the scroll bar programmatically:
-
-```cpp
-scrollBar.HideBar();
-```
-
 ## Managing Scroll Position
 
-Update the scroll bar position to reflect the current scroll state of your content.
+### Setting and Getting Position
 
-### Setting Scroll Position
-
-Use `SetScrollPosition()` to update the scroll bar indicator position:
+Set the scroll position programmatically:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
-
-// Set scroll position
-scrollBar.SetScrollPosition(Vector2(10.0f, 25.0f));
-
-// Get current scroll position
+scrollBar.SetScrollPosition(Vector2(15.0f, 25.0f));
 Vector2 position = scrollBar.GetScrollPosition();
 ```
 
 ### Updating Bar Size
 
-Synchronize the scroll bar thumb size with the content and viewport dimensions using `UpdateBarSize()`:
+When using `ScrollBar` standalone, call `UpdateBarSize()` to recalculate the bar proportions based on content and viewport dimensions:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
+float scrollWidth = 100.0f;   // Total scrollable content width
+float scrollHeight = 200.0f;  // Total scrollable content height
+float viewportWidth = 50.0f;  // Visible viewport width
+float viewportHeight = 100.0f; // Visible viewport height
 
-// Update bar size based on content and viewport dimensions
-// scrollWidth: total scrollable content width
-// scrollHeight: total scrollable content height
-// viewportWidth: visible area width
-// viewportHeight: visible area height
-scrollBar.UpdateBarSize(1000.0f, 2000.0f, 400.0f, 600.0f);
+scrollBar.UpdateBarSize(scrollWidth, scrollHeight, viewportWidth, viewportHeight);
 ```
 
-### Updating Scroll Position from External Source
+### Updating Scroll Position
 
-Use `UpdateScrollPosition()` to update the scroll position from an external source:
+Update the scroll bar position to reflect content scrolling:
 
 ```cpp
-ScrollBar scrollBar = ScrollBar::New();
+scrollBar.UpdateScrollPosition(Vector2(10.0f, 20.0f));
+```
 
-// Update scroll position from external scroll events
-scrollBar.UpdateScrollPosition(Vector2(50.0f, 100.0f));
+### Hiding the Bar
+
+Programmatically hide the scroll bar. This only affects bars with `ScrollBarVisibility::Auto`; always-visible bars remain visible:
+
+```cpp
+scrollBar.HideBar();
 ```
 
 ## Using with ScrollView
 
-The `ScrollView` component has built-in scroll bar support. Configure scroll bar visibility directly on `ScrollView` for common use cases:
+`ScrollView` has built-in scroll bar support. Configure visibility directly on the `ScrollView` instance:
 
 ```cpp
-#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/scroll-view.h>
 
-using namespace Dali;
-using namespace Dali::Ui;
-
-// Create a ScrollView with automatic scroll bars
 ScrollView scrollView = ScrollView::New()
   .SetScrollDirection(ScrollDirection::Vertical)
   .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
   .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
-
-// Add content to the scroll view
-View content = View::New();
-content.SetRequestedWidth(600.0f);
-content.SetRequestedHeight(2000.0f);
-scrollView.SetContent(content);
-
-// Add scroll view to parent
-parentView.Add(scrollView);
 ```
 
-For standalone scroll bar usage, create and configure a `ScrollBar` instance separately:
-
-```cpp
-ScrollBar scrollBar = ScrollBar::New();
-scrollBar.SetBarThickness(12.0f);
-scrollBar.SetBarColor(Vector4(0.0f, 0.5f, 1.0f, 1.0f));
-scrollBar.SetBarCornerRadius(6.0f);
-scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
-scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+When using `ScrollView`, the scroll bar is managed automatically and you do not need to create a separate `ScrollBar` instance or call `UpdateBarSize()` manually.

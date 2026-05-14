@@ -1,13 +1,266 @@
 [36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
-Generated the Ui Scale Manager developer guide at `generated/ui-scale-manager.md`. The document includes:
+---
+title: Ui Scale Manager
+sidebar_label: Ui Scale Manager
+category: styling-theme-config
+---
 
-- Frontmatter with title, sidebar_label, and category
-- Brief overview of UiScaleManager functionality
-- Table of contents with anchor links
-- Feature-specific sections covering:
-  - Getting the current scale with `UiScaleManager::Get().GetScale()`
-  - Setting the system scale with `SetScale()`
-  - View scale policies (`UiScalePolicy::INHERIT`, `ENABLED`, `DISABLED`)
-  - Practical examples for scale control panels, mixed policy layouts, and nested scale islands
+# Ui Scale Manager
 
-All API usage examples were verified against the public headers (`ui-scale-manager.h`, `ui-scale-policy.h`, `view.h`) and the sample code in `ui-scale-example.cpp`.
+UiScaleManager provides access to the system-driven adaptive UI scale, allowing applications to respond to display scale changes and control how individual views participate in scaling.
+
+## Table of Contents
+
+- [Getting the Scale Manager](#getting-the-scale-manager)
+- [Reading and Setting the System Scale](#reading-and-setting-the-system-scale)
+- [Scale Policies for Views](#scale-policies-for-views)
+- [Practical Examples](#practical-examples)
+
+## Getting the Scale Manager
+
+`UiScaleManager` is a singleton that provides access to the current system scale factor. Use the static `Get()` method to retrieve the singleton instance.
+
+```cpp
+UiScaleManager scaleManager = UiScaleManager::Get();
+float currentScale = scaleManager.GetScale();
+```
+
+The scale manager is a handle-based object that can be safely copied or moved:
+
+```cpp
+UiScaleManager manager1 = UiScaleManager::Get();
+UiScaleManager manager2 = manager1;  // Copy constructor
+UiScaleManager manager3 = std::move(manager1);  // Move constructor
+```
+
+## Reading and Setting the System Scale
+
+### Reading the Current Scale
+
+Use `GetScale()` to retrieve the current system scale factor. The default value is 1.0.
+
+```cpp
+float scale = UiScaleManager::Get().GetScale();
+// Use the scale value for adaptive layout calculations
+```
+
+### Setting the System Scale
+
+Use `SetScale()` to change the system scale factor. This triggers re-layout of all registered layout roots.
+
+```cpp
+void ApplyUserScale(float userScale)
+{
+    if (userScale >= 0.5f && userScale <= 3.0f)
+    {
+        UiScaleManager::Get().SetScale(userScale);
+    }
+}
+```
+
+A typical pattern for responding to user input:
+
+```cpp
+void OnScalePresetSelected(float presetScale)
+{
+    UiScaleManager::Get().SetScale(presetScale);
+    UpdateScaleDisplay();
+}
+
+void UpdateScaleDisplay()
+{
+    float currentScale = UiScaleManager::Get().GetScale();
+    // Update UI to show current scale
+}
+```
+
+## Scale Policies for Views
+
+Each view can control how it participates in the system-driven scale through `UiScalePolicy`. The policy determines how the effective scale is calculated for a view and its descendants.
+
+### Available Policies
+
+| Policy | Behavior |
+|--------|----------|
+| `UiScalePolicy::INHERIT` | Inherits effective scale from parent. Root views inherit from UiScaleManager. This is the default. |
+| `UiScalePolicy::ENABLED` | Always applies the current UiScaleManager scale, ignoring parent policy. |
+| `UiScalePolicy::DISABLED` | Opts out of scaling (effectiveScale = 1.0). Descendant INHERIT views also get 1.0. |
+
+### Setting the Policy on a View
+
+Use `SetUiScalePolicy()` on any `View` to control its scaling behavior:
+
+```cpp
+View view = View::New();
+view.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Default behavior
+```
+
+### Policy Inheritance Examples
+
+**Default scaling (INHERIT):**
+
+```cpp
+// All views scale proportionally with the system scale
+View container = View::New();
+container.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Default
+
+View child = View::New();
+child.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Inherits from parent
+container.Add(child);
+```
+
+**Forced scaling (ENABLED):**
+
+```cpp
+// This view always scales, even if parent is DISABLED
+View scalingChild = View::New();
+scalingChild.SetUiScalePolicy(UiScalePolicy::ENABLED);
+```
+
+**Fixed-size container (DISABLED):**
+
+```cpp
+// Container and its INHERIT children stay at 1.0 scale
+View fixedContainer = View::New();
+fixedContainer.SetUiScalePolicy(UiScalePolicy::DISABLED);
+
+View fixedChild = View::New();
+fixedChild.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Gets 1.0 from DISABLED parent
+fixedContainer.Add(fixedChild);
+```
+
+## Practical Examples
+
+### Scale Control Panel
+
+A complete example showing how to build a UI that responds to scale changes:
+
+```cpp
+class ScaleController : public ConnectionTracker
+{
+public:
+    void Initialize(Window window)
+    {
+        // Create control panel
+        StackLayout panel = StackLayout::New(StackOrientation::VERTICAL);
+        panel.SetRequestedWidth(MATCH_PARENT);
+        panel.SetRequestedHeight(WRAP_CONTENT);
+
+        // Scale display label
+        mScaleLabel = Label::New("System Scale: 1.00");
+        mScaleLabel.SetRequestedWidth(MATCH_PARENT);
+        mScaleLabel.SetRequestedHeight(WRAP_CONTENT);
+        panel.Add(mScaleLabel);
+
+        // Preset buttons
+        StackLayout buttonRow = StackLayout::New(StackOrientation::HORIZONTAL);
+        static constexpr float presets[] = {0.8f, 1.0f, 1.2f, 1.5f, 2.0f};
+
+        for (float preset : presets)
+        {
+            InteractiveView btn = CreatePresetButton(preset);
+            buttonRow.Add(btn);
+        }
+        panel.Add(buttonRow);
+
+        window.Add(panel);
+        UpdateScaleLabel();
+    }
+
+private:
+    InteractiveView CreatePresetButton(float scale)
+    {
+        InteractiveView btn = InteractiveView::New();
+        btn.SetRequestedWidth(WRAP_CONTENT);
+        btn.SetRequestedHeight(44.0f);
+
+        btn.ConnectClickedSignal(this, [this, scale](View, const InputEvent&) {
+            ApplyScale(scale);
+        });
+        return btn;
+    }
+
+    void ApplyScale(float scale)
+    {
+        UiScaleManager::Get().SetScale(scale);
+        UpdateScaleLabel();
+    }
+
+    void UpdateScaleLabel()
+    {
+        float scale = UiScaleManager::Get().GetScale();
+        std::string text = "System Scale: " + std::to_string(scale).substr(0, 4);
+        mScaleLabel.SetText(text.c_str());
+    }
+
+    Label mScaleLabel;
+};
+```
+
+### Mixed Scaling in a Layout
+
+Creating a layout where some elements scale while others remain fixed:
+
+```cpp
+View CreateMixedScaleLayout()
+{
+    // Main container scales with system
+    StackLayout mainContainer = StackLayout::New(StackOrientation::HORIZONTAL);
+    mainContainer.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Default
+
+    // Fixed-size control panel (does not scale)
+    StackLayout controlPanel = StackLayout::New(StackOrientation::VERTICAL);
+    controlPanel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    controlPanel.SetBackgroundColor(UiColor(0x2D2D4D));
+
+    // Content area scales with system
+    View contentArea = View::New();
+    contentArea.SetUiScalePolicy(UiScalePolicy::INHERIT);
+
+    // Special element that scales even inside DISABLED parent
+    View scalingIndicator = View::New();
+    scalingIndicator.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    controlPanel.Add(scalingIndicator);
+
+    mainContainer.Add(controlPanel);
+    mainContainer.Add(contentArea);
+
+    return mainContainer;
+}
+```
+
+### Nested Scale Islands
+
+Creating isolated scale-free zones within a scaled layout:
+
+```cpp
+View CreateNestedScaleLayout()
+{
+    // Outer zone scales normally
+    StackLayout outerZone = StackLayout::New(StackOrientation::HORIZONTAL);
+    outerZone.SetUiScalePolicy(UiScalePolicy::INHERIT);
+
+    // Scaled content
+    View scaledContent = View::New();
+    scaledContent.SetUiScalePolicy(UiScalePolicy::INHERIT);
+    outerZone.Add(scaledContent);
+
+    // Create a scale-free island
+    StackLayout scaleFreeIsland = StackLayout::New(StackOrientation::VERTICAL);
+    scaleFreeIsland.SetUiScalePolicy(UiScalePolicy::DISABLED);
+
+    // Child inside island - fixed at 1.0 scale
+    View fixedChild = View::New();
+    fixedChild.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Gets 1.0 from DISABLED parent
+
+    // Exception: child that scales despite DISABLED parent
+    View scalingException = View::New();
+    scalingException.SetUiScalePolicy(UiScalePolicy::ENABLED);  // Uses system scale
+
+    scaleFreeIsland.Add(fixedChild);
+    scaleFreeIsland.Add(scalingException);
+    outerZone.Add(scaleFreeIsland);
+
+    return outerZone;
+}
+```

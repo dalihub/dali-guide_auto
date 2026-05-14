@@ -2,62 +2,56 @@
 
 ## Summary
 
-Reviewed the Input Event guide draft against public headers in `repos/dali-ui/dali-ui-foundation/public-api/`. The draft was largely accurate with one significant API usage error in the SelectableTrait section.
+Reviewed the Input Event guide draft against public headers in `repos/dali-ui/dali-ui-foundation/public-api/`. The document structure and most API descriptions are accurate. One code correction was needed.
 
-## Changed Prose
+## Changes Made
 
-### 1. SelectableTrait Signals Section (API Usage Correction)
+### 1. UiColor Constructor Arguments (PressedChangedSignal Handler section)
+
+**Location:** "PressedChangedSignal Handler" section, code example
 
 **Original:**
 ```cpp
-View view = View::New();
-SelectableTrait trait = SelectableTrait::New();
-view.SetTrait(SelectableTrait::New());
-trait.SelectionChangedSignal().Connect(this, [](View view, bool selected, InputEvent event) {
+view.SetBackgroundColor(Dali::Ui::UiColor(0xCCCCCCFF));
+// ...
+view.SetBackgroundColor(Dali::Ui::UiColor(0xFFFFFFFF));
 ```
 
 **Revised:**
 ```cpp
-View view = View::New();
-SelectableTrait trait = view.EnsureSelectableTrait();
-trait.SelectionChangedSignal().Connect(this, [](View view, bool selected, InputEvent event) {
+view.SetBackgroundColor(Dali::Ui::UiColor(0xCCCCCC));
+// ...
+view.SetBackgroundColor(Dali::Ui::UiColor(0xFFFFFF));
 ```
 
-**Source Evidence:** `view.h` lines 895-904 shows `EnsureSelectableTrait()` method that creates and attaches a SelectableTrait to a View. There is no `SetTrait()` method in the View class. The correct pattern is to use `EnsureSelectableTrait()` which returns the attached trait.
-
-### 2. InteractiveTrait Signals Section (Simplified API Pattern)
-
-**Original:**
+**Source Evidence:** `repos/dali-ui/dali-ui-foundation/public-api/ui-color.h` line 67-71:
 ```cpp
-View view = View::New();
-view.EnsureInteractiveTrait().ClickedSignal().Connect(this, [](View view, InputEvent event) {
+/**
+ * @brief Creates a UiColor from a hex RGB value.
+ *
+ * @param[in] rgb 0xRRGGBB format hex color
+ * @param[in] a Alpha component (0.0 ~ 1.0), defaults to 1.0
+ */
+explicit UiColor(uint32_t rgb, float a = 1.0f);
 ```
 
-**Revised:**
-```cpp
-View view = View::New();
-InteractiveTrait trait = view.EnsureInteractiveTrait();
-trait.ClickedSignal().Connect(this, [](View view, InputEvent event) {
-```
+**Reason:** The `UiColor` hex constructor takes RGB format (0xRRGGBB), not ARGB. The original code passed 8-digit hex values (0xCCCCCCFF, 0xFFFFFFFF) which would be misinterpreted. Corrected to 6-digit RGB values.
 
-**Reason:** Minor clarification for readability - storing the trait in a variable makes the code clearer and follows the same pattern used in the SelectableTrait section.
+## Verified Accurate
 
-## Verified Accurate Prose
+The following sections were verified against source and required no changes:
 
-The following sections were verified against source headers and required no changes:
-
-1. **Event Types Table** - Verified against `input-event-type.h`. All enum values and descriptions match the header documentation.
-
-2. **InputEvent Class Description** - Verified against `input-event.h`. Correctly states that `InputEvent` inherits from `BaseHandle` and supports copy/move semantics.
-
-3. **Creating InputEvent Objects** - All `New()` overloads verified against `input-event.h` lines 70-100. The `None()` static method and its behavior are correctly documented.
-
-4. **InteractiveView Signals** - Verified against `interactive-view.h`. Signal signatures and connection helper methods are correctly documented.
-
-5. **StateEvent Section** - Verified against `state-event.h`. The `GetCause()` method and `GetInputEventType()` convenience method are correctly described.
-
-6. **Code Examples** - All switch statement examples and event type checking patterns are accurate.
+1. **Event Types table** - Matches `InputEventType` enum in `input-event-type.h` exactly
+2. **`New()` overloads** - All six overloads verified in `input-event.h` (default NONE, TouchEvent, KeyEvent, TapGesture, LongPressGesture, WheelEvent)
+3. **`None()` static method** - Verified in `input-event.h` and implementation in `input-event.cpp`
+4. **Getter methods** - All five getters (`GetTouchEvent()`, `GetKeyEvent()`, `GetTapGesture()`, `GetLongPressGesture()`, `GetWheelEvent()`) verified with correct const reference return types
+5. **Signal signatures** - Verified in `interactive-trait.h`:
+   - `ClickedSignal`: `Signal<void(View, InputEvent)>`
+   - `PressedChangedSignal`: `Signal<void(View, bool, InputEvent)>`
+   - `LongPressedSignal`: `Signal<bool(View, InputEvent)>`
+6. **Connect methods** - Template method signatures verified in `interactive-trait.h`
+7. **Code examples** - Usage patterns match sample code in `repos/dali-ui/samples/attachment/attachment-example.cpp`
 
 ## Remaining Concerns
 
-None. All API references have been verified against public headers and the guide accurately reflects the dali-ui API surface.
+None. The document accurately describes the `InputEvent` API for application developers.

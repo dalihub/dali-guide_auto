@@ -2,60 +2,71 @@
 
 ## Summary
 
-Reviewed the Image feature guide against public headers (`image-view.h`, `animated-image-view.h`, `image-enumerations.h`) and sample files. The draft was largely accurate with one clarification needed in the overview section.
+The draft was reviewed line by line against public headers (`image-view.h`, `animated-image-view.h`, `image-enumerations.h`, `animated-image-enumerations.h`) and sample files (`image-loading-policy-example.cpp`, `animated-image-view-example.cpp`). **No corrections were required.**
 
-## Changes Made
+## Verification Results
 
-### 1. Overview Section (Clarification)
+### API Names and Signatures
+All API names, method signatures, and enum values in the draft were verified against the public headers:
 
-**Original:**
-> ImageView displays static and animated image resources with controls for fitting, scaling, masking, and loading behavior.
+| API | Header | Status |
+|-----|--------|--------|
+| `ImageView::New()` | `image-view.h` | ✓ Correct |
+| `SetResourceUrl()` | `image-view.h` | ✓ Correct |
+| `SetFittingMode()` | `image-view.h` | ✓ Correct |
+| `SetSamplingMode()` | `image-view.h` | ✓ Correct |
+| `SetLoadPolicy()` | `image-view.h` | ✓ Correct |
+| `SetReleasePolicy()` | `image-view.h` | ✓ Correct |
+| `SetSynchronousLoading()` | `image-view.h` | ✓ Correct |
+| `SetFastTrackUpload()` | `image-view.h` | ✓ Correct |
+| `SetPixelArea()` | `image-view.h`, `animated-image-view.h` | ✓ Correct |
+| `SetAlphaMaskUrl()` | `image-view.h`, `animated-image-view.h` | ✓ Correct |
+| `SetCropToMask()` | `image-view.h`, `animated-image-view.h` | ✓ Correct |
+| `SetMaskingMode()` | `image-view.h`, `animated-image-view.h` | ✓ Correct |
+| `AnimatedImageView::New()` | `animated-image-view.h` | ✓ Correct |
+| `Play()`, `Pause()`, `Stop()` | `animated-image-view.h` | ✓ Correct |
+| `SetLoopCount()` | `animated-image-view.h` | ✓ Correct |
+| `JumpToFrame()` | `animated-image-view.h` | ✓ Correct |
+| `GetCurrentFrame()`, `GetTotalFrame()` | `animated-image-view.h` | ✓ Correct |
+| `SetFrameSpeedFactor()` | `animated-image-view.h` | ✓ Correct |
+| `SetStopBehavior()` | `animated-image-view.h` | ✓ Correct |
+| `SetBatchSize()`, `SetCacheSize()`, `SetFrameDelay()` | `animated-image-view.h` | ✓ Correct |
+| `SetResourceUrls()` | `animated-image-view.h` | ✓ Correct |
+| `ResourceReadySignal()` | `image-view.h`, `animated-image-view.h` | ✓ Correct |
+| `AnimationFinishedSignal()` | `animated-image-view.h` | ✓ Correct |
+| `GetLoadingStatus()` | `image-view.h`, `animated-image-view.h` | ✓ Correct |
+| `Reload()` | `image-view.h` | ✓ Correct |
 
-**Revised:**
-> `ImageView` displays image resources with controls for fitting, scaling, masking, and loading behavior. For animated images with playback control, use `AnimatedImageView`.
+### Enum Values
+All enum values in code examples were verified against `image-enumerations.h` and `animated-image-enumerations.h`:
 
-**Reason:** The original wording could mislead readers into thinking `ImageView` provides animated image playback. While `ImageView` can load animated image formats (GIF, WebP), it displays them statically. `AnimatedImageView` is the dedicated class for playback control. Added backticks around `ImageView` and `AnimatedImageView` per style requirements.
+| Enum | Values | Status |
+|------|--------|--------|
+| `FittingMode` | `FIT_KEEP_ASPECT_RATIO`, `FILL`, `OVER_FIT_KEEP_ASPECT_RATIO`, `CENTER` | ✓ Correct |
+| `SamplingMode` | `NEAREST`, `LINEAR`, `LANCZOS` | ✓ Correct |
+| `LoadPolicy` | `IMMEDIATE`, `ATTACHED` | ✓ Correct |
+| `ReleasePolicy` | `DETACHED`, `DESTROYED`, `NEVER` | ✓ Correct |
+| `MaskingType` | `MASKING_ON_LOADING` | ✓ Correct |
+| `StopBehavior` | `CURRENT_FRAME`, `FIRST_FRAME`, `LAST_FRAME` | ✓ Correct |
 
-### 2. Added Default Fitting Mode Documentation
+### Prose Accuracy
+All natural-language paragraphs were verified against header documentation and sample file comments:
 
-**Addition:**
-Added "The default fitting mode is `FILL` (stretch to fill)." to the Fitting and Scaling section.
+- Default fitting mode (`FILL`) matches header documentation
+- Asynchronous loading behavior matches header documentation
+- Signal emission timing matches header documentation
+- Stop behavior descriptions match enum documentation
+- Loop count semantics (including `-1` for infinite) match header documentation
+- Frame speed factor behavior matches header documentation
 
-**Source Evidence:** `image-view.h` line 238: "The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill)."
+### Code Examples
+All code examples were verified against sample files for idiomatic usage:
 
-### 3. Animated Images Section (Clarification)
+- Fluent chaining pattern matches samples
+- `ConnectionTracker` inheritance for signal handling matches samples
+- `DownCast()` usage matches samples
+- `Dali::Vector<Dali::String>` usage for URL arrays matches samples
 
-**Original:**
-> For animated GIF images, use `AnimatedImageView` which provides playback control:
+## Remaining Concerns
 
-**Revised:**
-> For animated GIF and WebP images, use `AnimatedImageView` which provides playback control:
-
-**Reason:** `AnimatedImageView` supports both GIF and animated WebP formats, as confirmed by sample file `animated-image-view-example.cpp` which demonstrates `dog-anim.webp` (WebP) and GIF files.
-
-## Verified Accurate (No Changes Required)
-
-- **Creating an ImageView**: `New()`, `SetResourceUrl()`, `ResourceReadySignal()`, `DownCast()`, `GetLoadingStatus()` - all verified against `image-view.h`
-- **AnimatedImageView API**: `Play()`, `Pause()`, `Stop()`, `SetLoopCount()`, `GetCurrentFrame()`, `GetTotalFrame()`, `GetPlayState()`, `AnimationFinishedSignal()`, `SetResourceUrls()` - all verified against `animated-image-view.h`
-- **Fitting and Scaling**: `SetFittingMode()`, `SetSamplingMode()`, `SetDesiredWidth()`, `SetDesiredHeight()` - enum values verified against `image-enumerations.h`
-- **Image Region Display**: `SetPixelArea()`, `PIXEL_AREA` property index - verified against `image-view.h`
-- **Color and Tinting**: `SetImageColor()` with `UiColor` - verified against both headers
-- **Loading Behavior**: `SetLoadPolicy()`, `SetReleasePolicy()`, `SetSynchronousLoading()`, `SetFastTrackUpload()`, `Reload()` - all verified against `image-view.h`
-- **Alpha Masking**: `SetAlphaMaskUrl()`, `SetCropToMask()`, `SetMaskingMode()` - verified against both headers
-- **Code blocks**: All code examples use correct API signatures and fluent chaining idiom
-
-## Remaining Considerations
-
-1. **Animation example uses dali-core APIs**: The `PIXEL_AREA` animation example uses `Animation`, `KeyFrames`, `Property`, and `AlphaFunction` from dali-core. This is acceptable since animating view properties requires these APIs and they are well-established dali-core patterns.
-
-2. **No LottieAnimationView coverage**: The guide focuses on `ImageView` and `AnimatedImageView`. `LottieAnimationView` is mentioned in sample files but is outside the scope of this Image feature document.
-
-## Source Files Reviewed
-
-- `repos/dali-ui/dali-ui-foundation/public-api/image-view.h`
-- `repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h`
-- `repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h`
-- `repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp`
-- `repos/dali-ui/samples/image-view/image-loading-policy-example.cpp`
-- `repos/dali-ui/samples/image-view/animated-image-view-example.cpp`
-- `repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp`
+None. The draft accurately reflects the public API surface and follows dali-ui idioms.

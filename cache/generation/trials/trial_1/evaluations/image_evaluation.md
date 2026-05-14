@@ -4,41 +4,54 @@
 
 - Status: needs_repair
 - Publish ready: false
-- Bugs: 1
+- Bugs: 3
 - Warnings: 2
 - Needs review: 0
-- Repairable issues: 3
+- Repairable issues: 5
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| ENUM_VALUE_OWNER_MISMATCH | 1 |
-| PREFERRED_USAGE_PATTERN_MISSING | 1 |
-| THIN_SECTION | 1 |
+| SCOPED_VALUE_OWNER_MISMATCH | 3 |
+| THIN_SECTION | 2 |
 
 ## Human Review
 
 ### 1. THIN_SECTION (warning)
 
-- Location: line 204
-- Span: `## Loading Behavior`
-- Reason: Section ## Loading Behavior has very little explanatory or example content.
+- Location: line 74
+- Span: `## Loading Policies`
+- Reason: Section ## Loading Policies has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
-### 2. ENUM_VALUE_OWNER_MISMATCH (bug)
+### 2. THIN_SECTION (warning)
 
-- Location: line 173
-- Span: `ImageView::Property::PIXEL_AREA`
-- Reason: ImageView::Property::PIXEL_AREA is not defined by that Property owner.
-- Suggested direction: Use the property enum owner that actually defines this value.
+- Location: line 121
+- Span: `## Animated Images`
+- Reason: Section ## Animated Images has very little explanatory or example content.
+- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
-### 3. PREFERRED_USAGE_PATTERN_MISSING (warning)
+### 3. SCOPED_VALUE_OWNER_MISMATCH (bug)
 
-- Location: line n/a
-- Span: ``
-- Reason: Preferred usage pattern is not visible: image_signals
-- Suggested direction: Consider adding the preferred dali-ui idiom for this feature.
+- Location: line 265
+- Span: `Ui::Visual::ResourceStatus::LOADED`
+- Reason: Ui::Visual::ResourceStatus::LOADED could not be resolved with that exact owner/value combination.
+- Suggested direction: Use the exact public owner and value from the API index; do not infer enum/property owners from naming alone.
+
+### 4. SCOPED_VALUE_OWNER_MISMATCH (bug)
+
+- Location: line 305
+- Span: `Ui::Visual::ResourceStatus::LOADING`
+- Reason: Ui::Visual::ResourceStatus::LOADING could not be resolved with that exact owner/value combination.
+- Suggested direction: Use the exact public owner and value from the API index; do not infer enum/property owners from naming alone.
+
+### 5. SCOPED_VALUE_OWNER_MISMATCH (bug)
+
+- Location: line 309
+- Span: `Ui::Visual::ResourceStatus::LOADED`
+- Reason: Ui::Visual::ResourceStatus::LOADED could not be resolved with that exact owner/value combination.
+- Suggested direction: Use the exact public owner and value from the API index; do not infer enum/property owners from naming alone.
 
 ## Machine Data
 

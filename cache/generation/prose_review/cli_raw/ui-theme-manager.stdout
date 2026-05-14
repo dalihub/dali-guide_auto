@@ -1,0 +1,126 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Ui Theme Manager
+sidebar_label: Ui Theme Manager
+category: styling-theme-config
+---
+# Ui Theme Manager
+
+UiThemeManager is a singleton that provides access to the current theme identifier and notifies your application when the theme changes.
+
+## Table of Contents
+
+- [Accessing the Theme Manager](#accessing-the-theme-manager)
+- [Getting the Current Theme](#getting-the-current-theme)
+- [Responding to Theme Changes](#responding-to-theme-changes)
+
+## Accessing the Theme Manager
+
+`UiThemeManager` is a handle-based singleton. Obtain the instance using the static `Get()` method:
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+
+using namespace Dali::Ui;
+
+UiThemeManager manager = UiThemeManager::Get();
+```
+
+The returned handle can be safely copied or moved:
+
+```cpp
+UiThemeManager manager = UiThemeManager::Get();
+// Copy construction
+UiThemeManager copy(manager);
+// Move construction
+UiThemeManager moved(std::move(manager));
+```
+
+To downcast a `BaseHandle` to a `UiThemeManager`:
+
+```cpp
+BaseHandle handle = UiThemeManager::Get();
+UiThemeManager manager = UiThemeManager::DownCast(handle);
+if (manager) {
+  // Valid UiThemeManager
+}
+```
+
+## Getting the Current Theme
+
+Call `GetCurrentThemeId()` to retrieve the identifier of the active theme:
+
+```cpp
+UiThemeManager manager = UiThemeManager::Get();
+String themeId = manager.GetCurrentThemeId();
+```
+
+The method returns the theme identifier string, or an empty string if no theme is active. The default theme loader returns `"default"` when no custom theme has been set.
+
+## Responding to Theme Changes
+
+Connect to `ThemeChangedSignal()` to react when the application theme changes:
+
+```cpp
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ThemeObserver : public ConnectionTracker
+{
+public:
+  ThemeObserver()
+  {
+    UiThemeManager manager = UiThemeManager::Get();
+    manager.ThemeChangedSignal().Connect(this, &ThemeObserver::OnThemeChanged);
+  }
+
+  void OnThemeChanged()
+  {
+    UiThemeManager manager = UiThemeManager::Get();
+    String newThemeId = manager.GetCurrentThemeId();
+    // Update UI elements for the new theme
+  }
+};
+```
+
+The signal type is `Signal<void()>`, so the callback takes no parameters and returns void. Use a class derived from `ConnectionTracker` to manage signal connections automatically.
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Ui Theme Manager Prose Review
+
+## Summary
+
+The draft was accurate with one minor include path error. All API descriptions, code examples, and behavioral descriptions match the public header and UTC evidence.
+
+## Changes Made
+
+| Location | Original | Revised | Reason |
+|----------|----------|---------|--------|
+| Responding to Theme Changes | `#include <dali/public-api/object/connection-tracker.h>` | `#include <dali/public-api/signals/connection-tracker.h>` | Corrected include path to match actual header location in dali-core |
+
+## Verified Accurate (No Changes Needed)
+
+- **Overview**: Description of UiThemeManager as a handle-based singleton is correct.
+- `Get()` method: Static method returning singleton handle - verified in header and UTC.
+- `DownCast()` method: Static downcast from BaseHandle - verified in header and UTC.
+- `GetCurrentThemeId()`: Returns `String`, empty string if no theme active - verified in header.
+- Default theme behavior: Returns `"default"` for DefaultThemeLoader - verified in UTC line 141.
+- `ThemeChangedSignal()`: Returns `ThemeChangedSignalType&` which is `Signal<void()>` - verified in header.
+- Copy/move semantics: Defaulted operations work as described - verified in header and UTC.
+- ConnectionTracker usage pattern: Correct pattern shown for signal connection management.
+
+## Source Evidence
+
+- **Header**: `repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h`
+- **UTC**: `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiThemeManager.cpp`
+- **ConnectionTracker header**: `repos/dali-core/dali/public-api/signals/connection-tracker.h` (from context pack)
+
+## Remaining Concerns
+
+None. The document is accurate and follows the dali-ui app-facing guide conventions.
+-----END_PROSE_REVIEW_REPORT-----

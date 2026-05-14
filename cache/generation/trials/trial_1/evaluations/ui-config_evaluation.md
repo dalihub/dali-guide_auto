@@ -2,77 +2,70 @@
 
 ## Summary
 
-- Status: warning
-- Publish ready: true
-- Bugs: 0
-- Warnings: 8
+- Status: needs_repair
+- Publish ready: false
+- Bugs: 1
+- Warnings: 6
 - Needs review: 0
-- Repairable issues: 8
+- Repairable issues: 7
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| THIN_SECTION | 5 |
-| UNKNOWN_BACKTICK_API_TOKEN | 3 |
+| SCOPED_VALUE_OWNER_MISMATCH | 1 |
+| THIN_SECTION | 6 |
 
 ## Human Review
 
 ### 1. THIN_SECTION (warning)
 
-- Location: line 50
-- Span: `## Display Scaling and DPI Settings`
-- Reason: Section ## Display Scaling and DPI Settings has very little explanatory or example content.
+- Location: line 52
+- Span: `## Display Scaling and DPI Configuration`
+- Reason: Section ## Display Scaling and DPI Configuration has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
 ### 2. THIN_SECTION (warning)
 
-- Location: line 99
+- Location: line 108
 - Span: `## Text and Label Defaults`
 - Reason: Section ## Text and Label Defaults has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
 ### 3. THIN_SECTION (warning)
 
-- Location: line 146
+- Location: line 185
 - Span: `## Marquee Animation Defaults`
 - Reason: Section ## Marquee Animation Defaults has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
 ### 4. THIN_SECTION (warning)
 
-- Location: line 205
+- Location: line 254
 - Span: `## Focus and Input Configuration`
 - Reason: Section ## Focus and Input Configuration has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
 ### 5. THIN_SECTION (warning)
 
-- Location: line 293
-- Span: `## Image Loading Fallbacks`
-- Reason: Section ## Image Loading Fallbacks has very little explanatory or example content.
+- Location: line 361
+- Span: `## Image Loading Error Handling`
+- Reason: Section ## Image Loading Error Handling has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
-### 6. UNKNOWN_BACKTICK_API_TOKEN (warning)
+### 6. THIN_SECTION (warning)
 
-- Location: line 191
-- Span: `BrokenImageType::SMALL`
-- Reason: Backticked API-like token `BrokenImageType::SMALL` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
+- Location: line 393
+- Span: `## Interaction Effects`
+- Reason: Section ## Interaction Effects has very little explanatory or example content.
+- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
-### 7. UNKNOWN_BACKTICK_API_TOKEN (warning)
+### 7. SCOPED_VALUE_OWNER_MISMATCH (bug)
 
-- Location: line 192
-- Span: `BrokenImageType::NORMAL`
-- Reason: Backticked API-like token `BrokenImageType::NORMAL` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
-
-### 8. UNKNOWN_BACKTICK_API_TOKEN (warning)
-
-- Location: line 193
-- Span: `BrokenImageType::LARGE`
-- Reason: Backticked API-like token `BrokenImageType::LARGE` could not be resolved.
-- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
+- Location: line 295
+- Span: `KeyClickPolicy::ON_CLICK`
+- Reason: KeyClickPolicy::ON_CLICK could not be resolved with that exact owner/value combination.
+- Suggested direction: Use the exact public owner and value from the API index; do not infer enum/property owners from naming alone.
 
 ## Machine Data
 

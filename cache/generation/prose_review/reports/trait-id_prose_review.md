@@ -1,54 +1,82 @@
 # Trait Id Prose Review
 
 ## Summary
-Reviewed the Trait Id guide draft against public headers, implementation files, and UTCs. The draft was largely accurate with minor issues requiring correction.
 
-## Source Evidence Examined
-- `repos/dali-ui/dali-ui-foundation/public-api/trait-id.h` - Primary API definition
-- `repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h` - Reserved trait ID definitions
-- `repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h` - TraitImpl lifecycle callbacks
-- `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp` - Usage examples
+Reviewed the Trait Id guide draft against source evidence from:
+- `repos/dali-ui/dali-ui-foundation/public-api/trait-id.h` (public API)
+- `repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h` (reserved IDs)
+- `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp` (UTC usage patterns)
+- `repos/dali-ui/dali-ui-foundation/public-api/trait.h` (Trait handle)
+- `repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h` (TraitImpl base class)
 
 ## Changes Made
 
-### 1. Thread-safety description (Section: Allocating Trait IDs)
-- **Original**: "This method is thread-safe and uses an internal atomic counter."
-- **Revised**: "This method is thread-safe and lock-free, using an internal atomic counter."
-- **Source evidence**: `trait-id.h` line 41: "Uses an internal atomic counter. Thread-safe and lock-free."
-- **Reason**: Added "lock-free" to match the header documentation exactly.
+### 1. Removed Integration-Level Lifecycle Callback Example
 
-### 2. ReservedTraitId code block (Section: Using Trait IDs with Traits)
-- **Original**: Missing closing brace for namespace block (syntax error)
-- **Revised**: Added closing brace `}` and improved comment to clarify it's an example
-- **Source evidence**: `reserved-trait-id.h` shows 11 reserved IDs; the code block is illustrative
-- **Reason**: Fixed syntax error and clarified the code is an example, not exhaustive
+**Original prose (removed):**
+> When implementing a custom trait, pass the allocated `TraitId` to the trait system during attachment:
+> ```cpp
+> // Inside a trait implementation's lifecycle callback
+> void OnAttached(TraitId id, View& view) override
+> {
+>   // Store the id for later use
+>   mLastId = id;
+> }
+> ```
 
-## Verified Accurate (No Changes Needed)
+**Reason:** `TraitImpl` and its lifecycle callbacks (`OnAttached`, `OnDetached`, etc.) are in the `Dali::Ui::Integration` namespace, which is integration-level API not intended for application developers. The public `Trait` class is a handle that does not expose lifecycle callbacks. Application developers use pre-built traits like `InteractiveTrait` and `SelectableTrait` via View methods like `AsInteractive()` and `AsSelectable()`, or allocate `TraitId` values for custom trait identification.
 
-### API Descriptions
-- `TraitId::Alloc()` returns unique IDs - ✓ Verified in `trait-id.h`
-- `operator==` and `operator!=` for comparison - ✓ Verified in `trait-id.h`
-- `value` member is `uint32_t` and public - ✓ Verified in `trait-id.h`
-- IDs should be stored statically - ✓ Verified in header comment
+**Source evidence:** 
+- `trait-impl.h` shows `TraitImpl` is in `Dali::Ui::Integration` namespace
+- `trait.h` shows public `Trait` class has no lifecycle callback methods
+- UTC tests use `IntegrationView::SetTrait()` which requires `ViewImpl&` access
 
-### Code Examples
-- Static allocation pattern - ✓ Matches header documentation example
-- Equality/inequality comparison - ✓ Matches operator signatures
-- TraitImpl inheritance pattern - ✓ Matches `trait-impl.h`
-- Lifecycle callbacks (`OnAttached`, `OnDetached`) - ✓ Matches `TraitInterface` in `trait-impl.h`
+### 2. Corrected ReservedTraitId Namespace Qualification
 
-### Namespace References
-- `Dali::Ui::TraitId` - ✓ Correct
-- `Dali::Ui::Integration::TraitImpl` - ✓ Correct
-- `Dali::Ui::Integration::ReservedTraitId` - ✓ Correct
+**Original prose:**
+> The framework reserves a set of predefined `TraitId` constants in the `ReservedTraitId` namespace for internal use.
 
-## Remaining Considerations
+**Revised prose:**
+> The framework reserves a set of predefined `TraitId` constants in the `Dali::Ui::Integration::ReservedTraitId` namespace for internal use.
 
-1. **Incomplete ReservedTraitId list**: The code block shows only 4 of 11 reserved IDs. This is acceptable as the comment indicates "... and others" and the section is illustrative. A complete list would require enumerating all 11 IDs which may be excessive for a guide.
+**Reason:** The full namespace path is `Dali::Ui::Integration::ReservedTraitId`, not just `ReservedTraitId`. Accuracy requires the fully-qualified name.
 
-2. **OnBeforeAttached callback not shown**: The example shows `OnAttached` and `OnDetached` but not `OnBeforeAttached`. This is acceptable as the example demonstrates the pattern without being exhaustive.
+**Source evidence:** `reserved-trait-id.h` line 21: `namespace ReservedTraitId` is nested inside `namespace Dali { namespace Ui { namespace Integration {`
 
-3. **C++17 nested namespace syntax**: The code block uses `namespace Dali::Ui::Integration::ReservedTraitId` (C++17) while the actual header uses traditional nested namespaces. This is acceptable as both are valid C++ and the C++17 syntax is more concise for documentation.
+### 3. Updated Reserved ID List with Full Qualification
 
-## Conclusion
-The draft was accurate with only two minor issues: missing "lock-free" in the thread-safety description and a syntax error (missing closing brace) in the final code block. Both issues have been corrected. The guide structure, examples, and API descriptions are accurate and align with the public headers.
+**Original:** Listed IDs as `ReservedTraitId::INTERACTION_TRAIT`, etc.
+
+**Revised:** Listed IDs as `Dali::Ui::Integration::ReservedTraitId::INTERACTION_TRAIT`, etc.
+
+**Reason:** Consistency with the corrected namespace and accuracy for developers who may need to reference these symbols.
+
+### 4. Simplified Comparison Section Prose
+
+**Original prose:**
+> Use these to verify trait identity in lifecycle callbacks or when retrieving traits from a view.
+
+**Revised prose:**
+> Use these to verify trait identity when working with trait identifiers.
+
+**Reason:** Removed reference to "lifecycle callbacks" since those are integration-level APIs. The simpler phrasing remains accurate for all use cases.
+
+## Preserved Content
+
+- Document structure (overview, TOC, three main sections)
+- Code blocks for `TraitId::Alloc()` usage
+- Code blocks for equality/inequality operators
+- Code block for accessing `value` member
+- Thread-safety description of `Alloc()`
+- Recommendation to use `TraitId::Alloc()` for custom traits
+
+## Remaining Concerns
+
+None. The guide now accurately reflects the public API surface for application developers using dali-ui.
+
+## Verification
+
+- All API names verified against public headers
+- Namespace qualifications verified against source
+- Code examples compile against public API (conceptually)
+- No non-English prose present in original or revised document

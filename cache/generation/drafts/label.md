@@ -6,274 +6,315 @@ category: views-components
 
 # Label
 
-Label is a non-editable View that displays text. It performs text layout and rendering using the text rendering backend, but does not support user interaction or text editing.
+Label is a non-editable View that displays text using the dali-ui text rendering backend.
 
 ## Table of Contents
 
 - [Creating a Label](#creating-a-label)
 - [Text and Font Configuration](#text-and-font-configuration)
-- [Text Alignment](#text-alignment)
-- [Multi-Line Text and Line Wrapping](#multi-line-text-and-line-wrapping)
+- [Text Alignment and Layout](#text-alignment-and-layout)
+- [Multi-line Text and Overflow](#multi-line-text-and-overflow)
 - [Line Height Control](#line-height-control)
-- [Overflow Handling](#overflow-handling)
 - [Marquee Animation](#marquee-animation)
 - [Font Size Scaling](#font-size-scaling)
 - [Asynchronous Rendering](#asynchronous-rendering)
-- [Text Styling](#text-styling)
-- [Markup and Anchors](#markup-and-anchors)
-- [Cutout and Mask Effects](#cutout-and-mask-effects)
+- [Text Styling Effects](#text-styling-effects)
+- [Anchor Links](#anchor-links)
 
 ## Creating a Label
 
-Create a Label using `Label::New()`. You can pass an initial text string or set it later using `SetText()`.
+Create a `Label` using the static `New()` method. You can create an empty label or initialize it with text.
 
 ```cpp
 // Create an empty label
 Label label1 = Label::New();
 
 // Create a label with initial text
-Label label2 = Label::New("Hello World");
-
-// Set text after creation
-label1.SetText("Welcome to DALi");
-
-// Get the current text
-Dali::String currentText = label1.GetText();
+Label label2 = Label::New("Hello, World!");
 ```
 
-Labels support fluent chaining for all setters, allowing you to configure multiple properties in a single statement:
+Configure the label using fluent chaining for concise setup:
 
 ```cpp
-Label label = Label::New("Hello World")
-  .SetFontSize(24.0f)
-  .SetTextColor(UiColor(0x000000))
-  .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-  .SetVerticalTextAlignment(Text::Alignment::CENTER);
+Label label = Label::New("Welcome")
+    .SetFontFamily("SamsungOneUI_400")
+    .SetFontSize(24.0f)
+    .SetTextColor(UiColor(0x222222))
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
 ```
 
 ## Text and Font Configuration
 
-Configure the font appearance using font family, size, weight, width, and slant properties.
+### Setting Text
 
-### Font Family and Size
+Use `SetText()` to update the displayed text. Retrieve the current text with `GetText()`.
 
 ```cpp
-Label label = Label::New("Sample Text")
-  .SetFontFamily("SamsungOneUI_400")
-  .SetFontSize(20.0f);
+label.SetText("Updated text content");
+Dali::String currentText = label.GetText();
+```
 
-// Get current font settings
+### Font Family
+
+Specify the font family using `SetFontFamily()`:
+
+```cpp
+label.SetFontFamily("Ubuntu Mono");
 Dali::String fontFamily = label.GetFontFamily();
+```
+
+### Font Size
+
+Set the font size in pixels using `SetFontSize()`:
+
+```cpp
+label.SetFontSize(20.0f);
 float fontSize = label.GetFontSize();
 ```
 
 ### Font Weight, Width, and Slant
 
-Control the font style using `SetFontWeight()`, `SetFontWidth()`, and `SetFontSlant()`:
+Control font styling with `SetFontWeight()`, `SetFontWidth()`, and `SetFontSlant()`:
 
 ```cpp
-Label boldLabel = Label::New("Bold Text")
-  .SetFontFamily("SamsungOneUI_700")
-  .SetFontWeight(Text::FontWeight::BOLD);
+label.SetFontWeight(Text::FontWeight::BOLD);
+label.SetFontWidth(Text::FontWidth::NORMAL);
+label.SetFontSlant(Text::FontSlant::ITALIC);
 
-Label italicLabel = Label::New("Italic Text")
-  .SetFontSlant(Text::FontSlant::ITALIC);
-
-Label condensedLabel = Label::New("Condensed Text")
-  .SetFontWidth(Text::FontWidth::CONDENSED);
+Text::FontWeight weight = label.GetFontWeight();
+Text::FontWidth width = label.GetFontWidth();
+Text::FontSlant slant = label.GetFontSlant();
 ```
 
-### Font Variations
+Available font weight values include `THIN`, `LIGHT`, `NORMAL`, `MEDIUM`, `SEMI_BOLD`, `BOLD`, and `BLACK`.
 
-For variable fonts, use `SetFontVariation()` to specify axis values:
+### Font Variation Axes
 
-```cpp
-Dali::Vector<Text::FontVariationAxis> axes;
-axes.PushBack(Text::FontVariationAxis("wght", 700));
-axes.PushBack(Text::FontVariationAxis("wdth", 90));
-
-Label label = Label::New("Variable Font")
-  .SetFontVariation(axes);
-```
-
-You can also set font variations using a settings string:
+For variable fonts, configure font variation axes using `SetFontVariation()`:
 
 ```cpp
+// Using a settings string
 label.SetFontVariation("wght=700,wdth=90");
+
+// Using a vector of axes
+Dali::Vector<Text::FontVariationAxis> axes;
+axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
+axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+label.SetFontVariation(axes);
+
+// Retrieve current axes
+Dali::Vector<Text::FontVariationAxis> currentAxes = label.GetFontVariation();
+
+// Clear font variation
+label.ClearFontVariation();
 ```
 
-## Text Alignment
+## Text Alignment and Layout
 
-Control how text is positioned within the label bounds using horizontal and vertical alignment.
+### Horizontal and Vertical Alignment
+
+Control text alignment within the label bounds:
 
 ```cpp
-Label label = Label::New("Aligned Text")
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(100.0f)
-  .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-  .SetVerticalTextAlignment(Text::Alignment::CENTER);
+label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+Text::Alignment hAlign = label.GetHorizontalTextAlignment();
+Text::Alignment vAlign = label.GetVerticalTextAlignment();
 ```
 
-Available alignment values from `Text::Alignment`:
-- `START` - Align to the start (left for horizontal, top for vertical)
-- `CENTER` - Align to the center
-- `END` - Align to the end (right for horizontal, bottom for vertical)
+Alignment values are `START`, `CENTER`, and `END`.
 
-## Multi-Line Text and Line Wrapping
+### Layout Direction Mode
 
-Enable multi-line layout with `SetMultiLine(true)` and control how lines are wrapped using `SetLineWrapMode()`.
+Control how the text layout direction is determined:
 
 ```cpp
-Label multiLineLabel = Label::New("This is a long text that will wrap across multiple lines")
-  .SetRequestedWidth(300.0f)
-  .SetMultiLine(true)
-  .SetLineWrapMode(Text::LineWrapMode::WORD);
+label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+Text::LayoutDirectionMode mode = label.GetLayoutDirectionMode();
 ```
 
-Available line wrap modes from `Text::LineWrapMode`:
-- `WORD` - Wraps at word boundaries
-- `CHARACTER` - Wraps at individual characters
-- `HYPHENATION` - Wraps using hyphenation when possible
-- `MIXED` - Tries WORD first, then HYPHENATION, falls back to CHARACTER
+Available modes:
+- `CONTENTS`: Determines direction from the text content
+- `INHERIT`: Inherits from the parent view
+- `LOCALE`: Uses the system locale
+
+## Multi-line Text and Overflow
+
+### Multi-line Layout
+
+Enable multi-line text layout with `SetMultiLine()`:
+
+```cpp
+label.SetMultiLine(true);
+bool isMultiLine = label.IsMultiLine();
+```
+
+### Line Wrap Mode
+
+Control how text wraps when it exceeds the available width:
+
+```cpp
+label.SetLineWrapMode(Text::LineWrapMode::WORD);
+Text::LineWrapMode wrapMode = label.GetLineWrapMode();
+```
+
+Available wrap modes:
+- `WORD`: Wraps at word boundaries
+- `CHARACTER`: Wraps at individual characters
+- `HYPHENATION`: Wraps using hyphenation
+- `MIXED`: Tries word, then hyphenation, then character
+
+### Overflow Mode
+
+Handle text that exceeds the label bounds:
+
+```cpp
+label.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+Text::OverflowMode mode = label.GetOverflowMode();
+```
+
+Available modes:
+- `CLIP`: Clips text at the bounds
+- `ELLIPSIS`: Truncates with an ellipsis (...)
+
+### Line Count
+
+Retrieve the number of lines in the current layout:
+
+```cpp
+int lines = label.GetLineCount();
+int linesAtWidth = label.GetLineCount(200.0f);
+```
 
 ## Line Height Control
 
-Control the spacing between lines using `SetLineHeight()` and `SetLineHeightMode()`.
-
-### Relative Line Height
-
-When using `Text::LineHeightMode::RELATIVE`, the line height is calculated as a multiplier of the font size:
+Control line height using `SetLineHeight()` and `SetLineHeightMode()`:
 
 ```cpp
-Label label = Label::New("Multi-line text\nwith double spacing")
-  .SetMultiLine(true)
-  .SetLineHeight(2.0f)
-  .SetLineHeightMode(Text::LineHeightMode::RELATIVE);
-```
+// Relative mode: line height as a multiplier of font size
+label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+label.SetLineHeight(1.5f);
 
-### Absolute Line Height
+// Absolute mode: line height in pixels
+label.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
+label.SetLineHeight(50.0f);
 
-When using `Text::LineHeightMode::ABSOLUTE`, the value is treated as an exact pixel height:
-
-```cpp
-Label label = Label::New("Fixed line height")
-  .SetMultiLine(true)
-  .SetLineHeight(50.0f)
-  .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-```
-
-To use the natural line height derived from font metrics, set the line height to `Text::LINE_HEIGHT_AUTO`:
-
-```cpp
+// Auto: use natural line height from font metrics
 label.SetLineHeight(Text::LINE_HEIGHT_AUTO);
 ```
 
-## Overflow Handling
-
-Control how text is rendered when it exceeds the available layout bounds using `SetOverflowMode()`.
+Retrieve the current settings:
 
 ```cpp
-Label clippedLabel = Label::New("This text is too long for the available space")
-  .SetRequestedWidth(200.0f)
-  .SetOverflowMode(Text::OverflowMode::CLIP);
-
-Label ellipsisLabel = Label::New("This text will show ellipsis")
-  .SetRequestedWidth(200.0f)
-  .SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+float lineHeight = label.GetLineHeight();
+Text::LineHeightMode mode = label.GetLineHeightMode();
 ```
-
-Available overflow modes from `Text::OverflowMode`:
-- `CLIP` - Clips the overflowing text
-- `ELLIPSIS` - Truncates with an ellipsis (...)
 
 ## Marquee Animation
 
-Use marquee animation to scroll text that exceeds the available space. Configure the trigger policy, speed, loop count, and orientation.
+The marquee animation scrolls text that exceeds the available space.
 
-### Starting and Stopping Marquee
+### Trigger Policy
 
-```cpp
-Label marqueeLabel = Label::New("This is a long scrolling text for marquee animation")
-  .SetRequestedWidth(300.0f)
-  .SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
-
-// Start the marquee animation
-marqueeLabel.StartMarquee();
-
-// Stop the marquee animation
-marqueeLabel.StopMarquee();
-```
-
-### Trigger Policies
-
-Available trigger policies from `Text::MarqueeTriggerPolicy`:
-- `MANUAL` - Starts only when `StartMarquee()` is called
-- `ON_OVERFLOW` - Starts automatically when text exceeds available space
+Control when the marquee starts:
 
 ```cpp
-Label autoMarquee = Label::New("Auto-scrolling text")
-  .SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+Text::MarqueeTriggerPolicy policy = label.GetMarqueeTriggerPolicy();
 ```
 
-### Marquee Configuration
+Available policies:
+- `MANUAL`: Starts only when `StartMarquee()` is called
+- `ON_OVERFLOW`: Starts automatically when text overflows during layout
+
+### Orientation
+
+Set the scroll direction:
 
 ```cpp
-Label label = Label::New("Scrolling text")
-  .SetMarqueeSpeed(100)                    // Pixels per second
-  .SetMarqueeLoopCount(3)                   // Number of loops
-  .SetMarqueeLoopDelay(1.0f)                // Delay between loops in seconds
-  .SetMarqueeGap(50)                        // Gap before wrap in pixels
-  .SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL)
-  .SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+label.SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL);
+Text::MarqueeOrientation orientation = label.GetMarqueeOrientation();
 ```
 
-Available orientations from `Text::MarqueeOrientation`:
-- `HORIZONTAL` - Scrolls horizontally (for single-line text)
-- `VERTICAL` - Scrolls vertically (for multi-line text)
+- `HORIZONTAL`: For single-line text
+- `VERTICAL`: For multi-line text
 
-Available stop modes from `Text::MarqueeStopMode`:
-- `IMMEDIATE` - Stops immediately
-- `FINISH_LOOP` - Completes the current loop before stopping
+### Speed and Timing
+
+Configure marquee speed and timing:
+
+```cpp
+label.SetMarqueeSpeed(100);           // Pixels per second
+label.SetMarqueeLoopCount(3);         // Number of loops
+label.SetMarqueeLoopDelay(0.5f);      // Delay between loops in seconds
+label.SetMarqueeGap(50);              // Gap before wrap in pixels
+
+int speed = label.GetMarqueeSpeed();
+int loopCount = label.GetMarqueeLoopCount();
+float delay = label.GetMarqueeLoopDelay();
+int gap = label.GetMarqueeGap();
+```
+
+### Stop Mode
+
+Control how the marquee stops:
+
+```cpp
+label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+Text::MarqueeStopMode stopMode = label.GetMarqueeStopMode();
+```
+
+Available modes:
+- `IMMEDIATE`: Stops immediately
+- `FINISH_LOOP`: Completes the current loop before stopping
+
+### Starting and Stopping
+
+Control the marquee programmatically:
+
+```cpp
+label.StartMarquee();
+label.StopMarquee();
+bool isRunning = label.IsMarqueeRunning();
+```
 
 ## Font Size Scaling
 
-Apply font size scaling for accessibility and responsive design. Use `SetFontSizeScale()` with minimum and maximum constraints.
+Apply font size scaling for accessibility or responsive design.
 
-### Basic Font Size Scaling
-
-```cpp
-Label label = Label::New("Scalable text")
-  .SetFontSize(20.0f)
-  .SetFontSizeScale(1.5f);  // 150% of base font size
-
-float currentScale = label.GetFontSizeScale();
-```
-
-### Scale Constraints
-
-Set minimum and maximum scale limits:
+### Basic Scaling
 
 ```cpp
-Label label = Label::New("Constrained scale")
-  .SetFontSizeScale(1.5f)
-  .SetMinimumFontSizeScale(0.5f)
-  .SetMaximumFontSizeScale(2.0f);
+label.SetFontSizeScale(1.5f);
+float scale = label.GetFontSizeScale();
 ```
 
-### System Font Size Scale
+### Minimum and Maximum Constraints
 
-Enable system font size scale to respond to system accessibility settings:
+Set bounds for the effective scale:
 
 ```cpp
-Label label = Label::New("System-aware text")
-  .SetSystemFontSizeScaleEnabled(true);
+label.SetMinimumFontSizeScale(0.8f);
+label.SetMaximumFontSizeScale(2.0f);
 
-bool isEnabled = label.IsSystemFontSizeScaleEnabled();
+float minScale = label.GetMinimumFontSizeScale();
+float maxScale = label.GetMaximumFontSizeScale();
 ```
 
-### Adjusted Font Size Scale
+### System Font Scale
 
-Get the final adjusted scale after applying all constraints:
+Enable system font size scale integration:
+
+```cpp
+label.SetSystemFontSizeScaleEnabled(true);
+bool enabled = label.IsSystemFontSizeScaleEnabled();
+```
+
+### Adjusted Scale
+
+Retrieve the final adjusted scale after all constraints:
 
 ```cpp
 float adjustedScale = label.GetAdjustedFontSizeScale();
@@ -281,33 +322,45 @@ float adjustedScale = label.GetAdjustedFontSizeScale();
 
 ## Asynchronous Rendering
 
-For complex text layouts, enable asynchronous rendering to avoid blocking the main thread.
+For complex text layouts, enable asynchronous rendering to avoid blocking the UI thread.
 
 ### Enabling Async Rendering
 
 ```cpp
-Label label = Label::New("Complex text layout")
-  .SetAsyncRendering(true);
-
+label.SetAsyncRendering(true);
 bool isAsync = label.IsAsyncRendering();
 ```
 
-### Async Rendering Signals
+### Render Scale
 
-Connect to signals to be notified when async operations complete:
+Improve quality when the view is visually scaled:
 
 ```cpp
-// Called when async rendering finishes
+label.SetRenderScale(2.0f);  // Render at 2x, then downscale
+float scale = label.GetRenderScale();
+```
+
+### Async Size Computation
+
+Request size calculations asynchronously:
+
+```cpp
+label.RequestAsyncNaturalSize();
+label.RequestAsyncHeightForWidth(300.0f);
+int asyncLines = label.GetAsyncLineCount();
+```
+
+### Async Signals
+
+Connect to signals for async operation completion:
+
+```cpp
 label.AsyncRenderFinishedSignal().Connect(this, &MyClass::OnAsyncRenderFinished);
-
-// Called when async natural size computation finishes
 label.AsyncNaturalSizeComputedSignal().Connect(this, &MyClass::OnAsyncNaturalSize);
-
-// Called when async height-for-width computation finishes
 label.AsyncHeightForWidthComputedSignal().Connect(this, &MyClass::OnAsyncHeightForWidth);
 ```
 
-Signal callback signatures:
+Signal handler signatures:
 
 ```cpp
 void OnAsyncRenderFinished(View view, float width, float height);
@@ -315,125 +368,140 @@ void OnAsyncNaturalSize(View view, float width, float height);
 void OnAsyncHeightForWidth(View view, float width, float height);
 ```
 
-### Requesting Async Size Computation
+## Text Styling Effects
+
+### Text Color
+
+Set the text color using `SetTextColor()`:
 
 ```cpp
-// Request natural size computation
-label.RequestAsyncNaturalSize();
-
-// Request height for a specific width
-label.RequestAsyncHeightForWidth(300.0f);
+label.SetTextColor(UiColor(0x333333));
+UiColor color = label.GetTextColor();
 ```
 
-### Render Scale
+### Text Background
 
-Improve rendering quality when the view is visually scaled by rendering at a higher resolution:
-
-```cpp
-Label label = Label::New("High quality scaled text")
-  .SetAsyncRendering(true)
-  .SetRenderScale(2.0f);  // Render at 2x resolution
-
-float scale = label.GetRenderScale();
-```
-
-## Text Styling
-
-Apply text styles including underline, shadow, outline, line-through, and bevel effects.
-
-### Text Color and Background
+Set a background color behind the text glyphs:
 
 ```cpp
-Label label = Label::New("Styled text")
-  .SetTextColor(UiColor(0x000000))
-  .SetTextBackgroundColor(UiColor(0xFFFF00));
-
-UiColor textColor = label.GetTextColor();
+label.SetTextBackgroundColor(UiColor(0xFFFF00));
 UiColor bgColor = label.GetTextBackgroundColor();
+label.ClearTextBackgroundColor();
 ```
 
-### Text Fit
+### Underline
 
-Use text fit to automatically select the largest font size that fits the available space:
+Apply underline styling:
 
 ```cpp
-// Using FitRange
-Label fitLabel = Label::New("Auto-sized text")
-  .SetTextFit(Text::FitRange(10.0f, 40.0f, 5.0f));  // min, max, step
-
-// Using FitCandidate
-Dali::Vector<Text::FitCandidate> candidates;
-candidates.PushBack(Text::FitCandidate(14.0f, 28.0f));  // fontSize, lineHeight
-candidates.PushBack(Text::FitCandidate(18.0f, 36.0f));
-
-Label candidateLabel = Label::New("Candidate-sized text")
-  .SetTextFit(candidates);
+Text::Underline underline;
+underline.enable = true;
+underline.color = UiColor(0xFF0000);
+underline.height = 2.0f;
+label.SetUnderline(underline);
+label.ClearUnderline();
 ```
 
-## Markup and Anchors
+### Shadow
 
-Enable markup processing to display rich text with embedded HTML-like tags.
-
-### Enabling Markup
+Apply shadow effects:
 
 ```cpp
-Label label = Label::New("<b>Bold</b> and <i>italic</i> text")
-  .SetMarkupEnabled(true);
+Text::Shadow shadow;
+shadow.enable = true;
+shadow.color = UiColor(0x000000);
+shadow.offset = Vector2(2.0f, 2.0f);
+label.SetShadow(shadow);
+label.ClearShadow();
 ```
 
-### Anchor Links
+### Outline
 
-Configure anchor colors and handle anchor click events:
+Apply outline styling:
 
 ```cpp
-Label anchorLabel = Label::New("<a href='link1'>Click here</a>")
-  .SetMarkupEnabled(true)
-  .SetAnchorColor(UiColor(0x0000FF))
-  .SetAnchorClickedColor(UiColor(0xFF0000));
-
-// Connect to anchor click signal
-anchorLabel.AnchorClickedSignal().Connect(this, &MyClass::OnAnchorClicked);
+Text::Outline outline;
+outline.enable = true;
+outline.color = UiColor(0xFFFFFF);
+outline.width = 1.0f;
+label.SetOutline(outline);
+label.ClearOutline();
 ```
 
-The anchor click callback receives the view and the href string:
+### Line-Through
+
+Apply strikethrough styling:
 
 ```cpp
-void OnAnchorClicked(View view, const Dali::String& href)
-{
-  // Handle anchor click
-}
+Text::LineThrough lineThrough;
+lineThrough.enable = true;
+lineThrough.color = UiColor(0xFF0000);
+label.SetLineThrough(lineThrough);
+label.ClearLineThrough();
 ```
 
-## Cutout and Mask Effects
+### Bevel
 
-Render text as a cutout or apply mask effects for creative text displays.
-
-### Cutout Text
-
-When cutout is enabled, the glyph shapes are cut out from the rendered content:
+Apply bevel effects:
 
 ```cpp
-Label cutoutLabel = Label::New("Cutout")
-  .SetBackgroundColor(UiColor(0x1F2A36))
-  .SetCutoutEnabled(true);
+Text::Bevel bevel;
+label.SetBevel(bevel);
+label.ClearBevel();
+```
+
+### Cutout Effect
+
+Render text as a cutout mask:
+
+```cpp
+label.SetCutoutEnabled(true);
+bool isCutout = label.IsCutoutEnabled();
 ```
 
 ### Mask Effect
 
-Apply a mask effect using another view as the mask source:
+Use another view as a mask source:
 
 ```cpp
-Label maskSource = Label::New("Background pattern text...")
-  .SetTextColor(UiColor(0x3A6D75))
-  .SetFontSize(10.0f)
-  .SetMultiLine(true);
-
-Label maskedLabel = Label::New("Hello")
-  .SetTextColor(UiColor(0xFF0000))
-  .SetMaskEffect(maskSource);
+Label label = Label::New("Masked Text");
+View maskView = CreateGradientView();
+label.SetMaskEffect(maskView);
+label.ClearMaskEffect();
 ```
 
-To clear the mask effect:
+## Anchor Links
+
+Enable markup processing to support anchor links in text.
+
+### Enabling Markup
 
 ```cpp
-maskedLabel.ClearMaskEffect();
+label.SetMarkupEnabled(true);
+bool isMarkupEnabled = label.IsMarkupEnabled();
+```
+
+### Anchor Colors
+
+Configure anchor appearance:
+
+```cpp
+label.SetAnchorColor(UiColor(0x0000FF));
+label.SetAnchorClickedColor(UiColor(0xFF0000));
+
+UiColor anchorColor = label.GetAnchorColor();
+UiColor clickedColor = label.GetAnchorClickedColor();
+```
+
+### Handling Anchor Clicks
+
+Connect to the `AnchorClickedSignal()` to handle link interactions:
+
+```cpp
+label.AnchorClickedSignal().Connect(this, &MyClass::OnAnchorClicked);
+
+void OnAnchorClicked(View view, const Dali::String& href)
+{
+    // Handle the anchor click
+    // href contains the link target
+}

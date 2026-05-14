@@ -1,0 +1,224 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_OVERVIEW_MARKDOWN-----
+# DALi Overview
+
+## What DALi Is
+
+DALi (Dynamic Animation Library) is a cross-platform UI framework written in C++ for building hardware-accelerated user interfaces. It provides a retained-mode scene graph architecture where UI elements persist in a tree structure and the framework handles rendering, layout, and input processing.
+
+The framework consists of three layered repositories:
+
+- **dali-core** provides the rendering foundation: a scene graph of actors, property animation, image loading, and GPU resource management
+- **dali-adaptor** provides the platform integration layer: application lifecycle, window management, input event dispatching, and device status monitoring
+- **dali-ui** provides the UI component layer: a View-based widget system with automatic layout, theming, and built-in interaction patterns
+
+Applications typically work with the dali-ui layer, which builds on the lower layers to offer higher-level abstractions.
+
+## How DALi Is Organized
+
+The dali-ui library is divided into two sub-libraries:
+
+- **dali-ui-foundation** provides core abstractions: the base [View](view.md) class, [layout containers](layouts.md), [visuals](visuals.md), [text rendering](text.md), [theming](ui-color-manager.md), and utility types
+- **dali-ui-components** provides ready-to-use controls: buttons, sliders, and composite components built on the foundation layer
+
+The foundation layer introduces the **Trait system**, which allows attaching composable behaviors to Views. For example, [InteractiveView](interactive-view.md) adds click handling, and the selectable trait adds selection state management.
+
+## The App-Facing Model
+
+Applications interact with DALi through a View hierarchy. A [View](view.md) is the fundamental UI object that participates in layout, renders visuals, and responds to input. Views are arranged in a parent-child tree where each View's size and position are determined by its parent container's layout algorithm.
+
+The layout system uses a Measure/Arrange pass model. Views request sizes using `WRAP_CONTENT` (size to content) or `MATCH_PARENT` (fill parent), and parent layouts compute final positions. Four layout containers are provided:
+
+- [AbsoluteLayout](layouts.md) positions children at explicit coordinates
+- [StackLayout](layouts.md) arranges children in a single row or column
+- [FlexLayout](layouts.md) provides flexbox-style layout with grow, shrink, and wrap
+- [GridLayout](layouts.md) arranges children in a grid with rows and columns
+
+Views display content through **visuals**—renderable objects attached to the view. [ImageVisual](visuals.md) displays images, [ColorVisual](visuals.md) fills with solid color, and [AnimatedImageVisual](visuals.md) plays animated sequences. Multiple visuals can be layered on a single View.
+
+## Interaction, Motion, and Presentation
+
+DALi provides built-in patterns for common UI behaviors:
+
+**Input and Focus** — [InteractiveView](interactive-view.md) handles clicks and long presses. [FocusManager](focus-manager.md) provides keyboard navigation with directional focus movement and focus groups. [ViewState](view-state.md) tracks interactive states like focused, pressed, and disabled.
+
+**Animation** — The [Animation](animation.md) API animates any animatable property on a View using alpha functions (easing curves), key frames, and looping. Animations can target position, size, opacity, color, and custom properties.
+
+**Theming** — [UiColorManager](ui-color-manager.md) provides theme-driven color lookups. [UiColor](ui-color.md) represents colors that can be explicit RGBA values or theme references resolved at runtime.
+
+**Images** — [ImageView](image-view.md) displays static images with fitting modes and masking. [AnimatedImageView](animated-image-view.md) plays GIF and animated WebP files. [LottieAnimationView](lottie-animation-view.md) renders vector animations from After Effects exports.
+
+**Text** — [Label](label.md) displays non-editable text with multi-line layout, marquee scrolling, and styling effects. [InputField](input-field.md) provides single-line text input with cursor and selection management.
+
+**Scrolling** — [ScrollView](scroll-view.md) provides a scrollable viewport for content larger than the visible area, with fling behavior and scroll bars.
+
+## Where To Go Next
+
+The guides in this documentation are organized by functional area. Start with [View (Base UI Object)](view.md) to understand the core View API, then explore [Layouts](layouts.md) to learn how to arrange Views. For interactive components, see [InteractiveView](interactive-view.md) and [FocusManager](focus-manager.md). For visual content, see [ImageView](image-view.md), [Label](label.md), and [Animation](animation.md).
+
+```svg:assets/dali-overview-at-a-glance.svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" width="480" height="280">
+  <style>
+    .box { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 1; }
+    .core { fill: #e3f2fd; stroke: #90caf9; stroke-width: 1.5; }
+    .adaptor { fill: #fff3e0; stroke: #ffcc80; stroke-width: 1.5; }
+    .ui { fill: #e8f5e9; stroke: #a5d6a7; stroke-width: 1.5; }
+    .label { font-family: system-ui, sans-serif; font-size: 11px; fill: #495057; }
+    .title { font-family: system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #212529; }
+    .layer { font-family: system-ui, sans-serif; font-size: 10px; fill: #6c757d; }
+  </style>
+  
+  <!-- Application Layer -->
+  <rect x="20" y="20" width="440" height="40" rx="4" class="box"/>
+  <text x="240" y="44" text-anchor="middle" class="title">Application</text>
+  
+  <!-- dali-ui layer -->
+  <rect x="20" y="75" width="440" height="70" rx="4" class="ui"/>
+  <text x="35" y="93" class="layer">dali-ui</text>
+  <rect x="35" y="100" width="130" height="35" rx="3" class="box"/>
+  <text x="100" y="122" text-anchor="middle" class="title">dali-ui-foundation</text>
+  <rect x="175" y="100" width="130" height="35" rx="3" class="box"/>
+  <text x="240" y="122" text-anchor="middle" class="title">dali-ui-components</text>
+  <text x="320" y="122" text-anchor="middle" class="label">View, Layout, Visuals,</text>
+  <text x="320" y="135" text-anchor="middle" class="label">Theme, Animation, Text...</text>
+  
+  <!-- dali-adaptor layer -->
+  <rect x="20" y="160" width="440" height="45" rx="4" class="adaptor"/>
+  <text x="35" y="178" class="layer">dali-adaptor</text>
+  <text x="240" y="190" text-anchor="middle" class="label">Application Lifecycle · Window Management · Input Events · Timers</text>
+  
+  <!-- dali-core layer -->
+  <rect x="20" y="220" width="440" height="45" rx="4" class="core"/>
+  <text x="35" y="238" class="layer">dali-core</text>
+  <text x="240" y="250" text-anchor="middle" class="label">Scene Graph · Actors · Animation · Rendering · Images · Math</text>
+</svg>
+```
+-----END_OVERVIEW_MARKDOWN-----
+
+-----BEGIN_OVERVIEW_KO_MARKDOWN-----
+# DALi 개요
+
+## DALi란
+
+DALi(Dynamic Animation Library)는 하드웨어 가속 사용자 인터페이스를 구축하기 위한 크로스 플랫폼 C++ UI 프레임워크입니다. DALi는 retained-mode 씬 그래프 아키텍처를 제공하며, UI 요소가 트리 구조로 유지되고 프레임워크가 렌더링, 레이아웃, 입력 처리를 담당합니다.
+
+프레임워크는 세 개의 계층적 리포지토리로 구성됩니다:
+
+- **dali-core**는 렌더링 기반을 제공합니다: 액터로 구성된 씬 그래프, 프로퍼티 애니메이션, 이미지 로딩, GPU 리소스 관리
+- **dali-adaptor**는 플랫폼 통합 계층을 제공합니다: 애플리케이션 수명 주기, 윈도우 관리, 입력 이벤트 디스패치, 장치 상태 모니터링
+- **dali-ui**는 UI 컴포넌트 계층을 제공합니다: 자동 레이아웃, 테마, 내장 인터랙션 패턴이 있는 View 기반 위젯 시스템
+
+애플리케이션은 일반적으로 상위 수준의 추상화를 제공하는 dali-ui 계층을 사용하여 개발합니다.
+
+## DALi 구조
+
+dali-ui 라이브러리는 두 개의 하위 라이브러리로 나뉩니다:
+
+- **dali-ui-foundation**은 핵심 추상화를 제공합니다: 기본 [View](view.md) 클래스, [레이아웃 컨테이너](layouts.md), [비주얼](visuals.md), [텍스트 렌더링](text.md), [테마](ui-color-manager.md), 유틸리티 타입
+- **dali-ui-components**는 바로 사용 가능한 컨트롤을 제공합니다: 버튼, 슬라이더, 파운데이션 계층 기반의 복합 컴포넌트
+
+파운데이션 계층은 **트레이트 시스템**을 도입합니다. 트레이트는 View에 결합 가능한 동작을 부착할 수 있게 합니다. 예를 들어, [InteractiveView](interactive-view.md)는 클릭 처리를 추가하고, 선택 가능 트레이트는 선택 상태 관리를 추가합니다.
+
+## 앱 대면 모델
+
+애플리케이션은 View 계층 구조를 통해 DALi와 상호작용합니다. [View](view.md)는 레이아웃에 참여하고, 비주얼을 렌더링하고, 입력에 응답하는 기본 UI 객체입니다. View는 부모-자식 트리로 배치되며, 각 View의 크기와 위치는 부모 컨테이너의 레이아웃 알고리즘에 의해 결정됩니다.
+
+레이아웃 시스템은 Measure/Arrange 패스 모델을 사용합니다. View는 `WRAP_CONTENT`(콘텐츠에 맞춤) 또는 `MATCH_PARENT`(부모 채우기)를 사용하여 크기를 요청하고, 부모 레이아웃이 최종 위치를 계산합니다. 네 가지 레이아웃 컨테이너가 제공됩니다:
+
+- [AbsoluteLayout](layouts.md)은 자식을 명시적 좌표에 배치
+- [StackLayout](layouts.md)은 자식을 단일 행 또는 열로 배치
+- [FlexLayout](layouts.md)은 flexbox 스타일 레이아웃 제공 (grow, shrink, wrap)
+- [GridLayout](layouts.md)은 자식을 행과 열이 있는 그리드로 배치
+
+View는 **비주얼**을 통해 콘텐츠를 표시합니다. 비주얼은 View에 부착되는 렌더링 가능한 객체입니다. [ImageVisual](visuals.md)은 이미지를 표시하고, [ColorVisual](visuals.md)은 단색으로 채우며, [AnimatedImageVisual](visuals.md)은 애니메이션 시퀀스를 재생합니다. 여러 비주얼을 단일 View에 레이어링할 수 있습니다.
+
+## 인터랙션, 모션, 프레젠테이션
+
+DALi는 일반적인 UI 동작을 위한 내장 패턴을 제공합니다:
+
+**입력 및 포커스** — [InteractiveView](interactive-view.md)는 클릭과 롱 프레스를 처리합니다. [FocusManager](focus-manager.md)는 방향성 포커스 이동과 포커스 그룹을 통한 키보드 내비게이션을 제공합니다. [ViewState](view-state.md)는 포커스, 프레스, 비활성화 같은 인터랙티브 상태를 추적합니다.
+
+**애니메이션** — [Animation](animation.md) API는 알파 함수(이징 커브), 키프레임, 루핑을 사용하여 View의 애니메이션 가능한 프로퍼티를 애니메이션합니다. 위치, 크기, 불투명도, 색상, 커스텀 프로퍼티를 대상으로 할 수 있습니다.
+
+**테마** — [UiColorManager](ui-color-manager.md)는 테마 기반 색상 조회를 제공합니다. [UiColor](ui-color.md)는 명시적 RGBA 값이거나 런타임에 해결되는 테마 참조일 수 있는 색상을 나타냅니다.
+
+**이미지** — [ImageView](image-view.md)는 피팅 모드와 마스킹이 있는 정적 이미지를 표시합니다. [AnimatedImageView](animated-image-view.md)는 GIF와 애니메이션 WebP 파일을 재생합니다. [LottieAnimationView](lottie-animation-view.md)는 After Effects 내보내기에서 벡터 애니메이션을 렌더링합니다.
+
+**텍스트** — [Label](label.md)은 여러 줄 레이아웃, 마퀴 스크롤, 스타일링 효과가 있는 편집 불가능한 텍스트를 표시합니다. [InputField](input-field.md)는 커서와 선택 관리가 있는 한 줄 텍스트 입력을 제공합니다.
+
+**스크롤** — [ScrollView](scroll-view.md)은 가시 영역보다 큰 콘텐츠를 위한 스크롤 가능한 뷰포트를 제공하며, 플링 동작과 스크롤 바가 있습니다.
+
+## 다음 단계
+
+이 문서의 가이드는 기능 영역별로 구성되어 있습니다. 핵심 View API를 이해하려면 [View (기본 UI 객체)](view.md)부터 시작한 후, View 배치 방법을 배우려면 [레이아웃](layouts.md)을 살펴보세요. 인터랙티브 컴포넌트는 [InteractiveView](interactive-view.md)와 [FocusManager](focus-manager.md)를 참조하세요. 비주얼 콘텐츠는 [ImageView](image-view.md), [Label](label.md), [Animation](animation.md)을 참조하세요.
+
+```svg:assets/dali-overview-at-a-glance.svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" width="480" height="280">
+  <style>
+    .box { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 1; }
+    .core { fill: #e3f2fd; stroke: #90caf9; stroke-width: 1.5; }
+    .adaptor { fill: #fff3e0; stroke: #ffcc80; stroke-width: 1.5; }
+    .ui { fill: #e8f5e9; stroke: #a5d6a7; stroke-width: 1.5; }
+    .label { font-family: system-ui, sans-serif; font-size: 11px; fill: #495057; }
+    .title { font-family: system-ui, sans-serif; font-size: 12px; font-weight: 600; fill: #212529; }
+    .layer { font-family: system-ui, sans-serif; font-size: 10px; fill: #6c757d; }
+  </style>
+  
+  <!-- Application Layer -->
+  <rect x="20" y="20" width="440" height="40" rx="4" class="box"/>
+  <text x="240" y="44" text-anchor="middle" class="title">Application</text>
+  
+  <!-- dali-ui layer -->
+  <rect x="20" y="75" width="440" height="70" rx="4" class="ui"/>
+  <text x="35" y="93" class="layer">dali-ui</text>
+  <rect x="35" y="100" width="130" height="35" rx="3" class="box"/>
+  <text x="100" y="122" text-anchor="middle" class="title">dali-ui-foundation</text>
+  <rect x="175" y="100" width="130" height="35" rx="3" class="box"/>
+  <text x="240" y="122" text-anchor="middle" class="title">dali-ui-components</text>
+  <text x="320" y="122" text-anchor="middle" class="label">View, Layout, Visuals,</text>
+  <text x="320" y="135" text-anchor="middle" class="label">Theme, Animation, Text...</text>
+  
+  <!-- dali-adaptor layer -->
+  <rect x="20" y="160" width="440" height="45" rx="4" class="adaptor"/>
+  <text x="35" y="178" class="layer">dali-adaptor</text>
+  <text x="240" y="190" text-anchor="middle" class="label">Application Lifecycle · Window Management · Input Events · Timers</text>
+  
+  <!-- dali-core layer -->
+  <rect x="20" y="220" width="440" height="45" rx="4" class="core"/>
+  <text x="35" y="238" class="layer">dali-core</text>
+  <text x="240" y="250" text-anchor="middle" class="label">Scene Graph · Actors · Animation · Rendering · Images · Math</text>
+</svg>
+```
+-----END_OVERVIEW_KO_MARKDOWN-----
+
+-----BEGIN_OVERVIEW_REPORT-----
+## Generation Report
+
+### Source Verification
+- Reviewed dali-core, dali-adaptor, and dali-ui repository structures
+- Verified architecture from README.md files and public API headers
+- Confirmed View class API from view.h
+
+### Content Decisions
+- Structured overview around the three-layer architecture (core/adaptor/ui)
+- Introduced the View-centric mental model for app developers
+- Listed all four layout containers with brief descriptions
+- Covered major functional areas: input/focus, animation, theming, images, text, scrolling
+- Included one SVG diagram showing the layered architecture
+
+### Links Created
+All links reference existing guide files from the provided source map:
+- view.md, layouts.md, visuals.md, text.md, ui-color-manager.md
+- interactive-view.md, focus-manager.md, view-state.md
+- animation.md, ui-color.md
+- image-view.md, animated-image-view.md, lottie-animation-view.md
+- label.md, input-field.md, scroll-view.md
+
+### Constraints Met
+- No code blocks or C++ examples included
+- No Mermaid diagrams used
+- One small SVG included for architecture visualization
+- No promotional language; objective description of framework characteristics
+- No references to pipeline internals, cache files, or local paths
+- English and Korean versions use identical link targets and SVG path
+-----END_OVERVIEW_REPORT-----

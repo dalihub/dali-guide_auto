@@ -6,93 +6,102 @@ category: utilities
 
 # Signals
 
-Signals provide a type-safe publish-subscribe mechanism that allows objects to emit events that other objects can subscribe to. The signal-slot pattern enables loose coupling between event sources and handlers.
+Signals provide a type-safe publish-subscribe mechanism for responding to events in dali-ui applications. They enable loose coupling between event sources and handlers while ensuring automatic disconnection when slot owners are destroyed.
 
 ## Table of Contents
 
 - [Connecting to Signals](#connecting-to-signals)
 - [Emitting Signals](#emitting-signals)
-- [Connection Management](#connection-management)
+- [Connection Lifecycle Management](#connection-lifecycle-management)
 - [Signal Variants](#signal-variants)
+- [Advanced Connection Patterns](#advanced-connection-patterns)
 
 ## Connecting to Signals
 
-To receive signal notifications, connect a callback function or member function to the signal. The connection requires a `ConnectionTrackerInterface` implementation to manage the connection lifecycle.
+To receive signal emissions, connect a callback function or member function to the signal. The connection requires a `ConnectionTrackerInterface` implementation to manage the signal-slot connection lifetime.
 
 ### Member Function Connection
 
-The most common pattern is to inherit from `ConnectionTracker` and connect member functions:
+The most common pattern is inheriting from `ConnectionTracker` and connecting member functions:
 
 ```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+
 class MyController : public ConnectionTracker
 {
 public:
   void OnInit(Application application)
   {
     Window window = application.GetWindow();
+    
+    // Connect to window key event signal
     window.KeyEventSignal().Connect(this, &MyController::OnKeyEvent);
   }
 
   void OnKeyEvent(Window window, KeyEvent event)
   {
-    // Handle key event
+    if(event.GetState() == KeyEvent::DOWN)
+    {
+      // Handle key press
+    }
   }
 };
 ```
+
+The `ConnectionTracker` base class automatically disconnects all signals when the object is destroyed, preventing dangling callbacks.
 
 ### Static Function Connection
 
-Connect free or static functions directly without a connection tracker:
+For simple callbacks without object context, connect static functions:
 
 ```cpp
-void OnButtonPressed()
+void OnApplicationReady()
 {
-  // Handle button press
+  // Handle application ready event
 }
 
 // Connect static function
-button.PressedSignal().Connect(&OnButtonPressed);
+someSignal.Connect(&OnApplicationReady);
 
-// Disconnect when done
-button.PressedSignal().Disconnect(&OnButtonPressed);
+// Later, disconnect when no longer needed
+someSignal.Disconnect(&OnApplicationReady);
 ```
 
-### SlotDelegate Connection
+### View Signal Connection
 
-Use `SlotDelegate` when you cannot inherit from `ConnectionTracker`:
-
-```cpp
-class MyHandler
-{
-public:
-  SlotDelegate<MyHandler> mSlotDelegate;
-
-  void ConnectToSignal(Signal<void()>& signal)
-  {
-    signal.Connect(mSlotDelegate, &MyHandler::OnSignal);
-  }
-
-  void OnSignal()
-  {
-    // Handle signal
-  }
-};
-```
-
-### Functor Connection
-
-Connect lambda expressions or function objects:
+dali-ui views expose signals for user interaction and state changes:
 
 ```cpp
-class MyController : public ConnectionTracker
+class WebViewController : public ConnectionTracker
 {
 public:
-  void SetupHandler(Button& button)
+  void SetupWebView()
   {
-    button.PressedSignal().Connect(this, [](Button b) {
-      // Handle button press
-    });
+    mWebView = WebView::New();
+    
+    // Connect to page load signals
+    mWebView.PageLoadStartedSignal().Connect(this, &WebViewController::OnPageLoadStarted);
+    mWebView.PageLoadFinishedSignal().Connect(this, &WebViewController::OnPageLoadFinished);
+    mWebView.UrlChangedSignal().Connect(this, &WebViewController::OnUrlChanged);
   }
+
+  void OnPageLoadStarted(WebView view, const Dali::String& url)
+  {
+    // Handle page load start
+  }
+
+  void OnPageLoadFinished(WebView view, const Dali::String& url)
+  {
+    // Handle page load complete
+  }
+
+  void OnUrlChanged(WebView view, const Dali::String& url)
+  {
+    // Handle URL change
+  }
+
+private:
+  WebView mWebView;
 };
 ```
 
@@ -102,179 +111,282 @@ Signals are emitted by calling the `Emit()` method with arguments matching the s
 
 ### Void Return Signals
 
-For signals without return values, use `Emit()`:
+For signals without return values:
 
 ```cpp
-// Signal with no parameters
+// Define signal type
 typedef Signal<void()> VoidSignalType;
+typedef Signal<void(int)> IntParamSignalType;
+
+// Emit without arguments
 VoidSignalType signal;
 signal.Emit();
 
-// Signal with one parameter
-typedef Signal<void(int)> IntSignalType;
-IntSignalType intSignal;
+// Emit with arguments
+IntParamSignalType intSignal;
 intSignal.Emit(42);
-
-// Signal with two parameters
-typedef Signal<void(float, float)> FloatPairSignalType;
-FloatPairSignalType floatSignal;
-floatSignal.Emit(1.0f, 2.0f);
 ```
 
 ### Signals with Return Values
 
-For signals that return values, `Emit()` returns the last callback's result:
+For signals that return a value, `Emit()` returns the last callback's return value:
 
 ```cpp
 typedef Signal<bool()> BoolSignalType;
-BoolSignalType boolSignal;
+typedef Signal<int(float, int)> MixedReturnSignalType;
 
-bool result = boolSignal.Emit();
-// Returns true if any callback returns true, false otherwise
+BoolSignalType boolSignal;
+bool result = boolSignal.Emit();  // Returns last callback result
+
+MixedReturnSignalType mixedSignal;
+int value = mixedSignal.Emit(1.5f, 10);
 ```
 
-For boolean signals with multiple callbacks, use `EmitOr()` to return `true` if any callback returns `true`:
+### EmitOr for Two-Parameter Return Signals
+
+For signals with two parameters and a return value, `EmitOr()` aggregates results using the `|=` operator. For boolean-returning signals, this returns `true` if any callback returns `true`:
 
 ```cpp
-typedef Signal<bool(float, int)> BoolResultSignalType;
-BoolResultSignalType signal;
+typedef Signal<bool(float, int)> BoolReturnSignalType;
 
-// Returns true if any connected callback returns true
-bool consumed = signal.EmitOr(1.0f, 10);
+BoolReturnSignalType signal;
+signal.Connect(&handler1, &Handler1::OnEvent);
+signal.Connect(&handler2, &Handler2::OnEvent);
+
+// Returns true if any handler returns true
+bool handled = signal.EmitOr(1.0f, 5);
 ```
 
-## Connection Management
+Note: `EmitOr()` is only available for `Signal<Ret(Arg0, Arg1)>` — signals with exactly two parameters and a return value.
+
+## Connection Lifecycle Management
 
 ### Automatic Disconnection
 
-When a `ConnectionTracker` is destroyed, all its connections are automatically disconnected:
+When a `ConnectionTracker`-derived object is destroyed, all its signal connections are automatically disconnected:
 
 ```cpp
-class MyController : public ConnectionTracker
+class Controller : public ConnectionTracker
 {
 public:
-  void Connect(Button& button)
+  Controller()
   {
-    button.PressedSignal().Connect(this, &MyController::OnPressed);
+    // Connections tracked automatically
+    someSignal.Connect(this, &Controller::OnEvent);
   }
-
-  ~MyController()
-  {
-    // All connections automatically disconnected
-  }
+  
+  // Destructor automatically disconnects all connections
 };
 ```
 
 ### Manual Disconnection
 
-Explicitly disconnect individual callbacks:
+Disconnect individual callbacks explicitly:
 
 ```cpp
 // Disconnect member function
-signal.Disconnect(this, &MyClass::OnCallback);
+signal.Disconnect(&handler, &HandlerClass::OnCallback);
 
 // Disconnect static function
 signal.Disconnect(&StaticCallback);
 ```
 
-### Querying Connection State
+### Disconnect All Connections
 
-Check if a signal has connected slots:
+Remove all connections from a `ConnectionTracker`:
 
 ```cpp
-if (signal.Empty())
+class MyController : public ConnectionTracker
+{
+public:
+  void Reset()
+  {
+    // Disconnect all signals connected through this tracker
+    DisconnectAll();
+  }
+};
+```
+
+### Querying Connection State
+
+Check signal state before operations:
+
+```cpp
+Signal<void()> signal;
+
+// Check if any connections exist
+if(signal.Empty())
 {
   // No callbacks connected
 }
 
+// Get connection count
 uint32_t count = signal.GetConnectionCount();
-```
-
-### Disconnecting All Connections
-
-Use `SlotDelegate::DisconnectAll()` to disconnect all connections from a delegate:
-
-```cpp
-SlotDelegate<MyHandler> mSlotDelegate;
-mSlotDelegate.DisconnectAll();
 ```
 
 ## Signal Variants
 
-DALi provides signal templates for different parameter counts and return types.
+Signals support up to three parameters with optional return values.
 
-### No Parameters
+### Zero Parameters
 
 ```cpp
-// void return, no parameters
+// void return
 Signal<void()> voidSignal;
+voidSignal.Connect(this, &MyClass::OnEvent);
+voidSignal.Emit();
 
 // with return value
-Signal<bool()> boolSignal;
 Signal<int()> intSignal;
+int result = intSignal.Emit();
 ```
 
 ### One Parameter
 
 ```cpp
-// void return, one parameter
-Signal<void(int)> intParamSignal;
+// void return with one parameter
+Signal<void(int)> voidIntSignal;
+voidIntSignal.Connect(this, &MyClass::OnValue);
+voidIntSignal.Emit(42);
 
 // with return value
-Signal<bool(float)> floatResultSignal;
+Signal<bool(const std::string&)> boolStringSignal;
+bool result = boolStringSignal.Emit("test");
 ```
 
 ### Two Parameters
 
 ```cpp
-// void return, two parameters
-Signal<void(float, float)> twoFloatSignal;
+// void return with two parameters
+Signal<void(float, float)> positionSignal;
+positionSignal.Connect(this, &MyClass::OnPosition);
+positionSignal.Emit(100.0f, 200.0f);
 
 // with return value
-Signal<bool(int, int)> intPairResultSignal;
+Signal<int(float, int)> mixedSignal;
+int value = mixedSignal.Emit(1.5f, 10);
 ```
 
 ### Three Parameters
 
 ```cpp
-// void return, three parameters
-Signal<void(float, float, float)> threeFloatSignal;
+// void return with three parameters
+Signal<void(float, float, float)> colorSignal;
+colorSignal.Connect(this, &MyClass::OnColor);
+colorSignal.Emit(1.0f, 0.5f, 0.0f);
 
 // with return value
-Signal<int(float, float, float)> threeFloatResultSignal;
+Signal<int(float, float, float)> threeParamReturnSignal;
+int result = threeParamReturnSignal.Emit(1.0f, 2.0f, 3.0f);
 ```
 
-### Defining Custom Signals
+## Advanced Connection Patterns
 
-To add signals to your own classes, define signal typedefs and provide accessor methods:
+### SlotDelegate for Composition
+
+When inheritance from `ConnectionTracker` is not desired, use `SlotDelegate`. The `SlotDelegate` constructor requires a pointer to the owning object:
 
 ```cpp
-class MyButton : public View
+#include <dali/public-api/signals/slot-delegate.h>
+
+class MyComponent
 {
 public:
-  // Signal typedefs
-  typedef Signal<void()> PressedSignalType;
-  typedef Signal<void(int)> ValueChangedSignalType;
+  MyComponent()
+  : mSlotDelegate(this)
+  {
+  }
 
-  // Signal accessors
-  PressedSignalType& PressedSignal();
-  ValueChangedSignalType& ValueChangedSignal();
+  void ConnectSignals(Signal<void()>& signal)
+  {
+    signal.Connect(mSlotDelegate, &MyComponent::OnEvent);
+  }
+
+  void DisconnectAll()
+  {
+    mSlotDelegate.DisconnectAll();
+  }
+
+  uint32_t GetConnectionCount() const
+  {
+    return mSlotDelegate.GetConnectionCount();
+  }
 
 private:
-  PressedSignalType mPressedSignal;
-  ValueChangedSignalType mValueChangedSignal;
+  void OnEvent()
+  {
+    // Handle event
+  }
+
+  SlotDelegate<MyComponent> mSlotDelegate;
 };
 ```
 
-In the implementation:
+### Functor Objects
+
+Connect lambda expressions or functor objects:
 
 ```cpp
-MyButton::PressedSignalType& MyButton::PressedSignal()
+class MyController : public ConnectionTracker
 {
-  return mPressedSignal;
+public:
+  void SetupHandler()
+  {
+    Signal<void(int)> signal;
+    
+    // Connect lambda
+    signal.Connect(this, [this](int value) {
+      OnValueReceived(value);
+    });
+  }
+
+  void OnValueReceived(int value)
+  {
+    // Handle value
+  }
+};
+```
+
+### Multiple Connections
+
+A signal can have multiple callbacks connected. They are called in connection order:
+
+```cpp
+Signal<void()> signal;
+
+signal.Connect(&handler1, &Handler1::OnEvent);
+signal.Connect(&handler2, &Handler2::OnEvent);
+signal.Connect(&handler3, &Handler3::OnEvent);
+
+// All three handlers called in order
+signal.Emit();
+```
+
+### Connection During Emission
+
+Callbacks connected during signal emission are not called until the next emission:
+
+```cpp
+Signal<void()> signal;
+signal.Connect(this, &MyClass::FirstHandler);
+
+void FirstHandler()
+{
+  // This connection will not fire during this emission cycle
+  signal.Connect(this, &MyClass::SecondHandler);
 }
 
-void MyButton::EmitPressed()
+signal.Emit();  // Only FirstHandler called
+signal.Emit();  // Both FirstHandler and SecondHandler called
+```
+
+### Disconnection During Emission
+
+Callbacks can safely disconnect themselves during emission:
+
+```cpp
+void OnEvent()
 {
-  mPressedSignal.Emit();
+  // Safe to disconnect during callback
+  signal.Disconnect(this, &MyClass::OnEvent);
 }

@@ -6,206 +6,225 @@ category: styling-theme-config
 
 # Ui Color
 
-`UiColor` provides a theme-aware color abstraction for dali-ui applications. It supports both explicit RGBA values and theme color identifiers that resolve at runtime, enabling consistent styling and dynamic theme switching.
+UiColor provides a theme-aware color abstraction for dali-ui applications. It supports both explicit RGBA values and theme color references that resolve at runtime.
 
 ## Table of Contents
 
-- [Creating UiColor Objects](#creating-uicolor-objects)
+- [Creating UiColor Instances](#creating-uicolor-instances)
+- [Theme Color References](#theme-color-references)
+- [Alpha Manipulation](#alpha-manipulation)
 - [Predefined Theme Colors](#predefined-theme-colors)
-- [Resolving Color Values](#resolving-color-values)
-- [Modifying Alpha](#modifying-alpha)
-- [Using UiColor with Views](#using-uicolor-with-views)
+- [Converting to Vector4](#converting-to-vector4)
 
-## Creating UiColor Objects
+## Creating UiColor Instances
 
-### RGBA Constructor
+UiColor offers multiple constructors for different use cases.
 
-Create a `UiColor` from red, green, blue, and alpha components. Each component is a float in the range `[0.0, 1.0]`. The alpha parameter defaults to `1.0f` (fully opaque).
+### RGBA Values
+
+Create a UiColor with explicit red, green, blue, and alpha components. Values are in the range 0.0 to 1.0.
 
 ```cpp
-// Fully opaque red
-UiColor red(1.0f, 0.0f, 0.0f);
+// Full RGBA
+UiColor red(1.0f, 0.0f, 0.0f, 1.0f);
 
-// Semi-transparent blue with explicit alpha
-UiColor blue(0.0f, 0.0f, 1.0f, 0.7f);
+// RGB with default alpha of 1.0
+UiColor gray(0.5f, 0.5f, 0.5f);
 ```
 
-### Hex RGB Constructor
+### Hex RGB Values
 
-Create a `UiColor` from a 24-bit RGB hex value. The alpha defaults to `1.0f`.
+Create a UiColor from a hexadecimal RGB value. The alpha defaults to 1.0.
 
 ```cpp
-// Pure red (0xFF0000)
+// 0xFF0000 = pure red
 UiColor red(0xFF0000u);
 
-// Custom color with separate alpha
-UiColor custom(0x387AFFu, 0.5f);
+// Hex with explicit alpha
+UiColor translucentGreen(0x00FF00u, 0.5f);
 ```
 
-### Theme Color Identifier
+### Vector4 Values
 
-Create a `UiColor` that references a named theme color. The actual RGBA value is resolved at runtime from the current theme.
+Construct a UiColor from an existing Vector4.
 
 ```cpp
-// Reference a theme color by name
+Vector4 input(0.2f, 0.4f, 0.6f, 0.8f);
+UiColor color(input);
+```
+
+### Default Construction
+
+A default-constructed UiColor has no color ID and resolves to transparent black (Vector4::ZERO).
+
+```cpp
+UiColor color;
+// color.HasColorId() == false
+// color.GetRgba() == Vector4::ZERO
+```
+
+## Theme Color References
+
+UiColor can reference theme colors by string identifier. The actual RGBA value is resolved at runtime through the theme system.
+
+### Creating Theme Color References
+
+```cpp
+// Reference a theme color by ID
 UiColor themeColor("ThemeColor1");
 
-// Move semantics for efficiency
-UiColor movedColor(std::move(String("AnotherColor")));
+// Check if the color is a theme reference
+if (themeColor.HasColorId()) {
+    String id = themeColor.GetColorId(); // "ThemeColor1"
+}
 ```
 
-Use `HasColorId()` to check if a `UiColor` holds a theme identifier rather than explicit RGBA values:
+### Resolving Theme Colors
+
+Call `GetRgba()` to resolve the color to its RGBA value. Unknown theme IDs return Vector4::ZERO.
 
 ```cpp
-UiColor explicit(1.0f, 0.0f, 0.0f);
-UiColor themed("Primary");
+UiColor color("Primary");
+Vector4 resolved = color.GetRgba();
 
-bool isExplicit = explicit.HasColorId(); // false
-bool isThemed = themed.HasColorId();     // true
+// Unknown theme colors fall back to transparent
+UiColor unknown("NonExistentColorId");
+Vector4 fallback = unknown.GetRgba(); // Vector4::ZERO
 ```
 
-## Predefined Theme Colors
+### Using with Views
 
-`UiColor` provides static constants for common theme colors. These are theme identifiers, not fixed RGBA values.
+Apply UiColor to view backgrounds for theme-aware styling.
 
 ```cpp
-// Primary accent color
-UiColor primary = UiColor::PRIMARY;
+// Use predefined theme colors
+View view = View::New()
+    .SetBackgroundColor(UiColor::PRIMARY);
 
-// Background color for containers
-UiColor background = UiColor::BACKGROUND;
+// Use custom theme color
+View themedView = View::New()
+    .SetBackgroundColor(UiColor("ThemeColor2"));
 
-// Outline or border color
-UiColor outline = UiColor::OUTLINE;
+// Apply to layout
+Layout layout = Layout::New()
+    .SetBackgroundColor(UiColor::BACKGROUND);
 ```
 
-Each predefined constant holds a color ID:
+## Alpha Manipulation
 
-```cpp
-String primaryId = UiColor::PRIMARY.GetColorId();   // "Primary"
-String backgroundId = UiColor::BACKGROUND.GetColorId(); // "Background"
-String outlineId = UiColor::OUTLINE.GetColorId();   // "Outline"
-```
-
-## Resolving Color Values
-
-### GetRgba
-
-Call `GetRgba()` to resolve a `UiColor` to its RGBA components. For theme colors, this returns the current theme's resolved value. Unknown theme identifiers return `Vector4::ZERO`.
-
-```cpp
-UiColor color(0.2f, 0.4f, 0.6f, 0.8f);
-Vector4 rgba = color.GetRgba();
-// rgba.r == 0.2f, rgba.g == 0.4f, rgba.b == 0.6f, rgba.a == 0.8f
-```
-
-For theme colors, resolution depends on the active theme:
-
-```cpp
-UiColor primary = UiColor::PRIMARY;
-Vector4 resolved = primary.GetRgba(); // Resolves to theme's Primary color
-```
-
-### Implicit Conversion to Vector4
-
-`UiColor` supports implicit conversion to `Vector4`, allowing direct use where `Vector4` color parameters are expected:
-
-```cpp
-UiColor color(0.5f, 0.6f, 0.7f, 0.8f);
-Vector4 vec = color; // Implicit conversion
-```
-
-## Modifying Alpha
+UiColor provides fluent methods for adjusting transparency while preserving theme references.
 
 ### WithAlpha
 
-`WithAlpha(float alpha)` returns a new `UiColor` with the alpha set to the specified value. The original color is unchanged. Alpha values are clamped to `[0.0, 1.0]`.
+`WithAlpha()` sets an absolute alpha value, clamped to the range [0.0, 1.0]. The original UiColor is unchanged.
 
 ```cpp
-UiColor original(1.0f, 0.0f, 0.0f, 1.0f);
-UiColor semi = original.WithAlpha(0.5f);
-
-// original.GetRgba().a == 1.0f (unchanged)
-// semi.GetRgba().a == 0.5f
+UiColor solid(1.0f, 0.0f, 0.0f, 1.0f);
+UiColor translucent = solid.WithAlpha(0.3f);
+// solid.GetRgba().a == 1.0f (unchanged)
+// translucent.GetRgba().a == 0.3f
 ```
 
-For theme colors, `WithAlpha` preserves the color ID:
+When applied to a theme color reference, the color ID is preserved:
 
 ```cpp
-UiColor themed = UiColor::PRIMARY.WithAlpha(0.7f);
-bool stillThemed = themed.HasColorId(); // true
+UiColor primary = UiColor::PRIMARY.WithAlpha(0.7f);
+// primary.HasColorId() == true
+// primary.GetColorId() == "Primary"
 ```
 
 ### ScaleAlpha
 
-`ScaleAlpha(float factor)` returns a new `UiColor` with the alpha multiplied by the given factor. The result is clamped to `[0.0, 1.0]`.
+`ScaleAlpha()` multiplies the current alpha by a factor, clamped to [0.0, 1.0]. The original UiColor is unchanged.
 
 ```cpp
-UiColor original(1.0f, 0.0f, 0.0f, 0.8f);
-UiColor scaled = original.ScaleAlpha(0.5f);
-
-// scaled.GetRgba().a == 0.4f (0.8 * 0.5)
+UiColor color(1.0f, 0.0f, 0.0f, 0.8f);
+UiColor result = color.ScaleAlpha(0.5f);
+// result.GetRgba().a == 0.4f (0.8 * 0.5)
 ```
 
-### Chaining Alpha Operations
-
-`WithAlpha` and `ScaleAlpha` can be chained for fluent alpha manipulation:
+Theme color references are preserved:
 
 ```cpp
-// Set alpha to 0.5, then scale by 0.2 -> final alpha = 0.1
+UiColor scaled = UiColor::PRIMARY.ScaleAlpha(0.5f);
+// scaled.HasColorId() == true
+// scaled.GetColorId() == "Primary"
+```
+
+### Fluent Chaining
+
+Chain alpha methods for complex transformations:
+
+```cpp
+// WithAlpha then ScaleAlpha: 0.5 * 0.2 = 0.1
 UiColor result = UiColor::PRIMARY.WithAlpha(0.5f).ScaleAlpha(0.2f);
 
-// Scale by 0.5, then override to 0.3
-UiColor overrideResult = UiColor::PRIMARY.ScaleAlpha(0.5f).WithAlpha(0.3f);
+// Multiple ScaleAlpha calls multiply together
+UiColor chained = UiColor(1.0f, 0.0f, 0.0f, 1.0f)
+    .ScaleAlpha(0.5f)
+    .ScaleAlpha(0.2f);
+// chained.GetRgba().a == 0.1f
 ```
 
-## Using UiColor with Views
+### Practical Example
 
-`UiColor` integrates with the View-based object model for setting background colors:
+Create semi-transparent colors for overlays and effects:
 
 ```cpp
-// Set background using a predefined theme color
-View view = View::New()
-    .SetBackgroundColor(UiColor::PRIMARY);
-
-// Set background using a custom RGBA color
-View customView = View::New()
-    .SetBackgroundColor(UiColor(0xFF5C8Au));
-
-// Set background using a theme color identifier
-View themedView = View::New()
-    .SetBackgroundColor(UiColor("ThemeColor1"));
+const UiColor BACKGROUND_TEXT_COLOR = UiColor(0xC8D7E8).WithAlpha(0.38f);
+const UiColor STATUS_TEXT_COLOR = UiColor(0xF6F0DE).WithAlpha(0.80f);
+const UiColor PLAY_BORDER_COLOR = UiColor(0x6EDCFF).WithAlpha(0.26f);
 ```
 
-Use `UiColor` with layout containers:
+## Predefined Theme Colors
+
+UiColor provides static constants for common theme colors.
+
+### PRIMARY
+
+The primary brand color.
 
 ```cpp
-Layout container = Layout::New()
-    .SetBackgroundColor(UiColor::BACKGROUND)
-    .SetRequestedWidth(200_spx)
-    .SetRequestedHeight(200_spx);
+UiColor primary = UiColor::PRIMARY;
+// primary.HasColorId() == true
+// primary.GetColorId() == "Primary"
 ```
 
-Combine alpha modification with view styling:
+### BACKGROUND
+
+The default background color for containers.
 
 ```cpp
-// Semi-transparent background
-View overlay = View::New()
-    .SetBackgroundColor(UiColor(0x000000u).WithAlpha(0.5f));
-
-// Scaled alpha for subtle backgrounds
-View subtle = View::New()
-    .SetBackgroundColor(UiColor::BACKGROUND.ScaleAlpha(0.3f));
+Layout layout = Layout::New()
+    .SetBackgroundColor(UiColor::BACKGROUND);
 ```
 
-Update colors dynamically in response to user interaction:
+### OUTLINE
+
+The outline color for borders and text effects.
 
 ```cpp
-View clickable = View::New()
-    .SetBackgroundColor(UiColor::PRIMARY)
-    .AsInteractive([this](InteractiveTrait& trait) {
-        trait.ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
-            view.SetBackgroundColor(UiColor("ThemeColor1"));
-            return true;
-        });
-    });
+Text::Outline outline = Text::Outline()
+    .SetColor(UiColor::OUTLINE.WithAlpha(0.48f))
+    .SetWidth(1.5f)
+    .SetBlurRadius(1.6f);
+```
+
+## Converting to Vector4
+
+UiColor implicitly converts to Vector4 for compatibility with APIs that expect raw color values.
+
+```cpp
+UiColor color(0.5f, 0.6f, 0.7f, 0.8f);
+Vector4 vec = color; // implicit conversion
+
+// Use with APIs expecting Vector4
+label.SetTextColor(color); // implicit conversion to Vector4
+```
+
+Explicit conversion is also available via `GetRgba()`:
+
+```cpp
+UiColor themeColor("Primary");
+Vector4 resolved = themeColor.GetRgba();
+```

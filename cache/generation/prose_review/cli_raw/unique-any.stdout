@@ -1,0 +1,159 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Unique Any
+sidebar_label: Unique Any
+category: utilities
+---
+# Unique Any
+
+`UniqueAny` provides type-erased storage for a single value, supporting both copyable and move-only types. It is used internally by dali-ui for view attachments and can store arbitrary values with type-safe retrieval.
+
+## Table of Contents
+
+- [Storing Values](#storing-values)
+- [Retrieving Values](#retrieving-values)
+- [Transferring Ownership](#transferring-ownership)
+- [Checking and Clearing State](#checking-and-clearing-state)
+
+## Storing Values
+
+Construct a `UniqueAny` by passing a value to the constructor. The value is moved into the internal storage, allowing move-only types to be stored.
+
+```cpp
+// Store a primitive value
+Dali::Ui::UniqueAny attachment(42);
+
+// Store a move-only type
+struct MoveOnly {
+  explicit MoveOnly(int v) : value(v) {}
+  MoveOnly(MoveOnly&&) noexcept = default;
+  MoveOnly(const MoveOnly&) = delete;
+  int value;
+};
+
+Dali::Ui::UniqueAny moveAttachment(MoveOnly(7));
+```
+
+The default constructor creates an empty `UniqueAny` that holds no value:
+
+```cpp
+Dali::Ui::UniqueAny empty; // Empty, holds no value
+```
+
+## Retrieving Values
+
+Use the `Get<T>()` method to retrieve a pointer to the stored value. The method returns `nullptr` if the requested type does not match the stored type.
+
+```cpp
+Dali::Ui::UniqueAny attachment(3);
+
+int* value = attachment.Get<int>();
+if (value) {
+  // Use *value
+}
+
+// Returns nullptr for type mismatch
+float* wrong = attachment.Get<float>(); // nullptr
+```
+
+The returned pointer is owned by the `UniqueAny`. Do not delete it or use it after the `UniqueAny` is destroyed or moved from.
+
+## Transferring Ownership
+
+Use `Detach<T>()` to transfer ownership of the stored value out of the `UniqueAny`. On success, the `UniqueAny` becomes empty and ownership is returned in a `Dali::UniquePtr`.
+
+```cpp
+Dali::Ui::UniqueAny attachment(MoveOnly(17));
+
+// Type mismatch leaves UniqueAny unchanged
+Dali::UniquePtr<int> mismatch = attachment.Detach<int>();
+// mismatch.Get() == nullptr, attachment still holds MoveOnly
+
+// Correct type transfers ownership
+Dali::UniquePtr<MoveOnly> value = attachment.Detach<MoveOnly>();
+if (value.Get()) {
+  // Ownership transferred, use value->value
+}
+// attachment is now empty
+```
+
+## Checking and Clearing State
+
+Check whether a `UniqueAny` holds a value using `Empty()` or the boolean conversion operator:
+
+```cpp
+Dali::Ui::UniqueAny attachment(3);
+
+if (attachment) // True if holds a value
+{
+  // attachment stores something
+}
+
+if (!attachment.Empty()) // Same check
+{
+  // attachment stores something
+}
+```
+
+Call `Reset()` to clear the stored value:
+
+```cpp
+Dali::Ui::UniqueAny attachment(3);
+attachment.Reset(); // Now empty
+
+// After Reset:
+// attachment.Empty() == true
+// attachment.Get<int>() == nullptr
+```
+
+`UniqueAny` is move-only and cannot be copied:
+
+```cpp
+Dali::Ui::UniqueAny a(5);
+Dali::Ui::UniqueAny b(std::move(a)); // OK: move constructor
+a = std::move(b); // OK: move assignment
+// Dali::Ui::UniqueAny c(a); // Error: copy constructor deleted
+```
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Unique Any Prose Review
+
+## Summary
+
+The draft is accurate and well-aligned with the public API. No prose changes were required.
+
+## Verification Against Source Evidence
+
+### API Signatures Verified (from `repos/dali-ui/dali-ui-foundation/public-api/unique-any.h`)
+
+| API | Draft Description | Header Evidence | Status |
+|-----|-------------------|-----------------|--------|
+| `UniqueAny()` default constructor | "creates an empty UniqueAny that holds no value" | `UniqueAny();` creates empty | ✓ Accurate |
+| `UniqueAny(T&& value)` | "value is moved into the internal storage" | Template constructor with `Dali::Forward<T>(value)` | ✓ Accurate |
+| `Empty()` | "True if no value is stored" | `bool Empty() const;` returns true if no value | ✓ Accurate |
+| `operator bool()` | "True if a value is stored" | `explicit operator bool() const;` | ✓ Accurate |
+| `Get<T>()` | "returns nullptr if the type does not match" | Returns `nullptr` if `!IsType<ValueType>()` | ✓ Accurate |
+| `Detach<T>()` | "On success, UniqueAny becomes empty; on type mismatch, unchanged" | Implementation shows early return on type mismatch, otherwise `mHolder = nullptr` | ✓ Accurate |
+| `Reset()` | "clears the stored value" | `void Reset();` | ✓ Accurate |
+| Move-only | "cannot be copied" | Copy constructor/assignment deleted | ✓ Accurate |
+
+### Code Examples Verified (from `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp`)
+
+| Example | UTC Evidence | Status |
+|---------|--------------|--------|
+| `Get<T>()` with type mismatch returning nullptr | `UtcDaliUniqueAnyGetP`: `DALI_TEST_CHECK(!attachment.Get<float>())` | ✓ Accurate |
+| `Reset()` clearing value | `UtcDaliUniqueAnyResetP`: confirms `Empty()` and `!attachment` after reset | ✓ Accurate |
+| `Detach<T>()` type mismatch behavior | `UtcDaliUniqueAnyDetachP`: `DALI_TEST_CHECK(!mismatch.Get())` and `DALI_TEST_CHECK(attachment.Get<MoveOnly>())` | ✓ Accurate |
+| `Detach<T>()` success behavior | `UtcDaliUniqueAnyDetachP`: confirms ownership transfer and empty after | ✓ Accurate |
+| Move-only type storage | `UtcDaliUniqueAnyMoveOnlyP`: confirms `MoveOnly` can be stored and retrieved | ✓ Accurate |
+
+## Remaining Concerns
+
+None. The draft accurately describes the `UniqueAny` API with correct code examples that match the public header and UTC tests.
+
+## Changes Made
+
+None required. The draft prose is accurate and the code blocks are verified against source evidence.
+-----END_PROSE_REVIEW_REPORT-----

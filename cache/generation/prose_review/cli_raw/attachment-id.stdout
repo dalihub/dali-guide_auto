@@ -1,57 +1,197 @@
 [36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
 -----BEGIN_REVISED_MARKDOWN-----
---- title: Attachment Id sidebar_label: Attachment Id category: views-components --- # Attachment Id `AttachmentId` is a lightweight identifier for attaching custom data to `View` objects. Use attachments to store instance-specific state—useful when you don't want to subclass, or when subclassing View handle classes that cannot hold persistent fields. ## Table of Contents - [Allocating an AttachmentId](#allocating-an-attachmentid) - [Attaching Data to a View](#attaching-data-to-a-view) - [Retrieving Attachment Data](#retrieving-attachment-data) - [Detaching and Removing Attachments](#detaching-and-removing-attachments) - [Using Attachments in Custom Controls](#using-attachments-in-custom-controls) ## Allocating an AttachmentId Allocate one `AttachmentId` per logical attachment type using `AttachmentId::Alloc()`. Store the result statically so the same ID can be reused across all instances. ```cpp #include <dali-ui-foundation/dali-ui-foundation.h> using namespace Dali; using namespace Dali::Ui; namespace { // One-time allocation per attachment type const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc(); const AttachmentId USER_DATA_ID = AttachmentId::Alloc(); } ``` The `AttachmentId::Alloc()` method is thread-safe and lock-free. It uses an internal atomic counter to generate unique identifiers. Do not allocate a new ID per object instance or per API call—this wastes the process-wide ID space and makes previously stored attachments impossible to retrieve. ## Attaching Data to a View Use `View::SetAttachment()` to attach custom data to a `View`. The data is stored as `Dali::UniquePtr<T>`, transferring ownership to the View. ```cpp struct CounterData { explicit CounterData(Label label) : label(label) { } Label label; uint32_t count{0u}; }; // Create and attach data InteractiveView view = InteractiveView::New() .SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label)) .SetRequestedWidth(220.0f) .SetRequestedHeight(80.0f); ``` If an attachment already exists for the given ID, it is destroyed and replaced. The stored attachment is destroyed when removed, replaced, or when the View implementation is destroyed. ## Retrieving Attachment Data Use `View::GetAttachment()` to retrieve a pointer to the stored data. The returned pointer is owned by the View—do not delete it. ```cpp void UpdateLabel(View view) { CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID); if(data) { ++data->count; char text[64]; std::snprintf(text, sizeof(text), "Count: %u", data->count); data->label.SetText(text); } } ``` The method returns `nullptr` if no attachment exists for the ID or if the type does not match. Always check the result before using the pointer. ## Detaching and Removing Attachments Use `View::DetachAttachment()` to remove an attachment and take ownership of the data. This is useful when you need to modify and reattach the data. ```cpp void OnResetClicked(View view, InputEvent event) { // Detach and take ownership Dali::UniquePtr<CounterData> data = view.DetachAttachment<CounterData>(COUNTER_DATA_ID); if(data) { // Modify the data data->count = 0u; data->label.SetText("Count: 0"); // Reattach with modified data view.SetAttachment(COUNTER_DATA_ID, Dali::Move(data)); } } ``` Use `View::RemoveAttachment()` to destroy an attachment without retrieving it: ```cpp view.RemoveAttachment(COUNTER_DATA_ID); ``` ## Using Attachments in Custom Controls Attachments are particularly useful when deriving from View handle classes. Since DALi handles are lightweight and should not add fields for persistent state, attachments provide a way to store custom data in the implementation-side object. ```cpp class MyButton : public InteractiveView { public: struct Data { Data(Label label, UiColor normalColor, UiColor pressedColor) : label(label), normalColor(normalColor), pressedColor(pressedColor) { } Label label; UiColor normalColor; UiColor pressedColor; uint32_t clickCount{0u}; }; static MyButton New(const Dali::String& text) { MyButton button(InteractiveView::New()); button.Initialize(text); return button; } static MyButton DownCast(BaseHandle handle) { InteractiveView view = InteractiveView::DownCast(handle); // Verify this is a MyButton by checking for our attachment return view && view.GetAttachment<Data>(GetDataId()) ? MyButton(view) : MyButton(); } void IncrementClickCount() { Data* data = GetAttachment<Data>(GetDataId()); if(data) { ++data->clickCount; SetBackgroundColor((data->clickCount % 2u) ? data->pressedColor : data->normalColor); char text[64]; std::snprintf(text, sizeof(text), "MyButton: %u", data->clickCount); data->label.SetText(text); } } DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton) private: explicit MyButton(InteractiveView view) : InteractiveView(view) { } static AttachmentId GetDataId() { static AttachmentId id = AttachmentId::Alloc(); return id; } }; ``` ### Avoiding Reference Cycles Attachment data follows the lifetime of the View it is attached to. Avoid attaching data that strongly references the owner, its parent, or an ancestor—this creates a reference cycle. Keeping a child handle is safe because DALi children do not strongly reference their parent. ### Type Identity Considerations Use a stable namespace-scope type for attachment data. Local types and anonymous-namespace types should not be used when the attachment may be retrieved from another translation unit, because they may not have a stable cross-translation-unit type identity.
+---
+title: Attachment Id
+sidebar_label: Attachment Id
+category: views-components
+---
+
+# Attachment Id
+
+`Dali::Ui::AttachmentId` is a lightweight identifier for attaching custom data to `View` instances. Use attachments to store per-object state without subclassing or adding fields to handle types.
+
+## Table of Contents
+
+- [Allocating an Attachment ID](#allocating-an-attachment-id)
+- [Attaching Data to a View](#attaching-data-to-a-view)
+- [Retrieving Attachment Data](#retrieving-attachment-data)
+- [Detaching and Reattaching](#detaching-and-reattaching)
+- [Comparison Operations](#comparison-operations)
+
+## Allocating an Attachment ID
+
+Allocate one `AttachmentId` per logical attachment type using `AttachmentId::Alloc()`. Store the returned ID in static storage so it can be reused across `SetAttachment()`, `GetAttachment()`, and `DetachAttachment()` calls.
+
+```cpp
+#include <dali-ui-foundation/public-api/attachment-id.h>
+
+using namespace Dali::Ui;
+
+// In an anonymous namespace or as a static member
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+}
+```
+
+Do not allocate a new ID per object instance or per API call. Repeated one-shot allocation wastes the process-wide ID space and makes previously stored attachments impossible to retrieve.
+
+`AttachmentId::Alloc()` is thread-safe and lock-free. It uses an internal atomic counter. If the `uint32_t` ID space is exhausted, an assertion is raised instead of wrapping around.
+
+## Attaching Data to a View
+
+Use `View::SetAttachment()` to attach custom data to a `View`. The data ownership is transferred to the View via `Dali::UniquePtr<T>`.
+
+```cpp
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali/public-api/object/unique-ptr.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+
+// Attach data to a View
+InteractiveView counter = InteractiveView::New()
+  .SetAttachment(COUNTER_DATA_ID, MakeUnique<CounterData>(label));
+```
+
+If another attachment already exists for the same ID, it is destroyed and replaced. The stored attachment is destroyed when removed, replaced, or when the View implementation is destroyed.
+
+## Retrieving Attachment Data
+
+Use `View::GetAttachment()` to retrieve a pointer to the stored data. The returned pointer is owned by the View.
+
+```cpp
+void UpdateLabel(View view)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+  if(data)
+  {
+    char text[64];
+    std::snprintf(text, sizeof(text), "Count: %u", data->count);
+    data->label.SetText(text);
+  }
+}
+```
+
+The pointer becomes invalid after the attachment is removed, replaced, or the View is destroyed. Always check for `nullptr` before using the returned pointer.
+
+## Detaching and Reattaching
+
+Use `View::DetachAttachment()` to remove an attachment and take ownership of the data. This is useful for modifying and reattaching data.
+
+```cpp
+void OnResetClicked(View view, AttachmentId id)
+{
+  UniquePtr<CounterData> data = view.DetachAttachment<CounterData>(id);
+  if(data)
+  {
+    data->count = 0u;
+    data->label.SetText("Count: 0");
+    view.SetAttachment(id, Move(data));
+  }
+}
+```
+
+Use `View::RemoveAttachment()` to destroy an attachment without retrieving it. It returns `true` if an attachment was removed, or `false` if no attachment existed for the given ID:
+
+```cpp
+bool removed = view.RemoveAttachment(COUNTER_DATA_ID);
+```
+
+## Comparison Operations
+
+`AttachmentId` supports equality and inequality comparison via `operator==` and `operator!=`.
+
+```cpp
+AttachmentId id1 = AttachmentId::Alloc();
+AttachmentId id2 = AttachmentId::Alloc();
+
+if(id1 != id2)
+{
+  // Different attachment slots
+}
+
+if(id1 == id1)
+{
+  // Same attachment slot
+}
+```
+
+The `value` member provides access to the underlying `uint32_t` identifier for debugging or logging purposes.
 -----END_REVISED_MARKDOWN-----
 
 -----BEGIN_PROSE_REVIEW_REPORT-----
 # Attachment Id Prose Review
 
 ## Summary
-The draft was accurate against the source evidence. Only one minor prose improvement was needed.
+
+The draft is accurate and well-aligned with the public API. One minor improvement was made to document the return value of `RemoveAttachment()`.
 
 ## Changes Made
 
-### 1. Overview Section (Line 1)
-**Original:** "Use attachments to store instance-specific state without subclassing or adding fields to handling types."
+### 1. RemoveAttachment return value documentation
 
-**Revised:** "Use attachments to store instance-specific state—useful when you don't want to subclass, or when subclassing View handle classes that cannot hold persistent fields."
+**Location:** "Detaching and Reattaching" section
 
-**Source Evidence:** 
-- `repos/dali-ui/samples/attachment/my-button-example.cpp` lines 17-22: "Most DALi public classes are lightweight handles over internal implementations. A derived handle should not add fields for persistent state because the state is lost when the object is copied or upcast to the base handle type."
-- `repos/dali-ui/dali-ui-foundation/public-api/view.h`: View is documented as a handle class with no data members.
+**Before:**
+> Use `View::RemoveAttachment()` to destroy an attachment without retrieving it:
+> ```cpp
+> view.RemoveAttachment(COUNTER_DATA_ID);
+> ```
 
-**Rationale:** The original phrase "handling types" was imprecise. DALi uses the term "handle" for lightweight public classes. The revision clarifies the use case and aligns with sample code comments.
+**After:**
+> Use `View::RemoveAttachment()` to destroy an attachment without retrieving it. It returns `true` if an attachment was removed, or `false` if no attachment existed for the given ID:
+> ```cpp
+> bool removed = view.RemoveAttachment(COUNTER_DATA_ID);
+> ```
 
-### 2. "Using Attachments in Custom Controls" Section
-**Original:** "Since DALi handles are lightweight and should not add fields for persistent state"
+**Source Evidence:** `repos/dali-ui/dali-ui-foundation/public-api/view.h` line 1018-1024:
+```cpp
+/**
+ * @brief Removes an attachment.
+ *
+ * Removing an attachment destroys the stored UniqueAny and its owned value.
+ *
+ * @param[in] id The key to identify the attachment
+ * @return True if an attachment was removed
+ */
+bool RemoveAttachment(AttachmentId id);
+```
 
-**Revised:** (Unchanged - verified accurate)
+## Verified Accurate Prose
 
-**Source Evidence:** Same as above. The sample code explicitly documents this pattern.
+The following sections were verified against source and required no changes:
 
-## Verified Accurate (No Changes Needed)
+1. **AttachmentId struct description** - Matches `repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h` documentation
+2. **Alloc() thread-safety** - Header confirms "Thread-safe and lock-free" with "internal atomic counter"
+3. **ID space exhaustion behavior** - Header confirms "assertion is raised instead of wrapping around"
+4. **SetAttachment ownership transfer** - Header confirms `Dali::UniquePtr<T>` ownership transfer and replacement behavior
+5. **GetAttachment return semantics** - Header confirms pointer ownership remains with View, returns nullptr on missing/type mismatch
+6. **DetachAttachment return semantics** - Header confirms returns `Dali::UniquePtr<T>`, nullptr on missing/type mismatch
+7. **Comparison operators** - Header confirms `operator==` and `operator!=` compare `value` members
+8. **value member** - Header confirms `uint32_t value` is a public member
 
-### AttachmentId API
-- `AttachmentId::Alloc()` returns unique identifiers - **Verified** in `attachment-id.h` lines 47-55
-- Thread-safe and lock-free - **Verified** in `attachment-id.h` line 52
-- `operator==` and `operator!=` - **Verified** in `attachment-id.h` lines 57-67
-- `uint32_t value` member - **Verified** in `attachment-id.h` line 69
+## Code Block Verification
 
-### View Attachment Methods
-- `SetAttachment(AttachmentId, Dali::UniquePtr<T>)` returns `View&` for chaining - **Verified** in `view.h` lines 619-630
-- `GetAttachment<T>(AttachmentId)` returns `T*` - **Verified** in `view.h` lines 644-654
-- `DetachAttachment<T>(AttachmentId)` returns `Dali::UniquePtr<T>` - **Verified** in `view.h` lines 668-686
-- `RemoveAttachment(AttachmentId)` returns `bool` - **Verified** in `view.h` line 637
-
-### Code Examples
-All code examples match the patterns in:
+All code blocks were verified against:
+- `repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h`
+- `repos/dali-ui/dali-ui-foundation/public-api/view.h`
 - `repos/dali-ui/samples/attachment/attachment-example.cpp`
-- `repos/dali-ui/samples/attachment/my-button-example.cpp`
 
-### Best Practices
-- "Avoiding Reference Cycles" section - **Verified** in `my-button-example.cpp` lines 23-26
-- "Type Identity Considerations" section - **Verified** in `view.h` lines 625-628 (docstring note)
+Code patterns match actual usage in the sample code.
 
 ## Remaining Concerns
-None. The draft accurately reflects the API and follows established patterns from the sample code.
+
+None. The document accurately describes the AttachmentId feature for application developers.
 -----END_PROSE_REVIEW_REPORT-----

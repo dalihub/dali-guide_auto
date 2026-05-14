@@ -10,164 +10,256 @@ UiScaleManager provides access to the system-driven adaptive UI scale, allowing 
 
 ## Table of Contents
 
-- [Getting the Current Scale](#getting-the-current-scale)
-- [Setting the System Scale](#setting-the-system-scale)
-- [View Scale Policies](#view-scale-policies)
+- [Getting the Scale Manager](#getting-the-scale-manager)
+- [Reading and Setting the System Scale](#reading-and-setting-the-system-scale)
+- [Scale Policies for Views](#scale-policies-for-views)
 - [Practical Examples](#practical-examples)
 
-## Getting the Current Scale
+## Getting the Scale Manager
 
-The `UiScaleManager` is a singleton that exposes the current system scale factor. Use `UiScaleManager::Get()` to obtain the singleton instance, then call `GetScale()` to retrieve the current scale value.
+`UiScaleManager` is a singleton that provides access to the current system scale factor. Use the static `Get()` method to retrieve the singleton instance.
 
 ```cpp
-// Get the current system scale factor
-float scale = Dali::Ui::UiScaleManager::Get().GetScale();
-
-// Default scale is 1.0
-if(scale > 1.0f)
-{
-  // Handle enlarged UI mode
-}
+UiScaleManager scaleManager = UiScaleManager::Get();
+float currentScale = scaleManager.GetScale();
 ```
 
-The scale value defaults to 1.0 and can be read at any time during application execution.
+The scale manager is a handle-based object that can be safely copied or moved:
 
-## Setting the System Scale
+```cpp
+UiScaleManager manager1 = UiScaleManager::Get();
+UiScaleManager manager2 = manager1;  // Copy constructor
+UiScaleManager manager3 = std::move(manager1);  // Move constructor
+```
+
+## Reading and Setting the System Scale
+
+### Reading the Current Scale
+
+Use `GetScale()` to retrieve the current system scale factor. The default value is 1.0.
+
+```cpp
+float scale = UiScaleManager::Get().GetScale();
+// Use the scale value for adaptive layout calculations
+```
+
+### Setting the System Scale
 
 Use `SetScale()` to change the system scale factor. This triggers re-layout of all registered layout roots.
 
 ```cpp
-// Set scale to 1.5x (150%)
-Dali::Ui::UiScaleManager::Get().SetScale(1.5f);
-
-// Set scale to 2.0x (200%)
-Dali::Ui::UiScaleManager::Get().SetScale(2.0f);
+void ApplyUserScale(float userScale)
+{
+    if (userScale >= 0.5f && userScale <= 3.0f)
+    {
+        UiScaleManager::Get().SetScale(userScale);
+    }
+}
 ```
 
-When the scale changes, all views with the appropriate policy will be resized proportionally. Typical scale values range from 0.8 to 2.0.
+A typical pattern for responding to user input:
 
-## View Scale Policies
+```cpp
+void OnScalePresetSelected(float presetScale)
+{
+    UiScaleManager::Get().SetScale(presetScale);
+    UpdateScaleDisplay();
+}
 
-Each view can control how it participates in system-driven scaling through `UiScalePolicy`. Set the policy using `SetUiScalePolicy()` on any view.
+void UpdateScaleDisplay()
+{
+    float currentScale = UiScaleManager::Get().GetScale();
+    // Update UI to show current scale
+}
+```
+
+## Scale Policies for Views
+
+Each view can control how it participates in the system-driven scale through `UiScalePolicy`. The policy determines how the effective scale is calculated for a view and its descendants.
 
 ### Available Policies
 
 | Policy | Behavior |
 |--------|----------|
-| `UiScalePolicy::INHERIT` | Inherits effective scale from parent; root views inherit from UiScaleManager. This is the default. |
+| `UiScalePolicy::INHERIT` | Inherits effective scale from parent. Root views inherit from UiScaleManager. This is the default. |
 | `UiScalePolicy::ENABLED` | Always applies the current UiScaleManager scale, ignoring parent policy. |
-| `UiScalePolicy::DISABLED` | Opts out of scaling (effectiveScale = 1.0); descendant INHERIT views also get 1.0. |
+| `UiScalePolicy::DISABLED` | Opts out of scaling (effectiveScale = 1.0). Descendant INHERIT views also get 1.0. |
 
-### Setting Policy on Views
+### Setting the Policy on a View
+
+Use `SetUiScalePolicy()` on any `View` to control its scaling behavior:
 
 ```cpp
-using namespace Dali::Ui;
-
-// Create a view with default INHERIT policy
-View scaledView = View::New();
-scaledView.SetUiScalePolicy(UiScalePolicy::INHERIT);  // default
-
-// Create a view that always scales with the system
-View alwaysScaledView = View::New();
-alwaysScaledView.SetUiScalePolicy(UiScalePolicy::ENABLED);
-
-// Create a view that never scales
-View fixedSizeView = View::New();
-fixedSizeView.SetUiScalePolicy(UiScalePolicy::DISABLED);
+View view = View::New();
+view.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Default behavior
 ```
 
-### Policy Inheritance
+### Policy Inheritance Examples
 
-The policy system follows a hierarchical model:
+**Default scaling (INHERIT):**
 
-- **INHERIT (default)**: The view inherits its effective scale from its parent. Root views inherit directly from `UiScaleManager`.
-- **ENABLED**: The view bypasses its parent's policy and always uses the system scale directly. Use this when a child should scale even inside a non-scaling container.
-- **DISABLED**: The view opts out of scaling entirely, creating a "scale-free island." Descendants with INHERIT will also have effectiveScale = 1.0, but descendants with ENABLED can still scale.
+```cpp
+// All views scale proportionally with the system scale
+View container = View::New();
+container.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Default
+
+View child = View::New();
+child.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Inherits from parent
+container.Add(child);
+```
+
+**Forced scaling (ENABLED):**
+
+```cpp
+// This view always scales, even if parent is DISABLED
+View scalingChild = View::New();
+scalingChild.SetUiScalePolicy(UiScalePolicy::ENABLED);
+```
+
+**Fixed-size container (DISABLED):**
+
+```cpp
+// Container and its INHERIT children stay at 1.0 scale
+View fixedContainer = View::New();
+fixedContainer.SetUiScalePolicy(UiScalePolicy::DISABLED);
+
+View fixedChild = View::New();
+fixedChild.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Gets 1.0 from DISABLED parent
+fixedContainer.Add(fixedChild);
+```
 
 ## Practical Examples
 
 ### Scale Control Panel
 
-This example shows a complete scale control implementation with preset buttons and custom input:
+A complete example showing how to build a UI that responds to scale changes:
 
 ```cpp
-class ScaleController : public Dali::ConnectionTracker
+class ScaleController : public ConnectionTracker
 {
 public:
-  void ApplyScale(float scale)
-  {
-    Dali::Ui::UiScaleManager::Get().SetScale(scale);
-    UpdateScaleLabel();
-  }
+    void Initialize(Window window)
+    {
+        // Create control panel
+        StackLayout panel = StackLayout::New(StackOrientation::VERTICAL);
+        panel.SetRequestedWidth(MATCH_PARENT);
+        panel.SetRequestedHeight(WRAP_CONTENT);
 
-  void UpdateScaleLabel()
-  {
-    float currentScale = Dali::Ui::UiScaleManager::Get().GetScale();
-    mScaleLabel.SetText("System Scale: " + std::to_string(currentScale));
-  }
+        // Scale display label
+        mScaleLabel = Label::New("System Scale: 1.00");
+        mScaleLabel.SetRequestedWidth(MATCH_PARENT);
+        mScaleLabel.SetRequestedHeight(WRAP_CONTENT);
+        panel.Add(mScaleLabel);
+
+        // Preset buttons
+        StackLayout buttonRow = StackLayout::New(StackOrientation::HORIZONTAL);
+        static constexpr float presets[] = {0.8f, 1.0f, 1.2f, 1.5f, 2.0f};
+
+        for (float preset : presets)
+        {
+            InteractiveView btn = CreatePresetButton(preset);
+            buttonRow.Add(btn);
+        }
+        panel.Add(buttonRow);
+
+        window.Add(panel);
+        UpdateScaleLabel();
+    }
 
 private:
-  Dali::Ui::Label mScaleLabel;
+    InteractiveView CreatePresetButton(float scale)
+    {
+        InteractiveView btn = InteractiveView::New();
+        btn.SetRequestedWidth(WRAP_CONTENT);
+        btn.SetRequestedHeight(44.0f);
+
+        btn.ConnectClickedSignal(this, [this, scale](View, const InputEvent&) {
+            ApplyScale(scale);
+        });
+        return btn;
+    }
+
+    void ApplyScale(float scale)
+    {
+        UiScaleManager::Get().SetScale(scale);
+        UpdateScaleLabel();
+    }
+
+    void UpdateScaleLabel()
+    {
+        float scale = UiScaleManager::Get().GetScale();
+        std::string text = "System Scale: " + std::to_string(scale).substr(0, 4);
+        mScaleLabel.SetText(text.c_str());
+    }
+
+    Label mScaleLabel;
 };
 ```
 
-### Mixed Policy Layout
+### Mixed Scaling in a Layout
 
-This example demonstrates combining different policies in a single layout:
+Creating a layout where some elements scale while others remain fixed:
 
 ```cpp
-using namespace Dali::Ui;
+View CreateMixedScaleLayout()
+{
+    // Main container scales with system
+    StackLayout mainContainer = StackLayout::New(StackOrientation::HORIZONTAL);
+    mainContainer.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Default
 
-// Container that does NOT scale
-StackLayout fixedContainer = StackLayout::New(StackOrientation::HORIZONTAL);
-fixedContainer.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    // Fixed-size control panel (does not scale)
+    StackLayout controlPanel = StackLayout::New(StackOrientation::VERTICAL);
+    controlPanel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    controlPanel.SetBackgroundColor(UiColor(0x2D2D4D));
 
-// Child that inherits DISABLED (also won't scale)
-View fixedChild = View::New();
-fixedChild.SetUiScalePolicy(UiScalePolicy::INHERIT);  // inherits 1.0 from parent
-fixedContainer.Add(fixedChild);
+    // Content area scales with system
+    View contentArea = View::New();
+    contentArea.SetUiScalePolicy(UiScalePolicy::INHERIT);
 
-// Child that scales despite DISABLED parent
-View scalingChild = View::New();
-scalingChild.SetUiScalePolicy(UiScalePolicy::ENABLED);  // uses system scale directly
-fixedContainer.Add(scalingChild);
+    // Special element that scales even inside DISABLED parent
+    View scalingIndicator = View::New();
+    scalingIndicator.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    controlPanel.Add(scalingIndicator);
+
+    mainContainer.Add(controlPanel);
+    mainContainer.Add(contentArea);
+
+    return mainContainer;
+}
 ```
 
 ### Nested Scale Islands
 
-Create isolated scale-free regions within a scaled layout:
+Creating isolated scale-free zones within a scaled layout:
 
 ```cpp
-// Main layout scales with system
-StackLayout mainLayout = StackLayout::New(StackOrientation::VERTICAL);
-// INHERIT is default - scales with system
-
-// Create a scale-free island
-StackLayout scaleFreeZone = StackLayout::New(StackOrientation::HORIZONTAL);
-scaleFreeZone.SetUiScalePolicy(UiScalePolicy::DISABLED);
-// All INHERIT children inside stay at 1.0 scale
-
-// ENABLED child breaks out of the island
-View scalingButton = View::New();
-scalingButton.SetUiScalePolicy(UiScalePolicy::ENABLED);
-scaleFreeZone.Add(scalingButton);  // This child still scales
-
-mainLayout.Add(scaleFreeZone);
-```
-
-### Reading Scale for Conditional Logic
-
-```cpp
-float scale = Dali::Ui::UiScaleManager::Get().GetScale();
-
-if(scale >= 1.5f)
+View CreateNestedScaleLayout()
 {
-  // Use compact layout for large scale
-  UseCompactLayout();
-}
-else
-{
-  // Use standard layout
-  UseStandardLayout();
+    // Outer zone scales normally
+    StackLayout outerZone = StackLayout::New(StackOrientation::HORIZONTAL);
+    outerZone.SetUiScalePolicy(UiScalePolicy::INHERIT);
+
+    // Scaled content
+    View scaledContent = View::New();
+    scaledContent.SetUiScalePolicy(UiScalePolicy::INHERIT);
+    outerZone.Add(scaledContent);
+
+    // Create a scale-free island
+    StackLayout scaleFreeIsland = StackLayout::New(StackOrientation::VERTICAL);
+    scaleFreeIsland.SetUiScalePolicy(UiScalePolicy::DISABLED);
+
+    // Child inside island - fixed at 1.0 scale
+    View fixedChild = View::New();
+    fixedChild.SetUiScalePolicy(UiScalePolicy::INHERIT);  // Gets 1.0 from DISABLED parent
+
+    // Exception: child that scales despite DISABLED parent
+    View scalingException = View::New();
+    scalingException.SetUiScalePolicy(UiScalePolicy::ENABLED);  // Uses system scale
+
+    scaleFreeIsland.Add(fixedChild);
+    scaleFreeIsland.Add(scalingException);
+    outerZone.Add(scaleFreeIsland);
+
+    return outerZone;
 }
 ```

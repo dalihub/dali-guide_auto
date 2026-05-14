@@ -1,20 +1,19 @@
 [36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
-Phase 2.3.5 source-grounded prose review completed for Addon Manager guide.
+Completed Phase 2.3.5 source-grounded prose review for Addon Manager documentation.
 
-**Output file**: `cache/generation/drafts/addon-manager-reviewed.md`
+**Review Summary:**
+- Verified all API signatures against source headers in `repos/dali-core/dali/integration-api/addon-manager.h`, `repos/dali-core/dali/devel-api/common/addon-binder.h`, `repos/dali-core/dali/devel-api/addons/addon-base.h`, and `repos/dali-core/dali/devel-api/addons/addon-dispatch-table.h`
 
-**Key corrections made**:
+**Changes Made (2 prose corrections):**
+1. **DALI_ADDON_VERSION**: Changed description from "macro" to "function" - it is declared as `constexpr uint32_t DALI_ADDON_VERSION(...)` in the header, not a macro.
 
-1. **Removed `InvokeGlobalProc()` section** - This template method is marked `DALI_INTERNAL` in the header, not intended for application use.
+2. **GetAddOn()**: Clarified that this method always calls `LoadAddOns()` internally, so it may load the addon if not already cached (not just retrieve an already-loaded addon).
 
-2. **Fixed manual function retrieval example** - The template versions of `GetGlobalProc<T>` and `GetInstanceProc<T>` are internal APIs. Rewrote to use the `void*` returning versions with explicit casting.
+**Verified Accurate:**
+- All namespace and class names (`Dali::Integration::AddOnManager`, `Dali::AddOn::AddOnBinder`, `Dali::AddOns::AddOnBase`, `Dali::AddOns::DispatchTable`, `Dali::AddOnDispatchTable`)
+- All method signatures and struct members
+- Lifecycle methods and callback patterns
+- `ADDON_BIND_FUNCTION` and `REGISTER_ADDON_CLASS` macro usage
+- All code blocks preserved with no functional changes
 
-3. **Clarified dispatch table types** - The draft conflated `Dali::AddOnDispatchTable` (registration) with `Dali::AddOns::DispatchTable` (function lookup). Made the distinction clear.
-
-4. **Removed misleading manual dispatch table population** - The `REGISTER_ADDON_CLASS()` macro handles `Dali::AddOnDispatchTable` creation and registration automatically via `AddOnConstructorInternal()`.
-
-5. **Added platform limitation note** - The `REGISTER_ADDON_CLASS` macro requires GCC/Clang and is only supported on Linux-based environments.
-
-6. **Fixed AddOnBinder constructor example** - The constructor requires both `addonName` and `libraryName` parameters.
-
-All API names, namespaces, method signatures, and structure fields verified against source headers. Section structure preserved. Code blocks maintained with minimal corrections.
+Output saved to: `cache/generation/reviews/addon-manager-review.md`

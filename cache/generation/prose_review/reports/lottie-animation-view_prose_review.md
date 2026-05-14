@@ -2,97 +2,83 @@
 
 ## Summary
 
-Reviewed the Lottie Animation View guide against public headers (`lottie-animation-view.h`, `animated-image-enumerations.h`, `lottie-animation-enumerations.h`, `lottie-animation-types.h`), sample code (`lottie-animation-view-example.cpp`), and UTC tests (`utc-Dali-LottieAnimationView.cpp`). Made localized edits to improve accuracy while preserving the document structure and code blocks.
+Reviewed the Lottie Animation View guide against public headers (`lottie-animation-view.h`, `lottie-animation-enumerations.h`, `animated-image-enumerations.h`, `image-enumerations.h`), sample code (`lottie-animation-view-example.cpp`), and UTC tests (`utc-Dali-LottieAnimationView.cpp`). Made localized edits to improve accuracy while preserving all code blocks and document structure.
 
 ## Changes Made
 
-### 1. Play State Enum Order (Playback Control section)
-**Original:** Listed play states as PLAYING, PAUSED, STOPPED
-**Revised:** Listed play states as STOPPED, PLAYING, PAUSED
-**Source Evidence:** `animated-image-enumerations.h` defines the enum as:
+### 1. Loop Count Section - Added Missing Behavior for Value 0
+**Location:** Looping Configuration > Loop Count
+
+**Original:**
+> Set the number of times the animation repeats with `SetLoopCount()`. Use `-1` for infinite looping.
+
+**Revised:**
+> Set the number of times the animation repeats with `SetLoopCount()`. Use `-1` for infinite looping. A value of `0` means the animation will not play.
+
+**Source Evidence:** Header `lottie-animation-view.h` line 156-158:
 ```cpp
-enum class PlayState : uint8_t
-{
-  STOPPED, ///< Animation has stopped
-  PLAYING, ///< The animation is playing
-  PAUSED   ///< The animation is paused
-};
+* A value of -1 means infinite looping. A value of 0 means the animation
+* will not play. A positive value specifies an exact loop count.
 ```
-**Reason:** Corrected the order to match the actual enum definition.
 
-### 2. Loop Count Value 0 Behavior (Looping Configuration section)
-**Original:** Did not mention behavior for loop count of 0.
-**Revised:** Added sentence: "A value of `0` means the animation will not play."
-**Source Evidence:** `lottie-animation-view.h` docstring states: "A value of 0 means the animation will not play."
-**Reason:** Added missing documentation for the 0 value case.
+### 2. Markers Section - Corrected SetMinMaxFrameByMarker Behavior
+**Location:** Frame Range and Markers > Markers
 
-### 3. Frame Speed Factor Description (Animation Speed and Scaling section)
-**Original:** Only described the setter without mentioning the clamping behavior.
-**Revised:** Added sentence: "The speed factor is clamped to the range [0.01, 100.0] by the underlying animation renderer."
-**Source Evidence:** `lottie-animation-view.h` docstring: "The actual clamping to [0.01, 100.0] is handled by the underlying animation renderer."
-**Reason:** Added important implementation detail for developer awareness.
+**Original:**
+```cpp
+// Play from "start" marker to end
+lottieView.SetMinMaxFrameByMarker("start");
+```
 
-### 4. Render Scale Description (Animation Speed and Scaling section)
-**Original:** Brief description of quality tradeoffs.
-**Revised:** Added: "A value of 2.0 rasterizes at twice the visual dimensions, producing sharper output on high-density displays. Negative values flip the image."
-**Source Evidence:** `lottie-animation-view.h` docstring: "A value of 2.0 rasterizes at twice the visual dimensions... Negative values flip the image."
-**Reason:** Added missing details about what specific values do.
+**Revised:**
+```cpp
+// Play the range of the "start" marker
+lottieView.SetMinMaxFrameByMarker("start");
+```
 
-### 5. Desired Size Description (Resource Loading and Placeholder section)
-**Original:** "Set the desired dimensions for the animation"
-**Revised:** "Set the desired dimensions for the animation as a hint for the renderer" and added "A value of 0 means use the natural size."
-**Source Evidence:** `lottie-animation-view.h` docstrings: "Sets the desired rasterization width as a hint for the renderer" and "(0 to use natural size)"
-**Reason:** Clarified that this is a hint and documented the 0 value behavior.
+**Source Evidence:** Header `lottie-animation-view.h` line 183-186:
+```cpp
+* If only @p minMarker is given, the animation plays the range of that marker.
+* If both are given, the animation plays from the start of @p minMarker to the
+* end of @p maxMarker.
+```
 
-### 6. GetMarkerInfo/GetContentInfo Return Format (Frame Range and Markers section)
-**Original:** Only showed the method call without describing the return format.
-**Revised:** Added: "The returned map contains marker names as keys and two-element integer arrays `[startFrame, endFrame]` as values." and similar for GetContentInfo.
-**Source Evidence:** `lottie-animation-view.h` docstrings: "The returned map contains marker names as keys and a two-element integer array [startFrame, endFrame] as values."
-**Reason:** Added missing documentation about the return value structure.
+### 3. Pixel Area Section - Added Coordinate Format Clarification
+**Location:** Visual Styling > Pixel Area
 
-### 7. Animation Finished Signal Description (Signals and State Monitoring section)
-**Original:** "to be notified when the animation completes"
-**Revised:** "to be notified when the animation completes all loops"
-**Source Evidence:** `lottie-animation-view.h` typedef comment: "Animation finished signal type. Emitted when the animation completes all loops."
-**Reason:** Clarified that the signal fires after all loops complete, not just at the end of a single play.
+**Original:**
+> Display a sub-region of the animation using `SetPixelArea()`:
 
-### 8. Frame Cache Description (Memory and Performance section)
-**Original:** Brief description.
-**Revised:** Added: "When enabled, all decoded frames are cached in memory to reduce CPU cost during looping, at the expense of higher memory usage"
-**Source Evidence:** `lottie-animation-view.h` docstring: "When enabled, all decoded frames are cached in memory to reduce CPU cost during looping, at the expense of higher memory usage."
-**Reason:** Added important performance tradeoff information.
+**Revised:**
+> Display a sub-region of the animation using `SetPixelArea()`. The area is specified as normalized coordinates `(x, y, width, height)` where each component is in the range `[0, 1]`.
 
-### 9. Rasterization Notification Description (Memory and Performance section)
-**Original:** Brief description.
-**Revised:** Added: "This is useful for low-fps Lottie files to avoid unnecessary render thread wakeups"
-**Source Evidence:** `lottie-animation-view.h` docstring: "Useful for low-fps Lottie files to avoid unnecessary render thread wakeups."
-**Reason:** Added use case context.
+**Source Evidence:** Header `lottie-animation-view.h` line 363-366:
+```cpp
+* The area is specified as normalized coordinates: (x, y, width, height)
+* where each component is in the range [0, 1].
+```
 
-### 10. Pixel Area Description (Memory and Performance section)
-**Original:** Brief description.
-**Revised:** Added: "The area is specified as normalized coordinates (x, y, width, height) where each component is in the range [0, 1]"
-**Source Evidence:** `lottie-animation-view.h` docstring: "The area is specified as normalized coordinates: (x, y, width, height) where each component is in the range [0, 1]."
-**Reason:** Clarified the coordinate format.
+### 4. Properties Table - Updated LOOP_COUNT Description
+**Location:** Properties table
 
-### 11. Dynamic Properties Section (New Content)
-**Original:** Minimal placeholder example.
-**Revised:** Expanded with concrete example showing DynamicPropertyInfo fields, keyPath usage, and important thread safety warning.
-**Source Evidence:** `lottie-animation-types.h` struct definition and `lottie-animation-enumerations.h` VectorProperty enum.
-**Reason:** The original section was too sparse. Added concrete usage information from the type definitions.
+**Original:**
+| `LOOP_COUNT` | Integer | Number of loops (-1 for infinite) |
 
-### 12. Image Tinting Section
-**Original:** No mention of per-layer control.
-**Revised:** Added: "For per-layer color control, use `SetDynamicProperty()` instead."
-**Source Evidence:** `lottie-animation-view.h` docstring: "For per-layer color control, use SetDynamicProperty() instead."
-**Reason:** Added cross-reference to related functionality.
+**Revised:**
+| `LOOP_COUNT` | Integer | Number of loops (-1 for infinite, 0 to not play) |
+
+**Source Evidence:** Same as change #1 above.
+
+## Verified Accurate (No Changes Needed)
+
+The following were verified against source and found accurate:
+
+- **API names and namespaces**: All `LottieAnimationView`, `Ui::AnimatedImage::PlayState`, `Ui::AnimatedImage::StopBehavior`, `Ui::LottieAnimation::LoopingMode`, `Ui::Image::ReleasePolicy` references are correct per enumeration headers.
+- **Signal signatures**: `AnimationFinishedSignal()` and `ResourceReadySignal()` return types and callback signatures match header declarations.
+- **Method signatures**: All setter methods return `LottieAnimationView&` for fluent chaining as documented.
+- **Default values**: Verified via UTC tests - `LoopCount` defaults to -1, `StopBehavior` defaults to `CURRENT_FRAME`, `LoopingMode` defaults to `RESTART`, `FrameSpeedFactor` defaults to 1.0f, `RenderScale` defaults to 1.0f, `RedrawOnScaleUp/Down` default to true, `EnableFrameCache` defaults to false.
+- **Code examples**: All code blocks compile against the public API and follow dali-ui idioms.
 
 ## Remaining Concerns
 
-None. All prose has been verified against public headers, samples, and UTCs. The document structure was preserved and all code blocks remain accurate.
-
-## Verification Method
-
-- Compared enum values against `animated-image-enumerations.h` and `lottie-animation-enumerations.h`
-- Verified method signatures and docstrings against `lottie-animation-view.h`
-- Cross-referenced usage patterns with `lottie-animation-view-example.cpp`
-- Confirmed default values and behaviors with `utc-Dali-LottieAnimationView.cpp`
+None. The document accurately reflects the public API surface for `LottieAnimationView`.

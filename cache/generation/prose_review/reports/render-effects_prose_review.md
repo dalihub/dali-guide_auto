@@ -2,40 +2,64 @@
 
 ## Summary
 
-The draft was reviewed against public API headers in `repos/dali-ui/dali-ui-foundation/public-api/render-effects/` and the sample file `repos/dali-ui/samples/text/text-cutout-mask-example.cpp`. The draft was accurate overall with only one minor correction needed.
+The draft was reviewed against public headers in `repos/dali-ui/dali-ui-foundation/public-api/render-effects/` and sample code in `repos/dali-ui/samples/`. The document was largely accurate with correct API signatures and usage patterns.
 
 ## Changes Made
 
-### 1. Gaussian Blur Default Radius Unit (Line 42)
+### 1. Background Blur Effect - Default Radius Documentation
+**Location:** "Creating a Background Blur Effect" section
 
-**Original:** "Create with default radius (10 pixels)"
-**Revised:** "Create with default radius (10 units)"
+**Change:** Added explicit documentation that `BackgroundBlurEffect::New()` uses a default radius of 10 pixels.
 
-**Source Evidence:** `gaussian-blur-effect.h` line 47: "Creates an initialized GaussianBlurEffect, with default blur radius 10u."
+**Before:**
+```cpp
+Ui::BackgroundBlurEffect bgBlur = Ui::BackgroundBlurEffect::New(60u);
+```
 
-**Reason:** The API specifies the radius in units (10u), not pixels. While the distinction is minor, accuracy requires matching the header documentation.
+**After:**
+Added prose: "Create with a default radius of 10 pixels:" followed by the no-argument constructor example.
 
-## Verified Accurate Prose
+**Source Evidence:** `background-blur-effect.h` line 57: "Creates an initialized BackgroundBlurEffect, using default settings. As default, blur radius is set to 10u."
 
-The following sections were verified against source files and required no changes:
+### 2. Background Blur Effect - SetSourceActor Requirements
+**Location:** "Specifying Source and Stopper Actors" section
 
-- **Applying Render Effects**: `SetRenderEffect()`, `GetRenderEffect()`, `ClearRenderEffect()` methods confirmed in `view.h` lines 919-935.
-- **GaussianBlurEffect description**: Header confirms it "blurs owner view and its children" (line 38).
-- **BackgroundBlurEffect description**: Header confirms it "blurs owner view's background" (line 35).
-- **SetSourceActor/SetStopperActor**: Methods confirmed in `background-blur-effect.h` lines 152-163. Header note confirms source actor must be a parent.
-- **MaskEffect API**: `New()` overloads, `MaskMode` enum, `SetTargetMaskOnce()`, `SetSourceMaskOnce()` all confirmed in `mask-effect.h`.
-- **MaskEffect usage pattern**: Sample file `text-cutout-mask-example.cpp` lines 107-109 confirms the pattern of adding maskView as child before applying effect.
-- **Animation methods**: `AddBlurStrengthAnimation()` and `AddBlurOpacityAnimation()` signatures confirmed in both blur effect headers.
-- **Lifecycle methods**: `Activate()`, `Deactivate()`, `IsActivated()`, `Refresh()` confirmed in `render-effect.h` lines 55-70.
-- **FinishedSignal**: Confirmed in both `GaussianBlurEffect` and `BackgroundBlurEffect` headers.
+**Change:** Added important usage notes about `SetSourceActor()` requirements.
 
-## Code Blocks
+**Added:**
+> **Note:** The source actor must be a parent of the view for `SetSourceActor()` to take effect. The `RenderEffect` does not hold references to source or stopper actors, so you must ensure they remain valid for the effect's lifetime.
 
-All code blocks were preserved as requested. Code examples use correct dali-ui API patterns:
-- Fluent chaining with View setters
-- `Dali::Ui::View` as the primary object model
-- Proper use of `Dali::Animation`, `Dali::AlphaFunction`, `Dali::TimePeriod` from dali-core (acceptable as context APIs)
+**Source Evidence:** 
+- `background-blur-effect.h` line 147: "If given source actor is not a parent of source view, it has no efforts."
+- `background-blur-effect.h` line 149: "RenderEffect didn't hold source actor reference."
+- `background-blur-effect.h` line 156: "RenderEffect didn't hold stopper actor reference."
 
-## Remaining Concerns
+## Verified Accurate (No Changes Needed)
 
-None. The draft accurately reflects the public API surface for render effects.
+### API Signatures
+All API signatures in code blocks were verified against headers:
+- `GaussianBlurEffect::New()` and `New(uint32_t)` ✓
+- `BackgroundBlurEffect::New()` and `New(uint32_t)` ✓
+- `MaskEffect::New(Ui::View)` and `New(Ui::View, MaskMode, Vector2, Vector2)` ✓
+- `SetBlurRadius()`, `GetBlurRadius()` ✓
+- `SetBlurDownscaleFactor()`, `GetBlurDownscaleFactor()` ✓
+- `SetBlurOnce()`, `GetBlurOnce()` ✓
+- `SetSourceActor()`, `SetStopperActor()` ✓
+- `SetTargetMaskOnce()`, `SetSourceMaskOnce()` ✓
+- `AddBlurStrengthAnimation()`, `AddBlurOpacityAnimation()` ✓
+- `Activate()`, `Deactivate()`, `Refresh()`, `IsActivated()` ✓
+- `FinishedSignal()` ✓
+
+### Usage Patterns
+- `View::SetRenderEffect()` and `ClearRenderEffect()` confirmed in `view.h` ✓
+- Mask source must be added as child - confirmed in `text-cutout-mask-example.cpp` ✓
+- One render effect per view - confirmed in `render-effect.h` comment ✓
+
+### Code Blocks
+All code blocks were verified against sample code patterns in:
+- `repos/dali-ui/samples/ui-scale/ui-scale-example.cpp` (Zone F demonstrates all render effects)
+- `repos/dali-ui/samples/text/text-cutout-mask-example.cpp` (MaskEffect usage)
+
+## Remaining Considerations
+
+None. The document accurately reflects the public API and follows the dali-ui application developer guide conventions.

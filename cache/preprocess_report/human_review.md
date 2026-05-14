@@ -5,11 +5,15 @@ This report validates preprocess inputs before markdown generation.
 ## Summary
 
 - info: 2
-- needs_review: 6
+- needs_review: 9
 - warning: 33
 
 ## Needs Review
 
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-001 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-002 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
 - [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-003 has status parse_failed.
   - action: Review the failed LLM batch and fallback output.
 - [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-004 has status parse_failed.
@@ -19,6 +23,8 @@ This report validates preprocess inputs before markdown generation.
 - [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-006 has status parse_failed.
   - action: Review the failed LLM batch and fallback output.
 - [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-007 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-008 has status parse_failed.
   - action: Review the failed LLM batch and fallback output.
 - [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-009 has status parse_failed.
   - action: Review the failed LLM batch and fallback output.
@@ -97,7 +103,7 @@ This report validates preprocess inputs before markdown generation.
 - accessibility-highlight-overlay: category=accessibility (llm_category_classifier)
 - adaptor-framework: category=application-framework (llm_category_classifier)
 - addon-manager: category=platform-integration (llm_category_classifier)
-- animated-image-view: category=views-components (llm_category_classifier)
+- animated-image-view: category=images-visuals (llm_category_classifier)
 - animation: category=animation-motion (category_override)
 - attachment-id: category=views-components (llm_category_classifier)
 - focus-manager: category=input-interaction (llm_category_classifier)
@@ -120,8 +126,8 @@ This report validates preprocess inputs before markdown generation.
 - trait-id: category=views-components (llm_category_classifier)
 - ui-color: category=styling-theme-config (llm_category_classifier)
 - ui-color-manager: category=styling-theme-config (llm_category_classifier)
-- ui-component-config: category=styling-theme-config (llm_category_classifier)
-- ui-config: category=application-framework (llm_category_classifier)
+- ui-component-config: category=views-components (llm_category_classifier)
+- ui-config: category=styling-theme-config (llm_category_classifier)
 - ui-scale-manager: category=styling-theme-config (llm_category_classifier)
 - ui-theme-manager: category=styling-theme-config (llm_category_classifier)
 - unique-any: category=utilities (llm_category_classifier)
@@ -129,7 +135,7 @@ This report validates preprocess inputs before markdown generation.
 - view-state: category=views-components (llm_category_classifier)
 - visuals: category=images-visuals (llm_category_classifier)
 - web-view: category=views-components (llm_category_classifier)
-- <global>: llm_usage category_requests=1 ownership_requests=9 estimated_input_tokens=57214 (document_plan_llm_usage)
+- <global>: llm_usage category_requests=1 ownership_requests=9 estimated_input_tokens=57196 (document_plan_llm_usage)
 - <global>: llm_trace entries=10 (document_plan_llm_trace)
 - actors -> view: document_feature_rules.merge_into -> view (supporting_features)
 - align-enumerations: document_feature_rules.suppress ->  (supporting_features)

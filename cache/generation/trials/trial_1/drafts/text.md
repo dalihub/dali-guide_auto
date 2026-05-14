@@ -6,43 +6,35 @@ category: text
 
 # Text
 
-The Text feature provides text styling capabilities for dali-ui applications, including visual effects like shadows, outlines, underlines, and bevel effects for `Label` and `InputField` components.
+The Text feature provides text styling and input filtering capabilities for dali-ui applications. It includes style objects for visual effects like shadows, outlines, and bevels, as well as input filtering and font variation configuration.
 
 ## Table of Contents
 
-- [Text Style Effects](#text-style-effects)
-  - [Underline](#underline)
-  - [Shadow](#shadow)
-  - [Outline](#outline)
-  - [LineThrough](#linethrough)
-  - [Bevel](#bevel)
-- [Font Styling](#font-styling)
-  - [Font Weight, Width, and Slant](#font-weight-width-and-slant)
+- [Text Style Objects](#text-style-objects)
+  - [Underline Style](#underline-style)
+  - [Shadow Style](#shadow-style)
+  - [Outline Style](#outline-style)
+  - [LineThrough Style](#linethrough-style)
+  - [Bevel Style](#bevel-style)
 - [Input Filtering](#input-filtering)
-- [Font Variations](#font-variations)
-- [Dynamic Font Sizing](#dynamic-font-sizing)
+- [Text Fit Configuration](#text-fit-configuration)
+- [Font Variation Axes](#font-variation-axes)
 
----
+## Text Style Objects
 
-## Text Style Effects
+Text style objects are value-type classes that configure the visual appearance of text in `Label` and `InputField` controls. All style objects support fluent chaining for convenient configuration.
 
-Text style effects enhance text visibility and visual appeal. All style objects support fluent chaining for configuration.
+### Underline Style
 
-### Underline
-
-`Text::Underline` adds a line beneath text. Use it for emphasis or links.
-
-Create a basic underline:
+The `Dali::Ui::Text::Underline` class configures underline appearance for text. It supports solid, dashed, and double underline types.
 
 ```cpp
+// Create a solid underline with default settings
 Label label = Label::New("Underlined Text")
   .SetUnderline(Text::Underline());
-```
 
-Configure underline properties with fluent chaining:
-
-```cpp
-Label label = Label::New("Dashed Underline")
+// Create a dashed underline with custom styling
+Label dashedLabel = Label::New("Dashed Underline")
   .SetUnderline(
     Text::Underline()
       .SetColor(UiColor(0x0088FF))
@@ -52,40 +44,25 @@ Label label = Label::New("Dashed Underline")
       .SetDashGap(4.0f));
 ```
 
-Clear an underline from a label:
+The `Underline::Type` enum defines the rendering style:
+
+- `Type::SOLID` - Draws a solid underline
+- `Type::DASHED` - Draws a dashed underline using dash length and gap settings
+- `Type::DOUBLE` - Draws a double underline
+
+### Shadow Style
+
+The `Dali::Ui::Text::Shadow` class configures drop shadow effects for text.
 
 ```cpp
-label.ClearUnderline();
-```
-
-`InputField` also supports underline styling:
-
-```cpp
-InputField inputField = InputField::New()
-  .SetText("Input with underline")
-  .SetUnderline(
-    Text::Underline()
-      .SetColor(UiColor(0x0088FF))
-      .SetThickness(2.0f));
-```
-
-### Shadow
-
-`Text::Shadow` adds a drop shadow effect to text, creating depth and improving readability on complex backgrounds.
-
-Create a shadow with an offset:
-
-```cpp
-Label label = Label::New("Shadow Text")
+// Create a shadow with offset only
+Label shadowLabel = Label::New("Shadow Text")
   .SetShadow(
     Text::Shadow()
       .SetOffset(Vector2(1.0f, 1.0f)));
-```
 
-Configure shadow properties:
-
-```cpp
-Label label = Label::New("Shadow with Blur")
+// Create a shadow with full configuration
+Label styledShadow = Label::New("Styled Shadow")
   .SetShadow(
     Text::Shadow()
       .SetColor(UiColor(0xFF5500))
@@ -93,40 +70,21 @@ Label label = Label::New("Shadow with Blur")
       .SetBlurRadius(2.0f));
 ```
 
-Clear a shadow:
+Use `SetOffset()` to position the shadow relative to the text. Positive values offset right and down. Use `SetBlurRadius()` to create a softer shadow edge.
+
+### Outline Style
+
+The `Dali::Ui::Text::Outline` class configures outline effects around text characters.
 
 ```cpp
-label.ClearShadow();
-```
-
-`InputField` also supports shadow styling:
-
-```cpp
-InputField inputField = InputField::New()
-  .SetText("Input with shadow")
-  .SetShadow(
-    Text::Shadow()
-      .SetColor(UiColor(0xFF5500))
-      .SetOffset(Vector2(2.0f, 2.0f)));
-```
-
-### Outline
-
-`Text::Outline` draws a border around text characters for emphasis or special effects.
-
-Create a basic outline:
-
-```cpp
-Label label = Label::New("Outlined Text")
+// Create a simple outline
+Label outlineLabel = Label::New("Outlined Text")
   .SetOutline(
     Text::Outline()
       .SetWidth(2.0f));
-```
 
-Configure outline properties:
-
-```cpp
-Label label = Label::New("Styled Outline")
+// Create an outline with all properties
+Label styledOutline = Label::New("Styled Outline")
   .SetOutline(
     Text::Outline()
       .SetColor(UiColor(0x0066FF))
@@ -135,69 +93,32 @@ Label label = Label::New("Styled Outline")
       .SetBlurRadius(1.0f));
 ```
 
-Clear an outline:
+The `SetWidth()` method controls the outline thickness in pixels. Use `SetOffset()` to shift the outline position relative to the text.
+
+### LineThrough Style
+
+The `Dali::Ui::Text::LineThrough` class configures strikethrough effects for text.
 
 ```cpp
-label.ClearOutline();
-```
-
-`InputField` also supports outline styling:
-
-```cpp
-InputField inputField = InputField::New()
-  .SetText("Input with outline")
-  .SetOutline(
-    Text::Outline()
-      .SetColor(UiColor(0x0066FF))
-      .SetWidth(2.0f));
-```
-
-### LineThrough
-
-`Text::LineThrough` draws a horizontal line through text, commonly used to indicate deleted or completed items.
-
-Create a basic line-through:
-
-```cpp
-Label label = Label::New("Struck Through")
+// Create a default line-through
+Label strikeLabel = Label::New("Struck Through")
   .SetLineThrough(Text::LineThrough());
-```
 
-Configure line-through properties:
-
-```cpp
-Label label = Label::New("Styled LineThrough")
+// Create a styled line-through
+Label styledStrike = Label::New("Styled Strikethrough")
   .SetLineThrough(
     Text::LineThrough()
       .SetColor(UiColor(0xFF00FF))
       .SetThickness(3.0f));
 ```
 
-Clear a line-through:
+### Bevel Style
+
+The `Dali::Ui::Text::Bevel` class creates 3D-like embossed or engraved effects on text using light and shadow colors.
 
 ```cpp
-label.ClearLineThrough();
-```
-
-`InputField` also supports line-through styling:
-
-```cpp
-InputField inputField = InputField::New()
-  .SetText("Input with line-through")
-  .SetLineThrough(
-    Text::LineThrough()
-      .SetColor(UiColor(0xFF00FF))
-      .SetThickness(2.0f));
-```
-
-### Bevel
-
-`Text::Bevel` creates 3D embossed or engraved text effects by simulating light and shadow on character edges.
-
-Create an embossed effect (raised text):
-
-```cpp
-Label label = Label::New("Embossed")
+// Create an embossed effect (raised text)
+Label embossed = Label::New("Embossed")
   .SetTextColor(UiColor(0x333333))
   .SetBevel(
     Text::Bevel()
@@ -205,12 +126,9 @@ Label label = Label::New("Embossed")
       .SetIntensity(2.0f)
       .SetLightColor(UiColor(0x808080))
       .SetShadowColor(UiColor(0x0D0D0D)));
-```
 
-Create an engraved effect (sunken text):
-
-```cpp
-Label label = Label::New("Engraved")
+// Create an engraved effect (sunken text)
+Label engraved = Label::New("Engraved")
   .SetTextColor(UiColor(0x212121))
   .SetBevel(
     Text::Bevel()
@@ -220,157 +138,61 @@ Label label = Label::New("Engraved")
       .SetShadowColor(UiColor(0x808080)));
 ```
 
-Clear a bevel effect:
-
-```cpp
-label.ClearBevel();
-```
-
-#### Bevel Properties
-
-| Property | Method | Description |
-|----------|--------|-------------|
-| Direction | `SetDirection(Vector2)` | Light source direction. Negative values for top-left light. |
-| Intensity | `SetIntensity(float)` | Strength of the bevel effect. |
-| LightColor | `SetLightColor(UiColor)` | Color for the highlighted edge. |
-| ShadowColor | `SetShadowColor(UiColor)` | Color for the shadow edge. |
-
----
-
-## Font Styling
-
-### Font Weight, Width, and Slant
-
-Control font appearance using `FontWeight`, `FontWidth`, and `FontSlant` enumerations.
-
-Set font weight:
-
-```cpp
-Label label = Label::New("Bold Text")
-  .SetFontWeight(Text::FontWeight::BOLD);
-```
-
-Set font width:
-
-```cpp
-Label label = Label::New("Condensed Text")
-  .SetFontWidth(Text::FontWidth::SEMI_CONDENSED);
-```
-
-Set font slant:
-
-```cpp
-Label label = Label::New("Italic Text")
-  .SetFontSlant(Text::FontSlant::ITALIC);
-```
-
-#### Available Font Weights
-
-- `THIN`, `EXTRA_LIGHT`, `LIGHT`, `DEMI_LIGHT`, `BOOK`
-- `NORMAL`, `MEDIUM`, `SEMI_BOLD`, `BOLD`, `EXTRA_BOLD`, `BLACK`
-
-#### Available Font Widths
-
-- `ULTRA_CONDENSED`, `EXTRA_CONDENSED`, `CONDENSED`, `SEMI_CONDENSED`
-- `NORMAL`
-- `SEMI_EXPANDED`, `EXPANDED`, `EXTRA_EXPANDED`, `ULTRA_EXPANDED`
-
-#### Available Font Slants
-
-- `NORMAL` - Upright text
-- `ITALIC` - Italic style
-- `OBLIQUE` - Oblique style
-
----
+The `SetDirection()` method sets the light source direction. A direction of `(-1.0f, -1.0f)` simulates light from the top-left. Swap light and shadow colors to switch between embossed and engraved effects.
 
 ## Input Filtering
 
-`Text::InputFilter` restricts user input in `InputField` components using regular expression patterns.
-
-Create and apply an input filter:
+The `Dali::Ui::Text::InputFilter` class restricts the characters that can be entered in an `InputField`. It uses regular expression patterns to define allowed and denied input.
 
 ```cpp
+// Create an input filter that allows only digits but denies 0-5
 Text::InputFilter inputFilter;
-inputFilter.SetAllowPattern("[\\d]");  // Allow only digits
-inputFilter.SetDenyPattern("[0-5]");    // But deny 0-5
+inputFilter.SetAllowPattern("[\\d]");
+inputFilter.SetDenyPattern("[0-5]");
 
 InputField inputField = InputField::New()
-  .SetText("Digits 6-9 only")
+  .SetText("Enter digits 6-9 only")
   .SetInputFilter(inputFilter);
 ```
 
-Clear an input filter:
+The filter evaluates input as follows:
+
+1. If an allow pattern is set, input must match the pattern
+2. If a deny pattern is set, input must not match the pattern
+3. If both are set, both conditions must be satisfied
+
+Patterns follow `std::regex` ECMAScript grammar. Connect to `InputRejectedSignal` to handle rejected input:
+
+```cpp
+inputField.InputRejectedSignal().Connect(this, &MyClass::OnInputRejected);
+
+void OnInputRejected(View view, Text::InputFilter::RejectReason reason)
+{
+  // reason is NOT_ALLOWED or DENIED
+}
+```
+
+Clear the input filter to remove restrictions:
 
 ```cpp
 inputField.ClearInputFilter();
 ```
 
-Handle rejected input through the `InputRejectedSignal`:
+## Text Fit Configuration
+
+The `Dali::Ui::Text::FitRange` class configures range-based automatic font size adjustment to fit text within available space.
 
 ```cpp
-void OnInputRejected(View view, Text::InputFilter::RejectReason reason)
-{
-  if(reason == Text::InputFilter::RejectReason::NOT_ALLOWED)
-  {
-    // Handle rejected character
-  }
-}
-
-// Connect the signal
-inputField.InputRejectedSignal().Connect(this, &YourClass::OnInputRejected);
-```
-
----
-
-## Font Variations
-
-`Text::FontVariationAxis` configures OpenType font variation axes for variable fonts.
-
-Create a font variation axis:
-
-```cpp
-Text::FontVariationAxis axis = Text::FontVariationAxis("wght", 450.0f);
-```
-
-Set axis properties:
-
-```cpp
-axis.SetTag("wdth");
-axis.SetValue(75.0f);
-```
-
-Convert font variations to and from string format:
-
-```cpp
-// Parse from settings string
-Dali::Vector<Text::FontVariationAxis> axes = Text::FontVariation::FromString(settings);
-
-// Convert to string
-Dali::String settings = Text::FontVariation::ToString(axes);
-```
-
----
-
-## Dynamic Font Sizing
-
-### FitRange
-
-`Text::FitRange` defines a range for automatic font size fitting within a text control.
-
-Create a fit range:
-
-```cpp
+// Create a fit range for automatic font sizing
 Text::FitRange fitRange = Text::FitRange()
   .SetMinimumFontSize(12.0f)
   .SetMaximumFontSize(48.0f)
   .SetFontSizeStep(2.0f);
 ```
 
-### FitCandidate
+The range-based text fit algorithm searches from the maximum font size downward by the specified step until finding a size that fits the layout space. The line height follows the current text style configuration.
 
-`Text::FitCandidate` represents a candidate font size during the fitting process.
-
-Create and configure a fit candidate:
+The `Dali::Ui::Text::FitCandidate` class configures candidate-based text fit, where each candidate defines a specific font size and line height:
 
 ```cpp
 Text::FitCandidate candidate = Text::FitCandidate()
@@ -378,9 +200,38 @@ Text::FitCandidate candidate = Text::FitCandidate()
   .SetLineHeight(28.0f);
 ```
 
-Retrieve candidate properties:
+In candidate-based text fit, the algorithm selects the largest candidate that fits into the available layout space. Unlike range-based fit, each candidate specifies an absolute line height value.
+
+## Font Variation Axes
+
+The `Dali::Ui::Text::FontVariationAxis` class configures OpenType variable font axes for fine-grained font control.
 
 ```cpp
-float fontSize = candidate.GetFontSize();
-float lineHeight = candidate.GetLineHeight();
+// Create a font variation axis for weight
+Text::FontVariationAxis weightAxis = Text::FontVariationAxis()
+  .SetTag("wght")
+  .SetValue(450.0f);
+
+// Create a font variation axis for width
+Text::FontVariationAxis widthAxis = Text::FontVariationAxis()
+  .SetTag("wdth")
+  .SetValue(75.0f);
+```
+
+Common OpenType axis tags include:
+
+- `"wght"` - Font weight
+- `"wdth"` - Font width
+- `"slnt"` - Slant
+- `"opsz"` - Optical size
+
+Use `Dali::Ui::Text::FontVariation::ToString()` to serialize a vector of axes, and `FromString()` to parse a settings string:
+
+```cpp
+Dali::Vector<Text::FontVariationAxis> axes;
+axes.PushBack(Text::FontVariationAxis("wght", 450.0f));
+
+Dali::String settings = Text::FontVariation::ToString(axes);
+// Parse settings back to axes
+Dali::Vector<Text::FontVariationAxis> parsedAxes = Text::FontVariation::FromString(settings);
 ```
