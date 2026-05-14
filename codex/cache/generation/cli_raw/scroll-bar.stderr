@@ -1,0 +1,1434 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e25ed-f718-7263-b6f7-d3fdb1248e43
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Scroll Bar (scroll-bar)
+- Category: views-components
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-adaptor": 3,
+    "dali-core": 2,
+    "dali-ui": 28
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::ScrollBar | scope=primary
+- Dali::Ui::ScrollBar::DownCast | ScrollBar DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::ScrollBar::GetBarColor | Vector4 GetBarColor() const | scope=primary_member
+- Dali::Ui::ScrollBar::GetBarCornerRadius | Vector4 GetBarCornerRadius() const | scope=primary_member
+- Dali::Ui::ScrollBar::GetBarMinSize | float GetBarMinSize() const | scope=primary_member
+- Dali::Ui::ScrollBar::GetBarOffset | float GetBarOffset() const | scope=primary_member
+- Dali::Ui::ScrollBar::GetBarThickness | float GetBarThickness() const | scope=primary_member
+- Dali::Ui::ScrollBar::GetHorizontalScrollBarVisibility | ScrollBarVisibility GetHorizontalScrollBarVisibility() const override | scope=primary_member
+- Dali::Ui::ScrollBar::GetScrollPosition | Vector2 GetScrollPosition() const | scope=primary_member
+- Dali::Ui::ScrollBar::GetTarget | View GetTarget() const override | scope=primary_member
+- Dali::Ui::ScrollBar::GetVerticalScrollBarVisibility | ScrollBarVisibility GetVerticalScrollBarVisibility() const override | scope=primary_member
+- Dali::Ui::ScrollBar::HideBar | void HideBar() override | scope=primary_member
+- Dali::Ui::ScrollBar::New | ScrollBar New() | scope=primary_member
+- Dali::Ui::ScrollBar::ScrollBar | ScrollBar() | scope=primary_member
+- Dali::Ui::ScrollBar::SetBarColor | void SetBarColor(const Vector4 &color) | scope=primary_member
+- Dali::Ui::ScrollBar::SetBarCornerRadius | void SetBarCornerRadius(float radius) | scope=primary_member
+- Dali::Ui::ScrollBar::SetBarMinSize | void SetBarMinSize(float minSize) | scope=primary_member
+- Dali::Ui::ScrollBar::SetBarOffset | void SetBarOffset(float offset) | scope=primary_member
+- Dali::Ui::ScrollBar::SetBarThickness | void SetBarThickness(float thickness) | scope=primary_member
+- Dali::Ui::ScrollBar::SetHorizontalScrollBarVisibility | void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) override | scope=primary_member
+- Dali::Ui::ScrollBar::SetScrollPosition | void SetScrollPosition(const Vector2 &position) | scope=primary_member
+- Dali::Ui::ScrollBar::SetVerticalScrollBarVisibility | void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) override | scope=primary_member
+- Dali::Ui::ScrollBar::UpdateBarSize | void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) override | scope=primary_member
+- Dali::Ui::ScrollBar::UpdateScrollPosition | void UpdateScrollPosition(const Vector2 &position) override | scope=primary_member
+- Dali::Ui::ScrollBar::operator= | ScrollBar & operator=(ScrollBar &&rhs) noexcept | scope=primary_member
+- Dali::Ui::ScrollBar::~ScrollBar | ~ScrollBar() | scope=primary_member
+- Dali::Accessibility::Application | scope=context_lookup
+- Dali::Application | scope=context_lookup
+- Dali::Application::Application | Application(Application &&rhs) noexcept | scope=context_lookup
+- Dali::ConnectionTracker | scope=context_lookup
+- Dali::ConnectionTracker::ConnectionTracker | ConnectionTracker() | scope=context_lookup
+- Dali::Ui::ScrollView | scope=context_lookup
+- Dali::Ui::ScrollView::ScrollView | ScrollView() | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "confidence": 0.85,
+    "id": "scroll-bar_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::ScrollBar::New",
+      "Dali::Ui::ScrollBar::SetBarColor",
+      "Dali::Ui::ScrollBar::SetBarCornerRadius",
+      "Dali::Ui::ScrollBar::SetBarMinSize",
+      "Dali::Ui::ScrollBar::SetBarOffset",
+      "Dali::Ui::ScrollBar::SetBarThickness",
+      "Dali::Ui::ScrollBar::SetHorizontalScrollBarVisibility",
+      "Dali::Ui::ScrollBar::SetScrollPosition",
+      "Dali::Ui::ScrollBar::SetVerticalScrollBarVisibility"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "confidence": 0.8,
+    "id": "scroll-bar_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/scrollview/scrollbar-example.cpp:13 (sample, score=0.95)
+```cpp
+* limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// This example shows how to use ScrollView with ScrollBar component
+class ScrollBarExampleController : public ConnectionTracker
+{
+public:
+
+  ScrollBarExampleController(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &ScrollBarExampleController::Create);
+  }
+
+  ~ScrollBarExampleController() = default;
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+```
+
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:37 (utc, score=0.75)
+```cpp
+test_return_value = TET_PASS;
+}
+
+int UtcDaliScrollBarNew(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarNew");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  DALI_TEST_CHECK(scrollBar);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarDownCast(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarDownCast");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  BaseHandle handle(scrollBar);
+
+  ScrollBar scrollBar2 = ScrollBar::DownCast(handle);
+  DALI_TEST_CHECK(scrollBar2);
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "ConnectionTracker",
+      "New",
+      "ScrollBar",
+      "ScrollView",
+      "SetBarColor",
+      "SetBarThickness",
+      "SetHorizontalScrollBarVisibility",
+      "SetVerticalScrollBarVisibility"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollbar-example.cpp",
+    "relevance": "strong",
+    "score": 0.95,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 92,
+    "snippet_start_line": 13
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "DownCast",
+      "GetBarColor",
+      "GetBarCornerRadius",
+      "GetBarMinSize",
+      "GetBarOffset",
+      "GetBarThickness",
+      "GetHorizontalScrollBarVisibility",
+      "GetScrollPosition",
+      "GetVerticalScrollBarVisibility",
+      "New",
+      "ScrollBar",
+      "SetBarColor",
+      "SetBarCornerRadius",
+      "SetBarMinSize",
+      "SetBarOffset",
+      "SetBarThickness",
+      "SetHorizontalScrollBarVisibility",
+      "SetScrollPosition",
+      "SetVerticalScrollBarVisibility",
+      "UpdateBarSize"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 116,
+    "snippet_start_line": 37
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "ConnectionTracker",
+      "DownCast",
+      "GetHorizontalScrollBarVisibility",
+      "GetScrollPosition",
+      "GetVerticalScrollBarVisibility",
+      "New",
+      "ScrollBar",
+      "ScrollView",
+      "SetHorizontalScrollBarVisibility",
+      "SetScrollPosition",
+      "SetVerticalScrollBarVisibility"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollView.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 101,
+    "snippet_start_line": 22
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/scrollview/scrollbar-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// This example shows how to use ScrollView with ScrollBar component
+class ScrollBarExampleController : public ConnectionTracker
+{
+public:
+
+  ScrollBarExampleController(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &ScrollBarExampleController::Create);
+  }
+
+  ~ScrollBarExampleController() = default;
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+  {
+    // Get a handle to the window
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Connect to key event for exit
+    window.KeyEventSignal().Connect(this, &ScrollBarExampleController::OnKeyEvent);
+
+    // Create content view larger than scroll view
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(WRAP_CONTENT);
+    content.SetSpacing(10.0f);
+    content.SetPadding(Extents(20, 20, 20, 20));
+
+    // Add multiple colored views to demonstrate scrolling
+    for (int i = 0; i < 12; i++)
+    {
+      View view = View::New();
+      view.SetBackgroundColor(Color::BLUE);
+      view.SetRequestedWidth(MATCH_PARENT);
+      view.SetRequestedHeight(180.0f);
+      content.Add(view);
+    }
+
+    // Create a ScrollView with vertical scrolling and scroll bars
+    ScrollView scrollView = ScrollView::New()
+      .SetScrollDirection(ScrollDirection::Vertical)
+      .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
+      .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
+      .SetMaxFlingDistance(6000.0f)
+      .SetMinimumFlingDuration(1000)
+      .SetMaximumFlingDuration(2000)
+      .SetFlingSensitivity(1.0f)
+      .SetDecelerationRate(0.998f)
+      .SetOverScrollMode(OverScrollMode::ContentScrolls)
+      .SetRequestedWidth(600.0f)
+      .SetRequestedHeight(1200.0f)
+      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
+      .SetContent(content);
+
+    // Add scroll view to window
+    window.Add(scrollView);
+
+    // Create a separate ScrollBar to demonstrate standalone usage
+    // ScrollBar scrollBar = ScrollBar::New();
+    // scrollBar.SetBarThickness(12.0f);
+    // scrollBar.SetBarColor(Color::BLUE);
+    // scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+    // scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+    // scrollBar.SetRequestedWidth(600.0f);
+    // scrollBar.SetRequestedHeight(50.0f);
+    // scrollBar.SetPositionX(0.0f);
+    // scrollBar.SetPositionY(1250.0f);
+    // window.Add(scrollBar);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  ScrollBarExampleController test(application);
+  application.MainLoop();
+  return 0;
+}
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+
+#include <dali-ui-foundation/public-api/scroll-bar.h>
+#include <dali-ui-foundation/public-api/scrollable-enum.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+void utc_dali_scrollbar_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_scrollbar_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+int UtcDaliScrollBarNew(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarNew");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  DALI_TEST_CHECK(scrollBar);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarDownCast(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarDownCast");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  BaseHandle handle(scrollBar);
+
+  ScrollBar scrollBar2 = ScrollBar::DownCast(handle);
+  DALI_TEST_CHECK(scrollBar2);
+  DALI_TEST_CHECK(scrollBar == scrollBar2);
+
+  BaseHandle handle2;
+  ScrollBar scrollBar3 = ScrollBar::DownCast(handle2);
+  DALI_TEST_CHECK(!scrollBar3);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarCopyConstructor(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarCopyConstructor");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  ScrollBar copy(scrollBar);
+  DALI_TEST_CHECK(copy);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarAssignmentOperator(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarAssignmentOperator");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  ScrollBar copy;
+  copy = scrollBar;
+  DALI_TEST_CHECK(copy);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarMoveConstructor(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarMoveConstructor");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  ScrollBar moved = std::move(scrollBar);
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!scrollBar);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarMoveAssignmentOperator(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarMoveAssignmentOperator");
+
+  ScrollBar scrollBar = ScrollBar::New();
+  ScrollBar moved;
+  moved = std::move(scrollBar);
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!scrollBar);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetBarThickness(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetBarThickness");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  DALI_TEST_EQUALS(scrollBar.GetBarThickness(), 4.0f, TEST_LOCATION);
+
+  // Set new value
+scrollBar.SetBarThickness(10.0f);
+  DALI_TEST_EQUALS(scrollBar.GetBarThickness(), 10.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetBarColor(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetBarColor");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  Vector4 defaultColor(0.8f, 0.8f, 0.8f, 1.0f);
+  DALI_TEST_EQUALS(scrollBar.GetBarColor(), defaultColor, TEST_LOCATION);
+
+  // Set new value
+  Vector4 newColor(1.0f, 0.0f, 0.0f, 1.0f);
+  scrollBar.SetBarColor(newColor);
+  DALI_TEST_EQUALS(scrollBar.GetBarColor(), newColor, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetBarMinSize(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetBarMinSize");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Set new value
+  scrollBar.SetBarMinSize(20.0f);
+  DALI_TEST_EQUALS(scrollBar.GetBarMinSize(), 20.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetBarOffset(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetBarOffset");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  DALI_TEST_EQUALS(scrollBar.GetBarOffset(), 2.0f, TEST_LOCATION);
+
+exec
+/bin/bash -lc "rg -n \"class ScrollBar|enum.*ScrollBarVisibility|ScrollBarVisibility|SetBarColor|UpdateBarSize|SetScrollPosition\" repos/dali-ui -g '*ScrollBar*' -g '*.h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:39:class ScrollBarImpl;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:99:   * @copydoc IScrollBar::GetVerticalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:101:  ScrollBarVisibility GetVerticalScrollBarVisibility() const override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:104:   * @copydoc IScrollBar::SetVerticalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:106:  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:109:   * @copydoc IScrollBar::GetHorizontalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:111:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:114:   * @copydoc IScrollBar::SetHorizontalScrollBarVisibility()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:116:  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:119:   * @copydoc IScrollBar::UpdateBarSize()
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:121:  void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) override;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:146:  void    SetBarColor(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:160:  void    SetScrollPosition(const Vector2& position);
+repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h:39:enum class ScrollBarVisibility
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:17:  ChildClass& SetScrollPosition(const Vector2& position) { ScrollView::SetScrollPosition(position); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:65:  ChildClass& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) { ScrollView::SetVerticalScrollBarVisibility(visibility); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:71:  ChildClass& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) { ScrollView::SetHorizontalScrollBarVisibility(visibility); return *this; }
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:56:  virtual ScrollBarVisibility GetVerticalScrollBarVisibility() const = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:62:  virtual void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:68:  virtual ScrollBarVisibility GetHorizontalScrollBarVisibility() const = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:74:  virtual void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
+repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h:83:  virtual void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) = 0;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:139:int UtcDaliScrollBarGetSetBarColor(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:142:  tet_infoline(" UtcDaliScrollBarGetSetBarColor");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:152:  scrollBar.SetBarColor(newColor);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:213:int UtcDaliScrollBarGetSetVerticalScrollBarVisibility(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:216:  tet_infoline(" UtcDaliScrollBarGetSetVerticalScrollBarVisibility");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:221:  DALI_TEST_EQUALS(scrollBar.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:224:  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:225:  DALI_TEST_EQUALS(scrollBar.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:230:int UtcDaliScrollBarGetSetHorizontalScrollBarVisibility(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:233:  tet_infoline(" UtcDaliScrollBarGetSetHorizontalScrollBarVisibility");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:238:  DALI_TEST_EQUALS(scrollBar.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:241:  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:242:  DALI_TEST_EQUALS(scrollBar.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:247:int UtcDaliScrollBarUpdateBarSize(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:250:  tet_infoline(" UtcDaliScrollBarUpdateBarSize");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:255:  scrollBar.UpdateBarSize(100.0f, 200.0f, 50.0f, 100.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:275:int UtcDaliScrollBarGetSetScrollPosition(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:278:  tet_infoline(" UtcDaliScrollBarGetSetScrollPosition");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp:288:  scrollBar.SetScrollPosition(newPosition);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:144:  ScrollView& SetScrollPosition(const Vector2& position);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:257:  ScrollView& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:264:  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:271:  ScrollView& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:278:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:103:  void SetScrollPosition(const Vector2& position);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:223:  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:228:  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:233:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:238:  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:467:  ScrollBarVisibility mVerticalScrollBarVisibility;   ///< Vertical scroll bar visibility
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-view-impl.h:468:  ScrollBarVisibility mHorizontalScrollBarVisibility; ///< Horizontal scroll bar visibility
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:41:class ScrollBarImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:93:  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:98:  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:103:  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:108:  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:113:  void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:144:  void SetBarColor(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:164:  void SetScrollPosition(const Vector2& position);
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:195:  void UpdateBarSize();
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:293:  ScrollBarVisibility mVerticalVisibility;   ///< Vertical scroll bar visibility
+repos/dali-ui/dali-ui-foundation/integration-api/scroll-bar-impl.h:294:  ScrollBarVisibility mHorizontalVisibility; ///< Horizontal scroll bar visibility
+
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#ifndef DALI_UI_FOUNDATION_SCROLL_BAR_H
+#define DALI_UI_FOUNDATION_SCROLL_BAR_H
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/object/property-map.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/i-scroll-bar.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
+#include <dali-ui-foundation/public-api/scrollable-enum.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Integration
+{
+class ScrollBarImpl;
+}
+
+/**
+ * @brief A class representing a scroll bar that can be used to control the scrolling of a view.
+ */
+class DALI_UI_API ScrollBar : public AbsoluteLayout, public IScrollBar
+{
+public:
+  /**
+   * @brief Creates an uninitialized ScrollBar handle.
+   */
+  ScrollBar();
+
+  /**
+   * @brief Copy constructor.
+   */
+  ScrollBar(const ScrollBar& scrollBar);
+
+  /**
+   * @brief Move constructor.
+   */
+  ScrollBar(ScrollBar&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~ScrollBar();
+
+  /**
+   * @brief Copy assignment operator.
+   */
+  ScrollBar& operator=(const ScrollBar& handle);
+
+  /**
+   * @brief Move assignment operator.
+   */
+  ScrollBar& operator=(ScrollBar&& rhs) noexcept;
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an initialized ScrollBar.
+   * @return A handle to a newly allocated Dali resource.
+   */
+  static ScrollBar New();
+
+  /**
+   * @brief Downcasts a handle to ScrollBar handle.
+   * @param[in] handle Handle to an object.
+   * @return A handle to a ScrollBar or an uninitialized handle.
+   */
+  static ScrollBar DownCast(BaseHandle handle);
+
+public: // IScrollBar Implementation
+  /**
+   * @copydoc IScrollBar::GetTarget()
+   */
+  View GetTarget() const override;
+
+  /**
+   * @copydoc IScrollBar::GetVerticalScrollBarVisibility()
+   */
+  ScrollBarVisibility GetVerticalScrollBarVisibility() const override;
+
+  /**
+   * @copydoc IScrollBar::SetVerticalScrollBarVisibility()
+   */
+  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) override;
+
+  /**
+   * @copydoc IScrollBar::GetHorizontalScrollBarVisibility()
+   */
+  ScrollBarVisibility GetHorizontalScrollBarVisibility() const override;
+
+  /**
+   * @copydoc IScrollBar::SetHorizontalScrollBarVisibility()
+   */
+  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) override;
+
+  /**
+   * @copydoc IScrollBar::UpdateBarSize()
+   */
+  void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) override;
+
+  /**
+   * @copydoc IScrollBar::UpdateScrollPosition()
+   */
+  void UpdateScrollPosition(const Vector2& position) override;
+
+  /**
+   * @copydoc IScrollBar::HideBar()
+   */
+  void HideBar() override;
+
+public: // Properties
+  /**
+   * @brief Gets or sets the thickness of the scroll bar.
+   * @return The thickness of the scroll bar.
+   */
+  float GetBarThickness() const;
+  void  SetBarThickness(float thickness);
+
+  /**
+   * @brief Gets or sets the color of the scroll bar.
+   * @return The color of the scroll bar.
+   */
+  Vector4 GetBarColor() const;
+  void    SetBarColor(const Vector4& color);
+
+  /**
+   * @brief Gets or sets the minimum size of the scroll bar.
+   * @return The minimum size of the scroll bar.
+   */
+  float GetBarMinSize() const;
+  void  SetBarMinSize(float minSize);
+
+  /**
+   * @brief Gets or sets the current scroll position of the target view.
+   * @return The current scroll position.
+   */
+  Vector2 GetScrollPosition() const;
+  void    SetScrollPosition(const Vector2& position);
+
+  /**
+   * @brief Gets or sets the offset of bars from the edges.
+   * This creates a small gap between the bar and the scroll bar container edges.
+   * Padding can be set using View::SetPadding() which is inherited by ScrollBar.
+   * @return The bar offset.
+   */
+  float GetBarOffset() const;
+  void  SetBarOffset(float offset);
+
+  /**
+   * @brief Gets the corner radius of the scroll bar.
+   * @return The corner radius for each corner (topLeft, topRight, bottomRight, bottomLeft).
+   */
+  Vector4 GetBarCornerRadius() const;
+
+  /**
+   * @brief Sets the corner radius of the scroll bar (same for all corners).
+   * @param[in] radius The corner radius to apply to all corners.
+   */
+  void SetBarCornerRadius(float radius);
+
+  /**
+   * @brief Sets the corner radius of the scroll bar for each corner individually.
+   * @param[in] radius The corner radius (topLeft, topRight, bottomRight, bottomLeft).
+   */
+  void SetBarCornerRadius(const Vector4& radius);
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle from the Integration implementation.
+   */
+  explicit DALI_UI_API ScrollBar(Integration::ScrollBarImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Control from an Internal::CustomActor pointer.
+   */
+  explicit DALI_UI_API ScrollBar(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_LAYOUT_METHODS(ScrollBar)
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+#endif // DALI_UI_FOUNDATION_SCROLL_BAR_H
+exec
+/bin/bash -lc "sed -n '1,130p' repos/dali-ui/dali-ui-foundation/public-api/scrollable-enum.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#pragma once
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+/**
+ * @brief Scroll direction enumeration.
+ */
+enum class ScrollDirection
+{
+  Vertical,   ///< Vertical scrolling only
+  Horizontal, ///< Horizontal scrolling only
+  Both        ///< Both horizontal and vertical scrolling
+};
+
+/**
+ * @brief Scroll bar visibility enumeration.
+ */
+enum class ScrollBarVisibility
+{
+  Auto,   ///< Show scroll bar only when scrolling
+  Always, ///< Always show scroll bar
+  Never   ///< Never show scroll bar
+};
+
+/**
+ * @brief Scroll to position enumeration.
+ */
+enum class ScrollToPosition
+{
+  Start,      ///< Scroll to start of view
+  Center,     ///< Scroll to center of view
+  End,        ///< Scroll to end of view
+  MakeVisible ///< Scroll to make the view visible
+};
+
+/**
+ * @brief Over scroll mode enumeration.
+ */
+enum class OverScrollMode
+{
+  Never,         ///< Never allow over-scrolling
+  Always,        ///< Always allow over-scrolling
+  ContentScrolls ///< Allow over-scrolling only when content is scrollable
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '180,330p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-ScrollBar.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  DALI_TEST_EQUALS(scrollBar.GetBarOffset(), 2.0f, TEST_LOCATION);
+
+  // Set new value
+  scrollBar.SetBarOffset(5.0f);
+  DALI_TEST_EQUALS(scrollBar.GetBarOffset(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetBarCornerRadius(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetBarCornerRadius");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  Vector4 defaultRadius(1.0f, 1.0f, 1.0f, 1.0f);
+  DALI_TEST_EQUALS(scrollBar.GetBarCornerRadius(), defaultRadius, TEST_LOCATION);
+
+  // Set new value (same for all corners)
+  scrollBar.SetBarCornerRadius(3.0f);
+  Vector4 expectedRadius(3.0f, 3.0f, 3.0f, 3.0f);
+  DALI_TEST_EQUALS(scrollBar.GetBarCornerRadius(), expectedRadius, TEST_LOCATION);
+
+  // Set new value (different for each corner)
+  Vector4 newRadius(1.0f, 2.0f, 3.0f, 4.0f);
+  scrollBar.SetBarCornerRadius(newRadius);
+  DALI_TEST_EQUALS(scrollBar.GetBarCornerRadius(), newRadius, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetVerticalScrollBarVisibility(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetVerticalScrollBarVisibility");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  DALI_TEST_EQUALS(scrollBar.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+
+  // Set new value
+  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+  DALI_TEST_EQUALS(scrollBar.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetHorizontalScrollBarVisibility(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetHorizontalScrollBarVisibility");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  DALI_TEST_EQUALS(scrollBar.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
+
+  // Set new value
+  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+  DALI_TEST_EQUALS(scrollBar.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Always, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarUpdateBarSize(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarUpdateBarSize");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // This method doesn't return a value, so we just check that it doesn't crash
+  scrollBar.UpdateBarSize(100.0f, 200.0f, 50.0f, 100.0f);
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarUpdateScrollPosition(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarUpdateScrollPosition");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // This method doesn't return a value, so we just check that it doesn't crash
+  scrollBar.UpdateScrollPosition(Vector2(10.0f, 20.0f));
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+
+int UtcDaliScrollBarGetSetScrollPosition(void)
+{
+  UiTestApplication application;
+  tet_infoline(" UtcDaliScrollBarGetSetScrollPosition");
+
+  ScrollBar scrollBar = ScrollBar::New();
+
+  // Check default value
+  Vector2 defaultPosition(0.0f, 0.0f);
+  DALI_TEST_EQUALS(scrollBar.GetScrollPosition(), defaultPosition, TEST_LOCATION);
+
+  // Set new value
+  Vector2 newPosition(15.0f, 25.0f);
+  scrollBar.SetScrollPosition(newPosition);
+  DALI_TEST_EQUALS(scrollBar.GetScrollPosition(), newPosition, TEST_LOCATION);
+
+  END_TEST;
+}
+
+exec
+/bin/bash -lc "sed -n '1,130p' repos/dali-ui/dali-ui-foundation/public-api/i-scroll-bar.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#ifndef DALI_UI_FOUNDATION_I_SCROLL_BAR_H
+#define DALI_UI_FOUNDATION_I_SCROLL_BAR_H
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/math/vector2.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/scrollable-enum.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+/**
+ * @brief Defines the interface for a scroll bar, which is responsible for displaying and controlling the scrolling of a target view.
+ */
+class DALI_UI_API IScrollBar
+{
+public:
+  /**
+   * @brief Virtual destructor.
+   */
+  virtual ~IScrollBar() = default;
+
+  /**
+   * @brief Gets the target view for which the scroll bar is responsible.
+   * @return The target view.
+   */
+  virtual View GetTarget() const = 0;
+
+  /**
+   * @brief Gets the visibility of the vertical scroll bar.
+   * @return The vertical scroll bar visibility.
+   */
+  virtual ScrollBarVisibility GetVerticalScrollBarVisibility() const = 0;
+
+  /**
+   * @brief Sets the visibility of the vertical scroll bar.
+   * @param[in] visibility The vertical scroll bar visibility.
+   */
+  virtual void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
+
+  /**
+   * @brief Gets the visibility of the horizontal scroll bar.
+   * @return The horizontal scroll bar visibility.
+   */
+  virtual ScrollBarVisibility GetHorizontalScrollBarVisibility() const = 0;
+
+  /**
+   * @brief Sets the visibility of the horizontal scroll bar.
+   * @param[in] visibility The horizontal scroll bar visibility.
+   */
+  virtual void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
+
+  /**
+   * @brief Updates the size of the scroll bar based on the given scroll area and viewport size.
+   * @param[in] scrollWidth The width of the scrollable area.
+   * @param[in] scrollHeight The height of the scrollable area.
+   * @param[in] viewportWidth The width of the visible area.
+   * @param[in] viewportHeight The height of the visible area.
+   */
+  virtual void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) = 0;
+
+  /**
+   * @brief Updates the scroll position of the scroll bar based on the given position.
+   * @param[in] position The new scroll position.
+   */
+  virtual void UpdateScrollPosition(const Vector2& position) = 0;
+
+  /**
+   * @brief Hides the scroll bar (fade out).
+   *
+   * Called when scrolling ends. Only affects bars with Auto visibility.
+   */
+  virtual void HideBar() = 0;
+};
+
+} // namespace Ui
+
+} // namespace Dali
+
+#endif // DALI_UI_FOUNDATION_I_SCROLL_BAR_H
+codex
+---
+title: Scroll Bar
+sidebar_label: Scroll Bar
+category: views-components
+---
+
+# Scroll Bar
+
+`Dali::Ui::ScrollBar` displays and updates scroll bar indicators for scrollable dali-ui content.
+
+## Table of Contents
+
+- [Create a Scroll Bar](#create-a-scroll-bar)
+- [Choose Scroll Bar Visibility](#choose-scroll-bar-visibility)
+- [Style the Bar](#style-the-bar)
+- [Update Size and Position](#update-size-and-position)
+- [Read Current State](#read-current-state)
+- [Hide Auto Bars](#hide-auto-bars)
+
+## Create a Scroll Bar
+
+Create a scroll bar with `Dali::Ui::ScrollBar::New`. The default constructor `Dali::Ui::ScrollBar::ScrollBar` creates an uninitialized handle, so application code should use `Dali::Ui::ScrollBar::New` when it needs a usable scroll bar.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+void CreateScrollBar()
+{
+  ScrollBar scrollBar = ScrollBar::New();
+
+  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+}
+```
+
+Use `Dali::Ui::ScrollBar` as a dali-ui view component. Its scroll target is exposed as `Dali::Ui::View` through `Dali::Ui::ScrollBar::GetTarget`, so app-facing code can stay in the `Dali::Ui::View` object model.
+
+```cpp
+void InspectTarget(ScrollBar scrollBar)
+{
+  View target = scrollBar.GetTarget();
+
+  if(target)
+  {
+    Vector2 currentPosition = scrollBar.GetScrollPosition();
+    scrollBar.SetScrollPosition(currentPosition);
+  }
+}
+```
+
+## Choose Scroll Bar Visibility
+
+`Dali::Ui::ScrollBar::SetVerticalScrollBarVisibility` and `Dali::Ui::ScrollBar::SetHorizontalScrollBarVisibility` control whether each axis is shown automatically, always shown, or never shown.
+
+Use `ScrollBarVisibility::Auto` for bars that appear while scrolling, `ScrollBarVisibility::Always` for persistent indicators, and `ScrollBarVisibility::Never` for disabled axes.
+
+```cpp
+void ConfigureVerticalOnlyScrollBar(ScrollBar scrollBar)
+{
+  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+}
+```
+
+For a two-axis scroll area, enable both axes explicitly.
+
+```cpp
+void ConfigureBothAxes(ScrollBar scrollBar)
+{
+  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
+}
+```
+
+The current policy can be read back with `Dali::Ui::ScrollBar::GetVerticalScrollBarVisibility` and `Dali::Ui::ScrollBar::GetHorizontalScrollBarVisibility`.
+
+```cpp
+bool UsesVerticalAutoVisibility(ScrollBar scrollBar)
+{
+  return scrollBar.GetVerticalScrollBarVisibility() == ScrollBarVisibility::Auto;
+}
+```
+
+## Style the Bar
+
+The visual bar can be configured with typed setters. Use `Dali::Ui::ScrollBar::SetBarThickness` for bar width, `Dali::Ui::ScrollBar::SetBarColor` for color, `Dali::Ui::ScrollBar::SetBarMinSize` for the smallest displayed thumb size, and `Dali::Ui::ScrollBar::SetBarOffset` for the gap from the scroll bar container edges.
+
+```cpp
+void StyleScrollBar(ScrollBar scrollBar)
+{
+  scrollBar.SetBarThickness(10.0f);
+  scrollBar.SetBarColor(Vector4(0.2f, 0.45f, 0.9f, 1.0f));
+  scrollBar.SetBarMinSize(24.0f);
+  scrollBar.SetBarOffset(4.0f);
+}
+```
+
+Use `Dali::Ui::ScrollBar::SetBarCornerRadius` to round the bar. The float overload applies the same radius to all corners.
+
+```cpp
+void MakeRoundedBar(ScrollBar scrollBar)
+{
+  scrollBar.SetBarCornerRadius(3.0f);
+
+  Vector4 radius = scrollBar.GetBarCornerRadius();
+  scrollBar.SetBarCornerRadius(radius.x);
+}
+```
+
+You can read style values back with `Dali::Ui::ScrollBar::GetBarThickness`, `Dali::Ui::ScrollBar::GetBarColor`, `Dali::Ui::ScrollBar::GetBarMinSize`, `Dali::Ui::ScrollBar::GetBarOffset`, and `Dali::Ui::ScrollBar::GetBarCornerRadius`.
+
+```cpp
+float CalculateInsetForBar(ScrollBar scrollBar)
+{
+  return scrollBar.GetBarThickness() + scrollBar.GetBarOffset();
+}
+```
+
+## Update Size and Position
+
+Call `Dali::Ui::ScrollBar::UpdateBarSize` when the scrollable content size or viewport size changes. The method takes scrollable width, scrollable height, viewport width, and viewport height.
+
+```cpp
+void OnScrollableLayoutChanged(ScrollBar scrollBar)
+{
+  const float scrollWidth = 1200.0f;
+  const float scrollHeight = 2400.0f;
+  const float viewportWidth = 600.0f;
+  const float viewportHeight = 800.0f;
+
+  scrollBar.UpdateBarSize(scrollWidth, scrollHeight, viewportWidth, viewportHeight);
+}
+```
+
+Use `Dali::Ui::ScrollBar::SetScrollPosition` when the application sets the current scroll position directly. Use `Dali::Ui::ScrollBar::UpdateScrollPosition` when synchronizing the bar from a scrolling component.
+
+```cpp
+void SyncScrollPosition(ScrollBar scrollBar, const Vector2& position)
+{
+  scrollBar.SetScrollPosition(position);
+  scrollBar.UpdateScrollPosition(position);
+}
+```
+
+The position value can be retrieved with `Dali::Ui::ScrollBar::GetScrollPosition`.
+
+```cpp
+Vector2 MoveDownByPage(ScrollBar scrollBar, float pageHeight)
+{
+  Vector2 position = scrollBar.GetScrollPosition();
+  position.y += pageHeight;
+
+  scrollBar.SetScrollPosition(position);
+  return scrollBar.GetScrollPosition();
+}
+```
+
+## Read Current State
+
+A `Dali::Ui::ScrollBar` exposes its current configuration through matching getters. This is useful when a view state needs to be restored, compared, or copied to another scroll bar.
+
+```cpp
+void CopyVisualSettings(ScrollBar source, ScrollBar target)
+{
+  target.SetBarThickness(source.GetBarThickness());
+  target.SetBarColor(source.GetBarColor());
+  target.SetBarMinSize(source.GetBarMinSize());
+  target.SetBarOffset(source.GetBarOffset());
+
+  Vector4 radius = source.GetBarCornerRadius();
+  target.SetBarCornerRadius(radius);
+}
+```
+
+Visibility and position can be copied in the same way.
+
+```cpp
+void CopyScrollPolicy(ScrollBar source, ScrollBar target)
+{
+  target.SetVerticalScrollBarVisibility(source.GetVerticalScrollBarVisibility());
+  target.SetHorizontalScrollBarVisibility(source.GetHorizontalScrollBarVisibility());
+  target.SetScrollPosition(source.GetScrollPosition());
+}
+```
+
+## Hide Auto Bars
+
+`Dali::Ui::ScrollBar::HideBar` hides the bar using the scroll bar's fade-out behavior. It is intended for bars that use `ScrollBarVisibility::Auto`, where the bar is visible during scrolling and hidden when scrolling ends.
+
+```cpp
+void FinishScrolling(ScrollBar scrollBar)
+{
+  scrollBar.UpdateScrollPosition(scrollBar.GetScrollPosition());
+  scrollBar.HideBar();
+}
+```
+
+For a bar that should remain visible, use `Dali::Ui::ScrollBar::SetVerticalScrollBarVisibility` or `Dali::Ui::ScrollBar::SetHorizontalScrollBarVisibility` with `ScrollBarVisibility::Always` instead of hiding it at the end of interaction.
+
+```cpp
+void KeepIndicatorVisible(ScrollBar scrollBar)
+{
+  scrollBar.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
+  scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+}
+```
+tokens used
+17,974

@@ -1,0 +1,460 @@
+---
+title: Web View
+sidebar_label: Web View
+category: views-components
+---
+
+# Web View
+
+`Dali::Ui::WebView` embeds web content in a dali-ui application as a `Dali::Ui::View`.
+
+## Table of Contents
+
+- [Create and Load Web Content](#create-and-load-web-content)
+- [Navigate and Track Page State](#navigate-and-track-page-state)
+- [Configure Input, Zoom, and Rendering](#configure-input-zoom-and-rendering)
+- [Work with Page Content](#work-with-page-content)
+- [Handle WebView Events](#handle-webview-events)
+- [Manage Runtime Resources](#manage-runtime-resources)
+
+## Create and Load Web Content
+
+Create a web view with `Dali::Ui::WebView::New`, then load remote or inline content with `Dali::Ui::WebView::LoadUrl` or `Dali::Ui::WebView::LoadHtmlString`. A target platform must provide a web engine plugin for the view to display web pages.
+
+```cpp
+#include <dali-ui-foundation/public-api/web-view.h>
+
+Dali::Ui::WebView CreateWebView()
+{
+  Dali::Ui::WebView webView = Dali::Ui::WebView::New();
+
+  webView
+    .SetUserAgent(Dali::String("MyDaliUiApp/1.0"))
+    .SetDocumentBackgroundColor(Dali::Vector4(1.0f, 1.0f, 1.0f, 1.0f))
+    .LoadUrl(Dali::String("https://www.example.com"));
+
+  return webView;
+}
+```
+
+For generated or bundled content, use `Dali::Ui::WebView::LoadHtmlString`. Use `Dali::Ui::WebView::LoadContents` when you already have a byte buffer, MIME type, encoding, and base URI.
+
+```cpp
+Dali::Ui::WebView CreateInlinePage()
+{
+  Dali::Ui::WebView webView = Dali::Ui::WebView::New();
+
+  webView.LoadHtmlString(Dali::String(
+    "<!doctype html>"
+    "<html>"
+    "<head><title>dali-ui WebView</title></head>"
+    "<body><h1>Hello from dali-ui</h1></body>"
+    "</html>"));
+
+  return webView;
+}
+
+bool LoadBufferedHtml(Dali::Ui::WebView webView)
+{
+  const char html[] = "<html><body><p>Buffered content</p></body></html>";
+
+  return webView.LoadContents(
+    reinterpret_cast<const int8_t*>(html),
+    static_cast<uint32_t>(sizeof(html) - 1u),
+    Dali::String("text/html"),
+    Dali::String("UTF-8"),
+    Dali::String("https://www.example.com/"));
+}
+```
+
+`Dali::Ui::WebView::LoadHtmlStringOverrideCurrentEntry` loads the supplied HTML with base URI and unreachable URL values while overriding the current history entry.
+
+```cpp
+bool ShowErrorPage(Dali::Ui::WebView webView)
+{
+  return webView.LoadHtmlStringOverrideCurrentEntry(
+    Dali::String("<html><body><h1>Page unavailable</h1></body></html>"),
+    Dali::String("https://www.example.com/"),
+    Dali::String("https://www.example.com/missing"));
+}
+```
+
+## Navigate and Track Page State
+
+Use `Dali::Ui::WebView::CanGoBack` and `Dali::Ui::WebView::CanGoForward` before calling `Dali::Ui::WebView::GoBack` or `Dali::Ui::WebView::GoForward`. `Dali::Ui::WebView::Reload`, `Dali::Ui::WebView::ReloadWithoutCache`, and `Dali::Ui::WebView::StopLoading` control the current load.
+
+```cpp
+void NavigateBack(Dali::Ui::WebView webView)
+{
+  if(webView.CanGoBack())
+  {
+    webView.GoBack();
+  }
+}
+
+void NavigateForward(Dali::Ui::WebView webView)
+{
+  if(webView.CanGoForward())
+  {
+    webView.GoForward();
+  }
+}
+
+void RefreshPage(Dali::Ui::WebView webView, bool bypassCache)
+{
+  if(bypassCache)
+  {
+    webView.ReloadWithoutCache();
+  }
+  else
+  {
+    webView.Reload();
+  }
+}
+```
+
+Read current page state with `Dali::Ui::WebView::GetUrl`, `Dali::Ui::WebView::GetTitle`, and `Dali::Ui::WebView::GetLoadProgressPercentage`.
+
+```cpp
+struct PageState
+{
+  Dali::String url;
+  Dali::String title;
+  float        progress;
+};
+
+PageState ReadPageState(const Dali::Ui::WebView& webView)
+{
+  PageState state;
+  state.url      = webView.GetUrl();
+  state.title    = webView.GetTitle();
+  state.progress = webView.GetLoadProgressPercentage();
+  return state;
+}
+```
+
+## Configure Input, Zoom, and Rendering
+
+`Dali::Ui::WebView` provides typed setters for common browser behavior. Most configuration setters return `Dali::Ui::WebView&`, so they can be chained with other web-view configuration calls.
+
+```cpp
+Dali::Ui::WebView CreateConfiguredWebView()
+{
+  Dali::Ui::WebView webView = Dali::Ui::WebView::New();
+
+  webView
+    .SetMouseEventsEnabled(true)
+    .SetKeyEventsEnabled(true)
+    .SetCursorEnabledByClient(true)
+    .SetVideoHoleEnabled(true)
+    .SetPageZoomFactor(1.0f)
+    .SetTextZoomFactor(1.0f)
+    .SetTileCoverAreaMultiplier(2.0f)
+    .SetTilesClearedWhenHidden(true);
+
+  webView.SetScaleFactor(1.25f, Dali::Vector2(0.0f, 0.0f));
+
+  return webView;
+}
+```
+
+Use the matching getters when your UI needs to reflect the current web-view configuration.
+
+```cpp
+struct WebViewDisplayState
+{
+  bool  mouseEventsEnabled;
+  bool  keyEventsEnabled;
+  bool  videoHoleEnabled;
+  float pageZoomFactor;
+  float textZoomFactor;
+  float scaleFactor;
+};
+
+WebViewDisplayState ReadDisplayState(const Dali::Ui::WebView& webView)
+{
+  WebViewDisplayState state;
+  state.mouseEventsEnabled = webView.GetMouseEventsEnabled();
+  state.keyEventsEnabled   = webView.GetKeyEventsEnabled();
+  state.videoHoleEnabled   = webView.GetVideoHoleEnabled();
+  state.pageZoomFactor     = webView.GetPageZoomFactor();
+  state.textZoomFactor     = webView.GetTextZoomFactor();
+  state.scaleFactor        = webView.GetScaleFactor();
+  return state;
+}
+```
+
+When automatic key or touch forwarding is disabled, forward those events explicitly with `Dali::Ui::WebView::FeedKeyEvent` or `Dali::Ui::WebView::FeedTouchEvent`. Use `Dali::Ui::WebView::FeedMouseWheel` to pass wheel input directly to the web view.
+
+```cpp
+bool ForwardKeyToWebView(Dali::Ui::WebView webView, const Dali::KeyEvent& keyEvent)
+{
+  webView.SetKeyEventsEnabled(false);
+  return webView.FeedKeyEvent(keyEvent);
+}
+
+bool ForwardTouchToWebView(Dali::Ui::WebView webView, const Dali::TouchEvent& touchEvent)
+{
+  webView.SetMouseEventsEnabled(false);
+  return webView.FeedTouchEvent(touchEvent);
+}
+
+void ForwardWheelToWebView(Dali::Ui::WebView webView)
+{
+  webView.FeedMouseWheel(true, 1, 120, 240);
+}
+```
+
+## Work with Page Content
+
+Run JavaScript with `Dali::Ui::WebView::EvaluateJavaScript`. Register a named exposed object with `Dali::Ui::WebView::AddJavaScriptMessageHandler` when page scripts need to send string messages back to native code.
+
+```cpp
+void UpdateDocumentTitle(Dali::Ui::WebView webView)
+{
+  webView.EvaluateJavaScript(Dali::String("document.title = 'dali-ui WebView';"));
+}
+
+void RegisterBridge(Dali::Ui::WebView webView)
+{
+  webView.AddJavaScriptMessageHandler(
+    Dali::String("daliBridge"),
+    Dali::Ui::WebView::JavaScriptCallback::New(
+      [](const Dali::String& message)
+      {
+        (void)message;
+      }));
+}
+```
+
+Use asynchronous APIs for content extraction, screenshots, and video state checks. `Dali::Ui::WebView::GetPlainTextAsynchronously` returns page text through a `Dali::Ui::WebView::PlainTextCallback`. `Dali::Ui::WebView::GetScreenshotAsynchronously` returns a captured `Dali::Ui::ImageView` through a `Dali::Ui::WebView::ScreenshotCapturedCallback`.
+
+```cpp
+void RequestPlainText(Dali::Ui::WebView webView)
+{
+  webView.GetPlainTextAsynchronously(
+    Dali::Ui::WebView::PlainTextCallback::New(
+      [](const Dali::String& text)
+      {
+        (void)text;
+      }));
+}
+
+bool RequestScreenshot(Dali::Ui::WebView webView)
+{
+  return webView.GetScreenshotAsynchronously(
+    Dali::BoundsInteger(0, 0, 320, 240),
+    1.0f,
+    Dali::Ui::WebView::ScreenshotCapturedCallback::New(
+      [](Dali::Ui::ImageView image)
+      {
+        (void)image;
+      }));
+}
+
+bool RequestVideoState(Dali::Ui::WebView webView)
+{
+  return webView.CheckVideoPlayingAsynchronously(
+    Dali::Ui::WebView::VideoPlayingCallback::New(
+      [](bool isPlaying)
+      {
+        (void)isPlaying;
+      }));
+}
+```
+
+For synchronous snapshots and metadata, use `Dali::Ui::WebView::GetScreenshot`, `Dali::Ui::WebView::GetFavicon`, `Dali::Ui::WebView::GetSelectedText`, `Dali::Ui::WebView::GetContentSize`, `Dali::Ui::WebView::GetScrollPosition`, and `Dali::Ui::WebView::GetScrollSize`.
+
+```cpp
+struct WebContentInfo
+{
+  Dali::String  selectedText;
+  Dali::Vector2 contentSize;
+  Dali::Vector2 scrollPosition;
+  Dali::Vector2 scrollSize;
+};
+
+WebContentInfo ReadContentInfo(const Dali::Ui::WebView& webView)
+{
+  WebContentInfo info;
+  info.selectedText    = webView.GetSelectedText();
+  info.contentSize     = webView.GetContentSize();
+  info.scrollPosition  = webView.GetScrollPosition();
+  info.scrollSize      = webView.GetScrollSize();
+  return info;
+}
+
+Dali::Ui::ImageView CaptureVisibleArea(Dali::Ui::WebView webView)
+{
+  return webView.GetScreenshot(Dali::BoundsInteger(0, 0, 640, 480), 1.0f);
+}
+```
+
+`Dali::Ui::WebViewFindOption` defines bit flags for find-text options. The values include `Dali::Ui::WebViewFindOption::NONE`, `Dali::Ui::WebViewFindOption::CASE_INSENSITIVE`, `Dali::Ui::WebViewFindOption::AT_WORD_STARTS`, `Dali::Ui::WebViewFindOption::TREAT_MEDIAL_CAPITAL_AS_WORD_START`, `Dali::Ui::WebViewFindOption::BACKWARDS`, `Dali::Ui::WebViewFindOption::WRAP_AROUND`, `Dali::Ui::WebViewFindOption::SHOW_OVERLAY`, `Dali::Ui::WebViewFindOption::SHOW_FIND_INDICATOR`, and `Dali::Ui::WebViewFindOption::SHOW_HIGHLIGHT`.
+
+```cpp
+uint32_t BuildFindOptions()
+{
+  return static_cast<uint32_t>(Dali::Ui::WebViewFindOption::CASE_INSENSITIVE) |
+         static_cast<uint32_t>(Dali::Ui::WebViewFindOption::WRAP_AROUND) |
+         static_cast<uint32_t>(Dali::Ui::WebViewFindOption::SHOW_HIGHLIGHT);
+}
+```
+
+## Handle WebView Events
+
+Connect to web-view signals to respond to page loading, URL changes, frame rendering, scrolling, fullscreen transitions, text search results, geolocation permission requests, and process crashes.
+
+```cpp
+void ConnectPageSignals(Dali::Ui::WebView webView)
+{
+  webView.PageLoadStartedSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      (void)view;
+      (void)url;
+    });
+
+  webView.PageLoadInProgressSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      (void)view;
+      (void)url;
+    });
+
+  webView.PageLoadFinishedSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      Dali::String title = view.GetTitle();
+      (void)url;
+      (void)title;
+    });
+
+  webView.UrlChangedSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      (void)view;
+      (void)url;
+    });
+}
+```
+
+`Dali::Ui::WebView::FrameRenderedSignal` is emitted when a frame is rendered. Fullscreen signals let the app update surrounding UI, and `Dali::Ui::WebView::ExitFullscreen` can be used to leave fullscreen mode.
+
+```cpp
+void ConnectRenderingSignals(Dali::Ui::WebView webView)
+{
+  webView.FrameRenderedSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      (void)view;
+    });
+
+  webView.FullscreenEnteredSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      (void)view;
+    });
+
+  webView.FullscreenExitedSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      (void)view;
+    });
+}
+
+void LeaveFullscreen(Dali::Ui::WebView webView)
+{
+  webView.ExitFullscreen();
+}
+```
+
+Use scroll and permission signals to integrate the web page with application-level controls. `Dali::Ui::WebViewScrollEdge` is the scroll-edge type used by `Dali::Ui::WebView::ScrollEdgeReachedSignal`, and `Dali::Ui::WebViewOverScrolled` is the over-scroll direction type used by `Dali::Ui::WebView::OverScrolledSignal`.
+
+```cpp
+void ConnectInteractionSignals(Dali::Ui::WebView webView)
+{
+  webView.ScrollEdgeReachedSignal().Connect(
+    [](Dali::Ui::WebView view, Dali::Ui::WebViewScrollEdge edge)
+    {
+      (void)view;
+      (void)edge;
+    });
+
+  webView.OverScrolledSignal().Connect(
+    [](Dali::Ui::WebView view, Dali::Ui::WebViewOverScrolled direction)
+    {
+      (void)view;
+      (void)direction;
+    });
+
+  webView.TextFoundSignal().Connect(
+    [](Dali::Ui::WebView view, uint32_t count)
+    {
+      (void)view;
+      (void)count;
+    });
+
+  webView.GeolocationPermissionSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& host, const Dali::String& protocol) -> bool
+    {
+      (void)view;
+      (void)host;
+      (void)protocol;
+      return false;
+    });
+
+  webView.WebProcessCrashedSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      view.Reload();
+    });
+}
+```
+
+## Manage Runtime Resources
+
+Use `Dali::Ui::WebView::Suspend` and `Dali::Ui::WebView::Resume` for the web view lifecycle. Use `Dali::Ui::WebView::SuspendNetworkLoading` and `Dali::Ui::WebView::ResumeNetworkLoading` when only network activity should pause or continue.
+
+```cpp
+void PauseWebView(Dali::Ui::WebView webView)
+{
+  webView.Suspend();
+  webView.SuspendNetworkLoading();
+}
+
+void ResumeWebView(Dali::Ui::WebView webView)
+{
+  webView.ResumeNetworkLoading();
+  webView.Resume();
+}
+```
+
+Clear navigation history with `Dali::Ui::WebView::ClearHistory`, release tile resources with `Dali::Ui::WebView::ClearAllTilesResources`, and use tile-related setters to configure how tile resources are handled.
+
+```cpp
+void ResetBrowsingState(Dali::Ui::WebView webView)
+{
+  webView
+    .StopLoading()
+    .ClearHistory()
+    .SetTilesClearedWhenHidden(true);
+
+  webView.ClearAllTilesResources();
+}
+```
+
+Use custom headers when requests need application-specific metadata. `Dali::Ui::WebView::AddCustomHeader` and `Dali::Ui::WebView::RemoveCustomHeader` report whether the operation succeeded.
+
+```cpp
+bool ConfigureRequestHeaders(Dali::Ui::WebView webView)
+{
+  bool added = webView.AddCustomHeader(
+    Dali::String("X-App-Client"),
+    Dali::String("dali-ui"));
+
+  bool removed = webView.RemoveCustomHeader(Dali::String("X-Expired-Header"));
+
+  return added && removed;
+}
+```

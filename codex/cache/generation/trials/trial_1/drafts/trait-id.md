@@ -1,0 +1,142 @@
+---
+title: Trait Id
+sidebar_label: Trait Id
+category: utilities
+---
+
+# Trait Id
+
+`Dali::Ui::TraitId` is a lightweight handle that represents a unique identifier for a trait used with dali-ui `Dali::Ui::View`-based application code.
+
+## Table of Contents
+
+- [Allocate One ID per Logical Trait](#allocate-one-id-per-logical-trait)
+- [Compare Trait IDs](#compare-trait-ids)
+- [Use the Numeric Value for Diagnostics](#use-the-numeric-value-for-diagnostics)
+
+## Allocate One ID per Logical Trait
+
+Use `Dali::Ui::TraitId::Alloc()` once for each logical trait type, then reuse that `Dali::Ui::TraitId` everywhere that feature needs to refer to the same trait. The public header documents this as the intended pattern: allocate the ID once and store it statically.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kSelectionStateTraitId = Dali::Ui::TraitId::Alloc();
+const Dali::Ui::TraitId kValidationStateTraitId = Dali::Ui::TraitId::Alloc();
+} // namespace
+
+Dali::Ui::TraitId GetSelectionStateTraitId()
+{
+  return kSelectionStateTraitId;
+}
+
+Dali::Ui::TraitId GetValidationStateTraitId()
+{
+  return kValidationStateTraitId;
+}
+```
+
+In a dali-ui app, keep these IDs beside the feature code that works with `Dali::Ui::View`. The ID is the shared identifier for the trait; it is not a per-view value and should not be reallocated each time a view is created.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace
+{
+const Dali::Ui::TraitId kCardStateTraitId = Dali::Ui::TraitId::Alloc();
+} // namespace
+
+Dali::Ui::TraitId CardStateTraitId()
+{
+  return kCardStateTraitId;
+}
+
+void PrepareCardFeature(Dali::Ui::View& view)
+{
+  const Dali::Ui::TraitId traitId = CardStateTraitId();
+
+  (void)view;
+  (void)traitId;
+}
+```
+
+## Compare Trait IDs
+
+`Dali::Ui::TraitId::operator==` and `Dali::Ui::TraitId::operator!=` compare the stored identifier value. Use them when routing feature-specific behavior or checking that a helper is handling the expected trait.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kPressedTraitId = Dali::Ui::TraitId::Alloc();
+const Dali::Ui::TraitId kFocusedTraitId = Dali::Ui::TraitId::Alloc();
+} // namespace
+
+bool IsPressedTrait(Dali::Ui::TraitId traitId)
+{
+  return traitId == kPressedTraitId;
+}
+
+bool IsNotFocusTrait(Dali::Ui::TraitId traitId)
+{
+  return traitId != kFocusedTraitId;
+}
+```
+
+A useful app pattern is to pass `Dali::Ui::TraitId` through small feature helpers instead of exposing numeric IDs to the rest of the code.
+
+```cpp
+#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+namespace
+{
+const Dali::Ui::TraitId kEditableStateTraitId = Dali::Ui::TraitId::Alloc();
+} // namespace
+
+bool HandlesEditableState(Dali::Ui::View& view, Dali::Ui::TraitId traitId)
+{
+  (void)view;
+  return traitId == kEditableStateTraitId;
+}
+```
+
+## Use the Numeric Value for Diagnostics
+
+`Dali::Ui::TraitId::value` is a public `uint32_t` value. Application code normally compares `Dali::Ui::TraitId` objects directly, but `value` is useful when writing diagnostics, assertions, or compact logs.
+
+```cpp
+#include <cstdint>
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+namespace
+{
+const Dali::Ui::TraitId kDebugOverlayTraitId = Dali::Ui::TraitId::Alloc();
+} // namespace
+
+uint32_t GetDebugOverlayTraitValue()
+{
+  return kDebugOverlayTraitId.value;
+}
+```
+
+Prefer keeping numeric access at the boundary where you need the number. Inside feature code, keep using `Dali::Ui::TraitId` and its comparison operators so the meaning remains clear.
+
+```cpp
+#include <cstdint>
+#include <dali-ui-foundation/public-api/trait-id.h>
+
+bool SameTraitValue(Dali::Ui::TraitId lhs, Dali::Ui::TraitId rhs)
+{
+  return lhs == rhs;
+}
+
+uint32_t TraitValueForLog(Dali::Ui::TraitId traitId)
+{
+  return traitId.value;
+}
+```

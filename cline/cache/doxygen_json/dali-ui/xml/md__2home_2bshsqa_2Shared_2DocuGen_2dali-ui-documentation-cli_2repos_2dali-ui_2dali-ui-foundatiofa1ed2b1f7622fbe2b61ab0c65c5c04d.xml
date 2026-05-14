@@ -1,0 +1,711 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_202-input-field-analysis_8ko</compoundname>
+    <title>InputField 구조 분석</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md74"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md75">
+<title>목적</title>
+<para>이 문서의 목적은 <computeroutput>InputField</computeroutput>가 <ref refid="namespaceDali" kindref="compound">Dali</ref> UI <computeroutput>View</computeroutput>로 어떻게 구성되는지 분석하고, <computeroutput>TextVisualizer</computeroutput> 구현 시 참고할 부분과 제거해야 할 편집기 구조를 구분하는 것이다.</para>
+<para>특히 아래 항목을 명확히 정리한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Handle / Impl</computeroutput> 구조</para>
+</listitem><listitem><para><computeroutput>New()</computeroutput>, <computeroutput>DownCast()</computeroutput>, constructor 패턴</para>
+</listitem><listitem><para>property registration 방식</para>
+</listitem><listitem><para><computeroutput>OnInitialize()</computeroutput>, <computeroutput>OnRelayout()</computeroutput>, <computeroutput>OnMeasure()</computeroutput>, <computeroutput>OnPropertySet()</computeroutput> 사용 방식</para>
+</listitem><listitem><para><computeroutput>Text::Controller</computeroutput> 연결 방식</para>
+</listitem><listitem><para>rendering object 연결 방식</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>에 재사용할 수 있는 구조</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>에서 제거해야 할 editing 관련 구조</para>
+</listitem></itemizedlist>
+</para>
+<para>애매한 내용은 추측하지 않고 <computeroutput>확인 필요</computeroutput>로 표시한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md76">
+<title>분석 대상 파일</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md77">
+<title>직접 분석한 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="input-field_8h" kindref="compound">dali-ui-foundation/public-api/input-field.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field_8cpp" kindref="compound">dali-ui-foundation/public-api/input-field.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8h" kindref="compound">dali-ui-foundation/integration-api/input-field-impl.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/input-field-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-property-handler_8h" kindref="compound">dali-ui-foundation/integration-api/input-field-property-handler.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-property-handler_8cpp" kindref="compound">dali-ui-foundation/integration-api/input-field-property-handler.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-InputField.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md78">
+<title>함께 참고한 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="input-field-properties_8h" kindref="compound">dali-ui-foundation/public-api/text/input-field-properties.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/controls/text-controls/common-text-utils.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-backend.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md79">
+<title>현재 구조 요약</title>
+<para><computeroutput>InputField</computeroutput>는 public handle인 <computeroutput><ref refid="classDali_1_1Ui_1_1InputField" kindref="compound">Dali::Ui::InputField</ref></computeroutput>와 internal implementation인 <computeroutput><ref refid="classDali_1_1Ui_1_1Integration_1_1InputFieldImpl" kindref="compound">Dali::Ui::Integration::InputFieldImpl</ref></computeroutput>로 분리되어 있다.</para>
+<para>핵심 구조는 아래와 같다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Dali::Ui::InputField]<sp/>--&gt;<sp/>B[Integration::InputFieldImpl]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[ViewImpl<sp/>lifecycle]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>D[Text::Controller]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>E[Text::Decorator]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>F[Text::Renderer]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>G[InputMethodContext]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>H[Gesture<sp/>Detectors]</highlight></codeline>
+</programlisting></para>
+<para>즉, <computeroutput>InputFieldImpl</computeroutput>은 단순한 텍스트 뷰가 아니라 아래를 한 객체 안에서 함께 가진다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ViewImpl</computeroutput> 기반 수명주기</para>
+</listitem><listitem><para><computeroutput>Text::Controller</computeroutput> 기반 text model / layout / render data 생성</para>
+</listitem><listitem><para><computeroutput>Text::Decorator</computeroutput> 기반 cursor / selection / handle / popup 표현</para>
+</listitem><listitem><para><computeroutput>InputMethodContext</computeroutput> 기반 IME 연결</para>
+</listitem><listitem><para>tap / pan / long press / key event 처리</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput> 입장에서는 이 중 <computeroutput>ViewImpl + Controller + Renderer host</computeroutput> 구조는 참고 가치가 높고, 나머지 interactive runtime은 제거 대상이다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md80">
+<title>Handle / Impl 구조</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md81">
+<title>public handle</title>
+<para><computeroutput><ref refid="input-field_8h" kindref="compound">dali-ui-foundation/public-api/input-field.h</ref></computeroutput>의 <computeroutput><ref refid="classDali_1_1Ui_1_1InputField" kindref="compound">Dali::Ui::InputField</ref></computeroutput>는 <computeroutput>View</computeroutput>를 상속하는 handle 클래스다.</para>
+<para>주요 특징:</para>
+<para><itemizedlist>
+<listitem><para>데이터 멤버가 없다</para>
+</listitem><listitem><para>대부분의 setter/getter는 <computeroutput>GetImpl(*this)</computeroutput>를 통해 internal impl에 위임한다</para>
+</listitem><listitem><para>property enum은 <computeroutput>Text::InputFieldPropertyIndex</computeroutput>를 그대로 노출한다</para>
+</listitem></itemizedlist>
+</para>
+<para>관련 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField::New()</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::DownCast(BaseHandle handle)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::SetText(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::SetFontFamily(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::SetFontSize(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md82">
+<title>internal impl</title>
+<para><computeroutput><ref refid="input-field-impl_8h" kindref="compound">dali-ui-foundation/integration-api/input-field-impl.h</ref></computeroutput>의 <computeroutput>InputFieldImpl</computeroutput>은 실제 동작을 수행한다.</para>
+<para>상속 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ViewImpl</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::ControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::EditableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::SelectableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::AnchorControlInterface</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이 상속 구조만 봐도 <computeroutput>InputFieldImpl</computeroutput>이 표시용 view가 아니라 편집용 text host임을 알 수 있다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md83">
+<title>TextVisualizer 관점</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md84">
+<title>재사용할 수 있는 구조</title>
+<para><itemizedlist>
+<listitem><para>public handle / internal impl 이원화</para>
+</listitem><listitem><para>public API는 얇게 유지하고 internal impl에서 실제 로직 수행</para>
+</listitem><listitem><para><computeroutput>ViewImpl</computeroutput> lifecycle 기반으로 text layout/render를 통합하는 방식</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md85">
+<title>버릴 부분</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>EditableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>SelectableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>AnchorControlInterface</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput>는 1차 구현에서 위 3개 인터페이스를 기본 구조에 넣지 않는 편이 맞다.</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md86">
+<title>New(), DownCast(), constructor 패턴</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md87">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField::InputField()</computeroutput> in <computeroutput><ref refid="input-field_8cpp" kindref="compound">public-api/input-field.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::New()</computeroutput> in <computeroutput><ref refid="input-field_8cpp" kindref="compound">public-api/input-field.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::DownCast(BaseHandle)</computeroutput> in <computeroutput><ref refid="input-field_8cpp" kindref="compound">public-api/input-field.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField::InputField(Integration::InputFieldImpl&amp;)</computeroutput> in <computeroutput><ref refid="input-field_8cpp" kindref="compound">public-api/input-field.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::New()</computeroutput> in <computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">integration-api/input-field-impl.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md88">
+<title>실제 흐름</title>
+<para><computeroutput>InputField::New()</computeroutput>는 아래 패턴을 따른다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>Integration::InputFieldImpl::New()</computeroutput>로 impl 생성</para>
+</listitem><listitem><para><computeroutput>InputField(*impl)</computeroutput>로 handle 생성</para>
+</listitem><listitem><para><computeroutput>impl-&gt;Initialize()</computeroutput> 호출</para>
+</listitem><listitem><para>initialized handle 반환</para>
+</listitem></orderedlist>
+</para>
+<para>핵심 코드:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Integration::InputFieldImplPtr impl = Integration::InputFieldImpl::New();</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputField inputField = InputField(*impl);</computeroutput></para>
+</listitem><listitem><para><computeroutput>impl-&gt;Initialize();</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>DownCast()</computeroutput>는 다음 패턴이다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>return Ui::View::DownCast&lt;InputField, Integration::InputFieldImpl&gt;(handle);</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md89">
+<title>테스트에서 확인되는 점</title>
+<para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-InputField.cpp</computeroutput>에는 아래 UTC가 있다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UtcDaliInputFieldConstructorP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldNewP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldCopyConstructorP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldMoveConstructor</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldAssignmentOperatorP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldMoveAssignment</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldDownCastP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldDownCastN</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, handle 생성 / 복사 / 이동 / downcast 패턴은 이미 표준화되어 있고, <computeroutput>TextVisualizer</computeroutput>도 같은 패턴을 따르는 것이 자연스럽다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md90">
+<title>property registration 방식</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md91">
+<title>관련 위치</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">input-field-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-property-handler_8cpp" kindref="compound">input-field-property-handler.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field_8h" kindref="compound">input-field.h</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md92">
+<title>type registration</title>
+<para><computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">input-field-impl.cpp</ref></computeroutput> 상단에서 <ref refid="namespaceDali" kindref="compound">Dali</ref> type/property registration을 수행한다.</para>
+<para>관련 매크로:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>DALI_TYPE_REGISTRATION_BEGIN(InputFieldImpl, ViewImpl, Create)</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8cpp_1a82d820c9a175173bc77cdb8aab996adf" kindref="member">INPUT_FIELD_PROPERTY_REGISTRATION(...)</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8cpp_1a1be2235fe05b7d71aeb37c7b0612cbc4" kindref="member">INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY(...)</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>DALI_TYPE_REGISTRATION_END()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>등록되는 property 예:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>&quot;text&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;fontFamily&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;fontSize&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;textColor&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;placeholder&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;cursorWidth&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;cursorColor&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;selectionEnabled&quot;</computeroutput></para>
+</listitem><listitem><para><computeroutput>&quot;editable&quot;</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md93">
+<title>property dispatch</title>
+<para>실제 property set/get은 아래 구조를 따른다.</para>
+<para><orderedlist>
+<listitem><para><ref refid="namespaceDali" kindref="compound">Dali</ref> property system이 <computeroutput>InputFieldImpl::SetProperty()</computeroutput> / <computeroutput>GetProperty()</computeroutput> 호출</para>
+</listitem><listitem><para>내부에서 <computeroutput>PropertyHandler::SetProperty()</computeroutput> / <computeroutput>GetProperty()</computeroutput>로 위임</para>
+</listitem><listitem><para><computeroutput>switch(index)</computeroutput>로 각 setter/getter 호출</para>
+</listitem></orderedlist>
+</para>
+<para>관련 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputFieldImpl::SetProperty(BaseObject*, Property::Index, const Property::Value&amp;)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::GetProperty(BaseObject*, Property::Index)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::PropertyHandler::SetProperty(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::PropertyHandler::GetProperty(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md94">
+<title>테스트에서 확인되는 점</title>
+<para><computeroutput>utc-Dali-InputField.cpp</computeroutput>에는 아래 검증이 있다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UtcDaliInputFieldGetProperty</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliInputFieldSetProperty</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>여기서 property name과 index 매핑, <computeroutput>SetProperty()/GetProperty()</computeroutput> round-trip을 확인한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md95">
+<title>TextVisualizer 관점</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md96">
+<title>재사용할 수 있는 구조</title>
+<para><itemizedlist>
+<listitem><para>public property enum -&gt; internal property handler 분리</para>
+</listitem><listitem><para>registration과 실제 property 처리 로직 분리</para>
+</listitem><listitem><para>read-only property를 별도 registration 매크로로 구분하는 방식</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md97">
+<title>버릴 부분</title>
+<para><itemizedlist>
+<listitem><para>cursor / selection / editable / selectedText 등 editing 전용 property</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput>는 property 수를 크게 줄여야 한다.</para>
+<para>권장되는 1차 범위:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>text</computeroutput></para>
+</listitem><listitem><para><computeroutput>fontFamily</computeroutput></para>
+</listitem><listitem><para><computeroutput>fontSize</computeroutput></para>
+</listitem><listitem><para><computeroutput>textColor</computeroutput></para>
+</listitem><listitem><para><computeroutput>layoutDirectionMode</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>추가 검토 대상:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>fontWeight</computeroutput></para>
+</listitem><listitem><para><computeroutput>fontWidth</computeroutput></para>
+</listitem><listitem><para><computeroutput>fontSlant</computeroutput></para>
+</listitem><listitem><para><computeroutput>fontVariation</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md98">
+<title>OnInitialize / OnRelayout / OnMeasure / OnPropertySet 사용 방식</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md99">
+<title>OnInitialize()</title>
+<para>관련 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputFieldImpl::OnInitialize()</computeroutput> in <computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">input-field-impl.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>OnInitialize()</computeroutput>에서 수행하는 핵심 작업:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>ViewImpl::OnInitialize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController = Text::Controller::New(this, this, this, this)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;SetGlyphType(TextAbstraction::BITMAP_GLYPH)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mDecorator = Text::Decorator::New(*mController, *mController)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mInputMethodContext = InputMethodContext::New(self)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;GetLayoutEngine().SetLayout(Text::Layout::Engine::SINGLE_LINE_BOX)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;EnableTextInput(mDecorator, mInputMethodContext)</computeroutput></para>
+</listitem><listitem><para>scrolling / gesture / focus / locale / clipping 설정</para>
+</listitem><listitem><para><computeroutput>ApplyInitialConfig()</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>해석:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField</computeroutput>의 핵심 runtime은 <computeroutput>OnInitialize()</computeroutput>에서 거의 모두 구성된다</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput>는 생성 직후부터 single-line editable control로 세팅된다</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput>에서 참고할 부분:</para>
+<para><itemizedlist>
+<listitem><para>controller 생성 시점</para>
+</listitem><listitem><para>glyph type 지정 시점</para>
+</listitem><listitem><para>locale/layoutDirection signal 연결</para>
+</listitem><listitem><para>기본 config 적용 위치</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput>에서 제거할 부분:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Decorator::New(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputMethodContext::New(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>EnableTextInput(...)</computeroutput></para>
+</listitem><listitem><para>gesture detector 생성/attach</para>
+</listitem><listitem><para>scroll / no-text tap / grab handle 관련 설정</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md100">
+<title>OnRelayout()</title>
+<para>관련 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputFieldImpl::OnRelayout(const Vector2&amp;, RelayoutContainer&amp;)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>핵심 흐름:</para>
+<para><orderedlist>
+<listitem><para>padding 제외한 <computeroutput>contentSize</computeroutput> 계산</para>
+</listitem><listitem><para>RTL이면 padding start/end swap</para>
+</listitem><listitem><para>stencil / active layer / cursor layer 크기 갱신</para>
+</listitem><listitem><para><computeroutput>mController-&gt;Relayout(contentSize, layoutDirection)</computeroutput> 호출</para>
+</listitem><listitem><para>필요한 경우 <computeroutput>mDecorator-&gt;Relayout(contentSize, container)</computeroutput></para>
+</listitem><listitem><para>renderer가 없으면 <computeroutput>Text::Backend::Get().NewRenderer()</computeroutput>로 생성</para>
+</listitem><listitem><para><computeroutput>RenderText(updateTextType)</computeroutput> 호출</para>
+</listitem><listitem><para>cursor/selection signal emit</para>
+</listitem></orderedlist>
+</para>
+<para>이 흐름은 <computeroutput>TextVisualizer</computeroutput>에 가장 직접적으로 재사용 가능한 구조다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[OnRelayout]<sp/>--&gt;<sp/>B[padding<sp/>제외<sp/>contentSize<sp/>계산]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[mController.Relayout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[필요<sp/>시<sp/>renderer<sp/>생성]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[RenderText]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[scene<sp/>actor<sp/>동기화]</highlight></codeline>
+</programlisting></para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md101">
+<title>OnMeasure()</title>
+<para>관련 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputFieldImpl::OnMeasure(float widthConstraint, float heightConstraint)</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::GetNaturalSize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::GetHeightForWidth(float width)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>핵심 흐름:</para>
+<para><orderedlist>
+<listitem><para>requested/min/max constraint 수집</para>
+</listitem><listitem><para><computeroutput>GetNaturalSize()</computeroutput> 호출</para>
+</listitem><listitem><para>empty text면 <computeroutput>mController-&gt;GetDefaultFontLineHeight()</computeroutput>를 사용해 height 보정</para>
+</listitem><listitem><para><computeroutput>WRAP_CONTENT</computeroutput>, <computeroutput>MATCH_PARENT</computeroutput>, explicit size를 구분해 measured size 계산</para>
+</listitem></orderedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>측정 로직은 <computeroutput>ViewImpl</computeroutput>에서 수행하지만 실제 텍스트 자연 크기는 controller에 위임한다</para>
+</listitem><listitem><para>text가 비어 있을 때 line height로 높이를 보정하는 특수 규칙이 있다</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>TextVisualizer</computeroutput>에서 재사용할 수 있는 구조:</para>
+<para><itemizedlist>
+<listitem><para>controller natural size 기반 measure</para>
+</listitem><listitem><para>padding 반영 방식</para>
+</listitem><listitem><para>wrap-content일 때만 measure invalidation을 거는 방식</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>가 항상 multi-line이라면 empty text 측정 규칙을 <computeroutput>InputField</computeroutput>와 동일하게 가져갈지 별도 정의할지 결정 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md102">
+<title>OnPropertySet()</title>
+<para>관련 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputFieldImpl::OnPropertySet(Dali::Property::Index, const Dali::Property::Value&amp;)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>현재 구현은 거의 비어 있다.</para>
+<para><programlisting filename=".cpp"><codeline><highlight class="keywordflow">switch</highlight><highlight class="normal">(index)</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">default</highlight><highlight class="normal">:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>ViewImpl::OnPropertySet(index,<sp/>propertyValue);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal">}</highlight></codeline>
+</programlisting></para>
+<para>즉, <computeroutput>InputField</computeroutput>는 대부분의 자체 property를 <computeroutput>PropertyHandler</computeroutput> 경로로 처리하고, <computeroutput>OnPropertySet()</computeroutput>은 base view property fallback 정도로만 사용한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md103">
+<title>TextVisualizer 관점</title>
+<para>이 구조는 그대로 참고할 수 있다.</para>
+<para><itemizedlist>
+<listitem><para>custom text property는 static property handler에서 처리</para>
+</listitem><listitem><para><computeroutput>OnPropertySet()</computeroutput>은 view 공통 property forwarding 중심으로 유지</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md104">
+<title>Controller 연결 방식</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md105">
+<title>관련 코드</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mController = Text::Controller::New(this, this, this, this);</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;SetGlyphType(TextAbstraction::BITMAP_GLYPH);</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;GetLayoutEngine().SetLayout(Text::Layout::Engine::SINGLE_LINE_BOX);</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>InputFieldImpl</computeroutput>은 자기 자신을 아래 인터페이스 구현체로 controller에 넘긴다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::ControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::EditableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::SelectableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::AnchorControlInterface</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, controller는 view를 직접 아는 것이 아니라 interface를 통해 host와 상호작용한다.</para>
+<para>이 점은 <computeroutput>TextVisualizer</computeroutput>에 매우 중요하다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md106">
+<title>TextVisualizer에 재사용할 수 있는 구조</title>
+<para><itemizedlist>
+<listitem><para>controller가 host interface를 통해 relayout / measure invalidation / decoration actor 추가를 요청하는 방식</para>
+</listitem><listitem><para>handle과 controller를 직접 결합하지 않고 impl이 중간 host 역할을 하는 방식</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md107">
+<title>TextVisualizer에서 바꿔야 할 부분</title>
+<para><computeroutput>TextVisualizer</computeroutput>는 아래 인터페이스만 남기는 것이 적절하다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::ControlInterface</computeroutput> 유사 최소 host</para>
+</listitem></itemizedlist>
+</para>
+<para>제거 대상:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>EditableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>SelectableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>AnchorControlInterface</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>TextVisualizer</computeroutput>는 controller와의 결합 폭을 줄여야 한다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md108">
+<title>rendering object 연결 방식</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md109">
+<title>관련 코드</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mRenderer = Text::Backend::Get().NewRenderer();</computeroutput></para>
+</listitem><listitem><para><computeroutput>RenderText(updateTextType);</computeroutput></para>
+</listitem><listitem><para><computeroutput>CommonTextUtils::RenderText(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>InputFieldImpl</computeroutput>의 rendering 연결은 다음 흐름이다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>OnRelayout()</computeroutput>에서 <computeroutput>mController-&gt;Relayout(...)</computeroutput></para>
+</listitem><listitem><para>renderer가 없으면 <computeroutput>Text::Backend::Get().NewRenderer()</computeroutput>로 생성</para>
+</listitem><listitem><para><computeroutput>RenderText(updateTextType)</computeroutput> 호출</para>
+</listitem><listitem><para>내부에서 <computeroutput>CommonTextUtils::RenderText(Self(), mRenderer, mController, mDecorator, ...)</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>즉, impl은 직접 glyph draw를 하지 않고, renderer와 actor tree를 동기화하는 host 역할을 한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md110">
+<title>TextVisualizer에 재사용할 수 있는 구조</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>OnRelayout()</computeroutput> 시점에서 renderer를 lazy-create 하는 방식</para>
+</listitem><listitem><para>render host 함수가 actor attach/detach를 담당하는 방식</para>
+</listitem><listitem><para>text model/layout 계산과 실제 scene graph 반영을 분리하는 구조</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md111">
+<title>TextVisualizer에서 제거해야 할 부분</title>
+<para><computeroutput>CommonTextUtils::RenderText(...)</computeroutput> 호출 인자 중 아래는 1차 구현에서 제거 또는 null-path가 필요하다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mDecorator</computeroutput></para>
+</listitem><listitem><para><computeroutput>mCursorLayer</computeroutput></para>
+</listitem><listitem><para><computeroutput>mClippingDecorationActors</computeroutput></para>
+</listitem><listitem><para><computeroutput>mAnchorActors</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>CommonTextUtils::RenderText(...)</computeroutput>를 decorator 없이 재사용 가능한지, 또는 <computeroutput>TextVisualizer</computeroutput>용 경량 render helper가 필요한지 추가 확인 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md112">
+<title>editing 관련 구조와 오버헤드</title>
+<para><computeroutput>InputFieldImpl</computeroutput>의 멤버와 callback만 보아도 편집기 runtime이 큰 비중을 차지한다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md113">
+<title>cursor 관련</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mDecorator</computeroutput></para>
+</listitem><listitem><para><computeroutput>mCursorLayer</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetCursorWidth()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetCursorColor()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetCursorBlinkEnabled()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetCursorBlinkInterval()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetCursorPosition()</computeroutput></para>
+</listitem><listitem><para><computeroutput>EmitCursorPositionChanged()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md114">
+<title>selection 관련</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetSelectionEnabled()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetSelectionColor()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetSelectedText()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SelectText()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SelectWholeText()</computeroutput></para>
+</listitem><listitem><para><computeroutput>ClearSelection()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SelectionChanged()</computeroutput></para>
+</listitem><listitem><para><computeroutput>mSelectionStarted</computeroutput>, <computeroutput>mSelectionChanged</computeroutput>, <computeroutput>mSelectionCleared</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md115">
+<title>decorator 관련</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Decorator::New(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mDecorator-&gt;Relayout(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>AddDecoration(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetBoundingBox()</computeroutput>, <computeroutput>SetBoundingBox()</computeroutput></para>
+</listitem><listitem><para><computeroutput>FlipHandleVertically(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md116">
+<title>input method 관련</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mInputMethodContext</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnInputMethodContextEvent(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnFocusGained()</computeroutput>에서 IME activate</para>
+</listitem><listitem><para><computeroutput>OnFocusLost()</computeroutput>에서 IME deactivate</para>
+</listitem><listitem><para><computeroutput>OnKeyboardStatusChanged(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md117">
+<title>grab handle / popup 관련</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mController-&gt;SetGrabHandleEnabled(false);</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;SetGrabHandlePopupEnabled(false);</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>현재는 일부 비활성화되어 있지만, 구조 자체는 여전히 input control 전제다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md118">
+<title>event handling 관련</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>OnKeyEvent(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnTapDetected(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnPanDetected(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnLongPressDetected(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>self.TouchedSignal().Connect(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>TapGestureDetector</computeroutput></para>
+</listitem><listitem><para><computeroutput>PanGestureDetector</computeroutput></para>
+</listitem><listitem><para><computeroutput>LongPressGestureDetector</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md119">
+<title>TextVisualizer에서 제거해야 할 부분</title>
+<para>아래는 1차 구현에서 기본적으로 제거하는 것이 맞다.</para>
+<para><itemizedlist>
+<listitem><para>cursor</para>
+</listitem><listitem><para>selection</para>
+</listitem><listitem><para>decorator</para>
+</listitem><listitem><para>input method</para>
+</listitem><listitem><para>grab handle</para>
+</listitem><listitem><para>popup</para>
+</listitem><listitem><para>key/tap/pan/long press event handling</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md120">
+<title>관련 automated tests가 보여주는 구조</title>
+<para><computeroutput>utc-Dali-InputField.cpp</computeroutput>는 주로 아래를 검증한다.</para>
+<para><itemizedlist>
+<listitem><para>handle 생명주기</para>
+</listitem><listitem><para>property enum / property name 매핑</para>
+</listitem><listitem><para>public setter/getter 동작</para>
+</listitem><listitem><para>property set/get 동작</para>
+</listitem><listitem><para>cursor/selection/editable 관련 public API 존재 여부</para>
+</listitem></itemizedlist>
+</para>
+<para>이 테스트에서 확인되는 중요한 점:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>InputField</computeroutput>는 public API surface가 매우 넓다.</para>
+</listitem><listitem><para>많은 API가 편집기 기능을 노출한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>는 같은 패턴을 쓰더라도 public API는 훨씬 작아야 한다.</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md121">
+<title>TextVisualizer에 필요한 부분</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md122">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField::New()</computeroutput>와 같은 handle/impl 생성 패턴</para>
+</listitem><listitem><para><computeroutput>DownCast()</computeroutput> 패턴</para>
+</listitem><listitem><para>public API는 thin wrapper, internal impl이 실제 로직 수행하는 구조</para>
+</listitem><listitem><para><computeroutput>ViewImpl</computeroutput> lifecycle 기반 <computeroutput>OnInitialize()</computeroutput> / <computeroutput>OnMeasure()</computeroutput> / <computeroutput>OnRelayout()</computeroutput> 통합</para>
+</listitem><listitem><para><computeroutput>mController-&gt;Relayout(...)</computeroutput> 후 renderer host 호출 구조</para>
+</listitem><listitem><para>padding / clipping / renderer lazy creation 패턴</para>
+</listitem><listitem><para>property registration + property handler 분리 구조</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md123">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para>locale/layoutDirection signal 연결</para>
+</listitem><listitem><para><computeroutput>ApplyInitialConfig()</computeroutput> 방식</para>
+</listitem><listitem><para><computeroutput>GetNaturalSize()</computeroutput> / <computeroutput>GetHeightForWidth()</computeroutput>의 controller 위임 구조</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md124">
+<title>버릴 부분</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>EditableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>SelectableControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>AnchorControlInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::Decorator</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputMethodContext</computeroutput></para>
+</listitem><listitem><para>focus와 결합된 editing state</para>
+</listitem><listitem><para><computeroutput>OnKeyEvent()</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnTapDetected()</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnPanDetected()</computeroutput></para>
+</listitem><listitem><para><computeroutput>OnLongPressDetected()</computeroutput></para>
+</listitem><listitem><para>clipboard / cut / copy / paste</para>
+</listitem><listitem><para>cursor / selection signal</para>
+</listitem><listitem><para>grab handle / popup 관련 설정</para>
+</listitem><listitem><para>single-line layout 고정</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md125">
+<title>설계 결론</title>
+<para><computeroutput>InputField</computeroutput>는 <computeroutput>TextVisualizer</computeroutput>의 기반 클래스로 재사용할 대상은 아니다. 하지만 <computeroutput>View</computeroutput> 위에 텍스트 controller와 renderer를 얹는 host 구조는 매우 좋은 참고 구현이다.</para>
+<para>따라서 <computeroutput>TextVisualizer</computeroutput>는 아래 방향이 적절하다.</para>
+<para><itemizedlist>
+<listitem><para>public handle / internal impl 구조는 <computeroutput>InputField</computeroutput>를 따른다</para>
+</listitem><listitem><para><computeroutput>ViewImpl</computeroutput> lifecycle에서 measure / relayout / render를 통합하는 방식은 유지한다</para>
+</listitem><listitem><para>controller와 renderer 연결 방식은 참고하되, editing runtime은 제거한다</para>
+</listitem><listitem><para>property system은 단순한 표시용 API만 남기고 크게 축소한다</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md126">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>가 <computeroutput>InputField</computeroutput>처럼 <computeroutput>Text::Controller</computeroutput>를 직접 host할지, 별도 경량 controller를 둘지 이후 단계에서 확정 필요</para>
+</listitem><listitem><para><computeroutput>CommonTextUtils::RenderText(...)</computeroutput>를 decorator 없이 재사용할 수 있는지 추가 확인 필요</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> 1차 구현에서 anchor 처리도 완전히 제외할지 여부 확정 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatiofa1ed2b1f7622fbe2b61ab0c65c5c04d_1autotoc_md127">
+<title>TextVisualizer 설계에 주는 결론</title>
+<para><orderedlist>
+<listitem><para><computeroutput>InputField</computeroutput>에서 가장 중요한 재사용 포인트는 <computeroutput>Handle/Impl + ViewImpl lifecycle + controller/renderer host</computeroutput> 구조다.</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput>의 편집기 기능은 <computeroutput>TextVisualizer</computeroutput>에 그대로 가져오면 안 된다.</para>
+</listitem><listitem><para>특히 <computeroutput>Decorator</computeroutput>, <computeroutput>InputMethodContext</computeroutput>, gesture/key handling, selection/cursor API는 기본 구조에서 제거해야 한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>는 <computeroutput>InputField</computeroutput>를 &quot;복사&quot;하는 것이 아니라, <computeroutput>InputField</computeroutput>의 view hosting 패턴만 추출한 display-only view로 설계하는 것이 맞다. </para>
+</listitem></orderedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/02-input-field-analysis.ko.md"/>
+  </compounddef>
+</doxygen>

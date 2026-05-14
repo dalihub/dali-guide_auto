@@ -1,0 +1,270 @@
+---
+title: Scroll View
+sidebar_label: Scroll View
+category: views-components
+---
+
+# Scroll View
+
+`Dali::Ui::ScrollView` displays a larger `Dali::Ui::View` inside a scrollable viewport and exposes typed controls for direction, scroll position, fling behavior, scroll bars, overscroll, and scroll-related signals.
+
+## Table of Contents
+
+- [Create a Scroll View with View Content](#create-a-scroll-view-with-view-content)
+- [Configure Direction, Scroll Bars, and Overscroll](#configure-direction-scroll-bars-and-overscroll)
+- [Control the Scroll Position](#control-the-scroll-position)
+- [Tune Fling Behavior](#tune-fling-behavior)
+- [React to Scroll and Drag Signals](#react-to-scroll-and-drag-signals)
+- [Use Handles and Fluent Chaining](#use-handles-and-fluent-chaining)
+
+## Create a Scroll View with View Content
+
+Use `Dali::Ui::ScrollView::New` to create the scroll container, then attach the scrollable body with `Dali::Ui::ScrollView::SetContent`. The content is a `Dali::Ui::View`, so application code can keep working with the dali-ui view tree instead of a raw actor model.
+
+```cpp
+Dali::Ui::View BuildScrollableContent();
+
+Dali::Ui::ScrollView CreateArticleScroller()
+{
+  Dali::Ui::View content = BuildScrollableContent();
+
+  Dali::Ui::ScrollView scrollView = Dali::Ui::ScrollView::New()
+    .SetScrollDirection(Dali::Ui::ScrollDirection::Vertical)
+    .SetContent(content);
+
+  return scrollView;
+}
+```
+
+`Dali::Ui::ScrollView::GetContent` returns the current content view. This is useful when a controller needs to inspect or replace content after initial construction.
+
+```cpp
+void ReplaceContent(Dali::Ui::ScrollView scrollView, Dali::Ui::View replacement)
+{
+  Dali::Ui::View previousContent = scrollView.GetContent();
+
+  scrollView.SetContent(replacement);
+}
+```
+
+## Configure Direction, Scroll Bars, and Overscroll
+
+`Dali::Ui::ScrollView::SetScrollDirection` selects vertical, horizontal, or two-axis movement with `Dali::Ui::ScrollDirection::Vertical`, `Dali::Ui::ScrollDirection::Horizontal`, or `Dali::Ui::ScrollDirection::Both`.
+
+Scroll bar visibility is configured separately for each axis with `Dali::Ui::ScrollView::SetVerticalScrollBarVisibility` and `Dali::Ui::ScrollView::SetHorizontalScrollBarVisibility`. Use `Dali::Ui::ScrollBarVisibility::Auto` to show a bar only while scrolling, `Dali::Ui::ScrollBarVisibility::Always` to keep it visible, or `Dali::Ui::ScrollBarVisibility::Never` to hide it.
+
+```cpp
+Dali::Ui::ScrollView CreateVerticalListScroller(Dali::Ui::View content)
+{
+  return Dali::Ui::ScrollView::New()
+    .SetScrollDirection(Dali::Ui::ScrollDirection::Vertical)
+    .SetVerticalScrollBarVisibility(Dali::Ui::ScrollBarVisibility::Auto)
+    .SetHorizontalScrollBarVisibility(Dali::Ui::ScrollBarVisibility::Never)
+    .SetOverScrollMode(Dali::Ui::OverScrollMode::ContentScrolls)
+    .SetContent(content);
+}
+```
+
+`Dali::Ui::ScrollView::SetOverScrollMode` controls whether overscroll is available. `Dali::Ui::OverScrollMode::Never` disables it, `Dali::Ui::OverScrollMode::Always` allows it, and `Dali::Ui::OverScrollMode::ContentScrolls` allows it when the content is scrollable.
+
+```cpp
+void ConfigurePagedCanvas(Dali::Ui::ScrollView scrollView)
+{
+  scrollView
+    .SetScrollDirection(Dali::Ui::ScrollDirection::Both)
+    .SetVerticalScrollBarVisibility(Dali::Ui::ScrollBarVisibility::Always)
+    .SetHorizontalScrollBarVisibility(Dali::Ui::ScrollBarVisibility::Always)
+    .SetOverScrollMode(Dali::Ui::OverScrollMode::Never);
+}
+```
+
+The matching getters, such as `Dali::Ui::ScrollView::GetScrollDirection`, `Dali::Ui::ScrollView::GetVerticalScrollBarVisibility`, `Dali::Ui::ScrollView::GetHorizontalScrollBarVisibility`, and `Dali::Ui::ScrollView::GetOverScrollMode`, can be used to preserve or copy an existing configuration.
+
+```cpp
+void CopyScrollPolicy(Dali::Ui::ScrollView source, Dali::Ui::ScrollView target)
+{
+  target
+    .SetScrollDirection(source.GetScrollDirection())
+    .SetVerticalScrollBarVisibility(source.GetVerticalScrollBarVisibility())
+    .SetHorizontalScrollBarVisibility(source.GetHorizontalScrollBarVisibility())
+    .SetOverScrollMode(source.GetOverScrollMode());
+}
+```
+
+## Control the Scroll Position
+
+`Dali::Ui::ScrollView::SetScrollPosition` sets the current scroll position directly. `Dali::Ui::ScrollView::ScrollTo` moves to a target position and accepts an optional animation flag.
+
+```cpp
+void RestoreScrollPosition(Dali::Ui::ScrollView scrollView, const Dali::Vector2& savedPosition)
+{
+  scrollView.SetScrollPosition(savedPosition);
+}
+```
+
+```cpp
+void ShowTop(Dali::Ui::ScrollView scrollView)
+{
+  scrollView.ScrollTo(Dali::Vector2(0.0f, 0.0f), true);
+}
+```
+
+For one-axis movement, use `Dali::Ui::ScrollView::ScrollToX` or `Dali::Ui::ScrollView::ScrollToY`. These methods keep the other axis under the scroll view's current state.
+
+```cpp
+void JumpToSection(Dali::Ui::ScrollView scrollView, float y)
+{
+  scrollView.ScrollToY(y, true);
+}
+
+void JumpToColumn(Dali::Ui::ScrollView scrollView, float x)
+{
+  scrollView.ScrollToX(x, false);
+}
+```
+
+`Dali::Ui::ScrollView::GetScrollPosition` returns the current `Dali::Vector2` scroll position, and `Dali::Ui::ScrollView::IsScrolling` reports whether scrolling is currently in progress.
+
+```cpp
+Dali::Vector2 CaptureStablePosition(Dali::Ui::ScrollView scrollView)
+{
+  if(scrollView.IsScrolling())
+  {
+    return scrollView.GetScrollPosition();
+  }
+
+  return scrollView.GetScrollPosition();
+}
+```
+
+## Tune Fling Behavior
+
+A fling is controlled with typed setters on `Dali::Ui::ScrollView`. `Dali::Ui::ScrollView::SetMaxFlingDistance` limits how far a fling can carry the content, `Dali::Ui::ScrollView::SetMinimumFlingDuration` and `Dali::Ui::ScrollView::SetMaximumFlingDuration` bound the animation duration, `Dali::Ui::ScrollView::SetFlingSensitivity` adjusts gesture sensitivity, and `Dali::Ui::ScrollView::SetDecelerationRate` adjusts how quickly the fling slows.
+
+```cpp
+void ConfigureComfortableFling(Dali::Ui::ScrollView scrollView)
+{
+  scrollView
+    .SetMaxFlingDistance(6000.0f)
+    .SetMinimumFlingDuration(1000)
+    .SetMaximumFlingDuration(2000)
+    .SetFlingSensitivity(1.0f)
+    .SetDecelerationRate(0.998f);
+}
+```
+
+Use the corresponding getters to read back the active values.
+
+```cpp
+struct ScrollFlingSettings
+{
+  float maxDistance;
+  int minimumDuration;
+  int maximumDuration;
+  float sensitivity;
+  float decelerationRate;
+};
+
+ScrollFlingSettings ReadFlingSettings(Dali::Ui::ScrollView scrollView)
+{
+  return ScrollFlingSettings{
+    scrollView.GetMaxFlingDistance(),
+    scrollView.GetMinimumFlingDuration(),
+    scrollView.GetMaximumFlingDuration(),
+    scrollView.GetFlingSensitivity(),
+    scrollView.GetDecelerationRate()
+  };
+}
+```
+
+## React to Scroll and Drag Signals
+
+`Dali::Ui::ScrollView` emits separate signals for scroll state and drag state. `Dali::Ui::ScrollView::ScrollStartedSignal`, `Dali::Ui::ScrollView::ScrollingSignal`, and `Dali::Ui::ScrollView::ScrollFinishedSignal` use callbacks that receive the `Dali::Ui::ScrollView`. `Dali::Ui::ScrollView::DragStartedSignal` and `Dali::Ui::ScrollView::DragFinishedSignal` also receive the scroll view. `Dali::Ui::ScrollView::DraggingSignal` receives the scroll view plus `deltaX` and `deltaY`.
+
+```cpp
+class ScrollPanelController : public Dali::ConnectionTracker
+{
+public:
+  ScrollPanelController() = default;
+
+  void Connect(Dali::Ui::ScrollView scrollView)
+  {
+    scrollView.ScrollStartedSignal().Connect(this, &ScrollPanelController::OnScrollStarted);
+    scrollView.ScrollingSignal().Connect(this, &ScrollPanelController::OnScrolling);
+    scrollView.ScrollFinishedSignal().Connect(this, &ScrollPanelController::OnScrollFinished);
+    scrollView.DragStartedSignal().Connect(this, &ScrollPanelController::OnDragStarted);
+    scrollView.DraggingSignal().Connect(this, &ScrollPanelController::OnDragging);
+    scrollView.DragFinishedSignal().Connect(this, &ScrollPanelController::OnDragFinished);
+  }
+
+private:
+  void OnScrollStarted(Dali::Ui::ScrollView scrollView)
+  {
+    Dali::Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnScrolling(Dali::Ui::ScrollView scrollView)
+  {
+    Dali::Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnScrollFinished(Dali::Ui::ScrollView scrollView)
+  {
+    Dali::Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnDragStarted(Dali::Ui::ScrollView scrollView)
+  {
+    Dali::Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnDragging(Dali::Ui::ScrollView scrollView, float deltaX, float deltaY)
+  {
+    Dali::Vector2 position = scrollView.GetScrollPosition();
+  }
+
+  void OnDragFinished(Dali::Ui::ScrollView scrollView)
+  {
+    Dali::Vector2 position = scrollView.GetScrollPosition();
+  }
+};
+```
+
+Signal handlers are a good place to synchronize dependent UI with the current scroll position. Keep the callback signatures exact: `Dali::Ui::ScrollView::DraggingSignal` has two extra `float` parameters, while the other scroll and drag signals only pass the `Dali::Ui::ScrollView`.
+
+## Use Handles and Fluent Chaining
+
+`Dali::Ui::ScrollView` is a handle type. You can create an empty handle with `Dali::Ui::ScrollView::ScrollView`, initialize one with `Dali::Ui::ScrollView::New`, move-assign one with `Dali::Ui::ScrollView::operator=`, and downcast a generic handle with `Dali::Ui::ScrollView::DownCast`.
+
+```cpp
+Dali::Ui::ScrollView MakeScroller(Dali::Ui::View content)
+{
+  Dali::Ui::ScrollView scrollView;
+
+  scrollView = Dali::Ui::ScrollView::New()
+    .SetScrollDirection(Dali::Ui::ScrollDirection::Vertical)
+    .SetContent(content);
+
+  return scrollView;
+}
+```
+
+```cpp
+Dali::Ui::ScrollView AsScrollView(Dali::BaseHandle handle)
+{
+  return Dali::Ui::ScrollView::DownCast(handle);
+}
+```
+
+The public generated header `scroll-view.autogen.h` contributes `DALI_UI_CHAIN_SCROLLVIEW_METHODS` for fluent chain support in scroll-view-derived dali-ui types. Application code normally uses the resulting chainable setters directly, as shown throughout this guide.
+
+```cpp
+Dali::Ui::ScrollView ConfigureScroller(Dali::Ui::View content)
+{
+  return Dali::Ui::ScrollView::New()
+    .SetContent(content)
+    .SetScrollDirection(Dali::Ui::ScrollDirection::Vertical)
+    .SetOverScrollMode(Dali::Ui::OverScrollMode::ContentScrolls)
+    .SetVerticalScrollBarVisibility(Dali::Ui::ScrollBarVisibility::Auto);
+}
+```

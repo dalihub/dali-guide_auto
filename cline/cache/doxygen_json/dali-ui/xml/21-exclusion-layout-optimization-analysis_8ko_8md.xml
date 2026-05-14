@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="21-exclusion-layout-optimization-analysis_8ko_8md" kind="file" language="Markdown">
+    <compoundname>21-exclusion-layout-optimization-analysis.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>Exclusion<sp/>/<sp/>Layout<sp/>Optimization<sp/>Analysis</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>1.<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>`TextVisualizer`의<sp/>exclusion<sp/>layout<sp/>경로에서<sp/>남아<sp/>있는<sp/>중복<sp/>계산<sp/>후보를<sp/>정리하고,<sp/>이번<sp/>커밋에서<sp/>적용한<sp/>low-risk<sp/>개선<sp/>범위를<sp/>기록한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>primary<sp/>workload는<sp/>text<sp/>/<sp/>font<sp/>/<sp/>glyph<sp/>sequence가<sp/>stable하고,<sp/>moving<sp/>bounds<sp/>/<sp/>exclusion<sp/>/<sp/>layout<sp/>result<sp/>/<sp/>glyph<sp/>positions만<sp/>자주<sp/>바뀌는<sp/>layout-dynamic<sp/>text다.<sp/>따라서<sp/>prepare<sp/>이후<sp/>runtime<sp/>path에서<sp/>반복되는<sp/>layout<sp/>계산을<sp/>줄이는<sp/>것이<sp/>중요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>2.<sp/>현재<sp/>exclusion<sp/>layout<sp/>경로</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>relayout<sp/>경로는<sp/>다음<sp/>흐름을<sp/>갖는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[OnMeasure]<sp/>--&gt;<sp/>B[MeasureNaturalTextHeightForWidth]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[UpdateLayout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[LayoutGlyphs<sp/>/<sp/>LayoutPlaceholder]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[BuildSortedExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[BuildAvailableIntervalsFromSorted]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[measured<sp/>LayoutResult]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H[OnRelayout]<sp/>--&gt;<sp/>I[UpdateLayout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[LayoutGlyphs<sp/>/<sp/>LayoutPlaceholder]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>K[BuildSortedExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>K<sp/>--&gt;<sp/>L[BuildAvailableIntervalsFromSorted]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>--&gt;<sp/>M[mLayoutResult]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`OnMeasure()`가<sp/>wrap<sp/>height<sp/>계산을<sp/>위해<sp/>layout을<sp/>수행하고,<sp/>같은<sp/>width<sp/>/<sp/>same<sp/>prepared<sp/>text<sp/>/<sp/>same<sp/>line<sp/>height<sp/>/<sp/>same<sp/>exclusion<sp/>state로<sp/>곧바로<sp/>`OnRelayout()`이<sp/>호출되면<sp/>`UpdateLayout()`이<sp/>중복될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>3.<sp/>후보<sp/>분석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>후보<sp/>|<sp/>효과<sp/>가능성<sp/>|<sp/>위험<sp/>|<sp/>이번<sp/>판단<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---:|---:|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>measure<sp/>layout<sp/>cache<sp/>|<sp/>중간<sp/>|<sp/>낮음<sp/>|<sp/>적용<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>sorted<sp/>exclusion<sp/>cache<sp/>|<sp/>중간<sp/>|<sp/>중간<sp/>|<sp/>보류<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>exact<sp/>compare<sp/>epsilon<sp/>|<sp/>낮음-중간<sp/>|<sp/>높음<sp/>|<sp/>보류<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>available<sp/>interval<sp/>cache<sp/>|<sp/>중간<sp/>|<sp/>높음<sp/>|<sp/>보류<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>A.<sp/>OnMeasure<sp/>/<sp/>OnRelayout<sp/>중복<sp/>layout</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`OnMeasure()`는<sp/>fixed<sp/>width<sp/>+<sp/>wrap<sp/>height,<sp/>wrap<sp/>width<sp/>+<sp/>wrap<sp/>height<sp/>같은<sp/>Label-like<sp/>measure에서<sp/>natural<sp/>height를<sp/>계산하기<sp/>위해<sp/>local<sp/>`LayoutResult`를<sp/>만든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이후<sp/>parent가<sp/>같은<sp/>width로<sp/>`OnRelayout()`을<sp/>호출하면<sp/>exclusion<sp/>sort,<sp/>interval<sp/>generation,<sp/>word<sp/>wrap<sp/>scan,<sp/>glyph<sp/>placement가<sp/>한<sp/>번<sp/>더<sp/>수행될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>커밋에서는<sp/>`OnMeasure()`에서<sp/>만든<sp/>`LayoutResult`를<sp/>`TextVisualizerImpl`<sp/>내부<sp/>cache에<sp/>저장하고,<sp/>`OnRelayout()`에서<sp/>같은<sp/>layout<sp/>width일<sp/>때<sp/>이를<sp/>재사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>B.<sp/>sorted<sp/>exclusion<sp/>cache</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`LayoutGlyphs()`<sp/>/<sp/>`LayoutPlaceholder()`는<sp/>layout<sp/>pass마다<sp/>`BuildSortedExclusionRegions()`를<sp/>호출한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>정렬은<sp/>exclusion<sp/>set이<sp/>바뀌지<sp/>않는<sp/>동안<sp/>재사용할<sp/>수<sp/>있지만,<sp/>현재<sp/>`LayoutEngine`은<sp/>plain<sp/>`Dali::Vector&lt;Bounds&gt;`를<sp/>입력으로<sp/>받아<sp/>내부<sp/>local<sp/>sorted<sp/>cache를<sp/>만든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">core에서<sp/>sorted<sp/>cache를<sp/>유지하려면<sp/>다음<sp/>중<sp/>하나가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerImpl`이<sp/>sorted<sp/>exclusions를<sp/>보유하고<sp/>`LayoutEngine`<sp/>internal<sp/>overload에<sp/>전달</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutEngine`에<sp/>sorted<sp/>exclusion<sp/>input<sp/>type<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>static<sp/>/<sp/>dynamic<sp/>exclusion을<sp/>core<sp/>내부에서<sp/>분리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">internal<sp/>API<sp/>경계와<sp/>invalidation<sp/>범위가<sp/>커지므로<sp/>이번<sp/>커밋에서는<sp/>구현하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>C.<sp/>exclusion<sp/>equality<sp/>/<sp/>update<sp/>cost</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`SetExclusionRegions()`는<sp/>exact<sp/>compare<sp/>정책을<sp/>유지한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">moving<sp/>bounds<sp/>상황에서는<sp/>region<sp/>값이<sp/>대부분<sp/>매<sp/>tick<sp/>달라져<sp/>compare가<sp/>false가<sp/>되기<sp/>쉽다.<sp/>하지만<sp/>epsilon<sp/>compare를<sp/>core에<sp/>넣으면<sp/>text<sp/>avoidance<sp/>correctness와<sp/>public<sp/>semantic이<sp/>흐려진다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>현재<sp/>정책은<sp/>다음과<sp/>같이<sp/>유지한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>core는<sp/>exact<sp/>compare<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same-count<sp/>storage<sp/>update는<sp/>in-place<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>epsilon<sp/>/<sp/>threshold는<sp/>sample-level<sp/>실험으로만<sp/>둔다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>D.<sp/>available<sp/>interval<sp/>cache</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">line<sp/>y<sp/>/<sp/>line<sp/>height<sp/>/<sp/>exclusion<sp/>version<sp/>기반으로<sp/>available<sp/>interval<sp/>cache를<sp/>만들<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">하지만<sp/>word<sp/>wrap과<sp/>line<sp/>y<sp/>progression은<sp/>서로<sp/>영향을<sp/>주고,<sp/>moving<sp/>bounds의<sp/>old<sp/>/<sp/>new<sp/>y<sp/>range<sp/>invalidation이<sp/>필요하다.<sp/>또한<sp/>partial<sp/>relayout<sp/>없이<sp/>interval<sp/>cache만<sp/>넣으면<sp/>최종<sp/>glyph<sp/>placement<sp/>scan은<sp/>여전히<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>후보는<sp/>데모<sp/>후<sp/>partial<sp/>relayout<sp/>/<sp/>affected<sp/>y<sp/>range<sp/>설계와<sp/>함께<sp/>보는<sp/>편이<sp/>안전하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>4.<sp/>이번<sp/>적용:<sp/>measured<sp/>layout<sp/>result<sp/>cache</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>내부<sp/>상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mMeasuredLayoutCache`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mMeasuredLayoutWidth`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mHasMeasuredLayoutCache`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`MeasureNaturalTextHeightForWidth()`가<sp/>`UpdateLayout()`<sp/>결과를<sp/>cache한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`OnRelayout()`에서<sp/>`mLayoutDirty<sp/>==<sp/>true`이고<sp/>layout<sp/>width가<sp/>cache<sp/>width와<sp/>같으면<sp/>cache를<sp/>`mLayoutResult`로<sp/>복사한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache를<sp/>사용한<sp/>뒤에는<sp/>cache를<sp/>clear한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>width<sp/>비교<sp/>tolerance는<sp/>`0.001f`다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>5.<sp/>Invalidation<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">cache는<sp/>다음<sp/>경우<sp/>clear된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>변화<sp/>|<sp/>처리<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>text<sp/>변경<sp/>|<sp/>`MarkPrepareDirty()`에서<sp/>clear<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>font<sp/>family<sp/>변경<sp/>|<sp/>`MarkPrepareDirty()`에서<sp/>clear<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>font<sp/>size<sp/>변경<sp/>|<sp/>`MarkPrepareDirty()`에서<sp/>clear<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>explicit<sp/>`Prepare()`<sp/>|<sp/>prepare<sp/>시작<sp/>시<sp/>clear<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>line<sp/>height<sp/>변경<sp/>|<sp/>`SetLineHeight()`에서<sp/>clear<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>exclusion<sp/>변경<sp/>|<sp/>`SetExclusionRegions()`<sp/>/<sp/>`ClearExclusionRegions()`에서<sp/>clear<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">text<sp/>color<sp/>변경은<sp/>layout<sp/>result에<sp/>영향을<sp/>주지<sp/>않으므로<sp/>cache를<sp/>clear하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">size<sp/>변경은<sp/>cache<sp/>key인<sp/>layout<sp/>width로<sp/>판단한다.<sp/>`OnRelayout()`이<sp/>cache와<sp/>다른<sp/>width로<sp/>들어오면<sp/>cache를<sp/>사용하지<sp/>않고<sp/>기존처럼<sp/>`UpdateLayout()`을<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>6.<sp/>기대<sp/>효과와<sp/>한계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기대<sp/>효과:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>fixed<sp/>width<sp/>+<sp/>wrap<sp/>height에서<sp/>measure<sp/>직후<sp/>relayout되는<sp/>일반<sp/>control<sp/>lifecycle의<sp/>중복<sp/>layout을<sp/>줄인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion이<sp/>많은<sp/>sample에서<sp/>measure<sp/>/<sp/>relayout이<sp/>같은<sp/>width로<sp/>이어질<sp/>때<sp/>sort<sp/>/<sp/>interval<sp/>scan<sp/>/<sp/>word<sp/>wrap<sp/>scan을<sp/>한<sp/>번<sp/>절약할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API와<sp/>layout<sp/>policy를<sp/>바꾸지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">한계:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult`<sp/>copy<sp/>비용이<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>OnMeasure가<sp/>호출되지<sp/>않는<sp/>pure<sp/>relayout<sp/>path에는<sp/>효과가<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>매<sp/>frame<sp/>exclusion<sp/>변경으로<sp/>measure가<sp/>다시<sp/>열리는<sp/>상황에서는<sp/>layout<sp/>자체는<sp/>계속<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>sorted<sp/>exclusion<sp/>cache와<sp/>partial<sp/>relayout은<sp/>아직<sp/>남은<sp/>후보로<sp/>둔다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>7.<sp/>다음<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>low-risk<sp/>후보는<sp/>sorted<sp/>exclusion<sp/>cache를<sp/>`TextVisualizerImpl`과<sp/>`LayoutEngine`<sp/>internal<sp/>boundary에서<sp/>어떻게<sp/>넘길지<sp/>설계하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다만<sp/>실제<sp/>큰<sp/>성능<sp/>개선은<sp/>다음<sp/>축과<sp/>함께<sp/>봐야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>result<sp/>incremental<sp/>signature</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>affected<sp/>y<sp/>range<sp/>기반<sp/>partial<sp/>relayout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>TextVisualizer-only<sp/>renderer<sp/>geometry<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>커밋은<sp/>exclusion<sp/>layout<sp/>path의<sp/>가장<sp/>안전한<sp/>중복<sp/>제거만<sp/>적용한다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/21-exclusion-layout-optimization-analysis.ko.md"/>
+  </compounddef>
+</doxygen>

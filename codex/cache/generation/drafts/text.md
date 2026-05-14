@@ -1,0 +1,295 @@
+---
+title: Text
+sidebar_label: Text
+category: text
+---
+
+# Text
+
+Text in dali-ui is configured through typed `Dali::Ui::Text` value objects that can be used by text views in a `Dali::Ui::View` tree.
+
+## Table of Contents
+
+- [Text Styling Values](#text-styling-values)
+- [Bevel Effects](#bevel-effects)
+- [Fitting Text to Available Space](#fitting-text-to-available-space)
+- [Variable Font Settings](#variable-font-settings)
+- [Input Filtering](#input-filtering)
+- [Input Field Property Indexes](#input-field-property-indexes)
+
+## Text Styling Values
+
+The `Dali::Ui::Text` namespace provides small value types for text configuration. In a dali-ui application, these values are normally prepared near the `Dali::Ui::View` construction code and then passed to the relevant text view API.
+
+`Dali::Ui::Text::Bevel`, `Dali::Ui::Text::FitCandidate`, `Dali::Ui::Text::FitRange`, `Dali::Ui::Text::FontVariationAxis`, and `Dali::Ui::Text::InputFilter` are copyable configuration objects. Their setters return a reference to the same object, so they are convenient to build with fluent chaining.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::Bevel raisedText =
+  Text::Bevel()
+    .SetDirection(Vector2(-1.0f, -1.0f))
+    .SetIntensity(2.0f)
+    .SetLightColor(UiColor(0x808080))
+    .SetShadowColor(UiColor(0x0D0D0D));
+
+Text::FitCandidate compactCandidate =
+  Text::FitCandidate()
+    .SetFontSize(18.0f)
+    .SetLineHeight(22.0f);
+
+Text::FitRange scalableRange =
+  Text::FitRange()
+    .SetMinimumFontSize(14.0f)
+    .SetMaximumFontSize(28.0f)
+    .SetFontSizeStep(1.0f);
+```
+
+Use the corresponding getters when a view model or style layer needs to inspect an already-built text value.
+
+```cpp
+const Vector2& direction = raisedText.GetDirection();
+float intensity = raisedText.GetIntensity();
+
+float fontSize = compactCandidate.GetFontSize();
+float lineHeight = compactCandidate.GetLineHeight();
+
+float minimumSize = scalableRange.GetMinimumFontSize();
+float maximumSize = scalableRange.GetMaximumFontSize();
+float step = scalableRange.GetFontSizeStep();
+```
+
+## Bevel Effects
+
+`Dali::Ui::Text::Bevel` describes a 3D-like text effect using a light side and a shadow side. `SetDirection()` controls the light direction, `SetIntensity()` controls the strength of the effect, `SetLightColor()` sets the highlighted side, and `SetShadowColor()` sets the shaded side.
+
+A common raised effect uses a top-left light direction and separates the light and shadow colors clearly.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::Bevel embossed =
+  Text::Bevel()
+    .SetDirection(Vector2(-1.0f, -1.0f))
+    .SetIntensity(2.0f)
+    .SetLightColor(UiColor(0x808080))
+    .SetShadowColor(UiColor(0x0D0D0D));
+```
+
+An engraved effect can be produced by reversing the visual relationship between the light and shadow colors while keeping the same direction.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::Bevel engraved =
+  Text::Bevel()
+    .SetDirection(Vector2(-1.0f, -1.0f))
+    .SetIntensity(2.0f)
+    .SetLightColor(UiColor(0x0D0D0D))
+    .SetShadowColor(UiColor(0x808080));
+```
+
+For subtle light text on a light background, use a higher `SetIntensity()` only when the light and shadow colors are close enough to avoid a heavy outline.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::Bevel softHighlight =
+  Text::Bevel()
+    .SetDirection(Vector2(1.0f, -1.0f))
+    .SetIntensity(4.0f)
+    .SetLightColor(UiColor(0xFFFFFF))
+    .SetShadowColor(UiColor(0xD8E2E9));
+
+const UiColor& lightColor = softHighlight.GetLightColor();
+const UiColor& shadowColor = softHighlight.GetShadowColor();
+```
+
+## Fitting Text to Available Space
+
+`Dali::Ui::Text::FitRange` describes range-based fitting. It stores a minimum font size, maximum font size, and search step. The fitting behavior searches the range using the configured step to find a fitting size.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::FitRange titleRange =
+  Text::FitRange(18.0f, 36.0f, 1.0f);
+
+titleRange
+  .SetMinimumFontSize(16.0f)
+  .SetMaximumFontSize(34.0f)
+  .SetFontSizeStep(0.5f);
+
+float smallest = titleRange.GetMinimumFontSize();
+float largest = titleRange.GetMaximumFontSize();
+float step = titleRange.GetFontSizeStep();
+```
+
+`Dali::Ui::Text::FitCandidate` describes candidate-based fitting. Each candidate stores a font size and an absolute line height. Candidate-based fitting is useful when the allowed typography choices are discrete design tokens rather than a continuous size range.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::FitCandidate headline =
+  Text::FitCandidate(30.0f, 36.0f);
+
+Text::FitCandidate body =
+  Text::FitCandidate()
+    .SetFontSize(18.0f)
+    .SetLineHeight(24.0f);
+
+float headlineSize = headline.GetFontSize();
+float bodyLineHeight = body.GetLineHeight();
+```
+
+Use `Dali::Ui::Text::FitRange` when the application can accept any size within a range. Use `Dali::Ui::Text::FitCandidate` when the application should only choose from known text styles.
+
+## Variable Font Settings
+
+`Dali::Ui::Text::FontVariationAxis` represents one OpenType variation axis. The axis has a four-character tag such as `wght`, `wdth`, `slnt`, or `opsz`, plus a numeric value.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::FontVariationAxis weight("wght", 700.0f);
+
+weight
+  .SetTag("wght")
+  .SetValue(650.0f);
+
+const Dali::String& tag = weight.GetTag();
+float value = weight.GetValue();
+```
+
+`Dali::Ui::Text::FontVariation` converts between axis lists and string settings. `FromString()` accepts supported variation setting formats and returns parsed axes. `ToString()` emits the canonical comma-separated format.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Dali::Vector<Text::FontVariationAxis> axes =
+  Text::FontVariation::FromString("wght=700,wdth=90");
+
+Dali::String settings = Text::FontVariation::ToString(axes);
+```
+
+You can also build axes explicitly before converting them to a settings string.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Dali::Vector<Text::FontVariationAxis> axes;
+axes.PushBack(Text::FontVariationAxis("wght", 600.0f));
+axes.PushBack(Text::FontVariationAxis("wdth", 95.0f));
+
+Dali::String settings = Text::FontVariation::ToString(axes);
+```
+
+## Input Filtering
+
+`Dali::Ui::Text::InputFilter` describes input validation rules for editable text. `SetAllowPattern()` defines input that may be inserted. If an allow pattern is set, text that does not match it is rejected.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::InputFilter digitsOnly =
+  Text::InputFilter()
+    .SetAllowPattern("[\\d]");
+
+const Dali::String& allowPattern = digitsOnly.GetAllowPattern();
+```
+
+`SetDenyPattern()` defines input that must be rejected. If both allow and deny patterns are set, input must match the allow pattern and must not match the deny pattern.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::InputFilter identifierInput =
+  Text::InputFilter()
+    .SetAllowPattern("[A-Za-z0-9_]")
+    .SetDenyPattern("[\\s]");
+
+const Dali::String& denied = identifierInput.GetDenyPattern();
+```
+
+When input is rejected, the reason is represented by `Dali::Ui::Text::InputFilter::RejectReason`. `Dali::Ui::Text::InputFilter::RejectReason::NOT_ALLOWED` means the input did not match the allow pattern. `Dali::Ui::Text::InputFilter::RejectReason::DENIED` means it matched the deny pattern.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void HandleRejectedInput(Text::InputFilter::RejectReason reason)
+{
+  if(reason == Text::InputFilter::RejectReason::NOT_ALLOWED)
+  {
+    return;
+  }
+
+  if(reason == Text::InputFilter::RejectReason::DENIED)
+  {
+    return;
+  }
+}
+```
+
+## Input Field Property Indexes
+
+`Dali::Ui::Text::InputFieldPropertyIndex` contains property index constants for text input fields. In dali-ui application code, prefer typed view APIs when they are available. Use these constants only when integrating with code paths that require property indexes.
+
+Common editing and cursor indexes include `Dali::Ui::Text::InputFieldPropertyIndex::EDITABLE`, `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_POSITION`, `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_WIDTH`, `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_COLOR`, `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED`, and `Dali::Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::InputFieldPropertyIndex editableIndex =
+  Text::InputFieldPropertyIndex::EDITABLE;
+
+Text::InputFieldPropertyIndex cursorPositionIndex =
+  Text::InputFieldPropertyIndex::CURSOR_POSITION;
+
+Text::InputFieldPropertyIndex cursorColorIndex =
+  Text::InputFieldPropertyIndex::CURSOR_COLOR;
+```
+
+Font-related indexes include `Dali::Ui::Text::InputFieldPropertyIndex::FONT_FAMILY`, `Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE`, `Dali::Ui::Text::InputFieldPropertyIndex::FONT_SIZE_SCALE`, `Dali::Ui::Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE`, `Dali::Ui::Text::InputFieldPropertyIndex::FONT_WEIGHT`, `Dali::Ui::Text::InputFieldPropertyIndex::FONT_WIDTH`, and `Dali::Ui::Text::InputFieldPropertyIndex::FONT_SLANT`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::InputFieldPropertyIndex fontFamilyIndex =
+  Text::InputFieldPropertyIndex::FONT_FAMILY;
+
+Text::InputFieldPropertyIndex fontSizeIndex =
+  Text::InputFieldPropertyIndex::FONT_SIZE;
+
+Text::InputFieldPropertyIndex fontWeightIndex =
+  Text::InputFieldPropertyIndex::FONT_WEIGHT;
+```
+
+Layout and markup indexes include `Dali::Ui::Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT`, `Dali::Ui::Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE`, and `Dali::Ui::Text::InputFieldPropertyIndex::MARKUP_ENABLED`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Text::InputFieldPropertyIndex alignmentIndex =
+  Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT;
+
+Text::InputFieldPropertyIndex layoutDirectionIndex =
+  Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE;
+
+Text::InputFieldPropertyIndex markupIndex =
+  Text::InputFieldPropertyIndex::MARKUP_ENABLED;
+```

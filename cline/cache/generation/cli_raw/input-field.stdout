@@ -1,0 +1,500 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+---
+title: Input Field
+sidebar_label: Input Field
+category: views-components
+---
+
+# Input Field
+
+`InputField` is a single-line editable text view that supports user interaction for text input and editing, with comprehensive cursor, selection, and styling capabilities.
+
+## Table of Contents
+
+- [Creating an Input Field](#creating-an-input-field)
+- [Text and Placeholder](#text-and-placeholder)
+- [Font Configuration](#font-configuration)
+- [Cursor Configuration](#cursor-configuration)
+- [Text Selection](#text-selection)
+- [Password Input](#password-input)
+- [Font Size Scaling](#font-size-scaling)
+- [Typing Style](#typing-style)
+- [Signals](#signals)
+
+## Creating an Input Field
+
+Create an `InputField` using `InputField::New()` and configure it using the fluent setter API:
+
+```cpp
+using namespace Dali::Ui;
+
+InputField inputField = InputField::New()
+    .SetPlaceholder("Enter your text here")
+    .SetPlaceholderColor(UiColor(0x404040))
+    .SetFontSize(20.0f)
+    .SetCursorWidth(2)
+    .SetCursorColor(UiColor(0x222222))
+    .SetSelectionColor(UiColor(0xADD8E6))
+    .SetMaximumLength(50)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(60.0f)
+    .SetBackgroundColor(UiColor(0xFFFFFF))
+    .SetTextColor(UiColor(0x222222))
+    .SetPadding(Extents(12, 12, 12, 12))
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetFocusable(true);
+```
+
+Add the `InputField` to your view hierarchy:
+
+```cpp
+window.Add(inputField);
+```
+
+## Text and Placeholder
+
+### Setting and Getting Text
+
+Use `SetText()` to set the text content and `GetText()` to retrieve it:
+
+```cpp
+inputField.SetText("Hello, World!");
+Dali::String currentText = inputField.GetText();
+```
+
+### Placeholder Text
+
+Configure placeholder text that appears when the input field is empty:
+
+```cpp
+inputField.SetPlaceholder("Type here")
+          .SetPlaceholderColor(UiColor(0x808080));
+```
+
+Control whether the placeholder remains visible when the field has focus:
+
+```cpp
+inputField.SetShowPlaceholderOnFocus(true);
+bool showsOnFocus = inputField.IsPlaceholderShownOnFocus();
+```
+
+### Text Alignment
+
+Set horizontal and vertical text alignment:
+
+```cpp
+inputField.SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER);
+```
+
+### Overflow Mode
+
+Control how text is displayed when it exceeds the available space:
+
+```cpp
+inputField.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+```
+
+## Font Configuration
+
+### Font Family and Size
+
+Configure the font family and size:
+
+```cpp
+inputField.SetFontFamily("SamsungOneUI_400")
+          .SetFontSize(24.0f);
+```
+
+### Font Style Attributes
+
+Set font weight, width, and slant:
+
+```cpp
+inputField.SetFontWeight(Text::FontWeight::BOLD)
+          .SetFontWidth(Text::FontWidth::NORMAL)
+          .SetFontSlant(Text::FontSlant::ITALIC);
+```
+
+### Font Variations
+
+Configure OpenType font variation axes:
+
+```cpp
+inputField.SetFontVariation("wght=700,wdth=90");
+```
+
+Or use the typed API:
+
+```cpp
+Dali::Vector<Text::FontVariationAxis> axes;
+axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
+axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+inputField.SetFontVariation(axes);
+```
+
+Clear font variations:
+
+```cpp
+inputField.ClearFontVariation();
+```
+
+## Cursor Configuration
+
+### Cursor Appearance
+
+Configure the cursor width and color:
+
+```cpp
+inputField.SetCursorWidth(2)
+          .SetCursorColor(UiColor(0x222222));
+```
+
+### Cursor Blinking
+
+Enable or disable cursor blinking and set the blink interval:
+
+```cpp
+inputField.SetCursorBlinkEnabled(true)
+          .SetCursorBlinkInterval(0.5f);  // seconds
+
+bool isBlinking = inputField.IsCursorBlinkEnabled();
+float interval = inputField.GetCursorBlinkInterval();
+```
+
+### Cursor Position
+
+Set and get the cursor position as a character index:
+
+```cpp
+inputField.SetCursorPosition(5);
+uint32_t position = inputField.GetCursorPosition();
+```
+
+### Cursor Handle Images
+
+Customize the cursor handle images:
+
+```cpp
+inputField.SetCursorHandleImage(RESOURCES_DIR "cursor_handle.png");
+inputField.SetCursorHandlePressedImage(RESOURCES_DIR "cursor_handle_pressed.png");
+```
+
+## Text Selection
+
+### Enabling Selection
+
+Enable or disable text selection:
+
+```cpp
+inputField.SetSelectionEnabled(true);
+bool isEnabled = inputField.IsSelectionEnabled();
+```
+
+### Selection Color
+
+Set the highlight color for selected text:
+
+```cpp
+inputField.SetSelectionColor(UiColor(0xADD8E6));
+```
+
+### Programmatic Selection
+
+Select text programmatically:
+
+```cpp
+// Select a range
+inputField.SelectText(0, 5);  // Select first 5 characters
+
+// Select all text
+inputField.SelectWholeText();
+
+// Clear selection
+inputField.ClearSelection();
+```
+
+### Getting Selected Text
+
+Retrieve the selected text and its bounds:
+
+```cpp
+Dali::String selected = inputField.GetSelectedText();
+uint32_t start = inputField.GetSelectedTextStart();
+uint32_t end = inputField.GetSelectedTextEnd();
+```
+
+### Selection Handle Images
+
+Customize the selection handle images:
+
+```cpp
+inputField.SetSelectionHandleImageLeft(RESOURCES_DIR "selection_handle_left.png");
+inputField.SetSelectionHandleImageRight(RESOURCES_DIR "selection_handle_right.png");
+inputField.SetSelectionHandlePressedImageLeft(RESOURCES_DIR "selection_handle_left_pressed.png");
+inputField.SetSelectionHandlePressedImageRight(RESOURCES_DIR "selection_handle_right_pressed.png");
+```
+
+### Text Handles
+
+Enable text editing handles (cursor and selection handles):
+
+```cpp
+inputField.SetTextHandleEnabled(true)
+          .SetTextHandleColor(UiColor(0x000080));
+```
+
+## Password Input
+
+### Password Mode
+
+Configure password display mode:
+
+```cpp
+// Hide all characters
+inputField.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
+
+// Reveal last character briefly
+inputField.SetPasswordMode(Text::PasswordMode::REVEAL_LAST_CHARACTER);
+
+// Disable password mode
+inputField.SetPasswordMode(Text::PasswordMode::NONE);
+```
+
+Retrieve the current mode:
+
+```cpp
+Text::PasswordMode mode = inputField.GetPasswordMode();
+```
+
+### Password Mask Character
+
+Set the character used to mask password text:
+
+```cpp
+inputField.SetPasswordMaskCharacter(0x2022);  // '•' BULLET
+inputField.SetPasswordMaskCharacter(0x2A);     // '*'
+
+uint32_t maskChar = inputField.GetPasswordMaskCharacter();
+```
+
+### Password Reveal Duration
+
+Set how long the last character remains visible in `REVEAL_LAST_CHARACTER` mode:
+
+```cpp
+inputField.SetPasswordRevealDuration(1000);  // milliseconds
+uint32_t duration = inputField.GetPasswordRevealDuration();
+```
+
+## Font Size Scaling
+
+### Basic Font Size Scale
+
+Apply a scale factor to the font size:
+
+```cpp
+inputField.SetFontSizeScale(1.5f);
+float scale = inputField.GetFontSizeScale();
+```
+
+### Scale Constraints
+
+Set minimum and maximum scale limits:
+
+```cpp
+inputField.SetMinimumFontSizeScale(0.5f)
+          .SetMaximumFontSizeScale(2.0f);
+```
+
+### System Font Size Scale
+
+Enable automatic system font size scaling:
+
+```cpp
+inputField.SetSystemFontSizeScaleEnabled(true);
+bool usesSystem = inputField.IsSystemFontSizeScaleEnabled();
+```
+
+### Adjusted Font Size Scale
+
+Get the final adjusted scale after applying constraints:
+
+```cpp
+float adjustedScale = inputField.GetAdjustedFontSizeScale();
+```
+
+## Typing Style
+
+Typing style allows you to apply styles to selected text or text that will be inserted at the cursor position.
+
+### Typing Text Color
+
+```cpp
+inputField.SetTypingTextColor(UiColor(0xFF00FF));  // Magenta
+UiColor typingColor = inputField.GetTypingTextColor();
+```
+
+### Typing Font Family
+
+```cpp
+inputField.SetTypingFontFamily("DejaVu Sans");
+Dali::String family = inputField.GetTypingFontFamily();
+```
+
+### Typing Font Size
+
+```cpp
+inputField.SetTypingFontSize(18.0f);
+float size = inputField.GetTypingFontSize();
+```
+
+### Typing Font Style
+
+```cpp
+inputField.SetTypingFontWeight(Text::FontWeight::BOLD);
+inputField.SetTypingFontWidth(Text::FontWidth::CONDENSED);
+inputField.SetTypingFontSlant(Text::FontSlant::ITALIC);
+```
+
+## Signals
+
+### Text Changed Signal
+
+Emitted when the text content changes:
+
+```cpp
+void OnTextChanged(View view) {
+    InputField field = InputField::DownCast(view);
+    if (field) {
+        Dali::String newText = field.GetText();
+        // Handle text change
+    }
+}
+
+// Connect the signal
+inputField.TextChangedSignal().Connect(this, &YourClass::OnTextChanged);
+```
+
+### Maximum Length Reached Signal
+
+Emitted when input reaches the maximum length:
+
+```cpp
+void OnMaximumLengthReached(View view) {
+    // Notify user that maximum length is reached
+}
+
+inputField.SetMaximumLength(50);
+inputField.MaximumLengthReachedSignal().Connect(this, &YourClass::OnMaximumLengthReached);
+```
+
+### Cursor Position Changed Signal
+
+Emitted when the cursor position changes:
+
+```cpp
+void OnCursorPositionChanged(View view, uint32_t position) {
+    // React to cursor movement
+}
+
+inputField.CursorPositionChangedSignal().Connect(this, &YourClass::OnCursorPositionChanged);
+```
+
+### Selection Signals
+
+Monitor selection changes:
+
+```cpp
+void OnSelectionStarted(View view) {
+    // Selection started
+}
+
+void OnSelectionChanged(View view, uint32_t start, uint32_t end) {
+    // Selection range changed
+}
+
+void OnSelectionCleared(View view) {
+    // Selection cleared
+}
+
+inputField.SelectionStartedSignal().Connect(this, &YourClass::OnSelectionStarted);
+inputField.SelectionChangedSignal().Connect(this, &YourClass::OnSelectionChanged);
+inputField.SelectionClearedSignal().Connect(this, &YourClass::OnSelectionCleared);
+```
+
+### Input Rejected Signal
+
+Emitted when input is rejected by the input filter:
+
+```cpp
+void OnInputRejected(View view, Text::InputFilter::RejectReason reason) {
+    if (reason == Text::InputFilter::RejectReason::NOT_ALLOWED) {
+        // Input did not match allow pattern
+    }
+}
+
+Text::InputFilter filter;
+filter.SetAllowPattern("[\\d]");  // Only digits
+inputField.SetInputFilter(filter);
+inputField.InputRejectedSignal().Connect(this, &YourClass::OnInputRejected);
+```
+
+### Typing Style Changed Signal
+
+Emitted when the typing style at the cursor position changes:
+
+```cpp
+void OnTypingStyleChanged(View view, Text::TypingStyle::Mask mask) {
+    if (mask & Text::TypingStyle::TEXT_COLOR) {
+        // Text color at cursor changed
+    }
+    if (mask & Text::TypingStyle::FONT_FAMILY) {
+        // Font family at cursor changed
+    }
+}
+
+inputField.TypingStyleChangedSignal().Connect(this, &YourClass::OnTypingStyleChanged);
+```
+
+## Additional Configuration
+
+### Editable State
+
+Control whether the field can be edited:
+
+```cpp
+inputField.SetEditable(false);
+bool isEditable = inputField.IsEditable();
+```
+
+### Markup Support
+
+Enable markup processing in text:
+
+```cpp
+inputField.SetMarkupEnabled(true);
+inputField.SetText("<color value='#FF0000'>Red text</color>");
+```
+
+### Layout Direction
+
+Set how text direction is determined:
+
+```cpp
+inputField.SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+```
+
+### Input Filter
+
+Set an input filter to control what text can be entered:
+
+```cpp
+Text::InputFilter filter;
+filter.SetAllowPattern("[\\d]")    // Allow only digits
+      .SetDenyPattern("[0-5]");    // But deny 0-5
+inputField.SetInputFilter(filter);
+
+// Clear the filter
+inputField.ClearInputFilter();
+```

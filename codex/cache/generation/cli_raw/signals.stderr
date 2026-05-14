@@ -1,0 +1,3346 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e25f3-5b07-7742-b9c9-124ce946d52a
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Signals (signals)
+- Category: utilities
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-core": 180
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::BaseSignal | scope=primary
+- Dali::BaseSignal::EmitGuard | scope=primary
+- Dali::BaseSignal::Impl | scope=primary
+- Dali::Callback | scope=primary
+- Dali::CallbackBase | scope=primary
+- Dali::CallbackBase::Impl | scope=primary
+- Dali::CallbackFunctor0 | scope=primary
+- Dali::CallbackFunctor1 | scope=primary
+- Dali::CallbackFunctor2 | scope=primary
+- Dali::CallbackFunctor3 | scope=primary
+- Dali::CallbackFunctorDelegate0 | scope=primary
+- Dali::CallbackFunctorDelegate1 | scope=primary
+- Dali::CallbackFunctorDelegate2 | scope=primary
+- Dali::CallbackFunctorDelegate3 | scope=primary
+- Dali::CallbackFunctorDelegateReturn0 | scope=primary
+- Dali::CallbackFunctorDelegateReturn1 | scope=primary
+- Dali::CallbackFunctorDelegateReturn2 | scope=primary
+- Dali::CallbackFunctorDelegateReturn3 | scope=primary
+- Dali::CallbackFunctorReturn0 | scope=primary
+- Dali::CallbackFunctorReturn1 | scope=primary
+- Dali::CallbackFunctorReturn2 | scope=primary
+- Dali::CallbackFunctorReturn3 | scope=primary
+- Dali::ConnectionTracker | scope=primary
+- Dali::ConnectionTracker::Impl | scope=primary
+- Dali::ConnectionTracker::Impl::Pair | scope=primary
+- Dali::ConnectionTrackerInterface | scope=primary
+- Dali::Destroyer | scope=primary
+- Dali::Dispatcher0 | scope=primary
+- Dali::Dispatcher1 | scope=primary
+- Dali::Dispatcher2 | scope=primary
+- Dali::Dispatcher3 | scope=primary
+- Dali::DispatcherReturn0 | scope=primary
+- Dali::DispatcherReturn1 | scope=primary
+- Dali::DispatcherReturn2 | scope=primary
+- Dali::DispatcherReturn3 | scope=primary
+- Dali::FunctorDelegate | scope=primary
+- Dali::FunctorDestroyer | scope=primary
+- Dali::FunctorDispatcher | scope=primary
+- Dali::FunctorDispatcher0 | scope=primary
+- Dali::FunctorDispatcher1 | scope=primary
+- Dali::FunctorDispatcher2 | scope=primary
+- Dali::FunctorDispatcher3 | scope=primary
+- Dali::FunctorDispatcherReturn0 | scope=primary
+- Dali::FunctorDispatcherReturn1 | scope=primary
+- Dali::FunctorDispatcherReturn2 | scope=primary
+- Dali::FunctorDispatcherReturn3 | scope=primary
+- Dali::RenderCallback | scope=primary
+- Dali::RenderCallbackInput | scope=primary
+- Dali::Signal | scope=primary
+- Dali::Signal< Ret()> | scope=primary
+- Dali::Signal< Ret(Arg0)> | scope=primary
+- Dali::Signal< Ret(Arg0, Arg1)> | scope=primary
+- Dali::Signal< Ret(Arg0, Arg1, Arg2)> | scope=primary
+- Dali::Signal< void()> | scope=primary
+- Dali::Signal< void(Arg0)> | scope=primary
+- Dali::Signal< void(Arg0, Arg1)> | scope=primary
+- Dali::Signal< void(Arg0, Arg1, Arg2)> | scope=primary
+- Dali::SignalConnection | scope=primary
+- Dali::SignalConnectionBlock | scope=primary
+- Dali::SignalConnectionNode | scope=primary
+- Dali::SignalConnectionPool | scope=primary
+- Dali::SignalDelegate | scope=primary
+- Dali::SignalDelegate::CallbackBaseFunctor | scope=primary
+- Dali::SignalMixin | scope=primary
+- Dali::SignalObserver | scope=primary
+- Dali::SlotConnection | scope=primary
+- Dali::SlotDelegate | scope=primary
+- Dali::SlotObserver | scope=primary
+- Dali::VertexBufferUpdateCallback | scope=primary
+- Dali::VoidFunctorDispatcher0 | scope=primary
+- Dali::VoidFunctorDispatcher1 | scope=primary
+- Dali::VoidFunctorDispatcher2 | scope=primary
+- Dali::VoidFunctorDispatcher3 | scope=primary
+- Dali::VoidFunctorDispatcherReturn0 | scope=primary
+- Dali::VoidFunctorDispatcherReturn1 | scope=primary
+- Dali::VoidFunctorDispatcherReturn2 | scope=primary
+- Dali::VoidFunctorDispatcherReturn3 | scope=primary
+- Dali::BaseSignal::BaseSignal | BaseSignal() | scope=primary_member
+- Dali::BaseSignal::Emit | void Emit(Args... args) | scope=primary_member
+- Dali::BaseSignal::EmitGuard::EmitGuard | EmitGuard(bool &flag) | scope=primary_member
+- Dali::BaseSignal::EmitGuard::ErrorOccurred | bool ErrorOccurred() | scope=primary_member
+- Dali::BaseSignal::EmitGuard::mFlag | scope=primary_member
+- Dali::BaseSignal::EmitGuard::~EmitGuard | ~EmitGuard() | scope=primary_member
+- Dali::BaseSignal::EmitReturn | Ret EmitReturn(Args... args) | scope=primary_member
+- Dali::BaseSignal::EmitReturnOr | Ret EmitReturnOr(Args... args) | scope=primary_member
+- Dali::BaseSignal::Empty | bool Empty() const | scope=primary_member
+- Dali::BaseSignal::GetConnectionCount | uint32_t GetConnectionCount() const | scope=primary_member
+- Dali::BaseSignal::Impl::Impl | Impl()=default | scope=primary_member
+- Dali::BaseSignal::Impl::mCache | scope=primary_member
+- Dali::BaseSignal::Impl::~Impl | ~Impl()=default | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "confidence": 0.85,
+    "id": "signals_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::FunctorDelegate::New",
+      "Dali::RenderCallback::New"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "confidence": 0.8,
+    "id": "signals_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker",
+      "Dali::ConnectionTracker::DisconnectAll",
+      "Dali::ConnectionTracker::GetConnectionCount",
+      "Dali::ConnectionTracker::Impl",
+      "Dali::ConnectionTracker::Impl::DisconnectAllAndReset",
+      "Dali::ConnectionTracker::Impl::Erase",
+      "Dali::ConnectionTracker::Impl::GetSize"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/web-view/web-view-example.cpp:10 (sample, score=0.9)
+```cpp
+* Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @file  web-view-example.cpp
+ * @brief Basic WebView sample: loads a URL, shows page-load events and title.
+ *
+ * Key bindings
+ *   ESC / BACK   Quit
+ *   F            GoForward
+ *   B            GoBack
+ *   R            Reload
+ *   H            LoadHtmlString (inline HTML demo)
+ *   L            Load local HTML file (test.html)
+ *   J            EvaluateJavaScript (get document.title)
+ *   S            GetScreenshot → saved as screenshot.png via PixelData
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+```
+
+- repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:47 (sample, score=0.8)
+```cpp
+static constexpr float WINDOW_HEIGHT     = 800.0f;
+
+static const Vector4 COLOR_ITEM_A(0.85f, 0.92f, 1.00f, 1.0f);
+static const Vector4 COLOR_ITEM_B(0.70f, 0.82f, 0.95f, 1.0f);
+static const Vector4 COLOR_PRESSED(0.40f, 0.65f, 1.00f, 1.0f);
+static const Vector4 COLOR_STATUS_BG(0.15f, 0.15f, 0.15f, 1.0f);
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Helper: log a view's size and visibility
+static void LogViewInfo(const char* tag, View view)
+{
+  float w      = view.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+  float h      = view.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+  float lx     = view.GetProperty<float>(Actor::Property::POSITION_X);
+  float ly     = view.GetProperty<float>(Actor::Property::POSITION_Y);
+  float wx     = view.GetProperty<float>(Actor::Property::WORLD_POSITION_X);
+  float wy     = view.GetProperty<float>(Actor::Property::WORLD_POSITION_Y);
+  bool  vis    = view.GetProperty<bool>(Actor::Property::VISIBLE);
+  Vector2 scr  = view.GetProperty<Vector2>(Actor::Property::SCREEN_POSITION);
+  int clip     = view.GetProperty<int>(Actor::Property::CLIPPING_MODE);
+  DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample][Layout] %-24s  size=%5.0fx%-5.0f  local=(%5.0f,%5.0f)  world=(%6.0f,%6.0f)  screen=(%5.0f,%5.0f)  vis=%s  clip=%d\n",
+                        tag, w, h, lx, ly, wx, wy, scr.x, scr.y, vis ? "Y" : "N", clip);
+}
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Connect",
+      "ConnectionTracker",
+      "GetSize",
+      "New",
+      "Signal",
+      "callback",
+      "connection",
+      "view"
+    ],
+    "path": "repos/dali-ui/samples/web-view/web-view-example.cpp",
+    "relevance": "strong",
+    "score": 0.9,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 89,
+    "snippet_start_line": 10
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Connect",
+      "ConnectionTracker",
+      "New",
+      "Signal",
+      "size",
+      "view"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp",
+    "relevance": "strong",
+    "score": 0.8,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 126,
+    "snippet_start_line": 47
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "BindTextureResources",
+      "Callback",
+      "ExecutionMode",
+      "GetTextureResources",
+      "New",
+      "RenderCallback",
+      "RenderCallbackInput",
+      "Reset",
+      "callback",
+      "clippingBox",
+      "isTerminated",
+      "size",
+      "textureBindings",
+      "worldColor"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali/utc-Dali-DrawableActor.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 91,
+    "snippet_start_line": 12
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Allocate",
+      "CallbackBase",
+      "Emit",
+      "Execute",
+      "Free",
+      "GetBlockCount",
+      "GetCallback",
+      "GetFirstBlock",
+      "SignalConnectionNode",
+      "SignalConnectionPool",
+      "Slots",
+      "callback",
+      "connection",
+      "mCapacity",
+      "mHighWaterMark",
+      "mNext",
+      "size"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali/utc-Dali-SignalConnectionPool.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 124,
+    "snippet_start_line": 45
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "BaseSignal",
+      "CallbackBase",
+      "Connect",
+      "ConnectionTracker",
+      "ConnectionTrackerInterface",
+      "Disconnect",
+      "DisconnectAll",
+      "Emit",
+      "EmitOr",
+      "Empty",
+      "FunctorDelegate",
+      "GetConnectionCount",
+      "New",
+      "Reset",
+      "Signal",
+      "SlotDelegate",
+      "Slots",
+      "callback",
+      "connection",
+      "size"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali/utc-Dali-SignalTemplates.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 158,
+    "snippet_start_line": 79
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Connect",
+      "ConnectionTracker",
+      "DisconnectAll",
+      "Emit",
+      "Empty",
+      "FunctorDelegate",
+      "GetConnectionCount",
+      "New",
+      "Signal",
+      "connection"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali/utc-Dali-SignalTemplatesFunctors.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 115,
+    "snippet_start_line": 36
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Connect",
+      "ConnectionTracker",
+      "ConnectionTrackerInterface",
+      "Emit",
+      "FunctorDelegate",
+      "GetConnectionTracker",
+      "INVALID_INDEX",
+      "Impl",
+      "New",
+      "Reset",
+      "Signal",
+      "SlotDelegate",
+      "callback",
+      "size"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali/utc-Dali-TypeRegistry.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 113,
+    "snippet_start_line": 34
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Connect",
+      "ConnectionTracker",
+      "New",
+      "Signal",
+      "observer"
+    ],
+    "path": "repos/dali-ui/samples/scrollview/scrollview-example.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 98,
+    "snippet_start_line": 19
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-core/dali/public-api/signals/dali-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,240p' repos/dali-core/dali/public-api/signals/connection-tracker.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_CONNECTION_TRACKER_H
+#define DALI_CONNECTION_TRACKER_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <cstdint> // for uint32_t
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/signals/connection-tracker-interface.h>
+#include <dali/public-api/signals/signal-slot-observers.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_core_signals
+ * @{
+ */
+
+class CallbackBase;
+class SlotObserver;
+
+/**
+ * @brief Connection tracker concrete implementation.
+ * @SINCE_1_0.0
+ */
+class DALI_CORE_API ConnectionTracker : public ConnectionTrackerInterface
+{
+public:
+  /**
+   * @brief Constructor.
+   * @SINCE_1_0.0
+   */
+  ConnectionTracker();
+
+  /**
+   * @brief Virtual destructor.
+   * @SINCE_1_0.0
+   */
+  ~ConnectionTracker() override;
+
+  /**
+   * @brief Disconnects all signals from this object.
+   * @SINCE_1_0.0
+   */
+  void DisconnectAll();
+
+  /**
+   * @copydoc ConnectionTrackerInterface::SignalConnected
+   */
+  void SignalConnected(SlotObserver* slotObserver, CallbackBase* callback) override;
+
+  /**
+   * @copydoc ConnectionTrackerInterface::SignalDisconnected
+   */
+  void SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callback) override;
+
+  /**
+   * @brief Returns the connection count.
+   * @SINCE_1_0.0
+   * @return The connection count
+   */
+  uint32_t GetConnectionCount() const;
+
+private:
+  ConnectionTracker(const ConnectionTracker&)            = delete; ///< Deleted copy constructor. @SINCE_1_0.0
+  ConnectionTracker(ConnectionTracker&&)                 = delete; ///< Deleted move constructor. @SINCE_1_9.25
+  ConnectionTracker& operator=(const ConnectionTracker&) = delete; ///< Deleted copy assignment operator. @SINCE_1_0.0
+  ConnectionTracker& operator=(ConnectionTracker&&)      = delete; ///< Deleted move assignment operator. @SINCE_1_9.25
+
+private:
+  struct DALI_INTERNAL Impl;
+  Impl*                mCacheImpl; ///< Private internal extra data.
+};
+
+/**
+ * @}
+ */
+} // namespace Dali
+
+#endif // DALI_CONNECTION_TRACKER_H
+
+ succeeded in 0ms:
+#ifndef DALI_SIGNAL_H
+#define DALI_SIGNAL_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+/**
+ * @brief The class should implement Dali::ConnectionTrackerInterface, or inherit from Dali::ConnectionTracker.
+ *
+ * This enforces automatic disconnection when an object is destroyed, so you don't have
+ * to manually disconnect from signals.
+ *
+ * Alternatively, you can use a Dali::SlotDelegate if you don't want to inherit.
+ *
+ * E.g:
+ * @code
+ * class MyClass : public ConnectionTracker
+ * {
+ *
+ *   void Callback( Actor actor, const TouchEvent& event )
+ *   {
+ *     ...
+ *   }
+ *
+ *   void Init()
+ *   {
+ *     Actor actor = Actor::New();
+ *
+ *     actor.TouchedSignal().Connect( this, &MyClass::Callback );
+ *   }
+ *
+ *   ~MyClass()
+ *   {
+ *     // ConnectionTracker base class automatically disconnects
+ *   }
+ * }
+ * @endcode
+ * @SINCE_1_0.0
+ */
+
+// EXTERNAL INCLUDES
+#include <cstdint> // for uint32_t
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/signals/base-signal.h>
+#include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/signal-slot-connections.h>
+#include <dali/public-api/signals/slot-delegate.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_core_signals
+ * @{
+ */
+
+/**
+ * @brief Base Template class to provide signals.
+ *
+ * To create a signal for this class, you first have to define a typedef within your handle's scope:
+ * @code
+ * class MyHandle : public Handle
+ * {
+ * public:
+ *
+ *   // Typedefs
+ *
+ *   typedef Signal< void ()> VoidSignalType;         ///< For signals that require no parameters and no return value
+ *   typedef Signal< bool ()> BoolSignalType;         ///< For signals that do not need parameters but require a boolean return
+ *   typedef Signal< void ( float )> ParamSignalType; ///< For signals that need a float as a parameter but no return value
+ *
+ *   ...
+ *
+ * public:
+ *
+ *   // Signals
+ *
+ *   VoidSignalType&  VoidSignal();
+ *   BoolSignalType&  BoolSignal();
+ *   ParamSignalType& ParamSignal();
+ *
+ *   ...
+ * };
+ * @endcode
+ * The methods are required in the handle class so that the application writer can retrieve the Signal in order to connect/disconnect.
+ *
+ * In the implementation class, the members should be defined and the methods should be provided to retrieve the signal itself.
+ * These will be called by the equivalent methods in the MyHandle class.
+ * @code
+ * class MyObject : public Object
+ * {
+ *   ...
+ *
+ * public:
+ *
+ *   MyHandle::VoidSignalType&  VoidSignal()
+ *   {
+ *     return mVoidSignal;
+ *   }
+ *
+ *   MyHandle::BoolSignalType&  BoolSignal()
+ *   {
+ *     return mBoolSignal;
+ *   }
+ *
+ *   MyHandle::ParamSignalType& ParamSignal()
+ *   {
+ *     return mParamSignal;
+ *   }
+ *
+ * private:
+ *
+ *   // Signals
+ *   MyHandle::VoidSignalType   mVoidSignal;
+ *   MyHandle::BoolSignalType   mBoolSignal;
+ *   MyHandle::ParamSignalType  mParamSignal;
+ *
+ *   ...
+ * };
+ * @endcode
+ * @SINCE_1_0.0
+ */
+template<typename _Signature>
+class Signal
+{
+};
+
+class SignalMixin
+{
+public:
+  /**
+   * @brief Queries whether there are any connected slots.
+   *
+   * @SINCE_1_0.0
+   * @return True if there are any slots connected to the signal
+   */
+  bool Empty() const
+  {
+    return mImpl ? mImpl->Empty() : true;
+  }
+
+  /**
+   * @brief Queries the number of slots.
+   *
+   * @SINCE_1_0.0
+   * @return The number of slots connected to this signal
+   */
+  uint32_t GetConnectionCount() const
+  {
+    return mImpl ? mImpl->GetConnectionCount() : 0;
+  }
+
+public:
+  SignalMixin()
+  : mImpl(nullptr)
+  {
+  }
+
+  ~SignalMixin()
+  {
+    delete mImpl;
+  }
+
+protected:
+  BaseSignal& Impl()
+  {
+    if(!mImpl)
+    {
+      mImpl = new BaseSignal();
+    }
+    return *mImpl;
+  }
+
+private:
+  BaseSignal* mImpl;
+};
+
+/**
+ * @brief A template for Signals with no parameters or return value.
+ * @SINCE_1_0.0
+ */
+template<>
+class Signal<void()> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(void (*func)())
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(void (*func)())
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, void (X::*func)())
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, void (X::*func)())
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, void (X::*func)())
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+
+exec
+/bin/bash -lc "rg -n \"class Signal|template.*Signal|class ConnectionTracker|struct ConnectionTracker|class FunctorDelegate|class RenderCallback|Connect\\(|DisconnectAll|GetConnectionCount|Empty\\(|EmitReturnOr|EmitReturn\" repos/dali-core repos/dali-ui | head -200" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/build/doc/source/index.md:35:            v.TouchedSignal().Connect([](Actor a, TouchEvent t) {
+repos/dali-ui/wiki/Touch-&-Gesture.md:33:    view.TouchedSignal().Connect(this, &MyController::OnTouched);
+repos/dali-ui/wiki/Touch-&-Gesture.md:55:view.TouchedSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) -> bool {
+repos/dali-ui/wiki/Touch-&-Gesture.md:275:panGestureDetector.DetectedSignal().Connect(this, &YourClass::OnPan);
+repos/dali-ui/wiki/Touch-&-Gesture.md:391:        orangeView.TouchedSignal().Connect(this, &LongPanGestureTest::OnOrangeTouched);
+repos/dali-ui/wiki/Touch-&-Gesture.md:395:        mPanGestureDetector.DetectedSignal().Connect(this, &LongPanGestureTest::OnPan);
+repos/dali-ui/wiki/Touch-&-Gesture.md:398:        yellowView.InterceptTouchedSignal().Connect(this, &LongPanGestureTest::OnYellowInterceptTouch);
+repos/dali-ui/wiki/Touch-&-Gesture.md:401:        yellowView.TouchedSignal().Connect(this, &LongPanGestureTest::OnYellowTouched);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:59:    mApplication.InitSignal().Connect(this, &ManualTestLauncher::OnCreate);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:71:    window.KeyEventSignal().Connect(this, &ManualTestLauncher::OnKeyEvent);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:154:      trait.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:204:      trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
+repos/dali-ui/wiki/ScrollView.md:385:scrollView.ScrollStartedSignal().Connect(&handler, &MyScrollHandler::OnScrollStarted);
+repos/dali-ui/wiki/ScrollView.md:386:scrollView.ScrollingSignal().Connect(&handler, &MyScrollHandler::OnScrolling);
+repos/dali-ui/wiki/ScrollView.md:387:scrollView.ScrollFinishedSignal().Connect(&handler, &MyScrollHandler::OnScrollFinished);
+repos/dali-ui/wiki/ScrollView.md:388:scrollView.DragStartedSignal().Connect(&handler, &MyScrollHandler::OnDragStarted);
+repos/dali-ui/wiki/ScrollView.md:389:scrollView.DraggingSignal().Connect(&handler, &MyScrollHandler::OnDragging);
+repos/dali-ui/wiki/ScrollView.md:390:scrollView.DragFinishedSignal().Connect(&handler, &MyScrollHandler::OnDragFinished);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-tab-order.cpp:210:    label.FocusChangedSignal().Connect(this, [this, idx = mAllViews.size() - 1](View view, bool focused)
+repos/dali-ui/wiki/Fluent-API-(kr).md:19:            v.TouchedSignal().Connect([](Actor a, const TouchEvent& t) {
+repos/dali-ui/wiki/Fluent-API-(kr).md:68:    v.StateChangedSignal().Connect([](View view, StateEvent event) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:83:    mImage.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sync-loading.cpp:181:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Color-&-Theme-(kr).md:65:UiThemeManager::Get().ThemeChangedSignal().Connect(this, &MyApp::OnThemeChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:91:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewBuffer::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-buffer.cpp:206:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:92:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:100:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewLoop::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-loop.cpp:207:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:88:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:99:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewPlayControl::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-play-control.cpp:177:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/ImageView.md:439:imageView.ResourceReadySignal().Connect(&handler, &MyImageHandler::OnImageReady);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.cpp:100:                  view.FocusChangedSignal().Connect(this, [](View child, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-descendant-blocked.cpp:123:    btn.TouchedSignal().Connect(this, [onClick](Actor, TouchEvent e) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:95:    FocusManager::Get().FocusChangedSignal().Connect(this, &TcInputFieldFocus::OnFocusChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-input-field-focus.cpp:109:    field.FocusChangedSignal().Connect(this, [this, name](View view, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-color-pixel.cpp:159:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-source.cpp:203:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:77:    mView.ResourceReadySignal().Connect(this, &TcLottiePlaceholder::OnResourceReady);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-fitting-placeholder.cpp:173:      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-load-policy.cpp:75:    mImage.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-load-policy.cpp:201:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/State-Management.md:83:view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-render-quality.cpp:181:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-visual.cpp:190:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-url.cpp:71:    mImage.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-url.cpp:166:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.cpp:87:    mLabels[index].KeyEventSignal().Connect(this, [this, index](View, KeyEvent event) mutable -> bool
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.cpp:93:    mLabels[index].FocusChangedSignal().Connect(this, [this, index](View, bool focused) mutable
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:85:    mView.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:171:      Dali::String(" | PH: ") + Dali::String(phUrl.Empty() ? "none" : "SET"));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loading.cpp:217:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Focus-&-Key.md:145:    view.KeyEventSignal().Connect(this, &MyController::OnKeyEvent);
+repos/dali-ui/wiki/Focus-&-Key.md:167:view.KeyEventSignal().Connect(&tracker, [](View view, const KeyEvent& event) -> bool {
+repos/dali-ui/wiki/Focus-&-Key.md:187:view.FocusChangedSignal().Connect(&tracker, [](View view, bool focused) {
+repos/dali-ui/wiki/Focus-&-Key.md:204:focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus) {
+repos/dali-ui/wiki/Focus-&-Key.md:241:view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/wiki/Focus-&-Key.md:255:  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-fitting.cpp:118:        trait.ClickedSignal().Connect(this, [this, idx](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:142:    btn.TouchedSignal().Connect(this, [onClick](Actor, TouchEvent e) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-group-containment.cpp:151:    view.FocusChangedSignal().Connect(this, [baseColor](View changedView, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:81:    mPollTimer.TickSignal().Connect(this, &TcAnimatedImageViewSpeed::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-speed.cpp:179:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-load-policy.cpp:202:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-dynamic-property.cpp:180:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:143:    view.KeyEventSignal().Connect(this, &MyController::OnKeyEvent);
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:165:view.KeyEventSignal().Connect(&tracker, [](View view, const KeyEvent& event) -> bool {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:185:view.FocusChangedSignal().Connect(&tracker, [](View view, bool focused) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:202:focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:239:view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:251:  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:73:    mImage.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:112:      Dali::String("Placeholder: ") + Dali::String(ph.Empty() ? "none" : "SET") +
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:113:      Dali::String(" | GetPlaceholderUrl: ") + Dali::String(ph.Empty() ? "(empty)" : ph) +
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-placeholder.cpp:156:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-pixel-area.cpp:266:      trait.ClickedSignal().Connect(this, [this, index](View, const InputEvent&) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-pixel-area.cpp:292:      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:72:    mTarget.StateChangedSignal().Connect(this, &TcDisabledClearsPressed::OnStateChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:73:    mTarget.PressedChangedSignal().Connect(this, &TcDisabledClearsPressed::OnPressedChanged);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-disabled-clears-pressed.cpp:96:    mDisableTimer.TickSignal().Connect(this, &TcDisabledClearsPressed::OnDisableTimerTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-frame-range.cpp:83:    mPollTimer.TickSignal().Connect(this, &TcLottieFrameRange::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-frame-range.cpp:178:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Fluent-API.md:21:            v.TouchedSignal().Connect([](Actor a, const TouchEvent& t) {
+repos/dali-ui/wiki/Fluent-API.md:70:    v.StateChangedSignal().Connect([](View view, StateEvent event) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-depth-index.cpp:140:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-npatch.cpp:238:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-sampling.cpp:174:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:182:    if(!mMaskUrl.Empty())
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:194:    Dali::String maskStr = mImageLeft.GetAlphaMaskUrl().Empty() ? "none" : Dali::String(maskName);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-masking.cpp:237:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:90:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:94:    mView.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:103:    mPollTimer.TickSignal().Connect(this, &TcLottiePlayControl::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-play-control.cpp:188:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:75:                          view.FocusChangedSignal().Connect(this, [](View focusedView, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-request-focus.cpp:96:    btnRequestFocus.TouchedSignal().Connect(this, [this](Actor, TouchEvent e) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:172:      Dali::String(" | Placeholder: ") + Dali::String(phUrl.Empty() ? "none" : "SET"));
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-misc.cpp:213:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-info.cpp:73:    mView.ResourceReadySignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-info.cpp:183:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-animated-image-view-mask.cpp:167:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-focus-navigation.cpp:122:    label.FocusChangedSignal().Connect(this, [this, index](View view, bool focused)
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-depth-index.cpp:144:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:104:    mView.AnimationFinishedSignal().Connect(this, [this](View) {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:112:    mPollTimer.TickSignal().Connect(this, &TcLottieLoop::OnPollTick);
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-loop.cpp:212:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-lottie-visual.cpp:166:      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:32:    view.TouchedSignal().Connect(this, &MyController::OnTouched);
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:54:view.TouchedSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) -> bool {
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:274:panGestureDetector.DetectedSignal().Connect(this, &YourClass::OnPan);
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:390:        orangeView.TouchedSignal().Connect(this, &LongPanGestureTest::OnOrangeTouched);
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:394:        mPanGestureDetector.DetectedSignal().Connect(this, &LongPanGestureTest::OnPan);
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:397:        yellowView.InterceptTouchedSignal().Connect(this, &LongPanGestureTest::OnYellowInterceptTouch);
+repos/dali-ui/wiki/Touch-&-Gesture-(kr).md:400:        yellowView.TouchedSignal().Connect(this, &LongPanGestureTest::OnYellowTouched);
+repos/dali-ui/wiki/State-Management-(kr).md:86:view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
+repos/dali-ui/wiki/Color-&-Theme.md:69:UiThemeManager::Get().ThemeChangedSignal().Connect(this, &MyApp::OnThemeChanged);
+repos/dali-ui/wiki/ImageView-(kr).md:439:imageView.ResourceReadySignal().Connect(&handler, &MyImageHandler::OnImageReady);
+repos/dali-ui/wiki/ScrollView-(kr).md:394:scrollView.ScrollStartedSignal().Connect(&handler, &MyScrollHandler::OnScrollStarted);
+repos/dali-ui/wiki/ScrollView-(kr).md:395:scrollView.ScrollingSignal().Connect(&handler, &MyScrollHandler::OnScrolling);
+repos/dali-ui/wiki/ScrollView-(kr).md:396:scrollView.ScrollFinishedSignal().Connect(&handler, &MyScrollHandler::OnScrollFinished);
+repos/dali-ui/wiki/ScrollView-(kr).md:397:scrollView.DragStartedSignal().Connect(&handler, &MyScrollHandler::OnDragStarted);
+repos/dali-ui/wiki/ScrollView-(kr).md:398:scrollView.DraggingSignal().Connect(&handler, &MyScrollHandler::OnDragging);
+repos/dali-ui/wiki/ScrollView-(kr).md:399:scrollView.DragFinishedSignal().Connect(&handler, &MyScrollHandler::OnDragFinished);
+repos/dali-ui/samples/text/text-layout-direction-example.cpp:32:    mApplication.InitSignal().Connect(this, &TextLayoutController::OnInit);
+repos/dali-ui/samples/text/text-layout-direction-example.cpp:70:    window.KeyEventSignal().Connect(this, &TextLayoutController::OnKeyEvent);
+repos/dali-ui/samples/text/text-marquee-example.cpp:36:    mApplication.InitSignal().Connect(this, &TextController::OnInit);
+repos/dali-ui/samples/text/text-marquee-example.cpp:144:    mLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnFocusChanged);
+repos/dali-ui/samples/text/text-marquee-example.cpp:145:    mOverflowLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnOverflowFocusChanged);
+repos/dali-ui/samples/text/text-marquee-example.cpp:147:    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+repos/dali-core/dali/devel-api/signals/signal-delegate.h:62:  bool Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* functorDelegate)
+repos/dali-core/dali/devel-api/signals/signal-delegate.h:84:  bool Connect(T* object, void (T::*memberFunction)(void))
+repos/dali-core/automated-tests/src/common/signal-helper.h:214:    DALI_TEST_EQUALS(mSignalVoid0.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:215:    DALI_TEST_EQUALS(mSignalVoid1R.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:216:    DALI_TEST_EQUALS(mSignalVoid1V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:217:    DALI_TEST_EQUALS(mSignalVoid2V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:218:    DALI_TEST_EQUALS(mSignalVoid3V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:219:    DALI_TEST_EQUALS(mSignalBool1V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:220:    DALI_TEST_EQUALS(mSignalBool2V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:221:    DALI_TEST_EQUALS(mSignalInt2V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:222:    DALI_TEST_EQUALS(mSignalFloat0.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:223:    DALI_TEST_EQUALS(mSignalFloat1V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:224:    DALI_TEST_EQUALS(mSignalFloat2V.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:225:    DALI_TEST_EQUALS(mVoidSignalFloatValue3.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:226:    DALI_TEST_EQUALS(mFloatSignalFloatValue3.GetConnectionCount(), 0u, TEST_LOCATION);
+repos/dali-core/automated-tests/src/common/signal-helper.h:492:    signal.Connect(this, &TestSlotDisconnector::VoidSlotVoid);
+repos/dali-core/automated-tests/src/common/signal-helper.h:504:    signal.Connect(this, &TestSlotDisconnector::VoidSlotIntRef);
+repos/dali-core/automated-tests/src/common/signal-helper.h:600:    signal.Connect(this, &TestSlotMultiDisconnector::Slot0);
+repos/dali-core/automated-tests/src/common/signal-helper.h:601:    signal.Connect(this, &TestSlotMultiDisconnector::Slot1);
+repos/dali-core/automated-tests/src/common/signal-helper.h:602:    signal.Connect(this, &TestSlotMultiDisconnector::Slot2);
+repos/dali-core/automated-tests/src/common/signal-helper.h:603:    signal.Connect(this, &TestSlotMultiDisconnector::Slot3);
+repos/dali-core/automated-tests/src/common/signal-helper.h:604:    signal.Connect(this, &TestSlotMultiDisconnector::Slot4);
+repos/dali-core/automated-tests/src/common/signal-helper.h:605:    signal.Connect(this, &TestSlotMultiDisconnector::Slot5);
+repos/dali-core/automated-tests/src/common/signal-helper.h:606:    signal.Connect(this, &TestSlotMultiDisconnector::Slot6);
+repos/dali-core/automated-tests/src/common/signal-helper.h:607:    signal.Connect(this, &TestSlotMultiDisconnector::Slot7);
+repos/dali-core/automated-tests/src/common/signal-helper.h:608:    signal.Connect(this, &TestSlotMultiDisconnector::Slot8);
+repos/dali-core/automated-tests/src/common/signal-helper.h:609:    signal.Connect(this, &TestSlotMultiDisconnector::Slot9);
+repos/dali-core/automated-tests/src/common/signal-helper.h:694:    signal.Connect(this, &TestEmitDuringCallback::VoidSlotVoid);
+repos/dali-core/automated-tests/src/common/signal-helper.h:697:  void FloatRet0ParamConnect(TestSignals::FloatRet0ParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:700:    signal.Connect(this, &TestEmitDuringCallback::FloatRet0Param);
+repos/dali-core/automated-tests/src/common/signal-helper.h:702:  void FloatRet1ParamConnect(TestSignals::FloatRet1ParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:705:    signal.Connect(this, &TestEmitDuringCallback::FloatRet1Param);
+repos/dali-core/automated-tests/src/common/signal-helper.h:707:  void FloatRet2ParamConnect(TestSignals::FloatRet2ValueParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:710:    signal.Connect(this, &TestEmitDuringCallback::FloatRet2Param);
+repos/dali-core/automated-tests/src/common/signal-helper.h:712:  void FloatRet3ParamConnect(TestSignals::FloatRet3ValueParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:715:    signal.Connect(this, &TestEmitDuringCallback::FloatRet3Param);
+repos/dali-core/automated-tests/src/common/signal-helper.h:718:  void DeleteDuringEmitConnect(TestSignals::VoidRetNoParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:721:    signal.Connect(this, &TestEmitDuringCallback::DeleteSignalDuringEmit);
+repos/dali-core/automated-tests/src/common/signal-helper.h:724:  void DeleteDuringEmitConnect(TestSignals::BoolRet2ValueParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:727:    signal.Connect(this, &TestEmitDuringCallback::DeleteBoolRet2ParamSignalDuringEmit);
+repos/dali-core/automated-tests/src/common/signal-helper.h:730:  void DeleteDuringEmitConnect(TestSignals::FloatRet0ParamSignal& signal)
+repos/dali-core/automated-tests/src/common/signal-helper.h:733:    signal.Connect(this, &TestEmitDuringCallback::DeleteRetSignalDuringEmit);
+repos/dali-core/automated-tests/src/common/signal-helper.h:980:   * @copydoc ConnectionTrackerInterface::GetConnectionCount
+repos/dali-core/automated-tests/src/common/signal-helper.h:982:  virtual std::size_t GetConnectionCount() const
+repos/dali-ui/samples/text/text-style-bevel-example.cpp:31:    mApplication.InitSignal().Connect(this, &TextController::OnInit);
+repos/dali-ui/samples/text/text-style-bevel-example.cpp:126:    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+repos/dali-core/dali/devel-api/signals/render-callback.h:37: * @class RenderCallbackInput
+repos/dali-core/dali/devel-api/signals/render-callback.h:61: * @class RenderCallback
+repos/dali-core/automated-tests/src/dali/utc-Dali-RotationGestureRecognizer.cpp:140:  detector.DetectedSignal().Connect(&application, functor);
+repos/dali-core/automated-tests/src/dali/utc-Dali-RotationGestureRecognizer.cpp:180:  detector.DetectedSignal().Connect(&application, functor);
+repos/dali-core/automated-tests/src/dali/utc-Dali-RotationGestureRecognizer.cpp:208:  detector.DetectedSignal().Connect(&application, functor);
+repos/dali-core/automated-tests/src/dali/utc-Dali-RotationGestureRecognizer.cpp:249:  detector.DetectedSignal().Connect(&application, functor);
+repos/dali-ui/samples/text/text-fit-candidate-example.cpp:80:    mApplication.InitSignal().Connect(this, &TextFitCandidateController::OnInit);
+repos/dali-ui/samples/text/text-fit-candidate-example.cpp:171:    window.KeyEventSignal().Connect(this, &TextFitCandidateController::OnKeyEvent);
+repos/dali-ui/samples/text/text-style-example.cpp:36:    mApplication.InitSignal().Connect(this, &TextController::OnInit);
+repos/dali-ui/samples/text/text-style-example.cpp:162:    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:58:  DALI_TEST_CHECK(tracker.GetConnectionCount() == 0);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:71:    button->DownSignal().Connect(&testApp, &TestApp::OnButtonPress);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:72:    DALI_TEST_CHECK(testApp.GetConnectionCount() == 1);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:73:    DALI_TEST_CHECK(button->DownSignal().GetConnectionCount() == 1);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:76:  DALI_TEST_CHECK(button->DownSignal().GetConnectionCount() == 0);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:83:int UtcConnectionTrackerDisconnectAllP(void)
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:89:  button->DownSignal().Connect(&testApp, &TestApp::OnButtonPress);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:91:  DALI_TEST_CHECK(button->DownSignal().GetConnectionCount() == 1);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:93:  testApp.DisconnectAll();
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:95:  DALI_TEST_CHECK(button->DownSignal().GetConnectionCount() == 0);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:102:int UtcConnectionTrackerDisconnectAllN(void)
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:108:  DALI_TEST_CHECK(button->DownSignal().GetConnectionCount() == 0);
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:109:  testApp.DisconnectAll();
+repos/dali-core/automated-tests/src/dali/utc-Dali-ConnectionTracker.cpp:110:  DALI_TEST_CHECK(button->DownSignal().GetConnectionCount() == 0);
+
+exec
+/bin/bash -lc "rg -n \"void Connect|bool Connect|void Disconnect|void Emit|Ret Emit|EmitReturn|EmitReturnOr|Empty\\(|GetConnectionCount\" repos/dali-core/dali/public-api/signals/dali-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+153:  bool Empty() const
+155:    return mImpl ? mImpl->Empty() : true;
+164:  uint32_t GetConnectionCount() const
+166:    return mImpl ? mImpl->GetConnectionCount() : 0;
+208:  void Connect(void (*func)())
+219:  void Disconnect(void (*func)())
+232:  void Connect(X* obj, void (X::*func)())
+245:  void Disconnect(X* obj, void (X::*func)())
+258:  void Connect(SlotDelegate<X>& delegate, void (X::*func)())
+271:  void Disconnect(SlotDelegate<X>& delegate, void (X::*func)())
+284:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+296:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+305:  void Emit()
+325:  void Connect(Ret (*func)())
+336:  void Disconnect(Ret (*func)())
+349:  void Connect(X* obj, Ret (X::*func)())
+362:  void Disconnect(X* obj, Ret (X::*func)())
+375:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)())
+388:  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)())
+401:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+413:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+424:  Ret Emit()
+426:    return Impl().template EmitReturn<Ret>();
+444:  void Connect(void (*func)(Arg0 arg0))
+455:  void Disconnect(void (*func)(Arg0 arg0))
+468:  void Connect(X* obj, void (X::*func)(Arg0 arg0))
+481:  void Disconnect(X* obj, void (X::*func)(Arg0 arg0))
+494:  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0))
+507:  void Disconnect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0))
+520:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+532:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+543:  void Emit(Arg0 arg0)
+563:  void Connect(Ret (*func)(Arg0 arg0))
+574:  void Disconnect(Ret (*func)(Arg0 arg0))
+587:  void Connect(X* obj, Ret (X::*func)(Arg0 arg0))
+600:  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0))
+613:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+626:  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+639:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+651:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+663:  Ret Emit(Arg0 arg0)
+665:    return Impl().template EmitReturn<Ret, Arg0>(arg0);
+684:  void Connect(void (*func)(Arg0 arg0, Arg1 arg1))
+695:  void Disconnect(void (*func)(Arg0 arg0, Arg1 arg1))
+708:  void Connect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1))
+721:  void Disconnect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1))
+734:  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1))
+747:  void Disconnect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1))
+760:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+772:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+784:  void Emit(Arg0 arg0, Arg1 arg1)
+803:  void Connect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+814:  void Disconnect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+827:  void Connect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+840:  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+853:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+866:  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+879:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+891:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+904:  Ret Emit(Arg0 arg0, Arg1 arg1)
+906:    return Impl().template EmitReturn<Ret, Arg0, Arg1>(arg0, arg1);
+918:  Ret EmitOr(Arg0 arg0, Arg1 arg1)
+920:    return Impl().template EmitReturnOr<Ret, Arg0, Arg1>(arg0, arg1);
+938:  void Connect(void (*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+949:  void Disconnect(void (*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+962:  void Connect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+975:  void Disconnect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+988:  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1001:  void Disconnect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1014:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+1026:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+1039:  void Emit(Arg0 arg0, Arg1 arg1, Arg2 arg2)
+1059:  void Connect(Ret (*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1070:  void Disconnect(Ret (*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1083:  void Connect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1096:  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1109:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1122:  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+1135:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+1147:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+1161:  Ret Emit(Arg0 arg0, Arg1 arg1, Arg2 arg2)
+1163:    return Impl().template EmitReturn<Ret, Arg0, Arg1, Arg2>(arg0, arg1, arg2);
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-core/dali/public-api/signals/base-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_BASE_SIGNAL_H
+#define DALI_BASE_SIGNAL_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <cstdint> // for uint32_t
+#include <list>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/connection-tracker-interface.h>
+#include <dali/public-api/signals/signal-connection-pool.h>
+#include <dali/public-api/signals/signal-slot-connections.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_core_signals
+ * @{
+ */
+
+/**
+ * @brief Implementation class for Dali::Signal.
+ *
+ * A slot can be connected to many signals
+ * A signal can be connected to many slots
+ *
+ * To provide automatic disconnection when either a signal or the object owning the slot dies,
+ * observers are used.
+ *
+ * A signal is an object with state. It holds a list of SignalConnection%s.
+ *
+ * E.g.
+ *  Signal OnTouch. mSignalConnections contains
+ * <table>
+ * <tr><td> %Callback 0 </td><td> Signal Observer 0  </td></tr>
+ * <tr><td> %Callback 1 </td><td> Signal Observer 1  </td></tr>
+ * <tr><td> %Callback 2 </td><td> Signal Observer 2  </td></tr>
+ * </table>
+ *
+ * OnTouch.Emit() will run callbacks 0, 1 and 2.
+ *
+ * When the signal is destroyed. SignalDisconnected() is called on each Signal Observer.
+ *
+ * Slots are just static or member functions, so have no state. E.g. they can't keep
+ * track of how many signals they are connected to.
+ * If the object owning a slot dies, it must automatically be disconnected from all signals.
+ * If it doesn't disconnect and the signal is emitted, there will be a crash.
+ *
+ * To keep track of connections between slots and signals, a Connection tracker is used.
+ * It holds a list of SlotConnections.
+ *
+ * <table>
+ * <tr><td> %Callback 0 </td><td> Slot Observer 0  </td></tr>
+ * <tr><td> %Callback 1 </td><td> Slot Observer 1  </td></tr>
+ * <tr><td> %Callback 2 </td><td> Slot Observer 2  </td></tr>
+ * </table>
+ *
+ * When the connection tracker is destroyed, SlotDisconnected() is called on every slot observer ( signal ).
+ * Signals implement the Slot Observer interface, to be told when a slot has disconnected.
+ * Connection tracker implements the Signal Observer interface, to be told when a signal has disconnected (died).
+ *
+ * @SINCE_1_0.0
+ */
+class DALI_CORE_API BaseSignal : public SlotObserver
+{
+public:
+  /**
+   * @brief Constructor.
+   * @SINCE_1_0.0
+   */
+  BaseSignal();
+
+  /**
+   * @brief Virtual destructor.
+   * @SINCE_1_0.0
+   */
+  ~BaseSignal() override;
+
+  /**
+   * @brief Queries whether there are any connected slots.
+   *
+   * @SINCE_1_0.0
+   * @return True if there are any slots connected to the signal.
+   */
+  bool Empty() const
+  {
+    return (0 == mActiveCount);
+  }
+
+  /**
+   * @brief Queries the number of slots.
+   *
+   * @SINCE_1_0.0
+   * @return The number of slots connected to this signal
+   */
+  uint32_t GetConnectionCount() const
+  {
+    return mActiveCount;
+  }
+
+  // Templated Emit functions for the Signal implementations
+
+  /**
+   * @brief Used to guard against nested Emit() calls.
+   * @SINCE_1_0.0
+   */
+  struct DALI_CORE_API EmitGuard
+  {
+    /**
+     * @brief Creates the guard.
+     *
+     * @SINCE_1_0.0
+     * @param[in,out] flag This flag will be set to true during Emit() calls
+     */
+    EmitGuard(bool& flag);
+
+    /**
+     * @brief Non-virtual destructor.
+     *
+     * @SINCE_1_0.0
+     */
+    ~EmitGuard();
+
+    /**
+     * @brief Determines if an error occurred.
+     *
+     * @SINCE_1_0.0
+     * @return True if an error occurred i.e. if Emit() was called during Emit()
+     */
+    bool ErrorOccurred();
+
+    bool* mFlag; ///< Pointer to the emit guard flag.
+  };
+
+  /**
+   * @brief Emits a signal with parameter pack.
+   *
+   * @SINCE_1_9.33
+   * @param[in] args The parameter pack
+   * @return The value returned by the last callback
+   * @pre Cannot be called from inside the same Signal's Emit methods.
+   */
+  template<typename Ret, typename... Args>
+  Ret EmitReturn(Args... args)
+  {
+    Ret returnVal = Ret();
+
+    // Guards against nested Emit() calls
+    EmitGuard guard(mEmittingFlag);
+    if(guard.ErrorOccurred())
+    {
+      return returnVal;
+    }
+
+    // Guards against calling CleanupConnections if the signal is deleted during emission
+    bool signalDeleted{false};
+    mSignalDeleted = &signalDeleted;
+
+    // Snapshot tail so connections added during emit are not emitted
+    auto emitEnd = mEmitTail;
+
+    auto nodeIndex = mEmitHead;
+    while(nodeIndex != SignalConnectionNode::INVALID_INDEX)
+    {
+      auto*         node      = mPool.IndexToNode(nodeIndex);
+      auto          nextIndex = node->mEmitNext;
+      CallbackBase* callback(node->connection.GetCallback());
+      if(callback)
+      {
+        returnVal = CallbackBase::ExecuteReturn<Ret, Args...>(*callback, args...);
+        if(DALI_UNLIKELY(signalDeleted))
+        {
+          // Previously, we'd have emitted to remaining connections after this
+          // but now we stop as soon as the signal has been deleted.
+          guard.mFlag = nullptr;
+          return returnVal;
+        }
+      }
+      if(nodeIndex == emitEnd)
+      {
+        break;
+      }
+      nodeIndex = nextIndex;
+    }
+
+    // Cleanup NULL values from Connection container
+    CleanupConnections();
+    mSignalDeleted = nullptr;
+
+    return returnVal;
+  }
+
+  template<typename Ret, typename... Args>
+  Ret EmitReturnOr(Args... args)
+  {
+    Ret returnVal = Ret();
+
+    // Guards against nested Emit() calls
+    EmitGuard guard(mEmittingFlag);
+    if(guard.ErrorOccurred())
+    {
+      return returnVal;
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-core/dali/public-api/signals/callback.h && sed -n '1,180p' repos/dali-core/dali/devel-api/signals/functor-delegate.h && sed -n '1,170p' repos/dali-core/dali/devel-api/signals/render-callback.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+#ifndef DALI_CALLBACK_H
+#define DALI_CALLBACK_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <cstddef>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/signals/functor-delegate.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_core_signals
+ * @{
+ */
+
+class CallbackBase;
+
+/**
+ * @brief Callback base class to hold the data for callback function and member function calls.
+ * @SINCE_1_0.0
+ */
+class DALI_CORE_API CallbackBase
+{
+public:
+  /**
+   * @brief Default constructor.
+   * @SINCE_1_0.0
+   */
+  CallbackBase();
+
+  /**
+   * @brief Destructor.
+   * @SINCE_1_0.0
+   */
+  virtual ~CallbackBase();
+
+  /**
+   * @brief Resets the object pointer so that we know not to call methods of this object any more.
+   * @SINCE_1_0.0
+   */
+  void Reset();
+
+  /**
+   * @brief Function to call the function or member function dispatcher.
+   *
+   * This function template gets instantiated at the call site.
+   * @SINCE_1_9.33
+   * @param[in] callback The callback to call
+   * @param[in] args parameter pack to pass into the function
+   * @return The value from the function
+   */
+  template<typename R, typename... Args>
+  static R ExecuteReturn(CallbackBase& callback, Args... args)
+  {
+    R returnVal = R();
+    // if we point to a function, we can call it directly
+    // otherwise call the dispatcher function that knows the real type of the object
+    // Note that this template dispatcher lives in client code (where the callback was created)
+    // so the library containing the code has to be loaded, otherwise we crash boom bang
+    if(callback.mImpl.mObjectPointer)
+    {
+      using Dispatcher      = R (*)(CallbackBase&, Args...);
+      Dispatcher dispatcher = reinterpret_cast<Dispatcher>(callback.mImpl.mMemberFunctionDispatcher);
+      returnVal             = (*dispatcher)(callback, args...);
+    }
+    else if(callback.mStaticFunction)
+    {
+      // convert function type
+      using StaticFunction = R (*)(Args...);
+      returnVal            = (*(reinterpret_cast<StaticFunction>(callback.mStaticFunction)))(args...);
+    }
+
+    return returnVal;
+  }
+
+  /**
+   * @brief Function to call the function or member function dispatcher.
+   *
+   * This function template gets instantiated at the call site.
+   * @SINCE_1_9.33
+   * @param[in] callback The callback to call
+   * @param[in] args parameter pack to pass into the function
+   */
+  template<typename... Args>
+  static void Execute(CallbackBase& callback, Args... args)
+  {
+    // if we point to a function, we can call it directly
+    // otherwise call the dispatcher function that knows the real type of the object
+    // Note that this template dispatcher lives in client code (where the callback was created)
+    // so the library containing the code has to be loaded, otherwise we crash boom bang
+    if(callback.mImpl.mObjectPointer)
+    {
+      using Dispatcher      = void (*)(CallbackBase&, Args...);
+      Dispatcher dispatcher = reinterpret_cast<Dispatcher>(callback.mImpl.mMemberFunctionDispatcher);
+      (*dispatcher)(callback, args...);
+    }
+    else if(callback.mStaticFunction)
+    {
+      // convert function type
+      using StaticFunction = void (*)(Args...);
+      (*(reinterpret_cast<StaticFunction>(callback.mStaticFunction)))(args...);
+    }
+  }
+
+public:
+  /**
+   * @brief Function with static linkage.
+   * @SINCE_1_0.0
+   */
+  using StaticFunction = void (*)();
+
+  /**
+   * @brief Constructor for function with static linkage.
+   *
+   * @SINCE_1_0.0
+   * @param[in] function The function to call
+   */
+  CallbackBase(StaticFunction function);
+
+protected: // Constructors for deriving classes
+  /**
+   * @brief Member function.
+   * @SINCE_1_0.0
+   */
+  using MemberFunction = void (CallbackBase::*)();
+
+  /**
+   * @brief Used to call the correct member function.
+   * @SINCE_1_0.0
+   */
+  using Dispatcher = void (*)(CallbackBase&);
+
+  /**
+   * @brief Used to destroy mObjectPointer (NULL if not mObjectPointer is not owned).
+   * @SINCE_1_0.0
+   */
+  using Destructor = void (*)(void*);
+
+  /**
+   * @brief Copy constructor operator not declared.
+   * @SINCE_1_0.0
+   * @param[in] rhs Handle to an object
+   */
+  CallbackBase(const CallbackBase& rhs);
+
+  /**
+   * @brief Assignment operator not declared.
+   * @SINCE_1_0.0
+   * @param[in] rhs Handle to an object
+   * @return A reference to this
+   */
+  CallbackBase& operator=(const CallbackBase& rhs);
+
+  /**
+   * @brief Constructor for member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] object The object to call (not owned)
+   * @param[in] function The member function of the object
+   * @param[in] dispatcher Used to call the actual object
+   */
+sed: can't read repos/dali-core/dali/devel-api/signals/functor-delegate.h: No such file or directory
+
+exec
+/bin/bash -lc "rg --files repos/dali-core | rg 'functor-delegate|render-callback|callback.h"'$'"'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-core/dali/public-api/signals/callback.h
+repos/dali-core/dali/public-api/signals/functor-delegate.cpp
+repos/dali-core/dali/public-api/signals/functor-delegate.h
+repos/dali-core/dali/devel-api/signals/render-callback.h
+repos/dali-core/dali/devel-api/signals/vertex-buffer-update-callback.h
+repos/dali-core/dali/internal/update/manager/scene-graph-frame-callback.h
+
+exec
+/bin/bash -lc "sed -n '220,360p' repos/dali-core/dali/public-api/signals/dali-signal.h && sed -n '520,680p' repos/dali-core/dali/public-api/signals/dali-signal.h && sed -n '760,930p' repos/dali-core/dali/public-api/signals/dali-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, void (X::*func)())
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, void (X::*func)())
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, void (X::*func)())
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, void (X::*func)())
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctor0<X>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate0(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   * @SINCE_1_0.0
+   */
+  void Emit()
+  {
+    Impl().Emit();
+  }
+};
+
+/**
+ * @brief A template for Signals with no parameters and a return value.
+ * @SINCE_1_0.0
+ */
+template<typename Ret>
+class Signal<Ret()> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(Ret (*func)())
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(Ret (*func)())
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, Ret (X::*func)())
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctor1<X, Arg0>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate1<Arg0>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   */
+  void Emit(Arg0 arg0)
+  {
+    Impl().template Emit<Arg0>(arg0);
+  }
+};
+
+/**
+ * @brief A template for Signals with 1 parameter and a return value.
+ * @SINCE_1_0.0
+ */
+template<typename Ret, typename Arg0>
+class Signal<Ret(Arg0)> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(Ret (*func)(Arg0 arg0))
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(Ret (*func)(Arg0 arg0))
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn1<X, Arg0, Ret>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn1<Arg0, Ret>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret Emit(Arg0 arg0)
+  {
+    return Impl().template EmitReturn<Ret, Arg0>(arg0);
+  }
+};
+
+/**
+ * @brief A template for Signals with 2 parameters.
+ *
+ * @SINCE_1_0.0
+ */
+template<typename Arg0, typename Arg1>
+class Signal<void(Arg0, Arg1)> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctor2<X, Arg0, Arg1>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate2<Arg0, Arg1>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @param[in] arg1 The second value to pass to callbacks
+   */
+  void Emit(Arg0 arg0, Arg1 arg1)
+  {
+    Impl().template Emit<Arg0, Arg1>(arg0, arg1);
+  }
+};
+
+/**
+ * @brief A template for Signals with 2 parameters and a return value.
+ * @SINCE_1_0.0
+ */
+template<typename Ret, typename Arg0, typename Arg1>
+class Signal<Ret(Arg0, Arg1)> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn2<X, Arg0, Arg1, Ret>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn2<Arg0, Arg1, Ret>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @param[in] arg1 The second value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret Emit(Arg0 arg0, Arg1 arg1)
+  {
+    return Impl().template EmitReturn<Ret, Arg0, Arg1>(arg0, arg1);
+  }
+
+  /**
+   * @brief Emits the signal.
+   * If any one of the multiple callbacks returns true, the entire callback is consumed.
+   *
+   * @SINCE_2_3.35
+   * @param[in] arg0 The first value to pass to callbacks
+   * @param[in] arg1 The second value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret EmitOr(Arg0 arg0, Arg1 arg1)
+  {
+    return Impl().template EmitReturnOr<Ret, Arg0, Arg1>(arg0, arg1);
+  }
+};
+
+/**
+ * @brief A template for Signals with 3 parameters.
+ * @SINCE_1_0.0
+ */
+template<typename Arg0, typename Arg1, typename Arg2>
+class Signal<void(Arg0, Arg1, Arg2)> : public SignalMixin
+{
+
+exec
+/bin/bash -lc "sed -n '180,360p' repos/dali-core/dali/public-api/signals/base-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    auto nodeIndex = mEmitHead;
+    while(nodeIndex != SignalConnectionNode::INVALID_INDEX)
+    {
+      auto*         node      = mPool.IndexToNode(nodeIndex);
+      auto          nextIndex = node->mEmitNext;
+      CallbackBase* callback(node->connection.GetCallback());
+      if(callback)
+      {
+        returnVal = CallbackBase::ExecuteReturn<Ret, Args...>(*callback, args...);
+        if(DALI_UNLIKELY(signalDeleted))
+        {
+          // Previously, we'd have emitted to remaining connections after this
+          // but now we stop as soon as the signal has been deleted.
+          guard.mFlag = nullptr;
+          return returnVal;
+        }
+      }
+      if(nodeIndex == emitEnd)
+      {
+        break;
+      }
+      nodeIndex = nextIndex;
+    }
+
+    // Cleanup NULL values from Connection container
+    CleanupConnections();
+    mSignalDeleted = nullptr;
+
+    return returnVal;
+  }
+
+  template<typename Ret, typename... Args>
+  Ret EmitReturnOr(Args... args)
+  {
+    Ret returnVal = Ret();
+
+    // Guards against nested Emit() calls
+    EmitGuard guard(mEmittingFlag);
+    if(guard.ErrorOccurred())
+    {
+      return returnVal;
+    }
+
+    // Guards against calling CleanupConnections if the signal is deleted during emission
+    bool signalDeleted{false};
+    mSignalDeleted = &signalDeleted;
+
+    // Snapshot tail so connections added during emit are not emitted
+    auto emitEnd = mEmitTail;
+
+    auto nodeIndex = mEmitHead;
+    while(nodeIndex != SignalConnectionNode::INVALID_INDEX)
+    {
+      auto*         node      = mPool.IndexToNode(nodeIndex);
+      auto          nextIndex = node->mEmitNext;
+      CallbackBase* callback(node->connection.GetCallback());
+      if(callback)
+      {
+        returnVal |= CallbackBase::ExecuteReturn<Ret, Args...>(*callback, args...);
+        if(DALI_UNLIKELY(signalDeleted))
+        {
+          guard.mFlag = nullptr;
+          return returnVal;
+        }
+      }
+      if(nodeIndex == emitEnd)
+      {
+        break;
+      }
+      nodeIndex = nextIndex;
+    }
+
+    // Cleanup NULL values from Connection container
+    CleanupConnections();
+    mSignalDeleted = nullptr;
+
+    return returnVal;
+  }
+
+  /**
+   * @brief Emits a signal with  parameter pack.
+   *
+   * @SINCE_1_9.33
+   * @param[in] args The parameter pack
+   * @pre Cannot be called from inside the same Signal's Emit methods.
+   */
+  template<typename... Args>
+  void Emit(Args... args)
+  {
+    // Guards against nested Emit() calls
+    EmitGuard guard(mEmittingFlag);
+    if(guard.ErrorOccurred())
+    {
+      return;
+    }
+
+    // Guards against calling CleanupConnections if the signal is deleted during emission
+    bool signalDeleted{false};
+    mSignalDeleted = &signalDeleted;
+
+    // Snapshot tail so connections added during emit are not emitted
+    auto emitEnd = mEmitTail;
+
+    auto nodeIndex = mEmitHead;
+    while(nodeIndex != SignalConnectionNode::INVALID_INDEX)
+    {
+      auto*         node      = mPool.IndexToNode(nodeIndex);
+      auto          nextIndex = node->mEmitNext;
+      CallbackBase* callback(node->connection.GetCallback());
+      if(callback)
+      {
+        CallbackBase::Execute<Args...>(*callback, args...);
+        if(DALI_UNLIKELY(signalDeleted))
+        {
+          guard.mFlag = nullptr;
+          return;
+        }
+      }
+      if(nodeIndex == emitEnd)
+      {
+        break;
+      }
+      nodeIndex = nextIndex;
+    }
+
+    // Cleanup NULL values from Connection container
+    CleanupConnections();
+    mSignalDeleted = nullptr;
+  }
+
+  // Connect / Disconnect function for use by Signal implementations
+
+  /**
+   * @brief Called by Signal implementations, when the user calls Signal.Connect( ... ).
+   *
+   * @SINCE_1_0.0
+   * @param[in] callback A newly allocated callback object (takes ownership)
+   */
+  void OnConnect(CallbackBase* callback);
+
+  /**
+   * @brief Called by Signal implementations, when the user calls Signal.Disconnect( ... ).
+   *
+   * @SINCE_1_0.0
+   * @param[in] callback A newly allocated callback object (takes ownership)
+   */
+  void OnDisconnect(CallbackBase* callback);
+
+  /**
+   * @brief Called by Signal implementations, when the user calls Signal.Connect( ... ).
+   *
+   * @SINCE_1_0.0
+   * @param[in] tracker The connection tracker
+   * @param[in] callback A newly allocated callback object (takes ownership)
+   */
+  void OnConnect(ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
+  /**
+   * @brief Called by Signal implementations, when the user calls Signal.Disconnect( ... ).
+   *
+   * @SINCE_1_0.0
+   * @param[in] tracker The connection tracker
+   * @param[in] callback A newly allocated callback object (takes ownership)
+   */
+  void OnDisconnect(ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
+private: // SlotObserver interface, to be told when a slot disconnects
+  /**
+   * @copydoc SlotObserver::SlotDisconnected
+   */
+  void SlotDisconnected(CallbackBase* callback) override;
+
+private:
+  /**
+   * @brief Helper to find whether a callback is connected.
+   *
+   * @SINCE_2_5.17
+   * @param[in] callback The call back object
+   * @return Pointer to the SignalConnectionNode, or nullptr if not found
+   */
+  SignalConnectionNode* FindCallback(CallbackBase* callback) noexcept;
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-core/dali/public-api/signals/functor-delegate.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_FUNCTOR_DELEGATE_H
+#define DALI_FUNCTOR_DELEGATE_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <utility>
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_core_signals
+ * @{
+ */
+
+/**
+ * @brief Dispatcher to call a functor.
+ * @SINCE_1_0.0
+ */
+template<typename T>
+struct FunctorDispatcher
+{
+  /**
+   * @brief Calls a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] functorPtr The functor to call
+   */
+  static void Dispatch(void* functorPtr)
+  {
+    // "downcast" the functor type back to the correct one
+    T* functor = reinterpret_cast<T*>(functorPtr);
+    (*functor)();
+  }
+};
+
+/**
+ * @brief Dispatcher to delete a functor object.
+ * @SINCE_1_0.0
+ */
+template<typename T>
+struct FunctorDestroyer
+{
+  /**
+   * @brief Dispatcher to delete an object.
+   * @SINCE_1_0.0
+   * @param[in] functorPtr A functor object to delete
+   */
+  static void Delete(void* functorPtr)
+  {
+    // FunctorDelegate owns the object but we're the only one who knows the real type so need
+    // to delete by "downcasting" from void* to the correct type
+    delete reinterpret_cast<T*>(functorPtr);
+  }
+};
+
+/**
+ * @brief Used to connect a void() functor to a signal via BaseObject::SignalConnect().
+ * @SINCE_1_0.0
+ */
+class DALI_CORE_API FunctorDelegate
+{
+public:
+  /**
+   * @brief Constructor which copies a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] functor The functor object to move, either a class with operator() or a C function
+   * @return A pointer to the new function object
+   */
+  template<typename T>
+  static FunctorDelegate* New(T&& functor)
+  {
+    return new FunctorDelegate(reinterpret_cast<void*>(new T(std::move(functor))), // heap allocate the functor
+                               reinterpret_cast<FunctorDelegate::Dispatcher>(&FunctorDispatcher<T>::Dispatch),
+                               reinterpret_cast<FunctorDelegate::Destructor>(&FunctorDestroyer<T>::Delete));
+  }
+
+  /**
+   * @brief Non-virtual destructor; not intended as a base class.
+   * @SINCE_1_0.0
+   */
+  ~FunctorDelegate();
+
+  /**
+   * @brief Function to call the function or member function dispatcher.
+   * @SINCE_1_0.0
+   */
+  void Execute();
+
+private:
+  /**
+   * @brief Used to call the correct function.
+   * @SINCE_1_0.0
+   */
+  using Dispatcher = void (*)(void*);
+
+  /**
+   * @brief Used to destroy mObjectPointer.
+   * @SINCE_1_0.0
+   */
+  using Destructor = void (*)(void*);
+
+  /**
+   * @brief Not defined.
+   * @SINCE_1_0.0
+   */
+  FunctorDelegate(const FunctorDelegate& rhs);
+
+  /**
+   * @brief Not defined.
+   * @SINCE_1_0.0
+   */
+  const FunctorDelegate& operator=(const FunctorDelegate& rhs);
+
+  /**
+   * @brief Private constructor.
+   *
+   * @SINCE_1_0.0
+   * @param[in] functorPtr A newly allocated functor object (takes ownership)
+   * @param dispatcher Used to call the actual function
+   * @param destructor Used to delete the owned functor object
+   */
+  FunctorDelegate(void* functorPtr, Dispatcher dispatcher, Destructor destructor);
+
+public:
+  // Data for deriving classes & Dispatchers
+
+  void*      mFunctorPointer;           ///< Functor that will be called
+  Dispatcher mMemberFunctionDispatcher; ///< Dispatcher for member functions
+  Destructor mDestructorDispatcher;     ///< Destructor for owned objects
+};
+
+/**
+ * @}
+ */
+} // namespace Dali
+
+#endif // DALI_FUNCTOR_DELEGATE_H
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-core/dali/devel-api/signals/render-callback.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_RENDER_CALLBACK_H
+#define DALI_RENDER_CALLBACK_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-vector.h>
+#include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/math/matrix.h>
+#include <dali/public-api/math/rect.h>
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/object/any.h>
+#include <dali/public-api/rendering/texture.h>
+#include <dali/public-api/signals/callback.h>
+
+// EXTERNAL INCLUDES
+#include <utility>
+
+namespace Dali
+{
+/**
+ * @class RenderCallbackInput
+ *
+ * This structure contains data to be passed into the RenderCallback
+ * functor.
+ *
+ * @SINCE_2_1.30
+ */
+struct DALI_CORE_API RenderCallbackInput
+{
+  Dali::Matrix           mvp;
+  Dali::Matrix           projection;
+  Dali::Size             size;
+  Dali::BoundsInteger    clippingBox; ///< in screen coordinates
+  Dali::Vector<uint32_t> textureBindings;
+
+  Dali::Any eglContext;         ///< Storage for EGL Context
+  bool      usingOwnEglContext; ///< Uses own EGL context (owns GL state), custom code should be aware of it
+
+  Dali::Matrix  view; // Added at end to avoid abi break.
+  Dali::Vector4 worldColor;
+  bool          isTerminated; ///< Whether this callback is for terminate case, or not. @SINCE_2_4.35
+};
+
+/**
+ * @class RenderCallback
+ *
+ * RenderCallback is used by the direct rendering feature and allows injecting
+ * custom render code (using native API such as GL directly) into the DALi
+ * rendering stream. The RenderCallback will be executed within own context (unless
+ * native API is context-less) to maintain state separation from DALi render state.
+ *
+ * The class wraps CallbackBase object ensuring its type-safe assignment
+ *
+ * @SINCE_2_1.14
+ */
+class DALI_CORE_API RenderCallback
+{
+public:
+  /**
+   * @brief Mode of execution of custom rendering code into the pipeline
+   *
+   * ISOLATED mode will try to isolate custom rendering so it will start with
+   * clean state of graphics API and won't affect DALi rendering pipeline. This
+   * mode is considered as safe.
+   *
+   * UNSAFE mode will inject custom rendering code into DALi rendering
+   * pipeline as is and won't isolate graphics native API state. This mode
+   * should be used with caution and is considered unsafe.
+   *
+   * The default mode is ISOLATED.
+   *
+   * @SINCE_2_3.12
+   */
+  enum class ExecutionMode
+  {
+    /**
+     * @brief Native rendering commands will be isolated from DALi graphics pipline state
+     * @details This mode is default and provides safest way of executing custom graphics API commands.
+     * @SINCE_2_3.12
+     */
+    ISOLATED,
+
+    /**
+     * @brief Native rendering will be injected directly into DALi graphics pipeline
+     * @details This mode is considered unsafe as it's directly injected into DALi rendering pipeline.
+     * It inherits current graphics API state and may alter it.
+     * @SINCE_2_3.12
+     */
+    UNSAFE,
+
+    /**
+     * @brief Default mode is ISOLATED
+     * @SINCE_2_3.12
+     */
+    DEFAULT = ISOLATED
+  };
+
+  /**
+   * Templated member function type
+   */
+  template<class T>
+  using FuncType = bool (T::*)(const Dali::RenderCallbackInput&);
+
+  /**
+   * @brief Constructor of RenderCallback
+   *
+   * @param[in] object Object to invoke
+   * @param[in] func Member function to invoke
+   * @param[in] executionMode execution mode of custom code
+   *
+   * @SINCE_2_3.12
+   */
+  template<class T>
+  RenderCallback(T* object, FuncType<T> func, ExecutionMode executionMode)
+  : mCallback(MakeCallback(object, func)),
+    mExecutionMode(executionMode)
+  {
+  }
+
+  /**
+   * @brief Creates new instance of RenderCallback
+   *
+   * @SINCE_2_1.14
+   * @param[in] object Object to invoke
+   * @param[in] func Member function to invoke
+   * @return Unique pointer to the RenderCallback instance
+   */
+  template<class T>
+  static UniquePtr<Dali::RenderCallback> New(T* object, FuncType<T> func)
+  {
+    return MakeUnique<Dali::RenderCallback>(object, func, ExecutionMode::DEFAULT);
+  }
+
+  /**
+   * @brief Creates new instance of RenderCallback
+   *
+   * @SINCE_2_3.12
+   * @param[in] object Object to invoke
+   * @param[in] func Member function to invoke
+   * @param[in] executionMode Execution mode of custom code
+   * @return Unique pointer to the RenderCallback instance
+   */
+  template<class T>
+  static UniquePtr<Dali::RenderCallback> New(T* object, FuncType<T> func, ExecutionMode executionMode)
+  {
+    return MakeUnique<Dali::RenderCallback>(object, func, executionMode);
+  }
+
+  /**
+   * @brief Explicit cast operator
+   *
+   * @SINCE_2_1.14
+   * @return casts RenderCallback to CallbackBase object
+   */
+  explicit operator Dali::CallbackBase*()
+  {
+    return mCallback.Get();
+  }
+
+  /**
+   * @brief Binds DALi textures to the callback
+   *
+   * The textures that are bound to the callback will be passed upon
+   * callback execution providing native handles (like GL name) so they
+   * can be used alongside with custom GL code.
+   *
+   * Binding texture does not affect lifecycle and it's up to the client-side
+   * to make sure the resource is alive when used inside the callback.
+   *
+   * @param[in] textures List of DALi textures to be bound to the callback
+   * @SINCE_2_1.30
+   */
+  void BindTextureResources(Dali::Vector<Dali::Texture> textures)
+  {
+    mTextureResources = std::move(textures);
+  }
+
+  /**
+   * @brief Returns list of DALi textures bound to the callback
+   *
+   * @return list of textures
+   */
+  [[nodiscard]] const Dali::Vector<Dali::Texture>& GetTextureResources() const
+  {
+    return mTextureResources;
+  }
+  /**
+   * @brief Explicit cast operator
+   *
+   * @SINCE_2_1.14
+   * @return casts RenderCallback to CallbackBase object
+   */
+  explicit operator Dali::CallbackBase&()
+  {
+    return *mCallback;
+  }
+
+  /**
+   * @brief Returns input data passed to the callback upon execution
+   *
+   * The input data will be filled by the DALi and Graphics backend
+   * providing DALi rendering related data (such as clipping box) as well as
+   * Graphics native API related data (like EGLContext for GL).
+   *
+
+exec
+/bin/bash -lc "sed -n '1,160p' repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-view-key-event.cpp && sed -n '60,100p' repos/dali-ui/manual-tests/dali-ui-foundation/tc/tc-image-view-url.cpp && sed -n '140,170p' repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "manual-test-case.h"
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr uint32_t LABEL_COLORS[] = {0xE8D5E0, 0xD5E0D8, 0xD5DBE8};
+constexpr uint32_t COLOR_TEXT     = 0x3C3C3C;
+constexpr uint32_t COLOR_BG       = 0xF7F5F3;
+constexpr float    LABEL_HEIGHT   = 120.0f;
+constexpr float    LABEL_MARGIN   = 10.0f;
+constexpr float    CONTAINER_PAD  = 16.0f;
+constexpr float    FONT_SIZE      = 16.0f;
+constexpr uint32_t LABEL_COUNT    = 3;
+} // namespace
+
+/**
+ * @brief Verifies View::KeyEventSignal and View::FocusChangedSignal.
+ *
+ * Three focusable Labels are displayed.  Use Tab / arrow keys to move
+ * focus between them, and press any key to verify that the focused Label
+ * receives the key event.  Each Label shows:
+ *   - Whether it currently has focus
+ *   - The last key state (DOWN / UP)
+ *   - The last key name
+ */
+class TcViewKeyEvent : public ManualTest::TestCase, public ConnectionTracker
+{
+public:
+  Dali::String GetName() const override
+  {
+    return "View KeyEvent Signal";
+  }
+
+  Dali::String GetDescription() const override
+  {
+    return "Verifies KeyEventSignal and FocusChangedSignal on focusable Views";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+    contentArea.Add(
+      StackLayout::New(StackOrientation::VERTICAL)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetBackgroundColor(UiColor(COLOR_BG))
+        .SetPadding(Extents(CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD))
+        .Children({
+          CreateLabel(0),
+          CreateLabel(1),
+          CreateLabel(2)
+        }));
+  }
+
+  Label CreateLabel(int index)
+  {
+    mLabels[index] = Label::New()
+      .SetFontSize(FONT_SIZE)
+      .SetTextColor(UiColor(COLOR_TEXT))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(LABEL_HEIGHT)
+      .SetBackgroundColor(UiColor(LABEL_COLORS[index]))
+      .SetMargin(Extents(0, 0, 0, LABEL_MARGIN))
+      .SetMultiLine(true)
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .SetFocusable(true);
+
+    UpdateText(index);
+
+    mLabels[index].KeyEventSignal().Connect(this, [this, index](View, KeyEvent event) mutable -> bool
+    {
+      UpdateLabelKeyState(index, event.GetState(), event.GetKeyName());
+      return false;
+    });
+
+    mLabels[index].FocusChangedSignal().Connect(this, [this, index](View, bool focused) mutable
+    {
+      UpdateLabelFocusState(index, focused);
+    });
+
+    return mLabels[index];
+  }
+
+private:
+  void UpdateLabelFocusState(uint32_t index, bool focused)
+  {
+    mLastFocusState[index] = focused;
+    UpdateText(index);
+  }
+
+  void UpdateLabelKeyState(uint32_t index, KeyEvent::State state, Dali::String name)
+  {
+    mLastKeyState[index] = state == KeyEvent::DOWN ? "Press" : "Release";
+    mLastKeyName[index] = name;
+    UpdateText(index);
+  }
+
+  void UpdateText(uint32_t index)
+  {
+    Dali::String result = Dali::String("Label ") + Dali::String(std::to_string(index + 1).c_str());
+    result += Dali::String("\nFocused: ");
+    result += Dali::String(mLastFocusState[index] ? "YES" : "NO");
+    result += Dali::String("\nKey State: ") + mLastKeyState[index];
+    result += Dali::String("\nKey Name: ") + mLastKeyName[index];
+    mLabels[index].SetText(result);
+  }
+
+  Label mLabels[LABEL_COUNT];
+  bool mLastFocusState[LABEL_COUNT] = {false, };
+  Dali::String mLastKeyState[LABEL_COUNT] = {"NONE", };
+  Dali::String mLastKeyName[LABEL_COUNT] = {"NONE", };
+};
+
+REGISTER_MANUAL_TEST(TcViewKeyEvent)
+    return "Verify URL change, Reload, and ResourceReadySignal counter";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+    mReadyCount = 0;
+
+    mImage = ImageView::New(IMG_A)
+               .SetRequestedWidth(PREVIEW_SIZE)
+               .SetRequestedHeight(PREVIEW_SIZE);
+
+    mImage.ResourceReadySignal().Connect(this, [this](View) {
+      ++mReadyCount;
+      UpdateLabels();
+    });
+
+    mUrlLabel    = MakeStatusLabel("URL: A");
+    mStatusLabel = MakeStatusLabel("Status: - | ResourceReadySignal: 0");
+
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(WRAP_CONTENT)
+                            .SetBackgroundColor(UiColor(C_BG))
+                            .SetPadding(Extents(8, 8, 8, 8));
+
+    content.Add(MakeCenteredPreview(mImage));
+    content.Add(mUrlLabel);
+    content.Add(mStatusLabel);
+    content.Add(MakeButtonRow({
+      MakeButton("Set\nURL A", [this] { OnSetUrl(IMG_A, "A"); }),
+      MakeButton("Set\nURL B", [this] { OnSetUrl(IMG_B, "B"); }),
+      MakeButton("Reload",     [this] { mImage.Reload(); }),
+    }));
+
+    contentArea.Add(content);
+  }
+
+private:
+  void OnSetUrl(const char* url, const char* name)
+  {
+    mCurrentName = name;
+  }
+
+  View MakeListItem(std::size_t index)
+  {
+    const auto& tc = mTestCases[index];
+
+    return StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetBackgroundColor(UiColor(COLOR_ITEM_BG))
+      .SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V))
+      .SetFocusable(true)
+      .AsInteractive([this, index](InteractiveTrait& trait)
+    {
+      trait.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
+      {
+        EnterTestCase(index);
+        return true;
+      });
+    }).Children({
+        Label::New(tc->GetName()).SetTextColor(UiColor(COLOR_ITEM_NAME)).SetFontSize(FONT_TC_NAME).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT),
+        Label::New(tc->GetDescription()).SetTextColor(UiColor(COLOR_ITEM_DESC)).SetFontSize(FONT_TC_DESC).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT),
+      });
+  }
+
+  View MakeSeparator()
+  {
+    return View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(SEPARATOR_H)
+      .SetBackgroundColor(UiColor(COLOR_SEPARATOR));
+
+codex
+---
+title: Signals
+sidebar_label: Signals
+category: utilities
+---
+
+# Signals
+
+Signals let dali-ui application code react to view, input, resource, and lifecycle events while keeping connection lifetime explicit and safe.
+
+## Table of Contents
+
+- [Connect View Events](#connect-view-events)
+- [Track Connection Lifetime](#track-connection-lifetime)
+- [Use Lambdas, Member Functions, and Free Functions](#use-lambdas-member-functions-and-free-functions)
+- [Inspect and Disconnect Connections](#inspect-and-disconnect-connections)
+- [Expose Small Application Signals](#expose-small-application-signals)
+- [Use Return Values Carefully](#use-return-values-carefully)
+
+## Connect View Events
+
+In a dali-ui application, the usual entry point is a `Dali::Ui::View` or a class derived from it. View-facing APIs expose typed `Dali::Signal` objects. Application code connects a callback with the same argument and return shape as the signal.
+
+A typical controller inherits from `Dali::ConnectionTracker` and connects view signals during setup:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class PageController : public ConnectionTracker
+{
+public:
+  void Setup(Label title)
+  {
+    title.FocusChangedSignal().Connect(this, &PageController::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View view, bool focused)
+  {
+    view.SetBackgroundColor(focused ? UiColor(0x3366CC) : UiColor(0x222222));
+  }
+};
+```
+
+For input-style signals that return `bool`, return `true` when the event has been handled and should be consumed, or `false` when other handlers may continue processing it:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class KeyController : public ConnectionTracker
+{
+public:
+  void Setup(Label label)
+  {
+    label.SetFocusable(true);
+
+    label.KeyEventSignal().Connect(this, [this](View view, KeyEvent event) -> bool
+    {
+      return OnKeyEvent(view, event);
+    });
+  }
+
+private:
+  bool OnKeyEvent(View view, KeyEvent event)
+  {
+    if(event.GetState() == KeyEvent::DOWN)
+    {
+      view.SetBackgroundColor(UiColor(0x5588EE));
+      return true;
+    }
+
+    return false;
+  }
+};
+```
+
+`Dali::Signal<void(Arg0)>`, `Dali::Signal<void(Arg0, Arg1)>`, and `Dali::Signal<Ret(Arg0, Arg1)>` all require the callback signature to match the signal signature. For example, a focus signal callback receives `View, bool`, while a key signal callback receives `View, KeyEvent` and returns `bool`.
+
+## Track Connection Lifetime
+
+`Dali::ConnectionTracker` is the primary lifetime tool for application code. When a callback is connected with `this` and the receiving object derives from `Dali::ConnectionTracker`, the connection is associated with that receiver. Destroying the tracker disconnects the slots it owns.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ImageStatus : public ConnectionTracker
+{
+public:
+  void Bind(ImageView image, Label status)
+  {
+    mStatus = status;
+
+    image.ResourceReadySignal().Connect(this, [this](View)
+    {
+      ++mReadyCount;
+      mStatus.SetText("Ready count: " + String(std::to_string(mReadyCount).c_str()));
+    });
+  }
+
+private:
+  Label    mStatus;
+  uint32_t mReadyCount{0};
+};
+```
+
+A `Dali::ConnectionTracker` can also be passed explicitly when connecting a function object to a `Dali::Signal`. This is useful when the receiver object does not need a separate member function:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class Loader : public ConnectionTracker
+{
+public:
+  using ReadySignalType = Signal<void(uint32_t)>;
+
+  ReadySignalType& ReadySignal()
+  {
+    return mReadySignal;
+  }
+
+  void ConnectHandlers()
+  {
+    mReadySignal.Connect(this, [this](uint32_t itemCount)
+    {
+      mLastItemCount = itemCount;
+    });
+  }
+
+  void Complete(uint32_t itemCount)
+  {
+    mReadySignal.Emit(itemCount);
+  }
+
+private:
+  ReadySignalType mReadySignal;
+  uint32_t        mLastItemCount{0};
+};
+```
+
+`Dali::ConnectionTracker::DisconnectAll()` disconnects every signal currently tracked by the receiver. Use it when a controller leaves a page or rebinds to a new group of views before destruction.
+
+## Use Lambdas, Member Functions, and Free Functions
+
+A `Dali::Signal` supports several callback forms. In application code, member functions and lambdas with a `Dali::ConnectionTracker` are the most useful because their lifetime is tied to the receiver.
+
+Member function callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class FocusRing : public ConnectionTracker
+{
+public:
+  void Attach(View target)
+  {
+    target.FocusChangedSignal().Connect(this, &FocusRing::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View target, bool focused)
+  {
+    target.SetOpacity(focused ? 1.0f : 0.6f);
+  }
+};
+```
+
+Lambda callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class SelectionController : public ConnectionTracker
+{
+public:
+  void Attach(InteractiveTrait& trait)
+  {
+    trait.ClickedSignal().Connect(this, [this](View selectedView, InputEvent) -> bool
+    {
+      mSelected = selectedView;
+      return true;
+    });
+  }
+
+private:
+  View mSelected;
+};
+```
+
+Free function callback:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+namespace
+{
+void OnRefresh()
+{
+}
+}
+
+void ConnectRefresh(Signal<void()>& refreshSignal)
+{
+  refreshSignal.Connect(&OnRefresh);
+}
+```
+
+For function objects that need type-erased storage, `Dali::FunctorDelegate::New()` creates a delegate owned by the signal connection:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali/public-api/signals/functor-delegate.h>
+
+using namespace Dali;
+
+class RefreshController : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& refreshSignal)
+  {
+    refreshSignal.Connect(this, FunctorDelegate::New([this]
+    {
+      ++mRefreshCount;
+    }));
+  }
+
+private:
+  uint32_t mRefreshCount{0};
+};
+```
+
+## Inspect and Disconnect Connections
+
+`Dali::Signal` inherits connection inspection from `Dali::SignalMixin`. Use `Empty()` when you only need to know whether any slots are connected, and `GetConnectionCount()` when diagnostic code needs the exact count.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+class RefreshModel
+{
+public:
+  using ChangedSignalType = Signal<void()>;
+
+  ChangedSignalType& ChangedSignal()
+  {
+    return mChangedSignal;
+  }
+
+  bool HasListeners() const
+  {
+    return !mChangedSignal.Empty();
+  }
+
+  uint32_t ListenerCount() const
+  {
+    return mChangedSignal.GetConnectionCount();
+  }
+
+  void NotifyChanged()
+  {
+    mChangedSignal.Emit();
+  }
+
+private:
+  ChangedSignalType mChangedSignal;
+};
+```
+
+Disconnect a specific function or member function by passing the same receiver and callback shape used for `Connect()`:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class RefreshHandler : public ConnectionTracker
+{
+public:
+  void Attach(Signal<void()>& signal)
+  {
+    signal.Connect(this, &RefreshHandler::OnRefresh);
+  }
+
+  void Detach(Signal<void()>& signal)
+  {
+    signal.Disconnect(this, &RefreshHandler::OnRefresh);
+  }
+
+private:
+  void OnRefresh()
+  {
+  }
+};
+```
+
+When the receiver owns several connections, `Dali::ConnectionTracker::GetConnectionCount()` gives the number currently tracked by that receiver, and `Dali::ConnectionTracker::DisconnectAll()` clears them together:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PageBindings : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& opened, Signal<void()>& closed)
+  {
+    opened.Connect(this, &PageBindings::OnOpened);
+    closed.Connect(this, &PageBindings::OnClosed);
+  }
+
+  void Reset()
+  {
+    if(GetConnectionCount() > 0u)
+    {
+      DisconnectAll();
+    }
+  }
+
+private:
+  void OnOpened()
+  {
+  }
+
+  void OnClosed()
+  {
+  }
+};
+```
+
+## Expose Small Application Signals
+
+Application-level components can expose their own typed `Dali::Signal` members. Define a type alias, return the signal by reference, and emit it from the component when the state changes.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class SelectionModel
+{
+public:
+  using SelectionChangedSignalType = Signal<void(uint32_t)>;
+
+  SelectionChangedSignalType& SelectionChangedSignal()
+  {
+    return mSelectionChangedSignal;
+  }
+
+  void Select(uint32_t index)
+  {
+    if(mSelectedIndex != index)
+    {
+      mSelectedIndex = index;
+      mSelectionChangedSignal.Emit(mSelectedIndex);
+    }
+  }
+
+private:
+  SelectionChangedSignalType mSelectionChangedSignal;
+  uint32_t                   mSelectedIndex{0u};
+};
+
+class SelectionViewController : public ConnectionTracker
+{
+public:
+  void Bind(SelectionModel& model)
+  {
+    model.SelectionChangedSignal().Connect(this, &SelectionViewController::OnSelectionChanged);
+  }
+
+private:
+  void OnSelectionChanged(uint32_t index)
+  {
+    mLastSelection = index;
+  }
+
+  uint32_t mLastSelection{0u};
+};
+```
+
+Use the exact `Dali::Signal` specialization that matches the event contract:
+
+```cpp
+using StartedSignalType  = Dali::Signal<void()>;
+using ProgressSignalType = Dali::Signal<void(float)>;
+using AcceptedSignalType = Dali::Signal<bool(uint32_t, uint32_t)>;
+```
+
+`Dali::Signal<void()>` emits notifications without data. `Dali::Signal<void(Arg0)>` and `Dali::Signal<void(Arg0, Arg1)>` pass data to listeners. `Dali::Signal<Ret(Arg0, Arg1)>` collects a return value from connected callbacks.
+
+## Use Return Values Carefully
+
+A returning `Dali::Signal` returns the value from the last callback that runs. If no callbacks are connected, it returns a default-constructed value for the return type.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PermissionModel
+{
+public:
+  using AllowSignalType = Signal<bool(uint32_t)>;
+
+  AllowSignalType& AllowSignal()
+  {
+    return mAllowSignal;
+  }
+
+  bool CanOpen(uint32_t itemId)
+  {
+    return mAllowSignal.Emit(itemId);
+  }
+
+private:
+  AllowSignalType mAllowSignal;
+};
+
+class PermissionController : public ConnectionTracker
+{
+public:
+  void Bind(PermissionModel& model)
+  {
+    model.AllowSignal().Connect(this, &PermissionController::OnAllow);
+  }
+
+private:
+  bool OnAllow(uint32_t itemId)
+  {
+    return itemId != 0u;
+  }
+};
+```
+
+For two-argument returning signals, `EmitOr()` is available and combines callback results with logical OR behavior. This is useful for consumed-style application events where any handler may accept the event:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class CommandRouter
+{
+public:
+  using CommandSignalType = Signal<bool(uint32_t, uint32_t)>;
+
+  CommandSignalType& CommandSignal()
+  {
+    return mCommandSignal;
+  }
+
+  bool Dispatch(uint32_t commandId, uint32_t sourceId)
+  {
+    return mCommandSignal.EmitOr(commandId, sourceId);
+  }
+
+private:
+  CommandSignalType mCommandSignal;
+};
+
+class CommandHandler : public ConnectionTracker
+{
+public:
+  void Bind(CommandRouter& router)
+  {
+    router.CommandSignal().Connect(this, &CommandHandler::OnCommand);
+  }
+
+private:
+  bool OnCommand(uint32_t commandId, uint32_t)
+  {
+    return commandId == 1u;
+  }
+};
+```
+
+Keep returning signals narrow and documented in the component that owns them. For most dali-ui view events, application code connects to the signal exposed by the view or trait and follows that signal's callback signature.
+tokens used
+37,981

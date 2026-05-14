@@ -1,0 +1,331 @@
+---
+title: Ui Config
+sidebar_label: Ui Config
+category: styling-theme-config
+---
+
+# Ui Config
+
+`Dali::Ui::UiConfig` defines global dali-ui defaults that are applied once during application startup.
+
+## Table of Contents
+
+- [Apply Ui Config at Startup](#apply-ui-config-at-startup)
+- [Scaling and DPI Defaults](#scaling-and-dpi-defaults)
+- [Text Defaults](#text-defaults)
+- [Keyboard, Focus, and Tap Defaults](#keyboard-focus-and-tap-defaults)
+- [Broken Image Fallbacks](#broken-image-fallbacks)
+- [Marquee Defaults](#marquee-defaults)
+- [Reading Back Applied Values](#reading-back-applied-values)
+- [Generated Chain Methods](#generated-chain-methods)
+
+## Apply Ui Config at Startup
+
+Create the global configuration with `Dali::Ui::UiConfig::New()`, configure it with typed setters, and finish with `Dali::Ui::UiConfig::Apply()`. Setter methods return `Dali::Ui::UiConfig&`, so startup configuration is usually written as a fluent chain.
+
+Call `Dali::Ui::UiConfig::Apply()` once before the application main loop starts and before code relies on configured dali-ui defaults. After `Dali::Ui::UiConfig::Apply()`, the configuration is frozen, and later setter calls trigger an assertion failure.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ApplyUiDefaults()
+{
+  UiConfig::New()
+    .SetDpi(320)
+    .SetBaselineDpi(160)
+    .SetScalingFactor(1.25f)
+    .Apply();
+}
+```
+
+A default configuration is also valid when the application does not need custom values.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyDefaultUiConfig()
+{
+  UiConfig::New().Apply();
+}
+```
+
+## Scaling and DPI Defaults
+
+`Dali::Ui::UiConfig` owns the app-wide values used by dali-ui unit calculations. `Dali::Ui::UiConfig::SetDpi()` sets the target display DPI for `dp` and `sdp` units, `Dali::Ui::UiConfig::SetBaselineDpi()` sets the reference DPI for `dp` calculations, and `Dali::Ui::UiConfig::SetScalingFactor()` sets the multiplier for `spx` and `sdp` units.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+UiConfig CreateScaledUiConfig()
+{
+  UiConfig config = UiConfig::New();
+
+  config
+    .SetDpi(320)
+    .SetBaselineDpi(160)
+    .SetScalingFactor(1.5f);
+
+  return config;
+}
+```
+
+After the configuration is applied, `Dali::Ui::UiConfig::GetDpiFactor()` returns `dpi / baselineDpi`, and `Dali::Ui::UiConfig::GetScaledDpiFactor()` returns that DPI factor multiplied by `Dali::Ui::UiConfig::GetScalingFactor()`.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyAndReadScale()
+{
+  UiConfig config = UiConfig::New()
+    .SetDpi(320)
+    .SetBaselineDpi(160)
+    .SetScalingFactor(1.5f);
+
+  config.Apply();
+
+  const float dpiFactor = config.GetDpiFactor();
+  const float scaledDpiFactor = config.GetScaledDpiFactor();
+  const float scalingFactor = config.GetScalingFactor();
+
+  (void)dpiFactor;
+  (void)scaledDpiFactor;
+  (void)scalingFactor;
+}
+```
+
+## Text Defaults
+
+Use `Dali::Ui::UiConfig::SetDefaultFontSize()`, `Dali::Ui::UiConfig::SetDefaultTextColor()`, and `Dali::Ui::UiConfig::SetDefaultPlaceholderTextColor()` to establish text defaults for dali-ui text elements. `Dali::Ui::UiConfig::SetShowPlaceholderTextOnFocus()` controls whether placeholder text remains visible when a text input has focus, and `Dali::Ui::UiConfig::SetLabelAsyncRendering()` controls the default asynchronous rendering mode for `Dali::Ui::Label`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ApplyTextDefaults()
+{
+  UiConfig::New()
+    .SetDefaultFontSize(18.0f)
+    .SetDefaultTextColor(Vector4(0.08f, 0.08f, 0.08f, 1.0f))
+    .SetDefaultPlaceholderTextColor(Vector4(0.45f, 0.45f, 0.45f, 0.8f))
+    .SetShowPlaceholderTextOnFocus(false)
+    .SetLabelAsyncRendering(true)
+    .Apply();
+}
+```
+
+You can keep a handle and query the configured text values before or after applying the configuration.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ConfigureAndInspectTextDefaults()
+{
+  UiConfig config = UiConfig::New()
+    .SetDefaultFontSize(16.0f)
+    .SetDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f))
+    .SetDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f));
+
+  const float fontSize = config.GetDefaultFontSize();
+  const Vector4 textColor = config.GetDefaultTextColor();
+  const Vector4 placeholderColor = config.GetDefaultPlaceholderTextColor();
+
+  (void)fontSize;
+  (void)textColor;
+  (void)placeholderColor;
+
+  config.Apply();
+}
+```
+
+## Keyboard, Focus, and Tap Defaults
+
+`Dali::Ui::UiConfig` also owns app-wide interaction defaults. `Dali::Ui::UiConfig::SetKeyClickPolicy()` selects when D-Pad, remote, or keyboard input triggers click execution, `Dali::Ui::UiConfig::SetExecutionKeyPredicate()` selects which key names count as execution keys, and `Dali::Ui::UiConfig::SetKeyLongPressThreshold()` sets the repeated key-press count needed for a long press.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+bool IsExecutionKey(const Dali::String& keyName)
+{
+  return keyName == "Return" || keyName == "KP_Enter";
+}
+
+void ApplyKeyboardDefaults()
+{
+  UiConfig::New()
+    .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)
+    .SetExecutionKeyPredicate(IsExecutionKey)
+    .SetKeyLongPressThreshold(4u)
+    .SetTapRecognizerTime(250u)
+    .Apply();
+}
+```
+
+Focus defaults are configured with `Dali::Ui::UiConfig::SetAlwaysShowFocus()` and `Dali::Ui::UiConfig::EnableFocusClearOnEscape()`.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyFocusDefaults()
+{
+  UiConfig::New()
+    .SetAlwaysShowFocus(true)
+    .EnableFocusClearOnEscape(true)
+    .Apply();
+}
+```
+
+## Broken Image Fallbacks
+
+`Dali::Ui::UiConfig::SetBrokenImageUrl()` configures image URLs used by image views when image loading fails. The type is selected with `Dali::Ui::UiConfig::BrokenImageType`, so small, normal, and large view sizes can use different fallback assets.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ApplyBrokenImageDefaults()
+{
+  UiConfig::New()
+    .SetBrokenImageUrl(UiConfig::BrokenImageType::SMALL, Dali::String("assets/image-broken-small.png"))
+    .SetBrokenImageUrl(UiConfig::BrokenImageType::NORMAL, Dali::String("assets/image-broken-normal.png"))
+    .SetBrokenImageUrl(UiConfig::BrokenImageType::LARGE, Dali::String("assets/image-broken-large.png"))
+    .Apply();
+}
+```
+
+Use `Dali::Ui::UiConfig::GetBrokenImageUrl()` when shared setup code needs to inspect the configured fallback for a specific `Dali::Ui::UiConfig::BrokenImageType`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Dali::String GetNormalBrokenImageUrl(UiConfig config)
+{
+  return config.GetBrokenImageUrl(UiConfig::BrokenImageType::NORMAL);
+}
+```
+
+## Marquee Defaults
+
+For text that uses marquee behavior, `Dali::Ui::UiConfig` provides app-wide defaults for speed, loop count, loop delay, gap, stop mode, and orientation. These settings are useful when your application wants consistent marquee behavior across labels.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyMarqueeDefaults()
+{
+  UiConfig::New()
+    .SetMarqueeSpeed(90)
+    .SetMarqueeLoopCount(2)
+    .SetMarqueeLoopDelay(0.5f)
+    .SetMarqueeGap(48.0f)
+    .SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP)
+    .SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL)
+    .Apply();
+}
+```
+
+The matching getters return the configured values with the same types used by the setters.
+
+```cpp
+using namespace Dali::Ui;
+
+void ReadMarqueeDefaults(UiConfig config)
+{
+  const int speed = config.GetMarqueeSpeed();
+  const int loopCount = config.GetMarqueeLoopCount();
+  const float loopDelay = config.GetMarqueeLoopDelay();
+  const float gap = config.GetMarqueeGap();
+  const Text::MarqueeStopMode stopMode = config.GetMarqueeStopMode();
+  const Text::MarqueeOrientation orientation = config.GetMarqueeOrientation();
+
+  (void)speed;
+  (void)loopCount;
+  (void)loopDelay;
+  (void)gap;
+  (void)stopMode;
+  (void)orientation;
+}
+```
+
+## Reading Back Applied Values
+
+`Dali::Ui::UiConfig` is a handle type. You can copy it with `Dali::Ui::UiConfig::operator=`, pass it to helper functions, and downcast a `Dali::BaseHandle` with `Dali::Ui::UiConfig::DownCast()` when generic handle code needs to recover the concrete configuration type.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void InspectConfigHandle(BaseHandle handle)
+{
+  UiConfig config = UiConfig::DownCast(handle);
+
+  if(config)
+  {
+    const int dpi = config.GetDpi();
+    const int baselineDpi = config.GetBaselineDpi();
+    const bool focusClearsOnEscape = config.IsFocusClearOnEscapeEnabled();
+    const bool focusIndicatorShown = config.IsFocusIndicatorAlwaysShown();
+    const bool asyncLabels = config.IsLabelAsyncRendering();
+    const bool placeholderOnFocus = config.IsPlaceholderTextShownOnFocus();
+
+    (void)dpi;
+    (void)baselineDpi;
+    (void)focusClearsOnEscape;
+    (void)focusIndicatorShown;
+    (void)asyncLabels;
+    (void)placeholderOnFocus;
+  }
+}
+```
+
+`Dali::Ui::UiConfig::GetExecutionKeyPredicate()` returns the active function pointer. This is useful for diagnostic code that wants to test the configured predicate against a key name.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+bool UsesReturnAsExecutionKey(UiConfig config)
+{
+  ExecutionKeyPredicate predicate = config.GetExecutionKeyPredicate();
+  return predicate && predicate(Dali::String("Return"));
+}
+```
+
+## Generated Chain Methods
+
+`ui-config.autogen.h` is part of the public `Dali::Ui::UiConfig` feature surface. It defines `DALI_UI_CHAIN_UICONFIG_METHODS`, a macro used by derived configuration classes to forward selected `Dali::Ui::UiConfig` setters while preserving the derived return type for fluent chaining.
+
+Application code normally uses `Dali::Ui::UiConfig::New()` directly. A platform or product layer can use `DALI_UI_CHAIN_UICONFIG_METHODS` when it exposes a specialized configuration class and wants forwarded setters such as `Dali::Ui::UiConfig::SetDpi()`, `Dali::Ui::UiConfig::SetScalingFactor()`, and `Dali::Ui::UiConfig::SetBrokenImageUrl()` to keep returning the specialized type.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ProductUiConfig : public UiConfig
+{
+public:
+  ProductUiConfig() = default;
+
+  explicit ProductUiConfig(Integration::UiConfigImpl* impl)
+  : UiConfig(impl)
+  {
+  }
+
+  DALI_UI_CHAIN_UICONFIG_METHODS(ProductUiConfig)
+
+  static ProductUiConfig New()
+  {
+    Integration::UiConfigImplPtr impl = Integration::UiConfigImpl::New();
+    ProductUiConfig config(impl.Get());
+    config
+      .SetDpi(320)
+      .SetBaselineDpi(160)
+      .SetScalingFactor(1.25f);
+    return config;
+  }
+};
+```

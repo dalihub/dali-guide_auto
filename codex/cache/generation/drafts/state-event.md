@@ -1,0 +1,246 @@
+---
+title: State Event
+sidebar_label: State Event
+category: input-interaction
+---
+
+# State Event
+
+`Dali::Ui::StateEvent` describes one `Dali::Ui::View` state transition, including the previous state, current state, and optional input event that caused the transition.
+
+## Table of Contents
+
+- [Responding to View State Transitions](#responding-to-view-state-transitions)
+- [Detecting Added, Removed, and Changed States](#detecting-added-removed-and-changed-states)
+- [Reading Previous and Current State Snapshots](#reading-previous-and-current-state-snapshots)
+- [Checking the Input Cause](#checking-the-input-cause)
+- [Keeping Handlers Focused and Safe](#keeping-handlers-focused-and-safe)
+
+## Responding to View State Transitions
+
+In a dali-ui application, state changes are observed from a `Dali::Ui::View`. The state callback receives the `Dali::Ui::View` that changed and a `Dali::Ui::StateEvent` describing the transition.
+
+```cpp
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+
+class MyController : public Dali::ConnectionTracker
+{
+public:
+  void Watch(Dali::Ui::View button)
+  {
+    button.StateChangedSignal().Connect(
+      this,
+      [this](Dali::Ui::View view, Dali::Ui::StateEvent event)
+      {
+        OnButtonStateChanged(view, event);
+      });
+  }
+
+private:
+  void OnButtonStateChanged(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+  {
+    if(event.Added(Dali::Ui::ViewState::FOCUSED))
+    {
+      ShowFocusFeedback(view);
+    }
+
+    if(event.Removed(Dali::Ui::ViewState::FOCUSED))
+    {
+      HideFocusFeedback(view);
+    }
+  }
+
+  void ShowFocusFeedback(Dali::Ui::View view);
+  void HideFocusFeedback(Dali::Ui::View view);
+};
+```
+
+`Dali::Ui::StateEvent` is a handle type. Application code normally receives it from a state change signal rather than constructing it directly. The default constructor `Dali::Ui::StateEvent::StateEvent` creates an uninitialized handle, and the default destructor `Dali::Ui::StateEvent::~StateEvent` releases the handle normally.
+
+## Detecting Added, Removed, and Changed States
+
+Use `Dali::Ui::StateEvent::Added`, `Dali::Ui::StateEvent::Removed`, and `Dali::Ui::StateEvent::Changed` when the handler only cares about a specific state bit.
+
+```cpp
+void UpdateInteractionVisuals(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+{
+  if(event.Added(Dali::Ui::ViewState::PRESSED))
+  {
+    ApplyPressedStyle(view);
+  }
+
+  if(event.Removed(Dali::Ui::ViewState::PRESSED))
+  {
+    ClearPressedStyle(view);
+  }
+
+  if(event.Changed(Dali::Ui::ViewState::SELECTED))
+  {
+    RefreshSelectionStyle(view);
+  }
+}
+
+void ApplyPressedStyle(Dali::Ui::View view);
+void ClearPressedStyle(Dali::Ui::View view);
+void RefreshSelectionStyle(Dali::Ui::View view);
+```
+
+`Dali::Ui::StateEvent::Added(state)` is true when `state` was absent from `Dali::Ui::StateEvent::GetPrev` and present in `Dali::Ui::StateEvent::GetCurrent`.
+
+`Dali::Ui::StateEvent::Removed(state)` is true when `state` was present in `Dali::Ui::StateEvent::GetPrev` and absent from `Dali::Ui::StateEvent::GetCurrent`.
+
+`Dali::Ui::StateEvent::Changed(state)` is true when either `Dali::Ui::StateEvent::Added(state)` or `Dali::Ui::StateEvent::Removed(state)` is true.
+
+## Reading Previous and Current State Snapshots
+
+For compound decisions, compare the snapshots returned by `Dali::Ui::StateEvent::GetPrev` and `Dali::Ui::StateEvent::GetCurrent`.
+
+```cpp
+void HandleStateTransition(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+{
+  const Dali::Ui::ViewState& previous = event.GetPrev();
+  const Dali::Ui::ViewState& current  = event.GetCurrent();
+
+  const bool becameDisabled =
+    !previous.Contains(Dali::Ui::ViewState::DISABLED) &&
+    current.Contains(Dali::Ui::ViewState::DISABLED);
+
+  const bool noLongerPressed =
+    previous.Contains(Dali::Ui::ViewState::PRESSED) &&
+    !current.Contains(Dali::Ui::ViewState::PRESSED);
+
+  if(becameDisabled && noLongerPressed)
+  {
+    ClearPressedStyle(view);
+    ApplyDisabledStyle(view);
+  }
+}
+
+void ClearPressedStyle(Dali::Ui::View view);
+void ApplyDisabledStyle(Dali::Ui::View view);
+```
+
+This is useful when one transition affects multiple states. For example, a view can become disabled while also losing its pressed state. `Dali::Ui::StateEvent::GetPrev` and `Dali::Ui::StateEvent::GetCurrent` let the handler react to the whole transition instead of treating each state independently.
+
+## Checking the Input Cause
+
+A state transition can be caused by input, application code, or framework behavior. Use `Dali::Ui::StateEvent::GetInputEventType` before reading a typed input event.
+
+```cpp
+void HandleStateInputCause(const Dali::Ui::StateEvent& event)
+{
+  switch(event.GetInputEventType())
+  {
+    case Dali::Ui::InputEventType::TOUCH_EVENT:
+    {
+      const Dali::TouchEvent& touch = event.GetTouchEvent();
+      HandleTouchCausedStateChange(touch);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::KEY_EVENT:
+    {
+      const Dali::KeyEvent& key = event.GetKeyEvent();
+      HandleKeyCausedStateChange(key);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::TAP_GESTURE:
+    {
+      const Dali::TapGesture& tap = event.GetTapGesture();
+      HandleTapCausedStateChange(tap);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::LONG_PRESS_GESTURE:
+    {
+      const Dali::LongPressGesture& longPress = event.GetLongPressGesture();
+      HandleLongPressCausedStateChange(longPress);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::WHEEL_EVENT:
+    {
+      const Dali::WheelEvent& wheel = event.GetWheelEvent();
+      HandleWheelCausedStateChange(wheel);
+      break;
+    }
+
+    case Dali::Ui::InputEventType::NONE:
+    case Dali::Ui::InputEventType::RESERVED:
+    {
+      HandleNonInputStateChange();
+      break;
+    }
+  }
+}
+
+void HandleTouchCausedStateChange(const Dali::TouchEvent& event);
+void HandleKeyCausedStateChange(const Dali::KeyEvent& event);
+void HandleTapCausedStateChange(const Dali::TapGesture& gesture);
+void HandleLongPressCausedStateChange(const Dali::LongPressGesture& gesture);
+void HandleWheelCausedStateChange(const Dali::WheelEvent& event);
+void HandleNonInputStateChange();
+```
+
+`Dali::Ui::StateEvent::GetInputEventType` is the shortcut for the type of `Dali::Ui::StateEvent::GetCause`. When it returns `Dali::Ui::InputEventType::NONE`, the state change did not originate from a concrete input event.
+
+Only call `Dali::Ui::StateEvent::GetTouchEvent`, `Dali::Ui::StateEvent::GetKeyEvent`, `Dali::Ui::StateEvent::GetTapGesture`, `Dali::Ui::StateEvent::GetLongPressGesture`, or `Dali::Ui::StateEvent::GetWheelEvent` after checking that `Dali::Ui::StateEvent::GetInputEventType` matches the corresponding input type.
+
+## Keeping Handlers Focused and Safe
+
+A state handler should usually read the transition once, then dispatch to small application functions. This keeps input-specific code separate from visual state code.
+
+```cpp
+void OnStateChanged(Dali::Ui::View view, const Dali::Ui::StateEvent& event)
+{
+  if(event.Changed(Dali::Ui::ViewState::FOCUSED))
+  {
+    UpdateFocusState(view, event.GetCurrent().Contains(Dali::Ui::ViewState::FOCUSED));
+  }
+
+  if(event.Changed(Dali::Ui::ViewState::PRESSED))
+  {
+    UpdatePressedState(view, event.GetCurrent().Contains(Dali::Ui::ViewState::PRESSED));
+  }
+
+  if(event.Added(Dali::Ui::ViewState::DISABLED))
+  {
+    UpdateDisabledState(view, true);
+  }
+
+  if(event.Removed(Dali::Ui::ViewState::DISABLED))
+  {
+    UpdateDisabledState(view, false);
+  }
+}
+
+void UpdateFocusState(Dali::Ui::View view, bool focused);
+void UpdatePressedState(Dali::Ui::View view, bool pressed);
+void UpdateDisabledState(Dali::Ui::View view, bool disabled);
+```
+
+`Dali::Ui::StateEvent::operator=` is defaulted, so a `Dali::Ui::StateEvent` can be assigned when application code needs to keep the most recent event handle during a callback-owned workflow.
+
+```cpp
+class LastStateEventCache
+{
+public:
+  void OnStateChanged(Dali::Ui::View, Dali::Ui::StateEvent event)
+  {
+    mLastEvent = event;
+
+    if(mLastEvent.Changed(Dali::Ui::ViewState::SELECTED))
+    {
+      RefreshSelection();
+    }
+  }
+
+private:
+  void RefreshSelection();
+
+  Dali::Ui::StateEvent mLastEvent;
+};
+```

@@ -1,0 +1,312 @@
+---
+title: Attachment Id
+sidebar_label: Attachment Id
+category: utilities
+---
+
+# Attachment Id
+
+`Dali::Ui::AttachmentId` is a lightweight identifier for an attachment slot on a `Dali::Ui::View`.
+
+## Table of Contents
+
+- [Allocate One Id Per Attachment Type](#allocate-one-id-per-attachment-type)
+- [Attach View-Local State](#attach-view-local-state)
+- [Retrieve and Update Attachment Data](#retrieve-and-update-attachment-data)
+- [Replace, Remove, and Detach Data](#replace-remove-and-detach-data)
+- [Use Attachment Ids in Custom View Handles](#use-attachment-ids-in-custom-view-handles)
+
+## Allocate One Id Per Attachment Type
+
+Allocate a `Dali::Ui::AttachmentId` once for each logical attachment slot, then reuse that id whenever the same data type is stored, read, removed, or detached.
+
+`Dali::Ui::AttachmentId::Alloc()` returns the next unique id. Store the result in static or namespace-scope storage instead of allocating during each event or view update.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  uint32_t count{0u};
+};
+}
+```
+
+`Dali::Ui::AttachmentId` is a lightweight value type. You can compare ids with `Dali::Ui::AttachmentId::operator==` and `Dali::Ui::AttachmentId::operator!=` when routing attachment-aware logic.
+
+```cpp
+const AttachmentId FIRST_DATA_ID  = AttachmentId::Alloc();
+const AttachmentId SECOND_DATA_ID = AttachmentId::Alloc();
+
+if(FIRST_DATA_ID != SECOND_DATA_ID)
+{
+  // The ids address different attachment slots.
+}
+```
+
+The public `Dali::Ui::AttachmentId::value` field contains the underlying numeric id. Application code normally keeps ids opaque and compares the `Dali::Ui::AttachmentId` values directly.
+
+```cpp
+const AttachmentId DATA_ID = AttachmentId::Alloc();
+uint32_t rawId = DATA_ID.value;
+(void)rawId;
+```
+
+## Attach View-Local State
+
+In a dali-ui app, attach custom state to a `Dali::Ui::View` when the state belongs to that view but should not be stored as fields on a lightweight handle object.
+
+`Dali::Ui::View::SetAttachment()` takes ownership of non-null data passed with `Dali::MakeUnique`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+}
+
+InteractiveView CreateCounterView()
+{
+  Label label = Label::New("Count: 0")
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT)
+    .SetFontSize(18.0f)
+    .SetTextColor(UiColor(0xFFFFFF))
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+  return InteractiveView::New()
+    .SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label))
+    .SetRequestedWidth(220.0f)
+    .SetRequestedHeight(80.0f)
+    .SetBackgroundColor(UiColor(0x1565C0))
+    .Children({label});
+}
+```
+
+Use one `Dali::Ui::AttachmentId` for one logical attachment type. Calling `Dali::Ui::AttachmentId::Alloc()` every time a view is created would make the data hard to retrieve later, because reads must use the same id value that was used to store the data.
+
+## Retrieve and Update Attachment Data
+
+Read the attachment through the same `Dali::Ui::AttachmentId` used when the data was attached. The returned pointer is owned by the `Dali::Ui::View`; do not delete it or keep using it after the attachment is removed, replaced, or the view implementation is destroyed.
+
+```cpp
+#include <cstdio>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+
+void UpdateCounterLabel(View view)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+  if(!data)
+  {
+    return;
+  }
+
+  char text[64];
+  std::snprintf(text, sizeof(text), "Count: %u", data->count);
+  data->label.SetText(text);
+}
+}
+
+void OnCounterClicked(View view, InputEvent event)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+  if(data)
+  {
+    ++data->count;
+    view.SetBackgroundColor((data->count % 2u) ? UiColor(0x2E7D32) : UiColor(0x1565C0));
+    UpdateCounterLabel(view);
+  }
+}
+```
+
+If the id is missing or the requested type does not match the stored type, `Dali::Ui::View::GetAttachment()` returns `nullptr`. This makes it practical to use an attached marker or data object to check whether a generic `Dali::Ui::View` supports a feature.
+
+## Replace, Remove, and Detach Data
+
+Setting a new value for the same `Dali::Ui::AttachmentId` replaces the old attachment. `Dali::Ui::View::RemoveAttachment()` destroys the stored object. `Dali::Ui::View::DetachAttachment()` removes a matching typed attachment and transfers ownership back to the caller.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNT_DATA_ID = AttachmentId::Alloc();
+}
+
+void ReplaceCounterData(View view)
+{
+  view.SetAttachment(COUNT_DATA_ID, Dali::MakeUnique<int>(13));
+  view.SetAttachment(COUNT_DATA_ID, Dali::MakeUnique<int>(27));
+
+  int* value = view.GetAttachment<int>(COUNT_DATA_ID);
+  if(value)
+  {
+    *value += 1;
+  }
+}
+
+void RemoveCounterData(View view)
+{
+  bool removed = view.RemoveAttachment(COUNT_DATA_ID);
+  (void)removed;
+}
+
+Dali::UniquePtr<int> TakeCounterData(View view)
+{
+  return view.DetachAttachment<int>(COUNT_DATA_ID);
+}
+```
+
+Use `Dali::Ui::View::DetachAttachment()` when the data should continue to exist outside the view. Use `Dali::Ui::View::RemoveAttachment()` when the attachment should simply be discarded.
+
+```cpp
+void ResetCounter(View counter)
+{
+  Dali::UniquePtr<int> count = counter.DetachAttachment<int>(COUNT_DATA_ID);
+  if(count)
+  {
+    *count = 0;
+    counter.SetAttachment(COUNT_DATA_ID, Dali::Move(count));
+  }
+}
+```
+
+## Use Attachment Ids in Custom View Handles
+
+Attachments are useful when a custom public handle derives from a dali-ui view type. DALi handles are lightweight, so persistent per-view data should be stored on the implementation-backed view object rather than as ordinary fields on the handle wrapper.
+
+Keep the `Dali::Ui::AttachmentId` private to the custom handle and return the same static id every time.
+
+```cpp
+#include <cstdio>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class MyButton : public InteractiveView
+{
+public:
+  struct Data
+  {
+    Data(Label label, UiColor normalColor, UiColor pressedColor)
+    : label(label),
+      normalColor(normalColor),
+      pressedColor(pressedColor)
+    {
+    }
+
+    Label   label;
+    UiColor normalColor;
+    UiColor pressedColor;
+    uint32_t clickCount{0u};
+  };
+
+  MyButton() = default;
+
+  static MyButton New(const Dali::String& text)
+  {
+    MyButton button(InteractiveView::New());
+    button.Initialize(text);
+    return button;
+  }
+
+  static MyButton DownCast(BaseHandle handle)
+  {
+    InteractiveView view = InteractiveView::DownCast(handle);
+    return view && view.GetAttachment<Data>(GetDataId()) ? MyButton(view) : MyButton();
+  }
+
+  void Initialize(const Dali::String& text)
+  {
+    Label label = Label::New(text)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetFontSize(18.0f)
+      .SetTextColor(UiColor(0xFFFFFF))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    Add(label);
+    SetAttachment(GetDataId(), Dali::MakeUnique<Data>(label, UiColor(0x1565C0), UiColor(0x2E7D32)));
+    SetBackgroundColor(UiColor(0x1565C0));
+  }
+
+  void IncrementClickCount()
+  {
+    Data* data = GetAttachment<Data>(GetDataId());
+    if(!data)
+    {
+      return;
+    }
+
+    ++data->clickCount;
+    SetBackgroundColor((data->clickCount % 2u) ? data->pressedColor : data->normalColor);
+
+    char text[64];
+    std::snprintf(text, sizeof(text), "MyButton: %u", data->clickCount);
+    data->label.SetText(text);
+  }
+
+public:
+  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)
+
+private:
+  explicit MyButton(InteractiveView view)
+  : InteractiveView(view)
+  {
+  }
+
+  static AttachmentId GetDataId()
+  {
+    static AttachmentId id = AttachmentId::Alloc();
+    return id;
+  }
+};
+```
+
+This pattern lets application code keep using `Dali::Ui::View`-based handles while the custom view keeps its implementation-specific state behind a stable `Dali::Ui::AttachmentId`.

@@ -1,0 +1,2943 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e25ff-c516-79c1-bdcb-59c6c137c61c
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Ui Color (ui-color)
+- Category: styling-theme-config
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 15
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::UiColor | scope=primary
+- Dali::Ui::UiColor::BACKGROUND | scope=primary_member
+- Dali::Ui::UiColor::GetColorId | String GetColorId() const | scope=primary_member
+- Dali::Ui::UiColor::GetRgba | Vector4 GetRgba() const | scope=primary_member
+- Dali::Ui::UiColor::HasColorId | bool HasColorId() const | scope=primary_member
+- Dali::Ui::UiColor::OUTLINE | scope=primary_member
+- Dali::Ui::UiColor::PRIMARY | scope=primary_member
+- Dali::Ui::UiColor::ScaleAlpha | UiColor ScaleAlpha(float factor) const | scope=primary_member
+- Dali::Ui::UiColor::UiColor | UiColor(float r, float g, float b, float a=1.0f) | scope=primary_member
+- Dali::Ui::UiColor::WithAlpha | UiColor WithAlpha(float alpha) const | scope=primary_member
+- Dali::Ui::UiColor::operator Vector4 | operator Vector4() const | scope=primary_member
+- Dali::Ui::UiColor::operator= | UiColor & operator=(const UiColor &)=default | scope=primary_member
+- Dali::Ui::UiColor::~UiColor | ~UiColor()=default | scope=primary_member
+- Dali::Ui::Text::Outline | scope=context_lookup
+- Dali::Ui::Text::Outline::Outline | Outline(Outline &&rhs) noexcept | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:37 (utc, score=0.75)
+```cpp
+}
+
+// === Default Constructor ===
+
+int UtcDaliUiColorDefaultConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiColor color;
+
+  DALI_TEST_CHECK(!color.HasColorId());
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === RGBA Constructor ===
+
+int UtcDaliUiColorRgbaConstructorP(void)
+{
+  UiTestApplication application;
+```
+
+- repos/dali-ui/samples/color-controls/color-controls-example.cpp:39 (sample, score=0.65)
+```cpp
+void Create(Application application)
+  {
+    // Get a handle to the window
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+    window.KeyEventSignal().Connect(this, &ColorControlsExample::OnKeyEvent);
+
+    window.Add(Layout::New() // Parent
+      .SetBackgroundColor(UiColor::BACKGROUND)
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
+      .Children({
+        View::New() // Red child
+          .SetBackgroundColor(UiColor::PRIMARY)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .AsInteractive([this](InteractiveTrait& trait) {
+            trait.ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
+              mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
+              return true;
+            });
+          }),
+        View::New() // Blue child
+          .SetBackgroundColor(UiColor("ThemeColor2"))
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "BACKGROUND",
+      "GetColorId",
+      "GetRgba",
+      "HasColorId",
+      "OUTLINE",
+      "Outline",
+      "PRIMARY",
+      "ScaleAlpha",
+      "UiColor",
+      "WithAlpha"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 116,
+    "snippet_start_line": 37
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "BACKGROUND",
+      "PRIMARY",
+      "UiColor"
+    ],
+    "path": "repos/dali-ui/samples/color-controls/color-controls-example.cpp",
+    "relevance": "medium",
+    "score": 0.65,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 103,
+    "snippet_start_line": 39
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Outline",
+      "UiColor",
+      "WithAlpha"
+    ],
+    "path": "repos/dali-ui/samples/text-visualizer/text-breaker-example.cpp",
+    "relevance": "medium",
+    "score": 0.65,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 176,
+    "snippet_start_line": 97
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "GetRgba",
+      "UiColor",
+      "WithAlpha"
+    ],
+    "path": "repos/dali-ui/samples/text-visualizer/text-visualizer-performance-example.cpp",
+    "relevance": "medium",
+    "score": 0.65,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 156,
+    "snippet_start_line": 77
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "PRIMARY",
+      "UiColor"
+    ],
+    "path": "repos/dali-ui/samples/animation/animation-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 100,
+    "snippet_start_line": 43
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "UiColor",
+      "WithAlpha"
+    ],
+    "path": "repos/dali-ui/samples/text/text-cutout-mask-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 111,
+    "snippet_start_line": 32
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "GetRgba",
+      "UiColor"
+    ],
+    "path": "repos/dali-ui/samples/text/text-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 134,
+    "snippet_start_line": 55
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "GetRgba",
+      "UiColor"
+    ],
+    "path": "repos/dali-ui/samples/text/text-input-field-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 116,
+    "snippet_start_line": 37
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,150p' repos/dali-ui/samples/color-controls/color-controls-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+#include "test-config.h"
+#include "test-theme-loader.h"
+
+using namespace Dali;
+using namespace Dali::Ui;
+using Dali::Ui::View;
+
+class ColorControlsExample : public ConnectionTracker
+{
+public:
+
+  ColorControlsExample(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &ColorControlsExample::Create);
+  }
+
+  ~ColorControlsExample() = default; // Nothing to do in destructor
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+  {
+    // Get a handle to the window
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+    window.KeyEventSignal().Connect(this, &ColorControlsExample::OnKeyEvent);
+
+    window.Add(Layout::New() // Parent
+      .SetBackgroundColor(UiColor::BACKGROUND)
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
+      .Children({
+        View::New() // Red child
+          .SetBackgroundColor(UiColor::PRIMARY)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .AsInteractive([this](InteractiveTrait& trait) {
+            trait.ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
+              mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
+              return true;
+            });
+          }),
+        View::New() // Blue child
+          .SetBackgroundColor(UiColor("ThemeColor2"))
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .SetRequestedPositionX(100_spx)
+          .SetRequestedPositionY(100_spx)
+          .As(mSecondChild),
+      }));
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if(event.GetKeyName() == "1")
+      {
+        if(auto* loader = GetTestThemeLoader())
+        {
+          loader->ToggleTheme();
+        }
+        return;
+      }
+
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+  View mSecondChild;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  TestConfig::New().Apply();
+  ColorControlsExample test(application);
+  application.MainLoop();
+  return 0;
+}
+
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-test-suite-utils.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+void utc_dali_uicolor_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_uicolor_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// === Default Constructor ===
+
+int UtcDaliUiColorDefaultConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiColor color;
+
+  DALI_TEST_CHECK(!color.HasColorId());
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === RGBA Constructor ===
+
+int UtcDaliUiColorRgbaConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+
+  DALI_TEST_CHECK(!color.HasColorId());
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorRgbaConstructorDefaultAlphaP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(0.5f, 0.5f, 0.5f);
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved.a, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Vector4 Constructor ===
+
+int UtcDaliUiColorVector4ConstructorP(void)
+{
+  UiTestApplication application;
+
+  Vector4 input(0.2f, 0.4f, 0.6f, 0.8f);
+  UiColor color(input);
+
+  DALI_TEST_CHECK(!color.HasColorId());
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved, input, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === String ID Constructor ===
+
+int UtcDaliUiColorStringIdConstructorP(void)
+{
+  UiTestApplication application;
+
+  String id("TestColorId");
+  UiColor color(id);
+
+  DALI_TEST_CHECK(color.HasColorId());
+  DALI_TEST_EQUALS(color.GetColorId(), "TestColorId", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorStringIdMoveConstructorP(void)
+{
+  UiTestApplication application;
+
+  String id("MovedColorId");
+  UiColor color(std::move(id));
+
+  DALI_TEST_CHECK(color.HasColorId());
+  DALI_TEST_EQUALS(color.GetColorId(), "MovedColorId", TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Hex RGB Constructor ===
+
+int UtcDaliUiColorHexConstructorP(void)
+{
+  UiTestApplication application;
+
+  // 0xFF0000 = pure red
+  UiColor color(0xFF0000u);
+
+  DALI_TEST_CHECK(!color.HasColorId());
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorHexConstructorWithAlphaP(void)
+{
+  UiTestApplication application;
+
+  // 0x00FF00 = pure green, alpha 0.5
+  UiColor color(0x00FF00u, 0.5f);
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.g, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 0.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorHexConstructorMixedP(void)
+{
+  UiTestApplication application;
+
+  // 0x387AFF = the default "Primary" color
+  UiColor color(0x387AFFu);
+
+  Vector4 resolved = color.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 0x38 / 255.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.g, 0x7A / 255.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.b, 0xFF / 255.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Copy / Move Semantics ===
+
+int UtcDaliUiColorCopyConstructorRgbaP(void)
+{
+  UiTestApplication application;
+
+  UiColor original(1.0f, 0.5f, 0.25f, 0.75f);
+  UiColor copy(original);
+
+  DALI_TEST_CHECK(!copy.HasColorId());
+  DALI_TEST_EQUALS(copy.GetRgba(), original.GetRgba(), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorCopyConstructorTokenP(void)
+{
+  UiTestApplication application;
+
+  UiColor original("CopyTestId");
+  UiColor copy(original);
+
+  DALI_TEST_CHECK(copy.HasColorId());
+  DALI_TEST_EQUALS(copy.GetColorId(), "CopyTestId", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorMoveConstructorP(void)
+{
+  UiTestApplication application;
+
+  UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
+  Vector4 originalResolved = original.GetRgba();
+
+  UiColor moved(std::move(original));
+
+exec
+/bin/bash -lc "rg \"class UiColor|struct UiColor|UiColor\" repos/dali-ui -g '*ui-color*' -g '*UiColor*' -g '*.h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:UiColorManager::UiColorManager() = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:UiColorManager::UiColorManager(Internal::UiColorManagerImpl* impl)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:UiColorManager UiColorManager::Get()
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:  return Internal::UiColorManagerImpl::Get();
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:UiColorManager UiColorManager::DownCast(BaseHandle handle)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:  return UiColorManager(dynamic_cast<Internal::UiColorManagerImpl*>(handle.GetObjectPtr()));
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:Vector4 UiColorManager::GetColor(StringView colorId) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:bool UiColorManager::GetColor(StringView colorId, Vector4& outColor) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::RegisterBinding(BaseHandle view, StringView bindingId, ColorCallback callback)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:bool UiColorManager::GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:bool UiColorManager::HasBinding(BaseHandle view, StringView bindingId) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::ClearBinding(BaseHandle view, StringView bindingId)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::ClearBindings(BaseHandle view)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::SetColorOverride(ColorOverrideFunc func)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::ClearColorOverride()
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::InvalidateCache()
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.cpp:void UiColorManager::InvalidateCache(const UiColor& color)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  UiColor GetBackgroundColor();
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  void SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  UiColor GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  void SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  UiColor GetCurrentColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  UiColor GetBorderlineColor();
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  void SetBorderlineColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:   * @param[in] color      The UiColor to apply
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:  void SetColorBinding(StringView bindingId, const UiColor& color, T* inst, void (T::*setter)(const Vector4&))
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:    auto manager = UiColorManager::Get();
+repos/dali-ui/dali-ui-foundation/public-api/image-view.h:   * Accepts both direct RGBA values and theme color tokens via UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/image-view.h:  ImageView& SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/image-view.h:  UiColor GetImageColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:  AnimatedImageView& SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:  UiColor GetImageColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetTextColor();
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @param[in] color The placeholder text color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetPlaceholderColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @return The placeholder text color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetPlaceholderColor();
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @param[in] color The cursor color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetCursorColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @return The cursor color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetCursorColor();
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @param[in] color The selection highlight color as a UiColor).
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetSelectionColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @return The selection highlight color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetSelectionColor();
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @param[in] color The text editing handle color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetTextHandleColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:   * @return The text editing handle color as a UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetTextHandleColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetTextBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetTextBackgroundColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  InputField& SetTypingTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:  UiColor GetTypingTextColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:  LottieAnimationView& SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:  UiColor GetImageColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h: * through UiColorManager, not directly through this class.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:class UiColorManagerImpl;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h: * Pass to UpdateBinding() to register a binding between a UiColor and a View.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h: * UiColorManager is a Handle-based singleton that exposes color table
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h: *   Vector4 bg = UiColorManager::Get().GetColor("bg_primary");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:class DALI_UI_API UiColorManager : public BaseHandle
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @brief Creates an uninitialized UiColorManager handle.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  UiColorManager();
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  ~UiColorManager() = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  UiColorManager(const UiColorManager& handle) = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  UiColorManager(UiColorManager&& rhs) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  UiColorManager& operator=(const UiColorManager& handle) = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  UiColorManager& operator=(UiColorManager&& rhs) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @brief Returns the singleton UiColorManager instance.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @return A handle to the UiColorManager singleton
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  static UiColorManager Get();
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @brief Downcasts a handle to a UiColorManager handle.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @return A handle to a UiColorManager or an uninitialized handle
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  static UiColorManager DownCast(BaseHandle handle);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @brief Retrieves the UiColor associated with a named binding.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @param[out] outColor  The bound UiColor if found
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  [[nodiscard]] bool GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @param[in] color     The new UiColor to store (must have a color ID)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  void SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   *   UiColorManager::Get().SetColorOverride(MyOverride);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * so that subsequent UiColor::GetRgba() calls re-resolve from the
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @brief Invalidates the cached resolved color for a specific UiColor.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * If the given UiColor holds a token, its cached value is cleared so
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * No-op if the UiColor holds a direct RGBA value.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:   * @param[in] color The UiColor whose cache entry should be invalidated
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  void InvalidateCache(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color-manager.h:  explicit UiColorManager(Internal::UiColorManagerImpl* impl);
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:  * @param[in] color The UiColor to apply \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:  ChildClass& SetColor(const UiColor& color) { VisualBase::SetColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:  * If the UiColor has a color ID, it is resolved from the current \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:  * @param[in] color The UiColor to apply \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:  ChildClass& SetBorderlineColor(const UiColor& color) { VisualBase::SetBorderlineColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  * If the UiColor has a color ID, it is resolved from the current \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  * If the UiColor has direct RGBA values, it is applied immediately \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  * @param[in] color The UiColor to apply \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  ChildClass& SetColor(const UiColor& color) { View::SetColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  * If the UiColor has a color ID, it is resolved from the current \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  * @param[in] color The UiColor to apply \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:  ChildClass& SetBorderlineColor(const UiColor& color) { View::SetBorderlineColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  // @ANIMATABLE(Label::Property::TEXT_COLOR, UiColor)
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  Label& SetTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  UiColor GetTextColor();
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  Label& SetAnchorColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  UiColor GetAnchorColor();
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  Label& SetAnchorClickedColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  UiColor GetAnchorClickedColor();
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  Label& SetTextBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:  UiColor GetTextBackgroundColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/label.h:   *     .TextColor(UiColor::PRIMARY, 500_ms)
+repos/dali-ui/dali-ui-foundation/public-api/label.h:   *     .TextColor(UiColor::PRIMARY, 500_ms)
+repos/dali-ui/dali-ui-foundation/public-api/text/style/shadow.h:  Shadow& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/shadow.h:  const UiColor& GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.h:  Bevel& SetLightColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.h:  const UiColor& GetLightColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.h:  Bevel& SetShadowColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/bevel.h:  const UiColor& GetShadowColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:const UiColor UiColor::PRIMARY("Primary");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:const UiColor UiColor::BACKGROUND("Background");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:const UiColor UiColor::OUTLINE("Outline");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp: * UiColor is only used on the UI thread, so no synchronization is needed.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:static_assert(sizeof(float) == 4, "UiColor layout assumes 32-bit IEEE 754 float");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:static_assert(sizeof(UiColor) == 24, "UiColor must be exactly 24 bytes for ABI stability");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::UiColor()
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::UiColor(float r, float g, float b, float a)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::UiColor(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::UiColor(const String& colorId)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::UiColor(String&& colorId)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::UiColor(uint32_t rgb, float a)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:bool UiColor::HasColorId() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:String UiColor::GetColorId() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:Vector4 UiColor::GetRgba() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:    Internal::UiColorCache& cache   = Internal::UiColorCache::Get();
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:    // Cache miss — full lookup via UiColorManager
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:      if(UiColorManager::Get().GetColor(*namePtr, resolved))
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::operator Vector4() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor UiColor::ScaleAlpha(float factor) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:  UiColor out(*this);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor UiColor::WithAlpha(float alpha) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:  UiColor out(*this);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::Type UiColor::GetType() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:void UiColor::SetType(Type type)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:UiColor::AlphaMode UiColor::GetAlphaMode() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:void UiColor::SetAlphaMode(AlphaMode mode)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:Vector4 UiColor::ReadRgbaPayload() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:void UiColor::SetRgba(const Vector4& rgba)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:uint32_t UiColor::GetTokenId() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:void UiColor::SetTokenId(uint32_t tokenId)
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:float UiColor::GetTokenAlpha() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp:void UiColor::SetTokenAlpha(float alpha)
+repos/dali-ui/dali-ui-foundation/public-api/text/style/outline.h:  Outline& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/outline.h:  const UiColor& GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h: *                                  .SetColor(UiColor("Primary"))
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:  UiColor GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:   * @param[in] color The UiColor to apply
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:  VisualBase& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:  UiColor GetBorderlineColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:   * If the UiColor has a color ID, it is resolved from the current
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:   * @param[in] color The UiColor to apply
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.h:  VisualBase& SetBorderlineColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/line-through.h:  LineThrough& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/line-through.h:  const UiColor& GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:  ChildClass& SetTextColor(const UiColor& color) { Label::SetTextColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:  ChildClass& SetAnchorColor(const UiColor& color) { Label::SetAnchorColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:  ChildClass& SetAnchorClickedColor(const UiColor& color) { Label::SetAnchorClickedColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:  ChildClass& SetTextBackgroundColor(const UiColor& color) { Label::SetTextBackgroundColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/text/style/underline.h:  Underline& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/text/style/underline.h:  const UiColor& GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:class UiColor;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  UiColor GetBackgroundColor();
+repos/dali-ui/dali-ui-foundation/public-api/view.h:   * If the UiColor has a color ID, it is resolved from the current
+repos/dali-ui/dali-ui-foundation/public-api/view.h:   * If the UiColor has direct RGBA values, it is applied immediately
+repos/dali-ui/dali-ui-foundation/public-api/view.h:   * @param[in] color The UiColor to apply
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  View& SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  UiColor GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  View& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  UiColor GetCurrentColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  UiColor GetBorderlineColor();
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:   * If the UiColor has a color ID, it is resolved from the current
+repos/dali-ui/dali-ui-foundation/public-api/view.h:   * @param[in] color The UiColor to apply
+repos/dali-ui/dali-ui-foundation/public-api/view.h:  View& SetBorderlineColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetTextColor(const UiColor& color) { InputField::SetTextColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  * @param[in] color The placeholder text color as a UiColor. \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetPlaceholderColor(const UiColor& color) { InputField::SetPlaceholderColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  * @param[in] color The cursor color as a UiColor. \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetCursorColor(const UiColor& color) { InputField::SetCursorColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  * @param[in] color The selection highlight color as a UiColor). \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetSelectionColor(const UiColor& color) { InputField::SetSelectionColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  * @param[in] color The text editing handle color as a UiColor. \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetTextHandleColor(const UiColor& color) { InputField::SetTextHandleColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetTextBackgroundColor(const UiColor& color) { InputField::SetTextBackgroundColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:  ChildClass& SetTypingTextColor(const UiColor& color) { InputField::SetTypingTextColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h: * When constructed with RGBA values, UiColor behaves like a lightweight
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h: *   UiColor red(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h: *   UiColor primary("Primary");
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h: *   view.SetBackgroundColor(UiColor::PRIMARY);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:class DALI_UI_API UiColor
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  static const UiColor PRIMARY;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  static const UiColor BACKGROUND;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  static const UiColor OUTLINE;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Creates a default UiColor (transparent black, no ID).
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor();
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Creates a UiColor with explicit RGBA components.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor(float r, float g, float b, float a = 1.0f);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Creates a UiColor from a Vector4.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor(const Vector4& color);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Creates a UiColor with a string identifier.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  explicit UiColor(const String& colorId);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Creates a UiColor with a string identifier (rvalue overload).
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  explicit UiColor(String&& colorId);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Creates a UiColor from a hex RGB value.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  explicit UiColor(uint32_t rgb, float a = 1.0f);
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  ~UiColor() = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor(const UiColor&)                = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor(UiColor&&) noexcept            = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor& operator=(const UiColor&)     = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor& operator=(UiColor&&) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Returns whether this UiColor holds a string color ID.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @return True if this UiColor was constructed with a color ID
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * If this UiColor has a color ID, the value is looked up from the
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * If this UiColor has direct RGBA values, returns them as-is.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Returns a UiColor with alpha scaled by the given factor.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor ScaleAlpha(float factor) const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:   * @brief Returns a UiColor with alpha replaced by the given value.
+repos/dali-ui/dali-ui-foundation/public-api/ui-color.h:  UiColor WithAlpha(float alpha) const;
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:  LabelAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:  LabelAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:  LabelAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:  LabelAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:  LabelAnimationSpec& TextColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:  LabelAnimationSpec& TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:  ViewAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:  ViewAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:  ViewAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:  ViewAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:  LabelAnimationBridge& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:  LabelAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:  LabelAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:  LabelAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:  LabelAnimationBridge& TextColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:  LabelAnimationBridge& TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:  ViewAnimationBridge& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:  ViewAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:  ViewAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:  ViewAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer.h:  TextVisualizer& SetTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer.h:  UiColor GetTextColor();
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:  void SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:  UiColor GetImageColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/lottie-animation-view-impl.h:  UiColor mImageColor;
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer-impl.h:  void SetTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer-impl.h:  UiColor GetTextColor();
+repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer-impl.h:  UiColor                                        mTextColor;
+repos/dali-ui/dali-ui-foundation/integration-api/image-view-impl.h:  void SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/image-view-impl.h:  UiColor GetImageColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/image-view-impl.h:  UiColor mImageColor;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:  void SetImageColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:  UiColor GetImageColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/animated-image-view-impl.h:  UiColor mImageColor;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  void SetTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  UiColor GetTextColor();
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  void SetAnchorColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  UiColor GetAnchorColor();
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  void SetAnchorClickedColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  UiColor GetAnchorClickedColor();
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  void SetTextBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:  UiColor GetTextBackgroundColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/label-impl.h:private: // UiColorManager
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetTextColor();
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetPlaceholderColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetPlaceholderColor();
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetCursorColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetCursorColor();
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetSelectionColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetSelectionColor();
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetTextHandleColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetTextHandleColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetTextBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetTextBackgroundColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  void SetTypingTextColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:  UiColor GetTypingTextColor() const;
+repos/dali-ui/dali-ui-foundation/integration-api/input-field-impl.h:private: // UiColorManager
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorDefaultConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorRgbaConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorRgbaConstructorDefaultAlphaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(0.5f, 0.5f, 0.5f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorVector4ConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(input);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorStringIdConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorStringIdMoveConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(std::move(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorHexConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(0xFF0000u);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorHexConstructorWithAlphaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(0x00FF00u, 0.5f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorHexConstructorMixedP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(0x387AFFu);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorCopyConstructorRgbaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor original(1.0f, 0.5f, 0.25f, 0.75f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor copy(original);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorCopyConstructorTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor original("CopyTestId");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor copy(original);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorMoveConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor moved(std::move(original));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorCopyAssignmentP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor original(0.5f, 0.6f, 0.7f, 0.8f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor copy;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorMoveAssignmentP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor moved;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorHasColorIdRgbaN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorHasColorIdTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color("SomeToken");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorGetColorIdRgbaN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorGetColorIdTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color("MyColorId");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorResolveRgbaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(0.1f, 0.2f, 0.3f, 0.4f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorResolveTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color = UiColor::PRIMARY;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorResolveUnknownTokenN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color("NonExistentColorId12345");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorImplicitConversionP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(0.5f, 0.6f, 0.7f, 0.8f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorScaleAlphaRgbaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 0.8f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.ScaleAlpha(0.5f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorScaleAlphaTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.ScaleAlpha(0.5f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorScaleAlphaDoesNotModifyOriginalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.ScaleAlpha(0.5f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorScaleAlphaClampP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.ScaleAlpha(2.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorWithAlphaRgbaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.WithAlpha(0.3f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorWithAlphaTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.WithAlpha(0.7f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorWithAlphaDoesNotModifyOriginalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.WithAlpha(0.2f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorWithAlphaClampP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = color.WithAlpha(-1.0f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorWithAlphaThenScaleAlphaTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = UiColor::PRIMARY.WithAlpha(0.5f).ScaleAlpha(0.2f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorWithAlphaThenScaleAlphaRgbaP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = UiColor(1.0f, 0.0f, 0.0f, 1.0f).WithAlpha(0.5f).ScaleAlpha(0.2f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorScaleAlphaChainTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = UiColor::PRIMARY.ScaleAlpha(0.5f).ScaleAlpha(0.2f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  Vector4 primaryResolved = UiColor::PRIMARY.GetRgba();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorScaleAlphaThenWithAlphaTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  UiColor result = UiColor::PRIMARY.ScaleAlpha(0.5f).WithAlpha(0.3f);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorPredefinedPrimaryP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_CHECK(UiColor::PRIMARY.HasColorId());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_EQUALS(UiColor::PRIMARY.GetColorId(), "Primary", TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorPredefinedBackgroundP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_CHECK(UiColor::BACKGROUND.HasColorId());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_EQUALS(UiColor::BACKGROUND.GetColorId(), "Background", TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorPredefinedOutlineP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_CHECK(UiColor::OUTLINE.HasColorId());
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_EQUALS(UiColor::OUTLINE.GetColorId(), "Outline", TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:int UtcDaliUiColorSizeP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  // UiColor should be exactly 24 bytes for ABI stability
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp:  DALI_TEST_EQUALS(sizeof(UiColor), 24u, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetSingletonP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager1 = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager2 = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerCopyConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager copy(manager);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerMoveConstructorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager moved(std::move(manager));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerCopyAssignmentP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager copy;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerMoveAssignmentP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager moved;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerDownCastP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager downCasted = UiColorManager::DownCast(handle);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerDownCastN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager downCasted = UiColorManager::DownCast(handle);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetColorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetColorNotFoundN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetColorWithOutParamP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetColorWithOutParamN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetColorDefaultColorsP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerRegisterBindingTokenP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor color("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor outColor;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerSetBindingColorReplaceP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor tokenColor("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor bgColor("Background");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor outColor;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetBindingColorP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor color("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor outColor;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerGetBindingColorN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor outColor;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerClearBindingP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor color("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor outColor;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerClearBindingsP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor color1("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor color2("Background");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor outColor;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerClearBindingsNoBindingsN(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerSetColorOverrideP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerSetColorOverrideFallbackP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerClearColorOverrideP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColor color("Primary");
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerSetColorOverrideReplaceP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:int UtcDaliUiColorManagerSetColorOverrideNullP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColorManager.cpp:  UiColorManager manager = UiColorManager::Get();
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:  UiColor GetColor() const;
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:  void SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:  UiColor GetBorderlineColor() const;
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:  void SetBorderlineColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:   * @param[in] color      The UiColor to apply
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:  void SetColorBinding(StringView bindingId, const UiColor& color, T* inst, void (T::*setter)(const Vector4&))
+repos/dali-ui/dali-ui-foundation/devel-api/visuals/visual-base-impl.h:    auto manager = UiColorManager::Get();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:UiColorManagerImpl::UiColorManagerImpl() = default;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:UiColorManagerImpl::~UiColorManagerImpl() = default;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:UiColorManager UiColorManagerImpl::Get()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:  UiColorManager manager;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:    BaseHandle handle = service.GetSingleton(typeid(UiColorManager));
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:      manager = UiColorManager(static_cast<UiColorManagerImpl*>(handle.GetObjectPtr()));
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:      manager = UiColorManager(new UiColorManagerImpl());
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:Vector4 UiColorManagerImpl::GetColor(StringView colorId) const
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:bool UiColorManagerImpl::GetColor(StringView colorId, Vector4& outColor) const
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::RegisterBinding(BaseHandle view, StringView bindingId, ColorCallback callback)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:    UiThemeManager::Get().ThemeChangedSignal().Connect(mSlotDelegate, &UiColorManagerImpl::OnThemeChanged);
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:  bindings.emplace_back(std::string(bindingId.Data(), bindingId.Size()), BindingInfo{std::move(callback), UiColor{}});
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:bool UiColorManagerImpl::GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:bool UiColorManagerImpl::HasBinding(BaseHandle view, StringView bindingId) const
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::ClearBinding(BaseHandle view, StringView bindingId)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::ClearBindings(BaseHandle view)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::ClearBindings(void* objectPtr)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::SetColorOverride(ColorOverrideFunc func)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:  UiColorCache::Get().InvalidateAll();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::ClearColorOverride()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:  UiColorCache::Get().InvalidateAll();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::InvalidateCache()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:  UiColorCache::Get().InvalidateAll();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::InvalidateCache(const UiColor& color)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:    // UiColor stores tokenId internally but it's private.
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:    UiColorCache::Get().InvalidateAll();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::OnThemeChanged()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:  UiColorCache::Get().InvalidateAll();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.cpp:void UiColorManagerImpl::RefreshBindings()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h: * UiColor reads from the cache on the hot path; UiColorManager
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:class UiColorCache
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:  static UiColorCache& Get()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:    static UiColorCache instance;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:  UiColorCache() = default;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:  ~UiColorCache()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:  UiColorCache(const UiColorCache&)            = delete;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-cache.h:  UiColorCache& operator=(const UiColorCache&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h: * @brief Internal implementation of UiColorManager.
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:class DALI_UI_API UiColorManagerImpl : public BaseObject
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @brief Returns the singleton UiColorManager handle.
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @return A UiColorManager handle wrapping the singleton impl
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  static UiColorManager Get();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::GetColor(StringView colorId)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::GetColor(StringView colorId, Vector4& outColor)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::UpdateBinding
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::GetBindingColor
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  [[nodiscard]] bool GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::HasBinding
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::SetBindingColor
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  void SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color);
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::ClearBinding
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::ClearBindings(BaseHandle)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::SetColorOverride
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::ClearColorOverride
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::InvalidateCache()
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @copydoc Dali::Ui::UiColorManager::InvalidateCache(const UiColor&)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  void InvalidateCache(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:   * @brief Constructs a new UiColorManagerImpl.
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  UiColorManagerImpl();
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  ~UiColorManagerImpl() override;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  UiColorManagerImpl(const UiColorManagerImpl&)            = delete;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  UiColorManagerImpl(UiColorManagerImpl&&)                 = delete;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  UiColorManagerImpl& operator=(const UiColorManagerImpl&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  UiColorManagerImpl& operator=(UiColorManagerImpl&&)      = delete;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:    UiColor       color;
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  SlotDelegate<UiColorManagerImpl>            mSlotDelegate{this};
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h: * @brief Retrieves the UiColorManagerImpl from a UiColorManager handle.
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h: * @param[in] obj The UiColorManager handle
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:inline Internal::UiColorManagerImpl& GetImpl(UiColorManager& obj)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  return static_cast<Internal::UiColorManagerImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h: * @brief Retrieves the UiColorManagerImpl from a const UiColorManager handle.
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h: * @param[in] obj The UiColorManager handle
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:inline const Internal::UiColorManagerImpl& GetImpl(const UiColorManager& obj)
+repos/dali-ui/dali-ui-foundation/internal/ui-color-manager-impl.h:  return static_cast<const Internal::UiColorManagerImpl&>(handle);
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/ui-color.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector4.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+/**
+ * @brief A color value that can hold either direct RGBA components or a
+ * string identifier that is resolved at runtime via the current theme.
+ *
+ * When constructed with RGBA values, UiColor behaves like a lightweight
+ * wrapper around Vector4. When constructed with a string color ID, the
+ * actual RGBA values are looked up from the current ThemeLoaderInterface
+ * at the point of GetRgba().
+ *
+ * @code
+ *   // Direct RGBA
+ *   UiColor red(1.0f, 0.0f, 0.0f, 1.0f);
+ *
+ *   // ID-based (resolved from current theme)
+ *   UiColor primary("Primary");
+ *
+ *   // Predefined color IDs
+ *   view.SetBackgroundColor(UiColor::PRIMARY);
+ * @endcode
+ */
+class DALI_UI_API UiColor
+{
+public:
+  static const UiColor PRIMARY;
+  static const UiColor BACKGROUND;
+  static const UiColor OUTLINE;
+
+  /**
+   * @brief Creates a default UiColor (transparent black, no ID).
+   */
+  UiColor();
+
+  /**
+   * @brief Creates a UiColor with explicit RGBA components.
+   *
+   * @param[in] r Red component (0.0 ~ 1.0)
+   * @param[in] g Green component (0.0 ~ 1.0)
+   * @param[in] b Blue component (0.0 ~ 1.0)
+   * @param[in] a Alpha component (0.0 ~ 1.0), defaults to 1.0
+   */
+  UiColor(float r, float g, float b, float a = 1.0f);
+
+  /**
+   * @brief Creates a UiColor from a Vector4.
+   *
+   * @param[in] color The RGBA color as Vector4
+   */
+  UiColor(const Vector4& color);
+
+  /**
+   * @brief Creates a UiColor with a string identifier.
+   *
+   * The actual RGBA value is resolved from the current theme when
+   * GetRgba() is called.
+   *
+   * @param[in] colorId The color identifier string
+   */
+  explicit UiColor(const String& colorId);
+
+  /**
+   * @brief Creates a UiColor with a string identifier (rvalue overload).
+   *
+   * The actual RGBA value is resolved from the current theme when
+   * GetRgba() is called.
+   *
+   * This overload enables moving the string into the internal token registry
+   * to avoid an extra copy when the caller provides an rvalue.
+   *
+   * @param[in] colorId The color identifier string
+   */
+  explicit UiColor(String&& colorId);
+
+  /**
+   * @brief Creates a UiColor from a hex RGB value.
+   *
+   * @param[in] rgb 0xRRGGBB format hex color
+   * @param[in] a Alpha component (0.0 ~ 1.0), defaults to 1.0
+   */
+  explicit UiColor(uint32_t rgb, float a = 1.0f);
+
+  ~UiColor() = default;
+
+  UiColor(const UiColor&)                = default;
+  UiColor(UiColor&&) noexcept            = default;
+  UiColor& operator=(const UiColor&)     = default;
+  UiColor& operator=(UiColor&&) noexcept = default;
+
+  /**
+   * @brief Returns whether this UiColor holds a string color ID.
+   *
+   * @return True if this UiColor was constructed with a color ID
+   */
+  bool HasColorId() const;
+
+  /**
+   * @brief Returns the color ID string.
+   *
+   * @return The color ID, or an empty string if this is a direct RGBA color
+   */
+  String GetColorId() const;
+
+  /**
+   * @brief Returns the RGBA value as a Vector4.
+   *
+   * If this UiColor has a color ID, the value is looked up from the
+   * current theme. If the ID is not found, returns the fallback
+   * mColor value (default transparent black).
+   * If this UiColor has direct RGBA values, returns them as-is.
+   *
+   * @return The resolved RGBA color
+   */
+  Vector4 GetRgba() const;
+
+  /**
+   * @brief Implicit conversion to Vector4.
+   *
+   * Equivalent to calling GetRgba().
+   */
+  operator Vector4() const;
+
+  /**
+   * @brief Returns a UiColor with alpha scaled by the given factor.
+   *
+   * - RGBA: out.a = in.a * factor
+   * - Token: the resolved alpha is scaled by factor
+   */
+  UiColor ScaleAlpha(float factor) const;
+
+  /**
+   * @brief Returns a UiColor with alpha replaced by the given value.
+   *
+   * - RGBA: out.a = alpha
+   * - Token: the resolved alpha is replaced with alpha
+   */
+  UiColor WithAlpha(float alpha) const;
+
+private:
+  enum class Type : uint8_t
+  {
+    Rgba  = 0u,
+    Token = 1u,
+  };
+
+  enum class AlphaMode : uint8_t
+  {
+    Multiply = 0u,
+    With     = 1u,
+  };
+
+  Type      GetType() const;
+  void      SetType(Type type);
+  AlphaMode GetAlphaMode() const;
+  void      SetAlphaMode(AlphaMode mode);
+
+  Vector4 ReadRgbaPayload() const;
+  void    SetRgba(const Vector4& rgba);
+
+  uint32_t GetTokenId() const;
+  void     SetTokenId(uint32_t tokenId);
+  float    GetTokenAlpha() const;
+  void     SetTokenAlpha(float alpha);
+
+private:
+  alignas(8) uint8_t mData[24]{};
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/ui-color.h>
+
+// EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
+#include <algorithm>
+#include <cstring>
+#include <deque>
+#include <unordered_map>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/ui-color-cache.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+const UiColor UiColor::PRIMARY("Primary");
+const UiColor UiColor::BACKGROUND("Background");
+const UiColor UiColor::OUTLINE("Outline");
+
+namespace
+{
+
+using TokenId = uint32_t;
+
+/**
+ * @brief Registry for mapping between string color names and compact token IDs.
+ *
+ * Maintains bidirectional mapping:
+ *   - string color name  -> tokenId  (nameToId)
+ *   - tokenId            -> string*  (idToName, deque for pointer stability)
+ *
+ * tokenId 0 is reserved as "invalid / not set".
+ * UiColor is only used on the UI thread, so no synchronization is needed.
+ */
+struct TokenRegistry
+{
+  std::unordered_map<String, TokenId> nameToId;
+  std::deque<String>                  idToName;
+
+  TokenId GetOrCreateId(const String& name)
+  {
+    auto it = nameToId.find(name);
+    if(it != nameToId.end())
+    {
+      return it->second;
+    }
+    TokenId id = static_cast<TokenId>(idToName.size() + 1u);
+    idToName.push_back(name);
+    nameToId.emplace(name, id);
+
+    return id;
+  }
+
+  TokenId GetOrCreateId(String&& name)
+  {
+    auto it = nameToId.find(name);
+    if(it != nameToId.end())
+    {
+      return it->second;
+    }
+    TokenId id = static_cast<TokenId>(idToName.size() + 1u);
+    nameToId.emplace(name, id);
+    idToName.push_back(std::move(name));
+
+    return id;
+  }
+
+  const String* TryGetName(TokenId id) const
+  {
+    if(id == 0u)
+    {
+      return nullptr;
+    }
+    const size_t idx = static_cast<size_t>(id - 1u);
+    if(idx >= idToName.size())
+    {
+      return nullptr;
+    }
+    return &idToName[idx];
+  }
+};
+
+TokenRegistry& GetTokenRegistry()
+{
+  static TokenRegistry registry;
+  return registry;
+}
+
+/**
+ * mData[24] layout (alignas(8))
+ * ┌──────────┬───────────┬──────────┬─────────────────────────────────┐
+ * │ [0]      │ [1]       │ [2-7]    │ [8 .. 23]  (payload)            │
+ * │ Type     │ AlphaMode │ reserved │  Rgba : r g b a  (4 floats)     │
+ * │          │           │          │  Token: tokenId(u32) alpha(f32) │
+ * └──────────┴───────────┴──────────┴─────────────────────────────────┘
+ */
+constexpr size_t OFFSET_TYPE       = 0;
+constexpr size_t OFFSET_ALPHA_MODE = 1;
+constexpr size_t OFFSET_PAYLOAD    = 8;
+
+// Rgba payload offsets (from mData base)
+constexpr size_t OFFSET_RGBA_R = OFFSET_PAYLOAD;
+constexpr size_t OFFSET_RGBA_G = OFFSET_PAYLOAD + sizeof(float);
+constexpr size_t OFFSET_RGBA_B = OFFSET_PAYLOAD + sizeof(float) * 2;
+constexpr size_t OFFSET_RGBA_A = OFFSET_PAYLOAD + sizeof(float) * 3;
+
+// Token payload offsets (from mData base)
+constexpr size_t OFFSET_TOKEN_ID    = OFFSET_PAYLOAD;
+constexpr size_t OFFSET_TOKEN_ALPHA = OFFSET_PAYLOAD + sizeof(uint32_t);
+
+static_assert(sizeof(float) == 4, "UiColor layout assumes 32-bit IEEE 754 float");
+static_assert(sizeof(UiColor) == 24, "UiColor must be exactly 24 bytes for ABI stability");
+
+inline float ReadFloat(const uint8_t* data, size_t offset)
+{
+  float value;
+  std::memcpy(&value, data + offset, sizeof(float));
+  return value;
+}
+
+inline void WriteFloat(uint8_t* data, size_t offset, float value)
+{
+  std::memcpy(data + offset, &value, sizeof(float));
+}
+
+inline uint32_t ReadU32(const uint8_t* data, size_t offset)
+{
+  uint32_t v;
+  std::memcpy(&v, data + offset, sizeof(uint32_t));
+  return v;
+}
+
+inline void WriteU32(uint8_t* data, size_t offset, uint32_t v)
+{
+  std::memcpy(data + offset, &v, sizeof(uint32_t));
+}
+
+} // namespace
+
+UiColor::UiColor()
+{
+  std::memset(mData, 0, sizeof(mData));
+}
+
+UiColor::UiColor(float r, float g, float b, float a)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Rgba);
+  SetAlphaMode(AlphaMode::Multiply);
+  SetRgba(Vector4(r, g, b, a));
+}
+
+UiColor::UiColor(const Vector4& color)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Rgba);
+  SetAlphaMode(AlphaMode::Multiply);
+  SetRgba(color);
+}
+
+UiColor::UiColor(const String& colorId)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Token);
+  SetAlphaMode(AlphaMode::With);
+
+  TokenRegistry& registry = GetTokenRegistry();
+  SetTokenId(registry.GetOrCreateId(colorId));
+  SetTokenAlpha(1.0f);
+}
+
+UiColor::UiColor(String&& colorId)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Token);
+  SetAlphaMode(AlphaMode::With);
+
+  TokenRegistry& registry = GetTokenRegistry();
+  SetTokenId(registry.GetOrCreateId(std::move(colorId)));
+  SetTokenAlpha(1.0f);
+}
+
+UiColor::UiColor(uint32_t rgb, float a)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Rgba);
+  SetAlphaMode(AlphaMode::Multiply);
+  SetRgba(Vector4(((rgb >> 16) & 0xFF) / 255.0f,
+                  ((rgb >> 8) & 0xFF) / 255.0f,
+                  (rgb & 0xFF) / 255.0f,
+                  a));
+}
+
+bool UiColor::HasColorId() const
+{
+  return GetType() == Type::Token;
+}
+
+String UiColor::GetColorId() const
+
+exec
+/bin/bash -lc "sed -n '220,420p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  UiColor moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetRgba(), originalResolved, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorCopyAssignmentP(void)
+{
+  UiTestApplication application;
+
+  UiColor original(0.5f, 0.6f, 0.7f, 0.8f);
+  UiColor copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetRgba(), original.GetRgba(), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorMoveAssignmentP(void)
+{
+  UiTestApplication application;
+
+  UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
+  Vector4 originalResolved = original.GetRgba();
+
+  UiColor moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetRgba(), originalResolved, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === HasColorId / GetColorId ===
+
+int UtcDaliUiColorHasColorIdRgbaN(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f);
+  DALI_TEST_CHECK(!color.HasColorId());
+
+  END_TEST;
+}
+
+int UtcDaliUiColorHasColorIdTokenP(void)
+{
+  UiTestApplication application;
+
+  UiColor color("SomeToken");
+  DALI_TEST_CHECK(color.HasColorId());
+
+  END_TEST;
+}
+
+int UtcDaliUiColorGetColorIdRgbaN(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f);
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorGetColorIdTokenP(void)
+{
+  UiTestApplication application;
+
+  UiColor color("MyColorId");
+  DALI_TEST_EQUALS(color.GetColorId(), "MyColorId", TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Resolve ===
+
+int UtcDaliUiColorResolveRgbaP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(0.1f, 0.2f, 0.3f, 0.4f);
+  Vector4 resolved = color.GetRgba();
+
+  DALI_TEST_EQUALS(resolved, Vector4(0.1f, 0.2f, 0.3f, 0.4f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorResolveTokenP(void)
+{
+  UiTestApplication application;
+
+  // "Primary" is a known default theme color (0x387AFF)
+  UiColor color = UiColor::PRIMARY;
+  Vector4 resolved = color.GetRgba();
+
+  // Should resolve to non-zero (the default theme provides "Primary")
+  DALI_TEST_CHECK(resolved != Vector4::ZERO);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorResolveUnknownTokenN(void)
+{
+  UiTestApplication application;
+
+  UiColor color("NonExistentColorId12345");
+  Vector4 resolved = color.GetRgba();
+
+  // Unknown token should fallback to ZERO
+  DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Implicit Conversion to Vector4 ===
+
+int UtcDaliUiColorImplicitConversionP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(0.5f, 0.6f, 0.7f, 0.8f);
+  Vector4 vec = color; // implicit conversion
+
+  DALI_TEST_EQUALS(vec, Vector4(0.5f, 0.6f, 0.7f, 0.8f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === ScaleAlpha ===
+
+int UtcDaliUiColorScaleAlphaRgbaP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 0.8f);
+  UiColor result = color.ScaleAlpha(0.5f);
+
+  Vector4 resolved = result.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 0.4f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorScaleAlphaTokenP(void)
+{
+  UiTestApplication application;
+
+  UiColor color("Primary");
+  UiColor result = color.ScaleAlpha(0.5f);
+
+  // The result should still have a color ID
+  DALI_TEST_CHECK(result.HasColorId());
+  DALI_TEST_EQUALS(result.GetColorId(), "Primary", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorScaleAlphaDoesNotModifyOriginalP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+  UiColor result = color.ScaleAlpha(0.5f);
+
+  // Original should be unchanged
+  DALI_TEST_EQUALS(color.GetRgba().a, 1.0f, TEST_LOCATION);
+  // Result should have new alpha
+  DALI_TEST_EQUALS(result.GetRgba().a, 0.5f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorScaleAlphaClampP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+  UiColor result = color.ScaleAlpha(2.0f);
+
+  // Should clamp to 1.0
+  DALI_TEST_CHECK(result.GetRgba().a <= 1.0f);
+
+  END_TEST;
+}
+
+// === WithAlpha ===
+
+int UtcDaliUiColorWithAlphaRgbaP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+  UiColor result = color.WithAlpha(0.3f);
+
+
+exec
+/bin/bash -lc "sed -n '190,330p' repos/dali-ui/dali-ui-foundation/public-api/ui-color.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  SetTokenAlpha(1.0f);
+}
+
+UiColor::UiColor(String&& colorId)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Token);
+  SetAlphaMode(AlphaMode::With);
+
+  TokenRegistry& registry = GetTokenRegistry();
+  SetTokenId(registry.GetOrCreateId(std::move(colorId)));
+  SetTokenAlpha(1.0f);
+}
+
+UiColor::UiColor(uint32_t rgb, float a)
+{
+  std::memset(mData, 0, sizeof(mData));
+  SetType(Type::Rgba);
+  SetAlphaMode(AlphaMode::Multiply);
+  SetRgba(Vector4(((rgb >> 16) & 0xFF) / 255.0f,
+                  ((rgb >> 8) & 0xFF) / 255.0f,
+                  (rgb & 0xFF) / 255.0f,
+                  a));
+}
+
+bool UiColor::HasColorId() const
+{
+  return GetType() == Type::Token;
+}
+
+String UiColor::GetColorId() const
+{
+  if(GetType() != Type::Token)
+  {
+    return {};
+  }
+
+  TokenRegistry& registry = GetTokenRegistry();
+  const String*  name     = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
+  return name ? *name : String{};
+}
+
+Vector4 UiColor::GetRgba() const
+{
+  if(GetType() == Type::Token)
+  {
+    const uint32_t          tokenId = GetTokenId();
+    Internal::UiColorCache& cache   = Internal::UiColorCache::Get();
+
+    // Cache hit — return cached base color with alpha applied
+    Vector4 resolved;
+    if(cache.TryGet(tokenId, resolved))
+    {
+      const float tokenAlpha = std::clamp(GetTokenAlpha(), 0.0f, 1.0f);
+      resolved.a             = std::clamp((GetAlphaMode() == AlphaMode::Multiply) ? resolved.a * tokenAlpha : tokenAlpha, 0.0f, 1.0f);
+      return resolved;
+    }
+
+    // Cache miss — full lookup via UiColorManager
+    const String* namePtr = GetTokenRegistry().TryGetName(tokenId);
+    if(namePtr)
+    {
+      if(UiColorManager::Get().GetColor(*namePtr, resolved))
+      {
+        cache.Store(tokenId, resolved);
+
+        const float tokenAlpha = std::clamp(GetTokenAlpha(), 0.0f, 1.0f);
+        resolved.a             = std::clamp((GetAlphaMode() == AlphaMode::Multiply) ? resolved.a * tokenAlpha : tokenAlpha, 0.0f, 1.0f);
+        return resolved;
+      }
+    }
+    return Vector4::ZERO;
+  }
+  return ReadRgbaPayload();
+}
+
+UiColor::operator Vector4() const
+{
+  return GetRgba();
+}
+
+UiColor UiColor::ScaleAlpha(float factor) const
+{
+  UiColor out(*this);
+  if(GetType() == Type::Rgba)
+  {
+    Vector4 c = ReadRgbaPayload();
+    c.a *= factor;
+    c.a = std::clamp(c.a, 0.0f, 1.0f);
+    out.SetRgba(c);
+  }
+  else
+  {
+    if(GetAlphaMode() == AlphaMode::With)
+    {
+      out.SetTokenAlpha(std::clamp(GetTokenAlpha() * factor, 0.0f, 1.0f));
+    }
+    else
+    {
+      out.SetAlphaMode(AlphaMode::Multiply);
+      out.SetTokenAlpha(std::clamp(GetTokenAlpha() * factor, 0.0f, 1.0f));
+    }
+  }
+  return out;
+}
+
+UiColor UiColor::WithAlpha(float alpha) const
+{
+  UiColor out(*this);
+  alpha = std::clamp(alpha, 0.0f, 1.0f);
+  if(GetType() == Type::Rgba)
+  {
+    Vector4 c = ReadRgbaPayload();
+    c.a       = alpha;
+    out.SetRgba(c);
+  }
+  else
+  {
+    out.SetAlphaMode(AlphaMode::With);
+    out.SetTokenAlpha(alpha);
+  }
+  return out;
+}
+
+UiColor::Type UiColor::GetType() const
+{
+  return static_cast<Type>(mData[OFFSET_TYPE]);
+}
+
+void UiColor::SetType(Type type)
+{
+  mData[OFFSET_TYPE] = static_cast<uint8_t>(type);
+}
+
+UiColor::AlphaMode UiColor::GetAlphaMode() const
+{
+  return static_cast<AlphaMode>(mData[OFFSET_ALPHA_MODE]);
+}
+
+void UiColor::SetAlphaMode(AlphaMode mode)
+{
+
+exec
+/bin/bash -lc "sed -n '420,620p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UiColor.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+  Vector4 resolved = result.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 0.3f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorWithAlphaTokenP(void)
+{
+  UiTestApplication application;
+
+  UiColor color("Primary");
+  UiColor result = color.WithAlpha(0.7f);
+
+  DALI_TEST_CHECK(result.HasColorId());
+  DALI_TEST_EQUALS(result.GetColorId(), "Primary", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorWithAlphaDoesNotModifyOriginalP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+  UiColor result = color.WithAlpha(0.2f);
+
+  // Original unchanged
+  DALI_TEST_EQUALS(color.GetRgba().a, 1.0f, TEST_LOCATION);
+  // Result has new alpha
+  DALI_TEST_EQUALS(result.GetRgba().a, 0.2f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorWithAlphaClampP(void)
+{
+  UiTestApplication application;
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+
+  // Negative should clamp to 0
+  UiColor result = color.WithAlpha(-1.0f);
+  DALI_TEST_EQUALS(result.GetRgba().a, 0.0f, TEST_LOCATION);
+
+  // Over 1 should clamp to 1
+  result = color.WithAlpha(5.0f);
+  DALI_TEST_EQUALS(result.GetRgba().a, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Alpha Chaining ===
+
+int UtcDaliUiColorWithAlphaThenScaleAlphaTokenP(void)
+{
+  UiTestApplication application;
+
+  // WithAlpha fixes alpha to 0.5, then ScaleAlpha multiplies that fixed value by 0.2
+  // Expected: With mode preserved, final alpha = 0.5 * 0.2 = 0.1 (token's original alpha ignored)
+  UiColor result = UiColor::PRIMARY.WithAlpha(0.5f).ScaleAlpha(0.2f);
+
+  DALI_TEST_CHECK(result.HasColorId());
+
+  Vector4 resolved = result.GetRgba();
+  DALI_TEST_CHECK(resolved != Vector4::ZERO);
+  DALI_TEST_EQUALS(resolved.a, 0.1f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorWithAlphaThenScaleAlphaRgbaP(void)
+{
+  UiTestApplication application;
+
+  // RGBA case: WithAlpha sets alpha to 0.5, ScaleAlpha multiplies by 0.2
+  UiColor result = UiColor(1.0f, 0.0f, 0.0f, 1.0f).WithAlpha(0.5f).ScaleAlpha(0.2f);
+
+  Vector4 resolved = result.GetRgba();
+  DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolved.a, 0.1f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorScaleAlphaChainTokenP(void)
+{
+  UiTestApplication application;
+
+  // ScaleAlpha chaining: 1.0 * 0.5 * 0.2 = 0.1, then resolved.a = token_alpha * 0.1
+  UiColor result = UiColor::PRIMARY.ScaleAlpha(0.5f).ScaleAlpha(0.2f);
+
+  DALI_TEST_CHECK(result.HasColorId());
+
+  Vector4 primaryResolved = UiColor::PRIMARY.GetRgba();
+  Vector4 resolved        = result.GetRgba();
+  DALI_TEST_EQUALS(resolved.a, primaryResolved.a * 0.5f * 0.2f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorScaleAlphaThenWithAlphaTokenP(void)
+{
+  UiTestApplication application;
+
+  // ScaleAlpha then WithAlpha: WithAlpha should override to With mode
+  UiColor result = UiColor::PRIMARY.ScaleAlpha(0.5f).WithAlpha(0.3f);
+
+  DALI_TEST_CHECK(result.HasColorId());
+
+  Vector4 resolved = result.GetRgba();
+  DALI_TEST_EQUALS(resolved.a, 0.3f, 0.001f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Predefined Colors ===
+
+int UtcDaliUiColorPredefinedPrimaryP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::PRIMARY.HasColorId());
+  DALI_TEST_EQUALS(UiColor::PRIMARY.GetColorId(), "Primary", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorPredefinedBackgroundP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::BACKGROUND.HasColorId());
+  DALI_TEST_EQUALS(UiColor::BACKGROUND.GetColorId(), "Background", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorPredefinedOutlineP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::OUTLINE.HasColorId());
+  DALI_TEST_EQUALS(UiColor::OUTLINE.GetColorId(), "Outline", TEST_LOCATION);
+
+  END_TEST;
+}
+
+// === Size Check ===
+
+int UtcDaliUiColorSizeP(void)
+{
+  UiTestApplication application;
+
+  // UiColor should be exactly 24 bytes for ABI stability
+  DALI_TEST_EQUALS(sizeof(UiColor), 24u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+exec
+/bin/bash -lc "sed -n '1,160p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/actors/custom-actor.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/common/dali-string.h>
+#include <functional>
+#include <initializer_list>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/attachment-id.h>
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/unique-any.h>
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+#include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/visuals/visual-base.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+// Forward declarations
+class RenderEffect;
+class UiColor;
+class ViewAnimationBridge;
+class ViewAnimationSpec;
+
+// @ANIMATION_CONFIG(View)
+// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+// @ANIMATABLE_MANUAL(SizeWidth, float)
+// @ANIMATABLE_MANUAL(SizeHeight, float)
+// @ANIMATABLE_MANUAL(PositionX, float)
+// @ANIMATABLE_MANUAL(PositionY, float)
+
+class ViewImpl;
+
+/**
+ * @brief Move-only callback for custom focus navigation.
+ *
+ * @code
+ * // Member function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(this, &MyClass::OnFocusNavigation));
+ *
+ * // Static function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigationFunc));
+ * @endcode
+ *
+ * @note Signature: View(View currentFocusedView, FocusDirection direction)
+ */
+using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
+
+#include "view.autogen.h"
+/**
+ * @brief View is a base UI component class that extends CustomActor.
+ *
+ * View provides basic UI functionality and can be used as a foundation
+ * for creating custom UI components. It inherits all the capabilities
+ *
+ * View implements the layout system with Measure/Arrange passes.
+ */
+class DALI_UI_API View : public CustomActor
+{
+public:
+  // Typedefs
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized View handle.
+   *
+   * Only derived versions can be instantiated. Calling member
+   * functions with an uninitialized Dali::Object is not allowed.
+   */
+  View();
+
+  /**
+   * @brief Creates an initialized View.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static View New();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Creates another handle that points to the same real object.
+   * @param[in] view Handle to copy
+   */
+  View(const View& view);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  View(View&& rhs) noexcept;
+
+  /**
+   * @brief Destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~View();
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   *
+   * Changes this handle to point to another real object.
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  View& operator=(const View& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  View& operator=(View&& rhs) noexcept = default;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to View handle.
+   *
+   * If handle points to a View, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a View or an uninitialized handle
+   */
+  static View DownCast(BaseHandle handle);
+
+exec
+/bin/bash -lc "sed -n '160,300p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  static View DownCast(BaseHandle handle);
+
+public: // Measure / Arrange API
+  /**
+   * @brief Measures the view with the given constraints.
+   *
+   * This method implements caching to avoid redundant calculations.
+   * It calls OnMeasure internally (Template Method pattern).
+   *
+   * @param[in] widthConstraint The width constraint for measurement
+   * @param[in] heightConstraint The height constraint for measurement
+   * @return The measured size
+   */
+  MeasuredSize Measure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @brief Arranges the view within the given bounds.
+   *
+   * This method calls OnArrange internally (Template Method pattern).
+   *
+   * @param[in] bounds The bounds to arrange the view in
+   * @return The final arranged size
+   */
+  MeasuredSize Arrange(const LayoutRect& bounds);
+
+  /**
+   * @brief Invalidates the measure of this view.
+   *
+   * This propagates to the parent layout while one exists,
+   * until the layout root is reached (no parent Layout).
+   */
+  void InvalidateMeasure();
+
+  /**
+   * @brief Invalidates the arrange of this view.
+   */
+  void InvalidateArrange();
+
+  /**
+   * @brief Gets the measured size from the last Measure() pass.
+   *
+   * @return The measured size
+   */
+  MeasuredSize GetMeasuredSize() const;
+
+  /**
+   * @brief Sets a custom measure callback for this View.
+   *
+   * When set, the callback replaces the default measurement behavior
+   * during the layout pass. Pass a default-constructed callback to remove.
+   *
+   * @param[in] callback The measure callback (ownership transferred)
+   *
+   * @code
+   * // Member function
+   * view.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));
+   *
+   * // Static function
+   * view.SetMeasureCallback(MeasureCallback::New(&MyMeasure));
+   *
+   * // Remove callback
+   * view.SetMeasureCallback({});
+   * @endcode
+   */
+  void SetMeasureCallback(MeasureCallback callback);
+
+  /**
+   * @brief Sets a custom arrange callback for this View.
+   *
+   * When set, the callback replaces the default arrangement behavior
+   * during the layout pass. Pass a default-constructed callback to remove.
+   *
+   * The callback should arrange children in a LEFT_TO_RIGHT frame by calling
+   * View::Arrange() on each non-standalone child, which writes the child's
+   * POSITION_X / SIZE_WIDTH onto its Actor. The framework then mirrors
+   * direct children horizontally when the View's effective layout direction
+   * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
+   * themselves.
+   *
+   * @param[in] callback The arrange callback (ownership transferred)
+   *
+   * @code
+   * // Member function
+   * view.SetArrangeCallback(ArrangeCallback::New(this, &MyClass::OnArrange));
+   *
+   * // Static function
+   * view.SetArrangeCallback(ArrangeCallback::New(&MyArrange));
+   *
+   * // Remove callback
+   * view.SetArrangeCallback({});
+   * @endcode
+   */
+  void SetArrangeCallback(ArrangeCallback callback);
+
+public: // Properties
+  // @CHAIN_START(View)
+
+  /**
+   * @brief Gets the x scale factor applied to the view.
+   *
+   * @return The x scale factor
+   */
+  float GetScaleX() const;
+
+  /**
+   * @brief Gets the current x scale factor applied to the view.
+   *
+   * @return The current x scale factor
+   */
+  float GetCurrentScaleX() const;
+
+  // @ANIMATABLE(Actor::Property::SCALE_X, float)
+  /**
+   * @brief Sets the x scale factor applied to the view.
+   *
+   * @param[in] scaleX The X scale factor to set
+   */
+  View& SetScaleX(float scaleX);
+
+  /**
+   * @brief Gets the y scale factor applied to the view.
+   *
+   * @return The y scale factor
+   */
+  float GetScaleY() const;
+
+  /**
+   * @brief Gets the current y scale factor applied to the view.
+   *
+   * @return The current y scale factor
+   */
+  float GetCurrentScaleY() const;
+
+  /**
+   * @brief Sets the UiScale participation policy for this view.
+   *
+   * @param[in] policy The UiScalePolicy to apply
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetUiScalePolicy(UiScalePolicy policy);
+
+
+exec
+/bin/bash -lc "rg -n \"SetBackgroundColor|SetColor\\(|SetBorderlineColor|GetBackgroundColor|GetColor\\(|GetCurrentColor|GetBorderlineColor\" repos/dali-ui/dali-ui-foundation/public-api/view.h repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:240:  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:247:  ChildClass& SetColor(const UiColor& color) { View::SetColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:326:  ChildClass& SetBorderlineColor(const UiColor& color) { View::SetBorderlineColor(color); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/view.h:755:  UiColor GetBackgroundColor();
+repos/dali-ui/dali-ui-foundation/public-api/view.h:769:  View& SetBackgroundColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:776:  UiColor GetColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:784:  View& SetColor(const UiColor& color);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:791:  UiColor GetCurrentColor() const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:922:  UiColor GetBorderlineColor();
+repos/dali-ui/dali-ui-foundation/public-api/view.h:934:  View& SetBorderlineColor(const UiColor& color);
+
+exec
+/bin/bash -lc "sed -n '1,140p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// Generated by dali-ui preprocessor. Do not modify.
+#pragma once
+
+#define DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+  /** \
+  * @brief Sets the x scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  */ \
+  ChildClass& SetScaleX(float scaleX) { View::SetScaleX(scaleX); return *this; } \
+  /** \
+  * @brief Sets the UiScale participation policy for this view. \
+  * \
+  * @param[in] policy The UiScalePolicy to apply \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetUiScalePolicy(UiScalePolicy policy) { View::SetUiScalePolicy(policy); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScaleY(float scaleY) { View::SetScaleY(scaleY); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScale(float scaleX, float scaleY) { View::SetScale(scaleX, scaleY); return *this; } \
+  /** \
+  * @brief Sets the visibility of the view. \
+  * \
+  * @param[in] visibility True to make the view visible, false to hide it \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetVisibility(bool visibility) { View::SetVisibility(visibility); return *this; } \
+  /** \
+  * @brief Sets the opacity of the view. \
+  * \
+  * @param[in] opacity The opacity value to set (0.0 to 1.0) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetOpacity(float opacity) { View::SetOpacity(opacity); return *this; } \
+  /** \
+  * @brief Sets the X position requested by the user. \
+  * \
+  * This value is the layout input. The parent's Arrange pass uses it \
+  * (offset by the parent's left padding and this view's left margin) to \
+  * compute the final rendered position. The Actor::Property::POSITION_X \
+  * property is updated only by the next Arrange. \
+  * \
+  * To drive the rendered position without affecting the layout request \
+  * (e.g. for scrolling or animation that should not feed back into \
+  * layout), set Actor::Property::POSITION_X via SetProperty directly. \
+  * \
+  * @param[in] x The requested X position \
+  */ \
+  ChildClass& SetRequestedPositionX(float x) { View::SetRequestedPositionX(x); return *this; } \
+  /** \
+  * @brief Sets the Y position requested by the user. \
+  * \
+  * @param[in] y The requested Y position \
+  * @see SetRequestedPositionX \
+  */ \
+  ChildClass& SetRequestedPositionY(float y) { View::SetRequestedPositionY(y); return *this; } \
+  /** \
+  * @brief Sets the parent origin of the View. \
+  * \
+  * @param[in] point The parent origin to set \
+  */ \
+  ChildClass& SetParentOrigin(const Vector3& point) { View::SetParentOrigin(point); return *this; } \
+  /** \
+  * @brief Sets the pivot of the View. \
+  * \
+  * @param[in] point The pivot to set \
+  */ \
+  ChildClass& SetPivot(const Vector3& point) { View::SetPivot(point); return *this; } \
+  /** \
+  * @brief Sets the requested width. \
+  * \
+  * A positive value sets a fixed width. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] width The requested width \
+  */ \
+  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
+  /** \
+  * @brief Sets the requested height. \
+  * \
+  * A positive value sets a fixed height. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] height The requested height \
+  */ \
+  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
+  /** \
+  * @brief Sets the minimum width. \
+  * \
+  * @param[in] width The minimum width \
+  */ \
+  ChildClass& SetMinimumWidth(float width) { View::SetMinimumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the minimum height. \
+  * \
+  * @param[in] height The minimum height \
+  */ \
+  ChildClass& SetMinimumHeight(float height) { View::SetMinimumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the maximum width. \
+  * \
+  * @param[in] width The maximum width \
+  */ \
+  ChildClass& SetMaximumWidth(float width) { View::SetMaximumWidth(width); return *this; } \
+  /** \
+  * @brief Sets the maximum height. \
+  * \
+  * @param[in] height The maximum height \
+  */ \
+  ChildClass& SetMaximumHeight(float height) { View::SetMaximumHeight(height); return *this; } \
+  /** \
+  * @brief Sets the view margin. \
+  * \
+  * @param[in] margin The margin to set \
+  */ \
+  ChildClass& SetMargin(const Extents& margin) { View::SetMargin(margin); return *this; } \
+  /** \
+  * @brief Sets the view padding. \
+  * \
+  * @param[in] padding The padding to set \
+  */ \
+  ChildClass& SetPadding(const Extents& padding) { View::SetPadding(padding); return *this; } \
+  /** \
+  * @brief Sets the layout mode of this View. \
+  * \
+  * LayoutMode::DEFAULT (default) lets the parent container's layout system manage \
+  * this View's size and position normally. \
+  * \
+
+exec
+/bin/bash -lc "sed -n '730,800p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   */
+  View& SetForwardFocusableView(View view);
+
+  /**
+   * @brief Sets the backward focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating backward
+   */
+  View& SetBackwardFocusableView(View view);
+
+  /**
+   * @brief Sets a callback for focus navigation within this view's children.
+   *
+   * When set, this callback is invoked by the focus manager to determine the next
+   * focusable view. It takes priority over the OnFocusNavigationRequested() virtual method.
+   *
+   * @param[in] callback The focus navigation callback (move-only, ownership transferred)
+   */
+  void SetFocusNavigationCallback(FocusNavigationCallback callback);
+
+  /**
+   * @brief Gets the background color.
+   *
+   * @return The background color
+   */
+  UiColor GetBackgroundColor();
+
+  /**
+   * @brief Sets the background color.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * If the UiColor has direct RGBA values, it is applied immediately
+   * and any previous ID-based binding for this property is removed.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBackgroundColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color.
+   *
+   * @return The color
+   */
+  UiColor GetColor() const;
+
+  /**
+   * @brief Sets the color.
+   *
+   * @param[in] color The color to set
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetColor(const UiColor& color);
+
+  /**
+   * @brief Gets the current color.
+   *
+   * @return The current color
+   */
+  UiColor GetCurrentColor() const;
+
+  /**
+   * @brief Checks if the view is enabled.
+   *
+   * @return True if the view is enabled (default), false if disabled
+   */
+  bool IsEnabled() const;
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '910,940p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  /**
+   * @brief Sets the borderline width of the view.
+   *
+   * @param[in] width The borderline width to set
+   */
+  View& SetBorderlineWidth(float width);
+
+  /**
+   * @brief Gets the borderline color of the view.
+   *
+   * @return The borderline color
+   */
+  UiColor GetBorderlineColor();
+
+  // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor)
+  /**
+   * @brief Sets the borderline color of the view.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBorderlineColor(const UiColor& color);
+
+  /**
+   * @brief Gets the borderline offset of the view.
+   *
+   * @return The borderline offset
+   */
+
+exec
+/bin/bash -lc "sed -n '232,252p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h && sed -n '318,330p' repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * If the UiColor has direct RGBA values, it is applied immediately \
+  * and any previous ID-based binding for this property is removed. \
+  * \
+  * @param[in] color The UiColor to apply \
+  */ \
+  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+  /** \
+  * @brief Sets the color. \
+  * \
+  * @param[in] color The color to set \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetColor(const UiColor& color) { View::SetColor(color); return *this; } \
+  /** \
+  * @brief Sets whether the view is enabled. \
+  * \
+  * A disabled view does not receive user interaction. Setting this to false \
+  * adds the Disabled state and emits StateChangedSignal. \
+  * @brief Sets the borderline color of the view. \
+  * \
+  * If the UiColor has a color ID, it is resolved from the current \
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * @param[in] color The UiColor to apply \
+  */ \
+  ChildClass& SetBorderlineColor(const UiColor& color) { View::SetBorderlineColor(color); return *this; } \
+  /** \
+  * @brief Sets the borderline offset of the view. \
+  * \
+  * @param[in] offset The borderline offset to set \
+
+codex
+---
+title: Ui Color
+sidebar_label: Ui Color
+category: styling-theme-config
+---
+
+# Ui Color
+
+`Dali::Ui::UiColor` lets dali-ui views use either direct RGBA colors or theme-backed color tokens.
+
+## Table of Contents
+
+- [Use Theme Colors on Views](#use-theme-colors-on-views)
+- [Create Direct RGBA Colors](#create-direct-rgba-colors)
+- [Adjust Alpha Without Losing the Color Source](#adjust-alpha-without-losing-the-color-source)
+- [Inspect and Resolve Colors](#inspect-and-resolve-colors)
+
+## Use Theme Colors on Views
+
+In a dali-ui app, use `Dali::Ui::UiColor` with `Dali::Ui::View` color setters. The predefined colors `Dali::Ui::UiColor::PRIMARY`, `Dali::Ui::UiColor::BACKGROUND`, and `Dali::Ui::UiColor::OUTLINE` are token colors, so dali-ui can resolve them from the active theme.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateThemedPanel()
+{
+  View panel = View::New();
+
+  panel
+    .SetBackgroundColor(UiColor::BACKGROUND)
+    .SetColor(UiColor::PRIMARY)
+    .SetBorderlineColor(UiColor::OUTLINE);
+
+  return panel;
+}
+```
+
+Use these predefined tokens when the view should follow the application theme. `Dali::Ui::View::SetBackgroundColor` and `Dali::Ui::View::SetBorderlineColor` accept a `Dali::Ui::UiColor`; when that color has an ID, the view keeps a theme binding for that property.
+
+```cpp
+View CreatePrimaryTile()
+{
+  View tile = View::New();
+
+  tile.SetBackgroundColor(UiColor::PRIMARY);
+
+  return tile;
+}
+```
+
+## Create Direct RGBA Colors
+
+Use `Dali::Ui::UiColor::UiColor(float r, float g, float b, float a)` when a color should be a fixed value instead of a theme token. The alpha argument defaults to `1.0f`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateFixedColorSwatch()
+{
+  UiColor accent(0.20f, 0.48f, 0.95f, 1.0f);
+
+  View swatch = View::New();
+  swatch.SetBackgroundColor(accent);
+
+  return swatch;
+}
+```
+
+A direct RGBA `Dali::Ui::UiColor` has no color ID. Its `Dali::Ui::UiColor::GetRgba` value is the RGBA value supplied at construction.
+
+```cpp
+UiColor accent(0.20f, 0.48f, 0.95f);
+
+bool hasColorId = accent.HasColorId(); // false
+Vector4 rgba    = accent.GetRgba();    // alpha is 1.0f
+```
+
+## Adjust Alpha Without Losing the Color Source
+
+`Dali::Ui::UiColor::WithAlpha` returns a new `Dali::Ui::UiColor` with a replaced alpha value. It does not modify the original color.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateSubtlePrimaryBackground()
+{
+  UiColor subtlePrimary = UiColor::PRIMARY.WithAlpha(0.12f);
+
+  View background = View::New();
+  background.SetBackgroundColor(subtlePrimary);
+
+  return background;
+}
+```
+
+`Dali::Ui::UiColor::ScaleAlpha` returns a new color whose alpha is multiplied by the given factor. This is useful when deriving pressed, disabled, or overlay colors from a base color.
+
+```cpp
+View CreateDisabledPrimarySurface()
+{
+  UiColor disabledPrimary = UiColor::PRIMARY.ScaleAlpha(0.40f);
+
+  View surface = View::New();
+  surface.SetBackgroundColor(disabledPrimary);
+
+  return surface;
+}
+```
+
+`Dali::Ui::UiColor::WithAlpha` and `Dali::Ui::UiColor::ScaleAlpha` can be chained. The result remains a `Dali::Ui::UiColor`, so it can be passed directly to `Dali::Ui::View` color setters.
+
+```cpp
+View CreateOverlay()
+{
+  UiColor overlayColor = UiColor::BACKGROUND
+                           .WithAlpha(0.80f)
+                           .ScaleAlpha(0.50f);
+
+  View overlay = View::New();
+  overlay.SetBackgroundColor(overlayColor);
+
+  return overlay;
+}
+```
+
+## Inspect and Resolve Colors
+
+Use `Dali::Ui::UiColor::HasColorId` to distinguish theme-token colors from direct RGBA colors. Use `Dali::Ui::UiColor::GetColorId` when you need the token name for logging, comparison, or diagnostics.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+bool IsThemeBacked(const UiColor& color)
+{
+  return color.HasColorId();
+}
+
+String ReadThemeTokenName(const UiColor& color)
+{
+  return color.GetColorId();
+}
+```
+
+`Dali::Ui::UiColor::GetRgba` resolves the current RGBA value. For a direct RGBA color, it returns the stored components. For a token color such as `Dali::Ui::UiColor::PRIMARY`, it resolves the color through the active theme.
+
+```cpp
+UiColor directColor(1.0f, 0.0f, 0.0f, 0.75f);
+Vector4 directRgba = directColor.GetRgba();
+
+UiColor themeColor = UiColor::PRIMARY;
+Vector4 themeRgba  = themeColor.GetRgba();
+```
+
+`Dali::Ui::UiColor::operator Vector4` is equivalent to calling `Dali::Ui::UiColor::GetRgba`, so use it only when a resolved `Dali::Vector4` is specifically needed.
+
+```cpp
+UiColor color = UiColor::OUTLINE.WithAlpha(0.60f);
+
+Vector4 resolvedA = color.GetRgba();
+Vector4 resolvedB = color;
+```
+tokens used
+36,903

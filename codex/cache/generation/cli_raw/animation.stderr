@@ -1,0 +1,2907 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e25b9-e5a6-7fa0-87f9-7d450b67af3a
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Animation (animation)
+- Category: animation-motion
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-core": 175,
+    "dali-ui": 5
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::AlphaFunction | scope=primary
+- Dali::AlphaFunction::Impl | scope=primary
+- Dali::Animation | scope=primary
+- Dali::AnimationData | scope=primary
+- Dali::AnimationData::AnimationDataElement | scope=primary
+- Dali::Constraint | scope=primary
+- Dali::Constraint::Function | scope=primary
+- Dali::Constraint::Function::ObjectCopyConstructorDispatcher | scope=primary
+- Dali::ConstraintSource | scope=primary
+- Dali::EqualToConstraint | scope=primary
+- Dali::KeyFrames | scope=primary
+- Dali::LinearConstrainer | scope=primary
+- Dali::LinearConstrainer::Property | scope=primary
+- Dali::LocalSource | scope=primary
+- Dali::ParentSource | scope=primary
+- Dali::Path | scope=primary
+- Dali::Path::Property | scope=primary
+- Dali::PathConstrainer | scope=primary
+- Dali::PathConstrainer::Property | scope=primary
+- Dali::RelativeToConstraint | scope=primary
+- Dali::RelativeToConstraintFloat | scope=primary
+- Dali::Source | scope=primary
+- Dali::SpringData | scope=primary
+- Dali::SpringData::Impl | scope=primary
+- Dali::TimePeriod | scope=primary
+- Dali::Ui::Duration | scope=primary
+- Dali::Ui::LabelAnimationBridge | scope=primary
+- Dali::Ui::LabelAnimationSpec | scope=primary
+- Dali::Ui::ViewAnimationBridge | scope=primary
+- Dali::Ui::ViewAnimationSpec | scope=primary
+- Dali::AlphaFunction::AlphaFunction | AlphaFunction() | scope=primary_member
+- Dali::AlphaFunction::BuiltinFunction | scope=primary_member
+- Dali::AlphaFunction::GetBezierControlPoints | Vector4 GetBezierControlPoints() const | scope=primary_member
+- Dali::AlphaFunction::GetBuiltinFunction | BuiltinFunction GetBuiltinFunction() const | scope=primary_member
+- Dali::AlphaFunction::GetCustomFunction | AlphaFunctionPrototype GetCustomFunction() const | scope=primary_member
+- Dali::AlphaFunction::GetMode | Mode GetMode() const | scope=primary_member
+- Dali::AlphaFunction::GetSpringData | const Dali::SpringData & GetSpringData() const | scope=primary_member
+- Dali::AlphaFunction::Impl::Impl | Impl(SpringType springType) | scope=primary_member
+- Dali::AlphaFunction::Impl::mBuiltin | scope=primary_member
+- Dali::AlphaFunction::Impl::mMode | scope=primary_member
+- Dali::AlphaFunction::Impl::mVariantData | scope=primary_member
+- Dali::AlphaFunction::Impl::~Impl | ~Impl() | scope=primary_member
+- Dali::AlphaFunction::Mode | scope=primary_member
+- Dali::AlphaFunction::SpringType | scope=primary_member
+- Dali::AlphaFunction::operator= | AlphaFunction & operator=(AlphaFunction &&rhs) noexcept | scope=primary_member
+- Dali::AlphaFunction::~AlphaFunction | ~AlphaFunction() | scope=primary_member
+- Dali::Animation::Animate | void Animate(Actor actor, Path path, const Vector3 &forward) | scope=primary_member
+- Dali::Animation::AnimateBetween | void AnimateBetween(Property target, KeyFrames keyFrames) | scope=primary_member
+- Dali::Animation::AnimateBy | void AnimateBy(Property target, Property::Value relativeValue, TimePeriod period) | scope=primary_member
+- Dali::Animation::AnimateTo | void AnimateTo(Property target, Property::Value destinationValue, TimePeriod period) | scope=primary_member
+- Dali::Animation::Animation | Animation(const Animation &handle) | scope=primary_member
+- Dali::Animation::Clear | void Clear() | scope=primary_member
+- Dali::Animation::DownCast | Animation DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Animation::EndAction | scope=primary_member
+- Dali::Animation::FinishedSignal | AnimationSignalType & FinishedSignal() | scope=primary_member
+- Dali::Animation::GetAnimationId | uint32_t GetAnimationId() const | scope=primary_member
+- Dali::Animation::GetBlendPoint | float GetBlendPoint() const | scope=primary_member
+- Dali::Animation::GetCurrentLoop | int32_t GetCurrentLoop() | scope=primary_member
+- Dali::Animation::GetCurrentProgress | float GetCurrentProgress() | scope=primary_member
+- Dali::Animation::GetDefaultAlphaFunction | AlphaFunction GetDefaultAlphaFunction() const | scope=primary_member
+- Dali::Animation::GetDisconnectAction | EndAction GetDisconnectAction() const | scope=primary_member
+- Dali::Animation::GetDuration | float GetDuration() const | scope=primary_member
+- Dali::Animation::GetEndAction | EndAction GetEndAction() const | scope=primary_member
+- Dali::Animation::GetLoopCount | int32_t GetLoopCount() | scope=primary_member
+- Dali::Animation::GetLoopingMode | LoopingMode GetLoopingMode() const | scope=primary_member
+- Dali::Animation::GetPlayRange | Vector2 GetPlayRange() const | scope=primary_member
+- Dali::Animation::GetSpeedFactor | float GetSpeedFactor() const | scope=primary_member
+- Dali::Animation::GetState | State GetState() const | scope=primary_member
+- Dali::Animation::Hide | void Hide(Actor actor, float delaySeconds) | scope=primary_member
+- Dali::Animation::Interpolation | scope=primary_member
+- Dali::Animation::IsLooping | bool IsLooping() const | scope=primary_member
+- Dali::Animation::LoopingMode | scope=primary_member
+- Dali::Animation::New | Animation New(float durationSeconds) | scope=primary_member
+- Dali::Animation::Pause | void Pause() | scope=primary_member
+- Dali::Animation::Play | void Play() | scope=primary_member
+- Dali::Animation::PlayAfter | void PlayAfter(float delaySeconds) | scope=primary_member
+- Dali::Animation::PlayFrom | void PlayFrom(float progress) | scope=primary_member
+- Dali::Animation::SetBlendPoint | void SetBlendPoint(float blendPoint) | scope=primary_member
+- Dali::Animation::SetCurrentProgress | void SetCurrentProgress(float progress) | scope=primary_member
+- Dali::Animation::SetDefaultAlphaFunction | void SetDefaultAlphaFunction(AlphaFunction alpha) | scope=primary_member
+- Dali::Animation::SetDisconnectAction | void SetDisconnectAction(EndAction disconnectAction) | scope=primary_member
+- Dali::Animation::SetDuration | void SetDuration(float seconds) | scope=primary_member
+- Dali::Animation::SetEndAction | void SetEndAction(EndAction action) | scope=primary_member
+- Dali::Animation::SetLoopCount | void SetLoopCount(int32_t count) | scope=primary_member
+- Dali::Animation::SetLooping | void SetLooping(bool looping) | scope=primary_member
+- Dali::Animation::SetLoopingMode | void SetLoopingMode(LoopingMode loopingMode) | scope=primary_member
+- Dali::Animation::SetPlayRange | void SetPlayRange(const Vector2 &range) | scope=primary_member
+- Dali::Animation::SetSpeedFactor | void SetSpeedFactor(float factor) | scope=primary_member
+- Dali::Animation::Show | void Show(Actor actor, float delaySeconds) | scope=primary_member
+- Dali::Animation::State | scope=primary_member
+
+Property owner table:
+- Dali::Actor::Property: CLIPPING_MODE, COLOR, COLOR_ALPHA, COLOR_BLUE, COLOR_GREEN, COLOR_MODE, COLOR_RED, CONNECTED_TO_SCENE, CULLED, DRAW_MODE, HEIGHT_FOR_WIDTH, HEIGHT_RESIZE_POLICY, HIERARCHY_DEPTH, ID, INHERIT_LAYOUT_DIRECTION, INHERIT_ORIENTATION, INHERIT_POSITION, INHERIT_SCALE, IS_LAYER, IS_ROOT, KEYBOARD_FOCUSABLE, LAYOUT_DIRECTION, LEAVE_REQUIRED, MAXIMUM_SIZE, MINIMUM_SIZE, NAME, OPACITY, ORIENTATION, PADDING, PARENT_ORIGIN, PARENT_ORIGIN_X, PARENT_ORIGIN_Y, PARENT_ORIGIN_Z, PIVOT, PIVOT_X, PIVOT_Y, PIVOT_Z, POSITION, POSITION_USES_PIVOT, POSITION_X
+- Dali::LinearConstrainer::Property: PROGRESS, VALUE
+- Dali::Path::Property: CONTROL_POINTS, POINTS
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "confidence": 1.0,
+    "id": "view_animation",
+    "intent": "Animate a View using the dali-ui app-facing animation API.",
+    "preferred_symbols": [
+      "Dali::Ui::View::Animate"
+    ],
+    "property_values": [
+      "Dali::Actor::Property::OPACITY",
+      "Dali::Actor::Property::POSITION",
+      "Dali::Actor::Property::SCALE"
+    ],
+    "source": "generation_config",
+    "usage_note": "Use View as the object being animated. Inherited transform property enums are owned by Dali::Actor::Property."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "dali_ui_animation_bridge",
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/animation/animation-example.cpp:12 (sample, score=1.0)
+```cpp
+* See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using Dali::Ui::View;
+
+/**
+ * Demonstrates the typed animation API with both Bridge and Spec patterns.
+ *
+ * - Tap the red box: fade out using View-first Bridge pattern
+ * - Tap the blue box: fade in using Spec-first pattern
+ */
+class AnimationExample : public ConnectionTracker
+{
+public:
+  AnimationExample(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AnimationExample::Create);
+  }
+```
+
+- repos/dali-ui/samples/image-view/animated-image-view-example.cpp:21 (sample, score=1.0)
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+/**
+ * AnimatedImageView sample.
+ *
+ * Demonstrates:
+ *   - Play / Pause / Stop / JumpToFrame
+ *   - Change Image  (cycles through WebP, GIF×2, URL array)
+ *   - LoopCount  (infinite / 3 / 1)
+ *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)
+ *   - StopBehavior  (CURRENT / FIRST / LAST)
+ *   - SetFrameDelay  (200ms / 500ms / 1000ms / 2000ms)
+ *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
+ *   - AnimationFinishedSignal
+ *
+ * Image sources:
+ *   0. dog-anim.webp          (animated WebP)
+ *   1. dali-logo-anim.gif     (animated GIF)
+ *   2. animatedLoading.gif    (animated GIF)
+ *   3. URL Array: dog-anim-001~008.png     (8 PNG frames via SetResourceUrls)
+ *   4. URL Array: dali-logo-anim-001~015.png  (15 PNG frames via SetResourceUrls)
+ *
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "AlphaFunction",
+      "Animate",
+      "Animation",
+      "Application",
+      "Apply",
+      "ApplyTo",
+      "BackgroundColor",
+      "ConnectionTracker",
+      "InputEvent",
+      "New",
+      "Opacity",
+      "Play",
+      "PositionY",
+      "View",
+      "ViewAnimationSpec"
+    ],
+    "path": "repos/dali-ui/samples/animation/animation-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 91,
+    "snippet_start_line": 12
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Animation",
+      "Application",
+      "Apply",
+      "ConnectionTracker",
+      "DownCast",
+      "GetState",
+      "InputEvent",
+      "New",
+      "Pause",
+      "Play",
+      "SetLoopCount",
+      "Stop",
+      "View"
+    ],
+    "path": "repos/dali-ui/samples/image-view/animated-image-view-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 100,
+    "snippet_start_line": 21
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "AlphaFunction",
+      "Animate",
+      "AnimateBetween",
+      "Animation",
+      "Application",
+      "Apply",
+      "ConnectionTracker",
+      "DownCast",
+      "GetState",
+      "InputEvent",
+      "KeyFrames",
+      "New",
+      "Play",
+      "Property",
+      "Remove",
+      "SetLooping",
+      "Stop",
+      "View",
+      "property"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-pixel-area-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 112,
+    "snippet_start_line": 33
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Animation",
+      "Application",
+      "Apply",
+      "Clear",
+      "ConnectionTracker",
+      "DownCast",
+      "GetState",
+      "InputEvent",
+      "LoopingMode",
+      "Mode",
+      "New",
+      "Pause",
+      "Play",
+      "Property",
+      "SetLoopCount",
+      "SetLoopingMode",
+      "Stop",
+      "View"
+    ],
+    "path": "repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 100,
+    "snippet_start_line": 21
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Animate",
+      "AnimateTo",
+      "Animation",
+      "Application",
+      "Apply",
+      "ConnectionTracker",
+      "GetState",
+      "New",
+      "Play",
+      "Property",
+      "Stop",
+      "View",
+      "actor",
+      "value"
+    ],
+    "path": "repos/dali-ui/samples/text/text-render-scale-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 145,
+    "snippet_start_line": 66
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "AlphaFunction",
+      "Animate",
+      "Animation",
+      "Application",
+      "Apply",
+      "ConnectionTracker",
+      "GetState",
+      "New",
+      "Play",
+      "Property",
+      "SetLoopCount",
+      "TextColor"
+    ],
+    "path": "repos/dali-ui/samples/text/text-style-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 101,
+    "snippet_start_line": 22
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "Apply",
+      "Constraint",
+      "GetTag",
+      "New",
+      "Property",
+      "SetTag",
+      "actor",
+      "property",
+      "value"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali-internal/utc-Dali-Internal-Constraint.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 118,
+    "snippet_start_line": 39
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Add",
+      "AddPoint",
+      "AddSource",
+      "Animate",
+      "AnimateBy",
+      "AnimateTo",
+      "Animation",
+      "Apply",
+      "ApplyPost",
+      "Clear",
+      "Constraint",
+      "DownCast",
+      "EqualToConstraint",
+      "Function",
+      "GetTargetProperty",
+      "GetType",
+      "Hide",
+      "New",
+      "Opacity",
+      "Play"
+    ],
+    "path": "repos/dali-core/automated-tests/src/dali/utc-Dali-Actor.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 212,
+    "snippet_start_line": 133
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[]
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/animation/animation-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using Dali::Ui::View;
+
+/**
+ * Demonstrates the typed animation API with both Bridge and Spec patterns.
+ *
+ * - Tap the red box: fade out using View-first Bridge pattern
+ * - Tap the blue box: fade in using Spec-first pattern
+ */
+class AnimationExample : public ConnectionTracker
+{
+public:
+  AnimationExample(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AnimationExample::Create);
+  }
+
+  ~AnimationExample() = default;
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Build a reusable fade-in spec
+    mFadeInSpec = View::NewAnimationSpec()
+      .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
+
+    window.Add(Layout::New()
+      .Children({
+        InteractiveView::New()
+          .SetBackgroundColor(UiColor(0xFF0000))
+          .SetRequestedWidth(200_spx)
+          .SetRequestedHeight(200_spx)
+          .ConnectClickedSignal(this, &AnimationExample::OnRedClicked)
+          .As(mRedBox),
+        InteractiveView::New()
+          .SetBackgroundColor(UiColor(0x0000FF))
+          .SetOpacity(0.3f)
+          .SetRequestedWidth(200_spx)
+          .SetRequestedHeight(200_spx)
+          .SetRequestedPositionX(220_spx)
+          .ConnectClickedSignal(this, &AnimationExample::OnBlueClicked)
+          .As(mBlueBox),
+      }));
+  }
+
+  void OnRedClicked(View view, InputEvent e)
+  {
+    // View-first: Bridge pattern (stack-allocated, zero heap)
+    auto anim = Animation::New();
+    view.Animate(anim)
+      .BackgroundColor(UiColor::PRIMARY, 500_ms)
+      .PositionY(50.0f, 300_ms, AlphaFunction::EASE_OUT);
+
+    anim.Play();
+  }
+
+  void OnBlueClicked(View view, InputEvent e)
+  {
+    // Spec-first: reusable spec applied to Animation
+    auto anim = Animation::New();
+    mFadeInSpec.ApplyTo(anim, view);
+    anim.Play();
+  }
+
+private:
+  Application&       mApplication;
+  View               mRedBox;
+  View               mBlueBox;
+  ViewAnimationSpec  mFadeInSpec;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  AnimationExample example(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "rg -n \"class ViewAnimationSpec|struct ViewAnimationSpec|ViewAnimationSpec|class ViewAnimationBridge|ViewAnimationBridge|Animate\\(\" repos/dali-ui -g '*.h' -g '*.cpp'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:841:ViewAnimationBridge View::Animate(Animation animation)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:843:  return ViewAnimationBridge(animation, *this);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:846:ViewAnimationSpec View::NewAnimationSpec()
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:848:  return ViewAnimationSpec::New();
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1124:   *   label.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1133:  LabelAnimationBridge Animate(Animation animation);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:53:class ViewAnimationBridge;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:54:class ViewAnimationSpec;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2063:   * @brief Creates a ViewAnimationBridge for this View.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2070:   *   view.Animate(anim).Opacity(0.5f, 300_ms);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2075:   * @return A ViewAnimationBridge
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2077:  ViewAnimationBridge Animate(Animation animation);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2080:   * @brief Creates a new ViewAnimationSpec.
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2088:   * @return A new ViewAnimationSpec
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2090:  static ViewAnimationSpec NewAnimationSpec();
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:674:LabelAnimationBridge Label::Animate(Animation animation)
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:35:: ViewAnimationBridge(animation, view)
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:41:  ViewAnimationBridge::BackgroundColor(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:47:  ViewAnimationBridge::BackgroundColorBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:53:  ViewAnimationBridge::SizeWidth(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:59:  ViewAnimationBridge::SizeWidthBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:65:  ViewAnimationBridge::SizeHeight(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:71:  ViewAnimationBridge::SizeHeightBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:77:  ViewAnimationBridge::PositionX(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:83:  ViewAnimationBridge::PositionXBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:89:  ViewAnimationBridge::PositionY(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:95:  ViewAnimationBridge::PositionYBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:101:  ViewAnimationBridge::ScaleX(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:107:  ViewAnimationBridge::ScaleXBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:113:  ViewAnimationBridge::ScaleY(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:119:  ViewAnimationBridge::ScaleYBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:125:  ViewAnimationBridge::Opacity(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:131:  ViewAnimationBridge::OpacityBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:137:  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:143:  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:149:  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:155:  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:161:  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:167:  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:173:  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:179:  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:185:  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.cpp:191:  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:33: * LabelAnimationBridge extends ViewAnimationBridge with Label-specific
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:37: * Typically created via Label::Animate():
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:40: *   label.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:45:class DALI_UI_API LabelAnimationBridge : public ViewAnimationBridge
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:40:class ViewAnimationSpecImpl;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:52:class DALI_UI_API ViewAnimationSpec : public BaseHandle
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:55:  ViewAnimationSpec();
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:56:  static ViewAnimationSpec New();
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:58:  ViewAnimationSpec(const ViewAnimationSpec& other);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:59:  ViewAnimationSpec(ViewAnimationSpec&& rhs) noexcept;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:60:  ~ViewAnimationSpec();
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:61:  ViewAnimationSpec& operator=(const ViewAnimationSpec& other);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:62:  ViewAnimationSpec& operator=(ViewAnimationSpec&& rhs) noexcept;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:76:  ViewAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:85:  ViewAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:95:  ViewAnimationSpec& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:104:  ViewAnimationSpec& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:114:  ViewAnimationSpec& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:123:  ViewAnimationSpec& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:133:  ViewAnimationSpec& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:142:  ViewAnimationSpec& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:152:  ViewAnimationSpec& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:161:  ViewAnimationSpec& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:171:  ViewAnimationSpec& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:180:  ViewAnimationSpec& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:190:  ViewAnimationSpec& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:199:  ViewAnimationSpec& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:209:  ViewAnimationSpec& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:218:  ViewAnimationSpec& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:228:  ViewAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:237:  ViewAnimationSpec& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:247:  ViewAnimationSpec& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:256:  ViewAnimationSpec& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:266:  ViewAnimationSpec& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:275:  ViewAnimationSpec& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:285:  ViewAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:294:  ViewAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:304:  ViewAnimationSpec& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:313:  ViewAnimationSpec& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:326:  DALI_INTERNAL explicit ViewAnimationSpec(Internal::ViewAnimationSpecImpl* impl);
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:38:ViewAnimationSpecImpl::ViewAnimationSpecImpl() = default;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:40:ViewAnimationSpecImpl::~ViewAnimationSpecImpl() = default;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:42:ViewAnimationSpecImplPtr ViewAnimationSpecImpl::New()
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:44:  return ViewAnimationSpecImplPtr(new ViewAnimationSpecImpl());
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:47:void ViewAnimationSpecImpl::AddAnimateToEntry(Property::Index index, Property::Value value,
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:53:void ViewAnimationSpecImpl::AddAnimateToEntry(Property::Index index, Property::Value value,
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:60:void ViewAnimationSpecImpl::AddAnimateByEntry(Property::Index index, Property::Value value,
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:66:void ViewAnimationSpecImpl::AddAnimateByEntry(Property::Index index, Property::Value value,
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:73:void ViewAnimationSpecImpl::ApplyEntries(Animation animation, View view) const
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:86:void ViewAnimationSpecImpl::ApplyAnimateTo(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:92:void ViewAnimationSpecImpl::ApplyAnimateBy(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:102:void ViewAnimationSpecImpl::ApplyBackgroundColorTo(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:112:void ViewAnimationSpecImpl::ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:122:void ViewAnimationSpecImpl::ApplySizeWidthTo(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:128:void ViewAnimationSpecImpl::ApplySizeWidthBy(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:134:void ViewAnimationSpecImpl::ApplySizeHeightTo(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:140:void ViewAnimationSpecImpl::ApplySizeHeightBy(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:146:void ViewAnimationSpecImpl::ApplyPositionXTo(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:152:void ViewAnimationSpecImpl::ApplyPositionXBy(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:158:void ViewAnimationSpecImpl::ApplyPositionYTo(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.cpp:164:void ViewAnimationSpecImpl::ApplyPositionYBy(Animation& animation, View view, const Entry& entry)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:34:ViewAnimationBridge::ViewAnimationBridge(Animation animation, View view)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:40:ViewAnimationBridge& ViewAnimationBridge::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:43:  Internal::ViewAnimationSpecImpl::ApplyBackgroundColorTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target.GetRgba(), duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:47:ViewAnimationBridge& ViewAnimationBridge::BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:50:  Internal::ViewAnimationSpecImpl::ApplyBackgroundColorBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative.GetRgba(), duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:54:ViewAnimationBridge& ViewAnimationBridge::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:57:  Internal::ViewAnimationSpecImpl::ApplySizeWidthTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:61:ViewAnimationBridge& ViewAnimationBridge::SizeWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:64:  Internal::ViewAnimationSpecImpl::ApplySizeWidthBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:68:ViewAnimationBridge& ViewAnimationBridge::SizeHeight(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:71:  Internal::ViewAnimationSpecImpl::ApplySizeHeightTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:75:ViewAnimationBridge& ViewAnimationBridge::SizeHeightBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:78:  Internal::ViewAnimationSpecImpl::ApplySizeHeightBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:82:ViewAnimationBridge& ViewAnimationBridge::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:85:  Internal::ViewAnimationSpecImpl::ApplyPositionXTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:89:ViewAnimationBridge& ViewAnimationBridge::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:92:  Internal::ViewAnimationSpecImpl::ApplyPositionXBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:96:ViewAnimationBridge& ViewAnimationBridge::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:99:  Internal::ViewAnimationSpecImpl::ApplyPositionYTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:103:ViewAnimationBridge& ViewAnimationBridge::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:106:  Internal::ViewAnimationSpecImpl::ApplyPositionYBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:110:ViewAnimationBridge& ViewAnimationBridge::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:117:ViewAnimationBridge& ViewAnimationBridge::ScaleXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:124:ViewAnimationBridge& ViewAnimationBridge::ScaleY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:131:ViewAnimationBridge& ViewAnimationBridge::ScaleYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:138:ViewAnimationBridge& ViewAnimationBridge::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:145:ViewAnimationBridge& ViewAnimationBridge::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:152:ViewAnimationBridge& ViewAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:159:ViewAnimationBridge& ViewAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:166:ViewAnimationBridge& ViewAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:173:ViewAnimationBridge& ViewAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:180:ViewAnimationBridge& ViewAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:187:ViewAnimationBridge& ViewAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:194:ViewAnimationBridge& ViewAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:201:ViewAnimationBridge& ViewAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:208:ViewAnimationBridge& ViewAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.cpp:215:ViewAnimationBridge& ViewAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:44:class ViewAnimationSpecImpl;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:45:using ViewAnimationSpecImplPtr = IntrusivePtr<ViewAnimationSpecImpl>;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:48: * @brief Internal implementation of ViewAnimationSpec.
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:50:class DALI_UI_API ViewAnimationSpecImpl : public BaseObject
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:53:  static ViewAnimationSpecImplPtr New();
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:95:  ViewAnimationSpecImpl();
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:96:  ~ViewAnimationSpecImpl() override;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:101:  ViewAnimationSpecImpl(const ViewAnimationSpecImpl&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:102:  ViewAnimationSpecImpl(ViewAnimationSpecImpl&&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:103:  ViewAnimationSpecImpl& operator=(const ViewAnimationSpecImpl&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:104:  ViewAnimationSpecImpl& operator=(ViewAnimationSpecImpl&&) = delete;
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:107:inline Internal::ViewAnimationSpecImpl& GetImpl(ViewAnimationSpec& obj)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:110:  return static_cast<Internal::ViewAnimationSpecImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:113:inline const Internal::ViewAnimationSpecImpl& GetImpl(const ViewAnimationSpec& obj)
+repos/dali-ui/dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h:116:  return static_cast<const Internal::ViewAnimationSpecImpl&>(handle);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:33:ViewAnimationSpec::ViewAnimationSpec() = default;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:35:ViewAnimationSpec::ViewAnimationSpec(const ViewAnimationSpec& other) = default;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:37:ViewAnimationSpec::ViewAnimationSpec(ViewAnimationSpec&& rhs) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:39:ViewAnimationSpec::~ViewAnimationSpec() = default;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:41:ViewAnimationSpec& ViewAnimationSpec::operator=(const ViewAnimationSpec& other) = default;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:43:ViewAnimationSpec& ViewAnimationSpec::operator=(ViewAnimationSpec&& rhs) noexcept = default;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:45:ViewAnimationSpec ViewAnimationSpec::New()
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:47:  Internal::ViewAnimationSpecImplPtr p = Internal::ViewAnimationSpecImpl::New();
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:48:  return ViewAnimationSpec(p.Get());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:51:ViewAnimationSpec::ViewAnimationSpec(Internal::ViewAnimationSpecImpl* impl)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:56:void ViewAnimationSpec::ApplyTo(Animation animation, View view) const
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:65:ViewAnimationSpec& ViewAnimationSpec::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:67:  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target.GetRgba(), duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundColorTo);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:71:ViewAnimationSpec& ViewAnimationSpec::BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:73:  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative.GetRgba(), duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundColorBy);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:77:ViewAnimationSpec& ViewAnimationSpec::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:79:  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeWidthTo);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:83:ViewAnimationSpec& ViewAnimationSpec::SizeWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:85:  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeWidthBy);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:89:ViewAnimationSpec& ViewAnimationSpec::SizeHeight(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:91:  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeHeightTo);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:95:ViewAnimationSpec& ViewAnimationSpec::SizeHeightBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:97:  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeHeightBy);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:101:ViewAnimationSpec& ViewAnimationSpec::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:103:  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionXTo);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:107:ViewAnimationSpec& ViewAnimationSpec::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:109:  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionXBy);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:113:ViewAnimationSpec& ViewAnimationSpec::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:115:  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionYTo);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:119:ViewAnimationSpec& ViewAnimationSpec::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:121:  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionYBy);
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:125:ViewAnimationSpec& ViewAnimationSpec::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:131:ViewAnimationSpec& ViewAnimationSpec::ScaleXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:137:ViewAnimationSpec& ViewAnimationSpec::ScaleY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:143:ViewAnimationSpec& ViewAnimationSpec::ScaleYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:149:ViewAnimationSpec& ViewAnimationSpec::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:155:ViewAnimationSpec& ViewAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:161:ViewAnimationSpec& ViewAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:167:ViewAnimationSpec& ViewAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:173:ViewAnimationSpec& ViewAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:179:ViewAnimationSpec& ViewAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:185:ViewAnimationSpec& ViewAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:191:ViewAnimationSpec& ViewAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:197:ViewAnimationSpec& ViewAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:203:ViewAnimationSpec& ViewAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:209:ViewAnimationSpec& ViewAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.cpp:215:ViewAnimationSpec& ViewAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+repos/dali-ui/dali-ui-foundation/internal/animation/label-animation-spec-impl.autogen.h:40: * Inherits from ViewAnimationSpecImpl; reuses AddAnimateTo/ByEntry, ApplyEntries, ApplyAnimateTo/By.
+repos/dali-ui/dali-ui-foundation/internal/animation/label-animation-spec-impl.autogen.h:42:class DALI_UI_API LabelAnimationSpecImpl : public ViewAnimationSpecImpl
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:39: * ViewAnimationBridge is stack-allocated (no heap allocation) and provides
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:42: * Typically created via View::Animate():
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:45: *   view.Animate(anim)
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:50:class DALI_UI_API ViewAnimationBridge
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:65:  ViewAnimationBridge& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:74:  ViewAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:84:  ViewAnimationBridge& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:93:  ViewAnimationBridge& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:103:  ViewAnimationBridge& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:112:  ViewAnimationBridge& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:122:  ViewAnimationBridge& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:131:  ViewAnimationBridge& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:141:  ViewAnimationBridge& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:150:  ViewAnimationBridge& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:160:  ViewAnimationBridge& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:169:  ViewAnimationBridge& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:179:  ViewAnimationBridge& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:188:  ViewAnimationBridge& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:198:  ViewAnimationBridge& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:207:  ViewAnimationBridge& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:217:  ViewAnimationBridge& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:226:  ViewAnimationBridge& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:236:  ViewAnimationBridge& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:245:  ViewAnimationBridge& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:255:  ViewAnimationBridge& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:264:  ViewAnimationBridge& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:274:  ViewAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:283:  ViewAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:293:  ViewAnimationBridge& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:302:  ViewAnimationBridge& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:306:  ViewAnimationBridge(Animation animation, View view);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:39:: ViewAnimationSpec(impl)
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:49:  ViewAnimationSpec::BackgroundColor(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:55:  ViewAnimationSpec::BackgroundColorBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:61:  ViewAnimationSpec::SizeWidth(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:67:  ViewAnimationSpec::SizeWidthBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:73:  ViewAnimationSpec::SizeHeight(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:79:  ViewAnimationSpec::SizeHeightBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:85:  ViewAnimationSpec::PositionX(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:91:  ViewAnimationSpec::PositionXBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:97:  ViewAnimationSpec::PositionY(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:103:  ViewAnimationSpec::PositionYBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:109:  ViewAnimationSpec::ScaleX(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:115:  ViewAnimationSpec::ScaleXBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:121:  ViewAnimationSpec::ScaleY(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:127:  ViewAnimationSpec::ScaleYBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:133:  ViewAnimationSpec::Opacity(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:139:  ViewAnimationSpec::OpacityBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:145:  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:151:  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:157:  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:163:  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:169:  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:175:  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:181:  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:187:  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:193:  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.cpp:199:  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:38: * LabelAnimationSpec extends ViewAnimationSpec with Label-specific
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:48:class DALI_UI_API LabelAnimationSpec : public ViewAnimationSpec
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-animations.cpp:313:              animation.Animate(actor, path, forward, alphaFunction, timePeriod);
+repos/dali-ui/dali-ui-foundation/internal/builder/builder-animations.cpp:317:              animation.Animate(actor, path, forward, alphaFunction);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.h:110:  bool IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const override;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-visual-data.cpp:416:bool ViewDataImpl::VisualData::IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-base-data-impl.h:142:      if(observer->IsAnyPropertyAnimate(mRelativeProperties))
+repos/dali-ui/samples/text/text-style-example.cpp:189:    label.Animate(animation).TextColor(endColor, 1000_ms, AlphaFunction::SIN);
+repos/dali-ui/dali-ui-foundation/internal/visuals/visual-constraint-observer.h:46:  virtual bool IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const = 0;
+repos/dali-ui/samples/animation/animation-example.cpp:71:    view.Animate(anim)
+repos/dali-ui/samples/animation/animation-example.cpp:90:  ViewAnimationSpec  mFadeInSpec;
+
+exec
+/bin/bash -lc "sed -n '2050,2095p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @brief This signal is emitted when the view gets or loses focus.
+   *
+   * A callback of the following type may be connected:
+   * @code
+   *   bool YourCallbackName(View view, bool focused);
+   * @endcode
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   */
+  FocusChangedSignalType& FocusChangedSignal();
+
+public: // Animation
+  /**
+   * @brief Creates a ViewAnimationBridge for this View.
+   *
+   * Returns a lightweight, stack-allocated proxy that applies animations
+   * directly to the given Animation for this View.
+   *
+   * @code
+   *   auto anim = Animation::New();
+   *   view.Animate(anim).Opacity(0.5f, 300_ms);
+   *   anim.Play();
+   * @endcode
+   *
+   * @param[in] animation The Animation to apply to
+   * @return A ViewAnimationBridge
+   */
+  ViewAnimationBridge Animate(Animation animation);
+
+  /**
+   * @brief Creates a new ViewAnimationSpec.
+   *
+   * @code
+   *   auto spec = View::NewAnimationSpec()
+   *     .Opacity(1.0f, 300_ms);
+   *   spec.ApplyTo(anim, view);
+   * @endcode
+   *
+   * @return A new ViewAnimationSpec
+   */
+  static ViewAnimationSpec NewAnimationSpec();
+
+public:
+  /**
+   * @brief Sets an attachment internally.
+   *
+
+exec
+/bin/bash -lc "sed -n '35,220p' repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+/**
+ * @brief A lightweight bridge for applying animations to a View.
+ *
+ * ViewAnimationBridge is stack-allocated (no heap allocation) and provides
+ * type-safe fluent chaining for animating View properties.
+ *
+ * Typically created via View::Animate():
+ * @code
+ *   auto anim = Animation::New();
+ *   view.Animate(anim)
+ *     .Opacity(0.5f, 300_ms);
+ *   anim.Play();
+ * @endcode
+ */
+class DALI_UI_API ViewAnimationBridge
+{
+public:
+  ////////////////////////////////////////////////////////////////////////////
+  // Own properties
+  ////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @brief Animates the background color.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the background color by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the size width.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the size width by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the size height.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the size height by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the position x.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position x by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the position y.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position y by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the scale x.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the scale x by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the scale y.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the scale y by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the opacity.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the opacity by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the corner radius.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner radius by a relative amount.
+   *
+
+exec
+/bin/bash -lc "sed -n '45,230p' repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+ *
+ * @code
+ *   auto spec = View::NewAnimationSpec()
+ *     .Opacity(1.0f, 300_ms);
+ *   spec.ApplyTo(anim, view);
+ * @endcode
+ */
+class DALI_UI_API ViewAnimationSpec : public BaseHandle
+{
+public:
+  ViewAnimationSpec();
+  static ViewAnimationSpec New();
+
+  ViewAnimationSpec(const ViewAnimationSpec& other);
+  ViewAnimationSpec(ViewAnimationSpec&& rhs) noexcept;
+  ~ViewAnimationSpec();
+  ViewAnimationSpec& operator=(const ViewAnimationSpec& other);
+  ViewAnimationSpec& operator=(ViewAnimationSpec&& rhs) noexcept;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Own properties
+  ////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @brief Animates the background color.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the background color by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the size width.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the size width by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the size height.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the size height by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the position x.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position x by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the position y.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position y by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the scale x.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the scale x by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the scale y.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the scale y by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the opacity.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the opacity by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the corner radius.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner radius by a relative amount.
+
+exec
+/bin/bash -lc "rg -n \"static Animation New|Animation::New|FinishedSignal|SetLooping|SetLoopCount|SetPlayRange|SetEndAction|SetDefaultAlphaFunction|enum class|enum .*EndAction|enum .*LoopingMode\" repos/dali-core/dali/public-api/animation repos/dali-core/dali/public-api -g '*animation*.h' -g '*.h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-core/dali/public-api/render-tasks/render-task.h:86: * | finished     | @ref FinishedSignal() |
+repos/dali-core/dali/public-api/render-tasks/render-task.h:186:  enum class BuiltinCameraType
+repos/dali-core/dali/public-api/render-tasks/render-task.h:193:  enum class CameraActorType
+repos/dali-core/dali/public-api/render-tasks/render-task.h:679:   * @note The result can be used after the FinishedSignal is emitted.
+repos/dali-core/dali/public-api/render-tasks/render-task.h:694:   * @note This method is only available after the FinishedSignal is emitted.
+repos/dali-core/dali/public-api/render-tasks/render-task.h:705:  RenderTaskSignalType& FinishedSignal();
+repos/dali-core/dali/public-api/animation/animation.h:66: * mAnimation = Animation::New(3.0f); // duration 3 seconds
+repos/dali-core/dali/public-api/animation/animation.h:84: *   Animation animation = Animation::New(2.0f); // duration 2 seconds
+repos/dali-core/dali/public-api/animation/animation.h:86: *   animation.FinishedSignal().Connect( ExampleCallback );
+repos/dali-core/dali/public-api/animation/animation.h:113: * | finished     | @ref FinishedSignal()    |
+repos/dali-core/dali/public-api/animation/animation.h:134:  enum EndAction : uint8_t
+repos/dali-core/dali/public-api/animation/animation.h:170:  enum LoopingMode : uint8_t
+repos/dali-core/dali/public-api/animation/animation.h:177:   * @brief Creates an uninitialized Animation; this can be initialized with Animation::New().
+repos/dali-core/dali/public-api/animation/animation.h:195:  static Animation New(float durationSeconds);
+repos/dali-core/dali/public-api/animation/animation.h:206:  static Animation New();
+repos/dali-core/dali/public-api/animation/animation.h:282:   * This function resets the loop count and should not be used with SetLoopCount(int).
+repos/dali-core/dali/public-api/animation/animation.h:288:  void SetLooping(bool looping);
+repos/dali-core/dali/public-api/animation/animation.h:293:   * A zero is the same as SetLooping(true) i.e. repeat forever.
+repos/dali-core/dali/public-api/animation/animation.h:294:   * This function resets the looping value and should not be used with SetLooping(bool).
+repos/dali-core/dali/public-api/animation/animation.h:300:  void SetLoopCount(int32_t count);
+repos/dali-core/dali/public-api/animation/animation.h:305:   * A zero is the same as SetLooping(true) ie repeat forever.
+repos/dali-core/dali/public-api/animation/animation.h:339:  void SetEndAction(EndAction action);
+repos/dali-core/dali/public-api/animation/animation.h:374:  void SetDefaultAlphaFunction(AlphaFunction alpha);
+repos/dali-core/dali/public-api/animation/animation.h:388:   * must be in the 0-1 interval or in the play range interval if defined ( See @ref Animation::SetPlayRange ),
+repos/dali-core/dali/public-api/animation/animation.h:435:  void SetPlayRange(const Vector2& range);
+repos/dali-core/dali/public-api/animation/animation.h:474:   * The progress must be in the 0-1 interval or in the play range interval if defined ( See @ref Animation::SetPlayRange ),
+repos/dali-core/dali/public-api/animation/animation.h:526:  void SetLoopingMode(LoopingMode loopingMode);
+repos/dali-core/dali/public-api/animation/animation.h:550:  AnimationSignalType& FinishedSignal();
+repos/dali-core/dali/public-api/animation/animation.h:803:   * @brief This constructor is used by Animation::New() methods.
+repos/dali-core/dali/public-api/signals/slot-delegate.h:59: *     Animation animation = Animation::New( 1.0f );
+repos/dali-core/dali/public-api/signals/slot-delegate.h:60: *     animation.FinishedSignal().Connect( mSlotDelegate, &Example::OnAnimationFinished );
+repos/dali-core/dali/public-api/common/open-hash-map-managed.h:40:enum class EntryState : uint8_t
+repos/dali-core/dali/public-api/animation/animation.h:66: * mAnimation = Animation::New(3.0f); // duration 3 seconds
+repos/dali-core/dali/public-api/animation/animation.h:84: *   Animation animation = Animation::New(2.0f); // duration 2 seconds
+repos/dali-core/dali/public-api/animation/animation.h:86: *   animation.FinishedSignal().Connect( ExampleCallback );
+repos/dali-core/dali/public-api/animation/animation.h:113: * | finished     | @ref FinishedSignal()    |
+repos/dali-core/dali/public-api/animation/animation.h:134:  enum EndAction : uint8_t
+repos/dali-core/dali/public-api/animation/animation.h:170:  enum LoopingMode : uint8_t
+repos/dali-core/dali/public-api/animation/animation.h:177:   * @brief Creates an uninitialized Animation; this can be initialized with Animation::New().
+repos/dali-core/dali/public-api/animation/animation.h:195:  static Animation New(float durationSeconds);
+repos/dali-core/dali/public-api/animation/animation.h:206:  static Animation New();
+repos/dali-core/dali/public-api/animation/animation.h:282:   * This function resets the loop count and should not be used with SetLoopCount(int).
+repos/dali-core/dali/public-api/animation/animation.h:288:  void SetLooping(bool looping);
+repos/dali-core/dali/public-api/animation/animation.h:293:   * A zero is the same as SetLooping(true) i.e. repeat forever.
+repos/dali-core/dali/public-api/animation/animation.h:294:   * This function resets the looping value and should not be used with SetLooping(bool).
+repos/dali-core/dali/public-api/animation/animation.h:300:  void SetLoopCount(int32_t count);
+repos/dali-core/dali/public-api/animation/animation.h:305:   * A zero is the same as SetLooping(true) ie repeat forever.
+repos/dali-core/dali/public-api/animation/animation.h:339:  void SetEndAction(EndAction action);
+repos/dali-core/dali/public-api/animation/animation.h:374:  void SetDefaultAlphaFunction(AlphaFunction alpha);
+repos/dali-core/dali/public-api/animation/animation.h:388:   * must be in the 0-1 interval or in the play range interval if defined ( See @ref Animation::SetPlayRange ),
+repos/dali-core/dali/public-api/animation/animation.h:435:  void SetPlayRange(const Vector2& range);
+repos/dali-core/dali/public-api/animation/animation.h:474:   * The progress must be in the 0-1 interval or in the play range interval if defined ( See @ref Animation::SetPlayRange ),
+repos/dali-core/dali/public-api/animation/animation.h:526:  void SetLoopingMode(LoopingMode loopingMode);
+repos/dali-core/dali/public-api/animation/animation.h:550:  AnimationSignalType& FinishedSignal();
+repos/dali-core/dali/public-api/animation/animation.h:803:   * @brief This constructor is used by Animation::New() methods.
+repos/dali-core/dali/public-api/events/gesture-enumerations.h:46:enum class GestureState : uint8_t
+repos/dali-core/dali/public-api/events/gesture-enumerations.h:60:enum class GestureSourceType : int8_t
+repos/dali-core/dali/public-api/events/gesture-enumerations.h:71:enum class GestureSourceData : int8_t
+repos/dali-core/dali/public-api/actors/actor-enumerations.h:197:enum class Type
+
+exec
+/bin/bash -lc "sed -n '125,220p' repos/dali-core/dali/public-api/animation/animation.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+public:
+  using AnimationSignalType = Signal<void(Animation)>; ///< Animation finished signal type @SINCE_1_0.0
+
+  using AnyFunction = Any; ///< Interpolation function @SINCE_1_0.0
+
+  /**
+   * @brief Enumeration for what to do when the animation ends, is stopped, or is destroyed.
+   * @SINCE_1_0.0
+   */
+  enum EndAction : uint8_t
+  {
+    BAKE,      ///< When the animation ends, the animated property values are saved. @SINCE_1_0.0
+    DISCARD,   ///< When the animation ends, the animated property values are forgotten. @SINCE_1_0.0
+    BAKE_FINAL ///< If the animation is stopped, the animated property values are saved as if the animation had run to completion, otherwise behaves like Bake. @SINCE_1_0.0
+  };
+
+  /**
+   * @brief Enumeration for what interpolation method to use on key-frame animations.
+   * @SINCE_1_0.0
+   */
+  enum Interpolation : uint8_t
+  {
+    LINEAR, ///< Values in between key frames are interpolated using a linear polynomial. (Default) @SINCE_1_0.0
+    CUBIC   ///< Values in between key frames are interpolated using a cubic polynomial. @SINCE_1_0.0
+  };
+
+  /**
+   * @brief Enumeration for what state the animation is in.
+   *
+   * Note: Calling Reset() on this class will NOT reset the animation. It will call BaseHandle::Reset() which drops the object handle.
+   *
+   * @SINCE_1_1.21
+   */
+  enum State : uint8_t
+  {
+    STOPPED, ///< Animation has stopped @SINCE_1_1.21
+    PLAYING, ///< The animation is playing @SINCE_1_1.21
+    PAUSED   ///< The animation is paused @SINCE_1_1.21
+  };
+
+  /**
+   * @brief Enumeration for what looping mode is in.
+   *
+   * @SINCE_1_2.60
+   */
+  enum LoopingMode : uint8_t
+  {
+    RESTART,     ///< When the animation arrives at the end in looping mode, the animation restarts from the beginning. @SINCE_1_2.60
+    AUTO_REVERSE ///< When the animation arrives at the end in looping mode, the animation reverses direction and runs backwards again. @SINCE_1_2.60
+  };
+
+  /**
+   * @brief Creates an uninitialized Animation; this can be initialized with Animation::New().
+   *
+   * Calling member functions with an uninitialized Animation handle is not allowed.
+   * @SINCE_1_0.0
+   */
+  Animation();
+
+  /**
+   * @brief Creates an initialized Animation.
+   *
+   * The animation will not loop.
+   * The default end action is "Bake".
+   * The default alpha function is linear.
+   * @SINCE_1_0.0
+   * @param[in] durationSeconds The duration in seconds
+   * @return A handle to a newly allocated Dali resource
+   * @note durationSeconds can not be negative.
+   */
+  static Animation New(float durationSeconds);
+
+  /**
+   * @brief Creates an initialized Animation.
+   *
+   * The animation will not loop.
+   * The default end action is "Bake".
+   * The default alpha function is linear.
+   * @SINCE_2_5.18
+   * @return A handle to a newly allocated Dali resource
+   */
+  static Animation New();
+
+  /**
+   * @brief Downcasts a handle to Animation handle.
+   *
+   * If handle points to an Animation object, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @SINCE_1_0.0
+   * @param[in] handle Handle to an object
+   * @return Handle to an Animation object or an uninitialized handle
+   */
+  static Animation DownCast(BaseHandle handle);
+
+  /**
+
+exec
+/bin/bash -lc "sed -n '270,560p' repos/dali-core/dali/public-api/animation/animation.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+  /**
+   * @brief Retrieves the duration of an animation.
+   *
+   * @SINCE_1_0.0
+   * @return The duration in seconds
+   */
+  float GetDuration() const;
+
+  /**
+   * @brief Sets whether the animation will loop.
+   *
+   * This function resets the loop count and should not be used with SetLoopCount(int).
+   * Setting this parameter does not cause the animation to Play().
+   *
+   * @SINCE_1_0.0
+   * @param[in] looping True if the animation will loop
+   */
+  void SetLooping(bool looping);
+
+  /**
+   * @brief Enables looping for 'count' repeats.
+   *
+   * A zero is the same as SetLooping(true) i.e. repeat forever.
+   * This function resets the looping value and should not be used with SetLooping(bool).
+   * Setting this parameter does not cause the animation to Play().
+   *
+   * @SINCE_1_1.20
+   * @param[in] count The number of times to loop
+   */
+  void SetLoopCount(int32_t count);
+
+  /**
+   * @brief Gets the loop count.
+   *
+   * A zero is the same as SetLooping(true) ie repeat forever.
+   * The loop count is initially 1 for play once.
+   *
+   * @SINCE_1_1.20
+   * @return The number of times to loop
+   */
+  int32_t GetLoopCount();
+
+  /**
+   * @brief Gets the current loop count.
+   *
+   * A value 0 to GetLoopCount() indicating the current loop count when looping.
+   *
+   * @SINCE_1_1.20
+   * @return The current number of loops that have occured
+   */
+  int32_t GetCurrentLoop();
+
+  /**
+   * @brief Queries whether the animation will loop.
+   *
+   * @SINCE_1_0.0
+   * @return True if the animation will loop
+   */
+  bool IsLooping() const;
+
+  /**
+   * @brief Sets the end action of the animation.
+   *
+   * This action is performed when the animation ends or if it is stopped.
+   * Default end action is bake.
+   * @SINCE_1_0.0
+   * @param[in] action The end action
+   */
+  void SetEndAction(EndAction action);
+
+  /**
+   * @brief Returns the end action of the animation.
+   *
+   * @SINCE_1_0.0
+   * @return The end action
+   */
+  EndAction GetEndAction() const;
+
+  /**
+   * @brief Sets the disconnect action.
+   *
+   * If any of the animated property owners are disconnected from the stage while the animation is being played, then this action is performed.
+   * Default action is to BakeFinal.
+   * @SINCE_1_0.0
+   * @param[in] disconnectAction The disconnect action
+   */
+  void SetDisconnectAction(EndAction disconnectAction);
+
+  /**
+   * @brief Returns the disconnect action.
+   *
+   * @SINCE_1_0.0
+   * @return The disconnect action
+   */
+  EndAction GetDisconnectAction() const;
+
+  /**
+   * @brief Sets the default alpha function for an animation.
+   *
+   * This is applied to individual property animations, if no further alpha functions are supplied.
+   * @SINCE_1_0.0
+   * @param[in] alpha The default alpha function
+   */
+  void SetDefaultAlphaFunction(AlphaFunction alpha);
+
+  /**
+   * @brief Retrieves the default alpha function for an animation.
+   *
+   * @SINCE_1_0.0
+   * @return The default alpha function
+   */
+  AlphaFunction GetDefaultAlphaFunction() const;
+
+  /**
+   * @brief Sets the progress of the animation.
+   *
+   * The animation will play (or continue playing) from this point. The progress
+   * must be in the 0-1 interval or in the play range interval if defined ( See @ref Animation::SetPlayRange ),
+   * otherwise, it will be ignored.
+   *
+   * @SINCE_1_0.0
+   * @param[in] progress The new progress as a normalized value between [0,1]
+   * or between the play range if specified
+   */
+  void SetCurrentProgress(float progress);
+
+  /**
+   * @brief Retrieves the current progress of the animation.
+   *
+   * @SINCE_1_0.0
+   * @return The current progress as a normalized value between [0,1]
+   */
+  float GetCurrentProgress();
+
+  /**
+   * @brief Specifies a speed factor for the animation.
+   *
+   * The speed factor is a multiplier of the normal velocity of the animation. Values between [0,1] will
+   * slow down the animation and values above one will speed up the animation. It is also possible to specify a negative multiplier
+   * to play the animation in reverse.
+   *
+   * @SINCE_1_0.0
+   * @param[in] factor A value which will multiply the velocity
+   */
+  void SetSpeedFactor(float factor);
+
+  /**
+   * @brief Retrieves the speed factor of the animation.
+   *
+   * @SINCE_1_0.0
+   * @return Speed factor
+   */
+  float GetSpeedFactor() const;
+
+  /**
+   * @brief Sets the playing range.
+   *
+   * Animation will play between the values specified. Both values ( range.x and range.y ) should be between 0-1,
+   * otherwise they will be ignored. If the range provided is not in proper order ( minimum,maximum ), it will be reordered.
+   *
+   * @SINCE_1_0.0
+   * @param[in] range Two values between [0,1] to specify minimum and maximum progress. The
+   * animation will play between those values
+   */
+  void SetPlayRange(const Vector2& range);
+
+  /**
+   * @brief Gets the playing range.
+   *
+   * @SINCE_1_0.0
+   * @return The play range defined for the animation
+   */
+  Vector2 GetPlayRange() const;
+
+  /**
+   * @brief Sets the blend point to interpolate animate property
+   *
+   * @SINCE_2_2.26
+   * @param[in] blendPoint A value between [0,1], If the value of the keyframe whose progress is 0 is different from the current value,
+   * the property is animated as it smoothly blends until the progress reaches the blendPoint.
+   * @note The blend point only affects animation registered with AnimateBetween. Other animations operate the same as when Play() is called.
+   * And the blend point needs to be set before this animation plays. If the blend point changes after playback, animation continuity cannot be guaranteed.
+   * @note In the case of a looping animation, the animation is blended only in the first loop.
+   */
+  void SetBlendPoint(float blendPoint);
+
+  /**
+   * @brief Gets the Blend Point
+   *
+   * @SINCE_2_2.26
+   * @return The blend point to interpolate animate property
+   */
+  float GetBlendPoint() const;
+
+  /**
+   * @brief Play the animation.
+   * @SINCE_1_0.0
+   */
+  void Play();
+
+  /**
+   * @brief Plays the animation from a given point.
+   *
+   * The progress must be in the 0-1 interval or in the play range interval if defined ( See @ref Animation::SetPlayRange ),
+   * otherwise, it will be ignored.
+   *
+   * @SINCE_1_0.0
+   * @param[in] progress A value between [0,1], or between the play range if specified, from where the animation should start playing
+   */
+  void PlayFrom(float progress);
+
+  /**
+   * @brief Play the animation after a given delay time.
+   *
+   * The delay time is not included in the looping time.
+   * When the delay time is negative value, it would treat as play immediately.
+   * @SINCE_1_2.60
+   * @param[in] delaySeconds The delay time
+   */
+  void PlayAfter(float delaySeconds);
+
+  /**
+   * @brief Pauses the animation.
+   * @SINCE_1_0.0
+   */
+  void Pause();
+
+  /**
+   * @brief Queries the state of the animation.
+   * @SINCE_1_1.21
+   * @return The Animation::State
+   */
+  State GetState() const;
+
+  /**
+   * @brief Stops the animation.
+   * @SINCE_1_0.0
+   */
+  void Stop();
+
+  /**
+   * @brief Clears the animation.
+   *
+   * This disconnects any objects that were being animated, effectively stopping the animation.
+   * @SINCE_1_0.0
+   */
+  void Clear();
+
+  /**
+   * @brief Sets the looping mode.
+   *
+   * Animation plays forwards and then restarts from the beginning or runs backwards again.
+   * @SINCE_1_2.60
+   * @param[in] loopingMode The looping mode is one of RESTART and AUTO_REVERSE
+   */
+  void SetLoopingMode(LoopingMode loopingMode);
+
+  /**
+   * @brief Gets one of the current looping mode.
+   *
+   * @SINCE_1_2.60
+   * @return The current looping mode
+   */
+  LoopingMode GetLoopingMode() const;
+
+  /**
+   * @brief Get the unique id of Animation. It could be 0 given animation is invalid.
+   *
+   * @SINCE_2_3.14
+   * @return The unique id of Animation, or 0 if invalid.
+   */
+  uint32_t GetAnimationId() const;
+
+  /**
+   * @brief Connects to this signal to be notified when an Animation's animations have finished.
+   *
+   * @SINCE_1_0.0
+   * @return A signal object to connect with
+   */
+  AnimationSignalType& FinishedSignal();
+
+  /**
+   * @brief Animates a property value by a relative amount.
+   *
+   * The default alpha function will be used.
+   * The effect will start & end when the animation begins & ends.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] relativeValue The property value will change by this amount
+   */
+
+exec
+/bin/bash -lc "sed -n '220,340p' repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  /**
+   * @brief Animates the corner radius.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner radius by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the corner squareness.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner squareness by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline width.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline width by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline color.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline color by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline offset.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline offset by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+
+  /**
+   * @brief Applies all stored entries to the given Animation and View.
+   *
+   * @param[in] animation The Animation to apply to
+   * @param[in] view The target View
+   */
+  void ApplyTo(Animation animation, View view) const;
+
+public: // Not intended for application developers
+  /// @cond internal
+  DALI_INTERNAL explicit ViewAnimationSpec(Internal::ViewAnimationSpecImpl* impl);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "rg -n \"enum BuiltinFunction|EASE_IN_OUT|EASE_OUT|SIN|LINEAR|AlphaFunction\\(\" repos/dali-core/dali/public-api/animation/alpha-function.h repos/dali-core/dali/public-api/animation -g '*.h'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-core/dali/public-api/animation/alpha-function.h:40:using AlphaFunctionPrototype = float (*)(float); ///< Prototype of an alpha function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:47: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:54:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:56:  enum BuiltinFunction : uint8_t
+repos/dali-core/dali/public-api/animation/alpha-function.h:58:    DEFAULT,          ///< Linear @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:59:    LINEAR,           ///< No transformation @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:60:    REVERSE,          ///< Reverse linear @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:61:    EASE_IN_SQUARE,   ///< Speeds up and comes to a sudden stop (Square) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:62:    EASE_OUT_SQUARE,  ///< Sudden start and slows to a gradual stop (Square) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:63:    EASE_IN,          ///< Speeds up and comes to a sudden stop (Cubic) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:64:    EASE_OUT,         ///< Sudden start and slows to a gradual stop (Cubic) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:65:    EASE_IN_OUT,      ///< Speeds up and slows to a gradual stop (Cubic) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:66:    EASE_IN_SINE,     ///< Speeds up and comes to a sudden stop (sinusoidal) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:67:    EASE_OUT_SINE,    ///< Sudden start and slows to a gradual stop (sinusoidal) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:68:    EASE_IN_OUT_SINE, ///< Speeds up and slows to a gradual stop (sinusoidal) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:69:    BOUNCE,           ///< Sudden start, loses momentum and returns to start position @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:70:    SIN,              ///< Single revolution @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:71:    EASE_OUT_BACK,    ///< Sudden start, exceed end position and return to a gradual stop @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:77:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:81:    BUILTIN_FUNCTION, ///< The user has specified a built-in function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:82:    CUSTOM_FUNCTION,  ///< The user has provided a custom function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:83:    BEZIER,           ///< The user has provided the control points of a bezier curve @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:84:    SPRING,           ///< The user has provided the spring type @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:85:    CUSTOM_SPRING     ///< The user has provided the spring data @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:91:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:97:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:103:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:109:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:115:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:123:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:125:  AlphaFunction();
+repos/dali-core/dali/public-api/animation/alpha-function.h:131:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:134:  AlphaFunction(BuiltinFunction function);
+repos/dali-core/dali/public-api/animation/alpha-function.h:140:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:143:  AlphaFunction(AlphaFunctionPrototype function);
+repos/dali-core/dali/public-api/animation/alpha-function.h:150:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:156:  AlphaFunction(const Dali::Vector2& controlPoint0, const Dali::Vector2& controlPoint1);
+repos/dali-core/dali/public-api/animation/alpha-function.h:161:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:164:  AlphaFunction(SpringType springType);
+repos/dali-core/dali/public-api/animation/alpha-function.h:170:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:176:  AlphaFunction(const Dali::SpringData& springData);
+repos/dali-core/dali/public-api/animation/alpha-function.h:180:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:182:  ~AlphaFunction();
+repos/dali-core/dali/public-api/animation/alpha-function.h:187:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:190:  AlphaFunction(const AlphaFunction& rhs);
+repos/dali-core/dali/public-api/animation/alpha-function.h:195:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:198:  AlphaFunction(AlphaFunction&& rhs) noexcept;
+repos/dali-core/dali/public-api/animation/alpha-function.h:203:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:212:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:220:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:228:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:235:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:243:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:250:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/path.h:45: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:52:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:58:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:62:      POINTS = DEFAULT_OBJECT_PROPERTY_START_INDEX, ///< name "points",         type Vector3 @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:63:      CONTROL_POINTS,                               ///< name "controlPoints",  type Vector3 @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:70:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:80:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:91:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:99:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:106:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:114:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:123:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/path.h:131:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/path.h:140:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:148:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:162:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:176:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:186:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:195:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:204:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/path.h:214:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:1:#ifndef DALI_LINEAR_CONSTRAINER_H
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:2:#define DALI_LINEAR_CONSTRAINER_H
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:55: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:62:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:68:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:72:      VALUE = DEFAULT_OBJECT_PROPERTY_START_INDEX, ///< name "value" type Array of float @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:73:      PROGRESS,                                    ///< name "progress" type Array of float @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:80:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:90:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:101:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:109:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:116:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:124:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:133:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:141:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:150:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:161:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:171:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/linear-constrainer.h:183:#endif // DALI_LINEAR_CONSTRAINER_H
+repos/dali-core/dali/public-api/animation/time-period.h:33: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/time-period.h:40:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/time-period.h:48:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/time-period.h:56:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:36: * @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:41:  DEFAULT_TAG = 0, ///< Special tag that we don't set any tags @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:43:  CUSTOM_CONSTRAINT_TAG_START = 1,         ///< Minimum tag for application @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:44:  CUSTOM_CONSTRAINT_TAG_MAX   = 999999999, ///< Maximum tag for application @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:46:  INTERNAL_CONSTRAINT_TAG_START = CUSTOM_CONSTRAINT_TAG_MAX + 1, ///< Minimum tag for internal @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:48:  INTERNAL_TAG_MAX_COUNT_PER_DERIVATION = 1000000, ///< The range of tag number for each sub-repository could be used @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:50:  CORE_CONSTRAINT_TAG_START = INTERNAL_CONSTRAINT_TAG_START,                                          ///< Minimum tag that Core can uses up to @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:51:  CORE_CONSTRAINT_TAG_MAX   = CORE_CONSTRAINT_TAG_START + INTERNAL_TAG_MAX_COUNT_PER_DERIVATION - 1u, ///< Maximum tag that Core can uses up to @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-tag-ranges.h:53:  INTERNAL_CONSTRAINT_TAG_MAX = INTERNAL_CONSTRAINT_TAG_START + 999999999,  ///< Maximum tag for internal @SINCE_2_4.14
+repos/dali-core/dali/public-api/animation/constraint-source.h:36: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:40:  OBJECT_PROPERTY, ///< The property comes from an arbitrary object. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:41:  LOCAL_PROPERTY,  ///< The property comes from the object which the constraint is applied to. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:42:  PARENT_PROPERTY  ///< The property comes from the parent of the object, which the constraint is applied to. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:47: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:54:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:64: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:71:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:81: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:88:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:101: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:108:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:116:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint-source.h:124:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:46: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:54:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:64:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:75:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:83:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:90:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:98:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:107:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/key-frames.h:115:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/key-frames.h:125:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:134:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:144:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/key-frames.h:157:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/spring-data.h:34: * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/spring-data.h:42:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/spring-data.h:51:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:57:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:64:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:72:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:80:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:89:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:97:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:104:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:111:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:118:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:125:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:132:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/spring-data.h:142:   * @SINCE_2_4.18
+repos/dali-core/dali/public-api/animation/alpha-function.h:40:using AlphaFunctionPrototype = float (*)(float); ///< Prototype of an alpha function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:47: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:54:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:56:  enum BuiltinFunction : uint8_t
+repos/dali-core/dali/public-api/animation/alpha-function.h:58:    DEFAULT,          ///< Linear @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:59:    LINEAR,           ///< No transformation @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:60:    REVERSE,          ///< Reverse linear @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:61:    EASE_IN_SQUARE,   ///< Speeds up and comes to a sudden stop (Square) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:62:    EASE_OUT_SQUARE,  ///< Sudden start and slows to a gradual stop (Square) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:63:    EASE_IN,          ///< Speeds up and comes to a sudden stop (Cubic) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:64:    EASE_OUT,         ///< Sudden start and slows to a gradual stop (Cubic) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:65:    EASE_IN_OUT,      ///< Speeds up and slows to a gradual stop (Cubic) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:66:    EASE_IN_SINE,     ///< Speeds up and comes to a sudden stop (sinusoidal) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:67:    EASE_OUT_SINE,    ///< Sudden start and slows to a gradual stop (sinusoidal) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:68:    EASE_IN_OUT_SINE, ///< Speeds up and slows to a gradual stop (sinusoidal) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:69:    BOUNCE,           ///< Sudden start, loses momentum and returns to start position @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:70:    SIN,              ///< Single revolution @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:71:    EASE_OUT_BACK,    ///< Sudden start, exceed end position and return to a gradual stop @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:77:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:81:    BUILTIN_FUNCTION, ///< The user has specified a built-in function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:82:    CUSTOM_FUNCTION,  ///< The user has provided a custom function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:83:    BEZIER,           ///< The user has provided the control points of a bezier curve @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:84:    SPRING,           ///< The user has provided the spring type @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:85:    CUSTOM_SPRING     ///< The user has provided the spring data @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:91:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:97:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:103:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:109:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:115:     * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:123:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:125:  AlphaFunction();
+repos/dali-core/dali/public-api/animation/alpha-function.h:131:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:134:  AlphaFunction(BuiltinFunction function);
+repos/dali-core/dali/public-api/animation/alpha-function.h:140:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:143:  AlphaFunction(AlphaFunctionPrototype function);
+repos/dali-core/dali/public-api/animation/alpha-function.h:150:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:156:  AlphaFunction(const Dali::Vector2& controlPoint0, const Dali::Vector2& controlPoint1);
+repos/dali-core/dali/public-api/animation/alpha-function.h:161:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:164:  AlphaFunction(SpringType springType);
+repos/dali-core/dali/public-api/animation/alpha-function.h:170:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/alpha-function.h:176:  AlphaFunction(const Dali::SpringData& springData);
+repos/dali-core/dali/public-api/animation/alpha-function.h:180:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:182:  ~AlphaFunction();
+repos/dali-core/dali/public-api/animation/alpha-function.h:187:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:190:  AlphaFunction(const AlphaFunction& rhs);
+repos/dali-core/dali/public-api/animation/alpha-function.h:195:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:198:  AlphaFunction(AlphaFunction&& rhs) noexcept;
+repos/dali-core/dali/public-api/animation/alpha-function.h:203:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:212:   * @SINCE_2_5.14
+repos/dali-core/dali/public-api/animation/alpha-function.h:220:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:228:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:235:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:243:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/alpha-function.h:250:   * @SINCE_2_4.17
+repos/dali-core/dali/public-api/animation/animation.h:121: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:126:  using AnimationSignalType = Signal<void(Animation)>; ///< Animation finished signal type @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:128:  using AnyFunction = Any; ///< Interpolation function @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:132:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:136:    BAKE,      ///< When the animation ends, the animated property values are saved. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:137:    DISCARD,   ///< When the animation ends, the animated property values are forgotten. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:138:    BAKE_FINAL ///< If the animation is stopped, the animated property values are saved as if the animation had run to completion, otherwise behaves like Bake. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:143:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:147:    LINEAR, ///< Values in between key frames are interpolated using a linear polynomial. (Default) @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:148:    CUBIC   ///< Values in between key frames are interpolated using a cubic polynomial. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:156:   * @SINCE_1_1.21
+repos/dali-core/dali/public-api/animation/animation.h:160:    STOPPED, ///< Animation has stopped @SINCE_1_1.21
+repos/dali-core/dali/public-api/animation/animation.h:161:    PLAYING, ///< The animation is playing @SINCE_1_1.21
+repos/dali-core/dali/public-api/animation/animation.h:162:    PAUSED   ///< The animation is paused @SINCE_1_1.21
+repos/dali-core/dali/public-api/animation/animation.h:168:   * @SINCE_1_2.60
+repos/dali-core/dali/public-api/animation/animation.h:172:    RESTART,     ///< When the animation arrives at the end in looping mode, the animation restarts from the beginning. @SINCE_1_2.60
+repos/dali-core/dali/public-api/animation/animation.h:173:    AUTO_REVERSE ///< When the animation arrives at the end in looping mode, the animation reverses direction and runs backwards again. @SINCE_1_2.60
+repos/dali-core/dali/public-api/animation/animation.h:180:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:190:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:203:   * @SINCE_2_5.18
+repos/dali-core/dali/public-api/animation/animation.h:214:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:224:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:231:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:239:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:248:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/animation.h:256:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/animation.h:265:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:274:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:285:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:297:   * @SINCE_1_1.20
+repos/dali-core/dali/public-api/animation/animation.h:308:   * @SINCE_1_1.20
+repos/dali-core/dali/public-api/animation/animation.h:318:   * @SINCE_1_1.20
+repos/dali-core/dali/public-api/animation/animation.h:326:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:336:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:344:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:354:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:362:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:371:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:374:  void SetDefaultAlphaFunction(AlphaFunction alpha);
+repos/dali-core/dali/public-api/animation/animation.h:379:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:382:  AlphaFunction GetDefaultAlphaFunction() const;
+repos/dali-core/dali/public-api/animation/animation.h:391:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:400:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:412:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:420:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:431:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:440:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:448:   * @SINCE_2_2.26
+repos/dali-core/dali/public-api/animation/animation.h:460:   * @SINCE_2_2.26
+repos/dali-core/dali/public-api/animation/animation.h:467:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:477:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:487:   * @SINCE_1_2.60
+repos/dali-core/dali/public-api/animation/animation.h:494:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:500:   * @SINCE_1_1.21
+repos/dali-core/dali/public-api/animation/animation.h:507:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:515:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:523:   * @SINCE_1_2.60
+repos/dali-core/dali/public-api/animation/animation.h:531:   * @SINCE_1_2.60
+repos/dali-core/dali/public-api/animation/animation.h:539:   * @SINCE_2_3.14
+repos/dali-core/dali/public-api/animation/animation.h:547:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:557:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:567:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:578:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:588:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:601:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:611:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:622:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:632:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:643:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:652:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:662:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:672:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:683:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:693:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:704:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:715:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:732:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:745:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:759:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:773:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:785:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:794:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/animation.h:804:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:42: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:48:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:55:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:67:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:79:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:91:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:103:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:115:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:127:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:144: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:150:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:160:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:170:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:188: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:194:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:204:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraints.h:224: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:70: * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:94:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:109:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:126:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:148:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:168:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:199:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:206:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:215:       * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:226:    Function(const Function&)            = delete; ///< Deleted copy constructor. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:227:    Function(Function&&)                 = delete; ///< Deleted move constructor. @SINCE_1_9.25
+repos/dali-core/dali/public-api/animation/constraint.h:228:    Function& operator=(const Function&) = delete; ///< Deleted copy assignment operator. @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:229:    Function& operator=(Function&&)      = delete; ///< Deleted move assignment operator. @SINCE_1_9.25
+repos/dali-core/dali/public-api/animation/constraint.h:234:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:254:     * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:273:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:277:    BAKE,   ///< When the constraint is fully-applied, the constrained value is saved. @SINCE_1_9.28
+repos/dali-core/dali/public-api/animation/constraint.h:278:    DISCARD ///< When the constraint is removed, the constrained value is discarded. @SINCE_1_9.28
+repos/dali-core/dali/public-api/animation/constraint.h:283:   * @SINCE_2_4.37
+repos/dali-core/dali/public-api/animation/constraint.h:287:    APPLY_ONCE   = 0, ///< Apply constraint once only e.g. bake a property and keep. @SINCE_2_4.37
+repos/dali-core/dali/public-api/animation/constraint.h:288:    APPLY_ALWAYS = 1  ///< Apply constraint every frame. @SINCE_2_4.37
+repos/dali-core/dali/public-api/animation/constraint.h:293:   * @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:297:    INITIALIZED = 0, ///< Initial state, or removed. @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:300:    APPLIED      = 100, ///< Apply() called. @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:301:    POST_APPLIED = 101, ///< ApplyPost() called. @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:304:    APPLIED_OBJECT_OFF_SCENE      = 200, ///< Apply() called, but some object scene offed. Will be applied if all scene on again @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:305:    POST_APPLIED_OBJECT_OFF_SCENE = 201, ///< ApplyPost() called, but some object scene offed. Will be post-applied if all scene on again @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:308:    OBJECT_DESTROYED = 300, ///< Object destroyed. Could never be applied again. @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:317:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:335:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:367:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:400:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:420:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:430:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:437:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:445:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:454:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/constraint.h:462:   * @SINCE_1_9.22
+repos/dali-core/dali/public-api/animation/constraint.h:473:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:482:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:490:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:502:   * @SINCE_2_2.23
+repos/dali-core/dali/public-api/animation/constraint.h:513:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:520:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:528:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:538:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:546:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:581:   * @SINCE_2_4.37
+repos/dali-core/dali/public-api/animation/constraint.h:588:   * @SINCE_2_4.37
+repos/dali-core/dali/public-api/animation/constraint.h:598:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:606:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:614:   * @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:622:   * @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:630:   * @SINCE_2_5.7
+repos/dali-core/dali/public-api/animation/constraint.h:640:   * @SINCE_1_0.0
+repos/dali-core/dali/public-api/animation/constraint.h:651:   * @SINCE_1_0.0
+
+exec
+/bin/bash -lc "rg -n \"class Duration|struct Duration|Duration\\(\" repos/dali-ui/dali-ui-foundation/public-api -g '*.h' -g '*.cpp'" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/text/input-field-properties.h:276:     * @see InputField::SetPasswordRevealDuration(), InputField::GetPasswordRevealDuration().
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:35:  ChildClass& SetMinimumFlingDuration(int duration) { ScrollView::SetMinimumFlingDuration(duration); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:41:  ChildClass& SetMaximumFlingDuration(int duration) { ScrollView::SetMaximumFlingDuration(duration); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:161:int ScrollView::GetMinimumFlingDuration() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:163:  return GetImpl(*this).GetMinimumFlingDuration();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:166:ScrollView& ScrollView::SetMinimumFlingDuration(int duration)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:168:  GetImpl(*this).SetMinimumFlingDuration(duration);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:172:int ScrollView::GetMaximumFlingDuration() const
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:174:  return GetImpl(*this).GetMaximumFlingDuration();
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:177:ScrollView& ScrollView::SetMaximumFlingDuration(int duration)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.cpp:179:  GetImpl(*this).SetMaximumFlingDuration(duration);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.cpp:433:InputField& InputField::SetPasswordRevealDuration(uint32_t duration)
+repos/dali-ui/dali-ui-foundation/public-api/input-field.cpp:435:  GetImpl(*this).SetPasswordRevealDuration(duration);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.cpp:439:uint32_t InputField::GetPasswordRevealDuration() const
+repos/dali-ui/dali-ui-foundation/public-api/input-field.cpp:441:  return GetImpl(*this).GetPasswordRevealDuration();
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:35:class Duration
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:41:  constexpr Duration()
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:50:  constexpr explicit Duration(float seconds)
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:85:  return Duration(static_cast<float>(value) / 1000.0f);
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:96:  return Duration(static_cast<float>(value) / 1000.0f);
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:107:  return Duration(static_cast<float>(value));
+repos/dali-ui/dali-ui-foundation/public-api/animation/duration.h:118:  return Duration(static_cast<float>(value));
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:668:  InputField& SetPasswordRevealDuration(uint32_t duration);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:675:  uint32_t GetPasswordRevealDuration() const;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:76:  ViewAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:85:  ViewAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:95:  ViewAnimationSpec& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:104:  ViewAnimationSpec& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:114:  ViewAnimationSpec& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:123:  ViewAnimationSpec& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:133:  ViewAnimationSpec& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:142:  ViewAnimationSpec& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:152:  ViewAnimationSpec& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:161:  ViewAnimationSpec& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:171:  ViewAnimationSpec& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:180:  ViewAnimationSpec& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:190:  ViewAnimationSpec& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:199:  ViewAnimationSpec& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:209:  ViewAnimationSpec& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:218:  ViewAnimationSpec& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:228:  ViewAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:237:  ViewAnimationSpec& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:247:  ViewAnimationSpec& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:256:  ViewAnimationSpec& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:266:  ViewAnimationSpec& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:275:  ViewAnimationSpec& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:285:  ViewAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:294:  ViewAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:304:  ViewAnimationSpec& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h:313:  ViewAnimationSpec& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:246:  ChildClass& SetPasswordRevealDuration(uint32_t duration) { InputField::SetPasswordRevealDuration(duration); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:186:  ScrollView& SetMinimumFlingDuration(int duration);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:193:  int GetMinimumFlingDuration() const;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:200:  ScrollView& SetMaximumFlingDuration(int duration);
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:207:  int GetMaximumFlingDuration() const;
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:65:  ViewAnimationBridge& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:74:  ViewAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:84:  ViewAnimationBridge& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:93:  ViewAnimationBridge& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:103:  ViewAnimationBridge& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:112:  ViewAnimationBridge& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:122:  ViewAnimationBridge& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:131:  ViewAnimationBridge& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:141:  ViewAnimationBridge& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:150:  ViewAnimationBridge& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:160:  ViewAnimationBridge& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:169:  ViewAnimationBridge& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:179:  ViewAnimationBridge& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:188:  ViewAnimationBridge& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:198:  ViewAnimationBridge& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:207:  ViewAnimationBridge& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:217:  ViewAnimationBridge& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:226:  ViewAnimationBridge& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:236:  ViewAnimationBridge& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:245:  ViewAnimationBridge& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:255:  ViewAnimationBridge& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:264:  ViewAnimationBridge& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:274:  ViewAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:283:  ViewAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:293:  ViewAnimationBridge& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:302:  ViewAnimationBridge& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:311:    if(required > mAnimation.GetDuration())
+repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h:313:      mAnimation.SetDuration(required);
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:60:  LabelAnimationBridge& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:69:  LabelAnimationBridge& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:79:  LabelAnimationBridge& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:88:  LabelAnimationBridge& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:98:  LabelAnimationBridge& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:107:  LabelAnimationBridge& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:117:  LabelAnimationBridge& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:126:  LabelAnimationBridge& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:136:  LabelAnimationBridge& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:145:  LabelAnimationBridge& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:155:  LabelAnimationBridge& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:164:  LabelAnimationBridge& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:174:  LabelAnimationBridge& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:183:  LabelAnimationBridge& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:193:  LabelAnimationBridge& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:202:  LabelAnimationBridge& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:212:  LabelAnimationBridge& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:221:  LabelAnimationBridge& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:231:  LabelAnimationBridge& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:240:  LabelAnimationBridge& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:250:  LabelAnimationBridge& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:259:  LabelAnimationBridge& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:269:  LabelAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:278:  LabelAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:288:  LabelAnimationBridge& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:297:  LabelAnimationBridge& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:311:  LabelAnimationBridge& TextColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h:320:  LabelAnimationBridge& TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:66:  LabelAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:75:  LabelAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:85:  LabelAnimationSpec& SizeWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:94:  LabelAnimationSpec& SizeWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:104:  LabelAnimationSpec& SizeHeight(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:113:  LabelAnimationSpec& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:123:  LabelAnimationSpec& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:132:  LabelAnimationSpec& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:142:  LabelAnimationSpec& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:151:  LabelAnimationSpec& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:161:  LabelAnimationSpec& ScaleX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:170:  LabelAnimationSpec& ScaleXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:180:  LabelAnimationSpec& ScaleY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:189:  LabelAnimationSpec& ScaleYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:199:  LabelAnimationSpec& Opacity(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:208:  LabelAnimationSpec& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:218:  LabelAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:227:  LabelAnimationSpec& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:237:  LabelAnimationSpec& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:246:  LabelAnimationSpec& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:256:  LabelAnimationSpec& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:265:  LabelAnimationSpec& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:275:  LabelAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:284:  LabelAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:294:  LabelAnimationSpec& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:303:  LabelAnimationSpec& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:317:  LabelAnimationSpec& TextColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+repos/dali-ui/dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h:326:  LabelAnimationSpec& TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+exec
+/bin/bash -lc "sed -n '555,650p' repos/dali-core/dali/public-api/animation/animation.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * The default alpha function will be used.
+   * The effect will start & end when the animation begins & ends.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] relativeValue The property value will change by this amount
+   */
+  void AnimateBy(Property target, Property::Value relativeValue);
+
+  /**
+   * @brief Animates a property value by a relative amount.
+   *
+   * The effect will start & end when the animation begins & ends.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] relativeValue The property value will change by this amount
+   * @param[in] alpha The alpha function to apply
+   */
+  void AnimateBy(Property target, Property::Value relativeValue, AlphaFunction alpha);
+
+  /**
+   * @brief Animates a property value by a relative amount.
+   *
+   * The default alpha function will be used.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] relativeValue The property value will increase/decrease by this amount
+   * @param[in] period The effect will occur during this time period
+   */
+  void AnimateBy(Property target, Property::Value relativeValue, TimePeriod period);
+
+  /**
+   * @brief Animates a property value by a relative amount.
+   *
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] relativeValue The property value will increase/decrease by this amount
+   * @param[in] alpha The alpha function to apply
+   * @param[in] period The effect will occur during this time period
+   */
+  void AnimateBy(Property target, Property::Value relativeValue, AlphaFunction alpha, TimePeriod period);
+
+  /**
+   * @brief Animates a property to a destination value.
+   *
+   * The default alpha function will be used.
+   * The effect will start & end when the animation begins & ends.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] destinationValue The destination value
+   */
+  void AnimateTo(Property target, Property::Value destinationValue);
+
+  /**
+   * @brief Animates a property to a destination value.
+   *
+   * The effect will start & end when the animation begins & ends.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] destinationValue The destination value
+   * @param[in] alpha The alpha function to apply
+   */
+  void AnimateTo(Property target, Property::Value destinationValue, AlphaFunction alpha);
+
+  /**
+   * @brief Animates a property to a destination value.
+   *
+   * The default alpha function will be used.
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] destinationValue The destination value
+   * @param[in] period The effect will occur during this time period
+   */
+  void AnimateTo(Property target, Property::Value destinationValue, TimePeriod period);
+
+  /**
+   * @brief Animates a property to a destination value.
+   *
+   * @SINCE_1_0.0
+   * @param[in] target The target object/property to animate
+   * @param[in] destinationValue The destination value
+   * @param[in] alpha The alpha function to apply
+   * @param[in] period The effect will occur during this time period
+   */
+  void AnimateTo(Property target, Property::Value destinationValue, AlphaFunction alpha, TimePeriod period);
+
+  /**
+   * @brief Animates a property between keyframes.
+   *
+   * @SINCE_1_0.0
+   * @param[in] target The target object property to animate
+   * @param[in] keyFrames The set of time/value pairs between which to animate
+   */
+  void AnimateBetween(Property target, KeyFrames keyFrames);
+
+  /**
+   * @brief Animates a property between keyframes.
+
+exec
+/bin/bash -lc "sed -n '1,90p' repos/dali-ui/dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/animation/duration.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+class View;
+
+namespace Internal DALI_INTERNAL
+{
+class ViewAnimationSpecImpl;
+}
+
+/**
+ * @brief Defines a reusable, typed animation specification for View properties.
+ *
+ * @code
+ *   auto spec = View::NewAnimationSpec()
+ *     .Opacity(1.0f, 300_ms);
+ *   spec.ApplyTo(anim, view);
+ * @endcode
+ */
+class DALI_UI_API ViewAnimationSpec : public BaseHandle
+{
+public:
+  ViewAnimationSpec();
+  static ViewAnimationSpec New();
+
+  ViewAnimationSpec(const ViewAnimationSpec& other);
+  ViewAnimationSpec(ViewAnimationSpec&& rhs) noexcept;
+  ~ViewAnimationSpec();
+  ViewAnimationSpec& operator=(const ViewAnimationSpec& other);
+  ViewAnimationSpec& operator=(ViewAnimationSpec&& rhs) noexcept;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Own properties
+  ////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @brief Animates the background color.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the background color by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the size width.
+   *
+   * @param[in] target The target value
+
+codex
+---
+title: Animation
+sidebar_label: Animation
+category: animation-motion
+---
+
+# Animation
+
+`Animation` lets a dali-ui app move, fade, scale, and sequence `Dali::Ui::View` changes with typed, fluent APIs.
+
+## Table of Contents
+
+- [Animate a View Directly](#animate-a-view-directly)
+- [Reuse Motion with ViewAnimationSpec](#reuse-motion-with-viewanimationspec)
+- [Control Timing, Easing, and Delays](#control-timing-easing-and-delays)
+- [Loop, Reverse, Pause, and Resume](#loop-reverse-pause-and-resume)
+- [End Behavior and Cleanup](#end-behavior-and-cleanup)
+
+## Animate a View Directly
+
+For application code, start from `Dali::Ui::View` and create a `Dali::Animation` as the timing handle. `Dali::Ui::View::Animate` returns a `Dali::Ui::ViewAnimationBridge`, which applies typed animation entries to that `View`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+void FadeOut(Dali::Ui::View panel)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  panel.Animate(animation)
+    .Opacity(0.0f, Dali::Ui::Duration(0.25f), Dali::AlphaFunction::EASE_OUT);
+
+  animation.Play();
+}
+```
+
+The fluent calls on `Dali::Ui::ViewAnimationBridge` are view-oriented. Use `Opacity`, `PositionX`, `PositionY`, `ScaleX`, and `ScaleY` for common app motion instead of addressing raw `Dali::Actor` properties directly.
+
+```cpp
+void SlideAndFadeIn(Dali::Ui::View panel)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  panel.Animate(animation)
+    .PositionY(0.0f, Dali::Ui::Duration(0.35f), Dali::AlphaFunction::EASE_OUT)
+    .Opacity(1.0f, Dali::Ui::Duration(0.20f), Dali::AlphaFunction::EASE_IN);
+
+  animation.Play();
+}
+```
+
+Use the `By` variants when the destination should be relative to the current view state.
+
+```cpp
+void Nudge(Dali::Ui::View panel)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  panel.Animate(animation)
+    .PositionXBy(24.0f, Dali::Ui::Duration(0.15f), Dali::AlphaFunction::EASE_OUT)
+    .ScaleXBy(0.05f, Dali::Ui::Duration(0.15f))
+    .ScaleYBy(0.05f, Dali::Ui::Duration(0.15f));
+
+  animation.Play();
+}
+```
+
+## Reuse Motion with ViewAnimationSpec
+
+Use `Dali::Ui::ViewAnimationSpec` when the same motion recipe should be applied to multiple views or replayed later. Create a spec with `Dali::Ui::View::NewAnimationSpec`, add typed entries, then call `ApplyTo`.
+
+```cpp
+Dali::Ui::ViewAnimationSpec CreateEnterSpec()
+{
+  return Dali::Ui::View::NewAnimationSpec()
+    .Opacity(1.0f, Dali::Ui::Duration(0.25f), Dali::AlphaFunction::EASE_IN_OUT)
+    .PositionY(0.0f, Dali::Ui::Duration(0.35f), Dali::AlphaFunction::EASE_OUT);
+}
+
+void PlayEnter(Dali::Ui::View card, const Dali::Ui::ViewAnimationSpec& enterSpec)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  enterSpec.ApplyTo(animation, card);
+
+  animation.Play();
+}
+```
+
+A spec stores the animation entries; the `Dali::Animation` still owns playback state such as duration, current progress, loop count, and whether it is playing or paused.
+
+```cpp
+void ApplySharedPulse(Dali::Ui::View first, Dali::Ui::View second)
+{
+  Dali::Ui::ViewAnimationSpec pulse = Dali::Ui::View::NewAnimationSpec()
+    .ScaleX(1.08f, Dali::Ui::Duration(0.18f), Dali::AlphaFunction::EASE_OUT)
+    .ScaleY(1.08f, Dali::Ui::Duration(0.18f), Dali::AlphaFunction::EASE_OUT)
+    .Opacity(0.85f, Dali::Ui::Duration(0.18f));
+
+  Dali::Animation firstAnimation = Dali::Animation::New();
+  Dali::Animation secondAnimation = Dali::Animation::New();
+
+  pulse.ApplyTo(firstAnimation, first);
+  pulse.ApplyTo(secondAnimation, second);
+
+  firstAnimation.Play();
+  secondAnimation.PlayAfter(0.08f);
+}
+```
+
+## Control Timing, Easing, and Delays
+
+`Dali::Ui::Duration` is passed to each typed view animation entry. `Dali::AlphaFunction` controls interpolation. If no alpha function is supplied to a typed entry, the default is linear.
+
+```cpp
+void StageEntrance(Dali::Ui::View title, Dali::Ui::View body)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  title.Animate(animation)
+    .Opacity(1.0f, Dali::Ui::Duration(0.20f), Dali::AlphaFunction::EASE_IN)
+    .PositionY(0.0f, Dali::Ui::Duration(0.30f), Dali::AlphaFunction::EASE_OUT);
+
+  body.Animate(animation)
+    .Opacity(1.0f, Dali::Ui::Duration(0.20f), Dali::AlphaFunction::EASE_IN, Dali::Ui::Duration(0.10f))
+    .PositionY(0.0f, Dali::Ui::Duration(0.30f), Dali::AlphaFunction::EASE_OUT, Dali::Ui::Duration(0.10f));
+
+  animation.Play();
+}
+```
+
+You can set a default easing on `Dali::Animation` with `SetDefaultAlphaFunction`. Typed entries that receive an explicit `Dali::AlphaFunction` use that value for the entry.
+
+```cpp
+void UseDefaultEasing(Dali::Ui::View panel)
+{
+  Dali::Animation animation = Dali::Animation::New();
+  animation.SetDefaultAlphaFunction(Dali::AlphaFunction::EASE_IN_OUT);
+
+  panel.Animate(animation)
+    .Opacity(1.0f, Dali::Ui::Duration(0.25f))
+    .PositionX(0.0f, Dali::Ui::Duration(0.25f));
+
+  animation.Play();
+}
+```
+
+`PlayAfter` delays the start of the whole `Dali::Animation`. Per-entry delay on `Dali::Ui::ViewAnimationBridge` offsets individual entries inside the same animation.
+
+```cpp
+void DelayedReveal(Dali::Ui::View panel)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  panel.Animate(animation)
+    .Opacity(1.0f, Dali::Ui::Duration(0.20f))
+    .ScaleX(1.0f, Dali::Ui::Duration(0.25f), Dali::AlphaFunction::EASE_OUT)
+    .ScaleY(1.0f, Dali::Ui::Duration(0.25f), Dali::AlphaFunction::EASE_OUT);
+
+  animation.PlayAfter(0.15f);
+}
+```
+
+## Loop, Reverse, Pause, and Resume
+
+`Dali::Animation` controls playback. Use `SetLoopCount` for a fixed repeat count, or `SetLooping(true)` for continuous playback. Use `SetLoopingMode` with `Dali::Animation::AUTO_REVERSE` when the animation should run forward and backward across each loop.
+
+```cpp
+Dali::Animation StartBreathing(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  view.Animate(animation)
+    .ScaleX(1.04f, Dali::Ui::Duration(0.8f), Dali::AlphaFunction::EASE_IN_OUT)
+    .ScaleY(1.04f, Dali::Ui::Duration(0.8f), Dali::AlphaFunction::EASE_IN_OUT);
+
+  animation.SetLooping(true);
+  animation.SetLoopingMode(Dali::Animation::AUTO_REVERSE);
+  animation.Play();
+
+  return animation;
+}
+```
+
+For a finite loop, use `SetLoopCount`. A count of `0` is equivalent to continuous looping, so use a positive value for a fixed repeat count.
+
+```cpp
+void PulseThreeTimes(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  view.Animate(animation)
+    .Opacity(0.6f, Dali::Ui::Duration(0.2f), Dali::AlphaFunction::EASE_IN_OUT);
+
+  animation.SetLoopCount(3);
+  animation.SetLoopingMode(Dali::Animation::AUTO_REVERSE);
+  animation.Play();
+}
+```
+
+Use `Pause`, `Play`, `PlayFrom`, and `SetCurrentProgress` for interactive playback control.
+
+```cpp
+void TogglePaused(Dali::Animation animation)
+{
+  if(animation.GetState() == Dali::Animation::PLAYING)
+  {
+    animation.Pause();
+  }
+  else
+  {
+    animation.Play();
+  }
+}
+
+void ReplayFromMiddle(Dali::Animation animation)
+{
+  animation.PlayFrom(0.5f);
+}
+```
+
+`SetPlayRange` limits playback to a normalized segment. `SetSpeedFactor` changes playback speed; values below `1.0f` slow down, values above `1.0f` speed up, and negative values play in reverse.
+
+```cpp
+void PlaySecondHalfFast(Dali::Animation animation)
+{
+  animation.SetPlayRange(Dali::Vector2(0.5f, 1.0f));
+  animation.SetSpeedFactor(2.0f);
+  animation.PlayFrom(0.5f);
+}
+```
+
+## End Behavior and Cleanup
+
+`Dali::Animation::SetEndAction` defines what happens to animated values when playback ends or the animation is stopped. The default is `Dali::Animation::BAKE`, which keeps the animated values. Use `Dali::Animation::DISCARD` when the animated values should be forgotten, or `Dali::Animation::BAKE_FINAL` when stopping should save the final values as if playback completed.
+
+```cpp
+void FadeForPreview(Dali::Ui::View preview)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  preview.Animate(animation)
+    .Opacity(0.35f, Dali::Ui::Duration(0.2f));
+
+  animation.SetEndAction(Dali::Animation::DISCARD);
+  animation.Play();
+}
+```
+
+Use `SetDisconnectAction` to control what happens if an animated property owner is disconnected while the animation is playing.
+
+```cpp
+void AnimatePossiblyTemporaryView(Dali::Ui::View view)
+{
+  Dali::Animation animation = Dali::Animation::New();
+
+  view.Animate(animation)
+    .PositionY(80.0f, Dali::Ui::Duration(0.3f), Dali::AlphaFunction::EASE_OUT)
+    .Opacity(0.0f, Dali::Ui::Duration(0.3f));
+
+  animation.SetDisconnectAction(Dali::Animation::BAKE_FINAL);
+  animation.Play();
+}
+```
+
+Connect `FinishedSignal` when application state should update after the animation completes. The signal callback receives the finished `Dali::Animation`.
+
+```cpp
+class MotionController : public Dali::ConnectionTracker
+{
+public:
+  void Collapse(Dali::Ui::View panel)
+  {
+    Dali::Animation animation = Dali::Animation::New();
+
+    panel.Animate(animation)
+      .Opacity(0.0f, Dali::Ui::Duration(0.2f), Dali::AlphaFunction::EASE_IN)
+      .PositionY(-32.0f, Dali::Ui::Duration(0.2f), Dali::AlphaFunction::EASE_IN);
+
+    animation.FinishedSignal().Connect(this, &MotionController::OnCollapseFinished);
+    animation.Play();
+  }
+
+private:
+  void OnCollapseFinished(Dali::Animation animation)
+  {
+    animation.Clear();
+  }
+};
+```
+
+`Clear` disconnects animated objects from the `Dali::Animation`. Keep the `Dali::Animation` handle alive for as long as your app needs to query or control playback state with methods such as `GetState`, `GetCurrentProgress`, `GetLoopCount`, or `GetAnimationId`.
+tokens used
+54,829

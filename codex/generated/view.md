@@ -1,0 +1,339 @@
+---
+title: View (Base UI Object)
+sidebar_label: View (Base UI Object)
+category: views-components
+---
+
+# View (Base UI Object)
+
+`Dali::Ui::View` is the base app-facing UI object for building dali-ui screens, composing child views, styling surfaces, handling input, and driving typed animations.
+
+## Table of Contents
+
+- [Create and Configure a View](#create-and-configure-a-view)
+- [Build a View Tree](#build-a-view-tree)
+- [Handle Click, Press, and Long Press](#handle-click-press-and-long-press)
+- [Add Selection State](#add-selection-state)
+- [Animate a View](#animate-a-view)
+- [Read Runtime View State](#read-runtime-view-state)
+
+## Create and Configure a View
+
+Create app UI objects with `Dali::Ui::View::New`. In dali-ui application code, use `Dali::Ui::View` as the object you pass around instead of treating the UI as raw `Dali::Actor` instances.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+View panel = View::New()
+  .SetBackgroundColor(UiColor(0.12f, 0.14f, 0.18f, 1.0f))
+  .SetRequestedWidth(360.0f)
+  .SetRequestedHeight(240.0f)
+  .SetCornerRadius(16.0f)
+  .SetBorderlineWidth(2.0f)
+  .SetBorderlineColor(UiColor(1.0f, 1.0f, 1.0f, 0.20f));
+```
+
+Use typed setters for common view concerns. For example, `SetRequestedWidth` and `SetRequestedHeight` define the requested layout size, while `GetCurrentSize` reads the current rendered size after layout.
+
+```cpp
+View tile = View::New()
+  .SetRequestedWidth(96.0f)
+  .SetRequestedHeight(96.0f)
+  .SetBackgroundColor(UiColor(0x3366FF))
+  .SetOpacity(0.92f);
+
+MeasuredSize renderedSize = tile.GetCurrentSize();
+UiColor background = tile.GetBackgroundColor();
+float borderWidth = tile.GetBorderlineWidth();
+```
+
+For property references, use the owner that defines the property. View-owned properties are under `Dali::Ui::View::Property`, such as `Dali::Ui::View::Property::BACKGROUND`, `Dali::Ui::View::Property::BORDERLINE_WIDTH`, `Dali::Ui::View::Property::CORNER_RADIUS`, and `Dali::Ui::View::Property::LAYOUT_MODE`.
+
+## Build a View Tree
+
+A `Dali::Ui::View` can own child views. Use `Add` or fluent `Children` composition to build the UI hierarchy, and use `GetChildCount` and `GetChildAt` when you need to inspect the tree.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+View toolbar = View::New()
+  .SetRequestedWidth(480.0f)
+  .SetRequestedHeight(72.0f)
+  .SetPadding(Extents(12.0f, 12.0f, 8.0f, 8.0f))
+  .Children({
+    View::New()
+      .SetRequestedWidth(48.0f)
+      .SetRequestedHeight(48.0f)
+      .SetBackgroundColor(UiColor(0x222222)),
+    View::New()
+      .SetRequestedWidth(160.0f)
+      .SetRequestedHeight(48.0f)
+      .SetBackgroundColor(UiColor(0x445566)),
+  });
+
+uint32_t childCount = toolbar.GetChildCount();
+
+if(childCount > 0u)
+{
+  View firstChild = toolbar.GetChildAt(0u);
+  firstChild.SetCornerRadius(8.0f);
+}
+```
+
+Use `SetLayoutMode` when a child should participate differently in its parent layout. `LayoutMode::STANDALONE` is useful for overlay-like children whose requested position is applied directly on the view.
+
+```cpp
+View overlay = View::New()
+  .SetLayoutMode(LayoutMode::STANDALONE)
+  .SetRequestedPositionX(24.0f)
+  .SetRequestedPositionY(24.0f)
+  .SetRequestedWidth(200.0f)
+  .SetRequestedHeight(64.0f)
+  .SetBackgroundColor(UiColor(0.0f, 0.0f, 0.0f, 0.72f));
+
+toolbar.Add(overlay);
+
+LayoutMode mode = overlay.GetLayoutMode();
+Vector2 currentPosition = overlay.GetCurrentPosition();
+```
+
+## Handle Click, Press, and Long Press
+
+Ensure that a view has `Dali::Ui::InteractiveTrait` by calling `AsInteractive`. Configure input behavior on the trait, then connect callbacks with `ConnectClickedSignal`, `ConnectPressedChangedSignal`, or `ConnectLongPressedSignal`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+class CardController : public ConnectionTracker
+{
+public:
+  View CreateCard()
+  {
+    return View::New()
+      .SetRequestedWidth(280.0f)
+      .SetRequestedHeight(120.0f)
+      .SetBackgroundColor(UiColor(0x20242A))
+      .AsInteractive([this](InteractiveTrait& trait)
+      {
+        trait.SetClickable(true);
+        trait.ConnectClickedSignal(this, &CardController::OnClicked);
+        trait.ConnectPressedChangedSignal(this, &CardController::OnPressedChanged);
+        trait.ConnectLongPressedSignal(this, &CardController::OnLongPressed);
+      });
+  }
+
+  void OnClicked(View view, InputEvent event)
+  {
+    view.SetBackgroundColor(UiColor(0x2E6BE6));
+  }
+
+  void OnPressedChanged(View view, bool pressed, InputEvent event)
+  {
+    view.SetOpacity(pressed ? 0.72f : 1.0f);
+  }
+
+  bool OnLongPressed(View view, InputEvent event)
+  {
+    view.SetBorderlineWidth(4.0f);
+    return true;
+  }
+};
+```
+
+`InteractiveTrait::ClickedSignal` emits `void(View, InputEvent)`. `InteractiveTrait::PressedChangedSignal` emits `void(View, bool, InputEvent)`. `InteractiveTrait::LongPressedSignal` emits `bool(View, InputEvent)`, where returning `true` consumes the long press and prevents the following click signal from being emitted.
+
+```cpp
+View button = View::New()
+  .AsInteractive([](InteractiveTrait& trait)
+  {
+    trait.SetPseudoDisabled(false);
+    bool clickable = trait.IsClickable();
+    bool pressed = trait.IsPressed();
+    bool pseudoDisabled = trait.IsPseudoDisabled();
+
+    if(!clickable || pseudoDisabled || pressed)
+    {
+      trait.SetClickable(true);
+    }
+  });
+```
+
+## Add Selection State
+
+Use `Dali::Ui::SelectableTrait` when a view needs selected or unselected state. The trait exposes `SetSelected`, `IsSelected`, `SelectionChangedSignal`, and `EnableToggleByClick`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ChoiceController : public ConnectionTracker
+{
+public:
+  View CreateChoice()
+  {
+    return View::New()
+      .SetRequestedWidth(240.0f)
+      .SetRequestedHeight(56.0f)
+      .SetBackgroundColor(UiColor(0x30343B))
+      .AsSelectable([this](SelectableTrait& trait)
+      {
+        trait.SetSelected(false);
+        trait.EnableToggleByClick(true);
+        trait.SelectionChangedSignal().Connect(this, &ChoiceController::OnSelectionChanged);
+      });
+  }
+
+  void OnSelectionChanged(View view, bool selected, InputEvent event)
+  {
+    view.SetBackgroundColor(selected ? UiColor(0x2E6BE6) : UiColor(0x30343B));
+    view.SetBorderlineWidth(selected ? 3.0f : 0.0f);
+  }
+};
+```
+
+`SelectableTrait::EnableToggleByClick` lets click interaction update selection state. If the owner view does not already have `Dali::Ui::InteractiveTrait`, enabling toggle-by-click creates and attaches one. If you need to set state directly, call `SelectableTrait::SetSelected`.
+
+```cpp
+View option = View::New()
+  .AsSelectable([](SelectableTrait& trait)
+  {
+    trait.EnableToggleByClick(false);
+    trait.SetSelected(true);
+
+    bool selected = trait.IsSelected();
+    bool togglesByClick = trait.IsToggleByClickEnabled();
+
+    if(selected && !togglesByClick)
+    {
+      trait.EnableToggleByClick(true);
+    }
+  });
+```
+
+## Animate a View
+
+Use `Dali::Ui::View::Animate` for one-off animations on a view. It returns a typed `ViewAnimationBridge` so application code can keep the animation target as a `Dali::Ui::View`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void FadeAndMove(View view)
+{
+  Animation animation = Animation::New();
+
+  view.Animate(animation)
+    .Opacity(0.35f, 180_ms, AlphaFunction::EASE_OUT)
+    .PositionY(48.0f, 240_ms, AlphaFunction::EASE_IN_OUT);
+
+  animation.Play();
+}
+```
+
+Use `Dali::Ui::View::NewAnimationSpec` when you want a reusable animation recipe. Apply the spec to different `Dali::Ui::View` instances with an animation object.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+class MotionController
+{
+public:
+  MotionController()
+  : mShowSpec(
+      View::NewAnimationSpec()
+        .Opacity(1.0f, 220_ms, AlphaFunction::EASE_IN_OUT)
+        .ScaleX(1.0f, 220_ms, AlphaFunction::EASE_IN_OUT)
+        .ScaleY(1.0f, 220_ms, AlphaFunction::EASE_IN_OUT))
+  {
+  }
+
+  void Show(View view)
+  {
+    Animation animation = Animation::New();
+    mShowSpec.ApplyTo(animation, view);
+    animation.Play();
+  }
+
+private:
+  ViewAnimationSpec mShowSpec;
+};
+```
+
+When referring to property constants directly, keep the owner precise. View visual properties such as `Dali::Ui::View::Property::CORNER_RADIUS`, `Dali::Ui::View::Property::BORDERLINE_COLOR`, and `Dali::Ui::View::Property::BORDERLINE_OFFSET` belong to `Dali::Ui::View::Property`. Inherited transform and opacity properties such as `Dali::Actor::Property::POSITION`, `Dali::Actor::Property::SCALE`, and `Dali::Actor::Property::OPACITY` belong to `Dali::Actor::Property`.
+
+## Read Runtime View State
+
+Use getters on `Dali::Ui::View` to read layout, styling, and current rendered values. Requested values describe app intent; current values describe the result after DALi has applied layout and animation.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void InspectView(View view)
+{
+  MeasuredSize currentSize = view.GetCurrentSize();
+  Vector2 currentPosition = view.GetCurrentPosition();
+  Vector2 currentScale = view.GetCurrentScale();
+
+  UiColor color = view.GetColor();
+  UiColor currentColor = view.GetCurrentColor();
+  UiColor background = view.GetBackgroundColor();
+
+  Extents margin = view.GetMargin();
+  float maximumWidth = view.GetMaximumWidth();
+  float maximumHeight = view.GetMaximumHeight();
+}
+```
+
+For directional layout, `GetEffectiveLayoutDirection` returns the resolved direction after inheritance is considered.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void MirrorAwareLayout(View container, View floatingChild)
+{
+  Dali::LayoutDirection::Type direction = container.GetEffectiveLayoutDirection();
+
+  floatingChild
+    .SetLayoutMode(LayoutMode::STANDALONE)
+    .SetRequestedPositionX(direction == Dali::LayoutDirection::RIGHT_TO_LEFT ? 24.0f : 320.0f)
+    .SetRequestedPositionY(16.0f);
+
+  LayoutMode mode = floatingChild.GetLayoutMode();
+  Vector2 renderedPosition = floatingChild.GetCurrentPosition();
+}
+```
+
+For application-owned data associated with a view, store a typed attachment with `SetAttachment` and retrieve it with `GetAttachment`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+struct RowState
+{
+  int index{0};
+  bool active{false};
+};
+
+void SetRowState(View row, AttachmentId stateId, int index)
+{
+  row.SetAttachment(stateId, Dali::MakeUnique<RowState>(RowState{index, true}));
+}
+
+void ReadRowState(View row, AttachmentId stateId)
+{
+  RowState* state = row.GetAttachment<RowState>(stateId);
+
+  if(state && state->active)
+  {
+    row.SetBorderlineWidth(2.0f);
+    row.SetBorderlineColor(UiColor(0x2E6BE6));
+  }
+}
+```

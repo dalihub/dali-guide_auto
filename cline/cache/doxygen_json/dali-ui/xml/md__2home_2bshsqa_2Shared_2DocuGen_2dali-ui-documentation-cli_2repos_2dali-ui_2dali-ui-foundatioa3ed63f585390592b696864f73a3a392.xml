@@ -1,0 +1,1150 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_217-structural-optimization-analysis_8ko</compoundname>
+    <title>TextVisualizer Structural Optimization Analysis</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md665"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md666">
+<title>1. 목적</title>
+<para>현재 <computeroutput>TextVisualizer</computeroutput> performance sample은 수요일 데모에 사용할 수 있을 정도로 visual quality와 체감 성능이 좋아졌다.</para>
+<para>하지만 지금 상태는 아직 “정말 빠르고 가벼운 텍스트 엔진”이라기보다는, 기존 <computeroutput>TextController</computeroutput> / <computeroutput>TextView</computeroutput>를 건드리지 않고 새로운 렌더링 경로를 기능적으로 세운 단계에 가깝다. 다음 성능 개선은 단순 micro optimization보다 pipeline 구조 안의 중복 계산과 cache 경계를 줄이는 방향이 더 중요하다.</para>
+<para>이 문서는 다음 구현 커밋을 정하기 위한 코드 분석 문서다. 구현 변경은 포함하지 않는다.</para>
+<para>분석 축은 크게 세 가지다.</para>
+<para><itemizedlist>
+<listitem><para>exclusion / layout 계산 최적화</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput> / render update 비용 최적화</para>
+</listitem><listitem><para>prepare cache와 layout-local cache의 역할 재분배</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md667">
+<title>2. 현재 전체 성능 경로 요약</title>
+<para>현재 performance sample에서 moving bounds가 동작할 때 전체 경로는 대략 다음과 같다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Timer<sp/>tick]<sp/>--&gt;<sp/>B[moving<sp/>orb<sp/>/<sp/>overlay<sp/>update]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[exclusion<sp/>region<sp/>vector<sp/>build]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[SetExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[MarkLayoutDirty<sp/>/<sp/>MarkPlacementRenderDirty]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[LayoutGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[BuildSortedExclusionRegions]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[BuildAvailableIntervalsFromSorted<sp/>per<sp/>line]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[word<sp/>wrap<sp/>range<sp/>scan]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[LayoutResult]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>K[LayoutResult<sp/>signature]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>L[AtlasViewAdapter<sp/>line<sp/>metrics<sp/>cache]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>K<sp/>--&gt;<sp/>M{layout<sp/>unchanged?}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>M<sp/>--&gt;|yes|<sp/>N[skip<sp/>render<sp/>update]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>M<sp/>--&gt;|no|<sp/>O[UpdateRenderData]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>--&gt;<sp/>O</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>O<sp/>--&gt;<sp/>P[Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>P<sp/>--&gt;<sp/>Q[AtlasRenderer<sp/>mesh<sp/>/<sp/>actor<sp/>update]</highlight></codeline>
+</programlisting></para>
+<para>현재 dirty / cache 의미는 다음과 같다.</para>
+<para><table rows="8" cols="3"><row>
+<entry thead="yes"><para>단계   </para>
+</entry><entry thead="yes"><para>현재 트리거   </para>
+</entry><entry thead="yes"><para>현재 cache 수준    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>prepare   </para>
+</entry><entry thead="no"><para>text / font / font size 변경   </para>
+</entry><entry thead="no"><para><computeroutput>PreparedText</computeroutput>에 characters, line break, glyphs, glyph mapping, line metrics 저장    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>exclusion update   </para>
+</entry><entry thead="no"><para>sample tick / drag / key 조작   </para>
+</entry><entry thead="no"><para>core는 <computeroutput>mExclusionRegions</computeroutput> 저장, same-count in-place update    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>layout   </para>
+</entry><entry thead="no"><para>exclusion / size / lineHeight 변경   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutResult</computeroutput> 재계산, <computeroutput>GlyphLayoutCache</computeroutput>는 layout pass-local    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>render skip 판단   </para>
+</entry><entry thead="no"><para>render dirty path   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutResult::CalculateSignature()</computeroutput> full scan    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>adapter cache   </para>
+</entry><entry thead="no"><para>layout result 연결   </para>
+</entry><entry thead="no"><para>line metrics cache rebuild    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>render data   </para>
+</entry><entry thead="no"><para>render dirty path   </para>
+</entry><entry thead="no"><para><computeroutput>UpdateRenderData()</computeroutput>가 render data vector를 채움    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>atlas render   </para>
+</entry><entry thead="no"><para>render dirty path   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasRenderer::Render()</computeroutput>가 glyph / position을 <computeroutput>ViewInterface</computeroutput>에서 다시 가져와 mesh / actor 생성   </para>
+</entry></row>
+</table>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md668">
+<title>3. Exclusion / Layout 계산 병목 분석</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md669">
+<title>A. exclusion region vector build</title>
+<para>sample의 <computeroutput>ApplyExclusionRegions()</computeroutput>는 매 tick 새 <computeroutput>Dali::Vector&lt;Bounds&gt; regions</computeroutput>를 만든다.</para>
+<para>현재 포함되는 region은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>title line exclusion</para>
+</listitem><listitem><para>drop cap exclusion</para>
+</listitem><listitem><para>fixed column bounds</para>
+</listitem><listitem><para>moving orb ellipse bands</para>
+</listitem><listitem><para>moving overlay text bounds</para>
+</listitem></itemizedlist>
+</para>
+<para>코드 기준으로 보면 <computeroutput>mFixedColumnBounds</computeroutput>, title exclusion, drop cap은 거의 static이다. 반면 orb와 overlay text는 매 tick 움직인다. 현재는 이 둘을 하나의 vector로 매번 합친 뒤 core <computeroutput>SetExclusionRegions()</computeroutput>에 전달한다.</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para>sample에서 static exclusion cache를 만들고, tick에서는 dynamic exclusions만 append한다.</para>
+</listitem><listitem><para>combined vector는 member로 유지해 <computeroutput>Clear()</computeroutput> 후 <computeroutput>Reserve()</computeroutput> / <computeroutput>PushBack()</computeroutput>으로 재사용한다.</para>
+</listitem><listitem><para>title / drop cap / fixed columns는 초기화나 style 변경 시에만 rebuild한다.</para>
+</listitem><listitem><para>core public API는 그대로 두고 sample-level optimization으로 처리할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>성격:</para>
+<para><itemizedlist>
+<listitem><para>수요일 데모 전 low-risk 후보.</para>
+</listitem><listitem><para>core behavior 영향 없음.</para>
+</listitem><listitem><para>다만 sample-only라 실제 engine 구조 개선은 아니다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md670">
+<title>B. &lt;tt&gt;SetExclusionRegions()&lt;/tt&gt; exact compare</title>
+<para>현재 core는 <computeroutput>AreExclusionRegionsEqual()</computeroutput>로 exact compare를 수행한 뒤, 값이 다르면 저장소를 갱신한다. 최근 same-count update는 in-place로 바뀌었지만, 남은 비용은 여전히 있다.</para>
+<para><itemizedlist>
+<listitem><para>compare는 region count에 비례한다.</para>
+</listitem><listitem><para>moving bounds에서는 대부분 값이 달라져 compare가 거의 항상 false일 가능성이 높다.</para>
+</listitem><listitem><para>compare 후에도 rect copy는 필요하다.</para>
+</listitem><listitem><para>epsilon compare는 layout correctness risk가 있어 core 기본 정책에 넣기 어렵다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para>caller가 “무조건 changed”를 아는 경우 compare를 생략하는 private/internal path가 가능한지 검토한다.</para>
+</listitem><listitem><para>public API 없이 <computeroutput>TextVisualizerImpl</computeroutput> 내부에서만 fast path를 만들기는 현재 public call 경계상 쉽지 않다.</para>
+</listitem><listitem><para>core API에 epsilon이나 unchecked update를 추가하는 것은 public semantics와 correctness를 먼저 설계해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>결론:</para>
+<para><itemizedlist>
+<listitem><para>데모 전에는 core 정책 변경보다 sample-level vector reuse가 안전하다.</para>
+</listitem><listitem><para>core exact compare 자체를 줄이는 것은 데모 후 설계 후보로 둔다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md671">
+<title>C. y-sorted exclusion scan</title>
+<para>현재 <computeroutput>LayoutGlyphs()</computeroutput>와 <computeroutput>LayoutPlaceholder()</computeroutput>는 layout pass 시작 시 <computeroutput>BuildSortedExclusionRegions()</computeroutput>를 호출한다. 이후 각 line은 <computeroutput>BuildAvailableIntervalsFromSorted()</computeroutput>로 y 후보만 본다.</para>
+<para>비용 성격:</para>
+<para><itemizedlist>
+<listitem><para>sort 비용은 <computeroutput>O(N log N)</computeroutput>이다.</para>
+</listitem><listitem><para>N은 title / fixed / drop cap / overlay / orb bands를 모두 포함한다.</para>
+</listitem><listitem><para>orb band count가 11이고 active orb가 5개면 orb만 55개 region이다.</para>
+</listitem><listitem><para>moving bounds 때문에 현재는 layout pass마다 sort가 다시 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para>static sorted regions cache와 dynamic sorted regions cache를 분리한다.</para>
+</listitem><listitem><para>dynamic regions만 tick마다 sort한다.</para>
+</listitem><listitem><para>layout pass에서는 두 sorted list를 merge하거나, static list + dynamic list를 각각 scan한다.</para>
+</listitem><listitem><para>더 큰 N에서는 y bucket / spatial index를 검토한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutEngine</computeroutput>은 현재 <computeroutput>Dali::Vector&lt;Bounds&gt;</computeroutput>를 받아 내부 anonymous namespace의 sorted vector를 만든다.</para>
+</listitem><listitem><para>sorted cache를 core에 유지하려면 <computeroutput>TextVisualizerImpl</computeroutput>과 <computeroutput>LayoutEngine</computeroutput> 사이의 internal signature 조정이 필요하다.</para>
+</listitem><listitem><para>public API는 건드리지 않아도 가능하지만, internal ownership과 invalidation 설계를 해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md672">
+<title>D. per-line available interval generation</title>
+<para><computeroutput>BuildAvailableIntervalsFromSorted()</computeroutput>는 line마다 다음 작업을 한다.</para>
+<para><orderedlist>
+<listitem><para>y-overlap 후보 region scan</para>
+</listitem><listitem><para>blocked interval 생성</para>
+</listitem><listitem><para>blocked interval x sort</para>
+</listitem><listitem><para>merge</para>
+</listitem><listitem><para>available interval 생성</para>
+</listitem></orderedlist>
+</para>
+<para>현재 y-sorted scan으로 전체 region scan은 줄었지만, line마다 blocked interval sort / merge는 남아 있다.</para>
+<para>비용 성격:</para>
+<para><itemizedlist>
+<listitem><para>visible line count x candidate regions 비용이다.</para>
+</listitem><listitem><para>line height가 자연스러워지면서 visible line count는 줄었지만, 긴 text에서는 여전히 누적된다.</para>
+</listitem><listitem><para>같은 y band에서 비슷한 interval 결과가 반복될 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para>line band interval cache: <computeroutput>(lineTop, lineHeight, exclusionVersion)</computeroutput> 기준으로 intervals cache.</para>
+</listitem><listitem><para>y bucket cache: exclusion region을 y bucket에 넣고 line마다 bucket만 조회.</para>
+</listitem><listitem><para>affected y range만 recompute: moving bounds의 old/new bounds가 덮는 y range만 interval cache invalidation.</para>
+</listitem><listitem><para>same available interval reuse: 이전 layout line의 y와 interval이 같으면 재사용.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>moving bounds가 많으면 cache invalidation이 복잡해진다.</para>
+</listitem><listitem><para>현재 full relayout 구조에서는 interval cache만 넣어도 word wrap / glyph placement는 다시 돈다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md673">
+<title>E. full &lt;tt&gt;LayoutGlyphs()&lt;/tt&gt; relayout</title>
+<para>현재 exclusion이 바뀌면 전체 glyph placement를 처음부터 다시 만든다.</para>
+<para>이 구조의 장점은 단순성과 correctness다. 단점은 moving bounds에서 매 tick 전체 text를 다시 훑는다는 점이다.</para>
+<para>word wrap이 들어간 뒤에는 앞쪽 line의 break가 바뀌면 뒤쪽 line start glyph가 모두 달라질 수 있다. 그래서 partial relayout은 단순하지 않다.</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para>previous layout의 line start glyph cache를 저장한다.</para>
+</listitem><listitem><para>affected y range 위쪽 line들은 이전 placement를 유지하고, 그 아래부터 reflow하는 prototype을 만든다.</para>
+</listitem><listitem><para>line start glyph / line y / available intervals가 같으면 해당 line placement reuse를 검토한다.</para>
+</listitem><listitem><para>static text + moving exclusions라는 전제를 활용해 prepared glyph data는 계속 재사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>결론:</para>
+<para><itemizedlist>
+<listitem><para>효과 가능성은 크지만 회귀 위험도 크다.</para>
+</listitem><listitem><para>수요일 데모 전에는 피하고, 데모 후 prototype으로 분리하는 것이 안전하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md674">
+<title>F. word wrap range scan</title>
+<para>현재 <computeroutput>GlyphLayoutCache</computeroutput>로 glyph advance, width, prefix advance, character range, break allowed / mandatory 정보를 layout pass-local로 만든다. 하지만 interval fit 자체는 <computeroutput>FindGlyphRangeForInterval()</computeroutput>에서 <computeroutput>glyphStart</computeroutput>부터 순차 scan한다.</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>nextBreakAfterGlyph</computeroutput> array</para>
+</listitem><listitem><para><computeroutput>previousBreakBeforeGlyph</computeroutput> array</para>
+</listitem><listitem><para>prefix advance를 이용한 max glyph end binary search</para>
+</listitem><listitem><para>max glyph end 이후 previous break 후보로 보정</para>
+</listitem><listitem><para>mandatory break 위치를 별도 prefix/index로 찾아 line 강제 종료</para>
+</listitem></itemizedlist>
+</para>
+<para>어려운 점:</para>
+<para><itemizedlist>
+<listitem><para>glyph width와 advance 중 <computeroutput>max()</computeroutput>를 required width로 쓰는 현재 정책은 단순 prefix advance만으로 완전히 대체하기 어렵다.</para>
+</listitem><listitem><para>oversized first glyph fallback이 있다.</para>
+</listitem><listitem><para>mandatory break는 available width와 무관하게 line을 종료해야 한다.</para>
+</listitem><listitem><para>exclusion interval이 여러 개일 때 같은 line 다음 fragment로 보낼지 다음 line으로 보낼지 정책이 섞인다.</para>
+</listitem></itemizedlist>
+</para>
+<para>결론:</para>
+<para><itemizedlist>
+<listitem><para>next/previous break cache는 유효하지만, 먼저 stable <computeroutput>GlyphLayoutCache</computeroutput> fields를 <computeroutput>PreparedText</computeroutput>로 올리는 편이 더 안전하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md675">
+<title>4. AtlasRenderer / Render Update 병목 분석</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md676">
+<title>A. &lt;tt&gt;UpdateRenderData()&lt;/tt&gt; 비용</title>
+<para><computeroutput>AtlasRendererBridge::UpdateRenderData()</computeroutput>는 renderable glyph count만큼 다음을 수행한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mAdapter-&gt;GetGlyphPlacement(index, placement)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mAdapter-&gt;GetGlyphInfo(placement.glyphIndex, glyph)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mImpl-&gt;mRenderData</computeroutput>에 glyph / placement / x / y / width / height push</para>
+</listitem></itemizedlist>
+</para>
+<para>그런데 실제 <computeroutput>AtlasRenderer::Render()</computeroutput> 호출 경로를 보면 <computeroutput>mRenderData</computeroutput>는 <computeroutput>Renderer::Render()</computeroutput>의 입력으로 전달되지 않는다. <computeroutput>AttachRendererToHost()</computeroutput>는 <computeroutput>mRenderer-&gt;Render(mViewInterface, ...)</computeroutput>를 호출하고, <computeroutput>AtlasRenderer::Render()</computeroutput>는 다시 <computeroutput>view.GetNumberOfGlyphs()</computeroutput>와 <computeroutput>view.GetGlyphs()</computeroutput>를 통해 glyphs / positions vector를 새로 채운다.</para>
+<para>즉 현재 코드 기준으로 <computeroutput>UpdateRenderData()</computeroutput>는 다음 역할에 가깝다.</para>
+<para><itemizedlist>
+<listitem><para>renderer 생성 보장</para>
+</listitem><listitem><para>adapter glyph placement / glyph info validation</para>
+</listitem><listitem><para>render dirty clear 조건에서 사용하는 success gate</para>
+</listitem><listitem><para>future render data cache 후보</para>
+</listitem></itemizedlist>
+</para>
+<para>중복 가능성:</para>
+<para><itemizedlist>
+<listitem><para>실제 Render 입력은 <computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>가 다시 만든다.</para>
+</listitem><listitem><para>따라서 <computeroutput>UpdateRenderData()</computeroutput>는 현재 render path에서 glyph lookup을 한 번 더 수행하는 비용일 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UpdateRenderData()</computeroutput>를 lightweight validation으로 축소한다.</para>
+</listitem><listitem><para>render dirty clear 조건은 <computeroutput>AttachRendererToHost()</computeroutput> 성공 + <computeroutput>GetLastReturnedGlyphCount()</computeroutput> consistency 중심으로 대체한다.</para>
+</listitem><listitem><para>또는 <computeroutput>UpdateRenderData()</computeroutput>가 만든 positions / glyphs cache를 실제 <computeroutput>ViewInterface::GetGlyphs()</computeroutput>에서 재사용하도록 연결한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>render dirty clear 조건을 건드리는 작업이므로 별도 커밋이어야 한다.</para>
+</listitem><listitem><para>지금 당장 제거하면 render success 판정이 약해질 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md677">
+<title>B. &lt;tt&gt;ViewInterface::GetGlyphs()&lt;/tt&gt; 비용</title>
+<para><computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>는 <computeroutput>AtlasRenderer::Render()</computeroutput> 내부에서 호출된다.</para>
+<para>현재 루프는 placement count만큼 다음을 수행한다.</para>
+<para><itemizedlist>
+<listitem><para>adapter에서 glyph placement lookup</para>
+</listitem><listitem><para>prepared text에서 glyph info lookup</para>
+</listitem><listitem><para><computeroutput>GetRendererGlyphPosition()</computeroutput> 호출</para>
+</listitem><listitem><para>renderer glyph position 계산</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>GetRendererGlyphPosition()</computeroutput>은 line metrics cache를 우선 사용하지만, cache lookup은 lineTop 기준 vector scan이다. line count가 많으면 glyph마다 line metrics cache를 선형 scan할 수 있다.</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GlyphPlacement</computeroutput>에 line index를 저장한다.</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter</computeroutput>가 glyph placement index -&gt; line metrics cache index를 미리 만든다.</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter</computeroutput>가 renderer glyph positions cache를 layout result 연결 시 미리 구성한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>는 glyph info / position cache를 copy하는 형태로 단순화한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>효과:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Renderer::Render()</computeroutput> path에서 반복 position 계산과 line cache lookup을 줄일 수 있다.</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData()</computeroutput>와 통합하면 중복 lookup 제거도 가능하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md678">
+<title>C. &lt;tt&gt;AtlasRenderer::Render()&lt;/tt&gt; full call</title>
+<para>현재 <computeroutput>AtlasRenderer::Render()</computeroutput>는 시작 시 <computeroutput>UnparentAndReset(mImpl-&gt;mActor)</computeroutput>를 호출한다. 이후 glyph count만큼 glyph / position vector를 만들고, <computeroutput>AddGlyphs()</computeroutput>에서 mesh와 actor를 다시 만든다.</para>
+<para>코드 기준 주요 비용:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Vector&lt;GlyphInfo&gt;</computeroutput> allocation / resize</para>
+</listitem><listitem><para><computeroutput>Vector&lt;Vector2&gt;</computeroutput> allocation / resize</para>
+</listitem><listitem><para><computeroutput>ViewInterface::GetGlyphs()</computeroutput> full copy</para>
+</listitem><listitem><para>glyph atlas cache lookup / bitmap 생성 필요 여부 확인</para>
+</listitem><listitem><para>meshContainer / meshContainerOutline 생성</para>
+</listitem><listitem><para>mesh stitch</para>
+</listitem><listitem><para><computeroutput>RemoveText()</computeroutput>로 old text cache reference count decrement</para>
+</listitem><listitem><para><computeroutput>CreateMeshActor()</computeroutput>에서 <computeroutput>VertexBuffer</computeroutput>, <computeroutput>Geometry</computeroutput>, <computeroutput>Renderer</computeroutput>, <computeroutput>Actor</computeroutput> 생성</para>
+</listitem><listitem><para>output actor child attach</para>
+</listitem></itemizedlist>
+</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para>same glyph count / same atlas texture / same style이면 vertex positions만 update 가능한지 조사.</para>
+</listitem><listitem><para><computeroutput>Geometry</computeroutput> vertex buffer update만 가능한지 조사.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput>에 geometry-only update API가 필요한지 검토.</para>
+</listitem><listitem><para>기존 <computeroutput>text-atlas-renderer.*</computeroutput> 변경 없이 bridge / adapter cache로 줄일 수 있는 범위를 먼저 줄인다.</para>
+</listitem></itemizedlist>
+</para>
+<para>위험:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>text-atlas-renderer.*</computeroutput>는 기존 text pipeline도 공유하는 내부 renderer다.</para>
+</listitem><listitem><para>데모 전 직접 수정은 위험하다.</para>
+</listitem><listitem><para>geometry-only update는 효과 가능성이 크지만 데모 후 작업으로 분리해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md679">
+<title>D. renderer output actor lifecycle</title>
+<para><computeroutput>AtlasRendererBridge::AttachRendererToHost()</computeroutput>는 <computeroutput>Renderer::Render()</computeroutput>가 반환한 output actor를 host에 attach한다.</para>
+<para>현재 정책:</para>
+<para><itemizedlist>
+<listitem><para>기존 output과 새 output이 다르면 이전 output을 detach한다.</para>
+</listitem><listitem><para>새 output parent가 없으면 render host에 attach한다.</para>
+</listitem><listitem><para>stale actor 누적을 막는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>하지만 <computeroutput>AtlasRenderer::Render()</computeroutput> 자체가 <computeroutput>UnparentAndReset(mImpl-&gt;mActor)</computeroutput>로 내부 actor를 reset한다. 따라서 bridge에서 output actor를 재사용하더라도 renderer 내부에서 mesh actor / child actor가 재생성될 수 있다.</para>
+<para>확인 후보:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetRendererOutputDescendantCount()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetRendererOutputTotalRendererCount()</computeroutput></para>
+</listitem><listitem><para>actor child count 변화</para>
+</listitem><listitem><para>mesh actor 재생성 여부</para>
+</listitem><listitem><para>renderer count가 매 render마다 안정적으로 유지되는지</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md680">
+<title>E. render dirty / layout signature</title>
+<para>layout unchanged render skip은 이미 들어갔지만, signature 계산 자체는 <computeroutput>LayoutResult::CalculateSignature()</computeroutput>가 전체 line / cluster / glyph placement를 full scan한다.</para>
+<para>비용 성격:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>O(line count + glyph placement count + cluster placement count)</computeroutput></para>
+</listitem><listitem><para>glyph placement가 매우 크면 render skip을 판단하기 위해 이미 큰 비용을 지불한다.</para>
+</listitem><listitem><para>render skip이 많이 발생하면 이 비용이 이득일 수 있지만, layout이 계속 바뀌는 경우에는 순수 overhead가 된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보 개선:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutResult</computeroutput> 생성 중 signature를 incremental로 누적한다.</para>
+</listitem><listitem><para>placement push 시 hash를 업데이트한다.</para>
+</listitem><listitem><para><computeroutput>LayoutResult</computeroutput>에 cached signature와 valid flag를 둔다.</para>
+</listitem><listitem><para>signature 계산 비용을 render skip 판단 시점에서 layout 생성 시점으로 흡수한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>hash 갱신 누락은 render skip correctness 문제로 바로 이어진다.</para>
+</listitem><listitem><para><computeroutput>LayoutPlaceholder()</computeroutput>와 <computeroutput>LayoutGlyphs()</computeroutput> 양쪽을 함께 다뤄야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md681">
+<title>5. Prepare / Layout Cache 강화 분석</title>
+<para><computeroutput>TextVisualizer</computeroutput>의 핵심 설계는 prepare와 layout을 분리하는 것이다.</para>
+<para>원래 목표는 다음에 가깝다.</para>
+<para><itemizedlist>
+<listitem><para>text / font / fontSize 변경 시 expensive prepare 수행</para>
+</listitem><listitem><para>moving bounds 변경 시 prepare는 재사용</para>
+</listitem><listitem><para>runtime에는 layout placement만 최대한 싸게 수행</para>
+</listitem></itemizedlist>
+</para>
+<para>따라서 다음 최적화 방향은 runtime layout / render path에서 stable text-derived computation을 제거하고 prepare cache로 올리는 것이다.</para>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md682">
+<title>A. 현재 prepare cache와 layout-local cache 구분</title>
+<para>현재 <computeroutput>PreparedText</computeroutput>에 저장된 stable data:</para>
+<para><itemizedlist>
+<listitem><para>UTF-32 characters</para>
+</listitem><listitem><para>line break info</para>
+</listitem><listitem><para>paragraph info</para>
+</listitem><listitem><para>script runs</para>
+</listitem><listitem><para>font runs</para>
+</listitem><listitem><para>shaped glyphs</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem><listitem><para>glyph to character map</para>
+</listitem><listitem><para>characters per glyph</para>
+</listitem><listitem><para>character to glyph table</para>
+</listitem><listitem><para>glyphs per character table</para>
+</listitem><listitem><para>new paragraph glyphs</para>
+</listitem><listitem><para>prepared-level line metrics</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 <computeroutput>LayoutGlyphs()</computeroutput>가 매 layout pass마다 만드는 <computeroutput>GlyphLayoutCache</computeroutput>:</para>
+<para><itemizedlist>
+<listitem><para>glyph advances</para>
+</listitem><listitem><para>glyph widths</para>
+</listitem><listitem><para>prefix advances</para>
+</listitem><listitem><para>character starts</para>
+</listitem><listitem><para>character ends</para>
+</listitem><listitem><para>break allowed after glyph</para>
+</listitem><listitem><para>break mandatory after glyph</para>
+</listitem></itemizedlist>
+</para>
+<para>분석:</para>
+<para><itemizedlist>
+<listitem><para>위 <computeroutput>GlyphLayoutCache</computeroutput> 항목은 대부분 text / font / fontSize가 바뀌지 않으면 변하지 않는다.</para>
+</listitem><listitem><para>exclusion, layout width, line height에는 직접 의존하지 않는다.</para>
+</listitem><listitem><para>moving bounds use case에서는 매 tick 다시 계산할 필요가 적다.</para>
+</listitem><listitem><para>대신 memory 사용량은 glyph count에 비례해 늘어난다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md683">
+<title>B. &lt;tt&gt;PreparedText&lt;/tt&gt;로 올릴 수 있는 stable cache 후보</title>
+<para><table rows="8" cols="4"><row>
+<entry thead="yes"><para>후보   </para>
+</entry><entry thead="yes"><para>현재 위치   </para>
+</entry><entry thead="yes"><para>prepare cache로 올릴 수 있는 이유   </para>
+</entry><entry thead="yes"><para>주의    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph placement advance cache   </para>
+</entry><entry thead="no"><para><computeroutput>BuildGlyphLayoutCache()</computeroutput>   </para>
+</entry><entry thead="no"><para>glyph metrics 기반이며 prepare 이후 stable   </para>
+</entry><entry thead="no"><para>font size / fallback glyph 변경 시 clear    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph placement width cache   </para>
+</entry><entry thead="no"><para><computeroutput>BuildGlyphLayoutCache()</computeroutput>   </para>
+</entry><entry thead="no"><para>glyph width fallback 계산도 stable   </para>
+</entry><entry thead="no"><para>width/advance 정책 변경 시 함께 업데이트    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph character range cache   </para>
+</entry><entry thead="no"><para><computeroutput>BuildGlyphLayoutCache()</computeroutput>   </para>
+</entry><entry thead="no"><para>glyphToCharacterMap + charactersPerGlyph 결과는 stable   </para>
+</entry><entry thead="no"><para>complex cluster policy와 같이 검증 필요    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>break allowed after glyph cache   </para>
+</entry><entry thead="no"><para><computeroutput>BuildGlyphLayoutCache()</computeroutput>   </para>
+</entry><entry thead="no"><para>lineBreakInfo + glyph character end 기반   </para>
+</entry><entry thead="no"><para>word wrap policy 변경 시 invalidation    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>break mandatory after glyph cache   </para>
+</entry><entry thead="no"><para><computeroutput>BuildGlyphLayoutCache()</computeroutput>   </para>
+</entry><entry thead="no"><para>hard break 후보도 stable   </para>
+</entry><entry thead="no"><para>newline glyph fixture 추가 필요    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>prefix advance cache   </para>
+</entry><entry thead="no"><para><computeroutput>BuildGlyphLayoutCache()</computeroutput>   </para>
+</entry><entry thead="no"><para>glyph advance 누적합은 layout width와 무관   </para>
+</entry><entry thead="no"><para>character spacing 도입 시 invalidation 필요    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph base render metrics   </para>
+</entry><entry thead="no"><para>prepared glyph info   </para>
+</entry><entry thead="no"><para>glyph info 자체는 이미 있음   </para>
+</entry><entry thead="no"><para>renderer position은 layout dependent라 제외   </para>
+</entry></row>
+</table>
+</para>
+<para>추천:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText::GlyphLayoutData</computeroutput> 같은 internal struct를 추가하는 방향이 깔끔하다.</para>
+</listitem><listitem><para>public API는 추가하지 않고 internal getter만 둔다.</para>
+</listitem><listitem><para><computeroutput>TextPreparer</computeroutput>가 shaping 직후 cache를 채우거나, <computeroutput>PreparedText</computeroutput> setter 후 lazy build를 둘 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md684">
+<title>C. LayoutResult / layout cache 후보</title>
+<para>layout width와 exclusion에 의존하는 data는 <computeroutput>PreparedText</computeroutput>가 아니라 <computeroutput>LayoutResult</computeroutput> 또는 <computeroutput>TextVisualizerImpl</computeroutput> 쪽에 둬야 한다.</para>
+<para><table rows="6" cols="3"><row>
+<entry thead="yes"><para>후보   </para>
+</entry><entry thead="yes"><para>위치 후보   </para>
+</entry><entry thead="yes"><para>이유    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>line start glyph cache   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutResult</computeroutput> 또는 <computeroutput>TextVisualizerImpl</computeroutput>   </para>
+</entry><entry thead="no"><para>다음 relayout warm start / partial relayout 기반    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>available interval cache   </para>
+</entry><entry thead="no"><para><computeroutput>TextVisualizerImpl</computeroutput>   </para>
+</entry><entry thead="no"><para>exclusion version + line band 기준 재사용    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>layout signature incremental hash   </para>
+</entry><entry thead="no"><para><computeroutput>LayoutResult</computeroutput>   </para>
+</entry><entry thead="no"><para>full <computeroutput>CalculateSignature()</computeroutput> scan 제거    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>renderer glyph position cache   </para>
+</entry><entry thead="no"><para><computeroutput>AtlasViewAdapter</computeroutput> 또는 <computeroutput>LayoutResult</computeroutput>   </para>
+</entry><entry thead="no"><para><computeroutput>ViewInterface::GetGlyphs()</computeroutput> position 계산 제거    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph placement line index   </para>
+</entry><entry thead="no"><para><computeroutput>GlyphPlacement</computeroutput>   </para>
+</entry><entry thead="no"><para>line metrics lookup을 O(1)에 가깝게 만듦   </para>
+</entry></row>
+</table>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md685">
+<title>D. static / dynamic exclusion cache</title>
+<para>sample과 실제 use case 모두 static / dynamic exclusion이 섞일 수 있다.</para>
+<para>현재 sample 기준:</para>
+<para><itemizedlist>
+<listitem><para>static: title, fixed columns, drop cap</para>
+</listitem><listitem><para>dynamic: moving orbs, moving overlay text</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 core 기준:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetExclusionRegions()</computeroutput>는 하나의 vector만 받는다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 매번 <computeroutput>BuildSortedExclusionRegions()</computeroutput>를 호출한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>후보:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerImpl</computeroutput>에 exclusion version과 sorted exclusion cache를 둔다.</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput>에서 storage update와 함께 sorted cache를 갱신한다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>에는 이미 sorted cache를 받는 internal overload를 추가하거나, <computeroutput>LayoutEngine</computeroutput> 밖에서 interval builder를 분리한다.</para>
+</listitem><listitem><para>static/dynamic split은 public API 없이 sample에서 먼저 검증한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutEngine</computeroutput> anonymous namespace에 있는 sorted type을 외부로 꺼내야 할 수 있다.</para>
+</listitem><listitem><para>internal API 노출 범위를 최소화해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md686">
+<title>E. cache invalidation 정책</title>
+<para>캐시 강화에서 가장 중요한 것은 invalidation이다.</para>
+<para><table rows="9" cols="4"><row>
+<entry thead="yes"><para>변화   </para>
+</entry><entry thead="yes"><para>PreparedText cache   </para>
+</entry><entry thead="yes"><para>Layout cache   </para>
+</entry><entry thead="yes"><para>Render cache    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>text 변경   </para>
+</entry><entry thead="no"><para>clear   </para>
+</entry><entry thead="no"><para>clear   </para>
+</entry><entry thead="no"><para>clear    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>font family 변경   </para>
+</entry><entry thead="no"><para>clear   </para>
+</entry><entry thead="no"><para>clear   </para>
+</entry><entry thead="no"><para>clear    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>font size 변경   </para>
+</entry><entry thead="no"><para>clear   </para>
+</entry><entry thead="no"><para>clear   </para>
+</entry><entry thead="no"><para>clear    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>line height 변경   </para>
+</entry><entry thead="no"><para>keep prepare   </para>
+</entry><entry thead="no"><para>clear layout   </para>
+</entry><entry thead="no"><para>clear render    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>text color 변경   </para>
+</entry><entry thead="no"><para>keep prepare   </para>
+</entry><entry thead="no"><para>keep layout   </para>
+</entry><entry thead="no"><para>clear render    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>exclusion 변경   </para>
+</entry><entry thead="no"><para>keep prepare   </para>
+</entry><entry thead="no"><para>clear layout   </para>
+</entry><entry thead="no"><para>clear render    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>size 변경   </para>
+</entry><entry thead="no"><para>keep prepare   </para>
+</entry><entry thead="no"><para>clear layout   </para>
+</entry><entry thead="no"><para>clear render    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>status/sample text 변경   </para>
+</entry><entry thead="no"><para>해당 <computeroutput>TextVisualizer</computeroutput>만 clear   </para>
+</entry><entry thead="no"><para>해당 control만 clear   </para>
+</entry><entry thead="no"><para>해당 control만 clear   </para>
+</entry></row>
+</table>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md687">
+<title>F. cache 강화 우선 구현 후보</title>
+<para><orderedlist>
+<listitem><para>Move stable <computeroutput>GlyphLayoutCache</computeroutput> fields into <computeroutput>PreparedText</computeroutput><itemizedlist>
+<listitem><para>advances</para>
+</listitem><listitem><para>widths</para>
+</listitem><listitem><para>character starts / ends</para>
+</listitem><listitem><para>break allowed / mandatory</para>
+</listitem><listitem><para>prefix advances</para>
+</listitem><listitem><para>효과: <computeroutput>LayoutGlyphs()</computeroutput> 시작 비용 감소</para>
+</listitem><listitem><para>위험: <computeroutput>PreparedText</computeroutput> memory 증가</para>
+</listitem><listitem><para>public API 영향 없음</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>Cache sorted exclusion regions in <computeroutput>TextVisualizerImpl</computeroutput><itemizedlist>
+<listitem><para><computeroutput>SetExclusionRegions()</computeroutput> 때 sorted cache 갱신</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 sorted cache 사용</para>
+</listitem><listitem><para>효과: layout pass마다 sort 제거</para>
+</listitem><listitem><para>위험: <computeroutput>LayoutEngine</computeroutput> internal API 경계 조정 필요</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>Incremental <computeroutput>LayoutResult</computeroutput> signature<itemizedlist>
+<listitem><para>placement push 중 hash 누적</para>
+</listitem><listitem><para>효과: <computeroutput>CalculateSignature()</computeroutput> full scan 제거</para>
+</listitem><listitem><para>위험: hash 갱신 누락 가능</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>Precompute renderer glyph positions after layout<itemizedlist>
+<listitem><para><computeroutput>AtlasViewAdapter</computeroutput> cache</para>
+</listitem><listitem><para><computeroutput>ViewInterface::GetGlyphs()</computeroutput>는 copy 위주</para>
+</listitem><listitem><para>효과: render path 비용 감소</para>
+</listitem><listitem><para>위험: cache invalidation 필요</para>
+</listitem></itemizedlist>
+</para>
+</listitem></orderedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md688">
+<title>6. 진행: stable glyph layout cache in &lt;tt&gt;PreparedText&lt;/tt&gt;</title>
+<para>이번 구현에서 layout pass마다 만들던 stable glyph layout cache를 <computeroutput>PreparedText</computeroutput>로 이동했다.</para>
+<para>이전 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutGlyphs()</computeroutput> 시작 시마다 layout-local <computeroutput>GlyphLayoutCache</computeroutput>를 만들었다.</para>
+</listitem><listitem><para>cache에는 glyph advance, glyph width, prefix advance, glyph별 character range, glyph 이후 line break 가능 여부가 들어 있었다.</para>
+</listitem><listitem><para>이 값들은 text / font / font size / shaping 결과가 바뀌지 않으면 동일하지만, moving bounds relayout 때마다 다시 계산됐다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText::GlyphLayoutData</computeroutput>가 stable glyph layout cache를 보관한다.</para>
+</listitem><listitem><para><computeroutput>TextPreparer</computeroutput>가 shaping, glyph metrics, glyph-to-character mapping, line break info 준비 후 <computeroutput>GlyphLayoutData</computeroutput>를 만든다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput>는 <computeroutput>preparedText.HasGlyphLayoutData()</computeroutput>가 true이면 이 cache를 사용한다.</para>
+</listitem><listitem><para>수동 test fixture나 legacy prepared object처럼 cache가 없는 경우에는 기존 계산과 같은 local fallback을 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>cache fields:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>advances</computeroutput></para>
+</listitem><listitem><para><computeroutput>widths</computeroutput></para>
+</listitem><listitem><para><computeroutput>prefixAdvances</computeroutput></para>
+</listitem><listitem><para><computeroutput>characterStarts</computeroutput></para>
+</listitem><listitem><para><computeroutput>characterEnds</computeroutput></para>
+</listitem><listitem><para><computeroutput>breakAllowedAfterGlyph</computeroutput></para>
+</listitem><listitem><para><computeroutput>breakMandatoryAfterGlyph</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para>word wrap policy는 변경하지 않았다.</para>
+</listitem><listitem><para>glyph placement, line break, exclusion interval, render dirty 정책은 변경하지 않았다.</para>
+</listitem><listitem><para>layout width / exclusion region에 의존하는 데이터는 여전히 <computeroutput>LayoutEngine</computeroutput> / <computeroutput>LayoutResult</computeroutput>에 남긴다.</para>
+</listitem><listitem><para><computeroutput>PreparedText</computeroutput>의 glyph / mapping / line break setter는 stale cache 방지를 위해 glyph layout cache를 clear한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>효과:</para>
+<para><itemizedlist>
+<listitem><para>moving bounds처럼 text / font / font size는 그대로이고 exclusion만 바뀌는 경우, <computeroutput>LayoutGlyphs()</computeroutput> 진입 시 반복 계산이 줄어든다.</para>
+</listitem><listitem><para>memory 사용은 glyph count에 비례해 증가한다.</para>
+</listitem><listitem><para>word wrap 이후 늘어난 layout pass 시작 비용을 prepare 단계로 올리는 1차 구조 개선이다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>매우 긴 텍스트에서 memory 증가량과 layout CPU 감소의 균형</para>
+</listitem><listitem><para>prefix advance cache를 이용한 binary search word wrap으로 이어갈지 여부</para>
+</listitem><listitem><para>glyph layout cache와 future line start / renderer position cache의 역할 분리</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md689">
+<title>7. 진행: precomputed renderer glyph positions</title>
+<para>이번 구현에서 <computeroutput>AtlasViewAdapter</computeroutput>가 renderer glyph position cache를 보관하도록 했다.</para>
+<para>이전 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>는 render path에서 glyph마다 <computeroutput>AtlasViewAdapter::GetRendererGlyphPosition()</computeroutput>을 호출했다.</para>
+</listitem><listitem><para><computeroutput>GetRendererGlyphPosition()</computeroutput>은 placement와 glyph info를 조회하고, line metrics cache 또는 fallback scan으로 baseline offset을 찾아 renderer position을 계산했다.</para>
+</listitem><listitem><para>layout result가 바뀌지 않으면 이 position은 stable하지만, render call마다 반복 계산될 수 있었다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasViewAdapter</computeroutput>가 <computeroutput>PreparedText</computeroutput>와 <computeroutput>LayoutResult</computeroutput>를 받은 시점에 renderer glyph positions를 미리 계산한다.</para>
+</listitem><listitem><para>line metrics cache를 먼저 rebuild한 뒤 position cache를 rebuild한다.</para>
+</listitem><listitem><para><computeroutput>GetRendererGlyphPosition()</computeroutput>은 cache hit 시 cached position을 반환한다.</para>
+</listitem><listitem><para>cache가 없거나 invalid한 경우 기존 계산 경로로 fallback한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>cache invalidation:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetPreparedText()</computeroutput>는 line metrics cache와 renderer glyph position cache를 rebuild한다.</para>
+</listitem><listitem><para><computeroutput>SetLayoutResult()</computeroutput>도 두 cache를 rebuild한다.</para>
+</listitem><listitem><para><computeroutput>Clear()</computeroutput>는 두 cache를 clear한다.</para>
+</listitem><listitem><para><computeroutput>SetControlSize()</computeroutput>는 glyph position과 무관하므로 cache를 invalidate하지 않는다.</para>
+</listitem><listitem><para><computeroutput>SetTextColor()</computeroutput>도 position과 무관하므로 cache를 invalidate하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para>renderer position 계산 공식은 변경하지 않았다.</para>
+</listitem><listitem><para>word wrap, layout, exclusion, render dirty clear 조건은 변경하지 않았다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput> API 흐름은 유지하고 adapter cache를 통해 비용만 줄인다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para>glyph info copy는 여전히 render path에서 발생한다.</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData()</computeroutput>와 renderer position cache 사이에 중복 가능성이 남아 있다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer::Render()</computeroutput> full call과 mesh / actor recreation 비용은 그대로 남아 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>long text에서 position cache memory 증가량</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData()</computeroutput>를 position cache와 통합하거나 축소할 수 있는지</para>
+</listitem><listitem><para>glyph index -&gt; renderer position direct copy path가 더 필요한지</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md690">
+<title>8. 진행: reduce redundant &lt;tt&gt;UpdateRenderData&lt;/tt&gt;</title>
+<para>이번 구현에서 <computeroutput>AtlasRendererBridge::UpdateRenderData()</computeroutput>의 역할을 full render data build에서 lightweight validation + renderer ensure로 축소했다.</para>
+<para>이전 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UpdateRenderData()</computeroutput>가 renderable glyph count만큼 adapter placement와 glyph info를 순회했다.</para>
+</listitem><listitem><para>순회 결과를 <computeroutput>mRenderData</computeroutput> vector에 push했다.</para>
+</listitem><listitem><para>하지만 <computeroutput>AtlasRenderer::Render()</computeroutput>는 이 vector를 직접 입력으로 받지 않고, <computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>를 통해 glyphs / positions를 다시 요청했다.</para>
+</listitem><listitem><para>renderer glyph position cache가 생긴 뒤에는 position 계산도 adapter 쪽에서 이미 준비되어 있어 full vector build의 중복성이 더 커졌다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>UpdateRenderData()</computeroutput>는 adapter가 renderable glyphs를 갖는지 확인한다.</para>
+</listitem><listitem><para>renderer instance 생성을 보장한다.</para>
+</listitem><listitem><para>first / last glyph placement, glyph info, renderer position만 smoke validation한다.</para>
+</listitem><listitem><para>validated glyph count와 validation 상태만 bridge 내부에 저장한다.</para>
+</listitem><listitem><para><computeroutput>mRenderData</computeroutput> vector와 glyph count만큼의 per-glyph push loop는 제거했다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 safety gate:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AttachRendererToHost()</computeroutput>는 기존처럼 <computeroutput>Renderer::Render()</computeroutput>를 호출한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput> diagnostics는 last requested / returned glyph count를 기록한다.</para>
+</listitem><listitem><para>render dirty clear는 기존처럼 <computeroutput>UpdateRenderData()</computeroutput> success, attach success, render ready, output actor, output parent, returned glyph count 조건을 모두 본다.</para>
+</listitem><listitem><para>즉 <computeroutput>IsRenderReady()</computeroutput>만으로 render dirty를 clear하지 않는 정책은 유지된다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Renderer::Render()</computeroutput> 호출 횟수와 attach 정책은 변경하지 않았다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput> 자체는 수정하지 않았다.</para>
+</listitem><listitem><para>layout, word wrap, exclusion, font size, line height 정책은 변경하지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Renderer::Render()</computeroutput> full call은 여전히 남아 있다.</para>
+</listitem><listitem><para><computeroutput>ViewInterface::GetGlyphs()</computeroutput>는 glyph info copy를 계속 수행한다.</para>
+</listitem><listitem><para>geometry-only update 또는 <computeroutput>AtlasRenderer</computeroutput> 내부 mesh reuse는 데모 후 후보로 남긴다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md691">
+<title>9. 진행: sample static / dynamic exclusion split</title>
+<para>이번 구현에서 performance sample의 exclusion vector build를 static / dynamic / combined cache로 나눴다.</para>
+<para>이전 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ApplyExclusionRegions()</computeroutput>가 매 tick local <computeroutput>Dali::Vector&lt;Bounds&gt;</computeroutput>를 새로 만들었다.</para>
+</listitem><listitem><para>title exclusion, drop cap exclusion, fixed column bounds, moving orb bands, overlay text bounds를 모두 매번 append했다.</para>
+</listitem><listitem><para>이 중 title / drop cap / fixed columns는 runtime key 입력으로 바뀌지 않는 static exclusion이다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 구조:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mStaticExclusionRegions</computeroutput>는 초기화 시 title / drop cap / fixed column bounds를 한 번 rebuild한다.</para>
+</listitem><listitem><para><computeroutput>mDynamicExclusionRegions</computeroutput>는 tick마다 moving orb ellipse bands와 overlay text bounds만 rebuild한다.</para>
+</listitem><listitem><para><computeroutput>mCombinedExclusionRegions</computeroutput>는 member vector로 재사용하고 static + dynamic을 합쳐 <computeroutput>SetExclusionRegions()</computeroutput>에 전달한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>유지한 정책:</para>
+<para><itemizedlist>
+<listitem><para>core <computeroutput>TextVisualizer</computeroutput> public API는 변경하지 않았다.</para>
+</listitem><listitem><para>layout / word wrap / render dirty clear 정책은 변경하지 않았다.</para>
+</listitem><listitem><para>sample visual layout, font size, line height, body text, orb positions는 변경하지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+<para>남은 한계:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetExclusionRegions()</computeroutput>는 exclusion enabled 상태에서 여전히 tick마다 호출된다.</para>
+</listitem><listitem><para><computeroutput>LayoutGlyphs()</computeroutput> full relayout은 그대로 남아 있다.</para>
+</listitem><listitem><para>core sorted exclusion cache나 static / dynamic API는 아직 없다.</para>
+</listitem></itemizedlist>
+</para>
+<para>성격:</para>
+<para><itemizedlist>
+<listitem><para>sample-only low-risk optimization이다.</para>
+</listitem><listitem><para>데모용 visual output을 유지하면서 vector allocation / repeated static append 비용을 줄이는 목적이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md692">
+<title>10. 최적화 후보 risk / effect 표</title>
+<para><table rows="13" cols="6"><row>
+<entry thead="yes"><para>후보   </para>
+</entry><entry thead="yes"><para>효과 가능성   </para>
+</entry><entry thead="yes"><para>구현 난이도   </para>
+</entry><entry thead="yes"><para>회귀 위험   </para>
+</entry><entry thead="yes"><para>파일 영향   </para>
+</entry><entry thead="yes"><para>추천 단계    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>Move stable <computeroutput>GlyphLayoutCache</computeroutput> fields into <computeroutput>PreparedText</computeroutput>   </para>
+</entry><entry thead="no"><para>중간~높음   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>낮음~중간   </para>
+</entry><entry thead="no"><para><computeroutput>prepared-text.*</computeroutput>, <computeroutput>text-preparer.cpp</computeroutput>, <computeroutput>layout-engine.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>sample static/dynamic exclusion split   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>sample only   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>combined exclusion vector reuse   </para>
+</entry><entry thead="no"><para>낮음~중간   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>sample only   </para>
+</entry><entry thead="no"><para>데모 전 가능    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>cached sorted exclusion regions in <computeroutput>TextVisualizerImpl</computeroutput>   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para><computeroutput>text-visualizer-impl.*</computeroutput>, <computeroutput>layout-engine.*</computeroutput> internal   </para>
+</entry><entry thead="no"><para>데모 전 후보, 신중    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>prefix advance binary search word wrap   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para><computeroutput>layout-engine.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>데모 후 또는 충분한 UTC 후    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>next / previous break candidate cache   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para><computeroutput>PreparedText</computeroutput> or <computeroutput>layout-engine.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>데모 후 또는 별도 최적화    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>reduce <computeroutput>UpdateRenderData()</computeroutput> if redundant   </para>
+</entry><entry thead="no"><para>중간~높음   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>낮음~중간   </para>
+</entry><entry thead="no"><para><computeroutput>atlas-renderer-bridge.*</computeroutput>, dirty success 조건   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>precomputed renderer glyph positions   </para>
+</entry><entry thead="no"><para>중간~높음   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>낮음~중간   </para>
+</entry><entry thead="no"><para><computeroutput>atlas-view-adapter.*</computeroutput>, view interface   </para>
+</entry><entry thead="no"><para>1차 완료    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph placement line index   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="layout-types_8h" kindref="compound">layout-types.h</ref></computeroutput>, <computeroutput>layout-engine.cpp</computeroutput>, adapter   </para>
+</entry><entry thead="no"><para>데모 후 권장    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>incremental <computeroutput>LayoutResult</computeroutput> signature   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para>중간   </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="layout-types_8h" kindref="compound">layout-types.h</ref></computeroutput>, <computeroutput>layout-engine.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>데모 전 가능하지만 신중    </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>AtlasRenderer</computeroutput> geometry-only update investigation   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para><computeroutput>text-atlas-renderer.*</computeroutput>   </para>
+</entry><entry thead="no"><para>데모 후    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>partial relayout prototype   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>layout engine / impl 전반   </para>
+</entry><entry thead="no"><para>데모 후   </para>
+</entry></row>
+</table>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md693">
+<title>11. 다음 바로 구현할 후보 3개</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md694">
+<title>1. Incremental &lt;tt&gt;LayoutResult&lt;/tt&gt; signature</title>
+<para>현재 기준 추천 1순위다.</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>layout unchanged render skip을 위해 <computeroutput>LayoutResult::CalculateSignature()</computeroutput>가 full scan을 수행한다.</para>
+</listitem><listitem><para>placement push 중 signature를 함께 누적하면 별도 full scan 비용을 줄일 수 있다.</para>
+</listitem><listitem><para>public API 영향 없이 internal <computeroutput>LayoutResult</computeroutput> 확장으로 가능하다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>hash 갱신 누락이 correctness에 영향을 줄 수 있으므로 UTC를 충분히 유지한다.</para>
+</listitem><listitem><para>signature policy 자체는 바꾸지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md695">
+<title>2. &lt;tt&gt;ViewInterface::GetGlyphs()&lt;/tt&gt; copy path 분석</title>
+<para>추천 2순위다.</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>renderer position cache와 lightweight <computeroutput>UpdateRenderData()</computeroutput>가 들어간 뒤에도 glyph info copy는 render path에 남아 있다.</para>
+</listitem><listitem><para>glyph info와 cached position을 더 직접적인 배열로 제공할 수 있는지 조사할 수 있다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput> 수정 없이 adapter / view interface 경계에서 줄일 수 있는 여지가 있는지 확인한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::ViewInterface</computeroutput> contract를 바꾸지 않는다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput> 변경이 필요해지면 데모 후 작업으로 분리한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md696">
+<title>3. Core sorted exclusion cache 분석</title>
+<para>추천 3순위다.</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>sample static / dynamic split은 완료됐지만 core layout pass에서는 여전히 combined vector를 매번 sort한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerImpl</computeroutput>에 sorted exclusion cache를 둘 수 있으면 layout pass 시작 비용을 더 줄일 수 있다.</para>
+</listitem><listitem><para>public API 없이 internal 경계에서 해결 가능한지 검토할 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>internal <computeroutput>LayoutEngine</computeroutput> signature 조정이 필요할 수 있다.</para>
+</listitem><listitem><para>static / dynamic invalidation을 core에서 어떻게 표현할지 먼저 정리해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md697">
+<title>12. 수요일 데모 전 / 데모 후 작업 분리</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md698">
+<title>데모 전 안전 작업</title>
+<para><itemizedlist>
+<listitem><para>sample combined exclusion vector reuse</para>
+</listitem><listitem><para>incremental <computeroutput>LayoutResult</computeroutput> signature only if UTC scope is clear</para>
+</listitem><listitem><para>optional debug status 유지 / FPS-only 기본 상태 유지</para>
+</listitem><listitem><para>existing diagnostics는 기본 off 유지</para>
+</listitem></itemizedlist>
+</para>
+<para>데모 전 원칙:</para>
+<para><itemizedlist>
+<listitem><para>public API 추가 금지</para>
+</listitem><listitem><para><computeroutput>TextController</computeroutput> / <computeroutput>TextView</computeroutput> / <computeroutput>Label</computeroutput> / <computeroutput>InputField</computeroutput> 수정 금지</para>
+</listitem><listitem><para><computeroutput>text-atlas-renderer.*</computeroutput> 수정 금지</para>
+</listitem><listitem><para>visual output이 바뀌는 최적화는 피한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md699">
+<title>데모 후 작업</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasRenderer</computeroutput> geometry-only update 조사 및 prototype</para>
+</listitem><listitem><para>partial relayout prototype</para>
+</listitem><listitem><para>shape-based exclusion API 설계</para>
+</listitem><listitem><para>public incremental exclusion API 설계</para>
+</listitem><listitem><para>bidi / cluster / emoji quality improvements</para>
+</listitem><listitem><para>variable line height 설계</para>
+</listitem></itemizedlist>
+</para>
+<para>데모 후 원칙:</para>
+<para><itemizedlist>
+<listitem><para>효과가 큰 구조 변경은 별도 branch / fixture / screenshot 비교와 함께 진행한다.</para>
+</listitem><listitem><para>기존 renderer 공유 경로를 건드리는 변경은 충분한 regression 범위를 확보한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md700">
+<title>13. 측정 / 검증 계획</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md701">
+<title>조건</title>
+<para><table rows="9" cols="2"><row>
+<entry thead="yes"><para>조건   </para>
+</entry><entry thead="yes"><para>값    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>status   </para>
+</entry><entry thead="no"><para>off(FPS-only), on(debug counters)    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>orb count   </para>
+</entry><entry thead="no"><para>2, 5, 6    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>band count   </para>
+</entry><entry thead="no"><para>5, 11    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>text length   </para>
+</entry><entry thead="no"><para>current, shorter, longer    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>threshold   </para>
+</entry><entry thead="no"><para>현재 sample에는 없음, 재도입 branch 또는 이전 build와 비교 시 on/off    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>word wrap   </para>
+</entry><entry thead="no"><para>current only    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>font size   </para>
+</entry><entry thead="no"><para>16, 20, 24    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>line height   </para>
+</entry><entry thead="no"><para>current, +0.2, -0.2   </para>
+</entry></row>
+</table>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md702">
+<title>측정 항목</title>
+<para><itemizedlist>
+<listitem><para>rough FPS</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> count</para>
+</listitem><listitem><para>layout count if available</para>
+</listitem><listitem><para>render call count if diagnostics enabled</para>
+</listitem><listitem><para>render skip count if diagnostics enabled</para>
+</listitem><listitem><para>glyph placement count</para>
+</listitem><listitem><para>visible line count</para>
+</listitem><listitem><para>exclusion region count</para>
+</listitem><listitem><para>renderer output renderer count</para>
+</listitem><listitem><para><computeroutput>ViewInterface::GetGlyphs()</computeroutput> call count</para>
+</listitem><listitem><para>last requested / returned glyph count</para>
+</listitem></itemizedlist>
+</para>
+<para>주의:</para>
+<para><itemizedlist>
+<listitem><para>sample FPS는 rough value다.</para>
+</listitem><listitem><para>status on은 측정 왜곡 가능성이 있다.</para>
+</listitem><listitem><para>debug counters는 off일 때 detailed formatting 비용이 없어야 한다.</para>
+</listitem><listitem><para>정확한 CPU profiling이 필요하면 sample-only timing 또는 external profiler로 분리한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioa3ed63f585390592b696864f73a3a392_1autotoc_md703">
+<title>14. 결론</title>
+<para>현재 남은 최적화는 단순 micro optimization보다 pipeline 구조 중복 제거가 중요하다.</para>
+<para>특히 먼저 확인해야 할 부분은 <computeroutput>UpdateRenderData()</computeroutput>와 <computeroutput>Renderer::Render()</computeroutput> / <computeroutput>ViewInterface</computeroutput> 데이터 경로의 중복 여부다. 현재 코드 기준으로 <computeroutput>UpdateRenderData()</computeroutput>가 만든 <computeroutput>mRenderData</computeroutput>는 <computeroutput>AtlasRenderer::Render()</computeroutput>에 직접 전달되지 않고, <computeroutput>Render()</computeroutput>는 <computeroutput>ViewInterface::GetGlyphs()</computeroutput>로 glyphs / positions를 다시 얻는다. 이 경로는 render update 비용을 줄일 수 있는 중요한 후보지만, render dirty clear 조건과 연결되어 있으므로 별도 커밋에서 조심히 다뤄야 한다.</para>
+<para>exclusion 쪽은 static / dynamic 분리와 vector/cache 재사용이 수요일 전 low-risk 후보에 가깝다. 반면 partial relayout은 효과 가능성은 크지만 word wrap 전파 때문에 데모 후 prototype으로 분리하는 것이 맞다.</para>
+<para>이번 구현으로 가장 자연스러웠던 1순위 후보인 **Move stable <computeroutput>GlyphLayoutCache</computeroutput> fields into <computeroutput>PreparedText</computeroutput>**는 1차 완료됐다.</para>
+<para>이 변경의 의미:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>의 핵심 설계인 prepare / layout 분리에 가장 잘 맞는다.</para>
+</listitem><listitem><para>word wrap 이후 layout pass마다 반복 생성되는 stable cache 비용을 줄인다.</para>
+</listitem><listitem><para>moving bounds에서는 text / font / fontSize가 유지되므로 효과가 직접적이다.</para>
+</listitem><listitem><para>public API 영향이 없다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput> 수정 없이 적용 가능하다.</para>
+</listitem><listitem><para>partial relayout이나 geometry-only update보다 위험이 낮다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이번 구현으로 render path 후보 중 하나였던 **Precompute renderer glyph positions in <computeroutput>AtlasViewAdapter</computeroutput>**도 1차 완료됐다.</para>
+<para>이번 구현으로 **Reduce redundant <computeroutput>UpdateRenderData()</computeroutput>**도 1차 완료됐다. <computeroutput>UpdateRenderData()</computeroutput>는 더 이상 glyph count만큼 render data vector를 만들지 않고, renderer ensure와 lightweight validation gate 역할만 수행한다.</para>
+<para>이번 구현으로 sample-level **static / dynamic exclusion split**도 1차 완료됐다. sample은 static title / drop cap / fixed columns cache와 dynamic orb / overlay cache를 분리하고, combined vector를 member로 재사용한다.</para>
+<para>이제 다음 구조 최적화 후보는 core layout cache와 남은 render copy path 쪽이다. render 쪽은 <computeroutput>ViewInterface::GetGlyphs()</computeroutput> copy path 분석과 incremental layout signature를 작은 커밋으로 이어갈 수 있고, exclusion 쪽은 core sorted exclusion cache를 데모 후 후보로 검토하는 것이 좋다.</para>
+<para>다음 세션에서 구조 최적화를 시작한다면 이 문서와 <computeroutput><ref refid="15-current-optimization-status_8ko_8md" kindref="compound">15-current-optimization-status.ko.md</ref></computeroutput>를 먼저 읽고, 위 후보 중 demo risk가 낮은 항목부터 작은 커밋으로 진행하는 것을 권장한다. </para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/17-structural-optimization-analysis.ko.md"/>
+  </compounddef>
+</doxygen>

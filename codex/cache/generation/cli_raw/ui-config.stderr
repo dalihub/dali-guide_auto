@@ -1,0 +1,2610 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e2607-54e8-7bb1-a6d7-2e0c55d6f96f
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Ui Config (ui-config)
+- Category: styling-theme-config
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 66
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::UiConfig | scope=primary
+- Dali::Ui::UiConfig::Apply | void Apply() | scope=primary_member
+- Dali::Ui::UiConfig::BrokenImageType | scope=primary_member
+- Dali::Ui::UiConfig::DownCast | UiConfig DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::UiConfig::EnableFocusClearOnEscape | UiConfig & EnableFocusClearOnEscape(bool enable) | scope=primary_member
+- Dali::Ui::UiConfig::GetBaselineDpi | int GetBaselineDpi() const | scope=primary_member
+- Dali::Ui::UiConfig::GetBrokenImageUrl | const Dali::String & GetBrokenImageUrl(BrokenImageType brokenImageType) const | scope=primary_member
+- Dali::Ui::UiConfig::GetDefaultFontSize | float GetDefaultFontSize() const | scope=primary_member
+- Dali::Ui::UiConfig::GetDefaultInteractionEffect | Trait GetDefaultInteractionEffect() const | scope=primary_member
+- Dali::Ui::UiConfig::GetDefaultPlaceholderTextColor | Vector4 GetDefaultPlaceholderTextColor() const | scope=primary_member
+- Dali::Ui::UiConfig::GetDefaultTextColor | Vector4 GetDefaultTextColor() const | scope=primary_member
+- Dali::Ui::UiConfig::GetDpi | int GetDpi() const | scope=primary_member
+- Dali::Ui::UiConfig::GetDpiFactor | float GetDpiFactor() const | scope=primary_member
+- Dali::Ui::UiConfig::GetExecutionKeyPredicate | ExecutionKeyPredicate GetExecutionKeyPredicate() const | scope=primary_member
+- Dali::Ui::UiConfig::GetKeyClickPolicy | KeyClickPolicy GetKeyClickPolicy() const | scope=primary_member
+- Dali::Ui::UiConfig::GetKeyLongPressThreshold | uint32_t GetKeyLongPressThreshold() const | scope=primary_member
+- Dali::Ui::UiConfig::GetMarqueeGap | float GetMarqueeGap() const | scope=primary_member
+- Dali::Ui::UiConfig::GetMarqueeLoopCount | int GetMarqueeLoopCount() const | scope=primary_member
+- Dali::Ui::UiConfig::GetMarqueeLoopDelay | float GetMarqueeLoopDelay() const | scope=primary_member
+- Dali::Ui::UiConfig::GetMarqueeOrientation | Text::MarqueeOrientation GetMarqueeOrientation() const | scope=primary_member
+- Dali::Ui::UiConfig::GetMarqueeSpeed | int GetMarqueeSpeed() const | scope=primary_member
+- Dali::Ui::UiConfig::GetMarqueeStopMode | Text::MarqueeStopMode GetMarqueeStopMode() const | scope=primary_member
+- Dali::Ui::UiConfig::GetScaledDpiFactor | float GetScaledDpiFactor() const | scope=primary_member
+- Dali::Ui::UiConfig::GetScalingFactor | float GetScalingFactor() const | scope=primary_member
+- Dali::Ui::UiConfig::GetTapRecognizerTime | uint32_t GetTapRecognizerTime() const | scope=primary_member
+- Dali::Ui::UiConfig::IsFocusClearOnEscapeEnabled | bool IsFocusClearOnEscapeEnabled() const | scope=primary_member
+- Dali::Ui::UiConfig::IsFocusIndicatorAlwaysShown | bool IsFocusIndicatorAlwaysShown() const | scope=primary_member
+- Dali::Ui::UiConfig::IsLabelAsyncRendering | bool IsLabelAsyncRendering() const | scope=primary_member
+- Dali::Ui::UiConfig::IsPlaceholderTextShownOnFocus | bool IsPlaceholderTextShownOnFocus() const | scope=primary_member
+- Dali::Ui::UiConfig::New | UiConfig New() | scope=primary_member
+- Dali::Ui::UiConfig::SetAlwaysShowFocus | UiConfig & SetAlwaysShowFocus(bool alwaysShow) | scope=primary_member
+- Dali::Ui::UiConfig::SetBaselineDpi | UiConfig & SetBaselineDpi(int baselineDpi) | scope=primary_member
+- Dali::Ui::UiConfig::SetBrokenImageUrl | UiConfig & SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String &brokenImageUrl) | scope=primary_member
+- Dali::Ui::UiConfig::SetDefaultFontSize | UiConfig & SetDefaultFontSize(float fontSize) | scope=primary_member
+- Dali::Ui::UiConfig::SetDefaultInteractionEffect | UiConfig & SetDefaultInteractionEffect(Trait effect) | scope=primary_member
+- Dali::Ui::UiConfig::SetDefaultPlaceholderTextColor | UiConfig & SetDefaultPlaceholderTextColor(const Vector4 &color) | scope=primary_member
+- Dali::Ui::UiConfig::SetDefaultTextColor | UiConfig & SetDefaultTextColor(const Vector4 &color) | scope=primary_member
+- Dali::Ui::UiConfig::SetDpi | UiConfig & SetDpi(int dpi) | scope=primary_member
+- Dali::Ui::UiConfig::SetExecutionKeyPredicate | UiConfig & SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) | scope=primary_member
+- Dali::Ui::UiConfig::SetKeyClickPolicy | UiConfig & SetKeyClickPolicy(KeyClickPolicy policy) | scope=primary_member
+- Dali::Ui::UiConfig::SetKeyLongPressThreshold | UiConfig & SetKeyLongPressThreshold(uint32_t threshold) | scope=primary_member
+- Dali::Ui::UiConfig::SetLabelAsyncRendering | UiConfig & SetLabelAsyncRendering(bool asyncRendering) | scope=primary_member
+- Dali::Ui::UiConfig::SetMarqueeGap | UiConfig & SetMarqueeGap(float gap) | scope=primary_member
+- Dali::Ui::UiConfig::SetMarqueeLoopCount | UiConfig & SetMarqueeLoopCount(int loopCount) | scope=primary_member
+- Dali::Ui::UiConfig::SetMarqueeLoopDelay | UiConfig & SetMarqueeLoopDelay(float delay) | scope=primary_member
+- Dali::Ui::UiConfig::SetMarqueeOrientation | UiConfig & SetMarqueeOrientation(Text::MarqueeOrientation orientation) | scope=primary_member
+- Dali::Ui::UiConfig::SetMarqueeSpeed | UiConfig & SetMarqueeSpeed(int speed) | scope=primary_member
+- Dali::Ui::UiConfig::SetMarqueeStopMode | UiConfig & SetMarqueeStopMode(Text::MarqueeStopMode stopMode) | scope=primary_member
+- Dali::Ui::UiConfig::SetScalingFactor | UiConfig & SetScalingFactor(float scalingFactor) | scope=primary_member
+- Dali::Ui::UiConfig::SetShowPlaceholderTextOnFocus | UiConfig & SetShowPlaceholderTextOnFocus(bool enabled) | scope=primary_member
+- Dali::Ui::UiConfig::SetTapRecognizerTime | UiConfig & SetTapRecognizerTime(uint32_t timeMs) | scope=primary_member
+- Dali::Ui::UiConfig::UiConfig | UiConfig()=default | scope=primary_member
+- Dali::Ui::UiConfig::operator= | UiConfig & operator=(const UiConfig &handle)=default | scope=primary_member
+- Dali::Ui::UiConfig::~UiConfig | ~UiConfig()=default | scope=primary_member
+- ui-config.autogen.h | scope=document_as_part_of_primary_feature
+- ui-config.autogen.h::DALI_UI_CHAIN_UICONFIG_METHODS | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::Text | scope=context_lookup
+- Dali::Ui::Text::Alignment | scope=context_lookup
+- Dali::Ui::Text::Alignment::CENTER | scope=context_lookup
+- Dali::Ui::Text::Alignment::END | scope=context_lookup
+- Dali::Ui::Text::Alignment::START | scope=context_lookup
+- Dali::Ui::Text::Bevel | scope=context_lookup
+- Dali::Ui::Text::Bevel::Bevel | Bevel() | scope=context_lookup
+- Dali::Ui::Text::Bevel::GetDirection | const Vector2 & GetDirection() const | scope=context_lookup
+- Dali::Ui::Text::Bevel::GetIntensity | float GetIntensity() const | scope=context_lookup
+- Dali::Ui::Text::Bevel::GetLightColor | const UiColor & GetLightColor() const | scope=context_lookup
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "confidence": 0.85,
+    "id": "ui-config_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::UiConfig::New",
+      "Dali::Ui::UiConfig::SetAlwaysShowFocus",
+      "Dali::Ui::UiConfig::SetBaselineDpi",
+      "Dali::Ui::UiConfig::SetBrokenImageUrl",
+      "Dali::Ui::UiConfig::SetDefaultFontSize",
+      "Dali::Ui::UiConfig::SetDefaultInteractionEffect",
+      "Dali::Ui::UiConfig::SetDefaultPlaceholderTextColor",
+      "Dali::Ui::UiConfig::SetDefaultTextColor",
+      "Dali::Ui::UiConfig::SetDpi",
+      "Dali::Ui::UiConfig::SetExecutionKeyPredicate",
+      "Dali::Ui::UiConfig::SetKeyClickPolicy",
+      "Dali::Ui::UiConfig::SetKeyLongPressThreshold",
+      "Dali::Ui::UiConfig::SetLabelAsyncRendering"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Prefer typed constructors and setters when available."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/text/text-example.cpp:89 (sample, score=1.0)
+```cpp
+mLabel2.AsyncHeightForWidthComputedSignal().Connect(this, &TextController::OnAsyncHeightForWidth);
+    mLabel3.AsyncHeightForWidthComputedSignal().Connect(this, &TextController::OnAsyncHeightForWidth);
+
+    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+  }
+
+  void OnAsyncRenderFinished(View view, float width, float height)
+  {
+    Label label = Label::DownCast(view);
+    if(label)
+    {
+    }
+  }
+
+  void OnAsyncNaturalSize(View view, float width, float height)
+  {
+    Label label = Label::DownCast(view);
+    if(label)
+    {
+    }
+  }
+
+  void OnAsyncHeightForWidth(View view, float width, float height)
+  {
+```
+
+- repos/dali-ui/samples/text/text-marquee-example.cpp:37 (sample, score=1.0)
+```cpp
+}
+
+private:
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xFFFFFF));
+
+    window.Add(StackLayout::New(StackOrientation::VERTICAL)
+      .SetSpacing(STACK_SPACING)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .Children({
+        Label::New("Text Marquee Example\n"
+                   "Test options:\n"
+                   "[1] Start Marquee, [2] Stop Marquee, [i] Information\n"
+                   "Text::MarqueeOrientation::HORIZONTAL")
+          .SetFontSize(14.0f)
+          .SetMultiLine(true)
+          .SetLineHeight(1.6f)
+          .SetFocusable(true)
+          .SetTouchFocusable(true),
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "END",
+      "New",
+      "START",
+      "SetDefaultPlaceholderTextColor",
+      "SetLabelAsyncRendering",
+      "SetShowPlaceholderTextOnFocus",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/text/text-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 168,
+    "snippet_start_line": 89
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "END",
+      "New",
+      "START",
+      "SetLabelAsyncRendering",
+      "SetMarqueeLoopCount",
+      "SetMarqueeOrientation",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/text/text-marquee-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 116,
+    "snippet_start_line": 37
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "New",
+      "START",
+      "SetMarqueeGap",
+      "SetMarqueeLoopCount",
+      "SetMarqueeLoopDelay",
+      "SetMarqueeOrientation",
+      "SetMarqueeSpeed",
+      "SetMarqueeStopMode",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/text/text-render-scale-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 189,
+    "snippet_start_line": 110
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "New",
+      "START",
+      "SetLabelAsyncRendering",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/text/text-emoji-example.cpp",
+    "relevance": "strong",
+    "score": 0.95,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 321,
+    "snippet_start_line": 242
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "New",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/attachment/my-button-example.cpp",
+    "relevance": "strong",
+    "score": 0.85,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 124,
+    "snippet_start_line": 45
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "New",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/image-view/animated-image-view-example.cpp",
+    "relevance": "strong",
+    "score": 0.85,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 132,
+    "snippet_start_line": 53
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "New",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-color-example.cpp",
+    "relevance": "strong",
+    "score": 0.85,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 144,
+    "snippet_start_line": 65
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alignment",
+      "Apply",
+      "CENTER",
+      "DownCast",
+      "New",
+      "Text",
+      "UiConfig"
+    ],
+    "path": "repos/dali-ui/samples/image-view/image-loading-policy-example.cpp",
+    "relevance": "strong",
+    "score": 0.85,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 173,
+    "snippet_start_line": 94
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui/public-api/config/ui-config.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/config/ui-config.h: No such file or directory
+
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/dali-ui/public-api/config/ui-config.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ exited 2 in 0ms:
+sed: can't read repos/dali-ui/dali-ui/public-api/config/ui-config.autogen.h: No such file or directory
+
+exec
+/bin/bash -lc 'rg -n "class UiConfig|UiConfig::|DALI_UI_CHAIN_UICONFIG_METHODS|BrokenImageType|KeyClickPolicy|ExecutionKeyPredicate" repos/dali-ui -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/wiki/Configuration-(kr).md:33:  UiConfig::New()
+repos/dali-ui/wiki/Configuration-(kr).md:68:| Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Clicked 이벤트 발생이 key press 시점인지 release 시점인지 설정 |
+repos/dali-ui/wiki/Configuration-(kr).md:69:| Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | 클릭 실행으로 인식할 키를 결정하는 함수 |
+repos/dali-ui/wiki/Configuration.md:36:  UiConfig::New()
+repos/dali-ui/wiki/Configuration.md:71:| Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
+repos/dali-ui/wiki/Configuration.md:72:| Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | Function that determines which key triggers a click |
+repos/dali-ui/wiki/Ui-Scale-(Kr).md:7:| **정적 스케일** (`ScalingFactor`, `_spx`, `_sdp`) | 시작 시 `UiConfig::Apply()`로 고정, 런타임 변경 불가 | 앱 / 프레임워크 개발자 |
+repos/dali-ui/wiki/Ui-Scale-(Kr).md:138:- `ScalingFactor` = `1.5` (시작 시 `UiConfig::SetScalingFactor()`로 설정)
+repos/dali-ui/wiki/Unit-&-Scale.md:28:UiConfig::New()
+repos/dali-ui/wiki/Unit-&-Scale.md:59:> Unit literals require `UiConfig::Apply()` to have been called first.
+repos/dali-ui/wiki/Unit-&-Scale.md:66:> so the unit conversion may execute before `UiConfig::Apply()` has been called.
+repos/dali-ui/wiki/Focus-&-Key.md:238:view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);    // Fire Clicked signal on key-down
+repos/dali-ui/wiki/Focus-&-Key.md:271:| `SetKeyClickPolicy` | Default key-click timing (ON_RELEASE / ON_PRESS / DISABLED) |
+repos/dali-ui/wiki/Focus-&-Key.md:272:| `SetExecutionKeyPredicate` | Function that determines which keys trigger clicked/long-pressed execution (default: "Return") |
+repos/dali-ui/wiki/Focus-&-Key.md:281:UiConfig::New()
+repos/dali-ui/wiki/Focus-&-Key.md:282:  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // Fire clicked signal when the key is released
+repos/dali-ui/wiki/Focus-&-Key.md:283:  .SetExecutionKeyPredicate(MyKeyPredicate)        // Treat Return and KP_Enter as click keys
+repos/dali-ui/wiki/Focus-&-Key.md:289:> `SetExecutionKeyPredicate` only accepts a plain function pointer (no capturing lambdas). Pass `nullptr` to restore the default ("Return").
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:236:view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS); // 키 다운 시 클릭 시그널 발동
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:267:| `SetKeyClickPolicy` | 기본 키 클릭 발동 시점 (ON_RELEASE / ON_PRESS / DISABLED) |
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:268:| `SetExecutionKeyPredicate` | 클릭/롱프레스를 트리거하는 키 판별 함수 (기본값: "Return") |
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:277:UiConfig::New()
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:278:  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // 키를 뗄 때 클릭 시그널 발동
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:279:  .SetExecutionKeyPredicate(MyKeyPredicate)        // Return, KP_Enter를 클릭 키로 인식
+repos/dali-ui/wiki/Focus-&-Key-(kr).md:285:> `SetExecutionKeyPredicate`는 캡처 없는 함수 포인터만 허용합니다. `nullptr`를 전달하면 기본값("Return")으로 복원됩니다.
+repos/dali-ui/wiki/Color-&-Theme.md:132:**2. Subclass UiConfigImpl and override CreateThemeLoader()**
+repos/dali-ui/wiki/Unit-&-Scale-(kr).md:24:UiConfig::New()
+repos/dali-ui/wiki/Unit-&-Scale-(kr).md:55:> 단위 리터럴은 `UiConfig::Apply()` 이후에만 사용할 수 있습니다.
+repos/dali-ui/wiki/Unit-&-Scale-(kr).md:62:> `UiConfig::Apply()`가 호출되기 전에 단위 변환이 실행될 수 있습니다.
+repos/dali-ui/wiki/Ui-Scale.md:9:| **Static scale** (`ScalingFactor`, `_spx`, `_sdp`) | At startup via `UiConfig::Apply()`, frozen at runtime | App / framework developer |
+repos/dali-ui/wiki/Ui-Scale.md:140:- `ScalingFactor` = `1.5` (set via `UiConfig::SetScalingFactor()` at startup)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:4:#define DALI_UI_CHAIN_UICONFIG_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:8:  * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()). \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:11:  ChildClass& SetScalingFactor(float scalingFactor) { UiConfig::SetScalingFactor(scalingFactor); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:18:  ChildClass& SetDpi(int dpi) { UiConfig::SetDpi(dpi); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:25:  ChildClass& SetBaselineDpi(int baselineDpi) { UiConfig::SetBaselineDpi(baselineDpi); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:32:  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { UiConfig::SetKeyClickPolicy(policy); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:42:  * @note This parameter is a plain function pointer (ExecutionKeyPredicate). \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:52:  * @param[in] predicate A function pointer matching the ExecutionKeyPredicate \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:60:  *   UiConfig::New() \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:61:  *     .SetExecutionKeyPredicate(MyKeyPredicate) \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:65:  ChildClass& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) { UiConfig::SetExecutionKeyPredicate(predicate); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:77:  ChildClass& SetKeyLongPressThreshold(uint32_t threshold) { UiConfig::SetKeyLongPressThreshold(threshold); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:84:  ChildClass& SetTapRecognizerTime(uint32_t timeMs) { UiConfig::SetTapRecognizerTime(timeMs); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:96:  ChildClass& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl) { UiConfig::SetBrokenImageUrl(brokenImageType, brokenImageUrl); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:104:  ChildClass& EnableFocusClearOnEscape(bool enable) { UiConfig::EnableFocusClearOnEscape(enable); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:112:  ChildClass& SetDefaultInteractionEffect(Trait effect) { UiConfig::SetDefaultInteractionEffect(effect); return *this; }
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:187:   * @return The active KeyClickPolicy for this button.
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:189:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:194:   * @param policy The KeyClickPolicy to be applied (OnRelease, OnPress, or Disabled).
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.h:196:  void SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:43:using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:47:class UiConfigImpl;
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:66: *    UiConfig::New()
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:89:  enum class BrokenImageType
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:174:   * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:238:  UiConfig& SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:245:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:256:   * @note This parameter is a plain function pointer (ExecutionKeyPredicate).
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:266:   * @param[in] predicate A function pointer matching the ExecutionKeyPredicate
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:274:   *   UiConfig::New()
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:275:   *     .SetExecutionKeyPredicate(MyKeyPredicate)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:279:  UiConfig& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:286:  ExecutionKeyPredicate GetExecutionKeyPredicate() const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:335:  UiConfig& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:346:  const Dali::String& GetBrokenImageUrl(BrokenImageType brokenImageType) const;
+repos/dali-ui/dali-ui-foundation/public-api/key-click-policy.h:28:enum class KeyClickPolicy : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:105:KeyClickPolicy InteractiveTrait::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:107:  return GetImpl(*this).GetKeyClickPolicy();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:110:void InteractiveTrait::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-trait.cpp:112:  GetImpl(*this).SetKeyClickPolicy(policy);
+repos/dali-ui/manual-tests/dali-ui-foundation/main.cpp:271:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:31:UiConfig::UiConfig(Integration::UiConfigImpl* impl)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:36:UiConfig UiConfig::New()
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:46:UiConfig UiConfig::DownCast(BaseHandle handle)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:51:void UiConfig::Apply()
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:58:UiConfig& UiConfig::SetScalingFactor(float scalingFactor)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:64:float UiConfig::GetScalingFactor() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:69:float UiConfig::GetDpiFactor() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:74:float UiConfig::GetScaledDpiFactor() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:79:UiConfig& UiConfig::SetDpi(int dpi)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:85:int UiConfig::GetDpi() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:90:UiConfig& UiConfig::SetBaselineDpi(int baselineDpi)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:96:int UiConfig::GetBaselineDpi() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:101:UiConfig& UiConfig::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:103:  GetImpl(*this).SetKeyClickPolicy(policy);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:107:KeyClickPolicy UiConfig::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:109:  return GetImpl(*this).GetKeyClickPolicy();
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:112:UiConfig& UiConfig::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:114:  GetImpl(*this).SetExecutionKeyPredicate(predicate);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:118:ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:120:  return GetImpl(*this).GetExecutionKeyPredicate();
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:123:UiConfig& UiConfig::SetKeyLongPressThreshold(uint32_t count)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:129:uint32_t UiConfig::GetKeyLongPressThreshold() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:134:UiConfig& UiConfig::SetTapRecognizerTime(uint32_t timeMs)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:140:uint32_t UiConfig::GetTapRecognizerTime() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:145:UiConfig& UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:151:const Dali::String& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType) const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:156:UiConfig& UiConfig::EnableFocusClearOnEscape(bool enable)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:162:bool UiConfig::IsFocusClearOnEscapeEnabled() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:167:UiConfig& UiConfig::SetAlwaysShowFocus(bool alwaysShow)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:173:bool UiConfig::IsFocusIndicatorAlwaysShown() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:178:UiConfig& UiConfig::SetDefaultFontSize(float fontSize)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:184:float UiConfig::GetDefaultFontSize() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:189:UiConfig& UiConfig::SetDefaultTextColor(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:195:Vector4 UiConfig::GetDefaultTextColor() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:200:UiConfig& UiConfig::SetDefaultPlaceholderTextColor(const Vector4& color)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:206:Vector4 UiConfig::GetDefaultPlaceholderTextColor() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:211:UiConfig& UiConfig::SetShowPlaceholderTextOnFocus(bool enabled)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:217:bool UiConfig::IsPlaceholderTextShownOnFocus() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:222:UiConfig& UiConfig::SetMarqueeSpeed(int speed)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:228:int UiConfig::GetMarqueeSpeed() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:233:UiConfig& UiConfig::SetMarqueeLoopCount(int loopCount)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:239:int UiConfig::GetMarqueeLoopCount() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:244:UiConfig& UiConfig::SetMarqueeLoopDelay(float delay)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:250:float UiConfig::GetMarqueeLoopDelay() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:255:UiConfig& UiConfig::SetMarqueeGap(float gap)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:261:float UiConfig::GetMarqueeGap() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:266:UiConfig& UiConfig::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:272:Text::MarqueeStopMode UiConfig::GetMarqueeStopMode() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:277:UiConfig& UiConfig::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:283:Text::MarqueeOrientation UiConfig::GetMarqueeOrientation() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:288:UiConfig& UiConfig::SetLabelAsyncRendering(bool asyncRendering)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:294:bool UiConfig::IsLabelAsyncRendering() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:299:UiConfig& UiConfig::SetDefaultInteractionEffect(Trait effect)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:305:Trait UiConfig::GetDefaultInteractionEffect() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:124:KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:126:  return GetImpl(*this).GetInteractiveTrait().GetKeyClickPolicy();
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:129:InteractiveView& InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.cpp:131:  GetImpl(*this).GetInteractiveTrait().SetKeyClickPolicy(policy);
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:23:  * @param[in] policy The KeyClickPolicy to apply \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:24:  * @see InteractiveTrait::SetKeyClickPolicy \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:26:  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { InteractiveView::SetKeyClickPolicy(policy); return *this; } \
+repos/dali-ui/samples/text/text-layout-direction-example.cpp:116:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-marquee-example.cpp:350:  UiConfig::New()
+repos/dali-ui/samples/text/text-style-bevel-example.cpp:177:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-emoji-example.cpp:1739:  UiConfig::New().SetLabelAsyncRendering(true).Apply();
+repos/dali-ui/samples/text/text-scale-example.cpp:377:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-example.cpp:417:  UiConfig::New()
+repos/dali-ui/samples/text/text-fit-candidate-example.cpp:221:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-markup-example.cpp:112:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-font-variation-example.cpp:260:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-style-example.cpp:329:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-cutout-mask-example.cpp:202:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-fit-example.cpp:213:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-input-field-example.cpp:856:  UiConfig::New().Apply();
+repos/dali-ui/samples/text/text-render-scale-example.cpp:526:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:113:   * @copydoc Dali::Ui::InteractiveTrait::GetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:115:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:118:   * @copydoc Dali::Ui::InteractiveTrait::SetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:120:  void SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.h:231:  KeyClickPolicy                       mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:193:   * @return The active KeyClickPolicy
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:194:   * @see InteractiveTrait::GetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:196:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:201:   * @param[in] policy The KeyClickPolicy to apply
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:202:   * @see InteractiveTrait::SetKeyClickPolicy
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:204:  InteractiveView& SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/samples/attachment/my-button-example.cpp:149:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:34:bool DefaultExecutionKeyPredicate(const Dali::String& keyName)
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:56:  mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:69:  mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:111:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:122:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:133:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:143:void UiConfigImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:145:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:146:  mKeyClickPolicy = policy;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:149:KeyClickPolicy UiConfigImpl::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:151:  return mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:154:void UiConfigImpl::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:156:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:157:  DALI_ASSERT_ALWAYS(predicate && "ExecutionKeyPredicate must not be null");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:158:  mExecutionKeyPredicate = predicate;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:161:ExecutionKeyPredicate UiConfigImpl::GetExecutionKeyPredicate() const
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:163:  return mExecutionKeyPredicate;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:168:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:179:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:188:void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:190:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:195:    DALI_LOG_ERROR("Invalid BrokenImageType: [%d]\n", index);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:202:const Dali::String& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:207:    DALI_LOG_ERROR("Invalid BrokenImageType: [%d]\n", index);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:221:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:232:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:243:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:254:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:265:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:276:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:287:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:298:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:309:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:320:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:331:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:342:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:353:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp:364:  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+repos/dali-ui/samples/attachment/attachment-example.cpp:133:  UiConfig::New().Apply();
+repos/dali-ui/samples/web-view/web-view-example.cpp:279:  UiConfig::New().Apply();
+repos/dali-ui/samples/web-view/web-browser-example.cpp:301:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:41:class UiConfigImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:145:  void SetKeyClickPolicy(KeyClickPolicy policy);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:152:  KeyClickPolicy GetKeyClickPolicy() const;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:160:  void SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:167:  ExecutionKeyPredicate GetExecutionKeyPredicate() const;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:200:   * @copydoc UiConfig::SetBrokenImageUrl
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:202:  void SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:205:   * @copydoc UiConfig::GetBrokenImageUrl
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:207:  const Dali::String& GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:426:   * @brief Called after this config is applied via UiConfig::Apply().
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:473:  ExecutionKeyPredicate    mExecutionKeyPredicate;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.h:486:  KeyClickPolicy           mKeyClickPolicy;
+repos/dali-ui/samples/stacklayout/stacklayout-layout-direction-example.cpp:121:  UiConfig::New().Apply();
+repos/dali-ui/samples/visual-base/color-visual-example.cpp:316:  UiConfig::New().Apply();
+repos/dali-ui/samples/scrollview/scrollview-interactive-children.cpp:268:  UiConfig::New().Apply();
+repos/dali-ui/samples/color-controls/test-config.h:36:  DALI_UI_CHAIN_UICONFIG_METHODS(TestConfig);
+repos/dali-ui/samples/visual-base/image-visual-example.cpp:328:  UiConfig::New().Apply();
+repos/dali-ui/samples/visual-base/animated-image-visual-example.cpp:326:  UiConfig::New().Apply();
+repos/dali-ui/samples/text-visualizer/text-breaker-example.cpp:1182:  UiConfig::New().Apply();
+repos/dali-ui/samples/text-visualizer/text-visualizer-performance-example.cpp:892:  UiConfig::New().Apply();
+repos/dali-ui/samples/animation/animation-example.cpp:96:  UiConfig::New().Apply();
+repos/dali-ui/samples/gridlayout/gridlayout-layout-direction-example.cpp:144:  UiConfig::New().Apply();
+repos/dali-ui/samples/flexlayout/flexlayout-layout-direction-example.cpp:120:  UiConfig::New().Apply();
+repos/dali-ui/samples/customlayout/customlayout-diagonal-layout-direction-example.cpp:167:  UiConfig::New().Apply();
+repos/dali-ui/samples/viewlayout/view-layout-direction-example.cpp:138:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-manager.h:36:class UiConfigManagerImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-manager-impl.h:37:class UiConfigManagerImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.cpp:40:  "Call UiConfig::New().Apply() in main() before the application main loop starts. "
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:39:  mKeyClickPolicy(UiConfigManager::Get().GetConfig().GetKeyClickPolicy()),
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:134:KeyClickPolicy InteractiveTraitImpl::GetKeyClickPolicy() const
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:136:  return mKeyClickPolicy;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:139:void InteractiveTraitImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:141:  mKeyClickPolicy = policy;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:353:  return UiConfigManager::Get().GetConfig().GetExecutionKeyPredicate()(keyName);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:423:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE && !mClickBlockedByKey;
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:428:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_PRESS && (mPressedExecutionKeyCount == 1);
+repos/dali-ui/dali-ui-foundation/integration-api/interactive-trait-impl.cpp:433:  return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
+repos/dali-ui/dali-ui-foundation/integration-api/ui-config-manager-impl.cpp:44:  "Call UiConfig::New().Apply() in main() before the application main loop starts. "
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:250:    trait.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:257:  DALI_TEST_EQUALS(static_cast<uint32_t>(clickable.GetKeyClickPolicy()),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:258:                   static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:349:int UtcDaliInteractiveTraitKeyClickPolicyDefaultP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:355:  KeyClickPolicy policy = clickable.GetKeyClickPolicy();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:356:  DALI_TEST_CHECK(static_cast<uint32_t>(policy) <= static_cast<uint32_t>(KeyClickPolicy::RESERVED));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:360:int UtcDaliInteractiveTraitSetKeyClickPolicyP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:365:  clickable.SetKeyClickPolicy(KeyClickPolicy::DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:366:  DALI_TEST_EQUALS(static_cast<uint32_t>(clickable.GetKeyClickPolicy()),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:367:                   static_cast<uint32_t>(KeyClickPolicy::DISABLED),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:516:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:548:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveTrait.cpp:571:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::DISABLED);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:350:int UtcDaliInteractiveViewKeyClickPolicyP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:355:  view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:356:  DALI_TEST_EQUALS(static_cast<uint32_t>(view.GetKeyClickPolicy()),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-InteractiveView.cpp:357:                   static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-SelectableTrait.cpp:538:  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-test-application.cpp:43:  Ui::UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/animated-image-view-example.cpp:520:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-fitting-mode-example.cpp:324:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-view-fit-size-to-image-example.cpp:179:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-sampling-desired-size-example.cpp:596:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-color-example.cpp:325:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-view-example.cpp:86:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-pixel-area-example.cpp:421:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-loading-policy-example.cpp:613:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-view-with-layout-example.cpp:136:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/lottie-animation-view-example.cpp:539:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-view-npatch-example.cpp:243:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-view-sizing-example.cpp:330:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-alpha-mask-example.cpp:395:  UiConfig::New().Apply();
+repos/dali-ui/samples/image-view/image-placeholder-example.cpp:209:  UiConfig::New().Apply();
+repos/dali-ui/samples/hello-world/hello-world-example.cpp:74:  UiConfig::New().Apply();
+repos/dali-ui/samples/ui-scale/ui-scale-example.cpp:1401:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-components/public-api/ui-component-config.h:128:  DALI_UI_CHAIN_UICONFIG_METHODS(UiComponentConfig)
+repos/dali-ui/samples/absolutelayout/absolutelayout-layout-direction-example.cpp:118:  UiConfig::New().Apply();
+repos/dali-ui/dali-ui-components/public-api/ui-component-config.autogen.h:5:  DALI_UI_CHAIN_UICONFIG_METHODS(ChildClass)
+
+exec
+/bin/bash -lc "sed -n '1,420p' repos/dali-ui/dali-ui-foundation/public-api/ui-config.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/base-handle.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/key-click-policy.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/trait.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+/**
+ * @brief Function pointer type for determining whether a key triggers click execution.
+ *
+ * @param[in] keyName The name of the key
+ * @return True if the key should trigger click execution
+ */
+using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
+
+namespace Integration
+{
+class UiConfigImpl;
+}
+
+#include "ui-config.autogen.h"
+/**
+ * @brief An immutable-after-init configuration object for dali-ui global settings.
+ *
+ * UiConfig holds display and scaling parameters that affect unit calculations
+ * (spx, dp, sdp) across the entire dali-ui framework.
+ *
+ * Setter methods may only be called before the config is applied via Apply().
+ * After that point, any setter call will trigger an assertion failure.
+ *
+ * Setters return a reference to this object to support fluent method chaining:
+ * @code
+ *  int main(int argc, char** argv)
+ *  {
+ *    Application application = Application::New(&argc, &argv);
+ *
+ *    UiConfig::New()
+ *       .SetScalingFactor(1.5f)
+ *       .SetDpi(320)
+ *       .Apply();
+ *
+ *    HelloWorldController test(application);
+ *    application.MainLoop();
+ *
+ *    return 0;
+ *  }
+ * @endcode
+ */
+class DALI_UI_API UiConfig : public BaseHandle
+{
+public:
+  /**
+   * @brief The type of broken image for image loading failures.
+   *
+   * Different broken image types allow different broken images to be used
+   * based on the size of the view that needs to display them.
+   * For example, a small icon view can use a compact broken image (SMALL),
+   * while a large image view can use a more detailed broken image (LARGE).
+   */
+  enum class BrokenImageType
+  {
+    SMALL  = 0, ///< Broken image for small-sized views
+    NORMAL = 1, ///< Broken image for normal-sized views
+    LARGE  = 2  ///< Broken image for large-sized views
+  };
+
+public:
+  /**
+   * @brief Creates an uninitialized UiConfig handle.
+   */
+  UiConfig() = default;
+
+  /**
+   * @brief Destructor.
+   */
+  ~UiConfig() = default;
+
+  /**
+   * @brief Copy constructor.
+   *
+   * @param[in] handle Handle to copy
+   */
+  UiConfig(const UiConfig& handle) = default;
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  UiConfig(UiConfig&& rhs) noexcept = default;
+
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  UiConfig& operator=(const UiConfig& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  UiConfig& operator=(UiConfig&& rhs) noexcept = default;
+
+  /**
+   * @brief Creates a new UiConfig with default values.
+   *
+   * Default: scalingFactor=1.0f, dpi=160, baselineDpi=160.
+   *
+   * @return An initialized UiConfig handle
+   */
+  static UiConfig New();
+
+  /**
+   * @brief Downcasts a handle to a UiConfig handle.
+   *
+   * If handle points to a UiConfig, the downcast produces a valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a UiConfig or an uninitialized handle
+   */
+  static UiConfig DownCast(BaseHandle handle);
+
+public: // Properties
+  /**
+   * @brief Applies the UiConfig as the global configuration for given application.
+   *
+   * This must be called exactly once, typically in main() before the application
+   * main loop starts. After this call, the config is frozen and its setter methods
+   * can no longer be used. Unit literals (_spx, _dp, _sdp) require this to be
+   * called before they can be used.
+   *
+   * Calling Apply() more than once triggers an assertion failure.
+   */
+  void Apply();
+
+  // @CHAIN_START(UiConfig)
+  /**
+   * @brief Sets the scaling factor applied to spx and sdp units.
+   *
+   * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
+   * @param[in] scalingFactor The scaling factor value
+   */
+  UiConfig& SetScalingFactor(float scalingFactor);
+
+  /**
+   * @brief Retrieves the scaling factor.
+   *
+   * @return The scaling factor applied to spx and sdp units
+   */
+  float GetScalingFactor() const;
+
+  /**
+   * @brief Retrieves the DPI factor (dpi / baselineDpi).
+   *
+   * @pre The config must be frozen (i.e. Apply() must have been called).
+   * @return The computed DPI factor
+   */
+  float GetDpiFactor() const;
+
+  /**
+   * @brief Retrieves the scaled DPI factor (dpiFactor * scalingFactor).
+   *
+   * @pre The config must be frozen (i.e. Apply() must have been called).
+   * @return The computed scaled DPI factor
+   */
+  float GetScaledDpiFactor() const;
+
+  /**
+   * @brief Sets the screen DPI used for dp and sdp unit calculations.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] dpi The dots-per-inch value of the target display
+   */
+  UiConfig& SetDpi(int dpi);
+
+  /**
+   * @brief Retrieves the screen DPI.
+   *
+   * @return The dots-per-inch value of the target display
+   */
+  int GetDpi() const;
+
+  /**
+   * @brief Sets the baseline DPI used as the reference for dp calculations.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] baselineDpi The baseline dots-per-inch value
+   */
+  UiConfig& SetBaselineDpi(int baselineDpi);
+
+  /**
+   * @brief Retrieves the baseline DPI.
+   *
+   * @return The baseline dots-per-inch used as the reference for dp calculations
+   */
+  int GetBaselineDpi() const;
+
+  /**
+   * @brief Sets the default key click policy for clickable views.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] policy The key click policy
+   */
+  UiConfig& SetKeyClickPolicy(KeyClickPolicy policy);
+
+  /**
+   * @brief Retrieves the default key click policy.
+   *
+   * @return The key click policy
+   */
+  KeyClickPolicy GetKeyClickPolicy() const;
+
+  /**
+   * @brief Sets the predicate used to determine whether a key event triggers
+   * click execution (e.g. "Return", "KP_Enter").
+   *
+   * When a key event is received by a clickable View, this predicate is called
+   * with the key name. If it returns @c true, the View treats the key as a
+   * click execution key and fires the click action. The default predicate
+   * matches "Return" only.
+   *
+   * @note This parameter is a plain function pointer (ExecutionKeyPredicate).
+   * Lambdas with captures and member function pointers are not accepted.
+   * Only free functions or stateless lambdas may be used.
+   *
+   * @note Passing @c nullptr restores the default predicate that matches "Return".
+   *
+   * @pre The config must not be frozen (i.e. Apply() must not have been called).
+   * Calling this method after Apply() triggers an assert in debug builds and
+   * is ignored in release builds.
+   *
+   * @param[in] predicate A function pointer matching the ExecutionKeyPredicate
+   *                      signature, or @c nullptr to restore the default
+   * @return Reference to this UiConfig for method chaining
+   *
+   * @code
+   *   bool MyKeyPredicate(const Dali::String& keyName) {
+   *     return keyName == "Return" || keyName == "KP_Enter";
+   *   }
+   *   UiConfig::New()
+   *     .SetExecutionKeyPredicate(MyKeyPredicate)
+   *     .Apply();
+   * @endcode
+   */
+  UiConfig& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
+
+  /**
+   * @brief Retrieves the execution key predicate.
+   *
+   * @return The current execution key predicate function pointer
+   */
+  ExecutionKeyPredicate GetExecutionKeyPredicate() const;
+
+  /**
+   * @brief Sets the threshold for recognizing a key long-press.
+   *
+   * When a key is held down, the system generates repeated key press events.
+   * This threshold defines how many consecutive key press events must be
+   * received before the input is recognized as a long-press action.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] threshold The minimum number of consecutive key press events
+   *                      required to trigger a long-press
+   */
+  UiConfig& SetKeyLongPressThreshold(uint32_t threshold);
+
+  /**
+   * @brief Retrieves the threshold for recognizing a key long-press.
+   *
+   * @return The minimum number of consecutive key press events required
+   *         to trigger a long-press
+   */
+  uint32_t GetKeyLongPressThreshold() const;
+
+  /**
+   * @brief Sets the tap recognizer time limit in milliseconds.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] timeMs The time limit in milliseconds
+   */
+  UiConfig& SetTapRecognizerTime(uint32_t timeMs);
+
+  /**
+   * @brief Retrieves the tap recognizer time limit.
+   *
+   * @return The time limit in milliseconds
+   */
+  uint32_t GetTapRecognizerTime() const;
+
+  /**
+   * @brief Sets an image to be displayed when image loading fails.
+   *
+   * This method configures a broken image that will be shown in image views (e.g., ImageView)
+   * when the requested image fails to load properly. Using different broken image types
+   * allows for appropriate broken images based on the target view size.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
+   * @param[in] brokenImageUrl The URL of the broken image to use
+   */
+  UiConfig& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
+
+  /**
+   * @brief Gets the image URL to be displayed when image loading fails.
+   *
+   * Retrieves the broken image URL that was previously set for the specified broken image type.
+   * This image will be shown in image views when the requested image fails to load.
+   *
+   * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
+   * @return A reference to the broken image URL string
+   */
+  const Dali::String& GetBrokenImageUrl(BrokenImageType brokenImageType) const;
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Sets whether to clear focus when the Escape key is pressed.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enable True to enable focus clearing on Escape key
+   * @return Reference to this for method chaining
+   */
+  UiConfig& EnableFocusClearOnEscape(bool enable);
+
+  /**
+   * @brief Retrieves whether to clear focus when the Escape key is pressed.
+   *
+   * @return True if focus clearing on Escape key is enabled
+   */
+  bool IsFocusClearOnEscapeEnabled() const;
+
+  /**
+   * @brief Sets whether to always show the keyboard focus indicator.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] alwaysShow True to always show focus indicator
+   * @return Reference to this for method chaining
+   */
+  UiConfig& SetAlwaysShowFocus(bool alwaysShow);
+
+  /**
+   * @brief Retrieves whether to always show the keyboard focus indicator.
+   *
+   * @return True if focus indicator is always shown
+   */
+  bool IsFocusIndicatorAlwaysShown() const;
+
+  /**
+   * @brief Sets the default font point-size for text elements.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] fontSize The default font size in points
+   */
+  UiConfig& SetDefaultFontSize(float fontSize);
+
+  /**
+   * @brief Retrieves the default font point-size.
+   *
+   * @return The default font size in points
+   */
+  float GetDefaultFontSize() const;
+
+  /**
+   * @brief Sets the default text color for text elements.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] color The default text color
+   */
+  UiConfig& SetDefaultTextColor(const Vector4& color);
+
+  /**
+   * @brief Retrieves the default text color.
+   *
+   * @return The default text color
+   */
+  Vector4 GetDefaultTextColor() const;
+
+  /**
+   * @brief Sets the default placeholder text color.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] color The default placeholder text color.
+   */
+  UiConfig& SetDefaultPlaceholderTextColor(const Vector4& color);
+
+  /**
+   * @brief Returns the default placeholder text color.
+
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+// Generated by dali-ui preprocessor. Do not modify.
+#pragma once
+
+#define DALI_UI_CHAIN_UICONFIG_METHODS(ChildClass) \
+  /** \
+  * @brief Sets the scaling factor applied to spx and sdp units. \
+  * \
+  * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()). \
+  * @param[in] scalingFactor The scaling factor value \
+  */ \
+  ChildClass& SetScalingFactor(float scalingFactor) { UiConfig::SetScalingFactor(scalingFactor); return *this; } \
+  /** \
+  * @brief Sets the screen DPI used for dp and sdp unit calculations. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] dpi The dots-per-inch value of the target display \
+  */ \
+  ChildClass& SetDpi(int dpi) { UiConfig::SetDpi(dpi); return *this; } \
+  /** \
+  * @brief Sets the baseline DPI used as the reference for dp calculations. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] baselineDpi The baseline dots-per-inch value \
+  */ \
+  ChildClass& SetBaselineDpi(int baselineDpi) { UiConfig::SetBaselineDpi(baselineDpi); return *this; } \
+  /** \
+  * @brief Sets the default key click policy for clickable views. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] policy The key click policy \
+  */ \
+  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { UiConfig::SetKeyClickPolicy(policy); return *this; } \
+  /** \
+  * @brief Sets the predicate used to determine whether a key event triggers \
+  * click execution (e.g. "Return", "KP_Enter"). \
+  * \
+  * When a key event is received by a clickable View, this predicate is called \
+  * with the key name. If it returns @c true, the View treats the key as a \
+  * click execution key and fires the click action. The default predicate \
+  * matches "Return" only. \
+  * \
+  * @note This parameter is a plain function pointer (ExecutionKeyPredicate). \
+  * Lambdas with captures and member function pointers are not accepted. \
+  * Only free functions or stateless lambdas may be used. \
+  * \
+  * @note Passing @c nullptr restores the default predicate that matches "Return". \
+  * \
+  * @pre The config must not be frozen (i.e. Apply() must not have been called). \
+  * Calling this method after Apply() triggers an assert in debug builds and \
+  * is ignored in release builds. \
+  * \
+  * @param[in] predicate A function pointer matching the ExecutionKeyPredicate \
+  *                      signature, or @c nullptr to restore the default \
+  * @return Reference to this UiConfig for method chaining \
+  * \
+  * @code \
+  *   bool MyKeyPredicate(const Dali::String& keyName) { \
+  *     return keyName == "Return" || keyName == "KP_Enter"; \
+  *   } \
+  *   UiConfig::New() \
+  *     .SetExecutionKeyPredicate(MyKeyPredicate) \
+  *     .Apply(); \
+  * @endcode \
+  */ \
+  ChildClass& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) { UiConfig::SetExecutionKeyPredicate(predicate); return *this; } \
+  /** \
+  * @brief Sets the threshold for recognizing a key long-press. \
+  * \
+  * When a key is held down, the system generates repeated key press events. \
+  * This threshold defines how many consecutive key press events must be \
+  * received before the input is recognized as a long-press action. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] threshold The minimum number of consecutive key press events \
+  *                      required to trigger a long-press \
+  */ \
+  ChildClass& SetKeyLongPressThreshold(uint32_t threshold) { UiConfig::SetKeyLongPressThreshold(threshold); return *this; } \
+  /** \
+  * @brief Sets the tap recognizer time limit in milliseconds. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] timeMs The time limit in milliseconds \
+  */ \
+  ChildClass& SetTapRecognizerTime(uint32_t timeMs) { UiConfig::SetTapRecognizerTime(timeMs); return *this; } \
+  /** \
+  * @brief Sets an image to be displayed when image loading fails. \
+  * \
+  * This method configures a broken image that will be shown in image views (e.g., ImageView) \
+  * when the requested image fails to load properly. Using different broken image types \
+  * allows for appropriate broken images based on the target view size. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE) \
+  * @param[in] brokenImageUrl The URL of the broken image to use \
+  */ \
+  ChildClass& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl) { UiConfig::SetBrokenImageUrl(brokenImageType, brokenImageUrl); return *this; } \
+  /** \
+  * @brief Sets whether to clear focus when the Escape key is pressed. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] enable True to enable focus clearing on Escape key \
+  * @return Reference to this for method chaining \
+  */ \
+  ChildClass& EnableFocusClearOnEscape(bool enable) { UiConfig::EnableFocusClearOnEscape(enable); return *this; } \
+  /** \
+  * @brief Sets the default interaction effect applied to views when AsInteractive() is called. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] effect A Trait implementing InteractionEffectInterface, or Trait{} to disable the default \
+  * @return Reference to this for method chaining \
+  */ \
+  ChildClass& SetDefaultInteractionEffect(Trait effect) { UiConfig::SetDefaultInteractionEffect(effect); return *this; }
+
+exec
+/bin/bash -lc "sed -n '1,80p' repos/dali-ui/dali-ui-foundation/public-api/key-click-policy.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <cstdint>
+
+namespace Dali::Ui
+{
+/**
+ * @brief Defines the policy for when a click event is triggered via key input.
+ * This policy is specifically for D-Pad, Remote, or Keyboard interactions.
+ */
+enum class KeyClickPolicy : uint32_t
+{
+  /**
+   * @brief Trigger click when the key is released.
+   */
+  ON_RELEASE = 0,
+
+  /**
+   * @brief Trigger click immediately when the key is pressed.
+   */
+  ON_PRESS = 1,
+
+  /**
+   * @brief Disables click events from key inputs.
+   */
+  DISABLED = 2,
+
+  /**
+   * @brief Reserved for future expansion.
+   */
+  RESERVED = 99
+};
+} // namespace Dali::Ui
+
+exec
+/bin/bash -lc "sed -n '1,390p' repos/dali-ui/dali-ui-foundation/integration-api/ui-config-impl.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/integration-api/ui-config-impl.h>
+
+// EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/window-system-devel.h>
+#include <dali/devel-api/text-abstraction/font-client.h>
+#include <dali/integration-api/debug.h>
+#include <dali/public-api/common/dali-common.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/default-theme-loader.h>
+#include <dali-ui-foundation/integration-api/ui-config-impl.h>
+
+namespace
+{
+
+bool DefaultExecutionKeyPredicate(const Dali::String& keyName)
+{
+  return keyName == "Return";
+}
+
+#if defined(DEBUG_ENABLED)
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_UI_CONFIG");
+#endif
+
+} // unnamed namespace
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Integration
+{
+
+UiConfigImpl::UiConfigImpl()
+: mDefaultInteractionEffect(Trait()),
+  mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
+  mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)),
+  mDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f)),
+  mScalingFactor(1.0f),
+  mDefaultFontSize(16.0f),
+  mDpi(160),
+  mBaselineDpi(160),
+  mMarqueeSpeed(80),
+  mMarqueeLoopCount(2),
+  mMarqueeLoopDelay(1.0f),
+  mMarqueeGap(50.0f),
+  mMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE),
+  mMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL),
+  mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
+  mKeyLongPressThreshold(3),
+  mTapRecognizerTime(UINT32_MAX),
+  mClearFocusOnEscape(true),
+  mAlwaysShowFocus(true),
+  mShowPlaceholderTextOnFocus(true),
+  mLabelAsyncRendering(false),
+  mFrozen(false)
+{
+}
+
+UiConfigImpl::~UiConfigImpl() = default;
+
+UiConfigImplPtr UiConfigImpl::New()
+{
+  return UiConfigImplPtr(new UiConfigImpl());
+}
+
+void UiConfigImpl::Freeze()
+{
+  mFrozen                = true;
+  mCachedDpiFactor       = static_cast<float>(mDpi) / static_cast<float>(mBaselineDpi);
+  mCachedScaledDpiFactor = mCachedDpiFactor * mScalingFactor;
+}
+
+bool UiConfigImpl::IsFrozen() const
+{
+  return mFrozen;
+}
+
+float UiConfigImpl::GetDpiFactor() const
+{
+  return mCachedDpiFactor;
+}
+
+float UiConfigImpl::GetScaledDpiFactor() const
+{
+  return mCachedScaledDpiFactor;
+}
+
+void UiConfigImpl::SetScalingFactor(float scalingFactor)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mScalingFactor = scalingFactor;
+}
+
+float UiConfigImpl::GetScalingFactor() const
+{
+  return mScalingFactor;
+}
+
+void UiConfigImpl::SetDpi(int dpi)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mDpi = dpi;
+}
+
+int UiConfigImpl::GetDpi() const
+{
+  return mDpi;
+}
+
+void UiConfigImpl::SetBaselineDpi(int baselineDpi)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  DALI_ASSERT_ALWAYS(mBaselineDpi != 0 && "Baseline dpi could not be 0");
+  mBaselineDpi = baselineDpi;
+}
+
+int UiConfigImpl::GetBaselineDpi() const
+{
+  return mBaselineDpi;
+}
+
+void UiConfigImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mKeyClickPolicy = policy;
+}
+
+KeyClickPolicy UiConfigImpl::GetKeyClickPolicy() const
+{
+  return mKeyClickPolicy;
+}
+
+void UiConfigImpl::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  DALI_ASSERT_ALWAYS(predicate && "ExecutionKeyPredicate must not be null");
+  mExecutionKeyPredicate = predicate;
+}
+
+ExecutionKeyPredicate UiConfigImpl::GetExecutionKeyPredicate() const
+{
+  return mExecutionKeyPredicate;
+}
+
+void UiConfigImpl::SetKeyLongPressThreshold(uint32_t count)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mKeyLongPressThreshold = count;
+}
+
+uint32_t UiConfigImpl::GetKeyLongPressThreshold() const
+{
+  return mKeyLongPressThreshold;
+}
+
+void UiConfigImpl::SetTapRecognizerTime(uint32_t timeMs)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mTapRecognizerTime = timeMs;
+}
+
+uint32_t UiConfigImpl::GetTapRecognizerTime() const
+{
+  return mTapRecognizerTime;
+}
+
+void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+
+  uint32_t index = static_cast<uint32_t>(brokenImageType);
+  if(index >= 3)
+  {
+    DALI_LOG_ERROR("Invalid BrokenImageType: [%d]\n", index);
+    return;
+  }
+
+  mBrokenImageUrls[index] = brokenImageUrl;
+}
+
+const Dali::String& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const
+{
+  uint32_t index = static_cast<uint32_t>(brokenImageType);
+  if(index >= 3)
+  {
+    DALI_LOG_ERROR("Invalid BrokenImageType: [%d]\n", index);
+    return mBrokenImageUrls[0];
+  }
+
+  return mBrokenImageUrls[index];
+}
+
+std::vector<Dali::String> UiConfigImpl::GetBrokenImageUrlList() const
+{
+  return {mBrokenImageUrls[0], mBrokenImageUrls[1], mBrokenImageUrls[2]};
+}
+
+void UiConfigImpl::EnableFocusClearOnEscape(bool enable)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mClearFocusOnEscape = enable;
+}
+
+bool UiConfigImpl::IsFocusClearOnEscapeEnabled() const
+{
+  return mClearFocusOnEscape;
+}
+
+void UiConfigImpl::SetAlwaysShowFocus(bool alwaysShow)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mAlwaysShowFocus = alwaysShow;
+}
+
+bool UiConfigImpl::IsFocusIndicatorAlwaysShown() const
+{
+  return mAlwaysShowFocus;
+}
+
+void UiConfigImpl::SetDefaultFontSize(float fontSize)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mDefaultFontSize = fontSize;
+}
+
+float UiConfigImpl::GetDefaultFontSize() const
+{
+  return mDefaultFontSize;
+}
+
+void UiConfigImpl::SetDefaultTextColor(const Vector4& color)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mDefaultTextColor = color;
+}
+
+Vector4 UiConfigImpl::GetDefaultTextColor() const
+{
+  return mDefaultTextColor;
+}
+
+void UiConfigImpl::SetDefaultPlaceholderTextColor(const Vector4& color)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mDefaultPlaceholderTextColor = color;
+}
+
+Vector4 UiConfigImpl::GetDefaultPlaceholderTextColor() const
+{
+  return mDefaultPlaceholderTextColor;
+}
+
+void UiConfigImpl::SetShowPlaceholderTextOnFocus(bool enabled)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mShowPlaceholderTextOnFocus = enabled;
+}
+
+bool UiConfigImpl::IsPlaceholderTextShownOnFocus() const
+{
+  return mShowPlaceholderTextOnFocus;
+}
+
+void UiConfigImpl::SetMarqueeSpeed(int speed)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeSpeed = speed;
+}
+
+int UiConfigImpl::GetMarqueeSpeed() const
+{
+  return mMarqueeSpeed;
+}
+
+void UiConfigImpl::SetMarqueeLoopCount(int loopCount)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeLoopCount = loopCount;
+}
+
+int UiConfigImpl::GetMarqueeLoopCount() const
+{
+  return mMarqueeLoopCount;
+}
+
+void UiConfigImpl::SetMarqueeLoopDelay(float delay)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeLoopDelay = delay;
+}
+
+float UiConfigImpl::GetMarqueeLoopDelay() const
+{
+  return mMarqueeLoopDelay;
+}
+
+void UiConfigImpl::SetMarqueeGap(float gap)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeGap = gap;
+}
+
+float UiConfigImpl::GetMarqueeGap() const
+{
+  return mMarqueeGap;
+}
+
+void UiConfigImpl::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeStopMode = stopMode;
+}
+
+Text::MarqueeStopMode UiConfigImpl::GetMarqueeStopMode() const
+{
+  return mMarqueeStopMode;
+}
+
+void UiConfigImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeOrientation = orientation;
+}
+
+Text::MarqueeOrientation UiConfigImpl::GetMarqueeOrientation() const
+{
+  return mMarqueeOrientation;
+}
+
+void UiConfigImpl::SetLabelAsyncRendering(bool asyncRendering)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mLabelAsyncRendering = asyncRendering;
+}
+
+bool UiConfigImpl::IsLabelAsyncRendering() const
+{
+  return mLabelAsyncRendering;
+}
+
+void UiConfigImpl::SetDefaultInteractionEffect(Trait effect)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mDefaultInteractionEffect = effect;
+}
+
+Trait UiConfigImpl::GetDefaultInteractionEffect() const
+{
+  return mDefaultInteractionEffect;
+}
+
+void UiConfigImpl::OnApplied()
+{
+}
+
+void UiConfigImpl::OnApplicationCreated()
+{
+  Dali::TextAbstraction::EnableDesignCompatibility();
+
+  // TODO Disable default focus ring when default interaction effect applied.
+  // auto  handle           = FocusManager::Get();
+  // auto& focusManagerImpl = GetImpl(handle);
+  // focusManagerImpl.EnableFocusIndicator(false);
+
+  Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
+}
+
+ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()
+{
+
+exec
+/bin/bash -lc "sed -n '360,450p' repos/dali-ui/samples/text/text-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+    }
+    else if(event.GetKeyName() == "5")
+    {
+      mLabel2.RequestAsyncHeightForWidth(220);
+      mLabel3.RequestAsyncHeightForWidth(220);
+    }
+    else if(event.GetKeyName() == "6")
+    {
+      mLabel2.RequestAsyncHeightForWidth(440);
+      mLabel3.RequestAsyncHeightForWidth(440);
+    }
+    else if(event.GetKeyName() == "7")
+    {
+      mLabel2.SetPadding(Extents(0, 0, 0, 0));
+      mLabel3.SetPadding(Extents(0, 0, 0, 0));
+    }
+    else if(event.GetKeyName() == "8")
+    {
+      mLabel2.SetPadding(Extents(20, 20, 20, 20));
+      mLabel3.SetPadding(Extents(20, 20, 20, 20));
+    }
+
+    else if(event.GetKeyName() == "q")
+    {
+      UiScaleManager::Get().SetScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      UiScaleManager::Get().SetScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      UiScaleManager::Get().SetScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      UiScaleManager::Get().SetScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      UiScaleManager::Get().SetScale(2.0f);
+    }
+  }
+
+private:
+  Application& mApplication;
+  Label        mLabel;
+  Label        mLabel2;
+  Label        mLabel3;
+  Label        mLineHeightLabel;
+  Label        mLineHeightLabel2;
+  InputField   mField;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New()
+    .SetLabelAsyncRendering(true)
+    .SetDefaultPlaceholderTextColor(Color::DARK_GRAY)
+    .SetShowPlaceholderTextOnFocus(false)
+    .Apply();
+
+  TextController controller(application);
+  application.MainLoop();
+
+  return 0;
+}
+
+exec
+/bin/bash -lc "sed -n '330,370p' repos/dali-ui/samples/text/text-marquee-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  }
+
+private:
+  Application& mApplication;
+  Label        mLabelLtr;
+  Label        mLabelRtl;
+  Label        mLabelMultiline;
+  Label        mLabelFocus;
+  Label        mOverflowLabel;
+  Label        mOverflowLabelRtl;
+  Label        mOverflowLabelMultiline;
+  Label        mOverflowLabelFocus;
+  Label        mLabelVerticalStart;
+  Label        mLabelVerticalCenter;
+  Label        mLabelVerticalEnd;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New()
+    .SetLabelAsyncRendering(true)
+    .SetMarqueeLoopCount(1)
+    .Apply();
+
+  TextController controller(application);
+  application.MainLoop();
+
+  return 0;
+}
+
+exec
+/bin/bash -lc 'rg -n "enum class Marquee|MarqueeOrientation|MarqueeStopMode" repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h repos/dali-ui/dali-ui-foundation/public-api -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:124:enum class MarqueeTriggerPolicy : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:143:enum class MarqueeOrientation : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:162:enum class MarqueeStopMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/label-properties.h:192:     * @details Name "marqueeOrientation", type Text::MarqueeOrientation (Property::INTEGER) or Property::STRING.
+repos/dali-ui/dali-ui-foundation/public-api/text/label-properties.h:193:     * @see Label::SetMarqueeOrientation(), Label::GetMarqueeOrientation().
+repos/dali-ui/dali-ui-foundation/public-api/text/label-properties.h:199:     * @details Name "marqueeStopMode", type Text::MarqueeStopMode (Property::INTEGER) or Property::STRING.
+repos/dali-ui/dali-ui-foundation/public-api/text/label-properties.h:200:     * @see Label::SetMarqueeStopMode(), Label::GetMarqueeStopMode().
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:347:Label& Label::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:349:  GetImpl(*this).SetMarqueeOrientation(orientation);
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:353:Text::MarqueeOrientation Label::GetMarqueeOrientation() const
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:355:  return GetImpl(*this).GetMarqueeOrientation();
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:358:Label& Label::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:360:  GetImpl(*this).SetMarqueeStopMode(stopMode);
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:364:Text::MarqueeStopMode Label::GetMarqueeStopMode() const
+repos/dali-ui/dali-ui-foundation/public-api/label.cpp:366:  return GetImpl(*this).GetMarqueeStopMode();
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:507:  UiConfig& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:514:  Text::MarqueeStopMode GetMarqueeStopMode() const;
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:522:  UiConfig& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.h:529:  Text::MarqueeOrientation GetMarqueeOrientation() const;
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:182:  ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { Label::SetMarqueeOrientation(orientation); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:188:  ChildClass& SetMarqueeStopMode(Text::MarqueeStopMode stopMode) { Label::SetMarqueeStopMode(stopMode); return *this; } \
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:266:UiConfig& UiConfig::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:268:  GetImpl(*this).SetMarqueeStopMode(stopMode);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:272:Text::MarqueeStopMode UiConfig::GetMarqueeStopMode() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:274:  return GetImpl(*this).GetMarqueeStopMode();
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:277:UiConfig& UiConfig::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:279:  GetImpl(*this).SetMarqueeOrientation(orientation);
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:283:Text::MarqueeOrientation UiConfig::GetMarqueeOrientation() const
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.cpp:285:  return GetImpl(*this).GetMarqueeOrientation();
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:124:enum class MarqueeTriggerPolicy : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:143:enum class MarqueeOrientation : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h:162:enum class MarqueeStopMode : uint8_t
+repos/dali-ui/dali-ui-foundation/public-api/label.h:538:  Label& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:545:  Text::MarqueeOrientation GetMarqueeOrientation() const;
+repos/dali-ui/dali-ui-foundation/public-api/label.h:552:  Label& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+repos/dali-ui/dali-ui-foundation/public-api/label.h:559:  Text::MarqueeStopMode GetMarqueeStopMode() const;
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1005:   * The stopping behavior follows the current MarqueeStopMode:
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1006:   * - MarqueeStopMode::IMMEDIATE:
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1009:   * - MarqueeStopMode::FINISH_LOOP:
+
+exec
+/bin/bash -lc "sed -n '1,140p' repos/dali-ui/wiki/Configuration.md" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr))
+
+# Configuration
+
+dali-ui requires you to create a Config object and call `Apply()` at application startup.
+Until `Apply()` is called, key features including unit literals (`_spx`, `_dp`, `_sdp`) will
+not work correctly. Once `Apply()` is called, the configuration is frozen and cannot be
+changed at runtime.
+
+<br/>
+
+## Which Config should I use?
+
+The Config class depends on which library you are using.
+
+| Library | Config Class | Header |
+|---|---|---|
+| `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
+| `dali-ui-components` | `UiComponentConfig` | `<dali-ui-components/public-api/ui-component-config.h>` |
+
+`UiComponentConfig` inherits from `UiConfig` and supports all the same settings.
+If you are using `dali-ui-components`, always use `UiComponentConfig`.
+
+<br/>
+
+## Basic Usage
+
+<ins>Example</ins>
+
+```cpp
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+
+  // Apply() must be called before application.MainLoop().
+  UiConfig::New()
+    .SetDpi(320)
+    .SetScalingFactor(1.5f)
+    .Apply();
+
+  MyAppController controller(application);
+  application.MainLoop();
+  return 0;
+}
+```
+
+When using `dali-ui-components`:
+
+```cpp
+UiComponentConfig::New()
+  .SetDpi(320)
+  .SetScalingFactor(1.5f)
+  .Apply();
+```
+
+For a full working example, see the [hello-world sample](https://github.com/dalihub/dali-ui/tree/main/samples/hello-world).
+
+<br/>
+
+## Configuration Options
+
+The following describes key configuration options. For the full API, see [UiConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiConfig.html), [UiComponentConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiComponentConfig.html).
+
+| Option | Method | Default | Description |
+|---|---|---|---|
+| Scaling Factor | `SetScalingFactor(float)` | `1.0f` | Scale multiplier applied to `spx` and `sdp` units |
+| DPI | `SetDpi(int)` | `160` | Physical DPI of the target display |
+| Baseline DPI | `SetBaselineDpi(int)` | `160` | Reference DPI used for `dp` calculations |
+| Default Font Size | `SetDefaultFontSize(float)` | `16.0f` | Default font size for text elements (pt) |
+| Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | Default color for text elements |
+| Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
+| Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | Function that determines which key triggers a click |
+| Min Long Press Key Count | `SetMinLongPressKeyCount(uint32_t)` | — | Minimum key repeat count to trigger a long-press |
+| Tap Recognizer Time | `SetTapRecognizerTime(uint32_t)` | — | Time limit for tap recognition (ms) |
+| Broken Image URL | `SetBrokenImageUrl(type, url)` | — | Fallback image shown on load failure (SMALL/NORMAL/LARGE) |
+| Focus Clear on Escape | `EnableFocusClearOnEscape(bool)` | — | Whether to clear focus when Escape is pressed |
+| Always Show Focus | `SetAlwaysShowFocus(bool)` | — | Whether to always show the focus indicator |
+
+<br/>
+
+## For Framework Library Developers
+
+If you are building a platform- or device-specific framework library, you can subclass `UiConfig`
+or `UiComponentConfig` to define a pre-configured Config class and distribute it to app developers.
+
+```cpp
+// TVConfig.h (defined and distributed by the Framework developer)
+class TVConfig : public Dali::Ui::UiComponentConfig
+{
+public:
+  static TVConfig New()
+  {
+    return UiComponentConfig::New()
+      .SetDpi(72)
+      .SetScalingFactor(2.0f)
+      .SetDefaultFontSize(28.0f);
+  }
+};
+```
+
+App developers can then apply the platform configuration with a single line:
+
+```cpp
+TVConfig::New().Apply();
+```
+
+<br/>
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+exec
+/bin/bash -lc "sed -n '420,570p' repos/dali-ui/dali-ui-foundation/public-api/ui-config.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   * @brief Returns the default placeholder text color.
+   *
+   * @return The default placeholder text color.
+   */
+  Vector4 GetDefaultPlaceholderTextColor() const;
+
+  /**
+   * @brief Sets whether the placeholder text is shown when the control has focus.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enabled True to show the placeholder text when focused, false otherwise.
+   */
+  UiConfig& SetShowPlaceholderTextOnFocus(bool enabled);
+
+  /**
+   * @brief Returns whether the placeholder text is shown when the control has focus.
+   *
+   * @return True if the placeholder text is shown when focused, false otherwise.
+   */
+  bool IsPlaceholderTextShownOnFocus() const;
+
+  /**
+   * @brief Sets the marquee speed in pixels per second.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] speed The marquee speed in pixels per second
+   */
+  UiConfig& SetMarqueeSpeed(int speed);
+
+  /**
+   * @brief Retrieves the marquee speed.
+   *
+   * @return The marquee speed in pixels per second
+   */
+  int GetMarqueeSpeed() const;
+
+  /**
+   * @brief Sets the number of complete loops for marquee.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] loopCount The number of loops
+   */
+  UiConfig& SetMarqueeLoopCount(int loopCount);
+
+  /**
+   * @brief Retrieves the number of complete loops for marquee.
+   *
+   * @return The number of loops
+   */
+  int GetMarqueeLoopCount() const;
+
+  /**
+   * @brief Sets the amount of time to delay the start of marquee and further loops.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] delay The delay time in seconds
+   */
+  UiConfig& SetMarqueeLoopDelay(float delay);
+
+  /**
+   * @brief Retrieves the amount of time to delay the start of marquee and further loops.
+   *
+   * @return The delay time in seconds
+   */
+  float GetMarqueeLoopDelay() const;
+
+  /**
+   * @brief Sets the gap before marquee wraps.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] gap The gap in pixels
+   */
+  UiConfig& SetMarqueeGap(float gap);
+
+  /**
+   * @brief Retrieves the gap before marquee wraps.
+   *
+   * @return The gap in pixels
+   */
+  float GetMarqueeGap() const;
+
+  /**
+   * @brief Sets the marquee stop behaviour.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] stopMode The marquee stop mode
+   */
+  UiConfig& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @brief Retrieves the marquee stop behaviour.
+   *
+   * @return The marquee stop mode
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
+
+  /**
+   * @brief Sets the marquee orientation.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] orientation The marquee orientation
+   */
+  UiConfig& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+
+  /**
+   * @brief Retrieves the marquee orientation.
+   *
+   * @return The marquee orientation
+   */
+  Text::MarqueeOrientation GetMarqueeOrientation() const;
+
+  /**
+   * @brief Sets whether Label uses asynchronous text rendering by default.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] asyncRendering True to enable asynchronous rendering for Label by default,
+   * false to use synchronous rendering.
+   */
+  UiConfig& SetLabelAsyncRendering(bool asyncRendering);
+
+  /**
+   * @brief Retrieves whether Label uses asynchronous text rendering by default.
+   *
+   * @return True if asynchronous rendering is enabled for Label by default
+   */
+  bool IsLabelAsyncRendering() const;
+
+  /**
+   * @brief Sets the default interaction effect applied to views when AsInteractive() is called.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] effect A Trait implementing InteractionEffectInterface, or Trait{} to disable the default
+   * @return Reference to this for method chaining
+   */
+  UiConfig& SetDefaultInteractionEffect(Trait effect);
+
+  /**
+   * @brief Returns the default interaction effect.
+   *
+   * @return The default interaction effect handle, or an uninitialized Trait if none is set
+   */
+  Trait GetDefaultInteractionEffect() const;
+
+  // @CHAIN_END
+
+public: // Not intended for Application developers
+  /**
+   * @brief This constructor is used internally to wrap an implementation object.
+   *
+   * @param[in] impl A pointer to the internal UiConfig implementation
+   */
+
+exec
+/bin/bash -lc "sed -n '135,180p' repos/dali-ui/dali-ui-foundation/public-api/text/text-enumerations.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+   */
+  ON_OVERFLOW = 1
+};
+
+/**
+ * @brief Enumeration for selecting the orientation of the marquee animation.
+ * Defines whether the marquee scrolls horizontally or vertically.
+ */
+enum class MarqueeOrientation : uint8_t
+{
+  /**
+   * @brief Scrolls horizontally.
+   * The effective scroll direction is determined by the layout direction
+   * and the text direction (e.g., left-to-right or right-to-left).
+   */
+  HORIZONTAL = 0,
+  /**
+   * @brief Scrolls vertically.
+   * The content scrolls from bottom to top.
+   */
+  VERTICAL = 1
+};
+
+/**
+ * @brief Enumeration for defining how the marquee stops.
+ * Specifies the behavior when a stop request is issued.
+ */
+enum class MarqueeStopMode : uint8_t
+{
+  /**
+   * @brief Stops the marquee immediately.
+   * The current scrolling position is not preserved.
+   */
+  IMMEDIATE = 0,
+  /**
+   * @brief Stops the marquee after the current loop finishes.
+   * The marquee continues until the current cycle completes,
+   * then stops at the loop boundary.
+   */
+  FINISH_LOOP = 1
+};
+
+/**
+ * @brief Enumeration for text overflow handling.
+ * Specifies how text is rendered when it exceeds the available layout bounds.
+ */
+
+exec
+/bin/bash -lc "sed -n '1,95p' repos/dali-ui/samples/hello-world/hello-world-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using Dali::Ui::View;
+
+// This example shows how to create and display Hello World! using a simple TextActor
+class HelloWorldController : public ConnectionTracker
+{
+public:
+
+  HelloWorldController(Application& application)
+    : mApplication(application)
+  {
+    // Connect to the Application's Init signal
+    mApplication.InitSignal().Connect(this, &HelloWorldController::Create);
+  }
+
+  ~HelloWorldController() = default; // Nothing to do in destructor
+
+  // The Init signal is received once (only) during the Application lifetime
+  void Create(Application application)
+  {
+    // Get a handle to the window
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    window.Add(Layout::New() // Parent
+      .SetBackgroundColor(UiColor(0xFFFF00))
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
+      .Children({
+        InteractiveView::New() // Red child
+          .SetBackgroundColor(UiColor(0xFF0000))
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+            mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
+            return true;
+          }),
+        View::New() // Blue child
+          .SetBackgroundColor(UiColor(0x0000FF))
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
+          .SetRequestedPositionX(100_spx)
+          .SetRequestedPositionY(100_spx)
+          .As(mSecondChild)
+      }));
+  }
+
+private:
+  Application& mApplication;
+  View mSecondChild;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  HelloWorldController test(application);
+  application.MainLoop();
+  return 0;
+}
+
+codex
+---
+title: Ui Config
+sidebar_label: Ui Config
+category: styling-theme-config
+---
+
+# Ui Config
+
+`Dali::Ui::UiConfig` defines global dali-ui defaults that must be applied once during application startup.
+
+## Table of Contents
+
+- [Apply Ui Config at Startup](#apply-ui-config-at-startup)
+- [Scaling and DPI Defaults](#scaling-and-dpi-defaults)
+- [Text Defaults](#text-defaults)
+- [Keyboard, Focus, and Tap Defaults](#keyboard-focus-and-tap-defaults)
+- [Broken Image Fallbacks](#broken-image-fallbacks)
+- [Marquee Defaults](#marquee-defaults)
+- [Reading Back Applied Values](#reading-back-applied-values)
+- [Generated Chain Methods](#generated-chain-methods)
+
+## Apply Ui Config at Startup
+
+Create the global configuration with `Dali::Ui::UiConfig::New()`, configure it with typed setters, and finish with `Dali::Ui::UiConfig::Apply()`. Setter methods return `Dali::Ui::UiConfig&`, so startup configuration is usually written as a fluent chain.
+
+Call `Dali::Ui::UiConfig::Apply()` once before application views are created or before code relies on configured dali-ui defaults. After `Dali::Ui::UiConfig::Apply()`, the configuration is frozen and setter methods are no longer intended to be called.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ApplyUiDefaults()
+{
+  UiConfig::New()
+    .SetDpi(320)
+    .SetBaselineDpi(160)
+    .SetScalingFactor(1.25f)
+    .Apply();
+}
+```
+
+A default configuration is also valid when the application does not need custom values.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyDefaultUiConfig()
+{
+  UiConfig::New().Apply();
+}
+```
+
+## Scaling and DPI Defaults
+
+`Dali::Ui::UiConfig` owns the app-wide values used by dali-ui unit calculations. `Dali::Ui::UiConfig::SetDpi()` sets the target display DPI, `Dali::Ui::UiConfig::SetBaselineDpi()` sets the reference DPI, and `Dali::Ui::UiConfig::SetScalingFactor()` sets the scale multiplier for scalable UI units.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+UiConfig CreateScaledUiConfig()
+{
+  UiConfig config = UiConfig::New();
+
+  config
+    .SetDpi(320)
+    .SetBaselineDpi(160)
+    .SetScalingFactor(1.5f);
+
+  return config;
+}
+```
+
+After the configuration is applied, `Dali::Ui::UiConfig::GetDpiFactor()` returns `dpi / baselineDpi`, and `Dali::Ui::UiConfig::GetScaledDpiFactor()` returns that DPI factor multiplied by `Dali::Ui::UiConfig::GetScalingFactor()`.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyAndReadScale()
+{
+  UiConfig config = UiConfig::New()
+    .SetDpi(320)
+    .SetBaselineDpi(160)
+    .SetScalingFactor(1.5f);
+
+  config.Apply();
+
+  const float dpiFactor = config.GetDpiFactor();
+  const float scaledDpiFactor = config.GetScaledDpiFactor();
+  const float scalingFactor = config.GetScalingFactor();
+
+  (void)dpiFactor;
+  (void)scaledDpiFactor;
+  (void)scalingFactor;
+}
+```
+
+## Text Defaults
+
+Use `Dali::Ui::UiConfig::SetDefaultFontSize()`, `Dali::Ui::UiConfig::SetDefaultTextColor()`, and `Dali::Ui::UiConfig::SetDefaultPlaceholderTextColor()` to establish text defaults for dali-ui text controls. `Dali::Ui::UiConfig::SetShowPlaceholderTextOnFocus()` controls whether placeholder text remains visible when a text input has focus, and `Dali::Ui::UiConfig::SetLabelAsyncRendering()` controls the default asynchronous rendering mode for labels.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ApplyTextDefaults()
+{
+  UiConfig::New()
+    .SetDefaultFontSize(18.0f)
+    .SetDefaultTextColor(Vector4(0.08f, 0.08f, 0.08f, 1.0f))
+    .SetDefaultPlaceholderTextColor(Vector4(0.45f, 0.45f, 0.45f, 0.8f))
+    .SetShowPlaceholderTextOnFocus(false)
+    .SetLabelAsyncRendering(true)
+    .Apply();
+}
+```
+
+You can keep a handle and query the configured text values before or after applying the configuration.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ConfigureAndInspectTextDefaults()
+{
+  UiConfig config = UiConfig::New()
+    .SetDefaultFontSize(16.0f)
+    .SetDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f))
+    .SetDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f));
+
+  const float fontSize = config.GetDefaultFontSize();
+  const Vector4 textColor = config.GetDefaultTextColor();
+  const Vector4 placeholderColor = config.GetDefaultPlaceholderTextColor();
+
+  (void)fontSize;
+  (void)textColor;
+  (void)placeholderColor;
+
+  config.Apply();
+}
+```
+
+## Keyboard, Focus, and Tap Defaults
+
+`Dali::Ui::UiConfig` also owns app-wide interaction defaults. `Dali::Ui::UiConfig::SetKeyClickPolicy()` selects when key input triggers click execution, `Dali::Ui::UiConfig::SetExecutionKeyPredicate()` selects which key names count as execution keys, and `Dali::Ui::UiConfig::SetKeyLongPressThreshold()` sets the repeated key-press count needed for a long press.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+bool IsExecutionKey(const Dali::String& keyName)
+{
+  return keyName == "Return" || keyName == "KP_Enter";
+}
+
+void ApplyKeyboardDefaults()
+{
+  UiConfig::New()
+    .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)
+    .SetExecutionKeyPredicate(IsExecutionKey)
+    .SetKeyLongPressThreshold(4u)
+    .SetTapRecognizerTime(250u)
+    .Apply();
+}
+```
+
+Focus defaults are configured with `Dali::Ui::UiConfig::SetAlwaysShowFocus()` and `Dali::Ui::UiConfig::EnableFocusClearOnEscape()`.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyFocusDefaults()
+{
+  UiConfig::New()
+    .SetAlwaysShowFocus(true)
+    .EnableFocusClearOnEscape(true)
+    .Apply();
+}
+```
+
+## Broken Image Fallbacks
+
+`Dali::Ui::UiConfig::SetBrokenImageUrl()` configures image URLs used when image loading fails. The type is selected with `Dali::Ui::UiConfig::BrokenImageType`, so small, normal, and large view sizes can use different fallback assets.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void ApplyBrokenImageDefaults()
+{
+  UiConfig::New()
+    .SetBrokenImageUrl(UiConfig::BrokenImageType::SMALL, Dali::String("assets/image-broken-small.png"))
+    .SetBrokenImageUrl(UiConfig::BrokenImageType::NORMAL, Dali::String("assets/image-broken-normal.png"))
+    .SetBrokenImageUrl(UiConfig::BrokenImageType::LARGE, Dali::String("assets/image-broken-large.png"))
+    .Apply();
+}
+```
+
+Use `Dali::Ui::UiConfig::GetBrokenImageUrl()` when shared setup code needs to inspect the configured fallback for a specific `Dali::Ui::UiConfig::BrokenImageType`.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+Dali::String GetNormalBrokenImageUrl(UiConfig config)
+{
+  return config.GetBrokenImageUrl(UiConfig::BrokenImageType::NORMAL);
+}
+```
+
+## Marquee Defaults
+
+For text that uses marquee behavior, `Dali::Ui::UiConfig` provides app-wide defaults for speed, loop count, loop delay, gap, stop mode, and orientation. These settings are useful when your application wants consistent motion behavior across labels.
+
+```cpp
+using namespace Dali::Ui;
+
+void ApplyMarqueeDefaults()
+{
+  UiConfig::New()
+    .SetMarqueeSpeed(90)
+    .SetMarqueeLoopCount(2)
+    .SetMarqueeLoopDelay(0.5f)
+    .SetMarqueeGap(48.0f)
+    .SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP)
+    .SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL)
+    .Apply();
+}
+```
+
+The matching getters return the configured values with the same types used by the setters.
+
+```cpp
+using namespace Dali::Ui;
+
+void ReadMarqueeDefaults(UiConfig config)
+{
+  const int speed = config.GetMarqueeSpeed();
+  const int loopCount = config.GetMarqueeLoopCount();
+  const float loopDelay = config.GetMarqueeLoopDelay();
+  const float gap = config.GetMarqueeGap();
+  const Text::MarqueeStopMode stopMode = config.GetMarqueeStopMode();
+  const Text::MarqueeOrientation orientation = config.GetMarqueeOrientation();
+
+  (void)speed;
+  (void)loopCount;
+  (void)loopDelay;
+  (void)gap;
+  (void)stopMode;
+  (void)orientation;
+}
+```
+
+## Reading Back Applied Values
+
+`Dali::Ui::UiConfig` is a handle type. You can copy it with `Dali::Ui::UiConfig::operator=`, pass it to helper functions, and downcast a `Dali::BaseHandle` with `Dali::Ui::UiConfig::DownCast()` when generic handle code needs to recover the concrete configuration type.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+void InspectConfigHandle(BaseHandle handle)
+{
+  UiConfig config = UiConfig::DownCast(handle);
+
+  if(config)
+  {
+    const int dpi = config.GetDpi();
+    const int baselineDpi = config.GetBaselineDpi();
+    const bool focusClearsOnEscape = config.IsFocusClearOnEscapeEnabled();
+    const bool focusIndicatorShown = config.IsFocusIndicatorAlwaysShown();
+    const bool asyncLabels = config.IsLabelAsyncRendering();
+    const bool placeholderOnFocus = config.IsPlaceholderTextShownOnFocus();
+
+    (void)dpi;
+    (void)baselineDpi;
+    (void)focusClearsOnEscape;
+    (void)focusIndicatorShown;
+    (void)asyncLabels;
+    (void)placeholderOnFocus;
+  }
+}
+```
+
+`Dali::Ui::UiConfig::GetExecutionKeyPredicate()` returns the active function pointer. This is useful for diagnostic code that wants to test the configured predicate against a key name.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+bool UsesReturnAsExecutionKey(UiConfig config)
+{
+  ExecutionKeyPredicate predicate = config.GetExecutionKeyPredicate();
+  return predicate && predicate(Dali::String("Return"));
+}
+```
+
+## Generated Chain Methods
+
+`ui-config.autogen.h` is part of the public `Dali::Ui::UiConfig` feature surface. It defines `DALI_UI_CHAIN_UICONFIG_METHODS`, a macro used by derived configuration classes to forward selected `Dali::Ui::UiConfig` setters while preserving the derived return type for fluent chaining.
+
+Application code normally uses `Dali::Ui::UiConfig::New()` directly. A platform or product layer can use `DALI_UI_CHAIN_UICONFIG_METHODS` when it exposes a specialized configuration class and wants inherited setters such as `Dali::Ui::UiConfig::SetDpi()`, `Dali::Ui::UiConfig::SetScalingFactor()`, and `Dali::Ui::UiConfig::SetBrokenImageUrl()` to keep returning the specialized type.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ProductUiConfig : public UiConfig
+{
+public:
+  DALI_UI_CHAIN_UICONFIG_METHODS(ProductUiConfig)
+
+  static ProductUiConfig New()
+  {
+    ProductUiConfig config;
+    config
+      .SetDpi(320)
+      .SetBaselineDpi(160)
+      .SetScalingFactor(1.25f);
+    return config;
+  }
+};
+```
+tokens used
+58,826

@@ -1,0 +1,169 @@
+---
+title: Ui Color
+sidebar_label: Ui Color
+category: styling-theme-config
+---
+
+# Ui Color
+
+`Dali::Ui::UiColor` lets dali-ui color setters use either direct RGBA colors or theme-backed color tokens.
+
+## Table of Contents
+
+- [Use Theme Colors on Views](#use-theme-colors-on-views)
+- [Create Direct RGBA Colors](#create-direct-rgba-colors)
+- [Adjust Alpha Without Losing the Color Source](#adjust-alpha-without-losing-the-color-source)
+- [Inspect and Resolve Colors](#inspect-and-resolve-colors)
+
+## Use Theme Colors on Views
+
+In a dali-ui app, use `Dali::Ui::UiColor` with `Dali::Ui::View` color setters. The predefined colors `Dali::Ui::UiColor::PRIMARY`, `Dali::Ui::UiColor::BACKGROUND`, and `Dali::Ui::UiColor::OUTLINE` are token colors, so dali-ui can resolve them from the active theme.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateThemedPanel()
+{
+  View panel = View::New();
+
+  panel
+    .SetBackgroundColor(UiColor::BACKGROUND)
+    .SetColor(UiColor::PRIMARY)
+    .SetBorderlineColor(UiColor::OUTLINE);
+
+  return panel;
+}
+```
+
+Use these predefined tokens when the view should follow the application theme. `Dali::Ui::View::SetBackgroundColor`, `Dali::Ui::View::SetColor`, and `Dali::Ui::View::SetBorderlineColor` accept a `Dali::Ui::UiColor`; when that color has an ID, the view keeps a theme binding for that property.
+
+```cpp
+View CreatePrimaryTile()
+{
+  View tile = View::New();
+
+  tile.SetBackgroundColor(UiColor::PRIMARY);
+
+  return tile;
+}
+```
+
+## Create Direct RGBA Colors
+
+Use `Dali::Ui::UiColor::UiColor(float r, float g, float b, float a)` when a color should be a fixed value instead of a theme token. The alpha argument defaults to `1.0f`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateFixedColorSwatch()
+{
+  UiColor accent(0.20f, 0.48f, 0.95f, 1.0f);
+
+  View swatch = View::New();
+  swatch.SetBackgroundColor(accent);
+
+  return swatch;
+}
+```
+
+A direct RGBA `Dali::Ui::UiColor` has no color ID. Its `Dali::Ui::UiColor::GetRgba` value is the RGBA value supplied at construction.
+
+```cpp
+UiColor accent(0.20f, 0.48f, 0.95f);
+
+bool hasColorId = accent.HasColorId(); // false
+Vector4 rgba    = accent.GetRgba();    // alpha is 1.0f
+```
+
+## Adjust Alpha Without Losing the Color Source
+
+`Dali::Ui::UiColor::WithAlpha` returns a new `Dali::Ui::UiColor` with the alpha replaced by the given value, clamped to the `0.0f` to `1.0f` range. It does not modify the original color.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+View CreateSubtlePrimaryBackground()
+{
+  UiColor subtlePrimary = UiColor::PRIMARY.WithAlpha(0.12f);
+
+  View background = View::New();
+  background.SetBackgroundColor(subtlePrimary);
+
+  return background;
+}
+```
+
+`Dali::Ui::UiColor::ScaleAlpha` returns a new color whose alpha is multiplied by the given factor and clamped to the `0.0f` to `1.0f` range. This is useful when deriving pressed, disabled, or overlay colors from a base color.
+
+```cpp
+View CreateDisabledPrimarySurface()
+{
+  UiColor disabledPrimary = UiColor::PRIMARY.ScaleAlpha(0.40f);
+
+  View surface = View::New();
+  surface.SetBackgroundColor(disabledPrimary);
+
+  return surface;
+}
+```
+
+`Dali::Ui::UiColor::WithAlpha` and `Dali::Ui::UiColor::ScaleAlpha` can be chained. The result remains a `Dali::Ui::UiColor`, so it can be passed directly to `Dali::Ui::View` color setters.
+
+```cpp
+View CreateOverlay()
+{
+  UiColor overlayColor = UiColor::BACKGROUND
+                           .WithAlpha(0.80f)
+                           .ScaleAlpha(0.50f);
+
+  View overlay = View::New();
+  overlay.SetBackgroundColor(overlayColor);
+
+  return overlay;
+}
+```
+
+## Inspect and Resolve Colors
+
+Use `Dali::Ui::UiColor::HasColorId` to distinguish theme-token colors from direct RGBA colors. Use `Dali::Ui::UiColor::GetColorId` when you need the token name for logging, comparison, or diagnostics.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+bool IsThemeBacked(const UiColor& color)
+{
+  return color.HasColorId();
+}
+
+String ReadThemeTokenName(const UiColor& color)
+{
+  return color.GetColorId();
+}
+```
+
+`Dali::Ui::UiColor::GetRgba` resolves the current RGBA value. For a direct RGBA color, it returns the stored components. For a token color such as `Dali::Ui::UiColor::PRIMARY`, it resolves the color through the active theme.
+
+```cpp
+UiColor directColor(1.0f, 0.0f, 0.0f, 0.75f);
+Vector4 directRgba = directColor.GetRgba();
+
+UiColor themeColor = UiColor::PRIMARY;
+Vector4 themeRgba  = themeColor.GetRgba();
+```
+
+`Dali::Ui::UiColor::operator Vector4` is equivalent to calling `Dali::Ui::UiColor::GetRgba`, so use it only when a resolved `Dali::Vector4` is specifically needed.
+
+```cpp
+UiColor color = UiColor::OUTLINE.WithAlpha(0.60f);
+
+Vector4 resolvedA = color.GetRgba();
+Vector4 resolvedB = color;
+```

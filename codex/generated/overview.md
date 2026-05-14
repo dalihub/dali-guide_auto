@@ -1,0 +1,54 @@
+# DALi Overview
+
+## What DALi Is
+
+DALi is a UI toolkit built around a scene of visual objects that are created and controlled from application code. In the `dali-ui` layer, the main app-facing object is `Dali::Ui::View`: a handle used to build screens, attach child views, configure visual properties, receive interaction events, and start animations.
+
+A useful first mental model is:
+
+- the application starts through the adaptor framework;
+- the app builds a tree of `Dali::Ui::View` objects;
+- views are arranged by layouts, styled with colors and visuals, and updated through typed APIs;
+- input, focus, resource loading, and lifecycle changes are reported through signals and event objects.
+
+The detailed guides use this view-centered model throughout. For the base object, start with [View (Base UI Object)](view.md). For application startup and lifecycle, see [Adaptor Framework](adaptor-framework.md).
+
+## How DALi Is Organized
+
+The guide set is organized around the main areas an application touches:
+
+- Application setup and platform integration: [Adaptor Framework](adaptor-framework.md), [Addon Manager](addon-manager.md).
+- View composition and components: [View (Base UI Object)](view.md), [Layouts](layouts.md), [Interactive View](interactive-view.md), [Label](label.md), [Input Field](input-field.md), [Image View](image-view.md), [Animated Image View](animated-image-view.md), [Lottie Animation View](lottie-animation-view.md), [Scroll View](scroll-view.md), [Scroll Bar](scroll-bar.md), [Web View](web-view.md).
+- Input and state: [Input Event](input-event.md), [State Event](state-event.md), [View State](view-state.md), [Focus Manager](focus-manager.md), [Accessibility Highlight Overlay](accessibility-highlight-overlay.md).
+- Presentation: [Visuals](visuals.md), [Image](image.md), [Image Loader](image-loader.md), [Render Effects](render-effects.md), [Text](text.md), [Ui Color](ui-color.md), [Ui Color Manager](ui-color-manager.md), [Ui Theme Manager](ui-theme-manager.md), [Ui Scale Manager](ui-scale-manager.md).
+- Configuration and utilities: [Ui Config](ui-config.md), [Ui Component Config](ui-component-config.md), [Signals](signals.md), [Attachment Id](attachment-id.md), [Trait Id](trait-id.md), [Unique Any](unique-any.md), [I Scroll Bar](i-scroll-bar.md).
+
+## The App-Facing Model
+
+Most application code works with DALi through handle types. A handle represents an underlying object and can usually be copied through application code while still referring to the same DALi object. The guides call out when a default-constructed handle is uninitialized and when a factory or singleton accessor should be used instead.
+
+`Dali::Ui::View` is the common unit of composition. Component types such as `Label`, `ImageView`, `InputField`, `ScrollView`, and `WebView` are still views, so they can be placed in the same view tree and configured through component-specific APIs. Layout containers are also view objects; they arrange child views using typed layout objects and per-child layout parameters. See [Layouts](layouts.md) for flex, absolute, grid, and stack layout behavior.
+
+DALi also uses explicit event and state objects. [Input Event](input-event.md) describes the input cause delivered through interactive callbacks. [View State](view-state.md) represents states such as focused, pressed, disabled, and selected. [State Event](state-event.md) describes a transition between view states.
+
+## Interaction, Motion, and Presentation
+
+Interaction is usually handled through view callbacks and signals. [Interactive View](interactive-view.md) covers clickable and pressable surfaces, while [Signals](signals.md) explains how application code connects to view, input, resource, and lifecycle events and keeps connection lifetime explicit. Keyboard focus is coordinated through [Focus Manager](focus-manager.md), with accessibility focus presentation covered by [Accessibility Highlight Overlay](accessibility-highlight-overlay.md).
+
+Motion is expressed through typed animation APIs that operate on views. [Animation](animation.md) covers direct view animation, reusable motion specifications, timing, easing, looping, reversing, pausing, and end behavior.
+
+Presentation is split across several concepts. [Visuals](visuals.md) covers lightweight drawing objects attached to views for images, colors, animated images, and Lottie content. [Image View](image-view.md), [Animated Image View](animated-image-view.md), and [Lottie Animation View](lottie-animation-view.md) cover component views for those resources. [Render Effects](render-effects.md) covers blur and mask effects. [Ui Color](ui-color.md), [Ui Color Manager](ui-color-manager.md), and [Ui Theme Manager](ui-theme-manager.md) cover direct colors, theme color tokens, and theme-change handling.
+
+## Where To Go Next
+
+If you are reading the guide set for the first time, a practical order is:
+
+1. [Adaptor Framework](adaptor-framework.md) for startup, lifecycle, and the main window.
+2. [View (Base UI Object)](view.md) for the basic object model.
+3. [Layouts](layouts.md) for arranging views.
+4. [Signals](signals.md), [Input Event](input-event.md), and [Focus Manager](focus-manager.md) for interaction.
+5. [Visuals](visuals.md), [Image View](image-view.md), [Text](text.md), and [Ui Color](ui-color.md) for presentation.
+6. [Animation](animation.md) and [Render Effects](render-effects.md) for motion and view-level effects.
+7. [Ui Config](ui-config.md), [Ui Scale Manager](ui-scale-manager.md), and [Ui Theme Manager](ui-theme-manager.md) for application-wide defaults and runtime environment settings.
+
+The links are navigation aids. Each detailed guide is intended to stand on its own when you need that topic.

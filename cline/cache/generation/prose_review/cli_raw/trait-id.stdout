@@ -1,0 +1,163 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Trait Id
+sidebar_label: Trait Id
+category: views-components
+---
+
+# Trait Id
+
+`TraitId` is a lightweight handle representing a unique identifier for traits attached to `View` objects. Each trait type requires a unique `TraitId` to distinguish it from other traits on the same view.
+
+## Table of Contents
+
+- [Allocating Trait Identifiers](#allocating-trait-identifiers)
+- [Comparing TraitId Values](#comparing-traitid-values)
+- [Reserved Trait IDs](#reserved-trait-ids)
+
+## Allocating Trait Identifiers
+
+Use `TraitId::Alloc()` to allocate a unique identifier for each custom trait type. Call this method once per trait type and store the result in a static variable to ensure consistent identification throughout the application lifetime.
+
+```cpp
+// Allocate a unique ID for a custom trait (typically in an anonymous namespace)
+static const TraitId kMyCustomTrait = TraitId::Alloc();
+```
+
+The `TraitId::Alloc()` method is thread-safe and lock-free, using an internal atomic counter. Each call returns a new unique `TraitId` value.
+
+## Comparing TraitId Values
+
+`TraitId` provides equality and inequality operators for comparing identifier values. Use these to verify trait identity when working with trait identifiers.
+
+```cpp
+TraitId id1 = TraitId::Alloc();
+TraitId id2 = TraitId::Alloc();
+TraitId id3 = id1;
+
+// Compare for equality
+if (id1 == id3)
+{
+  // id1 and id3 have the same value
+}
+
+// Compare for inequality
+if (id1 != id2)
+{
+  // id1 and id2 have different values (each Alloc() returns a unique ID)
+}
+```
+
+Access the underlying numeric value through the `value` member when logging or debugging:
+
+```cpp
+TraitId id = TraitId::Alloc();
+uint32_t numericValue = id.value;
+```
+
+## Reserved Trait IDs
+
+The framework reserves a set of predefined `TraitId` constants in the `Dali::Ui::Integration::ReservedTraitId` namespace for internal use. These identifiers support built-in framework features such as layout parameters and interaction handling.
+
+Framework-reserved identifiers include:
+
+- `Dali::Ui::Integration::ReservedTraitId::INTERACTION_TRAIT` — Interaction behavior trait
+- `Dali::Ui::Integration::ReservedTraitId::SELECTABLE_TRAIT` — Selection state trait
+- `Dali::Ui::Integration::ReservedTraitId::STATE_HANDLER_TRAIT` — State handling trait
+- `Dali::Ui::Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS` — Absolute layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::STACK_LAYOUT_PARAMS` — Stack layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::GRID_LAYOUT_PARAMS` — Grid layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS` — Flex layout parameters
+- `Dali::Ui::Integration::ReservedTraitId::LAYOUT_MANAGER` — Layout manager trait
+- `Dali::Ui::Integration::ReservedTraitId::LAYOUT_SIGNALS` — Layout signal trait
+- `Dali::Ui::Integration::ReservedTraitId::INTERACTION_EFFECT` — Interaction effect trait
+- `Dali::Ui::Integration::ReservedTraitId::INTERACTION_EFFECT_DATA` — Interaction effect data
+
+Application code should allocate custom `TraitId` values via `TraitId::Alloc()` rather than using reserved identifiers.
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Trait Id Prose Review
+
+## Summary
+
+Reviewed the Trait Id guide draft against source evidence from:
+- `repos/dali-ui/dali-ui-foundation/public-api/trait-id.h` (public API)
+- `repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h` (reserved IDs)
+- `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp` (UTC usage patterns)
+- `repos/dali-ui/dali-ui-foundation/public-api/trait.h` (Trait handle)
+- `repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h` (TraitImpl base class)
+
+## Changes Made
+
+### 1. Removed Integration-Level Lifecycle Callback Example
+
+**Original prose (removed):**
+> When implementing a custom trait, pass the allocated `TraitId` to the trait system during attachment:
+> ```cpp
+> // Inside a trait implementation's lifecycle callback
+> void OnAttached(TraitId id, View& view) override
+> {
+>   // Store the id for later use
+>   mLastId = id;
+> }
+> ```
+
+**Reason:** `TraitImpl` and its lifecycle callbacks (`OnAttached`, `OnDetached`, etc.) are in the `Dali::Ui::Integration` namespace, which is integration-level API not intended for application developers. The public `Trait` class is a handle that does not expose lifecycle callbacks. Application developers use pre-built traits like `InteractiveTrait` and `SelectableTrait` via View methods like `AsInteractive()` and `AsSelectable()`, or allocate `TraitId` values for custom trait identification.
+
+**Source evidence:** 
+- `trait-impl.h` shows `TraitImpl` is in `Dali::Ui::Integration` namespace
+- `trait.h` shows public `Trait` class has no lifecycle callback methods
+- UTC tests use `IntegrationView::SetTrait()` which requires `ViewImpl&` access
+
+### 2. Corrected ReservedTraitId Namespace Qualification
+
+**Original prose:**
+> The framework reserves a set of predefined `TraitId` constants in the `ReservedTraitId` namespace for internal use.
+
+**Revised prose:**
+> The framework reserves a set of predefined `TraitId` constants in the `Dali::Ui::Integration::ReservedTraitId` namespace for internal use.
+
+**Reason:** The full namespace path is `Dali::Ui::Integration::ReservedTraitId`, not just `ReservedTraitId`. Accuracy requires the fully-qualified name.
+
+**Source evidence:** `reserved-trait-id.h` line 21: `namespace ReservedTraitId` is nested inside `namespace Dali { namespace Ui { namespace Integration {`
+
+### 3. Updated Reserved ID List with Full Qualification
+
+**Original:** Listed IDs as `ReservedTraitId::INTERACTION_TRAIT`, etc.
+
+**Revised:** Listed IDs as `Dali::Ui::Integration::ReservedTraitId::INTERACTION_TRAIT`, etc.
+
+**Reason:** Consistency with the corrected namespace and accuracy for developers who may need to reference these symbols.
+
+### 4. Simplified Comparison Section Prose
+
+**Original prose:**
+> Use these to verify trait identity in lifecycle callbacks or when retrieving traits from a view.
+
+**Revised prose:**
+> Use these to verify trait identity when working with trait identifiers.
+
+**Reason:** Removed reference to "lifecycle callbacks" since those are integration-level APIs. The simpler phrasing remains accurate for all use cases.
+
+## Preserved Content
+
+- Document structure (overview, TOC, three main sections)
+- Code blocks for `TraitId::Alloc()` usage
+- Code blocks for equality/inequality operators
+- Code block for accessing `value` member
+- Thread-safety description of `Alloc()`
+- Recommendation to use `TraitId::Alloc()` for custom traits
+
+## Remaining Concerns
+
+None. The guide now accurately reflects the public API surface for application developers using dali-ui.
+
+## Verification
+
+- All API names verified against public headers
+- Namespace qualifications verified against source
+- Code examples compile against public API (conceptually)
+- No non-English prose present in original or revised document
+-----END_PROSE_REVIEW_REPORT-----

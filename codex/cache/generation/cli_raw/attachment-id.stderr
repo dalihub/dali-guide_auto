@@ -1,0 +1,1396 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e25bd-b032-7541-917c-2ffbc5b2a8a7
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Attachment Id (attachment-id)
+- Category: utilities
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-ui": 5
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::AttachmentId | scope=primary
+- Dali::Ui::AttachmentId::Alloc | AttachmentId Alloc() | scope=primary_member
+- Dali::Ui::AttachmentId::operator!= | bool operator!=(const AttachmentId &other) const | scope=primary_member
+- Dali::Ui::AttachmentId::operator== | bool operator==(const AttachmentId &other) const | scope=primary_member
+- Dali::Ui::AttachmentId::value | scope=primary_member
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/attachment/attachment-example.cpp:17 (sample, score=0.6)
+```cpp
+#include <cstdio>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+
+void UpdateLabel(View view)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+```
+
+- repos/dali-ui/samples/attachment/my-button-example.cpp:96 (sample, score=0.6)
+```cpp
+DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)
+
+private:
+  explicit MyButton(InteractiveView view)
+  : InteractiveView(view)
+  {
+  }
+
+  static AttachmentId GetDataId()
+  {
+    static AttachmentId id = AttachmentId::Alloc();
+    return id;
+  }
+};
+
+class MyButtonExampleController : public ConnectionTracker
+{
+public:
+  explicit MyButtonExampleController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &MyButtonExampleController::Create);
+  }
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alloc",
+      "AttachmentId"
+    ],
+    "path": "repos/dali-ui/samples/attachment/attachment-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 96,
+    "snippet_start_line": 17
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alloc",
+      "AttachmentId"
+    ],
+    "path": "repos/dali-ui/samples/attachment/my-button-example.cpp",
+    "relevance": "medium",
+    "score": 0.6,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 153,
+    "snippet_start_line": 96
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alloc",
+      "AttachmentId",
+      "value"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 103,
+    "snippet_start_line": 24
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Alloc",
+      "AttachmentId",
+      "value"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp",
+    "relevance": "weak",
+    "score": 0.4,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 191,
+    "snippet_start_line": 112
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  },
+  {
+    "kind": "missing_usage_patterns",
+    "message": "No usage patterns were inferred or configured."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/attachment/my-button-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,180p' repos/dali-ui/samples/attachment/attachment-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+#include <cstdio>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+
+void UpdateLabel(View view)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+  if(data)
+  {
+    char text[64];
+    std::snprintf(text, sizeof(text), "Count: %u", data->count);
+    data->label.SetText(text);
+  }
+}
+} // unnamed namespace
+
+class AttachmentExampleController : public ConnectionTracker
+{
+public:
+  explicit AttachmentExampleController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AttachmentExampleController::Create);
+  }
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0x202020));
+
+    Label label = Label::New("Count: 0")
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetFontSize(18.0f)
+      .SetTextColor(UiColor(0xFFFFFF))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    InteractiveView counter = InteractiveView::New()
+      .SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label))
+      .SetRequestedWidth(220.0f)
+      .SetRequestedHeight(80.0f)
+      .SetRequestedPositionX(60.0f)
+      .SetRequestedPositionY(60.0f)
+      .SetBackgroundColor(UiColor(0x1565C0))
+      .Children({label})
+      .ConnectClickedSignal(this, &AttachmentExampleController::OnCounterClicked);
+
+    InteractiveView reset = InteractiveView::New()
+      .SetRequestedWidth(220.0f)
+      .SetRequestedHeight(64.0f)
+      .SetRequestedPositionX(60.0f)
+      .SetRequestedPositionY(160.0f)
+      .SetBackgroundColor(UiColor(0x424242))
+      .ConnectClickedSignal(this, &AttachmentExampleController::OnResetClicked)
+      .Children({Label::New("Detach and Reset")
+                    .SetRequestedWidth(MATCH_PARENT)
+                    .SetRequestedHeight(MATCH_PARENT)
+                    .SetFontSize(16.0f)
+                    .SetTextColor(UiColor(0xFFFFFF))
+                    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+                    .SetVerticalTextAlignment(Text::Alignment::CENTER)});
+
+    mCounter = counter;
+    window.Add(counter);
+    window.Add(reset);
+  }
+
+  void OnCounterClicked(View view, InputEvent event)
+  {
+    CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+    if(data)
+    {
+      ++data->count;
+      view.SetBackgroundColor((data->count % 2u) ? UiColor(0x2E7D32) : UiColor(0x1565C0));
+      UpdateLabel(view);
+    }
+  }
+
+  void OnResetClicked(View view, InputEvent event)
+  {
+    Dali::UniquePtr<CounterData> data = mCounter.DetachAttachment<CounterData>(COUNTER_DATA_ID);
+    if(data)
+    {
+      data->count = 0u;
+      data->label.SetText("Count: 0");
+      mCounter.SetAttachment(COUNTER_DATA_ID, Dali::Move(data))
+        .SetBackgroundColor(UiColor(0x1565C0));
+    }
+  }
+
+private:
+  Application& mApplication;
+  View         mCounter;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  AttachmentExampleController controller(application);
+  application.MainLoop();
+  return 0;
+}
+
+ succeeded in 0ms:
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+#include <cstdio>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+// Most DALi public classes are lightweight handles over internal implementations.
+// A derived handle should not add fields for persistent state because the state
+// is lost when the object is copied or upcast to the base handle type. Attachments
+// provide a way to keep custom data in the implementation-side object while still
+// deriving only from the public handle class.
+//
+// Attachment data follows the lifetime of the object it is attached to. Avoid
+// attaching data that strongly references the owner, its parent, or an ancestor,
+// as that can create a reference cycle. Keeping a child handle is fine because
+// DALi children do not strongly reference their parent.
+class MyButton : public InteractiveView
+{
+public:
+  struct Data
+  {
+    Data(Label label, UiColor normalColor, UiColor pressedColor)
+    : label(label),
+      normalColor(normalColor),
+      pressedColor(pressedColor)
+    {
+    }
+
+    Label   label;
+    UiColor normalColor;
+    UiColor pressedColor;
+    uint32_t clickCount{0u};
+  };
+
+  MyButton() = default;
+
+  static MyButton New(const Dali::String& text)
+  {
+    MyButton button(InteractiveView::New());
+    button.Initialize(text);
+    return button;
+  }
+
+  static MyButton DownCast(BaseHandle handle)
+  {
+    InteractiveView view = InteractiveView::DownCast(handle);
+    return view && view.GetAttachment<Data>(GetDataId()) ? MyButton(view) : MyButton();
+  }
+
+  void Initialize(const Dali::String& text)
+  {
+    Label label = Label::New(text)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetFontSize(18.0f)
+        .SetTextColor(UiColor(0xFFFFFF))
+        .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+        .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    Add(label);
+    SetAttachment(GetDataId(), Dali::MakeUnique<Data>(label, UiColor(0x1565C0), UiColor(0x2E7D32)));
+    SetBackgroundColor(UiColor(0x1565C0));
+  }
+
+  void IncrementClickCount()
+  {
+    Data* data = GetAttachment<Data>(GetDataId());
+    if(data)
+    {
+      ++data->clickCount;
+      SetBackgroundColor((data->clickCount % 2u) ? data->pressedColor : data->normalColor);
+
+      char text[64];
+      std::snprintf(text, sizeof(text), "MyButton: %u", data->clickCount);
+      data->label.SetText(text);
+    }
+  }
+
+public:
+  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)
+
+private:
+  explicit MyButton(InteractiveView view)
+  : InteractiveView(view)
+  {
+  }
+
+  static AttachmentId GetDataId()
+  {
+    static AttachmentId id = AttachmentId::Alloc();
+    return id;
+  }
+};
+
+class MyButtonExampleController : public ConnectionTracker
+{
+public:
+  explicit MyButtonExampleController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &MyButtonExampleController::Create);
+  }
+
+  void Create(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0x202020));
+
+    window.Add(MyButton::New("MyButton: 0")
+      .SetRequestedWidth(220.0f)
+      .SetRequestedHeight(80.0f)
+      .SetRequestedPositionX(60.0f)
+      .SetRequestedPositionY(60.0f)
+      .ConnectClickedSignal(this, &MyButtonExampleController::OnClicked));
+  }
+
+  void OnClicked(View view, InputEvent event)
+  {
+    MyButton button = MyButton::DownCast(view);
+    if(button)
+    {
+      button.IncrementClickCount();
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  MyButtonExampleController controller(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc 'rg -n "class AttachmentId|struct AttachmentId|AttachmentId|GetAttachment|SetAttachment|DALI_UI_CHAIN" repos/dali-ui -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:523:   * @copydoc Ui::View::SetAttachment()
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:525:  DALI_INTERNAL void SetAttachment(AttachmentId id, UniqueAny attachment);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:530:  bool RemoveAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:538:  DALI_INTERNAL UniqueAny* GetAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:546:  DALI_INTERNAL const UniqueAny* GetAttachment(AttachmentId id) const;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:554:  DALI_INTERNAL UniqueAny DetachAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.h:1279:  DALI_UI_CHAIN_VIEW_METHODS(InputField)
+repos/dali-ui/wiki/Fluent-API-(kr).md:105:이 파일에는 `DALI_UI_CHAIN_{CLASS}_METHODS(ChildClass)` 매크로가 정의되어 있으며,
+repos/dali-ui/wiki/Fluent-API-(kr).md:115:#define DALI_UI_CHAIN_VIEW_METHODS(ChildClass)              \
+repos/dali-ui/wiki/Fluent-API-(kr).md:133:  DALI_UI_CHAIN_VIEW_METHODS(Label)
+repos/dali-ui/wiki/Fluent-API-(kr).md:151:`label.autogen.h`의 `DALI_UI_CHAIN_LABEL_METHODS`는 `View` 매크로를 포함합니다:
+repos/dali-ui/wiki/Fluent-API-(kr).md:154:#define DALI_UI_CHAIN_LABEL_METHODS(ChildClass)   \
+repos/dali-ui/wiki/Fluent-API-(kr).md:155:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass)          \  // View의 setter 전부 포함
+repos/dali-ui/wiki/Fluent-API-(kr).md:161:따라서 `Label`을 상속하는 클래스는 `DALI_UI_CHAIN_LABEL_METHODS`만 사용하면
+repos/dali-ui/wiki/Fluent-API-(kr).md:185:- `myview.autogen.h` 생성 (`DALI_UI_CHAIN_MYVIEW_METHODS` 매크로 포함)
+repos/dali-ui/wiki/Fluent-API-(kr).md:187:- 클래스 끝에 `DALI_UI_CHAIN_VIEW_METHODS(MyView)` 삽입
+repos/dali-ui/wiki/Fluent-API-(kr).md:192:**3. `MyView`를 상속하는 클래스는 `DALI_UI_CHAIN_MYVIEW_METHODS`를 사용합니다**
+repos/dali-ui/dali-ui-foundation/public-api/scroll-bar.h:203:  DALI_UI_CHAIN_LAYOUT_METHODS(ScrollBar)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout.h:130:  DALI_UI_CHAIN_VIEW_METHODS(Layout)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.h:201:  DALI_UI_CHAIN_LAYOUT_METHODS(FlexLayout)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout.h:173:  DALI_UI_CHAIN_LAYOUT_METHODS(StackLayout)
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:582:  DALI_UI_CHAIN_VIEW_METHODS(AnimatedImageView)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout.autogen.h:4:#define DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass)
+repos/dali-ui/dali-ui-foundation/public-api/ui-config.autogen.h:4:#define DALI_UI_CHAIN_UICONFIG_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.autogen.h:4:#define DALI_UI_CHAIN_GRIDLAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.autogen.h:5:  DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.autogen.h:4:#define DALI_UI_CHAIN_FLEXLAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/flex-layout.autogen.h:5:  DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass) \
+repos/dali-ui/wiki/Fluent-API.md:108:Each generated file defines a `DALI_UI_CHAIN_{CLASS}_METHODS(ChildClass)` macro that re-wraps
+repos/dali-ui/wiki/Fluent-API.md:118:#define DALI_UI_CHAIN_VIEW_METHODS(ChildClass)              \
+repos/dali-ui/wiki/Fluent-API.md:136:  DALI_UI_CHAIN_VIEW_METHODS(Label)
+repos/dali-ui/wiki/Fluent-API.md:154:`DALI_UI_CHAIN_LABEL_METHODS` in `label.autogen.h` includes the `View` macro:
+repos/dali-ui/wiki/Fluent-API.md:157:#define DALI_UI_CHAIN_LABEL_METHODS(ChildClass)   \
+repos/dali-ui/wiki/Fluent-API.md:158:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass)          \  // includes all View setters
+repos/dali-ui/wiki/Fluent-API.md:164:A class inheriting from `Label` only needs `DALI_UI_CHAIN_LABEL_METHODS` to chain setters from
+repos/dali-ui/wiki/Fluent-API.md:188:- Generates `myview.autogen.h` (containing the `DALI_UI_CHAIN_MYVIEW_METHODS` macro)
+repos/dali-ui/wiki/Fluent-API.md:190:- Inserts `DALI_UI_CHAIN_VIEW_METHODS(MyView)` at the end of the class
+repos/dali-ui/wiki/Fluent-API.md:195:**3. Classes inheriting from `MyView` use `DALI_UI_CHAIN_MYVIEW_METHODS`**
+repos/dali-ui/dali-ui-foundation/public-api/layouts/grid-layout.h:221:  DALI_UI_CHAIN_LAYOUT_METHODS(GridLayout)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.autogen.h:4:#define DALI_UI_CHAIN_ABSOLUTELAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.autogen.h:5:  DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/absolute-layout.h:125:  DALI_UI_CHAIN_LAYOUT_METHODS(AbsoluteLayout)
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout.autogen.h:4:#define DALI_UI_CHAIN_STACKLAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/layouts/stack-layout.autogen.h:5:  DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:851:void View::SetAttachment(AttachmentId id, UniqueAny attachment)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:853:  GetImpl(*this).SetAttachment(id, Dali::Move(attachment));
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:856:bool View::RemoveAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:861:UniqueAny View::DetachAttachmentInternal(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:866:UniqueAny* View::GetAttachmentInternal(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:868:  return GetImpl(*this).GetAttachment(id);
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:871:const UniqueAny* View::GetAttachmentInternal(AttachmentId id) const
+repos/dali-ui/dali-ui-foundation/public-api/view.cpp:873:  return GetImpl(*this).GetAttachment(id);
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:31:std::atomic<uint32_t> gNextAttachmentId{1u};
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:34:AttachmentId AttachmentId::Alloc()
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:36:  uint32_t id = gNextAttachmentId.load(std::memory_order_relaxed);
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:39:    if(gNextAttachmentId.compare_exchange_weak(id, id + 1u, std::memory_order_relaxed, std::memory_order_relaxed))
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:41:      return AttachmentId(id);
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:45:  DALI_ASSERT_ALWAYS(false && "AttachmentId space exhausted");
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.cpp:46:  return AttachmentId(0u);
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:31: * AttachmentId values are allocated sequentially via AttachmentId::Alloc().
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:33: * static storage so it can be reused for SetAttachment(), GetAttachment(), and
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:42: * static const AttachmentId kMyViewDataAttachment = AttachmentId::Alloc();
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:45:struct DALI_UI_API AttachmentId
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:48:   * @brief Allocates and returns the next unique AttachmentId.
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:55:   * @return A new unique AttachmentId
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:57:  static AttachmentId Alloc();
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:62:  bool operator==(const AttachmentId& other) const
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:70:  bool operator!=(const AttachmentId& other) const
+repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h:78:  explicit AttachmentId(uint32_t v)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/animated-image-visual.h:615:  DALI_UI_CHAIN_VISUALBASE_METHODS(AnimatedImageVisual)
+repos/dali-ui/dali-ui-foundation/public-api/web-view.autogen.h:4:#define DALI_UI_CHAIN_WEBVIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/web-view.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:739:  DALI_UI_CHAIN_VIEW_METHODS(WebView)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-base.autogen.h:4:#define DALI_UI_CHAIN_VISUALBASE_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:598:  DALI_UI_CHAIN_VIEW_METHODS(LottieAnimationView)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:402:  DALI_UI_CHAIN_VIEW_METHODS(ScrollView)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1201:  View& SetAttachment(AttachmentId id, Dali::UniquePtr<T> data)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1203:    DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data");
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1204:    View::SetAttachment(id, UniqueAny(Dali::Move(data)));
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1218:  bool RemoveAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1231:  T* GetAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1235:    UniqueAny*  attachment = GetAttachmentInternal(id);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1251:  const T* GetAttachment(AttachmentId id) const
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1255:    const UniqueAny*  attachment = GetAttachmentInternal(id);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1276:  Dali::UniquePtr<T> DetachAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1280:    UniqueAny*  storedAttachment = GetAttachmentInternal(id);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2099:  void SetAttachment(AttachmentId id, UniqueAny attachment);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2151:  UniqueAny*       GetAttachmentInternal(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2152:  const UniqueAny* GetAttachmentInternal(AttachmentId id) const;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:2153:  UniqueAny        DetachAttachmentInternal(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:4:#define DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:465:  ChildClass& SetAttachment(AttachmentId id, Dali::UniquePtr<T> data) \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:467:  DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data"); \
+repos/dali-ui/dali-ui-foundation/public-api/view.autogen.h:468:  View::SetAttachment(id, UniqueAny(Dali::Move(data))); \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/animated-image-visual.autogen.h:4:#define DALI_UI_CHAIN_ANIMATEDIMAGEVISUAL_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/animated-image-visual.autogen.h:5:  DALI_UI_CHAIN_VISUALBASE_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/color-visual.autogen.h:4:#define DALI_UI_CHAIN_COLORVISUAL_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/color-visual.autogen.h:5:  DALI_UI_CHAIN_VISUALBASE_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:4:#define DALI_UI_CHAIN_LABEL_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/label.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/image-view.h:558:  DALI_UI_CHAIN_VIEW_METHODS(ImageView)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.h:556:  DALI_UI_CHAIN_VISUALBASE_METHODS(LottieAnimationVisual)
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:4:#define DALI_UI_CHAIN_SCROLLVIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:446:void ViewImpl::SetAttachment(AttachmentId id, UniqueAny attachment)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:448:  mImpl->SetAttachment(id, Dali::Move(attachment));
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:451:bool ViewImpl::RemoveAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:456:UniqueAny ViewImpl::DetachAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:461:UniqueAny* ViewImpl::GetAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:463:  return mImpl->GetAttachment(id);
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:466:const UniqueAny* ViewImpl::GetAttachment(AttachmentId id) const
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.cpp:468:  return mImpl->GetAttachment(id);
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:4:#define DALI_UI_CHAIN_INPUTFIELD_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/input-field.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.h:295:  DALI_UI_CHAIN_VIEW_METHODS(InteractiveView)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/image-visual.autogen.h:4:#define DALI_UI_CHAIN_IMAGEVISUAL_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/image-visual.autogen.h:5:  DALI_UI_CHAIN_VISUALBASE_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/label.h:1150:  DALI_UI_CHAIN_VIEW_METHODS(Label)
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:4:#define DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/interactive-view.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/color-visual.h:117:  DALI_UI_CHAIN_VISUALBASE_METHODS(ColorVisual)
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.autogen.h:4:#define DALI_UI_CHAIN_LOTTIEANIMATIONVISUAL_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/lottie-animation-visual.autogen.h:5:  DALI_UI_CHAIN_VISUALBASE_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-foundation/public-api/visuals/image-visual.h:486:  DALI_UI_CHAIN_VISUALBASE_METHODS(ImageVisual)
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:33: * @brief Stores attachments by AttachmentId.
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:43:  void SetAttachment(AttachmentId id, UniqueAny attachment)
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:61:  bool RemoveAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:77:  UniqueAny* GetAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:92:  const UniqueAny* GetAttachment(AttachmentId id) const
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:109:  UniqueAny DetachAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/internal/common/attachment-container.h:124:  std::vector<std::pair<AttachmentId, UniqueAny>> mAttachments;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:68:  AttachmentId id1 = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:69:  AttachmentId id2 = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:129:  AttachmentId        id = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:131:  container.SetAttachment(id, UniqueAny(Dali::MakeUnique<int>(5)));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:133:  UniqueAny*           attachment = container.GetAttachment(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:144:  AttachmentId        id = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:146:  container.SetAttachment(id, UniqueAny(Dali::MakeUnique<int>(5)));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:147:  container.SetAttachment(id, UniqueAny(Dali::MakeUnique<int>(9)));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:149:  UniqueAny*           attachment = container.GetAttachment(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:160:  AttachmentId        id = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:162:  container.SetAttachment(id, UniqueAny(Dali::MakeUnique<int>(5)));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:165:  DALI_TEST_CHECK(!container.GetAttachment(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:173:  AttachmentId        id = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:175:  container.SetAttachment(id, UniqueAny(Dali::MakeUnique<int>(19)));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:179:  DALI_TEST_CHECK(!container.GetAttachment(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:194:  AttachmentId        id = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-UniqueAny.cpp:196:  DALI_TEST_CHECK(!container.GetAttachment(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2556:  AttachmentId      id   = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2558:  view.SetAttachment(id, Dali::MakeUnique<int>(13));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2560:  int* value = view.GetAttachment<int>(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2563:  DALI_TEST_CHECK(!view.GetAttachment<float>(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2566:  const int* constValue = constView.GetAttachment<int>(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2576:  AttachmentId      id   = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2578:  view.SetAttachment(id, Dali::MakeUnique<int>(13));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2579:  view.SetAttachment(id, Dali::MakeUnique<int>(27));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2581:  int* value = view.GetAttachment<int>(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2591:  AttachmentId      id   = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2593:  view.SetAttachment(id, Dali::MakeUnique<int>(13));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2596:  DALI_TEST_CHECK(!view.GetAttachment<int>(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2605:  AttachmentId      id   = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2607:  view.SetAttachment(id, Dali::MakeUnique<int>(43));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2611:  DALI_TEST_CHECK(view.GetAttachment<int>(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2616:  DALI_TEST_CHECK(!view.GetAttachment<int>(id));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2625:  AttachmentId      id   = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2627:  view.SetAttachment(id, Dali::MakeUnique<ViewMoveOnlyAttachment>(31));
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2629:  ViewMoveOnlyAttachment* value = view.GetAttachment<ViewMoveOnlyAttachment>(id);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2639:  AttachmentId      id   = AttachmentId::Alloc();
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp:2641:  DALI_TEST_ASSERTION(view.SetAttachment(id, Dali::UniquePtr<int>()), "SetAttachment requires non-null data");
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:563:void ViewDataImpl::SetAttachment(AttachmentId id, UniqueAny attachment)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:569:  mAttachments->SetAttachment(id, Dali::Move(attachment));
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:572:bool ViewDataImpl::RemoveAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:577:UniqueAny ViewDataImpl::DetachAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:582:UniqueAny* ViewDataImpl::GetAttachment(AttachmentId id)
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:584:  return mAttachments ? mAttachments->GetAttachment(id) : nullptr;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:587:const UniqueAny* ViewDataImpl::GetAttachment(AttachmentId id) const
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.cpp:589:  return mAttachments ? mAttachments->GetAttachment(id) : nullptr;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:157:  void SetAttachment(AttachmentId id, UniqueAny attachment);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:164:  bool RemoveAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:171:  UniqueAny DetachAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:178:  UniqueAny* GetAttachment(AttachmentId id);
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-data-impl.h:185:  const UniqueAny* GetAttachment(AttachmentId id) const;
+repos/dali-ui/dali-ui-components/public-api/ui-component-config.h:128:  DALI_UI_CHAIN_UICONFIG_METHODS(UiComponentConfig)
+repos/dali-ui/dali-ui-components/public-api/dummy-component.h:141:  DALI_UI_CHAIN_VIEW_METHODS(DummyComponent)
+repos/dali-ui/dali-ui-components/public-api/dummy-component.autogen.h:4:#define DALI_UI_CHAIN_DUMMYCOMPONENT_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-components/public-api/dummy-component.autogen.h:5:  DALI_UI_CHAIN_VIEW_METHODS(ChildClass)
+repos/dali-ui/dali-ui-components/public-api/ui-component-config.autogen.h:4:#define DALI_UI_CHAIN_UICOMPONENTCONFIG_METHODS(ChildClass) \
+repos/dali-ui/dali-ui-components/public-api/ui-component-config.autogen.h:5:  DALI_UI_CHAIN_UICONFIG_METHODS(ChildClass)
+repos/dali-ui/scripts/autogen/gen-chaining-macro.py:311:        chain_macro = f"DALI_UI_CHAIN_{cls_upper}_METHODS"
+repos/dali-ui/scripts/autogen/gen-chaining-macro.py:315:            c_items.append(f"  DALI_UI_CHAIN_{b['parent'].upper()}_METHODS(ChildClass)")
+repos/dali-ui/scripts/autogen/gen-chaining-macro.py:372:        content = re.sub(r'\n\s*public:\n\s*DALI_UI_CHAIN_.*_METHODS\(.*\)', '', content)
+repos/dali-ui/scripts/autogen/gen-chaining-macro.py:381:            p_call = f"DALI_UI_CHAIN_{b['parent'].upper()}_METHODS({b['class']})"
+repos/dali-ui/scripts/autogen/autogen_chain.cmake:4:set(DALI_UI_CHAIN_GENERATOR "${CMAKE_CURRENT_LIST_DIR}/gen-chaining-macro.py")
+repos/dali-ui/scripts/autogen/autogen_chain.cmake:24:      COMMAND Python3::Interpreter "${DALI_UI_CHAIN_GENERATOR}" "${HEADER}"
+repos/dali-ui/scripts/autogen/autogen_chain.cmake:26:      DEPENDS "${HEADER}" "${DALI_UI_CHAIN_GENERATOR}"
+repos/dali-ui/scripts/autogen/README.md:27:* 수집된 메소드들을 오버로딩 해주는 `DALI_UI_CHAIN_{ClassName}_METHODS` 이라는 매크로를 작성
+repos/dali-ui/scripts/autogen/README.md:64:* **view.autogen.h** — `DALI_UI_CHAIN_VIEW_METHODS` 매크로가 총 2개 메소드 오버로딩 (`SetOpacity`, `EnableFocusEscape`)
+repos/dali-ui/scripts/autogen/README.md:66:* **label.autogen.h** — `DALI_UI_CHAIN_LABEL_METHODS` 매크로가 2개의 View 메소드 및 1개의 Label 메소드 오버로딩 (`SetText`)
+repos/dali-ui/scripts/autogen/README.md:76:  DALI_UI_CHAIN_LABEL_METHODS(MyLabel)
+repos/dali-ui/samples/attachment/my-button-example.cpp:63:    return view && view.GetAttachment<Data>(GetDataId()) ? MyButton(view) : MyButton();
+repos/dali-ui/samples/attachment/my-button-example.cpp:77:    SetAttachment(GetDataId(), Dali::MakeUnique<Data>(label, UiColor(0x1565C0), UiColor(0x2E7D32)));
+repos/dali-ui/samples/attachment/my-button-example.cpp:83:    Data* data = GetAttachment<Data>(GetDataId());
+repos/dali-ui/samples/attachment/my-button-example.cpp:96:  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)
+repos/dali-ui/samples/attachment/my-button-example.cpp:104:  static AttachmentId GetDataId()
+repos/dali-ui/samples/attachment/my-button-example.cpp:106:    static AttachmentId id = AttachmentId::Alloc();
+repos/dali-ui/samples/attachment/attachment-example.cpp:25:const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+repos/dali-ui/samples/attachment/attachment-example.cpp:40:  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+repos/dali-ui/samples/attachment/attachment-example.cpp:73:      .SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label))
+repos/dali-ui/samples/attachment/attachment-example.cpp:104:    CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+repos/dali-ui/samples/attachment/attachment-example.cpp:120:      mCounter.SetAttachment(COUNTER_DATA_ID, Dali::Move(data))
+repos/dali-ui/samples/color-controls/test-config.h:36:  DALI_UI_CHAIN_UICONFIG_METHODS(TestConfig);
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/public-api/attachment-id.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1180,1290p' repos/dali-ui/dali-ui-foundation/public-api/view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <cstdint>
+
+namespace Dali
+{
+namespace Ui
+{
+
+/**
+ * @brief A lightweight identifier for an attachment slot.
+ *
+ * AttachmentId values are allocated sequentially via AttachmentId::Alloc().
+ * Allocate one id per logical attachment type and store the returned id in
+ * static storage so it can be reused for SetAttachment(), GetAttachment(), and
+ * DetachAttachment().
+ *
+ * Do not allocate a new id per object instance or per API call. Repeated
+ * one-shot allocation wastes the process-wide id space and makes previously
+ * stored attachments impossible to retrieve.
+ *
+ * @code
+ * // One-time allocation per attachment type (e.g. in an anonymous namespace or as a static)
+ * static const AttachmentId kMyViewDataAttachment = AttachmentId::Alloc();
+ * @endcode
+ */
+struct DALI_UI_API AttachmentId
+{
+  /**
+   * @brief Allocates and returns the next unique AttachmentId.
+   *
+   * Uses an internal atomic counter. Thread-safe and lock-free.
+   * Call once per logical attachment type and store the result statically.
+   * If the uint32_t id space is exhausted, an assertion is raised instead of
+   * wrapping around to an already allocated id.
+   *
+   * @return A new unique AttachmentId
+   */
+  static AttachmentId Alloc();
+
+  /**
+   * @brief Equality operator.
+   */
+  bool operator==(const AttachmentId& other) const
+  {
+    return value == other.value;
+  }
+
+  /**
+   * @brief Inequality operator.
+   */
+  bool operator!=(const AttachmentId& other) const
+  {
+    return value != other.value;
+  }
+
+  uint32_t value;
+
+private:
+  explicit AttachmentId(uint32_t v)
+  : value(v)
+  {
+  }
+};
+
+} // namespace Ui
+} // namespace Dali
+
+ succeeded in 0ms:
+   * @brief Sets an attachment from uniquely owned data.
+   *
+   * The data ownership is moved into this View. If another
+   * attachment already exists for @p id, it is destroyed and replaced. The
+   * stored attachment is destroyed when it is removed, replaced, or when the
+   * View implementation is destroyed.
+   *
+   * @note This typed attachment API stores Dali::UniquePtr<T> with its default
+   * deleter. UniquePtr types with custom deleters are not supported by this
+   * overload.
+   *
+   * @note Use a stable namespace-scope type for attachment data. Local types and
+   * anonymous-namespace types should not be used when the attachment may be
+   * retrieved from another translation unit, because they may not have a stable
+   * cross-translation-unit type identity.
+   *
+   * @param[in] id The key to identify the attachment
+   * @param[in] data The data whose ownership is transferred to this View
+   * @return Reference to this View
+   */
+  template<typename T>
+  View& SetAttachment(AttachmentId id, Dali::UniquePtr<T> data)
+  {
+    DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data");
+    View::SetAttachment(id, UniqueAny(Dali::Move(data)));
+    return *this;
+  }
+
+  // @CHAIN_END
+
+  /**
+   * @brief Removes an attachment.
+   *
+   * Removing an attachment destroys the stored UniqueAny and its owned value.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return True if an attachment was removed
+   */
+  bool RemoveAttachment(AttachmentId id);
+
+  /**
+   * @brief Gets an attachment value.
+   *
+   * The returned pointer is owned by this View. The caller must not delete it
+   * and must not use it after the attachment is removed, replaced, or the View
+   * implementation is destroyed.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return Pointer to the stored value, or nullptr if missing or type mismatched
+   */
+  template<typename T>
+  T* GetAttachment(AttachmentId id)
+  {
+    using StoredType = Dali::UniquePtr<T>;
+
+    UniqueAny*  attachment = GetAttachmentInternal(id);
+    StoredType* data       = attachment ? attachment->Get<StoredType>() : nullptr;
+    return data ? data->Get() : nullptr;
+  }
+
+  /**
+   * @brief Gets a const attachment value.
+   *
+   * The returned pointer is owned by this View. The caller must not delete it
+   * and must not use it after the attachment is removed, replaced, or the View
+   * implementation is destroyed.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return Pointer to the stored value, or nullptr if missing or type mismatched
+   */
+  template<typename T>
+  const T* GetAttachment(AttachmentId id) const
+  {
+    using StoredType = Dali::UniquePtr<T>;
+
+    const UniqueAny*  attachment = GetAttachmentInternal(id);
+    const StoredType* data       = attachment ? attachment->Get<StoredType>() : nullptr;
+    return data ? data->Get() : nullptr;
+  }
+
+  /**
+   * @brief Detaches an attachment value.
+   *
+   * If the stored value type matches @p T, the attachment is removed from this
+   * View and ownership of the value is transferred to the returned UniquePtr.
+   * If the attachment is missing or the type does not match, this View is left
+   * unchanged and nullptr is returned.
+   *
+   * @note This typed attachment API detaches Dali::UniquePtr<T> with its
+   * default deleter. UniquePtr types with custom deleters are not supported by
+   * this overload.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return The detached value, or nullptr if missing or type mismatched
+   */
+  template<typename T>
+  Dali::UniquePtr<T> DetachAttachment(AttachmentId id)
+  {
+    using StoredType = Dali::UniquePtr<T>;
+
+    UniqueAny*  storedAttachment = GetAttachmentInternal(id);
+    StoredType* storedData       = storedAttachment ? storedAttachment->Get<StoredType>() : nullptr;
+    if(!storedData)
+    {
+      return Dali::UniquePtr<T>();
+    }
+
+    UniqueAny                   attachment = DetachAttachmentInternal(id);
+    Dali::UniquePtr<StoredType> data       = attachment.Detach<StoredType>();
+    return data.Get() ? Dali::Move(*data) : Dali::UniquePtr<T>();
+  }
+
+exec
+/bin/bash -lc "sed -n '2550,2645p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+}
+
+int UtcDaliViewAttachmentSetGetP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  AttachmentId      id   = AttachmentId::Alloc();
+
+  view.SetAttachment(id, Dali::MakeUnique<int>(13));
+
+  int* value = view.GetAttachment<int>(id);
+  DALI_TEST_CHECK(value);
+  DALI_TEST_EQUALS(*value, 13, TEST_LOCATION);
+  DALI_TEST_CHECK(!view.GetAttachment<float>(id));
+
+  const View constView(view);
+  const int* constValue = constView.GetAttachment<int>(id);
+  DALI_TEST_CHECK(constValue);
+  DALI_TEST_EQUALS(*constValue, 13, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAttachmentReplaceP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  AttachmentId      id   = AttachmentId::Alloc();
+
+  view.SetAttachment(id, Dali::MakeUnique<int>(13));
+  view.SetAttachment(id, Dali::MakeUnique<int>(27));
+
+  int* value = view.GetAttachment<int>(id);
+  DALI_TEST_CHECK(value);
+  DALI_TEST_EQUALS(*value, 27, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAttachmentRemoveP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  AttachmentId      id   = AttachmentId::Alloc();
+
+  view.SetAttachment(id, Dali::MakeUnique<int>(13));
+
+  DALI_TEST_CHECK(view.RemoveAttachment(id));
+  DALI_TEST_CHECK(!view.GetAttachment<int>(id));
+  DALI_TEST_CHECK(!view.RemoveAttachment(id));
+  END_TEST;
+}
+
+int UtcDaliViewAttachmentDetachP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  AttachmentId      id   = AttachmentId::Alloc();
+
+  view.SetAttachment(id, Dali::MakeUnique<int>(43));
+
+  Dali::UniquePtr<float> mismatch = view.DetachAttachment<float>(id);
+  DALI_TEST_CHECK(!mismatch.Get());
+  DALI_TEST_CHECK(view.GetAttachment<int>(id));
+
+  Dali::UniquePtr<int> value = view.DetachAttachment<int>(id);
+  DALI_TEST_CHECK(value.Get());
+  DALI_TEST_EQUALS(*value, 43, TEST_LOCATION);
+  DALI_TEST_CHECK(!view.GetAttachment<int>(id));
+  DALI_TEST_CHECK(!view.DetachAttachment<int>(id).Get());
+  END_TEST;
+}
+
+int UtcDaliViewAttachmentMoveOnlyP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  AttachmentId      id   = AttachmentId::Alloc();
+
+  view.SetAttachment(id, Dali::MakeUnique<ViewMoveOnlyAttachment>(31));
+
+  ViewMoveOnlyAttachment* value = view.GetAttachment<ViewMoveOnlyAttachment>(id);
+  DALI_TEST_CHECK(value);
+  DALI_TEST_EQUALS(value->value, 31, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAttachmentSetNullN(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  AttachmentId      id   = AttachmentId::Alloc();
+
+  DALI_TEST_ASSERTION(view.SetAttachment(id, Dali::UniquePtr<int>()), "SetAttachment requires non-null data");
+  END_TEST;
+}
+
+int UtcDaliViewInsertReordersMChildrenP(void)
+
+codex
+---
+title: Attachment Id
+sidebar_label: Attachment Id
+category: utilities
+---
+
+# Attachment Id
+
+`Dali::Ui::AttachmentId` is the stable key used to identify custom data attached to a `Dali::Ui::View`.
+
+## Table of Contents
+
+- [Allocate One Id Per Attachment Type](#allocate-one-id-per-attachment-type)
+- [Attach View-Local State](#attach-view-local-state)
+- [Retrieve and Update Attachment Data](#retrieve-and-update-attachment-data)
+- [Replace, Remove, and Detach Data](#replace-remove-and-detach-data)
+- [Use Attachment Ids in Custom View Handles](#use-attachment-ids-in-custom-view-handles)
+
+## Allocate One Id Per Attachment Type
+
+Allocate a `Dali::Ui::AttachmentId` once for each logical attachment slot, then reuse that id whenever the same data type is stored, read, removed, or detached.
+
+`Dali::Ui::AttachmentId::Alloc()` returns a new id. Store the result in static or namespace-scope storage instead of allocating during each event or view update.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  uint32_t count{0u};
+};
+}
+```
+
+`Dali::Ui::AttachmentId` is a lightweight value type. You can compare ids with `Dali::Ui::AttachmentId::operator==` and `Dali::Ui::AttachmentId::operator!=` when routing attachment-aware logic.
+
+```cpp
+const AttachmentId FIRST_DATA_ID  = AttachmentId::Alloc();
+const AttachmentId SECOND_DATA_ID = AttachmentId::Alloc();
+
+if(FIRST_DATA_ID != SECOND_DATA_ID)
+{
+  // The ids address different attachment slots.
+}
+```
+
+The public `Dali::Ui::AttachmentId::value` field contains the underlying numeric id. Application code normally keeps ids opaque and compares the `Dali::Ui::AttachmentId` values directly.
+
+```cpp
+const AttachmentId DATA_ID = AttachmentId::Alloc();
+uint32_t rawId = DATA_ID.value;
+(void)rawId;
+```
+
+## Attach View-Local State
+
+In a dali-ui app, attach custom state to a `Dali::Ui::View` when the state belongs to that view but should not be stored as fields on a lightweight handle object.
+
+The attachment data is owned by the view after it is passed with `Dali::MakeUnique`.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+}
+
+InteractiveView CreateCounterView()
+{
+  Label label = Label::New("Count: 0")
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(MATCH_PARENT)
+    .SetFontSize(18.0f)
+    .SetTextColor(UiColor(0xFFFFFF))
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+  return InteractiveView::New()
+    .SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label))
+    .SetRequestedWidth(220.0f)
+    .SetRequestedHeight(80.0f)
+    .SetBackgroundColor(UiColor(0x1565C0))
+    .Children({label});
+}
+```
+
+Use one `Dali::Ui::AttachmentId` for one logical attachment type. Calling `Dali::Ui::AttachmentId::Alloc()` every time a view is created would make the data hard to retrieve later, because reads must use the same id value that was used to store the data.
+
+## Retrieve and Update Attachment Data
+
+Read the attachment through the same `Dali::Ui::AttachmentId` used when the data was attached. The returned pointer is owned by the `Dali::Ui::View`; do not delete it.
+
+```cpp
+#include <cstdio>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNTER_DATA_ID = AttachmentId::Alloc();
+
+struct CounterData
+{
+  explicit CounterData(Label label)
+  : label(label)
+  {
+  }
+
+  Label    label;
+  uint32_t count{0u};
+};
+
+void UpdateCounterLabel(View view)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+  if(!data)
+  {
+    return;
+  }
+
+  char text[64];
+  std::snprintf(text, sizeof(text), "Count: %u", data->count);
+  data->label.SetText(text);
+}
+}
+
+void OnCounterClicked(View view, InputEvent event)
+{
+  CounterData* data = view.GetAttachment<CounterData>(COUNTER_DATA_ID);
+  if(data)
+  {
+    ++data->count;
+    view.SetBackgroundColor((data->count % 2u) ? UiColor(0x2E7D32) : UiColor(0x1565C0));
+    UpdateCounterLabel(view);
+  }
+}
+```
+
+If the id is missing or the requested type does not match the stored type, the typed lookup returns `nullptr`. This makes it practical to use an attached marker or data object to check whether a generic `Dali::Ui::View` supports a feature.
+
+## Replace, Remove, and Detach Data
+
+Setting a new value for the same `Dali::Ui::AttachmentId` replaces the old attachment. Removing an attachment destroys the stored object. Detaching transfers ownership back to the caller.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const AttachmentId COUNT_DATA_ID = AttachmentId::Alloc();
+}
+
+void ReplaceCounterData(View view)
+{
+  view.SetAttachment(COUNT_DATA_ID, Dali::MakeUnique<int>(13));
+  view.SetAttachment(COUNT_DATA_ID, Dali::MakeUnique<int>(27));
+
+  int* value = view.GetAttachment<int>(COUNT_DATA_ID);
+  if(value)
+  {
+    *value += 1;
+  }
+}
+
+void RemoveCounterData(View view)
+{
+  bool removed = view.RemoveAttachment(COUNT_DATA_ID);
+  (void)removed;
+}
+
+Dali::UniquePtr<int> TakeCounterData(View view)
+{
+  return view.DetachAttachment<int>(COUNT_DATA_ID);
+}
+```
+
+Use detach when the data should continue to exist outside the view. Use remove when the attachment should simply be discarded.
+
+```cpp
+void ResetCounter(View counter)
+{
+  Dali::UniquePtr<int> count = counter.DetachAttachment<int>(COUNT_DATA_ID);
+  if(count)
+  {
+    *count = 0;
+    counter.SetAttachment(COUNT_DATA_ID, Dali::Move(count));
+  }
+}
+```
+
+## Use Attachment Ids in Custom View Handles
+
+Attachments are useful when a custom public handle derives from a dali-ui view type. DALi handles are lightweight, so persistent per-view data should be stored on the implementation-backed view object rather than as ordinary fields on the handle wrapper.
+
+Keep the `Dali::Ui::AttachmentId` private to the custom handle and return the same static id every time.
+
+```cpp
+#include <cstdio>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class MyButton : public InteractiveView
+{
+public:
+  struct Data
+  {
+    Data(Label label, UiColor normalColor, UiColor pressedColor)
+    : label(label),
+      normalColor(normalColor),
+      pressedColor(pressedColor)
+    {
+    }
+
+    Label   label;
+    UiColor normalColor;
+    UiColor pressedColor;
+    uint32_t clickCount{0u};
+  };
+
+  MyButton() = default;
+
+  static MyButton New(const Dali::String& text)
+  {
+    MyButton button(InteractiveView::New());
+    button.Initialize(text);
+    return button;
+  }
+
+  static MyButton DownCast(BaseHandle handle)
+  {
+    InteractiveView view = InteractiveView::DownCast(handle);
+    return view && view.GetAttachment<Data>(GetDataId()) ? MyButton(view) : MyButton();
+  }
+
+  void Initialize(const Dali::String& text)
+  {
+    Label label = Label::New(text)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetFontSize(18.0f)
+      .SetTextColor(UiColor(0xFFFFFF))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    Add(label);
+    SetAttachment(GetDataId(), Dali::MakeUnique<Data>(label, UiColor(0x1565C0), UiColor(0x2E7D32)));
+    SetBackgroundColor(UiColor(0x1565C0));
+  }
+
+  void IncrementClickCount()
+  {
+    Data* data = GetAttachment<Data>(GetDataId());
+    if(!data)
+    {
+      return;
+    }
+
+    ++data->clickCount;
+    SetBackgroundColor((data->clickCount % 2u) ? data->pressedColor : data->normalColor);
+
+    char text[64];
+    std::snprintf(text, sizeof(text), "MyButton: %u", data->clickCount);
+    data->label.SetText(text);
+  }
+
+public:
+  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)
+
+private:
+  explicit MyButton(InteractiveView view)
+  : InteractiveView(view)
+  {
+  }
+
+  static AttachmentId GetDataId()
+  {
+    static AttachmentId id = AttachmentId::Alloc();
+    return id;
+  }
+};
+```
+
+This pattern lets application code keep using `Dali::Ui::View`-based handles while the custom view keeps its implementation-specific state behind a stable `Dali::Ui::AttachmentId`.
+tokens used
+20,690

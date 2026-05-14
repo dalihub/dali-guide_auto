@@ -1,0 +1,2927 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e25f7-2538-7022-9ad4-982972a1c824
+--------
+user
+You are repairing an existing DALi dali-ui Markdown guide.
+Return only the complete repaired Markdown document.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, validation reports, or file-write messages.
+If no changes are needed, return the full unchanged original Markdown document.
+Do not answer with phrases such as 'already repaired', 'no repairs needed', 'the document is valid', or 'all issues have been resolved'.
+The first non-frontmatter content must be the top-level document title heading.
+Do not rewrite the guide. Only edit the listed issue spans and the smallest surrounding context needed.
+Preserve unrelated headings, ordering, and correct content as-is.
+Keep the repaired user-facing guide in en only.
+Remove Korean, Japanese, Chinese, or other non-English prose when it appears in the guide.
+Do not invent APIs. Use only provided allowed symbols, property owners, usage patterns, or local helpers defined in a code block.
+Do not remove legitimate DALi domain/API terms such as placeholder image/text when they describe public API behavior.
+
+Source-grounded repair requirements:
+- Repair only the problematic spans and the smallest surrounding context needed; do not rewrite the whole document.
+- For each listed issue, use the repository evidence and context pack to verify the corrected wording or code before returning.
+- If an issue reveals the same API misuse nearby, fix the nearby equivalent misuse too; do not make unrelated style rewrites.
+- After repair, re-check the edited lines against public headers, implementation files, samples, or UTCs when needed.
+- For every edited C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Feature:
+signals
+
+Validator findings to repair:
+[
+  {
+    "id": "signals-T1-0001",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 134,
+    "span": "mReadySignal.Connect(",
+    "message": "mReadySignal.Connect() does not resolve on inferred type ReadySignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0002",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 142,
+    "span": "mReadySignal.Emit(",
+    "message": "mReadySignal.Emit() does not resolve on inferred type ReadySignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0003",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 271,
+    "span": "mChangedSignal.Empty(",
+    "message": "mChangedSignal.Empty() does not resolve on inferred type ChangedSignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0004",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 276,
+    "span": "mChangedSignal.GetConnectionCount(",
+    "message": "mChangedSignal.GetConnectionCount() does not resolve on inferred type ChangedSignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0005",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 281,
+    "span": "mChangedSignal.Emit(",
+    "message": "mChangedSignal.Emit() does not resolve on inferred type ChangedSignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0006",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 378,
+    "span": "mSelectionChangedSignal.Emit(",
+    "message": "mSelectionChangedSignal.Emit() does not resolve on inferred type SelectionChangedSignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0007",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 437,
+    "span": "mAllowSignal.Emit(",
+    "message": "mAllowSignal.Emit() does not resolve on inferred type AllowSignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  },
+  {
+    "id": "signals-T1-0008",
+    "code": "UNKNOWN_RECEIVER_METHOD",
+    "line": 480,
+    "span": "mCommandSignal.EmitOr(",
+    "message": "mCommandSignal.EmitOr() does not resolve on inferred type CommandSignalType.",
+    "suggestions": [],
+    "required_action": "Replace this call with an existing public method on the inferred receiver type."
+  }
+]
+
+Relevant allowed symbols:
+[
+  {
+    "display_name": "BaseSignal",
+    "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::BaseSignal",
+    "surface": "dali-core",
+    "symbol_id": "Dali::BaseSignal",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "EmitGuard",
+    "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::BaseSignal::EmitGuard",
+    "surface": "dali-core",
+    "symbol_id": "Dali::BaseSignal::EmitGuard",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Impl",
+    "header_path": "repos/dali-core/dali/public-api/signals/base-signal.cpp",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::BaseSignal::Impl",
+    "surface": "dali-core",
+    "symbol_id": "Dali::BaseSignal::Impl",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Callback",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Callback",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Callback",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackBase",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackBase",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackBase",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Impl",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::CallbackBase::Impl",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackBase::Impl",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctor0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctor0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctor0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctor1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctor1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctor1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctor2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctor2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctor2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctor3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctor3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctor3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegate0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegate0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegate0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegate1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegate1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegate1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegate2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegate2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegate2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegate3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegate3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegate3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegateReturn0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegateReturn0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegateReturn0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegateReturn1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegateReturn1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegateReturn1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegateReturn2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegateReturn2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegateReturn2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorDelegateReturn3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorDelegateReturn3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorDelegateReturn3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorReturn0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorReturn0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorReturn0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorReturn1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorReturn1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorReturn1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorReturn2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorReturn2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorReturn2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackFunctorReturn3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::CallbackFunctorReturn3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::CallbackFunctorReturn3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "ConnectionTracker",
+    "header_path": "repos/dali-core/dali/public-api/signals/connection-tracker.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::ConnectionTracker",
+    "surface": "dali-core",
+    "symbol_id": "Dali::ConnectionTracker",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Impl",
+    "header_path": "repos/dali-core/dali/public-api/signals/connection-tracker.cpp",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::ConnectionTracker::Impl",
+    "surface": "dali-core",
+    "symbol_id": "Dali::ConnectionTracker::Impl",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Pair",
+    "header_path": "repos/dali-core/dali/public-api/signals/connection-tracker.cpp",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::ConnectionTracker::Impl::Pair",
+    "surface": "dali-core",
+    "symbol_id": "Dali::ConnectionTracker::Impl::Pair",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "ConnectionTrackerInterface",
+    "header_path": "repos/dali-core/dali/public-api/signals/connection-tracker-interface.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::ConnectionTrackerInterface",
+    "surface": "dali-core",
+    "symbol_id": "Dali::ConnectionTrackerInterface",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Destroyer",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::Destroyer",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Destroyer",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Dispatcher0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::Dispatcher0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Dispatcher0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Dispatcher1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::Dispatcher1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Dispatcher1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Dispatcher2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::Dispatcher2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Dispatcher2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Dispatcher3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::Dispatcher3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Dispatcher3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "DispatcherReturn0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::DispatcherReturn0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::DispatcherReturn0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "DispatcherReturn1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::DispatcherReturn1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::DispatcherReturn1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "DispatcherReturn2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::DispatcherReturn2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::DispatcherReturn2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "DispatcherReturn3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::DispatcherReturn3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::DispatcherReturn3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDelegate",
+    "header_path": "repos/dali-core/dali/public-api/signals/functor-delegate.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::FunctorDelegate",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDelegate",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDestroyer",
+    "header_path": "repos/dali-core/dali/public-api/signals/functor-delegate.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDestroyer",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDestroyer",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcher",
+    "header_path": "repos/dali-core/dali/public-api/signals/functor-delegate.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcher",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcher",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcher0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcher0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcher0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcher1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcher1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcher1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcher2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcher2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcher2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcher3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcher3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcher3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcherReturn0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcherReturn0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcherReturn0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcherReturn1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcherReturn1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcherReturn1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcherReturn2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcherReturn2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcherReturn2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "FunctorDispatcherReturn3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::FunctorDispatcherReturn3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::FunctorDispatcherReturn3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "RenderCallback",
+    "header_path": "repos/dali-core/dali/devel-api/signals/render-callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::RenderCallback",
+    "surface": "dali-core",
+    "symbol_id": "Dali::RenderCallback",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "RenderCallbackInput",
+    "header_path": "repos/dali-core/dali/devel-api/signals/render-callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::RenderCallbackInput",
+    "surface": "dali-core",
+    "symbol_id": "Dali::RenderCallbackInput",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< Ret()>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< Ret()>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< Ret()>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< Ret(Arg0)>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< Ret(Arg0)>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< Ret(Arg0)>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< Ret(Arg0, Arg1)>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< Ret(Arg0, Arg1)>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< Ret(Arg0, Arg1)>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< Ret(Arg0, Arg1, Arg2)>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< Ret(Arg0, Arg1, Arg2)>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< Ret(Arg0, Arg1, Arg2)>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< void()>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< void()>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< void()>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< void(Arg0)>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< void(Arg0)>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< void(Arg0)>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< void(Arg0, Arg1)>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< void(Arg0, Arg1)>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< void(Arg0, Arg1)>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "Signal< void(Arg0, Arg1, Arg2)>",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::Signal< void(Arg0, Arg1, Arg2)>",
+    "surface": "dali-core",
+    "symbol_id": "Dali::Signal< void(Arg0, Arg1, Arg2)>",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalConnection",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-slot-connections.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SignalConnection",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalConnection",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalConnectionBlock",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-connection-pool.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::SignalConnectionBlock",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalConnectionBlock",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalConnectionNode",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-connection-pool.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::SignalConnectionNode",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalConnectionNode",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalConnectionPool",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-connection-pool.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SignalConnectionPool",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalConnectionPool",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalDelegate",
+    "header_path": "repos/dali-core/dali/devel-api/signals/signal-delegate.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SignalDelegate",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalDelegate",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "CallbackBaseFunctor",
+    "header_path": "repos/dali-core/dali/devel-api/signals/signal-delegate.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::SignalDelegate::CallbackBaseFunctor",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalDelegate::CallbackBaseFunctor",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalMixin",
+    "header_path": "repos/dali-core/dali/public-api/signals/dali-signal.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SignalMixin",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalMixin",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SignalObserver",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-slot-observers.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SignalObserver",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SignalObserver",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SlotConnection",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-slot-connections.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SlotConnection",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SlotConnection",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SlotDelegate",
+    "header_path": "repos/dali-core/dali/public-api/signals/slot-delegate.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SlotDelegate",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SlotDelegate",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "SlotObserver",
+    "header_path": "repos/dali-core/dali/public-api/signals/signal-slot-observers.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::SlotObserver",
+    "surface": "dali-core",
+    "symbol_id": "Dali::SlotObserver",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VertexBufferUpdateCallback",
+    "header_path": "repos/dali-core/dali/devel-api/signals/vertex-buffer-update-callback.h",
+    "kind": "class",
+    "public_api": true,
+    "signature": "Dali::VertexBufferUpdateCallback",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VertexBufferUpdateCallback",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcher0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcher0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcher0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcher1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcher1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcher1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcher2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcher2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcher2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcher3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcher3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcher3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcherReturn0",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcherReturn0",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcherReturn0",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcherReturn1",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcherReturn1",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcherReturn1",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcherReturn2",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcherReturn2",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcherReturn2",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "VoidFunctorDispatcherReturn3",
+    "header_path": "repos/dali-core/dali/public-api/signals/callback.h",
+    "kind": "struct",
+    "public_api": true,
+    "signature": "Dali::VoidFunctorDispatcherReturn3",
+    "surface": "dali-core",
+    "symbol_id": "Dali::VoidFunctorDispatcherReturn3",
+    "usage_scope": "primary"
+  },
+  {
+    "display_name": "BaseSignal",
+    "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
+    "kind": "constructor",
+    "public_api": true,
+    "signature": "BaseSignal()",
+    "surface": "dali-core",
+    "symbol_id": "Dali::BaseSignal::BaseSignal",
+    "usage_scope": "primary_member"
+  },
+  {
+    "display_name": "Emit",
+    "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
+    "kind": "method",
+    "public_api": true,
+    "signature": "void Emit(Args... args)",
+    "surface": "dali-core",
+    "symbol_id": "Dali::BaseSignal::Emit",
+    "usage_scope": "primary_member"
+  },
+  {
+    "display_name": "EmitGuard",
+    "header_path": "repos/dali-core/dali/public-api/signals/base-signal.h",
+    "kind": "constructor",
+    "public_api": true,
+    "signature": "EmitGuard(bool &flag)",
+    "surface": "dali-core",
+    "symbol_id": "Dali::BaseSignal::EmitGuard::EmitGuard",
+    "usage_scope": "primary_member"
+  }
+]
+
+Relevant property owners:
+[]
+
+Relevant usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "confidence": 0.85,
+    "id": "signals_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::FunctorDelegate::New",
+      "Dali::RenderCallback::New"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "confidence": 0.8,
+    "id": "signals_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker",
+      "Dali::ConnectionTracker::DisconnectAll",
+      "Dali::ConnectionTracker::GetConnectionCount",
+      "Dali::ConnectionTracker::Impl",
+      "Dali::ConnectionTracker::Impl::DisconnectAllAndReset",
+      "Dali::ConnectionTracker::Impl::Erase",
+      "Dali::ConnectionTracker::Impl::GetSize"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Original Markdown:
+---
+title: Signals
+sidebar_label: Signals
+category: utilities
+---
+
+# Signals
+
+Signals let dali-ui application code react to view, input, resource, and lifecycle events while keeping connection lifetime explicit.
+
+## Table of Contents
+
+- [Connect View Events](#connect-view-events)
+- [Track Connection Lifetime](#track-connection-lifetime)
+- [Use Lambdas, Member Functions, and Free Functions](#use-lambdas-member-functions-and-free-functions)
+- [Inspect and Disconnect Connections](#inspect-and-disconnect-connections)
+- [Expose Small Application Signals](#expose-small-application-signals)
+- [Use Return Values Carefully](#use-return-values-carefully)
+
+## Connect View Events
+
+In a dali-ui application, the usual entry point is a `Dali::Ui::View` or a class derived from it. View-facing APIs expose typed `Dali::Signal` objects such as `Dali::Ui::View::FocusChangedSignalType`, `Dali::Ui::View::KeyEventSignalType`, and `Dali::Ui::View::ResourceReadySignalType`. Application code connects a callback with the same argument and return shape as the signal.
+
+A typical controller inherits from `Dali::ConnectionTracker` and connects view signals during setup:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class PageController : public ConnectionTracker
+{
+public:
+  void Setup(Label title)
+  {
+    title.FocusChangedSignal().Connect(this, &PageController::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View view, bool focused)
+  {
+    view.SetBackgroundColor(focused ? UiColor(0x3366CC) : UiColor(0x222222));
+  }
+};
+```
+
+For `Dali::Ui::View::KeyEventSignalType`, return `true` when the key event has been handled and should be consumed, or `false` when other handlers may continue processing it:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class KeyController : public ConnectionTracker
+{
+public:
+  void Setup(Label label)
+  {
+    label.SetFocusable(true);
+
+    label.KeyEventSignal().Connect(this, [this](View view, KeyEvent event) -> bool
+    {
+      return OnKeyEvent(view, event);
+    });
+  }
+
+private:
+  bool OnKeyEvent(View view, KeyEvent event)
+  {
+    if(event.GetState() == KeyEvent::DOWN)
+    {
+      view.SetBackgroundColor(UiColor(0x5588EE));
+      return true;
+    }
+
+    return false;
+  }
+};
+```
+
+`Dali::Signal<void(Arg0)>`, `Dali::Signal<void(Arg0, Arg1)>`, and `Dali::Signal<Ret(Arg0, Arg1)>` all require the callback signature to match the signal signature. For example, a focus signal callback receives `View, bool`, while a view key signal callback receives `View, KeyEvent` and returns `bool`.
+
+## Track Connection Lifetime
+
+`Dali::ConnectionTracker` is the primary lifetime tool for application code. When a callback is connected with `this` and the receiving object derives from `Dali::ConnectionTracker`, the connection is associated with that receiver. Destroying the tracker disconnects the slots it owns.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ImageStatus : public ConnectionTracker
+{
+public:
+  void Bind(ImageView image, Label status)
+  {
+    mStatus = status;
+
+    image.ResourceReadySignal().Connect(this, [this](View)
+    {
+      ++mReadyCount;
+      mStatus.SetText("Ready count: " + String(std::to_string(mReadyCount).c_str()));
+    });
+  }
+
+private:
+  Label    mStatus;
+  uint32_t mReadyCount{0};
+};
+```
+
+A `Dali::ConnectionTracker` can also be passed explicitly when connecting a function object to a `Dali::Signal`. This is useful when the receiver object does not need a separate member function:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class Loader : public ConnectionTracker
+{
+public:
+  using ReadySignalType = Signal<void(uint32_t)>;
+
+  ReadySignalType& ReadySignal()
+  {
+    return mReadySignal;
+  }
+
+  void ConnectHandlers()
+  {
+    mReadySignal.Connect(this, [this](uint32_t itemCount)
+    {
+      mLastItemCount = itemCount;
+    });
+  }
+
+  void Complete(uint32_t itemCount)
+  {
+    mReadySignal.Emit(itemCount);
+  }
+
+private:
+  ReadySignalType mReadySignal;
+  uint32_t        mLastItemCount{0};
+};
+```
+
+`Dali::ConnectionTracker::DisconnectAll()` disconnects every signal currently tracked by the receiver. Use it when a controller leaves a page or rebinds to a new group of views before destruction.
+
+## Use Lambdas, Member Functions, and Free Functions
+
+A `Dali::Signal` supports several callback forms. In application code, member functions and lambdas with a `Dali::ConnectionTracker` are the most useful because their lifetime is tied to the receiver.
+
+Member function callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class FocusRing : public ConnectionTracker
+{
+public:
+  void Attach(View target)
+  {
+    target.FocusChangedSignal().Connect(this, &FocusRing::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View target, bool focused)
+  {
+    target.SetOpacity(focused ? 1.0f : 0.6f);
+  }
+};
+```
+
+Lambda callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class SelectionController : public ConnectionTracker
+{
+public:
+  void Attach(InteractiveTrait& trait)
+  {
+    trait.ClickedSignal().Connect(this, [this](View selectedView, InputEvent)
+    {
+      mSelected = selectedView;
+    });
+  }
+
+private:
+  View mSelected;
+};
+```
+
+Free function callback:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+namespace
+{
+void OnRefresh()
+{
+}
+}
+
+void ConnectRefresh(Signal<void()>& refreshSignal)
+{
+  refreshSignal.Connect(&OnRefresh);
+}
+```
+
+For function objects that need type-erased storage, `Dali::FunctorDelegate::New()` creates a delegate owned by the signal connection:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali/public-api/signals/functor-delegate.h>
+
+using namespace Dali;
+
+class RefreshController : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& refreshSignal)
+  {
+    refreshSignal.Connect(this, FunctorDelegate::New([this]
+    {
+      ++mRefreshCount;
+    }));
+  }
+
+private:
+  uint32_t mRefreshCount{0};
+};
+```
+
+## Inspect and Disconnect Connections
+
+`Dali::Signal` inherits connection inspection from `Dali::SignalMixin`. Use `Empty()` when you only need to know whether any slots are connected, and `GetConnectionCount()` when diagnostic code needs the exact count.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+class RefreshModel
+{
+public:
+  using ChangedSignalType = Signal<void()>;
+
+  ChangedSignalType& ChangedSignal()
+  {
+    return mChangedSignal;
+  }
+
+  bool HasListeners() const
+  {
+    return !mChangedSignal.Empty();
+  }
+
+  uint32_t ListenerCount() const
+  {
+    return mChangedSignal.GetConnectionCount();
+  }
+
+  void NotifyChanged()
+  {
+    mChangedSignal.Emit();
+  }
+
+private:
+  ChangedSignalType mChangedSignal;
+};
+```
+
+Disconnect a specific function or member function by passing the same receiver and callback shape used for `Connect()`:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class RefreshHandler : public ConnectionTracker
+{
+public:
+  void Attach(Signal<void()>& signal)
+  {
+    signal.Connect(this, &RefreshHandler::OnRefresh);
+  }
+
+  void Detach(Signal<void()>& signal)
+  {
+    signal.Disconnect(this, &RefreshHandler::OnRefresh);
+  }
+
+private:
+  void OnRefresh()
+  {
+  }
+};
+```
+
+When the receiver owns several connections, `Dali::ConnectionTracker::GetConnectionCount()` gives the number currently tracked by that receiver, and `Dali::ConnectionTracker::DisconnectAll()` clears them together:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PageBindings : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& opened, Signal<void()>& closed)
+  {
+    opened.Connect(this, &PageBindings::OnOpened);
+    closed.Connect(this, &PageBindings::OnClosed);
+  }
+
+  void Reset()
+  {
+    if(GetConnectionCount() > 0u)
+    {
+      DisconnectAll();
+    }
+  }
+
+private:
+  void OnOpened()
+  {
+  }
+
+  void OnClosed()
+  {
+  }
+};
+```
+
+## Expose Small Application Signals
+
+Application-level components can expose their own typed `Dali::Signal` members. Define a type alias, return the signal by reference, and emit it from the component when the state changes.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class SelectionModel
+{
+public:
+  using SelectionChangedSignalType = Signal<void(uint32_t)>;
+
+  SelectionChangedSignalType& SelectionChangedSignal()
+  {
+    return mSelectionChangedSignal;
+  }
+
+  void Select(uint32_t index)
+  {
+    if(mSelectedIndex != index)
+    {
+      mSelectedIndex = index;
+      mSelectionChangedSignal.Emit(mSelectedIndex);
+    }
+  }
+
+private:
+  SelectionChangedSignalType mSelectionChangedSignal;
+  uint32_t                   mSelectedIndex{0u};
+};
+
+class SelectionViewController : public ConnectionTracker
+{
+public:
+  void Bind(SelectionModel& model)
+  {
+    model.SelectionChangedSignal().Connect(this, &SelectionViewController::OnSelectionChanged);
+  }
+
+private:
+  void OnSelectionChanged(uint32_t index)
+  {
+    mLastSelection = index;
+  }
+
+  uint32_t mLastSelection{0u};
+};
+```
+
+Use the exact `Dali::Signal` specialization that matches the event contract:
+
+```cpp
+using StartedSignalType  = Dali::Signal<void()>;
+using ProgressSignalType = Dali::Signal<void(float)>;
+using AcceptedSignalType = Dali::Signal<bool(uint32_t, uint32_t)>;
+```
+
+`Dali::Signal<void()>` emits notifications without data. `Dali::Signal<void(Arg0)>` and `Dali::Signal<void(Arg0, Arg1)>` pass data to listeners. `Dali::Signal<Ret(Arg0, Arg1)>` returns a value from connected callbacks.
+
+## Use Return Values Carefully
+
+A returning `Dali::Signal` returns the value from the last callback that runs. If no callbacks are connected, it returns a default-constructed value for the return type.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PermissionModel
+{
+public:
+  using AllowSignalType = Signal<bool(uint32_t)>;
+
+  AllowSignalType& AllowSignal()
+  {
+    return mAllowSignal;
+  }
+
+  bool CanOpen(uint32_t itemId)
+  {
+    return mAllowSignal.Emit(itemId);
+  }
+
+private:
+  AllowSignalType mAllowSignal;
+};
+
+class PermissionController : public ConnectionTracker
+{
+public:
+  void Bind(PermissionModel& model)
+  {
+    model.AllowSignal().Connect(this, &PermissionController::OnAllow);
+  }
+
+private:
+  bool OnAllow(uint32_t itemId)
+  {
+    return itemId != 0u;
+  }
+};
+```
+
+For two-argument returning signals, `EmitOr()` is available and returns true if any connected callback returns true. This is useful for consumed-style application events where any handler may accept the event:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class CommandRouter
+{
+public:
+  using CommandSignalType = Signal<bool(uint32_t, uint32_t)>;
+
+  CommandSignalType& CommandSignal()
+  {
+    return mCommandSignal;
+  }
+
+  bool Dispatch(uint32_t commandId, uint32_t sourceId)
+  {
+    return mCommandSignal.EmitOr(commandId, sourceId);
+  }
+
+private:
+  CommandSignalType mCommandSignal;
+};
+
+class CommandHandler : public ConnectionTracker
+{
+public:
+  void Bind(CommandRouter& router)
+  {
+    router.CommandSignal().Connect(this, &CommandHandler::OnCommand);
+  }
+
+private:
+  bool OnCommand(uint32_t commandId, uint32_t)
+  {
+    return commandId == 1u;
+  }
+};
+```
+
+Keep returning signals narrow and documented in the component that owns them. For most dali-ui view events, application code connects to the signal exposed by the view or trait and follows that signal's callback signature.
+
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-core/dali/public-api/signals/dali-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#ifndef DALI_SIGNAL_H
+#define DALI_SIGNAL_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+/**
+ * @brief The class should implement Dali::ConnectionTrackerInterface, or inherit from Dali::ConnectionTracker.
+ *
+ * This enforces automatic disconnection when an object is destroyed, so you don't have
+ * to manually disconnect from signals.
+ *
+ * Alternatively, you can use a Dali::SlotDelegate if you don't want to inherit.
+ *
+ * E.g:
+ * @code
+ * class MyClass : public ConnectionTracker
+ * {
+ *
+ *   void Callback( Actor actor, const TouchEvent& event )
+ *   {
+ *     ...
+ *   }
+ *
+ *   void Init()
+ *   {
+ *     Actor actor = Actor::New();
+ *
+ *     actor.TouchedSignal().Connect( this, &MyClass::Callback );
+ *   }
+ *
+ *   ~MyClass()
+ *   {
+ *     // ConnectionTracker base class automatically disconnects
+ *   }
+ * }
+ * @endcode
+ * @SINCE_1_0.0
+ */
+
+// EXTERNAL INCLUDES
+#include <cstdint> // for uint32_t
+
+// INTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/signals/base-signal.h>
+#include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/signal-slot-connections.h>
+#include <dali/public-api/signals/slot-delegate.h>
+
+namespace Dali
+{
+/**
+ * @addtogroup dali_core_signals
+ * @{
+ */
+
+/**
+ * @brief Base Template class to provide signals.
+ *
+ * To create a signal for this class, you first have to define a typedef within your handle's scope:
+ * @code
+ * class MyHandle : public Handle
+ * {
+ * public:
+ *
+ *   // Typedefs
+ *
+ *   typedef Signal< void ()> VoidSignalType;         ///< For signals that require no parameters and no return value
+ *   typedef Signal< bool ()> BoolSignalType;         ///< For signals that do not need parameters but require a boolean return
+ *   typedef Signal< void ( float )> ParamSignalType; ///< For signals that need a float as a parameter but no return value
+ *
+ *   ...
+ *
+ * public:
+ *
+ *   // Signals
+ *
+ *   VoidSignalType&  VoidSignal();
+ *   BoolSignalType&  BoolSignal();
+ *   ParamSignalType& ParamSignal();
+ *
+ *   ...
+ * };
+ * @endcode
+ * The methods are required in the handle class so that the application writer can retrieve the Signal in order to connect/disconnect.
+ *
+ * In the implementation class, the members should be defined and the methods should be provided to retrieve the signal itself.
+ * These will be called by the equivalent methods in the MyHandle class.
+ * @code
+ * class MyObject : public Object
+ * {
+ *   ...
+ *
+ * public:
+ *
+ *   MyHandle::VoidSignalType&  VoidSignal()
+ *   {
+ *     return mVoidSignal;
+ *   }
+ *
+ *   MyHandle::BoolSignalType&  BoolSignal()
+ *   {
+ *     return mBoolSignal;
+ *   }
+ *
+ *   MyHandle::ParamSignalType& ParamSignal()
+ *   {
+ *     return mParamSignal;
+ *   }
+ *
+ * private:
+ *
+ *   // Signals
+ *   MyHandle::VoidSignalType   mVoidSignal;
+ *   MyHandle::BoolSignalType   mBoolSignal;
+ *   MyHandle::ParamSignalType  mParamSignal;
+ *
+ *   ...
+ * };
+ * @endcode
+ * @SINCE_1_0.0
+ */
+template<typename _Signature>
+class Signal
+{
+};
+
+class SignalMixin
+{
+public:
+  /**
+   * @brief Queries whether there are any connected slots.
+   *
+   * @SINCE_1_0.0
+   * @return True if there are any slots connected to the signal
+   */
+  bool Empty() const
+  {
+    return mImpl ? mImpl->Empty() : true;
+  }
+
+  /**
+   * @brief Queries the number of slots.
+   *
+   * @SINCE_1_0.0
+   * @return The number of slots connected to this signal
+   */
+  uint32_t GetConnectionCount() const
+  {
+    return mImpl ? mImpl->GetConnectionCount() : 0;
+  }
+
+public:
+  SignalMixin()
+  : mImpl(nullptr)
+  {
+  }
+
+  ~SignalMixin()
+  {
+    delete mImpl;
+  }
+
+protected:
+  BaseSignal& Impl()
+  {
+    if(!mImpl)
+    {
+      mImpl = new BaseSignal();
+    }
+    return *mImpl;
+  }
+
+private:
+  BaseSignal* mImpl;
+};
+
+/**
+ * @brief A template for Signals with no parameters or return value.
+ * @SINCE_1_0.0
+ */
+template<>
+class Signal<void()> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(void (*func)())
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(void (*func)())
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, void (X::*func)())
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, void (X::*func)())
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, void (X::*func)())
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+
+exec
+/bin/bash -lc "rg \"class Signal|EmitOr|GetConnectionCount|Empty\\(|void Emit|Connect\\(\" -n repos/dali-core/dali/public-api/signals/dali-signal.h repos/dali-core/dali/public-api/signals/base-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-core/dali/public-api/signals/base-signal.h:103:  bool Empty() const
+repos/dali-core/dali/public-api/signals/base-signal.h:114:  uint32_t GetConnectionCount() const
+repos/dali-core/dali/public-api/signals/base-signal.h:267:  void Emit(Args... args)
+repos/dali-core/dali/public-api/signals/base-signal.h:313:   * @brief Called by Signal implementations, when the user calls Signal.Connect( ... ).
+repos/dali-core/dali/public-api/signals/base-signal.h:318:  void OnConnect(CallbackBase* callback);
+repos/dali-core/dali/public-api/signals/base-signal.h:329:   * @brief Called by Signal implementations, when the user calls Signal.Connect( ... ).
+repos/dali-core/dali/public-api/signals/base-signal.h:335:  void OnConnect(ConnectionTrackerInterface* tracker, CallbackBase* callback);
+repos/dali-core/dali/public-api/signals/dali-signal.h:43: *     actor.TouchedSignal().Connect( this, &MyClass::Callback );
+repos/dali-core/dali/public-api/signals/dali-signal.h:140:class Signal
+repos/dali-core/dali/public-api/signals/dali-signal.h:144:class SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:153:  bool Empty() const
+repos/dali-core/dali/public-api/signals/dali-signal.h:155:    return mImpl ? mImpl->Empty() : true;
+repos/dali-core/dali/public-api/signals/dali-signal.h:164:  uint32_t GetConnectionCount() const
+repos/dali-core/dali/public-api/signals/dali-signal.h:166:    return mImpl ? mImpl->GetConnectionCount() : 0;
+repos/dali-core/dali/public-api/signals/dali-signal.h:199:class Signal<void()> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:208:  void Connect(void (*func)())
+repos/dali-core/dali/public-api/signals/dali-signal.h:210:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:232:  void Connect(X* obj, void (X::*func)())
+repos/dali-core/dali/public-api/signals/dali-signal.h:234:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:258:  void Connect(SlotDelegate<X>& delegate, void (X::*func)())
+repos/dali-core/dali/public-api/signals/dali-signal.h:260:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:284:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:286:    Impl().OnConnect(connectionTracker, new CallbackFunctor0<X>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:296:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:298:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate0(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:305:  void Emit()
+repos/dali-core/dali/public-api/signals/dali-signal.h:316:class Signal<Ret()> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:325:  void Connect(Ret (*func)())
+repos/dali-core/dali/public-api/signals/dali-signal.h:327:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:349:  void Connect(X* obj, Ret (X::*func)())
+repos/dali-core/dali/public-api/signals/dali-signal.h:351:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:375:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)())
+repos/dali-core/dali/public-api/signals/dali-signal.h:377:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:401:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:403:    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn0<X, Ret>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:413:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:415:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn0<Ret>(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:435:class Signal<void(Arg0)> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:444:  void Connect(void (*func)(Arg0 arg0))
+repos/dali-core/dali/public-api/signals/dali-signal.h:446:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:468:  void Connect(X* obj, void (X::*func)(Arg0 arg0))
+repos/dali-core/dali/public-api/signals/dali-signal.h:470:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:494:  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0))
+repos/dali-core/dali/public-api/signals/dali-signal.h:496:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:520:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:522:    Impl().OnConnect(connectionTracker, new CallbackFunctor1<X, Arg0>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:532:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:534:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate1<Arg0>(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:543:  void Emit(Arg0 arg0)
+repos/dali-core/dali/public-api/signals/dali-signal.h:554:class Signal<Ret(Arg0)> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:563:  void Connect(Ret (*func)(Arg0 arg0))
+repos/dali-core/dali/public-api/signals/dali-signal.h:565:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:587:  void Connect(X* obj, Ret (X::*func)(Arg0 arg0))
+repos/dali-core/dali/public-api/signals/dali-signal.h:589:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:613:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+repos/dali-core/dali/public-api/signals/dali-signal.h:615:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:639:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:641:    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn1<X, Arg0, Ret>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:651:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:653:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn1<Arg0, Ret>(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:675:class Signal<void(Arg0, Arg1)> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:684:  void Connect(void (*func)(Arg0 arg0, Arg1 arg1))
+repos/dali-core/dali/public-api/signals/dali-signal.h:686:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:708:  void Connect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1))
+repos/dali-core/dali/public-api/signals/dali-signal.h:710:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:734:  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1))
+repos/dali-core/dali/public-api/signals/dali-signal.h:736:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:760:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:762:    Impl().OnConnect(connectionTracker, new CallbackFunctor2<X, Arg0, Arg1>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:772:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:774:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate2<Arg0, Arg1>(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:784:  void Emit(Arg0 arg0, Arg1 arg1)
+repos/dali-core/dali/public-api/signals/dali-signal.h:795:class Signal<Ret(Arg0, Arg1)> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:803:  void Connect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+repos/dali-core/dali/public-api/signals/dali-signal.h:805:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:827:  void Connect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+repos/dali-core/dali/public-api/signals/dali-signal.h:829:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:853:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+repos/dali-core/dali/public-api/signals/dali-signal.h:855:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:879:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:881:    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn2<X, Arg0, Arg1, Ret>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:891:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:893:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn2<Arg0, Arg1, Ret>(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:918:  Ret EmitOr(Arg0 arg0, Arg1 arg1)
+repos/dali-core/dali/public-api/signals/dali-signal.h:929:class Signal<void(Arg0, Arg1, Arg2)> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:938:  void Connect(void (*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+repos/dali-core/dali/public-api/signals/dali-signal.h:940:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:962:  void Connect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+repos/dali-core/dali/public-api/signals/dali-signal.h:964:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:988:  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+repos/dali-core/dali/public-api/signals/dali-signal.h:990:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1014:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:1016:    Impl().OnConnect(connectionTracker, new CallbackFunctor3<X, Arg0, Arg1, Arg2>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1026:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:1028:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate3<Arg0, Arg1, Arg2>(delegate));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1039:  void Emit(Arg0 arg0, Arg1 arg1, Arg2 arg2)
+repos/dali-core/dali/public-api/signals/dali-signal.h:1050:class Signal<Ret(Arg0, Arg1, Arg2)> : public SignalMixin
+repos/dali-core/dali/public-api/signals/dali-signal.h:1059:  void Connect(Ret (*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+repos/dali-core/dali/public-api/signals/dali-signal.h:1061:    Impl().OnConnect(MakeCallback(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1083:  void Connect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+repos/dali-core/dali/public-api/signals/dali-signal.h:1085:    Impl().OnConnect(obj, MakeCallback(obj, func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1109:  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1, Arg2 arg2))
+repos/dali-core/dali/public-api/signals/dali-signal.h:1111:    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1135:  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+repos/dali-core/dali/public-api/signals/dali-signal.h:1137:    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn3<X, Arg0, Arg1, Arg2, Ret>(func));
+repos/dali-core/dali/public-api/signals/dali-signal.h:1147:  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+repos/dali-core/dali/public-api/signals/dali-signal.h:1149:    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn3<Arg0, Arg1, Arg2, Ret>(delegate));
+
+exec
+/bin/bash -lc "sed -n '640,930p' repos/dali-core/dali/public-api/signals/dali-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn1<X, Arg0, Ret>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn1<Arg0, Ret>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret Emit(Arg0 arg0)
+  {
+    return Impl().template EmitReturn<Ret, Arg0>(arg0);
+  }
+};
+
+/**
+ * @brief A template for Signals with 2 parameters.
+ *
+ * @SINCE_1_0.0
+ */
+template<typename Arg0, typename Arg1>
+class Signal<void(Arg0, Arg1)> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(void (*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(void (*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, void (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, void (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctor2<X, Arg0, Arg1>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegate2<Arg0, Arg1>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @param[in] arg1 The second value to pass to callbacks
+   */
+  void Emit(Arg0 arg0, Arg1 arg1)
+  {
+    Impl().template Emit<Arg0, Arg1>(arg0, arg1);
+  }
+};
+
+/**
+ * @brief A template for Signals with 2 parameters and a return value.
+ * @SINCE_1_0.0
+ */
+template<typename Ret, typename Arg0, typename Arg1>
+class Signal<Ret(Arg0, Arg1)> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(Ret (*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0, Arg1 arg1))
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn2<X, Arg0, Arg1, Ret>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn2<Arg0, Arg1, Ret>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @param[in] arg1 The second value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret Emit(Arg0 arg0, Arg1 arg1)
+  {
+    return Impl().template EmitReturn<Ret, Arg0, Arg1>(arg0, arg1);
+  }
+
+  /**
+   * @brief Emits the signal.
+   * If any one of the multiple callbacks returns true, the entire callback is consumed.
+   *
+   * @SINCE_2_3.35
+   * @param[in] arg0 The first value to pass to callbacks
+   * @param[in] arg1 The second value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret EmitOr(Arg0 arg0, Arg1 arg1)
+  {
+    return Impl().template EmitReturnOr<Ret, Arg0, Arg1>(arg0, arg1);
+  }
+};
+
+/**
+ * @brief A template for Signals with 3 parameters.
+ * @SINCE_1_0.0
+ */
+template<typename Arg0, typename Arg1, typename Arg2>
+class Signal<void(Arg0, Arg1, Arg2)> : public SignalMixin
+{
+
+exec
+/bin/bash -lc "sed -n '300,435p' repos/dali-core/dali/public-api/signals/dali-signal.h && sed -n '540,675p' repos/dali-core/dali/public-api/signals/dali-signal.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+  /**
+   * @brief Emits the signal.
+   * @SINCE_1_0.0
+   */
+  void Emit()
+  {
+    Impl().Emit();
+  }
+};
+
+/**
+ * @brief A template for Signals with no parameters and a return value.
+ * @SINCE_1_0.0
+ */
+template<typename Ret>
+class Signal<Ret()> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(Ret (*func)())
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(Ret (*func)())
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, Ret (X::*func)())
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, Ret (X::*func)())
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)())
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)())
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn0<X, Ret>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn0<Ret>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret Emit()
+  {
+    return Impl().template EmitReturn<Ret>();
+  }
+};
+
+/**
+ * @brief A template for Signals with 1 parameter.
+ * @SINCE_1_0.0
+ */
+template<typename Arg0>
+class Signal<void(Arg0)> : public SignalMixin
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   */
+  void Emit(Arg0 arg0)
+  {
+    Impl().template Emit<Arg0>(arg0);
+  }
+};
+
+/**
+ * @brief A template for Signals with 1 parameter and a return value.
+ * @SINCE_1_0.0
+ */
+template<typename Ret, typename Arg0>
+class Signal<Ret(Arg0)> : public SignalMixin
+{
+public:
+  /**
+   * @brief Connects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to connect
+   */
+  void Connect(Ret (*func)(Arg0 arg0))
+  {
+    Impl().OnConnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Disconnects a function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] func The function to disconnect
+   */
+  void Disconnect(Ret (*func)(Arg0 arg0))
+  {
+    Impl().OnDisconnect(MakeCallback(func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(X* obj, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnConnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] obj An object which must implement the ConnectionTrackerInterface
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(X* obj, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnDisconnect(obj, MakeCallback(obj, func));
+  }
+
+  /**
+   * @brief Connects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to connect
+   */
+  template<class X>
+  void Connect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnConnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Disconnects a member function.
+   *
+   * @SINCE_1_0.0
+   * @param[in] delegate A slot delegate
+   * @param[in] func The member function to disconnect
+   */
+  template<class X>
+  void Disconnect(SlotDelegate<X>& delegate, Ret (X::*func)(Arg0 arg0))
+  {
+    Impl().OnDisconnect(delegate.GetConnectionTracker(), MakeCallback(delegate.GetSlot(), func));
+  }
+
+  /**
+   * @brief Connects a function object.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] func The function object to copy
+   */
+  template<class X>
+  void Connect(ConnectionTrackerInterface* connectionTracker, const X& func)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorReturn1<X, Arg0, Ret>(func));
+  }
+
+  /**
+   * @brief Connects a function object using FunctorDelegate.
+   *
+   * @SINCE_1_0.0
+   * @param[in] connectionTracker A connection tracker which can be used to disconnect
+   * @param[in] delegate A newly allocated FunctorDelegate (ownership is taken)
+   */
+  void Connect(ConnectionTrackerInterface* connectionTracker, FunctorDelegate* delegate)
+  {
+    Impl().OnConnect(connectionTracker, new CallbackFunctorDelegateReturn1<Arg0, Ret>(delegate));
+  }
+
+  /**
+   * @brief Emits the signal.
+   *
+   * @SINCE_1_0.0
+   * @param[in] arg0 The first value to pass to callbacks
+   * @return The value returned by the last callback, or a default constructed value if no callbacks are connected
+   */
+  Ret Emit(Arg0 arg0)
+  {
+    return Impl().template EmitReturn<Ret, Arg0>(arg0);
+  }
+};
+
+/**
+ * @brief A template for Signals with 2 parameters.
+ *
+ * @SINCE_1_0.0
+ */
+template<typename Arg0, typename Arg1>
+class Signal<void(Arg0, Arg1)> : public SignalMixin
+
+codex
+---
+title: Signals
+sidebar_label: Signals
+category: utilities
+---
+
+# Signals
+
+Signals let dali-ui application code react to view, input, resource, and lifecycle events while keeping connection lifetime explicit.
+
+## Table of Contents
+
+- [Connect View Events](#connect-view-events)
+- [Track Connection Lifetime](#track-connection-lifetime)
+- [Use Lambdas, Member Functions, and Free Functions](#use-lambdas-member-functions-and-free-functions)
+- [Inspect and Disconnect Connections](#inspect-and-disconnect-connections)
+- [Expose Small Application Signals](#expose-small-application-signals)
+- [Use Return Values Carefully](#use-return-values-carefully)
+
+## Connect View Events
+
+In a dali-ui application, the usual entry point is a `Dali::Ui::View` or a class derived from it. View-facing APIs expose typed `Dali::Signal` objects such as `Dali::Ui::View::FocusChangedSignalType`, `Dali::Ui::View::KeyEventSignalType`, and `Dali::Ui::View::ResourceReadySignalType`. Application code connects a callback with the same argument and return shape as the signal.
+
+A typical controller inherits from `Dali::ConnectionTracker` and connects view signals during setup:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class PageController : public ConnectionTracker
+{
+public:
+  void Setup(Label title)
+  {
+    title.FocusChangedSignal().Connect(this, &PageController::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View view, bool focused)
+  {
+    view.SetBackgroundColor(focused ? UiColor(0x3366CC) : UiColor(0x222222));
+  }
+};
+```
+
+For `Dali::Ui::View::KeyEventSignalType`, return `true` when the key event has been handled and should be consumed, or `false` when other handlers may continue processing it:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class KeyController : public ConnectionTracker
+{
+public:
+  void Setup(Label label)
+  {
+    label.SetFocusable(true);
+
+    label.KeyEventSignal().Connect(this, [this](View view, KeyEvent event) -> bool
+    {
+      return OnKeyEvent(view, event);
+    });
+  }
+
+private:
+  bool OnKeyEvent(View view, KeyEvent event)
+  {
+    if(event.GetState() == KeyEvent::DOWN)
+    {
+      view.SetBackgroundColor(UiColor(0x5588EE));
+      return true;
+    }
+
+    return false;
+  }
+};
+```
+
+`Dali::Signal<void(Arg0)>`, `Dali::Signal<void(Arg0, Arg1)>`, and `Dali::Signal<Ret(Arg0, Arg1)>` all require the callback signature to match the signal signature. For example, a focus signal callback receives `View, bool`, while a view key signal callback receives `View, KeyEvent` and returns `bool`.
+
+## Track Connection Lifetime
+
+`Dali::ConnectionTracker` is the primary lifetime tool for application code. When a callback is connected with `this` and the receiving object derives from `Dali::ConnectionTracker`, the connection is associated with that receiver. Destroying the tracker disconnects the slots it owns.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ImageStatus : public ConnectionTracker
+{
+public:
+  void Bind(ImageView image, Label status)
+  {
+    mStatus = status;
+
+    image.ResourceReadySignal().Connect(this, [this](View)
+    {
+      ++mReadyCount;
+      mStatus.SetText("Ready count: " + String(std::to_string(mReadyCount).c_str()));
+    });
+  }
+
+private:
+  Label    mStatus;
+  uint32_t mReadyCount{0};
+};
+```
+
+A `Dali::ConnectionTracker` can also be passed explicitly when connecting a function object to a `Dali::Signal`. This is useful when the receiver object does not need a separate member function:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class Loader : public ConnectionTracker
+{
+public:
+  using ReadySignalType = Signal<void(uint32_t)>;
+
+  ReadySignalType& ReadySignal()
+  {
+    return mReadySignal;
+  }
+
+  void ConnectHandlers()
+  {
+    ReadySignal().Connect(this, [this](uint32_t itemCount)
+    {
+      mLastItemCount = itemCount;
+    });
+  }
+
+  void Complete(uint32_t itemCount)
+  {
+    ReadySignal().Emit(itemCount);
+  }
+
+private:
+  ReadySignalType mReadySignal;
+  uint32_t        mLastItemCount{0};
+};
+```
+
+`Dali::ConnectionTracker::DisconnectAll()` disconnects every signal currently tracked by the receiver. Use it when a controller leaves a page or rebinds to a new group of views before destruction.
+
+## Use Lambdas, Member Functions, and Free Functions
+
+A `Dali::Signal` supports several callback forms. In application code, member functions and lambdas with a `Dali::ConnectionTracker` are the most useful because their lifetime is tied to the receiver.
+
+Member function callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class FocusRing : public ConnectionTracker
+{
+public:
+  void Attach(View target)
+  {
+    target.FocusChangedSignal().Connect(this, &FocusRing::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View target, bool focused)
+  {
+    target.SetOpacity(focused ? 1.0f : 0.6f);
+  }
+};
+```
+
+Lambda callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class SelectionController : public ConnectionTracker
+{
+public:
+  void Attach(InteractiveTrait& trait)
+  {
+    trait.ClickedSignal().Connect(this, [this](View selectedView, InputEvent)
+    {
+      mSelected = selectedView;
+    });
+  }
+
+private:
+  View mSelected;
+};
+```
+
+Free function callback:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+namespace
+{
+void OnRefresh()
+{
+}
+}
+
+void ConnectRefresh(Signal<void()>& refreshSignal)
+{
+  refreshSignal.Connect(&OnRefresh);
+}
+```
+
+For function objects that need type-erased storage, `Dali::FunctorDelegate::New()` creates a delegate owned by the signal connection:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali/public-api/signals/functor-delegate.h>
+
+using namespace Dali;
+
+class RefreshController : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& refreshSignal)
+  {
+    refreshSignal.Connect(this, FunctorDelegate::New([this]
+    {
+      ++mRefreshCount;
+    }));
+  }
+
+private:
+  uint32_t mRefreshCount{0};
+};
+```
+
+## Inspect and Disconnect Connections
+
+`Dali::Signal` inherits connection inspection from `Dali::SignalMixin`. Use `Empty()` when you only need to know whether any slots are connected, and `GetConnectionCount()` when diagnostic code needs the exact count.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+class RefreshModel
+{
+public:
+  using ChangedSignalType = Signal<void()>;
+
+  ChangedSignalType& ChangedSignal()
+  {
+    return mChangedSignal;
+  }
+
+  const ChangedSignalType& ChangedSignal() const
+  {
+    return mChangedSignal;
+  }
+
+  bool HasListeners() const
+  {
+    return !ChangedSignal().Empty();
+  }
+
+  uint32_t ListenerCount() const
+  {
+    return ChangedSignal().GetConnectionCount();
+  }
+
+  void NotifyChanged()
+  {
+    ChangedSignal().Emit();
+  }
+
+private:
+  ChangedSignalType mChangedSignal;
+};
+```
+
+Disconnect a specific function or member function by passing the same receiver and callback shape used for `Connect()`:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class RefreshHandler : public ConnectionTracker
+{
+public:
+  void Attach(Signal<void()>& signal)
+  {
+    signal.Connect(this, &RefreshHandler::OnRefresh);
+  }
+
+  void Detach(Signal<void()>& signal)
+  {
+    signal.Disconnect(this, &RefreshHandler::OnRefresh);
+  }
+
+private:
+  void OnRefresh()
+  {
+  }
+};
+```
+
+When the receiver owns several connections, `Dali::ConnectionTracker::GetConnectionCount()` gives the number currently tracked by that receiver, and `Dali::ConnectionTracker::DisconnectAll()` clears them together:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PageBindings : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& opened, Signal<void()>& closed)
+  {
+    opened.Connect(this, &PageBindings::OnOpened);
+    closed.Connect(this, &PageBindings::OnClosed);
+  }
+
+  void Reset()
+  {
+    if(GetConnectionCount() > 0u)
+    {
+      DisconnectAll();
+    }
+  }
+
+private:
+  void OnOpened()
+  {
+  }
+
+  void OnClosed()
+  {
+  }
+};
+```
+
+## Expose Small Application Signals
+
+Application-level components can expose their own typed `Dali::Signal` members. Define a type alias, return the signal by reference, and emit it from the component when the state changes.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class SelectionModel
+{
+public:
+  using SelectionChangedSignalType = Signal<void(uint32_t)>;
+
+  SelectionChangedSignalType& SelectionChangedSignal()
+  {
+    return mSelectionChangedSignal;
+  }
+
+  void Select(uint32_t index)
+  {
+    if(mSelectedIndex != index)
+    {
+      mSelectedIndex = index;
+      SelectionChangedSignal().Emit(mSelectedIndex);
+    }
+  }
+
+private:
+  SelectionChangedSignalType mSelectionChangedSignal;
+  uint32_t                   mSelectedIndex{0u};
+};
+
+class SelectionViewController : public ConnectionTracker
+{
+public:
+  void Bind(SelectionModel& model)
+  {
+    model.SelectionChangedSignal().Connect(this, &SelectionViewController::OnSelectionChanged);
+  }
+
+private:
+  void OnSelectionChanged(uint32_t index)
+  {
+    mLastSelection = index;
+  }
+
+  uint32_t mLastSelection{0u};
+};
+```
+
+Use the exact `Dali::Signal` specialization that matches the event contract:
+
+```cpp
+using StartedSignalType  = Dali::Signal<void()>;
+using ProgressSignalType = Dali::Signal<void(float)>;
+using AcceptedSignalType = Dali::Signal<bool(uint32_t, uint32_t)>;
+```
+
+`Dali::Signal<void()>` emits notifications without data. `Dali::Signal<void(Arg0)>` and `Dali::Signal<void(Arg0, Arg1)>` pass data to listeners. `Dali::Signal<Ret(Arg0, Arg1)>` returns a value from connected callbacks.
+
+## Use Return Values Carefully
+
+A returning `Dali::Signal` returns the value from the last callback that runs. If no callbacks are connected, it returns a default-constructed value for the return type.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PermissionModel
+{
+public:
+  using AllowSignalType = Signal<bool(uint32_t)>;
+
+  AllowSignalType& AllowSignal()
+  {
+    return mAllowSignal;
+  }
+
+  bool CanOpen(uint32_t itemId)
+  {
+    return AllowSignal().Emit(itemId);
+  }
+
+private:
+  AllowSignalType mAllowSignal;
+};
+
+class PermissionController : public ConnectionTracker
+{
+public:
+  void Bind(PermissionModel& model)
+  {
+    model.AllowSignal().Connect(this, &PermissionController::OnAllow);
+  }
+
+private:
+  bool OnAllow(uint32_t itemId)
+  {
+    return itemId != 0u;
+  }
+};
+```
+
+For two-argument returning signals, `EmitOr()` is available and returns true if any connected callback returns true. This is useful for consumed-style application events where any handler may accept the event:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class CommandRouter
+{
+public:
+  using CommandSignalType = Signal<bool(uint32_t, uint32_t)>;
+
+  CommandSignalType& CommandSignal()
+  {
+    return mCommandSignal;
+  }
+
+  bool Dispatch(uint32_t commandId, uint32_t sourceId)
+  {
+    return CommandSignal().EmitOr(commandId, sourceId);
+  }
+
+private:
+  CommandSignalType mCommandSignal;
+};
+
+class CommandHandler : public ConnectionTracker
+{
+public:
+  void Bind(CommandRouter& router)
+  {
+    router.CommandSignal().Connect(this, &CommandHandler::OnCommand);
+  }
+
+private:
+  bool OnCommand(uint32_t commandId, uint32_t)
+  {
+    return commandId == 1u;
+  }
+};
+```
+
+Keep returning signals narrow and documented in the component that owns them. For most dali-ui view events, application code connects to the signal exposed by the view or trait and follows that signal's callback signature.
+tokens used
+29,078

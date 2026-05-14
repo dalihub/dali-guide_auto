@@ -1,0 +1,318 @@
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Image View
+sidebar_label: Image View
+category: views-components
+---
+
+# Image View
+
+`Dali::Ui::ImageView` displays image resources in a dali-ui app. Image loading is asynchronous by default, and the view provides app-facing controls for loading, fitting, sampling, masking, coloring, and N-patch rendering.
+
+## Table of Contents
+
+- [Create and Update an Image](#create-and-update-an-image)
+- [Fit, Crop, and Sample the Image](#fit-crop-and-sample-the-image)
+- [Use Placeholders and Loading Signals](#use-placeholders-and-loading-signals)
+- [Control Loading and Resource Lifetime](#control-loading-and-resource-lifetime)
+- [Apply Color, Alpha, and Masks](#apply-color-alpha-and-masks)
+- [Use N-Patch Images](#use-n-patch-images)
+- [Property Constants](#property-constants)
+
+## Create and Update an Image
+
+Create an image view with `Dali::Ui::ImageView::New()`, then set the image URL with `SetResourceUrl()`. The fluent setters return `Dali::Ui::ImageView&`, so related image options can be configured in one expression.
+
+```cpp
+using namespace Dali;
+using namespace Dali::Ui;
+
+ImageView thumbnail = ImageView::New()
+  .SetResourceUrl("images/profile.png")
+  .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
+  .SetDesiredWidth(256)
+  .SetDesiredHeight(256);
+```
+
+Use `GetResourceUrl()` when you need to inspect the current image source, and `Reload()` when the current URL should be loaded again after changing loader-time options.
+
+```cpp
+void ReplaceThumbnail(ImageView imageView, const Dali::String& nextUrl)
+{
+  if(imageView.GetResourceUrl() != nextUrl)
+  {
+    imageView.SetResourceUrl(nextUrl);
+  }
+
+  imageView.Reload();
+}
+```
+
+`Dali::Ui::ImageView::DownCast()` converts a generic handle back to an image view when the handle points to an image view; otherwise it returns an uninitialized handle.
+
+```cpp
+ImageView imageView = ImageView::DownCast(handle);
+if(imageView)
+{
+  imageView.SetResourceUrl("images/updated.png");
+}
+```
+
+## Fit, Crop, and Sample the Image
+
+`SetFittingMode()` controls how the image is placed inside the view bounds. `Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO` scales the image to fit while preserving its aspect ratio. `Ui::Image::FittingMode::FILL` stretches to fill the bounds. `Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO` preserves aspect ratio and crops overflow. `Ui::Image::FittingMode::CENTER` keeps the original image size.
+
+```cpp
+ImageView preview = ImageView::New()
+  .SetResourceUrl("images/banner.jpg")
+  .SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+
+Ui::Image::FittingMode currentMode = preview.GetFittingMode();
+```
+
+Use `SetPixelArea()` to display a normalized sub-region of the image. The `Vector4` value is `(x, y, width, height)`, with each component in normalized image coordinates.
+
+```cpp
+ImageView avatar = ImageView::New()
+  .SetResourceUrl("images/contact-sheet.png")
+  .SetFittingMode(Ui::Image::FittingMode::FILL)
+  .SetPixelArea(Vector4(0.25f, 0.0f, 0.25f, 0.5f));
+
+Vector4 visibleRegion = avatar.GetPixelArea();
+```
+
+Use `SetSamplingMode()` when scaled image quality matters. Desired width and height are loader hints in pixels; call `Reload()` after changing them for an already-loaded resource.
+
+```cpp
+ImageView icon = ImageView::New()
+  .SetResourceUrl("images/icon-large.png")
+  .SetDesiredWidth(64)
+  .SetDesiredHeight(64)
+  .SetSamplingMode(Ui::Image::SamplingMode::BOX_THEN_LINEAR);
+
+icon.SetDesiredWidth(128)
+    .SetDesiredHeight(128)
+    .Reload();
+
+int desiredWidth = icon.GetDesiredWidth();
+int desiredHeight = icon.GetDesiredHeight();
+```
+
+`SetImageLoadWithViewSize(true)` asks the loader to use the resolved view size as the image load size. Use it when the displayed size is the useful image size, and avoid combining it with aspect-ratio layout on the same `ImageView` because the view-size load path changes the natural-size value used for layout.
+
+```cpp
+ImageView cover = ImageView::New()
+  .SetResourceUrl("images/cover.jpg")
+  .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
+  .SetImageLoadWithViewSize(true);
+
+bool loadsAtViewSize = cover.IsImageLoadWithViewSizeEnabled();
+```
+
+## Use Placeholders and Loading Signals
+
+`SetPlaceholderUrl()` sets an image shown while the main resource is loading. `ResourceReadySignal()` is emitted with a `Dali::Ui::View` when the image resource has finished loading and is ready to display.
+
+```cpp
+class Gallery
+{
+public:
+  ImageView CreatePhoto()
+  {
+    ImageView image = ImageView::New()
+      .SetPlaceholderUrl("images/placeholder.png")
+      .SetResourceUrl("images/photo.jpg")
+      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+
+    image.ResourceReadySignal().Connect(this, &Gallery::OnImageReady);
+    return image;
+  }
+
+private:
+  void OnImageReady(View view)
+  {
+    ImageView image = ImageView::DownCast(view);
+    if(image)
+    {
+      Dali::String loadedUrl = image.GetResourceUrl();
+    }
+  }
+};
+```
+
+`GetLoadingStatus()` returns the current `Ui::Visual::ResourceStatus` for the image visual. This is useful for status checks around placeholder and reload flows.
+
+```cpp
+void RefreshImage(ImageView image)
+{
+  image.Reload();
+
+  Ui::Visual::ResourceStatus status = image.GetLoadingStatus();
+  (void)status;
+}
+```
+
+## Control Loading and Resource Lifetime
+
+`SetLoadPolicy()` controls when the image starts loading. `Ui::Image::LoadPolicy::IMMEDIATE` loads without waiting for scene attachment. `Ui::Image::LoadPolicy::ATTACHED` defers loading until the view is attached to the scene.
+
+```cpp
+ImageView image = ImageView::New()
+  .SetLoadPolicy(Ui::Image::LoadPolicy::ATTACHED)
+  .SetResourceUrl("images/deferred.jpg");
+
+Ui::Image::LoadPolicy loadPolicy = image.GetLoadPolicy();
+```
+
+`SetReleasePolicy()` controls when the image texture can be released from the cache. `Ui::Image::ReleasePolicy::DETACHED` releases when the visual is detached from the scene, `Ui::Image::ReleasePolicy::DESTROYED` releases when the visual is destroyed, and `Ui::Image::ReleasePolicy::NEVER` keeps it cached.
+
+```cpp
+ImageView reusable = ImageView::New()
+  .SetResourceUrl("images/tab-background.png")
+  .SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
+
+Ui::Image::ReleasePolicy releasePolicy = reusable.GetReleasePolicy();
+```
+
+Use `SetSynchronousLoading()` only for cases where synchronous loading is acceptable for the app flow. `SetFastTrackUpload()` requests the fast-track loading path, which is used only when the image visual meets the implementation constraints such as attached loading, detached release, non-synchronous loading, and no alpha-mask URL. `SetOrientationCorrection()` applies EXIF orientation metadata automatically.
+
+```cpp
+ImageView detail = ImageView::New()
+  .SetResourceUrl("images/camera-photo.jpg")
+  .SetSynchronousLoading(false)
+  .SetFastTrackUpload(true)
+  .SetOrientationCorrection(true);
+
+bool sync = detail.IsSynchronousLoading();
+bool fastTrack = detail.IsFastTrackUploadEnabled();
+bool orientationCorrection = detail.IsOrientationCorrectionEnabled();
+```
+
+## Apply Color, Alpha, and Masks
+
+`SetImageColor()` applies a `UiColor` multiplier to the image. Use it for tinting or fading image content independently of the image URL.
+
+```cpp
+ImageView tinted = ImageView::New()
+  .SetResourceUrl("images/symbol.png")
+  .SetImageColor(UiColor(1.0f, 0.2f, 0.2f, 1.0f));
+
+UiColor tint = tinted.GetImageColor();
+```
+
+Use `SetPreMultipliedAlpha()` when the source image data uses pre-multiplied alpha.
+
+```cpp
+ImageView overlay = ImageView::New()
+  .SetResourceUrl("images/overlay.png")
+  .SetPreMultipliedAlpha(true);
+
+bool preMultiplied = overlay.IsPreMultipliedAlpha();
+```
+
+`SetAlphaMaskUrl()` applies the alpha channel of a mask image to the main image. `SetCropToMask(true)` crops to the mask bounds. `SetMaskingMode()` selects whether masking is applied during rendering or loading.
+
+```cpp
+ImageView masked = ImageView::New()
+  .SetResourceUrl("images/profile.jpg")
+  .SetAlphaMaskUrl("images/circle-mask.png")
+  .SetCropToMask(true)
+  .SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING)
+  .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+
+Dali::String maskUrl = masked.GetAlphaMaskUrl();
+bool cropToMask = masked.IsCropToMask();
+Ui::Image::MaskingType maskingMode = masked.GetMaskingMode();
+```
+
+When changing mask resources or loader-time masking behavior after the image has loaded, call `Reload()`.
+
+```cpp
+void ChangeMask(ImageView image, const Dali::String& maskUrl)
+{
+  image.SetAlphaMaskUrl(maskUrl)
+       .SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
+
+  image.Reload();
+}
+```
+
+## Use N-Patch Images
+
+`SetNPatchBorder()` configures N-patch border insets as `(left, top, right, bottom)` pixel values. A non-zero border activates N-patch rendering for scalable image backgrounds.
+
+```cpp
+ImageView panel = ImageView::New()
+  .SetResourceUrl("images/panel.9.png")
+  .SetNPatchBorder(Vector4(12.0f, 12.0f, 12.0f, 12.0f));
+
+Vector4 border = panel.GetNPatchBorder();
+```
+
+Use `SetNPatchBorderOnly(true)` when only the border regions should be rendered and the center should be omitted.
+
+```cpp
+ImageView frame = ImageView::New()
+  .SetResourceUrl("images/frame.9.png")
+  .SetNPatchBorder(Vector4(16.0f, 16.0f, 16.0f, 16.0f))
+  .SetNPatchBorderOnly(true);
+
+bool borderOnly = frame.IsNPatchBorderOnly();
+```
+
+`SetDepthIndex()` changes the image visual depth order inside the same layer. Higher depth indices render on top of lower ones.
+
+```cpp
+ImageView foreground = ImageView::New()
+  .SetResourceUrl("images/foreground.png")
+  .SetDepthIndex(10);
+```
+
+## Property Constants
+
+Prefer the typed setters such as `SetResourceUrl()`, `SetFittingMode()`, and `SetLoadPolicy()` in application code. The `Dali::Ui::ImageView::Property` constants expose image-view property indices for systems that need `Dali::Handle::GetProperty()` or `SetProperty()` access.
+
+`Dali::Ui::ImageViewPropertyIndex` is the backing index definition for the image view property range. `Dali::Ui::ImageView::Property::IMAGE` maps to `Dali::Ui::ImageViewPropertyIndex::IMAGE`, and the same relationship exists for the other image view properties.
+
+```cpp
+int imageProperty = ImageView::Property::IMAGE;
+int fittingProperty = ImageView::Property::FITTING_MODE;
+int pixelAreaProperty = ImageView::Property::PIXEL_AREA;
+
+int imageIndex = ImageViewPropertyIndex::IMAGE;
+int pixelAreaIndex = ImageViewPropertyIndex::PIXEL_AREA;
+
+(void)imageProperty;
+(void)fittingProperty;
+(void)pixelAreaProperty;
+(void)imageIndex;
+(void)pixelAreaIndex;
+```
+
+The image view property surface includes `ImageView::Property::IMAGE`, `ImageView::Property::PLACEHOLDER_IMAGE`, `ImageView::Property::FITTING_MODE`, `ImageView::Property::SAMPLING_MODE`, `ImageView::Property::DESIRED_WIDTH`, `ImageView::Property::DESIRED_HEIGHT`, `ImageView::Property::IMAGE_COLOR`, `ImageView::Property::PIXEL_AREA`, `ImageView::Property::ALPHA_MASK_URL`, `ImageView::Property::CROP_TO_MASK`, `ImageView::Property::MASKING_MODE`, `ImageView::Property::LOAD_POLICY`, `ImageView::Property::RELEASE_POLICY`, `ImageView::Property::SYNCHRONOUS_LOADING`, `ImageView::Property::FAST_TRACK_UPLOADING`, `ImageView::Property::IMAGE_LOAD_WITH_VIEW_SIZE`, `ImageView::Property::ORIENTATION_CORRECTION`, `ImageView::Property::PRE_MULTIPLIED_ALPHA`, `ImageView::Property::N_PATCH_BORDER`, and `ImageView::Property::N_PATCH_BORDER_ONLY`.
+-----END_REVISED_MARKDOWN-----
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Image View Prose Review
+
+Changed prose:
+- Clarified the overview to state that image loading is asynchronous by default.
+- Narrowed `Reload()` guidance to reloading the current URL after loader-time option changes.
+- Clarified `DownCast()` behavior for non-`ImageView` handles.
+- Added source-grounded caution for `SetImageLoadWithViewSize(true)` and aspect-ratio layout.
+- Reworded `ResourceReadySignal()` to match the public header: the signal fires when the image has finished loading and is ready to display.
+- Reworded `LoadPolicy::IMMEDIATE` to avoid implying that a URL-less view necessarily loads at construction time.
+- Reworded `SetFastTrackUpload()` as a request for the fast-track path and listed key implementation constraints.
+- Tightened property constants prose to say they are property indices for `GetProperty()` / `SetProperty()` access.
+
+Source evidence:
+- `repos/dali-ui/dali-ui-foundation/public-api/image-view.h` defines `Dali::Ui::ImageView`, fluent setters, `Reload()`, `ResourceReadySignal()`, `SetImageLoadWithViewSize()`, `SetFastTrackUpload()`, N-patch APIs, and property-index intent.
+- `repos/dali-ui/dali-ui-foundation/public-api/image/image-enumerations.h` defines `FittingMode`, `SamplingMode`, `MaskingType`, `LoadPolicy`, and `ReleasePolicy` values used in the guide.
+- `repos/dali-ui/dali-ui-foundation/public-api/image-view-properties.h` confirms property names, types, backing indices, and the animatable `PIXEL_AREA`.
+- `repos/dali-ui/dali-ui-foundation/integration-api/image-view-impl.cpp` confirms defaults including `LoadPolicy::ATTACHED`, `ReleasePolicy::DETACHED`, `FittingMode::FILL`, `SamplingMode::BOX_THEN_LINEAR`, and `OrientationCorrection` enabled by default.
+- `repos/dali-ui/dali-ui-foundation/internal/visuals/image/image-visual.cpp` confirms `Reload()` behavior, view-size loading behavior, and fast-track eligibility constraints.
+- Samples under `repos/dali-ui/samples/image-view/` confirm usage patterns for fitting, desired size plus `Reload()`, placeholders and `ResourceReadySignal()`, loading policies, alpha masks, and pixel area.
+
+Remaining concerns:
+- Code snippets were preserved as requested and reviewed against public headers, but they were not compiled in this read-only review pass.
+- The guide intentionally does not document every default value or every fast-track rejection condition; only the conditions needed to avoid overclaiming are included.
+-----END_PROSE_REVIEW_REPORT-----

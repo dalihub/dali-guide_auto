@@ -1,0 +1,2312 @@
+OpenAI Codex v0.130.0
+--------
+workdir: /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 019e2624-23ec-75d2-b3d8-ff2f6b17f25f
+--------
+user
+You are generating a DALi dali-ui application developer guide.
+Return only the complete Markdown document. Do not include commentary outside Markdown.
+Do not wrap the Markdown document in a code fence.
+Do not include status commentary, execution notes, summaries, or file-write messages.
+The first non-frontmatter content must be the top-level document title heading.
+
+Hard requirements:
+- Write the final user-facing guide in en only.
+- Do not include Korean, Japanese, Chinese, or other non-English prose in the final guide.
+- Assume dali-ui is the default application layer.
+- Use Dali::Ui::View as the app-facing object model instead of raw Dali::Actor.
+- Use only API symbols from the provided Allowed symbols, Property owners, and Usage patterns.
+- Explain primary/supporting symbols as owned content when their usage scope says so.
+- Use context/reference symbols only for setup, examples, or background lookup.
+- Do not invent DALi APIs.
+- Do not use raw Actor/SetProperty idioms unless the context pack allows it.
+- If you are uncertain about an API, omit that example or use another provided symbol. Do not write unresolved placeholders.
+- Do not expose prompt instructions, schema names, uncertainty notes, or validation comments in the user document.
+- Start with a feature title, then a very short overview, then a table of contents.
+- Create feature-specific topic sections rather than a fixed template.
+- Include rich C++ API usage examples and use backticks for API names.
+- Prefer concise, compilable-looking snippets over long sample copies.
+
+Source grounding and API verification:
+- Write enough practical detail for application developers to use the feature in a dali-ui app.
+- Ground natural-language behavior claims in the actual public headers, implementation files, samples, or UTCs when the context pack is not enough.
+- Before writing examples, inspect the referenced public headers and relevant sample files when needed.
+- Prefer examples copied or adapted from existing samples when they match the feature; otherwise keep examples small and verify every API use.
+- After drafting, review the completed Markdown line by line against repository evidence and fix inaccurate explanations or code before returning.
+- For every C++ code block, inline API statement, and backticked API name, verify:
+  - receiver method exists on the receiver type
+  - static methods are called statically and member methods are called on valid instances
+  - assignment target is compatible with the method return type
+  - argument count, argument type, and overload shape match the public API
+  - enum owner and enum value both exist
+  - property constants use the correct owner and value type
+  - signal callback signatures match the public signal typedef
+  - code blocks do not rely on inferred namespaces or overloads from naming alone
+
+Document target:
+- Feature: Web View (web-view)
+- Category: views-components
+- Guide profile: dali-ui-app
+- Audience: application developers using dali-ui public APIs
+
+Structure policy:
+{
+  "required_shell": [
+    "title",
+    "overview",
+    "table_of_contents"
+  ],
+  "section_policy": {
+    "fixed_sections": false,
+    "guidance": "After the title, overview, and table of contents, choose feature-specific topic sections. Do not use a fixed section template for every feature. Sections should explain meaningful usage themes rather than list APIs mechanically.\n",
+    "max_topic_sections": 8,
+    "min_topic_sections": 2,
+    "require_api_examples_per_topic": true,
+    "require_backticked_api_names": true
+  },
+  "markdown": {
+    "frontmatter": {
+      "enabled": true,
+      "fields": {
+        "title": "{display_name}",
+        "sidebar_label": "{display_name}",
+        "category": "{category}"
+      }
+    },
+    "heading_style": "atx",
+    "code_fence_language": "cpp"
+  },
+  "content_quality": {
+    "overview_style": "very_short",
+    "require_table_of_contents": true,
+    "require_rich_api_examples": true,
+    "require_backticks_for_api_names": true,
+    "topic_sections_must_be_feature_specific": true,
+    "avoid_mechanical_api_listing": true,
+    "default_object_model": "Use Dali::Ui::View rather than Dali::Actor for app-facing object examples.",
+    "guide_assumption": "The reader is using dali-ui to build applications."
+  }
+}
+
+Surface and usage rules:
+{
+  "primary_surface": "dali-ui",
+  "rules": [
+    "Use dali-ui symbols as the app-facing API surface.",
+    "Use dali-core and dali-adaptor symbols only as setup/background unless the usage pattern explicitly marks them preferred.",
+    "Prefer View-based examples over raw Actor object-model examples."
+  ],
+  "symbol_counts": {
+    "dali-adaptor": 3,
+    "dali-core": 2,
+    "dali-ui": 109
+  }
+}
+
+Allowed symbols for code examples:
+- Dali::Ui::WebView | scope=primary
+- Dali::Ui::WebView::AddCustomHeader | bool AddCustomHeader(const Dali::String &name, const Dali::String &value) | scope=primary_member
+- Dali::Ui::WebView::AddJavaScriptMessageHandler | void AddJavaScriptMessageHandler(const Dali::String &exposedObjectName, JavaScriptCallback callback) | scope=primary_member
+- Dali::Ui::WebView::CanGoBack | bool CanGoBack() | scope=primary_member
+- Dali::Ui::WebView::CanGoForward | bool CanGoForward() | scope=primary_member
+- Dali::Ui::WebView::CheckVideoPlayingAsynchronously | bool CheckVideoPlayingAsynchronously(VideoPlayingCallback callback) | scope=primary_member
+- Dali::Ui::WebView::ClearAllTilesResources | void ClearAllTilesResources() | scope=primary_member
+- Dali::Ui::WebView::ClearHistory | WebView & ClearHistory() | scope=primary_member
+- Dali::Ui::WebView::DownCast | WebView DownCast(BaseHandle handle) | scope=primary_member
+- Dali::Ui::WebView::EvaluateJavaScript | void EvaluateJavaScript(const Dali::String &script) | scope=primary_member
+- Dali::Ui::WebView::ExitFullscreen | void ExitFullscreen() | scope=primary_member
+- Dali::Ui::WebView::FeedKeyEvent | bool FeedKeyEvent(const KeyEvent &keyEvent) | scope=primary_member
+- Dali::Ui::WebView::FeedMouseWheel | void FeedMouseWheel(bool yDirection, int step, int x, int y) | scope=primary_member
+- Dali::Ui::WebView::FeedTouchEvent | bool FeedTouchEvent(const TouchEvent &touchEvent) | scope=primary_member
+- Dali::Ui::WebView::FrameRenderedSignal | FrameRenderedSignalType & FrameRenderedSignal() | scope=primary_member
+- Dali::Ui::WebView::FullscreenEnteredSignal | FullscreenEnteredSignalType & FullscreenEnteredSignal() | scope=primary_member
+- Dali::Ui::WebView::FullscreenExitedSignal | FullscreenExitedSignalType & FullscreenExitedSignal() | scope=primary_member
+- Dali::Ui::WebView::GeolocationPermissionSignal | GeolocationPermissionSignalType & GeolocationPermissionSignal() | scope=primary_member
+- Dali::Ui::WebView::GetContentSize | Dali::Vector2 GetContentSize() const | scope=primary_member
+- Dali::Ui::WebView::GetFavicon | Dali::Ui::ImageView GetFavicon() const | scope=primary_member
+- Dali::Ui::WebView::GetKeyEventsEnabled | bool GetKeyEventsEnabled() const | scope=primary_member
+- Dali::Ui::WebView::GetLoadProgressPercentage | float GetLoadProgressPercentage() const | scope=primary_member
+- Dali::Ui::WebView::GetMouseEventsEnabled | bool GetMouseEventsEnabled() const | scope=primary_member
+- Dali::Ui::WebView::GetPageZoomFactor | float GetPageZoomFactor() const | scope=primary_member
+- Dali::Ui::WebView::GetPlainTextAsynchronously | void GetPlainTextAsynchronously(PlainTextCallback callback) | scope=primary_member
+- Dali::Ui::WebView::GetScaleFactor | float GetScaleFactor() const | scope=primary_member
+- Dali::Ui::WebView::GetScreenshot | Dali::Ui::ImageView GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor) | scope=primary_member
+- Dali::Ui::WebView::GetScreenshotAsynchronously | bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback) | scope=primary_member
+- Dali::Ui::WebView::GetScrollPosition | Dali::Vector2 GetScrollPosition() const | scope=primary_member
+- Dali::Ui::WebView::GetScrollSize | Dali::Vector2 GetScrollSize() const | scope=primary_member
+- Dali::Ui::WebView::GetSelectedText | Dali::String GetSelectedText() const | scope=primary_member
+- Dali::Ui::WebView::GetTextZoomFactor | float GetTextZoomFactor() const | scope=primary_member
+- Dali::Ui::WebView::GetTitle | Dali::String GetTitle() const | scope=primary_member
+- Dali::Ui::WebView::GetUrl | Dali::String GetUrl() const | scope=primary_member
+- Dali::Ui::WebView::GetUserAgent | Dali::String GetUserAgent() const | scope=primary_member
+- Dali::Ui::WebView::GetVideoHoleEnabled | bool GetVideoHoleEnabled() const | scope=primary_member
+- Dali::Ui::WebView::GoBack | WebView & GoBack() | scope=primary_member
+- Dali::Ui::WebView::GoForward | WebView & GoForward() | scope=primary_member
+- Dali::Ui::WebView::JavaScriptAlertReply | void JavaScriptAlertReply() | scope=primary_member
+- Dali::Ui::WebView::JavaScriptConfirmReply | void JavaScriptConfirmReply(bool confirmed) | scope=primary_member
+- Dali::Ui::WebView::JavaScriptPromptReply | void JavaScriptPromptReply(const Dali::String &result) | scope=primary_member
+- Dali::Ui::WebView::LoadContents | bool LoadContents(const int8_t *contents, uint32_t contentSize, const Dali::String &mimeType, const Dali::String &encoding, const Dali::String &baseUri) | scope=primary_member
+- Dali::Ui::WebView::LoadHtmlString | WebView & LoadHtmlString(const Dali::String &htmlString) | scope=primary_member
+- Dali::Ui::WebView::LoadHtmlStringOverrideCurrentEntry | bool LoadHtmlStringOverrideCurrentEntry(const Dali::String &html, const Dali::String &basicUri, const Dali::String &unreachableUrl) | scope=primary_member
+- Dali::Ui::WebView::LoadUrl | WebView & LoadUrl(const Dali::String &url) | scope=primary_member
+- Dali::Ui::WebView::New | WebView New() | scope=primary_member
+- Dali::Ui::WebView::OverScrolledSignal | OverScrolledSignalType & OverScrolledSignal() | scope=primary_member
+- Dali::Ui::WebView::PageLoadFinishedSignal | PageLoadFinishedSignalType & PageLoadFinishedSignal() | scope=primary_member
+- Dali::Ui::WebView::PageLoadInProgressSignal | PageLoadInProgressSignalType & PageLoadInProgressSignal() | scope=primary_member
+- Dali::Ui::WebView::PageLoadStartedSignal | PageLoadStartedSignalType & PageLoadStartedSignal() | scope=primary_member
+- Dali::Ui::WebView::RegisterJavaScriptAlertCallback | void RegisterJavaScriptAlertCallback(JavaScriptAlertCallback callback) | scope=primary_member
+- Dali::Ui::WebView::RegisterJavaScriptConfirmCallback | void RegisterJavaScriptConfirmCallback(JavaScriptConfirmCallback callback) | scope=primary_member
+- Dali::Ui::WebView::RegisterJavaScriptPromptCallback | void RegisterJavaScriptPromptCallback(JavaScriptPromptCallback callback) | scope=primary_member
+- Dali::Ui::WebView::Reload | WebView & Reload() | scope=primary_member
+- Dali::Ui::WebView::ReloadWithoutCache | bool ReloadWithoutCache() | scope=primary_member
+- Dali::Ui::WebView::RemoveCustomHeader | bool RemoveCustomHeader(const Dali::String &name) | scope=primary_member
+- Dali::Ui::WebView::Resume | WebView & Resume() | scope=primary_member
+- Dali::Ui::WebView::ResumeNetworkLoading | void ResumeNetworkLoading() | scope=primary_member
+- Dali::Ui::WebView::ScrollBy | void ScrollBy(int32_t deltaX, int32_t deltaY) | scope=primary_member
+- Dali::Ui::WebView::ScrollEdgeBy | bool ScrollEdgeBy(int32_t deltaX, int32_t deltaY) | scope=primary_member
+- Dali::Ui::WebView::ScrollEdgeReachedSignal | ScrollEdgeReachedSignalType & ScrollEdgeReachedSignal() | scope=primary_member
+- Dali::Ui::WebView::SetCursorEnabledByClient | WebView & SetCursorEnabledByClient(bool enabled) | scope=primary_member
+- Dali::Ui::WebView::SetDocumentBackgroundColor | WebView & SetDocumentBackgroundColor(const Dali::Vector4 &color) | scope=primary_member
+- Dali::Ui::WebView::SetKeyEventsEnabled | WebView & SetKeyEventsEnabled(bool enabled) | scope=primary_member
+- Dali::Ui::WebView::SetMouseEventsEnabled | WebView & SetMouseEventsEnabled(bool enabled) | scope=primary_member
+- Dali::Ui::WebView::SetPageZoomFactor | WebView & SetPageZoomFactor(float zoomFactor) | scope=primary_member
+- Dali::Ui::WebView::SetScaleFactor | void SetScaleFactor(float scaleFactor, Dali::Vector2 point) | scope=primary_member
+- Dali::Ui::WebView::SetTextZoomFactor | WebView & SetTextZoomFactor(float zoomFactor) | scope=primary_member
+- Dali::Ui::WebView::SetTileCoverAreaMultiplier | WebView & SetTileCoverAreaMultiplier(float multiplier) | scope=primary_member
+- Dali::Ui::WebView::SetTilesClearedWhenHidden | WebView & SetTilesClearedWhenHidden(bool cleared) | scope=primary_member
+- Dali::Ui::WebView::SetUserAgent | WebView & SetUserAgent(const Dali::String &userAgent) | scope=primary_member
+- Dali::Ui::WebView::SetVideoHoleEnabled | WebView & SetVideoHoleEnabled(bool enabled) | scope=primary_member
+- Dali::Ui::WebView::StopLoading | WebView & StopLoading() | scope=primary_member
+- Dali::Ui::WebView::Suspend | WebView & Suspend() | scope=primary_member
+- Dali::Ui::WebView::SuspendNetworkLoading | void SuspendNetworkLoading() | scope=primary_member
+- Dali::Ui::WebView::TextFoundSignal | TextFoundSignalType & TextFoundSignal() | scope=primary_member
+- Dali::Ui::WebView::UrlChangedSignal | UrlChangedSignalType & UrlChangedSignal() | scope=primary_member
+- Dali::Ui::WebView::WebProcessCrashedSignal | WebProcessCrashedSignalType & WebProcessCrashedSignal() | scope=primary_member
+- Dali::Ui::WebView::WebView | WebView() | scope=primary_member
+- Dali::Ui::WebViewFindOption | scope=document_as_part_of_primary_feature
+- Dali::Ui::WebViewFindOption::AT_WORD_STARTS | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::BACKWARDS | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::CASE_INSENSITIVE | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::NONE | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::SHOW_FIND_INDICATOR | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::SHOW_HIGHLIGHT | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::SHOW_OVERLAY | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::TREAT_MEDIAL_CAPITAL_AS_WORD_START | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewFindOption::WRAP_AROUND | scope=document_as_part_of_primary_feature_member
+- Dali::Ui::WebViewOverScrolled | scope=document_as_part_of_primary_feature
+
+Property owner table:
+- (none)
+
+Preferred usage patterns:
+[
+  {
+    "avoid_symbols": [],
+    "confidence": 0.85,
+    "id": "web-view_basic_setup",
+    "intent": "Create and configure the primary object using public dali-ui APIs.",
+    "preferred_symbols": [
+      "Dali::Ui::WebView::New",
+      "Dali::Ui::WebView::SetCursorEnabledByClient",
+      "Dali::Ui::WebView::SetDocumentBackgroundColor",
+      "Dali::Ui::WebView::SetKeyEventsEnabled",
+      "Dali::Ui::WebView::SetMouseEventsEnabled",
+      "Dali::Ui::WebView::SetPageZoomFactor",
+      "Dali::Ui::WebView::SetScaleFactor",
+      "Dali::Ui::WebView::SetTextZoomFactor",
+      "Dali::Ui::WebView::SetTileCoverAreaMultiplier",
+      "Dali::Ui::WebView::SetTilesClearedWhenHidden",
+      "Dali::Ui::WebView::SetUserAgent",
+      "Dali::Ui::WebView::SetVideoHoleEnabled"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Prefer typed constructors and setters when available."
+  },
+  {
+    "avoid_symbols": [],
+    "confidence": 0.8,
+    "id": "web-view_signals",
+    "intent": "React to user or resource events through public signals.",
+    "preferred_symbols": [
+      "Dali::ConnectionTracker",
+      "Dali::ConnectionTracker::ConnectionTracker",
+      "Dali::Ui::WebView::FrameRenderedSignal",
+      "Dali::Ui::WebView::FullscreenEnteredSignal",
+      "Dali::Ui::WebView::FullscreenExitedSignal",
+      "Dali::Ui::WebView::GeolocationPermissionSignal",
+      "Dali::Ui::WebView::OverScrolledSignal",
+      "Dali::Ui::WebView::PageLoadFinishedSignal"
+    ],
+    "property_values": [],
+    "source": "feature_owned_public_api",
+    "usage_note": "Use signal connection APIs only with their owning trait or class."
+  }
+]
+
+Constraints:
+{
+  "avoid_idioms_unless_needed": [
+    "raw_actor_set_property"
+  ],
+  "forbidden_claims": [],
+  "prefer_idioms": [
+    "fluent_chaining",
+    "typed_setters",
+    "view_tree"
+  ]
+}
+
+Short verified evidence snippets:
+- repos/dali-ui/samples/web-view/web-browser-example.cpp:31 (sample, score=1.0)
+```cpp
+const float NAV_BTN_WIDTH  = 78.0f;
+const float GO_BTN_WIDTH   = 48.0f;
+const float FONT_SIZE_BTN  = 20.0f;
+const float FONT_SIZE_URL  = 19.0f;
+const float FONT_SIZE_STS  = 15.0f;
+
+Label MakeNavButton(const char* text)
+{
+  return Label::New(text)
+    .SetFontSize(FONT_SIZE_BTN)
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetBackgroundColor(Color::IVORY)
+    .SetTextColor(Color::DARK_BLUE)
+    .SetRequestedWidth(NAV_BTN_WIDTH)
+    .SetRequestedHeight(TOOLBAR_HEIGHT)
+    .SetFocusable(true);
+}
+
+} // namespace
+
+class BrowserController : public ConnectionTracker
+{
+public:
+```
+
+- repos/dali-ui/samples/web-view/web-view-example.cpp:15 (sample, score=1.0)
+```cpp
+*/
+
+/**
+ * @file  web-view-example.cpp
+ * @brief Basic WebView sample: loads a URL, shows page-load events and title.
+ *
+ * Key bindings
+ *   ESC / BACK   Quit
+ *   F            GoForward
+ *   B            GoBack
+ *   R            Reload
+ *   H            LoadHtmlString (inline HTML demo)
+ *   L            Load local HTML file (test.html)
+ *   J            EvaluateJavaScript (get document.title)
+ *   S            GetScreenshot → saved as screenshot.png via PixelData
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/web-view.h>
+#include <dali/integration-api/debug.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+```
+
+Optional source files to inspect if needed:
+[
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "CanGoBack",
+      "CanGoForward",
+      "ConnectionTracker",
+      "GetLoadProgressPercentage",
+      "GetTitle",
+      "GoBack",
+      "GoForward",
+      "InputField",
+      "LoadUrl",
+      "New",
+      "PageLoadFinishedSignal",
+      "PageLoadInProgressSignal",
+      "PageLoadStartedSignal",
+      "Reload",
+      "StackLayout",
+      "StopLoading",
+      "UiConfig",
+      "UrlChangedSignal",
+      "WebView"
+    ],
+    "path": "repos/dali-ui/samples/web-view/web-browser-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 110,
+    "snippet_start_line": 31
+  },
+  {
+    "kind": "sample",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "Application",
+      "CanGoBack",
+      "CanGoForward",
+      "ConnectionTracker",
+      "EvaluateJavaScript",
+      "FrameRenderedSignal",
+      "GetScreenshot",
+      "GetScreenshotAsynchronously",
+      "GetTitle",
+      "GoBack",
+      "GoForward",
+      "ImageView",
+      "LoadHtmlString",
+      "LoadUrl",
+      "New",
+      "PageLoadFinishedSignal",
+      "PageLoadStartedSignal",
+      "Reload",
+      "UiConfig",
+      "UrlChangedSignal"
+    ],
+    "path": "repos/dali-ui/samples/web-view/web-view-example.cpp",
+    "relevance": "strong",
+    "score": 1.0,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 94,
+    "snippet_start_line": 15
+  },
+  {
+    "kind": "utc",
+    "lookup_instruction": "Open this file only if more concrete usage evidence is needed.",
+    "matched_symbols": [
+      "AT_WORD_STARTS",
+      "AddCustomHeader",
+      "AddJavaScriptMessageHandler",
+      "BACKWARDS",
+      "BOTTOM",
+      "CASE_INSENSITIVE",
+      "CanGoBack",
+      "CanGoForward",
+      "CheckVideoPlayingAsynchronously",
+      "ClearAllTilesResources",
+      "ClearHistory",
+      "DownCast",
+      "EvaluateJavaScript",
+      "ExitFullscreen",
+      "FeedMouseWheel",
+      "FrameRenderedSignal",
+      "FullscreenEnteredSignal",
+      "FullscreenExitedSignal",
+      "GeolocationPermissionSignal",
+      "GetContentSize"
+    ],
+    "path": "repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp",
+    "relevance": "strong",
+    "score": 0.75,
+    "selection_reason": "symbol_and_path_match",
+    "snippet_end_line": 188,
+    "snippet_start_line": 109
+  }
+]
+
+Uncertainty notes for you, not for the final document:
+[
+  {
+    "kind": "missing_property_owners",
+    "message": "No property owner table was available for this feature."
+  }
+]
+exec
+/bin/bash -lc "sed -n '1,260p' repos/dali-ui/dali-ui-foundation/public-api/web-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+exec
+/bin/bash -lc "sed -n '1,220p' repos/dali-ui/samples/web-view/web-view-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/events/key-event.h>
+#include <dali/public-api/events/touch-event.h>
+#include <dali/public-api/math/rect.h>
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/math/vector4.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/web-view-types.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration DALI_INTERNAL
+{
+class WebViewImpl;
+} //namespace Integration DALI_INTERNAL
+
+#include "web-view.autogen.h"
+/**
+ * @brief WebView is a View for displaying web content.
+ *
+ * This enables embedding web pages in the application.
+ * For a working WebView, a web engine plugin for the target platform must be provided.
+ *
+ * @code
+ * WebView view = WebView::New();
+ * view.LoadUrl("https://www.example.com");
+ * @endcode
+ */
+class DALI_UI_API WebView : public View
+{
+public: // Callback types
+  // -- JavaScript --
+  /// @brief Callback for JavaScript result or message.
+  using JavaScriptCallback = Callback<void(const Dali::String&)>;
+
+  /// @brief Callback for JavaScript alert dialog.
+  using JavaScriptAlertCallback = Callback<bool(const Dali::String&)>;
+
+  /// @brief Callback for JavaScript confirm dialog.
+  using JavaScriptConfirmCallback = Callback<bool(const Dali::String&)>;
+
+  /// @brief Callback for JavaScript prompt dialog.
+  using JavaScriptPromptCallback = Callback<bool(const Dali::String&, const Dali::String&)>;
+
+  // -- Async operations --
+  /// @brief Callback for screenshot captured asynchronously.
+  using ScreenshotCapturedCallback = Callback<void(Dali::Ui::ImageView)>;
+
+  /// @brief Callback for plain text retrieval.
+  using PlainTextCallback = Callback<void(const Dali::String&)>;
+
+  /// @brief Callback for video playing status check.
+  using VideoPlayingCallback = Callback<void(bool)>;
+
+public: // Signal types
+  // -- Page loading --
+  /// @brief Signal type for page load started events.
+  using PageLoadStartedSignalType = Signal<void(WebView, const Dali::String&)>;
+
+  /// @brief Signal type for page load in progress events.
+  using PageLoadInProgressSignalType = Signal<void(WebView, const Dali::String&)>;
+
+  /// @brief Signal type for page load finished events.
+  using PageLoadFinishedSignalType = Signal<void(WebView, const Dali::String&)>;
+
+  // -- Navigation --
+  /// @brief Signal type for URL changes.
+  using UrlChangedSignalType = Signal<void(WebView, const Dali::String&)>;
+
+  // -- Rendering --
+  /// @brief Signal type for frame rendered events.
+  using FrameRenderedSignalType = Signal<void(WebView)>;
+
+  // -- Scroll --
+  /// @brief Signal type for scroll edge reached events.
+  using ScrollEdgeReachedSignalType = Signal<void(WebView, WebViewScrollEdge)>;
+
+  /// @brief Signal type for over-scroll events.
+  using OverScrolledSignalType = Signal<void(WebView, WebViewOverScrolled)>;
+
+  // -- Fullscreen --
+  /// @brief Signal type for fullscreen enter events.
+  using FullscreenEnteredSignalType = Signal<void(WebView)>;
+
+  /// @brief Signal type for fullscreen exit events.
+  using FullscreenExitedSignalType = Signal<void(WebView)>;
+
+  // -- Text search --
+  /// @brief Signal type for text search results.
+  using TextFoundSignalType = Signal<void(WebView, uint32_t)>;
+
+  // -- Geolocation --
+  /// @brief Signal type for geolocation permission requests.
+  using GeolocationPermissionSignalType = Signal<bool(WebView, const Dali::String&, const Dali::String&)>;
+
+  // -- Process events --
+  /// @brief Signal type for web process crash events.
+  using WebProcessCrashedSignalType = Signal<void(WebView)>;
+
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized WebView handle.
+   */
+  WebView();
+
+  /**
+   * @brief Creates an initialized WebView.
+   * @return A handle to a newly allocated Dali resource
+   */
+  static WebView New();
+
+  /**
+   * @brief Creates an initialized WebView and immediately loads the given URL.
+   * @param[in] url The URL to load
+   * @return A handle to a newly allocated Dali resource
+   */
+  static WebView New(const Dali::String& url);
+
+  /**
+   * @brief Destructor.
+   */
+  ~WebView();
+
+  /**
+   * @brief Copy constructor.
+   */
+  WebView(const WebView& webView);
+
+  /**
+   * @brief Move constructor.
+   */
+  WebView(WebView&& rhs) noexcept;
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   */
+  WebView& operator=(const WebView& webView);
+
+  /**
+   * @brief Move assignment operator.
+   */
+  WebView& operator=(WebView&& rhs) noexcept;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to WebView.
+   */
+  static WebView DownCast(BaseHandle handle);
+
+public: // Setters for chaining
+  // @CHAIN_START(WebView, View)
+
+  /**
+   * @brief Sets the user agent string.
+   *
+   * @param[in] userAgent The user agent string
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetUserAgent(const Dali::String& userAgent);
+
+  /**
+   * @brief Loads the specified URL.
+   *
+   * @param[in] url The URL to load
+   * @return Reference to this for fluent chaining
+   */
+  WebView& LoadUrl(const Dali::String& url);
+
+  /**
+   * @brief Loads the specified HTML string.
+   *
+   * @param[in] htmlString The HTML string to load
+   * @return Reference to this for fluent chaining
+   */
+  WebView& LoadHtmlString(const Dali::String& htmlString);
+
+  /**
+   * @brief Reloads the current page.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& Reload();
+
+  /**
+   * @brief Stops loading the current page.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& StopLoading();
+
+  /**
+   * @brief Suspends the web view.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& Suspend();
+
+  /**
+   * @brief Resumes the web view.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& Resume();
+
+  /**
+   * @brief Navigates forward in history.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& GoForward();
+
+  /**
+   * @brief Navigates backward in history.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& GoBack();
+
+  /**
+   * @brief Clears the navigation history.
+   *
+   * @return Reference to this for fluent chaining
+   */
+  WebView& ClearHistory();
+
+  /**
+   * @brief Sets the page zoom factor.
+   *
+   * @param[in] zoomFactor The zoom factor
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetPageZoomFactor(float zoomFactor);
+
+
+ succeeded in 0ms:
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @file  web-view-example.cpp
+ * @brief Basic WebView sample: loads a URL, shows page-load events and title.
+ *
+ * Key bindings
+ *   ESC / BACK   Quit
+ *   F            GoForward
+ *   B            GoBack
+ *   R            Reload
+ *   H            LoadHtmlString (inline HTML demo)
+ *   L            Load local HTML file (test.html)
+ *   J            EvaluateJavaScript (get document.title)
+ *   S            GetScreenshot → saved as screenshot.png via PixelData
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/web-view.h>
+#include <dali/integration-api/debug.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+// URL loaded on startup (change to any reachable URL for live testing)
+const char* DEFAULT_URL = "https://www.naver.com";
+
+// Local HTML file path (relative to application resource directory)
+const char* LOCAL_HTML_PATH = "test.html";
+
+// Fallback HTML content when local file is not available
+const char* FALLBACK_HTML =
+  "<!DOCTYPE html>"
+  "<html><head><meta charset='UTF-8'><title>Offline Mode</title></head>"
+  "<body style='background:linear-gradient(135deg,#1a1a2e,#16213e);color:#eee;font-family:sans-serif;padding:40px;text-align:center'>"
+  "<h1 style='color:#e94560'>🌐 No Internet Connection</h1>"
+  "<p>Unable to connect to the internet.</p>"
+  "<p>Please check your network connection and try again.</p>"
+  "<hr style='border-color:#333;margin:30px 0'>"
+  "<p style='color:#888'>Press <b>R</b> to reload</p>"
+  "</body></html>";
+} // namespace
+
+// ---------------------------------------------------------------------------
+// Controller
+// ---------------------------------------------------------------------------
+
+class WebViewSampleController : public ConnectionTracker
+{
+public:
+  explicit WebViewSampleController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &WebViewSampleController::OnInit);
+  }
+
+private:
+  // -----------------------------------------------------------------------
+  // Init
+  // -----------------------------------------------------------------------
+  void OnInit(Application application)
+  {
+    Window window     = application.GetWindow();
+    auto   windowSize = window.GetSize();
+    window.SetBackgroundColor(Color::BLACK);
+
+    // ---- Create WebView ------------------------------------------------
+    mWebView = WebView::New();
+    mWebView
+      .SetRequestedWidth(static_cast<float>(windowSize.GetWidth()))
+      .SetRequestedHeight(static_cast<float>(windowSize.GetHeight()))
+      .SetRequestedPositionX(0.0f)
+      .SetRequestedPositionY(0.0f);
+
+    window.Add(mWebView);
+
+    // ---- Connect signals ----------------------------------
+    mWebView.PageLoadStartedSignal().Connect(this, &WebViewSampleController::OnPageLoadStarted);
+    mWebView.PageLoadFinishedSignal().Connect(this, &WebViewSampleController::OnPageLoadFinished);
+    mWebView.UrlChangedSignal().Connect(this, &WebViewSampleController::OnUrlChanged);
+    mWebView.FrameRenderedSignal().Connect(this, &WebViewSampleController::OnFrameRendered);
+
+    // ---- Load initial URL ----------------------------------------------
+    mWebView.LoadUrl(Dali::String(DEFAULT_URL));
+
+    // ---- Key & window signals ------------------------------------------
+    window.KeyEventSignal().Connect(this, &WebViewSampleController::OnKeyEvent);
+
+    DALI_LOG_RELEASE_INFO("[WebViewSample] Initialized. Loading: %s\n", DEFAULT_URL);
+  }
+
+  // -----------------------------------------------------------------------
+  // Page-load callbacks (Signal handlers - first param is WebView)
+  // -----------------------------------------------------------------------
+  void OnPageLoadStarted(WebView view, const Dali::String& url)
+  {
+    DALI_LOG_RELEASE_INFO("[WebViewSample] Page load started: %s\n", url.CStr());
+  }
+
+  void OnPageLoadFinished(WebView view, const Dali::String& url)
+  {
+    Dali::String title = mWebView.GetTitle();
+    DALI_LOG_RELEASE_INFO("[WebViewSample] Page load finished: %s  title=\"%s\"\n",
+                          url.CStr(), title.CStr());
+  }
+
+  bool TryLoadLocalHtml(const Dali::String& path)
+  {
+    // Try to load from file:// protocol
+    // Note: The path should be absolute or relative to app's resource directory
+    FILE* file = fopen(path.CStr(), "r");
+    if(file)
+    {
+      fclose(file);
+      Dali::String fileUrl = Dali::String("file://") + path;
+      mWebView.LoadUrl(fileUrl);
+      return true;
+    }
+    return false;
+  }
+
+  void OnUrlChanged(WebView view, const Dali::String& url)
+  {
+    DALI_LOG_RELEASE_INFO("[WebViewSample] URL changed: %s\n", url.CStr());
+  }
+
+  void OnFrameRendered(WebView view)
+  {
+    // Called each time a new frame from the web engine is composited.
+    // We only log the very first frame to avoid flooding the log.
+    if(!mFirstFrameReceived)
+    {
+      mFirstFrameReceived = true;
+      DALI_LOG_RELEASE_INFO("[WebViewSample] First frame rendered!\n");
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // Key input
+  // -----------------------------------------------------------------------
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::DOWN)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      mApplication.Quit();
+    }
+    else if(event.GetKeyName() == "F" || event.GetKeyName() == "f")
+    {
+      if(mWebView.CanGoForward())
+      {
+        DALI_LOG_RELEASE_INFO("[WebViewSample] GoForward\n");
+        mWebView.GoForward();
+      }
+      else
+      {
+        DALI_LOG_RELEASE_INFO("[WebViewSample] Cannot go forward\n");
+      }
+    }
+    else if(event.GetKeyName() == "B" || event.GetKeyName() == "b")
+    {
+      if(mWebView.CanGoBack())
+      {
+        DALI_LOG_RELEASE_INFO("[WebViewSample] GoBack\n");
+        mWebView.GoBack();
+      }
+      else
+      {
+        DALI_LOG_RELEASE_INFO("[WebViewSample] Cannot go back\n");
+      }
+    }
+    else if(event.GetKeyName() == "R" || event.GetKeyName() == "r")
+    {
+      DALI_LOG_RELEASE_INFO("[WebViewSample] Reload\n");
+      mWebView.Reload();
+    }
+    else if(event.GetKeyName() == "H" || event.GetKeyName() == "h")
+    {
+      DALI_LOG_RELEASE_INFO("[WebViewSample] LoadHtmlString\n");
+      mWebView.LoadHtmlString(Dali::String(
+        "<html><body style='background:#1a1a2e;color:#eee;font-family:sans-serif;padding:40px'>"
+        "<h1>dali-ui WebView</h1>"
+        "<p>Loaded from <b>LoadHtmlString()</b>.</p>"
+        "<p>Press <b>B</b> to go back, <b>R</b> to reload.</p>"
+        "</body></html>"));
+    }
+    else if(event.GetKeyName() == "L" || event.GetKeyName() == "l")
+    {
+      // Load local HTML file
+      DALI_LOG_RELEASE_INFO("[WebViewSample] Load local HTML\n");
+      Dali::String localPath = Dali::String(LOCAL_HTML_PATH);
+      if(TryLoadLocalHtml(localPath))
+      {
+        DALI_LOG_RELEASE_INFO("[WebViewSample] Loaded local HTML: %s\n", localPath.CStr());
+      }
+      else
+      {
+        DALI_LOG_RELEASE_INFO("[WebViewSample] Local HTML not found, using fallback\n");
+        mWebView.LoadHtmlString(Dali::String(FALLBACK_HTML));
+
+exec
+/bin/bash -lc 'rg -n "class WebView|typedef.*Signal|using.*Signal|PageLoadFinishedSignal|JavaScriptCallback|PlainTextCallback|ScreenshotCapturedCallback|VideoPlayingCallback|GeolocationPermissionSignal" repos/dali-ui -S' in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h:34:typedef Signal<void(uint32_t, std::vector<Devel::PixelBuffer>&)> PixelBufferLoadedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/scroll-state-observer.h:49:  using StateSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/internal/feedback/feedback-style.cpp:83:typedef std::vector<SignalFeedbackInfo>             SignalFeedbackInfoContainer;
+repos/dali-ui/dali-ui-foundation/internal/feedback/feedback-style.cpp:84:typedef SignalFeedbackInfoContainer::const_iterator SignalFeedbackInfoConstIter;
+repos/dali-ui/dali-ui-foundation/devel-api/drag-drop-detector/drag-and-drop-detector.h:112:  using DragAndDropSignal = Signal<void(View, DragAndDropDetector)>; ///< Drag & Drop signal
+repos/dali-ui/dali-ui-foundation/devel-api/builder/builder.h:444:  typedef Signal<void()> BuilderSignalType;
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.cpp:881:void WebViewImpl::EvaluateJavaScript(const Dali::String& script, WebView::JavaScriptCallback callback)
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.cpp:896:void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback)
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.cpp:1038:bool WebViewImpl::GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback)
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.cpp:1083:void WebViewImpl::GetPlainTextAsynchronously(WebView::PlainTextCallback callback)
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.cpp:1230:bool WebViewImpl::CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback callback)
+repos/dali-ui/dali-ui-foundation/integration-api/theme-loader-interface.h:49:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/integration-api/ui-theme-manager-impl.h:49:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/samples/web-view/web-view-example.cpp:65:class WebViewSampleController : public ConnectionTracker
+repos/dali-ui/samples/web-view/web-view-example.cpp:96:    mWebView.PageLoadFinishedSignal().Connect(this, &WebViewSampleController::OnPageLoadFinished);
+repos/dali-ui/samples/web-view/web-view-example.cpp:229:        WebView::JavaScriptCallback::New(this, &WebViewSampleController::OnJavaScriptResult));
+repos/dali-ui/samples/web-view/web-view-example.cpp:240:        WebView::ScreenshotCapturedCallback::New(this, &WebViewSampleController::OnScreenshotCaptured));
+repos/dali-ui/dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h:49:  typedef Signal<void(View, View)> KeyInputFocusChangedSignalType;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:41:  typedef Signal<void(TestButton&)> PanelDownSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:42:  typedef Signal<void(TestButton&)> PanelUpSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:115:  typedef Signal<void()> VoidRetNoParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:118:  typedef Signal<void(int)> VoidRet1ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:121:  typedef Signal<void(int&)> VoidRet1RefParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:124:  typedef Signal<void(int, int)> VoidRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:127:  typedef Signal<void(int, int, int)> VoidRet3ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:130:  typedef Signal<bool(float)> BoolRet1ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:133:  typedef Signal<bool(float, int)> BoolRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:136:  typedef Signal<int(float, int)> IntRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:139:  typedef Signal<float()> FloatRet0ParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:142:  typedef Signal<float(float)> FloatRet1ParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:145:  typedef Signal<float(float, float)> FloatRet2ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:148:  typedef Signal<float(float, float, float)> FloatRet3ValueParamSignal;
+repos/dali-ui/automated-tests/src/common/signal-helper.h:151:  typedef Signal<void(float, float, float)> VoidSignalTypeFloatValue3;
+repos/dali-ui/samples/web-view/web-browser-example.cpp:165:    mWebView.PageLoadFinishedSignal().Connect(this, &BrowserController::OnPageLoadFinished);
+repos/dali-ui/dali-ui-foundation/internal/drag-drop-detector/drag-and-drop-detector-impl.h:48:  using DragAndDropSignal = Dali::Ui::DragAndDropDetector::DragAndDropSignal;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1426:  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1900:  typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1903:  typedef Signal<void(View, bool)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1906:  typedef Signal<void(View)> ResourceReadySignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1909:  typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1912:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1915:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1918:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1921:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1924:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1927:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1930:  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1933:  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1937:  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view.h:1940:  typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:38:void OnJavaScriptCallback(const Dali::String& result) {}
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:43:void OnVideoPlayingCallback(bool isPlaying) {}
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:44:void OnPlainTextCallback(const Dali::String& text) {}
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:414:  auto callback = WebView::JavaScriptCallback::New(OnJavaScriptCallback);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:424:  auto callback = WebView::JavaScriptCallback::New(OnJavaScriptCallback);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:539:  auto callback = WebView::ScreenshotCapturedCallback::New(OnScreenshotCallback);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:581:  auto callback = WebView::PlainTextCallback::New(OnPlainTextCallback);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:691:  auto callback = WebView::VideoPlayingCallback::New(OnVideoPlayingCallback);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:719:int UtcDaliWebViewPageLoadFinishedSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:723:  view.PageLoadFinishedSignal().Connect([](WebView v, const Dali::String& url) {});
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:811:int UtcDaliWebViewGeolocationPermissionSignalP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:815:  view.GeolocationPermissionSignal().Connect([](WebView v, const Dali::String& host, const Dali::String& protocol) -> bool { return true; });
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:48:class WebViewImpl;
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:277:   * @copydoc Dali::Ui::WebView::EvaluateJavaScript(const Dali::String&, JavaScriptCallback)
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:279:  void EvaluateJavaScript(const Dali::String& script, WebView::JavaScriptCallback callback);
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:284:  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback);
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:356:  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback);
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:377:  void GetPlainTextAsynchronously(WebView::PlainTextCallback callback);
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:454:  bool CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback callback);
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:502:  /// @brief Emits the PageLoadFinishedSignal
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:518:  /// @brief Emits the GeolocationPermissionSignal and returns the result
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:646:  WebView::PageLoadFinishedSignalType      mPageLoadFinishedSignal;
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:654:  WebView::GeolocationPermissionSignalType mGeolocationPermissionSignal;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:331:  using ScrollStartedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:336:  using ScrollFinishedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:341:  using ScrollingSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:346:  using DragStartedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:351:  using DragFinishedSignalType = Signal<void(ScrollView)>;
+repos/dali-ui/dali-ui-foundation/public-api/scroll-view.h:356:  using DraggingSignalType = Signal<void(ScrollView, float, float)>; // scrollView, deltaX, deltaY
+repos/dali-ui/dali-ui-foundation/public-api/lottie-animation-view.h:87:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:344:bool WebView::GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback)
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:364:void WebView::GetPlainTextAsynchronously(PlainTextCallback callback)
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:457:bool WebView::CheckVideoPlayingAsynchronously(VideoPlayingCallback callback)
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:471:void WebView::EvaluateJavaScript(const Dali::String& script, JavaScriptCallback callback)
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:476:void WebView::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback)
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:525:WebView::PageLoadFinishedSignalType& WebView::PageLoadFinishedSignal()
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:527:  return GetImpl(*this).mPageLoadFinishedSignal;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:585:WebView::GeolocationPermissionSignalType& WebView::GeolocationPermissionSignal()
+repos/dali-ui/dali-ui-foundation/public-api/web-view.cpp:587:  return GetImpl(*this).mGeolocationPermissionSignal;
+repos/dali-ui/dali-ui-foundation/public-api/ui-theme-manager.h:52:  using ThemeChangedSignalType = Signal<void()>;
+repos/dali-ui/dali-ui-foundation/public-api/animated-image-view.h:91:  typedef Signal<void(View)> AnimationFinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/view-impl.h:92:  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
+repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h:55:  typedef Signal<void(View, View)> FocusChangedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:31:enum class WebViewScrollEdge
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:42:enum class WebViewOverScrolled
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:53:enum class WebViewFindOption : uint32_t
+repos/dali-ui/dali-ui-foundation/internal/text/async-text/text-load-observer.h:40:  typedef Signal<void(TextLoadObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/public-api/image-loader/async-image-loader.h:100:  typedef Signal<void(uint32_t, PixelData)> ImageLoadedSignalType; ///< Image loaded signal type
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:40:class WebViewImpl;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:60:  using JavaScriptCallback = Callback<void(const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:73:  using ScreenshotCapturedCallback = Callback<void(Dali::Ui::ImageView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:76:  using PlainTextCallback = Callback<void(const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:79:  using VideoPlayingCallback = Callback<void(bool)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:84:  using PageLoadStartedSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:87:  using PageLoadInProgressSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:90:  using PageLoadFinishedSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:94:  using UrlChangedSignalType = Signal<void(WebView, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:98:  using FrameRenderedSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:102:  using ScrollEdgeReachedSignalType = Signal<void(WebView, WebViewScrollEdge)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:105:  using OverScrolledSignalType = Signal<void(WebView, WebViewOverScrolled)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:109:  using FullscreenEnteredSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:112:  using FullscreenExitedSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:116:  using TextFoundSignalType = Signal<void(WebView, uint32_t)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:120:  using GeolocationPermissionSignalType = Signal<bool(WebView, const Dali::String&, const Dali::String&)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:124:  using WebProcessCrashedSignalType = Signal<void(WebView)>;
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:583:  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback);
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:597:  void GetPlainTextAsynchronously(PlainTextCallback callback);
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:605:  bool CheckVideoPlayingAsynchronously(VideoPlayingCallback callback);
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:621:  void EvaluateJavaScript(const Dali::String& script, JavaScriptCallback callback);
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:629:  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback);
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:685:  PageLoadFinishedSignalType& PageLoadFinishedSignal();
+repos/dali-ui/dali-ui-foundation/public-api/web-view.h:725:  GeolocationPermissionSignalType& GeolocationPermissionSignal();
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h:54:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/public-api/render-effects/background-blur-effect.h:57:  typedef Signal<void()> FinishedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/texture-manager/texture-upload-observer.h:43:  typedef Signal<void(TextureUploadObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:37:  typedef Signal<void()> AccessibilityActivateSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:40:  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:43:  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:46:  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:49:  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:52:  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:55:  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:58:  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:61:  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:64:  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
+repos/dali-ui/dali-ui-foundation/internal/views/view/view-accessibility-data.h:68:  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-timer.h:45:  typedef Signal<bool()> TimerSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-lifecycle-controller.h:38:  typedef Signal<void(void)> LifecycleSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:48:typedef Signal<void(Window, bool)>      FocusChangeSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:49:typedef Signal<void(Window, Int32Pair)> ResizeSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:57:  using KeyEventSignalType   = Signal<void(Window, KeyEvent)>;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:58:  using TouchEventSignalType = Signal<void(Window, TouchEvent)>;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:59:  using ResizeSignalType     = Signal<void(Window, WindowSize)>;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:100:typedef Signal<void()>                   EventProcessingFinishedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:101:typedef Signal<bool(Window, KeyEvent)>   KeyEventGeneratedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:102:typedef Signal<void(Window, WheelEvent)> WheelEventSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:103:typedef Signal<bool(Window, WheelEvent)> WheelEventGeneratedSignalType;
+repos/dali-ui/automated-tests/src/dali-test-suite-utils/dali-ui/ui-window.h:104:typedef Signal<void(Window, bool)>       VisibilityChangedSignalType;
+repos/dali-ui/dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h:60:  using ResourceReadySignalType = Signal<void(ResourceStatus)>;
+repos/dali-ui/dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h:38:  typedef Signal<void(SvgLoaderObserver*)> DestructionSignalType; ///< Signal prototype for the Destruction Signal.
+
+exec
+/bin/bash -lc "sed -n '260,780p' repos/dali-ui/dali-ui-foundation/public-api/web-view.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+  /**
+   * @brief Sets the text zoom factor.
+   *
+   * @param[in] zoomFactor The zoom factor
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetTextZoomFactor(float zoomFactor);
+
+  /**
+   * @brief Sets whether mouse events are enabled.
+   *
+   * @param[in] enabled True to enable mouse events
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetMouseEventsEnabled(bool enabled);
+
+  /**
+   * @brief Sets whether key events are enabled.
+   *
+   * @param[in] enabled True to enable key events
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetKeyEventsEnabled(bool enabled);
+
+  /**
+   * @brief Sets whether video hole is enabled.
+   *
+   * @param[in] enabled True to enable video hole
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetVideoHoleEnabled(bool enabled);
+
+  /**
+   * @brief Sets the document background color.
+   *
+   * @param[in] color The background color
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetDocumentBackgroundColor(const Dali::Vector4& color);
+
+  /**
+   * @brief Sets whether tiles are cleared when hidden.
+   *
+   * @param[in] cleared True to clear tiles when hidden
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetTilesClearedWhenHidden(bool cleared);
+
+  /**
+   * @brief Sets the tile cover area multiplier.
+   *
+   * @param[in] multiplier The multiplier value
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetTileCoverAreaMultiplier(float multiplier);
+
+  /**
+   * @brief Sets whether cursor is enabled by client.
+   *
+   * @param[in] enabled True to enable cursor by client
+   * @return Reference to this for fluent chaining
+   */
+  WebView& SetCursorEnabledByClient(bool enabled);
+
+  // @CHAIN_END
+
+public: // Getters (non-chainable)
+  /**
+   * @brief Gets the current URL.
+   *
+   * @return The current URL
+   */
+  Dali::String GetUrl() const;
+
+  /**
+   * @brief Gets the user agent string.
+   *
+   * @return The user agent string
+   */
+  Dali::String GetUserAgent() const;
+
+  /**
+   * @brief Gets the scroll position.
+   *
+   * @return The current scroll position
+   */
+  Dali::Vector2 GetScrollPosition() const;
+
+  /**
+   * @brief Gets the scroll size.
+   *
+   * @return The scroll size
+   */
+  Dali::Vector2 GetScrollSize() const;
+
+  /**
+   * @brief Gets the content size.
+   *
+   * @return The content size
+   */
+  Dali::Vector2 GetContentSize() const;
+
+  /**
+   * @brief Gets the page title.
+   *
+   * @return The page title
+   */
+  Dali::String GetTitle() const;
+
+  /**
+   * @brief Gets the load progress percentage.
+   *
+   * @return The load progress percentage (0.0 - 100.0)
+   */
+  float GetLoadProgressPercentage() const;
+
+  /**
+   * @brief Gets the page zoom factor.
+   *
+   * @return The page zoom factor
+   */
+  float GetPageZoomFactor() const;
+
+  /**
+   * @brief Gets the text zoom factor.
+   *
+   * @return The text zoom factor
+   */
+  float GetTextZoomFactor() const;
+
+  /**
+   * @brief Gets whether mouse events are enabled.
+   *
+   * @return True if mouse events are enabled
+   */
+  bool GetMouseEventsEnabled() const;
+
+  /**
+   * @brief Gets whether key events are enabled.
+   *
+   * @return True if key events are enabled
+   */
+  bool GetKeyEventsEnabled() const;
+
+  /**
+   * @brief Gets whether video hole is enabled.
+   *
+   * @return True if video hole is enabled
+   */
+  bool GetVideoHoleEnabled() const;
+
+  /**
+   * @brief Gets the currently selected text.
+   *
+   * @return The selected text
+   */
+  Dali::String GetSelectedText() const;
+
+  /**
+   * @brief Gets the scale factor.
+   *
+   * @return The scale factor
+   */
+  float GetScaleFactor() const;
+
+public: // Query methods (non-chainable, bool return)
+  /**
+   * @brief Checks if forward navigation is possible.
+   *
+   * @return True if can go forward
+   */
+  bool CanGoForward();
+
+  /**
+   * @brief Checks if backward navigation is possible.
+   *
+   * @return True if can go back
+   */
+  bool CanGoBack();
+
+  /**
+   * @brief Loads HTML string with override current entry.
+   *
+   * @param[in] html The HTML string
+   * @param[in] basicUri The base URI
+   * @param[in] unreachableUrl The unreachable URL
+   * @return True on success
+   */
+  bool LoadHtmlStringOverrideCurrentEntry(const Dali::String& html, const Dali::String& basicUri, const Dali::String& unreachableUrl);
+
+  /**
+   * @brief Loads contents.
+   *
+   * @param[in] contents The content data
+   * @param[in] contentSize The size of content data
+   * @param[in] mimeType The MIME type
+   * @param[in] encoding The encoding
+   * @param[in] baseUri The base URI
+   * @return True on success
+   */
+  bool LoadContents(const int8_t* contents, uint32_t contentSize, const Dali::String& mimeType, const Dali::String& encoding, const Dali::String& baseUri);
+
+  /**
+   * @brief Reloads without cache.
+   *
+   * @return True on success
+   */
+  bool ReloadWithoutCache();
+
+  /**
+   * @brief Adds a custom header.
+   *
+   * @param[in] name The header name
+   * @param[in] value The header value
+   * @return True on success
+   */
+  bool AddCustomHeader(const Dali::String& name, const Dali::String& value);
+
+  /**
+   * @brief Removes a custom header.
+   *
+   * @param[in] name The header name
+   * @return True on success
+   */
+  bool RemoveCustomHeader(const Dali::String& name);
+
+public: // Actions (non-chainable, void or special return)
+  /**
+   * @brief Scrolls by the specified delta.
+   *
+   * @param[in] deltaX The horizontal scroll delta
+   * @param[in] deltaY The vertical scroll delta
+   */
+  void ScrollBy(int32_t deltaX, int32_t deltaY);
+
+  /**
+   * @brief Scrolls by edge delta.
+   *
+   * @param[in] deltaX The horizontal scroll delta
+   * @param[in] deltaY The vertical scroll delta
+   * @return True on success
+   */
+  bool ScrollEdgeBy(int32_t deltaX, int32_t deltaY);
+
+  /**
+   * @brief Exits fullscreen mode.
+   */
+  void ExitFullscreen();
+
+  /**
+   * @brief Clears all tiles resources.
+   */
+  void ClearAllTilesResources();
+
+  /**
+   * @brief Suspends network loading.
+   */
+  void SuspendNetworkLoading();
+
+  /**
+   * @brief Resumes network loading.
+   */
+  void ResumeNetworkLoading();
+
+  /**
+   * @brief Sets the scale factor at a point.
+   *
+   * @param[in] scaleFactor The scale factor
+   * @param[in] point The point to scale around
+   */
+  void SetScaleFactor(float scaleFactor, Dali::Vector2 point);
+
+  /**
+   * @brief Feeds mouse wheel event.
+   *
+   * @param[in] yDirection True for Y direction
+   * @param[in] step The wheel step
+   * @param[in] x The X coordinate
+   * @param[in] y The Y coordinate
+   */
+  void FeedMouseWheel(bool yDirection, int step, int x, int y);
+
+  /**
+   * @brief Feeds a key event directly to the web engine.
+   *
+   * Use this to forward key events to the web engine when automatic key event
+   * forwarding is disabled (SetKeyEventsEnabled(false)).
+   *
+   * @param[in] keyEvent The key event to feed
+   * @return True if the event was consumed by the web engine
+   */
+  bool FeedKeyEvent(const KeyEvent& keyEvent);
+
+  /**
+   * @brief Feeds a touch event directly to the web engine.
+   *
+   * Use this to forward touch events to the web engine when automatic touch
+   * forwarding is disabled (SetMouseEventsEnabled(false)).
+   *
+   * @param[in] touchEvent The touch event to feed
+   * @return True if the event was consumed by the web engine
+   */
+  bool FeedTouchEvent(const TouchEvent& touchEvent);
+
+public: // Screenshot & Page Info
+  /**
+   * @brief Gets a screenshot.
+   *
+   * @param[in] viewArea The view area
+   * @param[in] scaleFactor The scale factor
+   * @return An ImageView containing the screenshot
+   */
+  Dali::Ui::ImageView GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor);
+
+  /**
+   * @brief Gets a screenshot asynchronously.
+   *
+   * @param[in] viewArea The view area
+   * @param[in] scaleFactor The scale factor
+   * @param[in] callback The callback to receive the screenshot
+   * @return True if the operation started successfully
+   */
+  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback);
+
+  /**
+   * @brief Gets the favicon.
+   *
+   * @return An ImageView containing the favicon
+   */
+  Dali::Ui::ImageView GetFavicon() const;
+
+  /**
+   * @brief Gets plain text asynchronously.
+   *
+   * @param[in] callback The callback to receive the plain text
+   */
+  void GetPlainTextAsynchronously(PlainTextCallback callback);
+
+  /**
+   * @brief Checks if video is playing asynchronously.
+   *
+   * @param[in] callback The callback to receive the result
+   * @return True if the operation started successfully
+   */
+  bool CheckVideoPlayingAsynchronously(VideoPlayingCallback callback);
+
+public: // JavaScript
+  /**
+   * @brief Evaluates JavaScript code.
+   *
+   * @param[in] script The JavaScript code to evaluate
+   */
+  void EvaluateJavaScript(const Dali::String& script);
+
+  /**
+   * @brief Evaluates JavaScript code with callback.
+   *
+   * @param[in] script The JavaScript code to evaluate
+   * @param[in] callback The callback to receive the result
+   */
+  void EvaluateJavaScript(const Dali::String& script, JavaScriptCallback callback);
+
+  /**
+   * @brief Adds a JavaScript message handler.
+   *
+   * @param[in] exposedObjectName The exposed object name
+   * @param[in] callback The callback to handle messages
+   */
+  void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback);
+
+  /**
+   * @brief Registers a JavaScript alert callback.
+   *
+   * @param[in] callback The callback for alert dialogs
+   */
+  void RegisterJavaScriptAlertCallback(JavaScriptAlertCallback callback);
+
+  /**
+   * @brief Replies to a JavaScript alert.
+   */
+  void JavaScriptAlertReply();
+
+  /**
+   * @brief Registers a JavaScript confirm callback.
+   *
+   * @param[in] callback The callback for confirm dialogs
+   */
+  void RegisterJavaScriptConfirmCallback(JavaScriptConfirmCallback callback);
+
+  /**
+   * @brief Replies to a JavaScript confirm.
+   *
+   * @param[in] confirmed The confirmation result
+   */
+  void JavaScriptConfirmReply(bool confirmed);
+
+  /**
+   * @brief Registers a JavaScript prompt callback.
+   *
+   * @param[in] callback The callback for prompt dialogs
+   */
+  void RegisterJavaScriptPromptCallback(JavaScriptPromptCallback callback);
+
+  /**
+   * @brief Replies to a JavaScript prompt.
+   *
+   * @param[in] result The prompt result
+   */
+  void JavaScriptPromptReply(const Dali::String& result);
+
+public: // Signals
+  /**
+   * @brief Signal emitted when page load starts.
+   */
+  PageLoadStartedSignalType& PageLoadStartedSignal();
+
+  /**
+   * @brief Signal emitted while page is loading.
+   */
+  PageLoadInProgressSignalType& PageLoadInProgressSignal();
+
+  /**
+   * @brief Signal emitted when page load finishes.
+   */
+  PageLoadFinishedSignalType& PageLoadFinishedSignal();
+
+  /**
+   * @brief Signal emitted when URL changes.
+   */
+  UrlChangedSignalType& UrlChangedSignal();
+
+  /**
+   * @brief Signal emitted when scroll edge is reached.
+   */
+  ScrollEdgeReachedSignalType& ScrollEdgeReachedSignal();
+
+  /**
+   * @brief Signal emitted when over-scroll occurs.
+   */
+  OverScrolledSignalType& OverScrolledSignal();
+
+  /**
+   * @brief Signal emitted when a frame is rendered.
+   */
+  FrameRenderedSignalType& FrameRenderedSignal();
+
+  /**
+   * @brief Signal emitted when entering fullscreen.
+   */
+  FullscreenEnteredSignalType& FullscreenEnteredSignal();
+
+  /**
+   * @brief Signal emitted when exiting fullscreen.
+   */
+  FullscreenExitedSignalType& FullscreenExitedSignal();
+
+  /**
+   * @brief Signal emitted when text is found.
+   */
+  TextFoundSignalType& TextFoundSignal();
+
+  /**
+   * @brief Signal emitted for geolocation permission request.
+   */
+  GeolocationPermissionSignalType& GeolocationPermissionSignal();
+
+  /**
+   * @brief Signal emitted when web process crashes.
+   */
+  WebProcessCrashedSignalType& WebProcessCrashedSignal();
+
+public: // Not intended for application developers
+  /// @cond internal
+  explicit DALI_INTERNAL WebView(Integration::WebViewImpl& implementation);
+  explicit DALI_INTERNAL WebView(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_VIEW_METHODS(WebView)
+};
+
+} // namespace Ui
+} // namespace Dali
+
+exec
+/bin/bash -lc "sed -n '220,360p' repos/dali-ui/samples/web-view/web-view-example.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+        mWebView.LoadHtmlString(Dali::String(FALLBACK_HTML));
+      }
+    }
+    else if(event.GetKeyName() == "J" || event.GetKeyName() == "j")
+    {
+      // Evaluate JavaScript and log result
+      DALI_LOG_RELEASE_INFO("[WebViewSample] EvaluateJavaScript\n");
+      mWebView.EvaluateJavaScript(
+        Dali::String("document.title"),
+        WebView::JavaScriptCallback::New(this, &WebViewSampleController::OnJavaScriptResult));
+    }
+    else if(event.GetKeyName() == "S" || event.GetKeyName() == "s")
+    {
+      DALI_LOG_RELEASE_INFO("[WebViewSample] GetScreenshotAsynchronously\n");
+      Dali::BoundsInteger viewArea(0, 0,
+                                   static_cast<int32_t>(mWebView.GetProperty<float>(Actor::Property::SIZE_WIDTH)),
+                                   static_cast<int32_t>(mWebView.GetProperty<float>(Actor::Property::SIZE_HEIGHT)));
+      mWebView.GetScreenshotAsynchronously(
+        viewArea,
+        /*scaleFactor=*/1.0f,
+        WebView::ScreenshotCapturedCallback::New(this, &WebViewSampleController::OnScreenshotCaptured));
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // JavaScript result callback
+  // -----------------------------------------------------------------------
+  void OnJavaScriptResult(const Dali::String& result)
+  {
+    DALI_LOG_RELEASE_INFO("[WebViewSample] JS result: %s\n", result.CStr());
+  }
+
+  // -----------------------------------------------------------------------
+  // Screenshot callback
+  // -----------------------------------------------------------------------
+  void OnScreenshotCaptured(Dali::Ui::ImageView screenshot)
+  {
+    if(!screenshot)
+    {
+      DALI_LOG_ERROR("[WebViewSample] Screenshot failed\n");
+      return;
+    }
+    DALI_LOG_RELEASE_INFO("[WebViewSample] Screenshot captured! URL=%s\n",
+                          screenshot.GetResourceUrl().CStr());
+  }
+
+private:
+  Application&     mApplication;
+  Dali::Ui::WebView mWebView;
+  bool              mFirstFrameReceived{false};
+};
+
+// ---------------------------------------------------------------------------
+// Entry point
+// ---------------------------------------------------------------------------
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application           application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+  WebViewSampleController sample(application);
+  application.MainLoop();
+  return 0;
+}
+
+exec
+/bin/bash -lc "sed -n '1,120p' repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+/**
+ * @brief Enumeration for the scroll edge.
+ */
+enum class WebViewScrollEdge
+{
+  LEFT,   ///< Left edge reached.
+  RIGHT,  ///< Right edge reached.
+  TOP,    ///< Top edge reached.
+  BOTTOM, ///< Bottom edge reached.
+};
+
+/**
+ * @brief Enumeration for the over-scroll direction.
+ */
+enum class WebViewOverScrolled
+{
+  LEFT,   ///< Left over-scrolled.
+  RIGHT,  ///< Right over-scrolled.
+  TOP,    ///< Top over-scrolled.
+  BOTTOM, ///< Bottom over-scrolled.
+};
+
+/**
+ * @brief Enumeration for the find-text options (can be combined with bitwise OR).
+ */
+enum class WebViewFindOption : uint32_t
+{
+  NONE                               = 0,
+  CASE_INSENSITIVE                   = 1 << 0,
+  AT_WORD_STARTS                     = 1 << 1,
+  TREAT_MEDIAL_CAPITAL_AS_WORD_START = 1 << 2,
+  BACKWARDS                          = 1 << 3,
+  WRAP_AROUND                        = 1 << 4,
+  SHOW_OVERLAY                       = 1 << 5,
+  SHOW_FIND_INDICATOR                = 1 << 6,
+  SHOW_HIGHLIGHT                     = 1 << 7,
+};
+
+} // namespace Ui
+} // namespace Dali
+exec
+/bin/bash -lc "sed -n '700,830p' repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+
+int UtcDaliWebViewPageLoadStartedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.PageLoadStartedSignal().Connect([](WebView v, const Dali::String& url) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewPageLoadInProgressSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.PageLoadInProgressSignal().Connect([](WebView v, const Dali::String& url) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewPageLoadFinishedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.PageLoadFinishedSignal().Connect([](WebView v, const Dali::String& url) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+// ===========================================================================
+// Signals — Scroll
+// ===========================================================================
+
+int UtcDaliWebViewScrollEdgeReachedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.ScrollEdgeReachedSignal().Connect([](WebView v, WebViewScrollEdge edge) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewOverScrolledSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.OverScrolledSignal().Connect([](WebView v, WebViewOverScrolled direction) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+// ===========================================================================
+// Signals — Navigation
+// ===========================================================================
+
+int UtcDaliWebViewUrlChangedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.UrlChangedSignal().Connect([](WebView v, const Dali::String& url) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+// ===========================================================================
+// Signals — Rendering
+// ===========================================================================
+
+int UtcDaliWebViewFrameRenderedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.FrameRenderedSignal().Connect([](WebView v) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+// ===========================================================================
+// Signals — Fullscreen
+// ===========================================================================
+
+int UtcDaliWebViewFullscreenEnteredSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.FullscreenEnteredSignal().Connect([](WebView v) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewFullscreenExitedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.FullscreenExitedSignal().Connect([](WebView v) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+// ===========================================================================
+// Signals — Text Search & Geolocation
+// ===========================================================================
+
+int UtcDaliWebViewTextFoundSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.TextFoundSignal().Connect([](WebView v, uint32_t count) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewGeolocationPermissionSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.GeolocationPermissionSignal().Connect([](WebView v, const Dali::String& host, const Dali::String& protocol) -> bool { return true; });
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+// ===========================================================================
+// Signals — Process Events
+// ===========================================================================
+
+int UtcDaliWebViewWebProcessCrashedSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.WebProcessCrashedSignal().Connect([](WebView v) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+
+exec
+/bin/bash -lc "rg -n \"WebViewFindOption|operator\\|\" repos/dali-ui/dali-ui-foundation repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp -S" in /home/bshsqa/Shared/DALi_Doc_Generator/dali-ui-documentation-cli
+ succeeded in 0ms:
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:855:int UtcDaliWebViewFindOptionEnumP(void)
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:857:  DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::NONE), 0u, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:858:  DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::CASE_INSENSITIVE), 1u << 0, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:859:  DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::AT_WORD_STARTS), 1u << 1, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:860:  DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::BACKWARDS), 1u << 3, TEST_LOCATION);
+repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-WebView.cpp:861:  DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::WRAP_AROUND), 1u << 4, TEST_LOCATION);
+repos/dali-ui/dali-ui-foundation/public-api/web-view-types.h:53:enum class WebViewFindOption : uint32_t
+repos/dali-ui/dali-ui-foundation/public-api/layouts/layout-types.h:582:inline AbsoluteLayoutFlags operator|(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
+repos/dali-ui/dali-ui-foundation/public-api/view-state.h:194:  ViewState operator|(const ViewState& rhs) const
+repos/dali-ui/dali-ui-foundation/public-api/visuals/visual-properties.h:163:inline ProportionFlags operator|(ProportionFlags lhs, ProportionFlags rhs)
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:616:   * @brief Converts a WebViewFindOption to WebEnginePlugin::FindOption.
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.h:618:  static Dali::WebEnginePlugin::FindOption ToEngineFindOption(WebViewFindOption options);
+repos/dali-ui/dali-ui-foundation/integration-api/web-view-impl.cpp:640:Dali::WebEnginePlugin::FindOption WebViewImpl::ToEngineFindOption(WebViewFindOption options)
+
+codex
+---
+title: Web View
+sidebar_label: Web View
+category: views-components
+---
+
+# Web View
+
+`Dali::Ui::WebView` embeds web content in a dali-ui application as a `Dali::Ui::View`.
+
+## Table of Contents
+
+- [Create and Load Web Content](#create-and-load-web-content)
+- [Navigate and Track Page State](#navigate-and-track-page-state)
+- [Configure Input, Zoom, and Rendering](#configure-input-zoom-and-rendering)
+- [Work with Page Content](#work-with-page-content)
+- [Handle WebView Events](#handle-webview-events)
+- [Manage Runtime Resources](#manage-runtime-resources)
+
+## Create and Load Web Content
+
+Create a web view with `Dali::Ui::WebView::New`, then load remote or inline content with `Dali::Ui::WebView::LoadUrl` or `Dali::Ui::WebView::LoadHtmlString`. A target platform must provide a web engine plugin for the view to display web pages.
+
+```cpp
+#include <dali-ui-foundation/public-api/web-view.h>
+
+Dali::Ui::WebView CreateWebView()
+{
+  Dali::Ui::WebView webView = Dali::Ui::WebView::New();
+
+  webView
+    .SetUserAgent(Dali::String("MyDaliUiApp/1.0"))
+    .SetDocumentBackgroundColor(Dali::Vector4(1.0f, 1.0f, 1.0f, 1.0f))
+    .LoadUrl(Dali::String("https://www.example.com"));
+
+  return webView;
+}
+```
+
+For generated or bundled content, use `Dali::Ui::WebView::LoadHtmlString`. Use `Dali::Ui::WebView::LoadContents` when you already have a byte buffer, MIME type, encoding, and base URI.
+
+```cpp
+Dali::Ui::WebView CreateInlinePage()
+{
+  Dali::Ui::WebView webView = Dali::Ui::WebView::New();
+
+  webView.LoadHtmlString(Dali::String(
+    "<!doctype html>"
+    "<html>"
+    "<head><title>dali-ui WebView</title></head>"
+    "<body><h1>Hello from dali-ui</h1></body>"
+    "</html>"));
+
+  return webView;
+}
+
+bool LoadBufferedHtml(Dali::Ui::WebView webView)
+{
+  const char html[] = "<html><body><p>Buffered content</p></body></html>";
+
+  return webView.LoadContents(
+    reinterpret_cast<const int8_t*>(html),
+    static_cast<uint32_t>(sizeof(html) - 1u),
+    Dali::String("text/html"),
+    Dali::String("UTF-8"),
+    Dali::String("https://www.example.com/"));
+}
+```
+
+`Dali::Ui::WebView::LoadHtmlStringOverrideCurrentEntry` replaces the current history entry with supplied HTML, base URI, and unreachable URL values.
+
+```cpp
+bool ShowErrorPage(Dali::Ui::WebView webView)
+{
+  return webView.LoadHtmlStringOverrideCurrentEntry(
+    Dali::String("<html><body><h1>Page unavailable</h1></body></html>"),
+    Dali::String("https://www.example.com/"),
+    Dali::String("https://www.example.com/missing"));
+}
+```
+
+## Navigate and Track Page State
+
+Use `Dali::Ui::WebView::CanGoBack` and `Dali::Ui::WebView::CanGoForward` before calling `Dali::Ui::WebView::GoBack` or `Dali::Ui::WebView::GoForward`. `Dali::Ui::WebView::Reload`, `Dali::Ui::WebView::ReloadWithoutCache`, and `Dali::Ui::WebView::StopLoading` control the current load.
+
+```cpp
+void NavigateBack(Dali::Ui::WebView webView)
+{
+  if(webView.CanGoBack())
+  {
+    webView.GoBack();
+  }
+}
+
+void NavigateForward(Dali::Ui::WebView webView)
+{
+  if(webView.CanGoForward())
+  {
+    webView.GoForward();
+  }
+}
+
+void RefreshPage(Dali::Ui::WebView webView, bool bypassCache)
+{
+  if(bypassCache)
+  {
+    webView.ReloadWithoutCache();
+  }
+  else
+  {
+    webView.Reload();
+  }
+}
+```
+
+Read current page state with `Dali::Ui::WebView::GetUrl`, `Dali::Ui::WebView::GetTitle`, and `Dali::Ui::WebView::GetLoadProgressPercentage`.
+
+```cpp
+struct PageState
+{
+  Dali::String url;
+  Dali::String title;
+  float        progress;
+};
+
+PageState ReadPageState(const Dali::Ui::WebView& webView)
+{
+  PageState state;
+  state.url      = webView.GetUrl();
+  state.title    = webView.GetTitle();
+  state.progress = webView.GetLoadProgressPercentage();
+  return state;
+}
+```
+
+## Configure Input, Zoom, and Rendering
+
+`Dali::Ui::WebView` provides typed setters for common browser behavior. The fluent setters return `Dali::Ui::WebView&`, so they can be chained with other web-view configuration calls.
+
+```cpp
+Dali::Ui::WebView CreateConfiguredWebView()
+{
+  Dali::Ui::WebView webView = Dali::Ui::WebView::New();
+
+  webView
+    .SetMouseEventsEnabled(true)
+    .SetKeyEventsEnabled(true)
+    .SetCursorEnabledByClient(true)
+    .SetVideoHoleEnabled(true)
+    .SetPageZoomFactor(1.0f)
+    .SetTextZoomFactor(1.0f)
+    .SetTileCoverAreaMultiplier(2.0f)
+    .SetTilesClearedWhenHidden(true);
+
+  webView.SetScaleFactor(1.25f, Dali::Vector2(0.0f, 0.0f));
+
+  return webView;
+}
+```
+
+Use the matching getters when your UI needs to reflect the current web-view configuration.
+
+```cpp
+struct WebViewDisplayState
+{
+  bool  mouseEventsEnabled;
+  bool  keyEventsEnabled;
+  bool  videoHoleEnabled;
+  float pageZoomFactor;
+  float textZoomFactor;
+  float scaleFactor;
+};
+
+WebViewDisplayState ReadDisplayState(const Dali::Ui::WebView& webView)
+{
+  WebViewDisplayState state;
+  state.mouseEventsEnabled = webView.GetMouseEventsEnabled();
+  state.keyEventsEnabled   = webView.GetKeyEventsEnabled();
+  state.videoHoleEnabled   = webView.GetVideoHoleEnabled();
+  state.pageZoomFactor     = webView.GetPageZoomFactor();
+  state.textZoomFactor     = webView.GetTextZoomFactor();
+  state.scaleFactor        = webView.GetScaleFactor();
+  return state;
+}
+```
+
+When automatic event forwarding is disabled, forward input explicitly with `Dali::Ui::WebView::FeedKeyEvent`, `Dali::Ui::WebView::FeedTouchEvent`, or `Dali::Ui::WebView::FeedMouseWheel`.
+
+```cpp
+bool ForwardKeyToWebView(Dali::Ui::WebView webView, const Dali::KeyEvent& keyEvent)
+{
+  webView.SetKeyEventsEnabled(false);
+  return webView.FeedKeyEvent(keyEvent);
+}
+
+bool ForwardTouchToWebView(Dali::Ui::WebView webView, const Dali::TouchEvent& touchEvent)
+{
+  webView.SetMouseEventsEnabled(false);
+  return webView.FeedTouchEvent(touchEvent);
+}
+
+void ForwardWheelToWebView(Dali::Ui::WebView webView)
+{
+  webView.FeedMouseWheel(true, 1, 120, 240);
+}
+```
+
+## Work with Page Content
+
+Run JavaScript with `Dali::Ui::WebView::EvaluateJavaScript`. Register named JavaScript message handlers with `Dali::Ui::WebView::AddJavaScriptMessageHandler` when page scripts need to send strings back to native code.
+
+```cpp
+void UpdateDocumentTitle(Dali::Ui::WebView webView)
+{
+  webView.EvaluateJavaScript(Dali::String("document.title = 'dali-ui WebView';"));
+}
+
+void RegisterBridge(Dali::Ui::WebView webView)
+{
+  webView.AddJavaScriptMessageHandler(
+    Dali::String("daliBridge"),
+    Dali::Ui::WebView::JavaScriptCallback::New(
+      [](const Dali::String& message)
+      {
+        (void)message;
+      }));
+}
+```
+
+Use asynchronous APIs for content extraction, screenshots, and video state checks. `Dali::Ui::WebView::GetPlainTextAsynchronously` returns page text through a `Dali::Ui::WebView::PlainTextCallback`. `Dali::Ui::WebView::GetScreenshotAsynchronously` returns a captured `Dali::Ui::ImageView` through a `Dali::Ui::WebView::ScreenshotCapturedCallback`.
+
+```cpp
+void RequestPlainText(Dali::Ui::WebView webView)
+{
+  webView.GetPlainTextAsynchronously(
+    Dali::Ui::WebView::PlainTextCallback::New(
+      [](const Dali::String& text)
+      {
+        (void)text;
+      }));
+}
+
+bool RequestScreenshot(Dali::Ui::WebView webView)
+{
+  return webView.GetScreenshotAsynchronously(
+    Dali::BoundsInteger(0, 0, 320, 240),
+    1.0f,
+    Dali::Ui::WebView::ScreenshotCapturedCallback::New(
+      [](Dali::Ui::ImageView image)
+      {
+        (void)image;
+      }));
+}
+
+bool RequestVideoState(Dali::Ui::WebView webView)
+{
+  return webView.CheckVideoPlayingAsynchronously(
+    Dali::Ui::WebView::VideoPlayingCallback::New(
+      [](bool isPlaying)
+      {
+        (void)isPlaying;
+      }));
+}
+```
+
+For synchronous snapshots and metadata, use `Dali::Ui::WebView::GetScreenshot`, `Dali::Ui::WebView::GetFavicon`, `Dali::Ui::WebView::GetSelectedText`, `Dali::Ui::WebView::GetContentSize`, `Dali::Ui::WebView::GetScrollPosition`, and `Dali::Ui::WebView::GetScrollSize`.
+
+```cpp
+struct WebContentInfo
+{
+  Dali::String  selectedText;
+  Dali::Vector2 contentSize;
+  Dali::Vector2 scrollPosition;
+  Dali::Vector2 scrollSize;
+};
+
+WebContentInfo ReadContentInfo(const Dali::Ui::WebView& webView)
+{
+  WebContentInfo info;
+  info.selectedText    = webView.GetSelectedText();
+  info.contentSize     = webView.GetContentSize();
+  info.scrollPosition  = webView.GetScrollPosition();
+  info.scrollSize      = webView.GetScrollSize();
+  return info;
+}
+
+Dali::Ui::ImageView CaptureVisibleArea(Dali::Ui::WebView webView)
+{
+  return webView.GetScreenshot(Dali::BoundsInteger(0, 0, 640, 480), 1.0f);
+}
+```
+
+`Dali::Ui::WebViewFindOption` describes find-text options owned by the web-view feature. The values include `Dali::Ui::WebViewFindOption::NONE`, `Dali::Ui::WebViewFindOption::CASE_INSENSITIVE`, `Dali::Ui::WebViewFindOption::AT_WORD_STARTS`, `Dali::Ui::WebViewFindOption::TREAT_MEDIAL_CAPITAL_AS_WORD_START`, `Dali::Ui::WebViewFindOption::BACKWARDS`, `Dali::Ui::WebViewFindOption::WRAP_AROUND`, `Dali::Ui::WebViewFindOption::SHOW_OVERLAY`, `Dali::Ui::WebViewFindOption::SHOW_FIND_INDICATOR`, and `Dali::Ui::WebViewFindOption::SHOW_HIGHLIGHT`.
+
+```cpp
+uint32_t BuildFindOptions()
+{
+  return static_cast<uint32_t>(Dali::Ui::WebViewFindOption::CASE_INSENSITIVE) |
+         static_cast<uint32_t>(Dali::Ui::WebViewFindOption::WRAP_AROUND) |
+         static_cast<uint32_t>(Dali::Ui::WebViewFindOption::SHOW_HIGHLIGHT);
+}
+```
+
+## Handle WebView Events
+
+Connect to web-view signals to respond to page loading, URL changes, frame rendering, scrolling, fullscreen transitions, text search results, geolocation permission requests, and process crashes.
+
+```cpp
+void ConnectPageSignals(Dali::Ui::WebView webView)
+{
+  webView.PageLoadStartedSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      (void)view;
+      (void)url;
+    });
+
+  webView.PageLoadInProgressSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      (void)view;
+      (void)url;
+    });
+
+  webView.PageLoadFinishedSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      Dali::String title = view.GetTitle();
+      (void)url;
+      (void)title;
+    });
+
+  webView.UrlChangedSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& url)
+    {
+      (void)view;
+      (void)url;
+    });
+}
+```
+
+`Dali::Ui::WebView::FrameRenderedSignal` is emitted when a frame is rendered. Fullscreen signals let the app update surrounding UI, and `Dali::Ui::WebView::ExitFullscreen` can be used to leave fullscreen mode.
+
+```cpp
+void ConnectRenderingSignals(Dali::Ui::WebView webView)
+{
+  webView.FrameRenderedSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      (void)view;
+    });
+
+  webView.FullscreenEnteredSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      (void)view;
+    });
+
+  webView.FullscreenExitedSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      (void)view;
+    });
+}
+
+void LeaveFullscreen(Dali::Ui::WebView webView)
+{
+  webView.ExitFullscreen();
+}
+```
+
+Use scroll and permission signals to integrate the web page with application-level controls. `Dali::Ui::WebViewOverScrolled` is the over-scroll direction type used by `Dali::Ui::WebView::OverScrolledSignal`.
+
+```cpp
+void ConnectInteractionSignals(Dali::Ui::WebView webView)
+{
+  webView.ScrollEdgeReachedSignal().Connect(
+    [](Dali::Ui::WebView view, Dali::Ui::WebViewScrollEdge edge)
+    {
+      (void)view;
+      (void)edge;
+    });
+
+  webView.OverScrolledSignal().Connect(
+    [](Dali::Ui::WebView view, Dali::Ui::WebViewOverScrolled direction)
+    {
+      (void)view;
+      (void)direction;
+    });
+
+  webView.TextFoundSignal().Connect(
+    [](Dali::Ui::WebView view, uint32_t count)
+    {
+      (void)view;
+      (void)count;
+    });
+
+  webView.GeolocationPermissionSignal().Connect(
+    [](Dali::Ui::WebView view, const Dali::String& host, const Dali::String& protocol) -> bool
+    {
+      (void)view;
+      (void)host;
+      (void)protocol;
+      return false;
+    });
+
+  webView.WebProcessCrashedSignal().Connect(
+    [](Dali::Ui::WebView view)
+    {
+      view.Reload();
+    });
+}
+```
+
+## Manage Runtime Resources
+
+Use `Dali::Ui::WebView::Suspend` and `Dali::Ui::WebView::Resume` for the web view lifecycle. Use `Dali::Ui::WebView::SuspendNetworkLoading` and `Dali::Ui::WebView::ResumeNetworkLoading` when only network activity should pause or continue.
+
+```cpp
+void PauseWebView(Dali::Ui::WebView webView)
+{
+  webView.Suspend();
+  webView.SuspendNetworkLoading();
+}
+
+void ResumeWebView(Dali::Ui::WebView webView)
+{
+  webView.ResumeNetworkLoading();
+  webView.Resume();
+}
+```
+
+Clear navigation and rendering resources with `Dali::Ui::WebView::ClearHistory`, `Dali::Ui::WebView::ClearAllTilesResources`, and the tile-related setters.
+
+```cpp
+void ResetBrowsingState(Dali::Ui::WebView webView)
+{
+  webView
+    .StopLoading()
+    .ClearHistory()
+    .SetTilesClearedWhenHidden(true);
+
+  webView.ClearAllTilesResources();
+}
+```
+
+Use custom headers when requests need application-specific metadata. `Dali::Ui::WebView::AddCustomHeader` and `Dali::Ui::WebView::RemoveCustomHeader` report whether the operation succeeded.
+
+```cpp
+bool ConfigureRequestHeaders(Dali::Ui::WebView webView)
+{
+  bool added = webView.AddCustomHeader(
+    Dali::String("X-App-Client"),
+    Dali::String("dali-ui"));
+
+  bool removed = webView.RemoveCustomHeader(Dali::String("X-Expired-Header"));
+
+  return added && removed;
+}
+```
+tokens used
+26,324

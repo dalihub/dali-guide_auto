@@ -1,0 +1,811 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5" kind="page">
+    <compoundname>md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_203-text-controller-analysis_8ko</compoundname>
+    <title>기존 text-controller 분석</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md128"/> </para>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md129">
+<title>목적</title>
+<para>이 문서의 목적은 기존 <computeroutput>Text::Controller</computeroutput>가 수행하는 작업을 <computeroutput>Prepare / Layout / Render</computeroutput> 관점으로 분해하고, <computeroutput>TextVisualizer</computeroutput>에서 재사용할 최소 기능과 제거해야 할 기능을 구분하는 것이다.</para>
+<para>이번 문서에서는 다음을 중점적으로 본다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetText()</computeroutput> 이후 내부 상태가 어떻게 바뀌는가</para>
+</listitem><listitem><para>font 관련 설정이 들어오면 어떤 단계가 다시 수행되는가</para>
+</listitem><listitem><para>shaping, font fallback, layout, visual model 생성이 정확히 언제 일어나는가</para>
+</listitem><listitem><para>renderer로 전달되는 데이터가 어디서 만들어지는가</para>
+</listitem><listitem><para>dirty / invalidation 구조가 어떻게 생겼는가</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput> / 편집 기능 때문에 어떤 오버헤드가 생기는가</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>용 경량 controller가 왜 필요한가</para>
+</listitem></itemizedlist>
+</para>
+<para>애매한 내용은 추측하지 않고 <computeroutput>확인 필요</computeroutput>로 표시한다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md130">
+<title>분석 대상 파일</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md131">
+<title>직접 분석한 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-impl.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-impl.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-text-updater.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-input-font-handler.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-relayouter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-model.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-model.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/logical-model-impl.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/visual-model-impl.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/layouts/layout-engine.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/layouts/layout-engine.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-view.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-view-interface.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md132">
+<title>필요한 경우 함께 참고한 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/text/shaper.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/segmentation.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/multi-language-support.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/glyph-metrics-helper.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md133">
+<title>현재 구조 요약</title>
+<para>현재 <computeroutput>Text::Controller</computeroutput>는 단순한 controller가 아니라, 사실상 아래를 묶은 텍스트 runtime이다.</para>
+<para><itemizedlist>
+<listitem><para>text property 저장</para>
+</listitem><listitem><para>text 변경 추적</para>
+</listitem><listitem><para>logical model 갱신</para>
+</listitem><listitem><para>visual model 갱신</para>
+</listitem><listitem><para>shaping / font validation / bidi / line break / glyph metrics</para>
+</listitem><listitem><para>layout / align / reorder</para>
+</listitem><listitem><para>natural size / height-for-width 계산</para>
+</listitem><listitem><para>placeholder / hidden text 처리</para>
+</listitem><listitem><para>scroll state 처리</para>
+</listitem><listitem><para>입력기 상태 처리</para>
+</listitem><listitem><para>selection / cursor / decorator / popup 처리</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>TextVisualizer</computeroutput> 입장에서 보면 유용한 텍스트 엔진과 불필요한 입력기 오버헤드가 한 객체 안에 같이 들어 있다.</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md134">
+<title>SetText 이후 내부 상태 변화</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md135">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Controller::SetText()</computeroutput> in <computeroutput>internal/text/controller/text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::TextUpdater::SetText()</computeroutput> in <computeroutput>internal/text/controller/text-controller-text-updater.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md136">
+<title>실제 흐름</title>
+<para><computeroutput>SetText()</computeroutput> 호출 후 핵심 흐름은 다음과 같다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>TextUpdater::SetText()</computeroutput> 진입</para>
+</listitem><listitem><para><computeroutput>impl.ResetInputMethodContext()</computeroutput></para>
+</listitem><listitem><para><computeroutput>ResetText(controller)</computeroutput>로 기존 text 제거</para>
+</listitem><listitem><para><computeroutput>impl.ClearStyleData()</computeroutput>로 style run 제거</para>
+</listitem><listitem><para><computeroutput>impl.mRawText = text</computeroutput></para>
+</listitem><listitem><para>markup enabled면 <computeroutput>ProcessMarkupString(...)</computeroutput></para>
+</listitem><listitem><para>UTF-8 -&gt; UTF-32 변환</para>
+</listitem><listitem><para><computeroutput>logicalModel-&gt;mText</computeroutput> 갱신</para>
+</listitem><listitem><para><computeroutput>mTextUpdateInfo.mNumberOfCharactersToAdd</computeroutput> 설정</para>
+</listitem><listitem><para><computeroutput>impl.QueueModifyEvent(ModifyEvent::TEXT_REPLACED)</computeroutput></para>
+</listitem><listitem><para><computeroutput>impl.mRecalculateNaturalSize = true</computeroutput></para>
+</listitem><listitem><para><computeroutput>impl.mRecalculateLayoutSize = true</computeroutput></para>
+</listitem><listitem><para><computeroutput>impl.mUpdateTextDirection = true</computeroutput></para>
+</listitem><listitem><para><computeroutput>impl.mOperationsPending = ALL_OPERATIONS</computeroutput></para>
+</listitem><listitem><para><computeroutput>impl.RequestRelayout()</computeroutput></para>
+</listitem></orderedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md137">
+<title>해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md138">
+<title>TextVisualizer에 필요한 부분</title>
+<para><itemizedlist>
+<listitem><para>raw text 저장</para>
+</listitem><listitem><para>markup 적용 여부에 따라 text preprocessing</para>
+</listitem><listitem><para>UTF-32 변환</para>
+</listitem><listitem><para>text update 범위(<computeroutput>mTextUpdateInfo</computeroutput>) 설정</para>
+</listitem><listitem><para><computeroutput>ALL_OPERATIONS</computeroutput>를 통해 prepare + layout 전체 재실행 예약</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md139">
+<title>버릴 부분</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>ResetInputMethodContext()</computeroutput></para>
+</listitem><listitem><para><computeroutput>EventData</computeroutput> 상태 전환</para>
+</listitem><listitem><para>cursor position reset</para>
+</listitem><listitem><para>selection 상태 정리</para>
+</listitem><listitem><para>editable callback</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md140">
+<title>font 관련 설정이 들어왔을 때 처리 흐름</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md141">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Controller::SetDefaultFontFamily()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::SetDefaultFontSize()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::SetDefaultFontWeight()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::SetDefaultFontWidth()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::SetDefaultFontSlant()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::Impl::ClearFontData()</computeroutput> in <computeroutput>text-controller-impl.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md142">
+<title>실제 흐름</title>
+<para>font 기본값이 바뀌면 대부분 아래 흐름을 따른다.</para>
+<para><orderedlist>
+<listitem><para>default font property 저장</para>
+</listitem><listitem><para><computeroutput>mImpl-&gt;ClearFontData()</computeroutput></para>
+</listitem><listitem><para><computeroutput>RequestRelayout()</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para><computeroutput>ClearFontData()</computeroutput>는 아래를 수행한다.</para>
+<para><itemizedlist>
+<listitem><para>cached font id 초기화</para>
+</listitem><listitem><para><computeroutput>mTextUpdateInfo</computeroutput>를 전체 텍스트 기준으로 재설정</para>
+</listitem><listitem><para><computeroutput>mRecalculateNaturalSize = true</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRecalculateLayoutSize = true</computeroutput></para>
+</listitem><listitem><para><computeroutput>mOperationsPending |= VALIDATE_FONTS | SHAPE_TEXT | BIDI_INFO | GET_GLYPH_METRICS | LAYOUT | UPDATE_LAYOUT_SIZE | REORDER | ALIGN</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md143">
+<title>해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md144">
+<title>TextVisualizer에 필요한 부분</title>
+<para><itemizedlist>
+<listitem><para>font 변경 시 shaping과 glyph metrics를 다시 수행해야 한다는 현재 dirty 규칙</para>
+</listitem><listitem><para>natural size / layout size cache 무효화</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md145">
+<title>버릴 부분</title>
+<para><itemizedlist>
+<listitem><para>editable state일 때 decorator/cursor 위치 갱신</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md146">
+<title>shaping이 언제 발생하는지</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md147">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>ControllerImplModelUpdater::Update()</computeroutput> in <computeroutput>text-controller-impl-model-updater.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md148">
+<title>실제 발생 시점</title>
+<para>shaping은 <computeroutput>UpdateModel()</computeroutput> 내부에서 <computeroutput>operations</computeroutput>에 <computeroutput>SHAPE_TEXT</computeroutput>가 포함될 때 수행된다.</para>
+<para>구체적으로는 아래 코드 경로다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>if(Controller::NO_OPERATION != (Controller::SHAPE_TEXT &amp; operations))</computeroutput></para>
+</listitem><listitem><para><computeroutput>ShapeText(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>주요 입력은 다음이다.</para>
+<para><itemizedlist>
+<listitem><para>UTF-32 text</para>
+</listitem><listitem><para>line break info</para>
+</listitem><listitem><para>scripts</para>
+</listitem><listitem><para>validated fonts</para>
+</listitem><listitem><para><computeroutput>startIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>requestedNumberOfCharacters</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, shaping은 property setter가 직접 하는 것이 아니라, dirty가 쌓인 뒤 <computeroutput>Relayout()</computeroutput> 또는 size 계산 경로에서 <computeroutput>UpdateModel()</computeroutput>이 실행될 때 발생한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md149">
+<title>TextVisualizer 해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md150">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para>shaping은 <computeroutput>Prepare</computeroutput> 단계에 해당한다</para>
+</listitem><listitem><para>width/height만 바뀌는 relayout에서는 shaping이 다시 일어나지 않도록 dirty를 분리해야 한다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md151">
+<title>font fallback이 언제 발생하는지</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md152">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>ControllerImplModelUpdater::Update()</computeroutput></para>
+</listitem><listitem><para><computeroutput>MultilanguageSupport::ValidateFonts(...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md153">
+<title>실제 발생 시점</title>
+<para>font fallback은 <computeroutput>VALIDATE_FONTS</computeroutput> 단계에서 수행된다.</para>
+<para>코드상 흐름:</para>
+<para><orderedlist>
+<listitem><para>default font description 계산</para>
+</listitem><listitem><para>font variation map 확인</para>
+</listitem><listitem><para><computeroutput>multilanguageSupport.ValidateFonts(...)</computeroutput></para>
+</listitem><listitem><para>validated font run이 logical model에 기록됨</para>
+</listitem></orderedlist>
+</para>
+<para>즉, fallback은 shaping보다 먼저 수행된다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md154">
+<title>TextVisualizer 해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md155">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para>font fallback은 <computeroutput>Prepare</computeroutput> 단계에 포함되어야 한다</para>
+</listitem><listitem><para>text / font / fontSize가 바뀌지 않는 한 다시 하지 않는 구조가 필요하다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md156">
+<title>layout이 언제 발생하는지</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md157">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Controller::Relayout()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::Relayouter::Relayout()</computeroutput> in <computeroutput>text-controller-relayouter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::Relayouter::DoRelayout()</computeroutput> in <computeroutput>text-controller-relayouter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>Layout::Engine::LayoutText()</computeroutput> in <computeroutput>internal/text/layouts/layout-engine.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md158">
+<title>실제 발생 시점</title>
+<para>layout은 <computeroutput>Relayout()</computeroutput> 경로에서 <computeroutput>operationsPending</computeroutput>에 <computeroutput>LAYOUT</computeroutput>이 포함되어 있을 때 수행된다.</para>
+<para>대표 상황:</para>
+<para><itemizedlist>
+<listitem><para>text 변경 후</para>
+</listitem><listitem><para>font 관련 변경 후</para>
+</listitem><listitem><para>control size 변경 후</para>
+</listitem><listitem><para>elide 상태 변경 후</para>
+</listitem><listitem><para>layout direction 변경 후</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>Relayouter::Relayout()</computeroutput> 안에서 새 size가 들어오면 자동으로 아래 dirty가 추가된다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LAYOUT</computeroutput></para>
+</listitem><listitem><para><computeroutput>ALIGN</computeroutput></para>
+</listitem><listitem><para><computeroutput>UPDATE_LAYOUT_SIZE</computeroutput></para>
+</listitem><listitem><para><computeroutput>REORDER</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, 현재 controller는 size 변화만으로도 layout 단계는 다시 수행한다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md159">
+<title>TextVisualizer 해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md160">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para>현재 구조에서도 <computeroutput>Prepare</computeroutput>와 <computeroutput>Layout</computeroutput>이 완전히 같은 단계는 아니다</para>
+</listitem><listitem><para>size 변화 시 layout만 다시 수행하는 흐름이 일부 이미 존재한다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md161">
+<title>한계</title>
+<para><itemizedlist>
+<listitem><para>현재 controller는 multi-interval / exclusion bounds layout을 지원하지 않는다</para>
+</listitem><listitem><para>rect 하나를 기준으로 한 기존 <computeroutput>Layout::Engine</computeroutput> 구조다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md162">
+<title>visual model이 언제 만들어지는지</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md163">
+<title>관련 함수</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>ControllerImplModelUpdater::Update()</computeroutput></para>
+</listitem><listitem><para><computeroutput>Text::Model</computeroutput></para>
+</listitem><listitem><para><computeroutput>VisualModelImpl</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md164">
+<title>실제 생성/갱신 시점</title>
+<para>visual model은 별도 한 번에 &quot;생성&quot;된다기보다 <computeroutput>UpdateModel()</computeroutput> 단계에서 점진적으로 채워진다.</para>
+<para>핵심 데이터 생성 시점:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ShapeText(...)</computeroutput> 후 <computeroutput>mVisualModel-&gt;mGlyphs</computeroutput></para>
+</listitem><listitem><para><computeroutput>CreateGlyphsPerCharacterTable(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>CreateCharacterToGlyphTable(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetGlyphMetrics(...)</computeroutput></para>
+</listitem><listitem><para>color segmentation 후 <computeroutput>mVisualModel-&gt;mColors</computeroutput>, <computeroutput>mColorIndices</computeroutput></para>
+</listitem><listitem><para><computeroutput>DoRelayout(...)</computeroutput> 후 <computeroutput>mGlyphPositions</computeroutput>, <computeroutput>mLines</computeroutput>, <computeroutput>layoutSize</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, visual model은 <computeroutput>Prepare</computeroutput>와 <computeroutput>Layout</computeroutput> 양쪽 결과를 모두 담는 구조다.</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md165">
+<title>TextVisualizer 해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md166">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para>glyph / character mapping</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem><listitem><para>glyph positions</para>
+</listitem><listitem><para>line list</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md167">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para>underline / strikethrough / background color runs</para>
+</listitem><listitem><para>preedit용 visual decoration 데이터</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md168">
+<title>renderer로 전달되는 데이터가 어디서 만들어지는지</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md169">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-model.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-view.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-view-interface.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/rendering/atlas/text-atlas-renderer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md170">
+<title>실제 흐름</title>
+<para><orderedlist>
+<listitem><para><computeroutput>UpdateModel()</computeroutput>이 logical/visual model을 갱신</para>
+</listitem><listitem><para><computeroutput>DoRelayout()</computeroutput>이 glyph positions와 lines를 계산</para>
+</listitem><listitem><para><computeroutput>Text::View</computeroutput>가 <computeroutput>Model</computeroutput>을 기반으로 renderer용 getter 제공</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer::Render(Text::ViewInterface&amp; view, ...)</computeroutput> 호출</para>
+</listitem></orderedlist>
+</para>
+<para>즉, renderer로 전달되는 최종 데이터는 <computeroutput>Text::ViewInterface</computeroutput>를 통해 나간다.</para>
+<para>대표 데이터:</para>
+<para><itemizedlist>
+<listitem><para>glyphs</para>
+</listitem><listitem><para>glyph positions</para>
+</listitem><listitem><para>default color</para>
+</listitem><listitem><para>glyph별 color index</para>
+</listitem><listitem><para>layout size</para>
+</listitem><listitem><para>control size</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md171">
+<title>TextVisualizer 해석</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md172">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>도 최종적으로 atlas renderer에 glyph와 position을 넘겨야 한다</para>
+</listitem><listitem><para>현재 계약은 <computeroutput>Text::ViewInterface</computeroutput> 중심이다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md173">
+<title>Controller 내부 dirty / invalidation 구조</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md174">
+<title>핵심 상태</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md175">
+<title>&lt;tt&gt;mOperationsPending&lt;/tt&gt;</title>
+<para>재실행할 연산 비트마스크다.</para>
+<para>예:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ALL_OPERATIONS</computeroutput></para>
+</listitem><listitem><para><computeroutput>VALIDATE_FONTS | SHAPE_TEXT | GET_GLYPH_METRICS | LAYOUT ...</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md176">
+<title>&lt;tt&gt;mTextUpdateInfo&lt;/tt&gt;</title>
+<para>어디부터 얼마만큼 다시 계산할지 기록한다.</para>
+<para>주요 필드:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mCharacterIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>mNumberOfCharactersToRemove</computeroutput></para>
+</listitem><listitem><para><computeroutput>mNumberOfCharactersToAdd</computeroutput></para>
+</listitem><listitem><para><computeroutput>mParagraphCharacterIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRequestedNumberOfCharacters</computeroutput></para>
+</listitem><listitem><para><computeroutput>mStartGlyphIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>mStartLineIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>mClearAll</computeroutput></para>
+</listitem><listitem><para><computeroutput>mFullRelayoutNeeded</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md177">
+<title>cache invalidation flag</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mRecalculateNaturalSize</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRecalculateLayoutSize</computeroutput></para>
+</listitem><listitem><para><computeroutput>mUpdateTextDirection</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md178">
+<title>의미</title>
+<para>현재 controller는 꽤 정교한 dirty 구조를 이미 갖고 있다. 문제는 이 dirty 구조가 입력기 상태와 혼합되어 있다는 점이다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md179">
+<title>InputField / Edit 기능 때문에 생기는 오버헤드</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md180">
+<title>관련 구조</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>EventData</computeroutput> in <computeroutput>text-controller-impl.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>text-controller-event-handler.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>text-controller-impl-event-handler.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>text-controller-input-font-handler.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md181">
+<title>실제 오버헤드</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md182">
+<title>직접 확인되는 오버헤드</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>EventData</computeroutput> 전체 상태 유지</para>
+</listitem><listitem><para>key/tap/pan/long-press event queue</para>
+</listitem><listitem><para>selection / cursor / highlight 상태</para>
+</listitem><listitem><para>decorator update flag</para>
+</listitem><listitem><para>IME preedit state</para>
+</listitem><listitem><para>placeholder active/inactive state</para>
+</listitem><listitem><para>input style tracking</para>
+</listitem><listitem><para>clipboard / popup / handle 처리</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md183">
+<title>layout와 결합된 오버헤드</title>
+<para><itemizedlist>
+<listitem><para>relayout 시 <computeroutput>ProcessInputEvents()</computeroutput></para>
+</listitem><listitem><para>font 변경 시 selection handle 재계산</para>
+</listitem><listitem><para>size 변경 시 decorator 위치 갱신</para>
+</listitem><listitem><para>editable 상태면 scroll-to-cursor / clamp / handle reposition 실행</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md184">
+<title>TextVisualizer 해석</title>
+<para>이 오버헤드는 표시용 View에는 대부분 불필요하다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md185">
+<title>TextVisualizer용 경량 controller가 필요한 이유</title>
+<para><orderedlist>
+<listitem><para><computeroutput>Prepare</computeroutput>와 <computeroutput>Layout</computeroutput>만 필요하지만 현재 controller는 edit runtime까지 함께 가진다.</para>
+</listitem><listitem><para>multi-interval / exclusion bounds layout은 기존 <computeroutput>Layout::Engine</computeroutput>로 직접 표현하기 어렵다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>는 shaping을 다시 하지 않는 phase 분리가 핵심인데, 현재 controller API는 그 경계가 명시적이지 않다.</para>
+</listitem><listitem><para>atlas renderer에는 최종적으로 glyph 데이터만 주면 되는데, 현재 controller는 그 전에 너무 많은 편집 상태를 관리한다.</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md186">
+<title>기존 Controller를 그대로 쓰는 경우의 장단점</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md187">
+<title>장점</title>
+<para><itemizedlist>
+<listitem><para>기존 shaping / font fallback / bidi / line break / glyph metrics 코드를 바로 재사용 가능</para>
+</listitem><listitem><para>natural size / height-for-width 계산 체계가 이미 존재</para>
+</listitem><listitem><para><computeroutput>Text::ViewInterface</computeroutput>와 renderer 연결 구조가 이미 있다</para>
+</listitem><listitem><para>partial update를 위한 dirty 구조(<computeroutput>mOperationsPending</computeroutput>, <computeroutput>mTextUpdateInfo</computeroutput>)가 있다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md188">
+<title>단점</title>
+<para><itemizedlist>
+<listitem><para>edit/runtime 오버헤드가 크다</para>
+</listitem><listitem><para>prepare와 layout이 public API 수준에서 분리되어 있지 않다</para>
+</listitem><listitem><para>exclusion bounds 기반 multi-interval layout을 넣기 어렵다</para>
+</listitem><listitem><para><computeroutput>EventData</computeroutput>가 존재하는 순간 interactive 로직이 많이 따라온다</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>가 원하는 &quot;plain display pipeline&quot;이 구조적으로 드러나지 않는다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md189">
+<title>새 Controller를 만드는 경우 필요한 최소 책임</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md190">
+<title>최소 책임</title>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md191">
+<title>Prepare 책임</title>
+<para><itemizedlist>
+<listitem><para>text 저장</para>
+</listitem><listitem><para>UTF-32 변환</para>
+</listitem><listitem><para>script 추출</para>
+</listitem><listitem><para>font fallback / validate</para>
+</listitem><listitem><para>shaping</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem><listitem><para>cluster mapping</para>
+</listitem><listitem><para>line break candidate 생성</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md192">
+<title>Layout 책임</title>
+<para><itemizedlist>
+<listitem><para>prepared glyph run 입력</para>
+</listitem><listitem><para>bounds / exclusion region 기반 line interval 계산</para>
+</listitem><listitem><para>glyph positioning</para>
+</listitem><listitem><para>line 정보 생성</para>
+</listitem><listitem><para>layout size 계산</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md193">
+<title>Render 전달 책임</title>
+<para><itemizedlist>
+<listitem><para>atlas renderer에 전달할 glyph list 제공</para>
+</listitem><listitem><para>glyph positions 제공</para>
+</listitem><listitem><para>기본 color 제공</para>
+</listitem><listitem><para>필요 시 <computeroutput>Text::ViewInterface</computeroutput> adapter 제공</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md194">
+<title>제거해야 할 책임</title>
+<para><itemizedlist>
+<listitem><para>IME</para>
+</listitem><listitem><para>selection</para>
+</listitem><listitem><para>cursor</para>
+</listitem><listitem><para>decorator</para>
+</listitem><listitem><para>popup / clipboard</para>
+</listitem><listitem><para>placeholder interaction</para>
+</listitem><listitem><para>input style</para>
+</listitem><listitem><para>editable state machine</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md195">
+<title>TextVisualizer에 필요한 부분</title>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md196">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>mOperationsPending</computeroutput> 같은 dirty 비트마스크 개념</para>
+</listitem><listitem><para><computeroutput>mTextUpdateInfo</computeroutput>처럼 update 범위를 좁히는 개념</para>
+</listitem><listitem><para><computeroutput>UpdateModel()</computeroutput> 안의 prepare 단계<itemizedlist>
+<listitem><para>font fallback</para>
+</listitem><listitem><para>shaping</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Relayouter</computeroutput>의 size 계산 패턴</para>
+</listitem><listitem><para><computeroutput>Text::ViewInterface</computeroutput>로 renderer에 데이터 넘기는 패턴</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md197">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetNaturalSize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetHeightForWidth()</computeroutput></para>
+</listitem><listitem><para>layout direction 변경 시 전체 relayout 처리</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md198">
+<title>버릴 부분</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>EventData</computeroutput></para>
+</listitem><listitem><para><computeroutput>ProcessInputEvents()</computeroutput></para>
+</listitem><listitem><para><computeroutput>EnableTextInput()</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFontHandler</computeroutput>의 selection/editing 상태 의존 처리</para>
+</listitem><listitem><para><computeroutput>HiddenInput</computeroutput>, placeholder editing state</para>
+</listitem><listitem><para>selection/cursor/clipboard/popup/decorator 전체</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md199">
+<title>설계 결론</title>
+<para>현재 <computeroutput>Text::Controller</computeroutput>는 <computeroutput>TextVisualizer</computeroutput>에 필요한 prepare 엔진을 많이 포함하고 있지만, 그 자체를 그대로 쓰기에는 입력기 오버헤드와 기존 rectangular layout 전제가 너무 크다.</para>
+<para>따라서 <computeroutput>TextVisualizer</computeroutput>는 아래 방향이 적절하다.</para>
+<para><itemizedlist>
+<listitem><para>기존 controller에서 prepare 단계에 해당하는 책임은 최대한 재사용</para>
+</listitem><listitem><para>layout은 <computeroutput>TextVisualizer</computeroutput> 전용 multi-interval engine으로 분리</para>
+</listitem><listitem><para>renderer로 나가는 최종 데이터 계약은 <computeroutput>Text::ViewInterface</computeroutput> 또는 그에 준하는 adapter로 유지</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md200">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> 1차 구현에서 기존 controller의 <computeroutput>UpdateModel()</computeroutput> 경로를 직접 재사용할지, prepare 전용 모델을 별도 추출할지 확정 필요</para>
+</listitem><listitem><para><computeroutput>Layout::Engine</computeroutput> 일부를 exclusion bounds 대응용으로 확장할지, 완전히 새 layout engine을 둘지 확정 필요</para>
+</listitem><listitem><para><computeroutput>Text::ViewInterface</computeroutput> 최소 구현 집합으로 atlas renderer를 바로 재사용할 수 있는지 추가 확인 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md201">
+<title>TextVisualizer 설계에 주는 결론</title>
+<para><orderedlist>
+<listitem><para>기존 <computeroutput>Text::Controller</computeroutput>는 <computeroutput>Prepare</computeroutput> 단계의 핵심 로직을 이미 가지고 있다.</para>
+</listitem><listitem><para>그러나 <computeroutput>Layout</computeroutput>은 현재 단일 rectangular box 전제가 강하고, edit/runtime 오버헤드가 크다.</para>
+</listitem><listitem><para>따라서 <computeroutput>TextVisualizer</computeroutput>는 &quot;기존 controller 전체 재사용&quot;보다 &quot;prepare 단계 재사용 + layout 분리&quot;가 더 적합하다.</para>
+</listitem><listitem><para>최종적으로는 atlas renderer가 요구하는 glyph 데이터만 공급하는 경량 controller 또는 model 계층이 필요하다.</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2bshsqa_2Shared_2DocuGen_2dali-ui-documentation-cli_2repos_2dali-ui_2dali-ui-foundatioaae78ba34dd02efa05bbd1d347ce5fc5_1autotoc_md202">
+<title>기능 매핑 표</title>
+<para><table rows="20" cols="5"><row>
+<entry thead="yes"><para>기능   </para>
+</entry><entry thead="yes"><para>기존 Controller 위치   </para>
+</entry><entry thead="yes"><para>TextVisualizer 필요 여부   </para>
+</entry><entry thead="yes"><para>재사용 가능성   </para>
+</entry><entry thead="yes"><para>비고    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>SetText 후 text update 범위 설정   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-text-updater.cpp</computeroutput>, <computeroutput>TextUpdater::SetText()</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>edit callback 제외 필요    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>UTF-8 -&gt; UTF-32 변환   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-text-updater.cpp</computeroutput>, <computeroutput>TextUpdater::SetText()</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>prepare 단계    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>Markup 처리   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-text-updater.cpp</computeroutput>, <computeroutput>ProcessMarkupString(...)</computeroutput>   </para>
+</entry><entry thead="no"><para>확인 필요   </para>
+</entry><entry thead="no"><para>보통   </para>
+</entry><entry thead="no"><para>1차 범위에서는 제외 가능    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>font fallback   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl-model-updater.cpp</computeroutput>, <computeroutput>ValidateFonts(...)</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>prepare 단계 핵심    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>shaping   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl-model-updater.cpp</computeroutput>, <computeroutput>ShapeText(...)</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>prepare 단계 핵심    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>glyph metrics   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl-model-updater.cpp</computeroutput>, <computeroutput>GetGlyphMetrics(...)</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>prepare 단계 핵심    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>line break candidate   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl-model-updater.cpp</computeroutput>, <computeroutput>GET_LINE_BREAKS</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>prepare 단계 핵심    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>bidi 정보   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl-model-updater.cpp</computeroutput>, <computeroutput>BIDI_INFO</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>prepare 단계에 포함 가능    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>visual model glyph 생성   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl-model-updater.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>glyph/cluster mapping 생성    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>layout 수행   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-relayouter.cpp</computeroutput>, <computeroutput>DoRelayout()</computeroutput> / <computeroutput>Layout::Engine::LayoutText()</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>exclusion bounds 대응에는 부족    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>natural size 계산   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-relayouter.cpp</computeroutput>, <computeroutput>GetNaturalSize()</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>보통   </para>
+</entry><entry thead="no"><para>새 layout 모델과 조정 필요    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>height-for-width 계산   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-relayouter.cpp</computeroutput>, <computeroutput>GetHeightForWidth()</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>보통   </para>
+</entry><entry thead="no"><para>새 layout 모델과 조정 필요    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>renderer 전달용 view   </para>
+</entry><entry thead="no"><para><computeroutput>text-view.h</computeroutput>, <computeroutput>text-view-interface.h</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>atlas adapter 형태로 재사용 가능    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>dirty 비트마스크   </para>
+</entry><entry thead="no"><para><computeroutput>mOperationsPending</computeroutput> in <computeroutput>text-controller-impl.*</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>높음   </para>
+</entry><entry thead="no"><para>구조는 재사용 가치 높음    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>text update 범위 추적   </para>
+</entry><entry thead="no"><para><computeroutput>mTextUpdateInfo</computeroutput> in <computeroutput>text-controller-impl.*</computeroutput>   </para>
+</entry><entry thead="no"><para>필요   </para>
+</entry><entry thead="no"><para>보통   </para>
+</entry><entry thead="no"><para>더 단순화 가능    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>selection / cursor   </para>
+</entry><entry thead="no"><para><computeroutput>EventData</computeroutput>, <computeroutput>text-controller-impl-event-handler.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>불필요   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>제거 대상    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>decorator / popup / handle   </para>
+</entry><entry thead="no"><para><computeroutput>EventData</computeroutput>, event handler 계열   </para>
+</entry><entry thead="no"><para>불필요   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>제거 대상    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>IME / preedit   </para>
+</entry><entry thead="no"><para><computeroutput>EventData</computeroutput>, <computeroutput>TextUpdater::InsertText()</computeroutput>   </para>
+</entry><entry thead="no"><para>불필요   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>제거 대상    </para>
+</entry></row>
+<row>
+<entry thead="no"><para>clipboard / editing runtime   </para>
+</entry><entry thead="no"><para><computeroutput>text-controller-impl.cpp</computeroutput>   </para>
+</entry><entry thead="no"><para>불필요   </para>
+</entry><entry thead="no"><para>낮음   </para>
+</entry><entry thead="no"><para>제거 대상   </para>
+</entry></row>
+</table>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/bshsqa/Shared/DocuGen/dali-ui-documentation-cli/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/03-text-controller-analysis.ko.md"/>
+  </compounddef>
+</doxygen>

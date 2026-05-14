@@ -1,0 +1,509 @@
+---
+title: Signals
+sidebar_label: Signals
+category: utilities
+---
+
+# Signals
+
+Signals let dali-ui application code react to view, input, resource, and lifecycle events while keeping connection lifetime explicit.
+
+## Table of Contents
+
+- [Connect View Events](#connect-view-events)
+- [Track Connection Lifetime](#track-connection-lifetime)
+- [Use Lambdas, Member Functions, and Free Functions](#use-lambdas-member-functions-and-free-functions)
+- [Inspect and Disconnect Connections](#inspect-and-disconnect-connections)
+- [Expose Small Application Signals](#expose-small-application-signals)
+- [Use Return Values Carefully](#use-return-values-carefully)
+
+## Connect View Events
+
+In a dali-ui application, the usual entry point is a `Dali::Ui::View` or a class derived from it. View-facing APIs expose typed `Dali::Signal` objects such as `Dali::Ui::View::FocusChangedSignalType`, `Dali::Ui::View::KeyEventSignalType`, and `Dali::Ui::View::ResourceReadySignalType`. Application code connects a callback with the same argument and return shape as the signal.
+
+A typical controller inherits from `Dali::ConnectionTracker` and connects view signals during setup:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class PageController : public ConnectionTracker
+{
+public:
+  void Setup(Label title)
+  {
+    title.FocusChangedSignal().Connect(this, &PageController::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View view, bool focused)
+  {
+    view.SetBackgroundColor(focused ? UiColor(0x3366CC) : UiColor(0x222222));
+  }
+};
+```
+
+For `Dali::Ui::View::KeyEventSignalType`, return `true` when the key event has been handled and should be consumed, or `false` when other handlers may continue processing it:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class KeyController : public ConnectionTracker
+{
+public:
+  void Setup(Label label)
+  {
+    label.SetFocusable(true);
+
+    label.KeyEventSignal().Connect(this, [this](View view, KeyEvent event) -> bool
+    {
+      return OnKeyEvent(view, event);
+    });
+  }
+
+private:
+  bool OnKeyEvent(View view, KeyEvent event)
+  {
+    if(event.GetState() == KeyEvent::DOWN)
+    {
+      view.SetBackgroundColor(UiColor(0x5588EE));
+      return true;
+    }
+
+    return false;
+  }
+};
+```
+
+`Dali::Signal<void(Arg0)>`, `Dali::Signal<void(Arg0, Arg1)>`, and `Dali::Signal<Ret(Arg0, Arg1)>` all require the callback signature to match the signal signature. For example, a focus signal callback receives `View, bool`, while a view key signal callback receives `View, KeyEvent` and returns `bool`.
+
+## Track Connection Lifetime
+
+`Dali::ConnectionTracker` is the primary lifetime tool for application code. When a callback is connected with `this` and the receiving object derives from `Dali::ConnectionTracker`, the connection is associated with that receiver. Destroying the tracker disconnects the slots it owns.
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class ImageStatus : public ConnectionTracker
+{
+public:
+  void Bind(ImageView image, Label status)
+  {
+    mStatus = status;
+
+    image.ResourceReadySignal().Connect(this, [this](View)
+    {
+      ++mReadyCount;
+      mStatus.SetText("Ready count: " + String(std::to_string(mReadyCount).c_str()));
+    });
+  }
+
+private:
+  Label    mStatus;
+  uint32_t mReadyCount{0};
+};
+```
+
+A `Dali::ConnectionTracker` can also be passed explicitly when connecting a function object to a `Dali::Signal`. This is useful when the receiver object does not need a separate member function:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class Loader : public ConnectionTracker
+{
+public:
+  using ReadySignalType = Signal<void(uint32_t)>;
+
+  ReadySignalType& ReadySignal()
+  {
+    return mReadySignal;
+  }
+
+  void ConnectHandlers()
+  {
+    ReadySignal().Connect(this, [this](uint32_t itemCount)
+    {
+      mLastItemCount = itemCount;
+    });
+  }
+
+  void Complete(uint32_t itemCount)
+  {
+    ReadySignal().Emit(itemCount);
+  }
+
+private:
+  ReadySignalType mReadySignal;
+  uint32_t        mLastItemCount{0};
+};
+```
+
+`Dali::ConnectionTracker::DisconnectAll()` disconnects every signal currently tracked by the receiver. Use it when a controller leaves a page or rebinds to a new group of views before destruction.
+
+## Use Lambdas, Member Functions, and Free Functions
+
+A `Dali::Signal` supports several callback forms. In application code, member functions and lambdas with a `Dali::ConnectionTracker` are the most useful because their lifetime is tied to the receiver.
+
+Member function callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class FocusRing : public ConnectionTracker
+{
+public:
+  void Attach(View target)
+  {
+    target.FocusChangedSignal().Connect(this, &FocusRing::OnFocusChanged);
+  }
+
+private:
+  void OnFocusChanged(View target, bool focused)
+  {
+    target.SetOpacity(focused ? 1.0f : 0.6f);
+  }
+};
+```
+
+Lambda callback:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+class SelectionController : public ConnectionTracker
+{
+public:
+  void Attach(InteractiveTrait& trait)
+  {
+    trait.ClickedSignal().Connect(this, [this](View selectedView, InputEvent)
+    {
+      mSelected = selectedView;
+    });
+  }
+
+private:
+  View mSelected;
+};
+```
+
+Free function callback:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+namespace
+{
+void OnRefresh()
+{
+}
+}
+
+void ConnectRefresh(Signal<void()>& refreshSignal)
+{
+  refreshSignal.Connect(&OnRefresh);
+}
+```
+
+For function objects that need type-erased storage, `Dali::FunctorDelegate::New()` creates a delegate owned by the signal connection:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali/public-api/signals/functor-delegate.h>
+
+using namespace Dali;
+
+class RefreshController : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& refreshSignal)
+  {
+    refreshSignal.Connect(this, FunctorDelegate::New([this]
+    {
+      ++mRefreshCount;
+    }));
+  }
+
+private:
+  uint32_t mRefreshCount{0};
+};
+```
+
+## Inspect and Disconnect Connections
+
+`Dali::Signal` inherits connection inspection from `Dali::SignalMixin`. Use `Empty()` when you only need to know whether any slots are connected, and `GetConnectionCount()` when diagnostic code needs the exact count.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+
+using namespace Dali;
+
+class RefreshModel
+{
+public:
+  using ChangedSignalType = Signal<void()>;
+
+  ChangedSignalType& ChangedSignal()
+  {
+    return mChangedSignal;
+  }
+
+  const ChangedSignalType& ChangedSignal() const
+  {
+    return mChangedSignal;
+  }
+
+  bool HasListeners() const
+  {
+    return !ChangedSignal().Empty();
+  }
+
+  uint32_t ListenerCount() const
+  {
+    return ChangedSignal().GetConnectionCount();
+  }
+
+  void NotifyChanged()
+  {
+    ChangedSignal().Emit();
+  }
+
+private:
+  ChangedSignalType mChangedSignal;
+};
+```
+
+Disconnect a specific function or member function by passing the same receiver and callback shape used for `Connect()`:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class RefreshHandler : public ConnectionTracker
+{
+public:
+  void Attach(Signal<void()>& signal)
+  {
+    signal.Connect(this, &RefreshHandler::OnRefresh);
+  }
+
+  void Detach(Signal<void()>& signal)
+  {
+    signal.Disconnect(this, &RefreshHandler::OnRefresh);
+  }
+
+private:
+  void OnRefresh()
+  {
+  }
+};
+```
+
+When the receiver owns several connections, `Dali::ConnectionTracker::GetConnectionCount()` gives the number currently tracked by that receiver, and `Dali::ConnectionTracker::DisconnectAll()` clears them together:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PageBindings : public ConnectionTracker
+{
+public:
+  void Bind(Signal<void()>& opened, Signal<void()>& closed)
+  {
+    opened.Connect(this, &PageBindings::OnOpened);
+    closed.Connect(this, &PageBindings::OnClosed);
+  }
+
+  void Reset()
+  {
+    if(GetConnectionCount() > 0u)
+    {
+      DisconnectAll();
+    }
+  }
+
+private:
+  void OnOpened()
+  {
+  }
+
+  void OnClosed()
+  {
+  }
+};
+```
+
+## Expose Small Application Signals
+
+Application-level components can expose their own typed `Dali::Signal` members. Define a type alias, return the signal by reference, and emit it from the component when the state changes.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class SelectionModel
+{
+public:
+  using SelectionChangedSignalType = Signal<void(uint32_t)>;
+
+  SelectionChangedSignalType& SelectionChangedSignal()
+  {
+    return mSelectionChangedSignal;
+  }
+
+  void Select(uint32_t index)
+  {
+    if(mSelectedIndex != index)
+    {
+      mSelectedIndex = index;
+      SelectionChangedSignal().Emit(mSelectedIndex);
+    }
+  }
+
+private:
+  SelectionChangedSignalType mSelectionChangedSignal;
+  uint32_t                   mSelectedIndex{0u};
+};
+
+class SelectionViewController : public ConnectionTracker
+{
+public:
+  void Bind(SelectionModel& model)
+  {
+    model.SelectionChangedSignal().Connect(this, &SelectionViewController::OnSelectionChanged);
+  }
+
+private:
+  void OnSelectionChanged(uint32_t index)
+  {
+    mLastSelection = index;
+  }
+
+  uint32_t mLastSelection{0u};
+};
+```
+
+Use the exact `Dali::Signal` specialization that matches the event contract:
+
+```cpp
+using StartedSignalType  = Dali::Signal<void()>;
+using ProgressSignalType = Dali::Signal<void(float)>;
+using AcceptedSignalType = Dali::Signal<bool(uint32_t, uint32_t)>;
+```
+
+`Dali::Signal<void()>` emits notifications without data. `Dali::Signal<void(Arg0)>` and `Dali::Signal<void(Arg0, Arg1)>` pass data to listeners. `Dali::Signal<Ret(Arg0, Arg1)>` returns a value from connected callbacks.
+
+## Use Return Values Carefully
+
+A returning `Dali::Signal` returns the value from the last callback that runs. If no callbacks are connected, it returns a default-constructed value for the return type.
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class PermissionModel
+{
+public:
+  using AllowSignalType = Signal<bool(uint32_t)>;
+
+  AllowSignalType& AllowSignal()
+  {
+    return mAllowSignal;
+  }
+
+  bool CanOpen(uint32_t itemId)
+  {
+    return AllowSignal().Emit(itemId);
+  }
+
+private:
+  AllowSignalType mAllowSignal;
+};
+
+class PermissionController : public ConnectionTracker
+{
+public:
+  void Bind(PermissionModel& model)
+  {
+    model.AllowSignal().Connect(this, &PermissionController::OnAllow);
+  }
+
+private:
+  bool OnAllow(uint32_t itemId)
+  {
+    return itemId != 0u;
+  }
+};
+```
+
+For two-argument returning signals, `EmitOr()` is available and returns true if any connected callback returns true. This is useful for consumed-style application events where any handler may accept the event:
+
+```cpp
+#include <dali/public-api/signals/dali-signal.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
+using namespace Dali;
+
+class CommandRouter
+{
+public:
+  using CommandSignalType = Signal<bool(uint32_t, uint32_t)>;
+
+  CommandSignalType& CommandSignal()
+  {
+    return mCommandSignal;
+  }
+
+  bool Dispatch(uint32_t commandId, uint32_t sourceId)
+  {
+    return CommandSignal().EmitOr(commandId, sourceId);
+  }
+
+private:
+  CommandSignalType mCommandSignal;
+};
+
+class CommandHandler : public ConnectionTracker
+{
+public:
+  void Bind(CommandRouter& router)
+  {
+    router.CommandSignal().Connect(this, &CommandHandler::OnCommand);
+  }
+
+private:
+  bool OnCommand(uint32_t commandId, uint32_t)
+  {
+    return commandId == 1u;
+  }
+};
+```
+
+Keep returning signals narrow and documented in the component that owns them. For most dali-ui view events, application code connects to the signal exposed by the view or trait and follows that signal's callback signature.

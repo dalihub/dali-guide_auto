@@ -1,0 +1,354 @@
+---
+title: Render Effects
+sidebar_label: Render Effects
+category: images-visuals
+---
+
+# Render Effects
+
+Render effects let a dali-ui app blur, background-blur, or mask a `Dali::Ui::View` through typed `Dali::Ui::RenderEffect` handles.
+
+## Table of Contents
+
+- [Applying a Render Effect to a View](#applying-a-render-effect-to-a-view)
+- [Blurring a View and Its Children](#blurring-a-view-and-its-children)
+- [Blurring What Is Behind a View](#blurring-what-is-behind-a-view)
+- [Masking a View with Another View](#masking-a-view-with-another-view)
+- [Refreshing, Activating, and Deactivating Effects](#refreshing-activating-and-deactivating-effects)
+- [Animating Blur Strength and Opacity](#animating-blur-strength-and-opacity)
+
+## Applying a Render Effect to a View
+
+`Dali::Ui::RenderEffect` is the base handle for render effects. In application code, create a concrete effect such as `Dali::Ui::GaussianBlurEffect`, `Dali::Ui::BackgroundBlurEffect`, or `Dali::Ui::MaskEffect`, then assign it to a `Dali::Ui::View`.
+
+Each effect has a single owner view. Setting a new render effect on the same view replaces that view's render-effect role.
+
+```cpp
+void ApplyEffect(Dali::Ui::View view)
+{
+  Dali::Ui::GaussianBlurEffect effect = Dali::Ui::GaussianBlurEffect::New(16u);
+  view.SetRenderEffect(effect);
+
+  if(effect.IsActivated())
+  {
+    effect.Refresh();
+  }
+}
+```
+
+To remove the effect from the view, clear the render effect on the `Dali::Ui::View`.
+
+```cpp
+void ClearEffect(Dali::Ui::View view)
+{
+  view.ClearRenderEffect();
+}
+```
+
+## Blurring a View and Its Children
+
+Use `Dali::Ui::GaussianBlurEffect` when the view itself, including its child view subtree, should be blurred. Create it with `Dali::Ui::GaussianBlurEffect::New(uint32_t blurRadius)`, then adjust quality and update behavior with typed setters.
+
+`SetBlurRadius()` changes the Gaussian kernel radius. `SetBlurDownscaleFactor()` controls the downscale factor used for the blur input texture; valid values are between `0.0f` and `1.0f`. Lower values can reduce rendering cost but also change the effective blur increments. `SetBlurOnce(true)` renders the blur once, while `SetBlurOnce(false)` keeps it updating every frame.
+
+```cpp
+void BlurPanel(Dali::Ui::View panel)
+{
+  Dali::Ui::GaussianBlurEffect blur = Dali::Ui::GaussianBlurEffect::New(24u);
+
+  blur.SetBlurDownscaleFactor(0.5f);
+  blur.SetBlurOnce(false);
+
+  panel.SetRenderEffect(blur);
+}
+```
+
+You can read the current settings back when you need to preserve or tune the effect state.
+
+```cpp
+void IncreaseBlurRadius(Dali::Ui::GaussianBlurEffect blur)
+{
+  const uint32_t currentRadius = blur.GetBlurRadius();
+  blur.SetBlurRadius(currentRadius + 8u);
+
+  const float downscaleFactor = blur.GetBlurDownscaleFactor();
+  if(downscaleFactor < 0.5f)
+  {
+    blur.SetBlurDownscaleFactor(0.5f);
+  }
+}
+```
+
+When one-shot blur rendering is enabled, connect to `Dali::Ui::GaussianBlurEffect::FinishedSignal()` to be notified after the effect has rendered.
+
+```cpp
+class BlurController : public Dali::ConnectionTracker
+{
+public:
+  void Apply(Dali::Ui::View panel)
+  {
+    mBlur = Dali::Ui::GaussianBlurEffect::New(20u);
+    mBlur.SetBlurOnce(true);
+    mBlur.FinishedSignal().Connect(this, &BlurController::OnBlurFinished);
+
+    panel.SetRenderEffect(mBlur);
+  }
+
+private:
+  void OnBlurFinished()
+  {
+    mBlur.Deactivate();
+  }
+
+  Dali::Ui::GaussianBlurEffect mBlur;
+};
+```
+
+## Blurring What Is Behind a View
+
+Use `Dali::Ui::BackgroundBlurEffect` when the owner view should blur its background rather than its own foreground content. This is useful for translucent panels, overlays, dialogs, and other surfaces that should soften the content behind them.
+
+Tree hierarchy matters for `Dali::Ui::BackgroundBlurEffect`: the view that owns the effect determines what is considered background content. Place the effect on the foreground view that visually sits over the content to be blurred.
+
+```cpp
+void ApplyBackgroundBlur(Dali::Ui::View overlay)
+{
+  Dali::Ui::BackgroundBlurEffect blur = Dali::Ui::BackgroundBlurEffect::New(28u);
+
+  blur.SetBlurDownscaleFactor(0.25f);
+  blur.SetBlurOnce(false);
+
+  overlay.SetRenderEffect(blur);
+}
+```
+
+`Dali::Ui::BackgroundBlurEffect` has the same blur tuning API as `Dali::Ui::GaussianBlurEffect`: `SetBlurRadius()`, `GetBlurRadius()`, `SetBlurDownscaleFactor()`, `GetBlurDownscaleFactor()`, `SetBlurOnce()`, and `GetBlurOnce()`.
+
+```cpp
+void ConfigureBackgroundBlur(Dali::Ui::BackgroundBlurEffect blur)
+{
+  blur.SetBlurRadius(32u);
+  blur.SetBlurDownscaleFactor(0.5f);
+  blur.SetBlurOnce(true);
+
+  const bool rendersOnce = blur.GetBlurOnce();
+  if(rendersOnce)
+  {
+    blur.Refresh();
+  }
+}
+```
+
+For advanced hierarchy control, `SetSourceActor()` selects a specific source actor for the background blur, and `SetStopperActor()` selects a stopper actor. These functions take `Dali::Actor` because the render pipeline works at actor level, but app-facing composition should still be modeled with `Dali::Ui::View`.
+
+```cpp
+void LimitBackgroundBlurSource(
+  Dali::Ui::View overlay,
+  Dali::Actor sourceActor,
+  Dali::Actor stopperActor)
+{
+  Dali::Ui::BackgroundBlurEffect blur = Dali::Ui::BackgroundBlurEffect::New(18u);
+
+  blur.SetSourceActor(sourceActor);
+  blur.SetStopperActor(stopperActor);
+
+  overlay.SetRenderEffect(blur);
+}
+```
+
+`Dali::Ui::BackgroundBlurEffect::FinishedSignal()` uses the same no-argument callback shape as `Dali::Ui::GaussianBlurEffect::FinishedSignal()`.
+
+```cpp
+class BackgroundBlurController : public Dali::ConnectionTracker
+{
+public:
+  void Apply(Dali::Ui::View overlay)
+  {
+    mBlur = Dali::Ui::BackgroundBlurEffect::New(20u);
+    mBlur.SetBlurOnce(true);
+    mBlur.FinishedSignal().Connect(this, &BackgroundBlurController::OnFinished);
+
+    overlay.SetRenderEffect(mBlur);
+  }
+
+private:
+  void OnFinished()
+  {
+    mBlur.Deactivate();
+  }
+
+  Dali::Ui::BackgroundBlurEffect mBlur;
+};
+```
+
+## Masking a View with Another View
+
+Use `Dali::Ui::MaskEffect` when a target `Dali::Ui::View` should be clipped by another `Dali::Ui::View`. The mask source is passed to `Dali::Ui::MaskEffect::New()`.
+
+The default mask mode is `Dali::Ui::MaskEffect::ALPHA`, where the mask source alpha channel controls visibility. `Dali::Ui::MaskEffect::LUMINANCE` uses the mask source luminance instead.
+
+```cpp
+void ApplyAlphaMask(Dali::Ui::View target, Dali::Ui::View maskSource)
+{
+  Dali::Ui::MaskEffect mask = Dali::Ui::MaskEffect::New(
+    maskSource,
+    Dali::Ui::MaskEffect::ALPHA,
+    Dali::Vector2(0.0f, 0.0f),
+    Dali::Vector2(1.0f, 1.0f));
+
+  mask.SetSourceMaskOnce(true);
+  mask.SetTargetMaskOnce(false);
+
+  target.Add(maskSource);
+  target.SetRenderEffect(mask);
+}
+```
+
+Use `SetSourceMaskOnce()` when the mask source is static. Use `SetTargetMaskOnce()` when the masked target is static. If either side changes visually every frame, keep that side updating.
+
+```cpp
+void ConfigureDynamicMask(Dali::Ui::MaskEffect mask)
+{
+  mask.SetSourceMaskOnce(true);
+  mask.SetTargetMaskOnce(false);
+
+  const bool sourceIsCached = mask.GetSourceMaskOnce();
+  const bool targetIsCached = mask.GetTargetMaskOnce();
+
+  if(sourceIsCached && !targetIsCached)
+  {
+    mask.Refresh();
+  }
+}
+```
+
+For a luminance mask, pass `Dali::Ui::MaskEffect::LUMINANCE` when constructing the effect.
+
+```cpp
+void ApplyLuminanceMask(Dali::Ui::View target, Dali::Ui::View maskSource)
+{
+  Dali::Ui::MaskEffect mask = Dali::Ui::MaskEffect::New(
+    maskSource,
+    Dali::Ui::MaskEffect::LUMINANCE,
+    Dali::Vector2(0.0f, 0.0f),
+    Dali::Vector2(1.0f, 1.0f));
+
+  target.Add(maskSource);
+  target.SetRenderEffect(mask);
+}
+```
+
+## Refreshing, Activating, and Deactivating Effects
+
+`Dali::Ui::RenderEffect` provides common control methods for concrete effects. `Activate()` enables the effect, `Deactivate()` disables it, `Refresh()` requests updated effect rendering, and `IsActivated()` reports whether the effect is active.
+
+These methods are useful when you retain the effect handle in a controller and want to pause, resume, or refresh the effect without rebuilding it.
+
+```cpp
+class EffectController
+{
+public:
+  void Attach(Dali::Ui::View view)
+  {
+    mEffect = Dali::Ui::GaussianBlurEffect::New(12u);
+    view.SetRenderEffect(mEffect);
+  }
+
+  void SetPaused(bool paused)
+  {
+    if(paused)
+    {
+      mEffect.Deactivate();
+    }
+    else
+    {
+      mEffect.Activate();
+      mEffect.Refresh();
+    }
+  }
+
+  bool IsRunning()
+  {
+    return mEffect.IsActivated();
+  }
+
+private:
+  Dali::Ui::GaussianBlurEffect mEffect;
+};
+```
+
+Because `Dali::Ui::GaussianBlurEffect`, `Dali::Ui::BackgroundBlurEffect`, and `Dali::Ui::MaskEffect` inherit from `Dali::Ui::RenderEffect`, the common control methods can be used directly on each concrete effect handle.
+
+```cpp
+void RefreshAnyBlur(Dali::Ui::BackgroundBlurEffect blur)
+{
+  if(blur.IsActivated())
+  {
+    blur.Refresh();
+  }
+  else
+  {
+    blur.Activate();
+  }
+}
+```
+
+## Animating Blur Strength and Opacity
+
+`Dali::Ui::GaussianBlurEffect` and `Dali::Ui::BackgroundBlurEffect` can add their own blur animations to a `Dali::Animation`.
+
+Use `AddBlurStrengthAnimation()` to animate from clear to blurred or from blurred to clear. Use `AddBlurOpacityAnimation()` to animate the opacity of the blurred result. Both APIs take an animation, an `AlphaFunction`, a `TimePeriod`, a start value, and an end value. The value range is `0.0f` to `1.0f`.
+
+```cpp
+void FadeInGaussianBlur(Dali::Ui::View view)
+{
+  Dali::Ui::GaussianBlurEffect blur = Dali::Ui::GaussianBlurEffect::New(24u);
+  view.SetRenderEffect(blur);
+
+  Dali::Animation animation = Dali::Animation::New(0.3f);
+
+  blur.AddBlurStrengthAnimation(
+    animation,
+    Dali::AlphaFunction::EASE_IN_OUT,
+    Dali::TimePeriod(0.0f, 0.3f),
+    0.0f,
+    1.0f);
+
+  blur.AddBlurOpacityAnimation(
+    animation,
+    Dali::AlphaFunction::EASE_IN_OUT,
+    Dali::TimePeriod(0.0f, 0.3f),
+    0.0f,
+    1.0f);
+
+  animation.Play();
+}
+```
+
+Reversing the `fromValue` and `toValue` produces a blur-to-clear animation.
+
+```cpp
+void FadeOutBackgroundBlur(Dali::Ui::View overlay)
+{
+  Dali::Ui::BackgroundBlurEffect blur = Dali::Ui::BackgroundBlurEffect::New(24u);
+  overlay.SetRenderEffect(blur);
+
+  Dali::Animation animation = Dali::Animation::New(0.25f);
+
+  blur.AddBlurStrengthAnimation(
+    animation,
+    Dali::AlphaFunction::EASE_IN_OUT,
+    Dali::TimePeriod(0.0f, 0.25f),
+    1.0f,
+    0.0f);
+
+  blur.AddBlurOpacityAnimation(
+    animation,
+    Dali::AlphaFunction::EASE_IN_OUT,
+    Dali::TimePeriod(0.0f, 0.25f),
+    1.0f,
+    0.0f);
+
+  animation.Play();
+}
+```
