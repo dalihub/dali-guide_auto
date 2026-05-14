@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">DALi ParentOrigin and Pivot concept</title>
+  <desc id="desc">A conceptual diagram showing how ParentOrigin selects a reference point in the parent, Pivot selects a reference point in the child, and Position aligns the child's pivot to the chosen parent origin.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowDark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 30px system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f172a; }
+      .label { font: 600 20px system-ui, -apple-system, Segoe UI, sans-serif; fill: #0f172a; }
+      .small { font: 16px system-ui, -apple-system, Segoe UI, sans-serif; fill: #334155; }
+      .tiny { font: 14px system-ui, -apple-system, Segoe UI, sans-serif; fill: #475569; }
+      .code { font: 600 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #1e293b; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="720" fill="#f8fafc"/>
+  <text x="60" y="62" class="title">ParentOrigin and Pivot: how a View is anchored</text>
+  <text x="60" y="94" class="small">ParentOrigin chooses a reference point inside the parent. Pivot chooses a reference point inside the child. Position aligns the child pivot to the parent reference.</text>
+
+  <rect x="70" y="145" width="520" height="380" rx="16" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
+  <text x="92" y="180" class="label">Parent View</text>
+  <text x="92" y="207" class="tiny">normalized coordinate space: left/top = 0.0, center = 0.5, right/bottom = 1.0</text>
+
+  <line x1="70" y1="335" x2="590" y2="335" stroke="#93c5fd" stroke-width="2" stroke-dasharray="7 7"/>
+  <line x1="330" y1="145" x2="330" y2="525" stroke="#93c5fd" stroke-width="2" stroke-dasharray="7 7"/>
+  <circle cx="330" cy="335" r="11" fill="#2563eb"/>
+  <text x="350" y="328" class="code">ParentOrigin::CENTER</text>
+  <text x="350" y="350" class="tiny">(0.5, 0.5, 0.5)</text>
+
+  <circle cx="70" cy="145" r="7" fill="#3b82f6"/>
+  <text x="88" y="139" class="tiny">TOP_LEFT</text>
+  <circle cx="590" cy="525" r="7" fill="#3b82f6"/>
+  <text x="500" y="552" class="tiny">BOTTOM_RIGHT</text>
+
+  <line x1="330" y1="335" x2="478" y2="263" stroke="#2563eb" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="382" y="270" class="label" fill="#2563eb">Position offset</text>
+
+  <rect x="478" y="263" width="260" height="170" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+  <text x="500" y="296" class="label">Child View</text>
+  <text x="500" y="322" class="tiny">the child is placed so its pivot matches the target point</text>
+
+  <line x1="478" y1="263" x2="738" y2="433" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="738" y1="263" x2="478" y2="433" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 6"/>
+  <circle cx="478" cy="263" r="12" fill="#dc2626"/>
+  <text x="500" y="256" class="code">Pivot::TOP_LEFT</text>
+  <text x="500" y="278" class="tiny">(0.0, 0.0, 0.5) in the child</text>
+
+  <path d="M 478 263 C 430 220, 378 215, 330 335" fill="none" stroke="#334155" stroke-width="3" marker-end="url(#arrowDark)"/>
+  <text x="620" y="195" class="small">In this example:</text>
+  <rect x="620" y="215" width="500" height="130" rx="12" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="645" y="248" class="code">child.SetParentOrigin(ParentOrigin::CENTER);</text>
+  <text x="645" y="278" class="code">child.SetPivot(Pivot::TOP_LEFT);</text>
+  <text x="645" y="308" class="code">child.SetPosition(...);</text>
+  <text x="645" y="335" class="tiny">The child's top-left point is the point aligned from the parent center.</text>
+
+  <rect x="620" y="390" width="500" height="170" rx="12" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="645" y="425" class="label">Why this matters</text>
+  <text x="645" y="455" class="small">• Use ParentOrigin to choose where the child is anchored in the parent.</text>
+  <text x="645" y="485" class="small">• Use Pivot to choose which point of the child is anchored.</text>
+  <text x="645" y="515" class="small">• Rotation, scale, and positioning are easier to reason about when the pivot is explicit.</text>
+
+  <text x="70" y="610" class="small">Typical constants are defined for both namespaces: TOP_LEFT, TOP_CENTER, CENTER, BOTTOM_RIGHT, and others.</text>
+  <text x="70" y="638" class="small">For 2D layout, DALi constants use z = 0.5f. ParentOrigin::DEFAULT is TOP_LEFT; Pivot::DEFAULT is CENTER.</text>
+</svg>
