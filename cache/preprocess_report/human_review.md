@@ -5,144 +5,28 @@ This report validates preprocess inputs before markdown generation.
 ## Summary
 
 - info: 2
-- needs_review: 31
-- warning: 66
+- needs_review: 6
+- warning: 33
 
 ## Needs Review
 
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (accessibility-highlight-overlay)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (adaptor-framework)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (addon-manager)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (animated-image-view)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (attachment-id)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (focus-manager)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (i-scroll-bar)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (image)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (image-loader)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (input-event)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (input-field)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (interactive-view)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (layouts)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (lottie-animation-view)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (render-effects)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (scroll-bar)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (scroll-view)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (signals)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (state-event)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (text)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (trait-id)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-color)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-color-manager)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-component-config)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-config)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-scale-manager)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (ui-theme-manager)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (unique-any)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (view-state)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (visuals)
-  - action: Review category rules or add a category assignment override.
-- [needs_review] LOW_CONFIDENCE_CATEGORY: Category assignment confidence is low. (web-view)
-  - action: Review category rules or add a category assignment override.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-003 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-004 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-005 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-006 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-007 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
+- [needs_review] LLM_TRACE_NON_OK_STATUS: LLM trace request ownership-009 has status parse_failed.
+  - action: Review the failed LLM batch and fallback output.
 
 ## Warning
 
 - [warning] PLANNING_AMBIGUOUS_RAW_FEATURE: Raw ambiguous feature is not a document target. (uncategorized_ambiguous_root)
   - action: Improve parser/path inference or suppress/merge the raw ambiguous feature.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (accessibility-highlight-overlay)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (adaptor-framework)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (addon-manager)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (animated-image-view)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (attachment-id)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (focus-manager)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (i-scroll-bar)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (image)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (image-loader)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (input-event)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (input-field)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (interactive-view)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (layouts)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (lottie-animation-view)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (render-effects)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (scroll-bar)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (scroll-view)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (signals)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (state-event)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (text)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (trait-id)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-color)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-color-manager)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-component-config)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-config)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-scale-manager)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (ui-theme-manager)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (unique-any)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (view-state)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (visuals)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_CATEGORY_LLM_FALLBACK: LLM category assignment failed or returned an unknown category. (web-view)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_LLM_API_KEY_MISSING: LLM API key is missing; category assignments fell back to uncategorized. (category_assignment)
-  - action: Review the planner evidence and update rules if needed.
-- [warning] PLANNING_LLM_API_KEY_MISSING: LLM API key is missing; ownership suggestions were skipped. (supporting_ownership)
-  - action: Review the planner evidence and update rules if needed.
 - [warning] PLANNING_MISSING_ENTRY_HEADERS: Document feature has no app entry headers. (adaptor-framework)
   - action: Check whether the feature is truly app-facing or should be supporting/context only.
 - [warning] PLANNING_MISSING_ENTRY_HEADERS: Document feature has no app entry headers. (addon-manager)
@@ -210,42 +94,43 @@ This report validates preprocess inputs before markdown generation.
 
 ## Decisions
 
-- accessibility-highlight-overlay: category=uncategorized (llm_category_fallback)
-- adaptor-framework: category=uncategorized (llm_category_fallback)
-- addon-manager: category=uncategorized (llm_category_fallback)
-- animated-image-view: category=uncategorized (llm_category_fallback)
+- accessibility-highlight-overlay: category=accessibility (llm_category_classifier)
+- adaptor-framework: category=application-framework (llm_category_classifier)
+- addon-manager: category=platform-integration (llm_category_classifier)
+- animated-image-view: category=views-components (llm_category_classifier)
 - animation: category=animation-motion (category_override)
-- attachment-id: category=uncategorized (llm_category_fallback)
-- focus-manager: category=uncategorized (llm_category_fallback)
-- i-scroll-bar: category=uncategorized (llm_category_fallback)
-- image: category=uncategorized (llm_category_fallback)
-- image-loader: category=uncategorized (llm_category_fallback)
+- attachment-id: category=views-components (llm_category_classifier)
+- focus-manager: category=input-interaction (llm_category_classifier)
+- i-scroll-bar: category=views-components (llm_category_classifier)
+- image: category=images-visuals (llm_category_classifier)
+- image-loader: category=images-visuals (llm_category_classifier)
 - image-view: category=views-components (category_override)
-- input-event: category=uncategorized (llm_category_fallback)
-- input-field: category=uncategorized (llm_category_fallback)
-- interactive-view: category=uncategorized (llm_category_fallback)
+- input-event: category=input-interaction (llm_category_classifier)
+- input-field: category=views-components (llm_category_classifier)
+- interactive-view: category=views-components (llm_category_classifier)
 - label: category=views-components (category_override)
-- layouts: category=uncategorized (llm_category_fallback)
-- lottie-animation-view: category=uncategorized (llm_category_fallback)
-- render-effects: category=uncategorized (llm_category_fallback)
-- scroll-bar: category=uncategorized (llm_category_fallback)
-- scroll-view: category=uncategorized (llm_category_fallback)
-- signals: category=uncategorized (llm_category_fallback)
-- state-event: category=uncategorized (llm_category_fallback)
-- text: category=uncategorized (llm_category_fallback)
-- trait-id: category=uncategorized (llm_category_fallback)
-- ui-color: category=uncategorized (llm_category_fallback)
-- ui-color-manager: category=uncategorized (llm_category_fallback)
-- ui-component-config: category=uncategorized (llm_category_fallback)
-- ui-config: category=uncategorized (llm_category_fallback)
-- ui-scale-manager: category=uncategorized (llm_category_fallback)
-- ui-theme-manager: category=uncategorized (llm_category_fallback)
-- unique-any: category=uncategorized (llm_category_fallback)
+- layouts: category=layout-sizing (llm_category_classifier)
+- lottie-animation-view: category=images-visuals (llm_category_classifier)
+- render-effects: category=images-visuals (llm_category_classifier)
+- scroll-bar: category=views-components (llm_category_classifier)
+- scroll-view: category=views-components (llm_category_classifier)
+- signals: category=utilities (llm_category_classifier)
+- state-event: category=input-interaction (llm_category_classifier)
+- text: category=text (llm_category_classifier)
+- trait-id: category=views-components (llm_category_classifier)
+- ui-color: category=styling-theme-config (llm_category_classifier)
+- ui-color-manager: category=styling-theme-config (llm_category_classifier)
+- ui-component-config: category=styling-theme-config (llm_category_classifier)
+- ui-config: category=application-framework (llm_category_classifier)
+- ui-scale-manager: category=styling-theme-config (llm_category_classifier)
+- ui-theme-manager: category=styling-theme-config (llm_category_classifier)
+- unique-any: category=utilities (llm_category_classifier)
 - view: category=views-components (category_override)
-- view-state: category=uncategorized (llm_category_fallback)
-- visuals: category=uncategorized (llm_category_fallback)
-- web-view: category=uncategorized (llm_category_fallback)
-- <global>: llm_usage category_requests=0 ownership_requests=0 estimated_input_tokens=0 (document_plan_llm_usage)
+- view-state: category=views-components (llm_category_classifier)
+- visuals: category=images-visuals (llm_category_classifier)
+- web-view: category=views-components (llm_category_classifier)
+- <global>: llm_usage category_requests=1 ownership_requests=9 estimated_input_tokens=57214 (document_plan_llm_usage)
+- <global>: llm_trace entries=10 (document_plan_llm_trace)
 - actors -> view: document_feature_rules.merge_into -> view (supporting_features)
 - align-enumerations: document_feature_rules.suppress ->  (supporting_features)
 - callback: document_feature_rules.suppress ->  (supporting_features)

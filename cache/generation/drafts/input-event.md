@@ -1,232 +1,229 @@
 ---
 title: Input Event
 sidebar_label: Input Event
-category: uncategorized
+category: input-interaction
 ---
 
 # Input Event
 
-`Dali::Ui::InputEvent` provides a unified wrapper for different input event types in dali-ui applications. It encapsulates touch events, key events, tap gestures, long-press gestures, and wheel events into a single type that can be passed through signal handlers and state change callbacks.
+`InputEvent` is a unified wrapper type that encapsulates different user input sources—touch, key, gesture, and wheel events—into a single object passed to interaction signal handlers.
 
 ## Table of Contents
 
 - [Understanding InputEvent](#understanding-inputevent)
-- [Creating InputEvent Instances](#creating-inputevent-instances)
-- [Inspecting Event Type and Origin](#inspecting-event-type-and-origin)
-- [Using InputEvent in Signal Handlers](#using-inputevent-in-signal-handlers)
-- [NONE Events for Non-Input Changes](#none-events-for-non-input-changes)
+- [Event Types](#event-types)
+- [Creating InputEvent Objects](#creating-inputevent-objects)
+- [Receiving InputEvent in Signal Handlers](#receiving-inputevent-in-signal-handlers)
+- [Inspecting Event Details](#inspecting-event-details)
+- [Programmatic State Changes](#programmatic-state-changes)
 
 ## Understanding InputEvent
 
-`Dali::Ui::InputEvent` is a handle class that wraps one of several underlying event types. When a user interacts with a view through touch, keyboard, or mouse wheel, the framework creates an `InputEvent` that carries the original event data. This allows signal handlers and state change callbacks to receive a consistent type regardless of the input source.
+`Dali::Ui::InputEvent` provides a type-safe wrapper around various input event types. When a user interacts with a view, the framework creates an `InputEvent` object and passes it to registered signal handlers. This allows your application to:
 
-The `InputEventType` enum defines the possible event categories:
+- Determine what kind of input triggered the interaction
+- Access the original event details when needed
+- Distinguish between user-initiated and programmatic state changes
+
+The `InputEvent` class inherits from `BaseHandle` and supports copy and move semantics.
+
+## Event Types
+
+The `Dali::Ui::InputEventType` enumeration defines the possible event sources:
 
 | Value | Description |
 |-------|-------------|
-| `InputEventType::NONE` | No concrete input event (API call or lifecycle change) |
-| `InputEventType::TOUCH_EVENT` | Touch-based input |
+| `InputEventType::NONE` | No concrete input event (programmatic or system-triggered) |
+| `InputEventType::TOUCH_EVENT` | Touch-based interaction |
 | `InputEventType::KEY_EVENT` | Keyboard input |
-| `InputEventType::TAP_GESTURE` | Tap gesture recognized |
-| `InputEventType::LONG_PRESS_GESTURE` | Long-press gesture recognized |
-| `InputEventType::WHEEL_EVENT` | Mouse wheel input |
+| `InputEventType::TAP_GESTURE` | Tap gesture recognition |
+| `InputEventType::LONG_PRESS_GESTURE` | Long press gesture recognition |
+| `InputEventType::WHEEL_EVENT` | Mouse wheel or scroll event |
 
-## Creating InputEvent Instances
-
-Use the static `InputEvent::New()` methods to create an `InputEvent` from a specific origin event. Each overload accepts a different event type:
+Use `GetInputEventType()` to determine the event type before accessing specific event details:
 
 ```cpp
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali/public-api/events/touch-event.h>
-#include <dali/public-api/events/key-event.h>
-#include <dali/public-api/events/tap-gesture.h>
-#include <dali/public-api/events/long-press-gesture.h>
-#include <dali/public-api/events/wheel-event.h>
-
-// Create from a touch event
-Dali::TouchEvent touchEvent = GetTouchEvent();
-Dali::Ui::InputEvent inputFromTouch = Dali::Ui::InputEvent::New(touchEvent);
-
-// Create from a key event
-Dali::KeyEvent keyEvent = GetKeyEvent();
-Dali::Ui::InputEvent inputFromKey = Dali::Ui::InputEvent::New(keyEvent);
-
-// Create from a tap gesture
-Dali::TapGesture tapGesture = GetTapGesture();
-Dali::Ui::InputEvent inputFromTap = Dali::Ui::InputEvent::New(tapGesture);
-
-// Create from a long-press gesture
-Dali::LongPressGesture longPressGesture = GetLongPressGesture();
-Dali::Ui::InputEvent inputFromLongPress = Dali::Ui::InputEvent::New(longPressGesture);
-
-// Create from a wheel event
-Dali::WheelEvent wheelEvent = GetWheelEvent();
-Dali::Ui::InputEvent inputFromWheel = Dali::Ui::InputEvent::New(wheelEvent);
-```
-
-## Inspecting Event Type and Origin
-
-Call `GetInputEventType()` to determine what kind of event is wrapped. Then use the appropriate getter method to retrieve the original event:
-
-```cpp
-void HandleInputEvent(Dali::Ui::InputEvent event)
+void OnClicked(View view, InputEvent event)
 {
     switch (event.GetInputEventType())
     {
-        case Dali::Ui::InputEventType::TOUCH_EVENT:
-        {
-            const Dali::TouchEvent& touch = event.GetTouchEvent();
-            // Process touch event
+        case InputEventType::TOUCH_EVENT:
+            // Handle touch-based click
             break;
-        }
-        case Dali::Ui::InputEventType::KEY_EVENT:
-        {
-            const Dali::KeyEvent& key = event.GetKeyEvent();
-            // Process key event
+        case InputEventType::KEY_EVENT:
+            // Handle key-based click (e.g., Enter key)
             break;
-        }
-        case Dali::Ui::InputEventType::TAP_GESTURE:
-        {
-            const Dali::TapGesture& tap = event.GetTapGesture();
-            // Process tap gesture
+        case InputEventType::TAP_GESTURE:
+            // Handle gesture-based click
             break;
-        }
-        case Dali::Ui::InputEventType::LONG_PRESS_GESTURE:
-        {
-            const Dali::LongPressGesture& longPress = event.GetLongPressGesture();
-            // Process long-press gesture
-            break;
-        }
-        case Dali::Ui::InputEventType::WHEEL_EVENT:
-        {
-            const Dali::WheelEvent& wheel = event.GetWheelEvent();
-            // Process wheel event
-            break;
-        }
-        case Dali::Ui::InputEventType::NONE:
         default:
-            // No concrete input event
             break;
     }
 }
 ```
 
-## Using InputEvent in Signal Handlers
+## Creating InputEvent Objects
 
-Interactive views emit signals that include an `InputEvent` parameter. This allows handlers to determine what triggered the interaction and access the original event details.
+### Creating from Specific Event Types
 
-### Clicked Signal
-
-The `ClickedSignal` fires when a view is clicked, either through a tap gesture or an execution key (such as Enter). The `InputEvent` indicates the source:
+`InputEvent` provides static `New()` overloads for each event type:
 
 ```cpp
-class MyController
-{
-public:
-    void SetupButton(Dali::Ui::InteractiveView button)
-    {
-        button.ConnectClickedSignal(this, &MyController::OnButtonClicked);
-    }
+// Create from touch event
+InputEvent touchInput = InputEvent::New(touchEvent);
 
-    bool OnButtonClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
-    {
-        if (event.GetInputEventType() == Dali::Ui::InputEventType::KEY_EVENT)
-        {
-            const Dali::KeyEvent& key = event.GetKeyEvent();
-            // Handle keyboard-triggered click
-        }
-        else if (event.GetInputEventType() == Dali::Ui::InputEventType::TAP_GESTURE)
-        {
-            const Dali::TapGesture& tap = event.GetTapGesture();
-            // Handle tap-triggered click
-        }
-        return true;
-    }
-};
+// Create from key event
+InputEvent keyInput = InputEvent::New(keyEvent);
+
+// Create from tap gesture
+InputEvent tapInput = InputEvent::New(tapGesture);
+
+// Create from long press gesture
+InputEvent longPressInput = InputEvent::New(longPressGesture);
+
+// Create from wheel event
+InputEvent wheelInput = InputEvent::New(wheelEvent);
 ```
 
-### Long-Pressed Signal
+### Creating a NONE-type Event
 
-The `LongPressedSignal` fires when a long-press gesture is recognized. The `InputEvent` wraps the `LongPressGesture`:
+For programmatic changes that do not originate from user input, create a NONE-type event:
 
 ```cpp
-class MyController
-{
-public:
-    void SetupLongPressView(Dali::Ui::InteractiveView view)
-    {
-        view.ConnectLongPressedSignal(this, &MyController::OnLongPressed);
-    }
-
-    bool OnLongPressed(Dali::Ui::View view, Dali::Ui::InputEvent event)
-    {
-        if (event.GetInputEventType() == Dali::Ui::InputEventType::LONG_PRESS_GESTURE)
-        {
-            const Dali::LongPressGesture& gesture = event.GetLongPressGesture();
-            // Access gesture details
-        }
-        return true; // Consume the event
-    }
-};
+InputEvent programmaticEvent = InputEvent::New();
 ```
 
-### Lambda-Based Connection
+The returned event has `GetInputEventType() == InputEventType::NONE`.
 
-For inline handlers, use lambda expressions with `ConnectClickedSignal`:
+### Using the Shared None Instance
+
+When you need a valid `InputEvent` with NONE type without heap allocation, use the shared instance:
 
 ```cpp
-void SetupButton(Dali::Ui::InteractiveView button)
+const InputEvent& noneEvent = InputEvent::None();
+```
+
+This is efficient for cases where you need to pass an `InputEvent` but no actual user input occurred.
+
+## Receiving InputEvent in Signal Handlers
+
+### InteractiveView Signals
+
+`InteractiveView` provides signal connection methods that pass `InputEvent` to handlers:
+
+```cpp
+// Connect to click signal
+InteractiveView button = InteractiveView::New();
+button.ConnectClickedSignal(this, [](View view, InputEvent event) {
+    // Handle click
+});
+
+// Connect to pressed state changes
+button.ConnectPressedChangedSignal(this, [](View view, bool pressed, InputEvent event) {
+    if (pressed) {
+        // User pressed down
+    } else {
+        // User released
+    }
+});
+
+// Connect to long press signal
+button.ConnectLongPressedSignal(this, [](View view, InputEvent event) -> bool {
+    // Return true to consume the event and suppress the click
+    return true;
+});
+```
+
+### InteractiveTrait Signals
+
+When using `InteractiveTrait` attached to a generic `View`, connect via the trait's signals:
+
+```cpp
+View view = View::New();
+view.EnsureInteractiveTrait().ClickedSignal().Connect(this, [](View view, InputEvent event) {
+    // Handle click
+});
+```
+
+### SelectableTrait Signals
+
+`SelectableTrait` passes `InputEvent` in its selection changed signal:
+
+```cpp
+View view = View::New();
+SelectableTrait trait = SelectableTrait::New();
+view.SetTrait(SelectableTrait::New());
+
+trait.SelectionChangedSignal().Connect(this, [](View view, bool selected, InputEvent event) {
+    if (event.GetInputEventType() == InputEventType::NONE) {
+        // Selection changed programmatically
+    } else {
+        // Selection changed due to user interaction
+    }
+});
+```
+
+## Inspecting Event Details
+
+After determining the event type, retrieve the original event to access detailed information:
+
+```cpp
+void OnClicked(View view, InputEvent event)
 {
-    button.ConnectClickedSignal(this, [](Dali::Ui::View view, Dali::Ui::InputEvent event) -> bool {
-        // Handle click, optionally inspect event type
-        if (event.GetInputEventType() == Dali::Ui::InputEventType::TOUCH_EVENT)
+    switch (event.GetInputEventType())
+    {
+        case InputEventType::TOUCH_EVENT:
         {
-            const Dali::TouchEvent& touch = event.GetTouchEvent();
-            // Access touch details
+            const TouchEvent& touch = event.GetTouchEvent();
+            // Access touch details: position, time, state, etc.
+            break;
         }
-        return true;
-    });
+        case InputEventType::KEY_EVENT:
+        {
+            const KeyEvent& key = event.GetKeyEvent();
+            // Access key details: key code, key string, state, etc.
+            break;
+        }
+        case InputEventType::TAP_GESTURE:
+        {
+            const TapGesture& tap = event.GetTapGesture();
+            // Access tap details: number of taps, screen position, etc.
+            break;
+        }
+        case InputEventType::LONG_PRESS_GESTURE:
+        {
+            const LongPressGesture& longPress = event.GetLongPressGesture();
+            // Access long press details
+            break;
+        }
+        case InputEventType::WHEEL_EVENT:
+        {
+            const WheelEvent& wheel = event.GetWheelEvent();
+            // Access wheel details: direction, delta, etc.
+            break;
+        }
+        case InputEventType::NONE:
+        default:
+            // No user input event available
+            break;
+    }
 }
 ```
 
-## NONE Events for Non-Input Changes
+## Programmatic State Changes
 
-When a state change occurs without direct user input—for example, through programmatic API calls or framework-triggered lifecycle events—the framework uses an `InputEvent` with type `NONE`.
-
-### Using the Shared NONE Instance
-
-`InputEvent::None()` returns a shared instance that avoids heap allocation on each call. Use this when you need a valid `InputEvent` representing no concrete input:
+When a view state changes programmatically rather than through user input, the associated `InputEvent` has type `NONE`. This pattern appears in `StateEvent` passed to `StateChangedSignal` handlers:
 
 ```cpp
-void NotifyStateChange(Dali::Ui::View view)
-{
-    // State changed programmatically, not from user input
-    EmitStateChange(view, Dali::Ui::InputEvent::None());
-}
+view.StateChangedSignal().Connect(this, [](View view, const StateEvent& e) {
+    if (e.GetInputEventType() == InputEventType::NONE) {
+        // State changed programmatically or by framework
+    } else if (e.Added(ViewState::PRESSED)) {
+        // User initiated press
+        const InputEvent& cause = e.GetCause();
+        // Inspect the specific input that caused the state change
+    }
+});
 ```
 
-### Creating a New NONE Event
-
-If you need a distinct `InputEvent` instance with type `NONE`, use `InputEvent::New()`:
-
-```cpp
-Dali::Ui::InputEvent noneEvent = Dali::Ui::InputEvent::New();
-// noneEvent.GetInputEventType() == Dali::Ui::InputEventType::NONE
-```
-
-### Handling NONE in Callbacks
-
-When processing `InputEvent` in callbacks, always handle the `NONE` case gracefully:
-
-```cpp
-void OnStateChanged(Dali::Ui::View view, Dali::Ui::InputEvent cause)
-{
-    if (cause.GetInputEventType() == Dali::Ui::InputEventType::NONE)
-    {
-        // State changed programmatically or via lifecycle event
-    }
-    else
-    {
-        // State changed due to user input
-    }
-}
+The `StateEvent::GetCause()` method returns the `InputEvent` that triggered the state transition, allowing you to distinguish between user actions and programmatic changes.

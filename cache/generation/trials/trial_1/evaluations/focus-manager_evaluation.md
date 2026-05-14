@@ -5,57 +5,43 @@
 - Status: warning
 - Publish ready: true
 - Bugs: 0
-- Warnings: 6
+- Warnings: 4
 - Needs review: 0
-- Repairable issues: 6
+- Repairable issues: 4
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
 | EMPTY_SECTION | 3 |
-| THIN_SECTION | 3 |
+| THIN_SECTION | 1 |
 
 ## Human Review
 
 ### 1. EMPTY_SECTION (warning)
 
-- Location: line 34
+- Location: line 35
 - Span: ``
-- Reason: Section ## Requesting and Setting Focus is empty.
+- Reason: Section ## Setting and Requesting Focus is empty.
 
 ### 2. EMPTY_SECTION (warning)
 
-- Location: line 95
+- Location: line 97
 - Span: ``
 - Reason: Section ## Moving Focus is empty.
 
 ### 3. THIN_SECTION (warning)
 
-- Location: line 210
+- Location: line 145
 - Span: `## Focus Groups`
 - Reason: Section ## Focus Groups has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
-### 4. THIN_SECTION (warning)
+### 4. EMPTY_SECTION (warning)
 
-- Location: line 254
-- Span: `## Focus Change Signals`
-- Reason: Section ## Focus Change Signals has very little explanatory or example content.
-- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
-
-### 5. THIN_SECTION (warning)
-
-- Location: line 320
-- Span: `## Focus Indicator`
-- Reason: Section ## Focus Indicator has very little explanatory or example content.
-- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
-
-### 6. EMPTY_SECTION (warning)
-
-- Location: line 338
+- Location: line 270
 - Span: ``
-- Reason: Section ## Window Focus Behavior is empty.
+- Reason: Section ## Focus Change Signals is empty.
 
 ## Machine Data
 

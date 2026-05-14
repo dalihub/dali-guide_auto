@@ -5,9 +5,9 @@
 - Status: needs_repair
 - Publish ready: false
 - Bugs: 4
-- Warnings: 0
+- Warnings: 1
 - Needs review: 0
-- Repairable issues: 4
+- Repairable issues: 5
 
 ## Issue Counts
 
@@ -17,6 +17,7 @@
 | MISSING_TITLE_HEADING | 1 |
 | NO_CPP_CODE_BLOCK | 1 |
 | TOO_FEW_TOPIC_SECTIONS | 1 |
+| UNKNOWN_BACKTICK_API_TOKEN | 1 |
 
 ## Human Review
 
@@ -38,7 +39,14 @@
 - Span: ``
 - Reason: Only 0 topic sections found; expected at least 2.
 
-### 4. NO_CPP_CODE_BLOCK (bug)
+### 4. UNKNOWN_BACKTICK_API_TOKEN (warning)
+
+- Location: line 6
+- Span: `AddOnManager::GetGlobalProc<const char*()>`
+- Reason: Backticked API-like token `AddOnManager::GetGlobalProc<const char*()>` could not be resolved.
+- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
+
+### 5. NO_CPP_CODE_BLOCK (bug)
 
 - Location: line n/a
 - Span: ``

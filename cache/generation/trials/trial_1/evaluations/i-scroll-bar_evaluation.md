@@ -5,31 +5,38 @@
 - Status: warning
 - Publish ready: true
 - Bugs: 0
-- Warnings: 2
+- Warnings: 3
 - Needs review: 0
-- Repairable issues: 2
+- Repairable issues: 3
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| EMPTY_SECTION | 1 |
-| THIN_SECTION | 1 |
+| THIN_SECTION | 3 |
 
 ## Human Review
 
 ### 1. THIN_SECTION (warning)
 
-- Location: line 38
+- Location: line 37
 - Span: `## Configuring Scroll Bar Visibility`
 - Reason: Section ## Configuring Scroll Bar Visibility has very little explanatory or example content.
 - Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
-### 2. EMPTY_SECTION (warning)
+### 2. THIN_SECTION (warning)
 
-- Location: line 65
-- Span: ``
-- Reason: Section ## Updating Bar Size and Position is empty.
+- Location: line 68
+- Span: `## Updating Scroll Bar State`
+- Reason: Section ## Updating Scroll Bar State has very little explanatory or example content.
+- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
+
+### 3. THIN_SECTION (warning)
+
+- Location: line 104
+- Span: `## Styling the Scroll Bar`
+- Reason: Section ## Styling the Scroll Bar has very little explanatory or example content.
+- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
 
 ## Machine Data
 

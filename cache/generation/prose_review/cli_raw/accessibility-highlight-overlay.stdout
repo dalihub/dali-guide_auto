@@ -1,20 +1,169 @@
 [36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
-Phase 2.3.5 source-grounded prose review completed for Accessibility Highlight Overlay.
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Accessibility Highlight Overlay
+sidebar_label: Accessibility Highlight Overlay
+category: accessibility
+---
 
-**Review Summary:**
-The draft documentation was largely accurate. Two issues were identified and corrected:
+# Accessibility Highlight Overlay
 
-1. **Accuracy correction:** The AUTO mode description incorrectly stated it calculates based on "the highlight actor's screen extents." The actual implementation uses `highlight.GetParent()` (the model) to calculate screen extents, not the highlight actor itself.
+The Accessibility Highlight Overlay provides a visual focus indicator for accessibility highlighting in dali-ui applications. It supports both automatic position calculation and manual positioning modes for flexible highlight overlay control.
 
-2. **Formatting fix:** The final code block was missing its closing triple backticks.
+## Table of Contents
 
-All other prose claims were verified against source code:
-- Default mode is AUTO (verified in constructor)
-- SetCustomHighlight switches to MANUAL mode (verified in implementation)
-- ResetCustomHighlight returns to AUTO mode (verified in implementation)
-- UpdateOverlay creates overlay hierarchy if needed (verified in implementation)
-- HideOverlay hides the visible highlight (verified in implementation)
+- [Overlay Modes](#overlay-modes)
+- [Creating and Configuring the Overlay](#creating-and-configuring-the-overlay)
+- [Manual Highlight Positioning](#manual-highlight-positioning)
+- [Showing and Hiding the Overlay](#showing-and-hiding-the-overlay)
 
-All code blocks were verified against public API signatures in the header file.
+## Overlay Modes
 
-Output saved to: `accessibility-highlight-overlay-reviewed.md`
+The `AccessibilityHighlightOverlay` operates in two modes determined by the `OverlayHighlightMode` enum:
+
+- `OverlayHighlightMode::AUTO` - The overlay position and size are automatically calculated based on the highlighted actor's screen extents.
+- `OverlayHighlightMode::MANUAL` - The overlay uses custom position and size values set by the application.
+
+By default, the overlay starts in `AUTO` mode. You can query the current mode using `GetOverlayMode()`:
+
+```cpp
+Dali::Ui::AccessibilityHighlightOverlay overlay;
+
+if (overlay.GetOverlayMode() == Dali::Ui::OverlayHighlightMode::AUTO)
+{
+  // Automatic positioning is active
+}
+```
+
+## Creating and Configuring the Overlay
+
+Create an `AccessibilityHighlightOverlay` instance and configure its mode before use. The overlay integrates with the accessibility system to display a highlight border around the currently focused element.
+
+```cpp
+// Create the highlight overlay
+Dali::Ui::AccessibilityHighlightOverlay highlightOverlay;
+
+// Set to automatic mode (default)
+highlightOverlay.SetOverlayMode(Dali::Ui::OverlayHighlightMode::AUTO);
+```
+
+To switch between modes at runtime:
+
+```cpp
+// Switch to manual mode
+highlightOverlay.SetOverlayMode(Dali::Ui::OverlayHighlightMode::MANUAL);
+
+// Switch back to automatic mode
+highlightOverlay.SetOverlayMode(Dali::Ui::OverlayHighlightMode::AUTO);
+```
+
+## Manual Highlight Positioning
+
+When you need precise control over the highlight position and size, use `SetCustomHighlight()` to specify custom coordinates. This method automatically switches the overlay to `MANUAL` mode.
+
+```cpp
+Dali::Ui::AccessibilityHighlightOverlay overlay;
+
+// Set a custom highlight at position (100, 150) with size (200, 80)
+Dali::Vector2 position(100.0f, 150.0f);
+Dali::Vector2 size(200.0f, 80.0f);
+overlay.SetCustomHighlight(position, size);
+```
+
+To return to automatic positioning after using a custom highlight, call `ResetCustomHighlight()`:
+
+```cpp
+// Reset to automatic mode
+overlay.ResetCustomHighlight();
+```
+
+The `ResetCustomHighlight()` method clears the manual position and size values and switches the mode back to `AUTO`.
+
+## Showing and Hiding the Overlay
+
+The `UpdateOverlay()` method updates or creates the highlight overlay for a specified actor. Pass the currently highlighted actor to this method.
+
+```cpp
+Dali::Ui::AccessibilityHighlightOverlay overlay;
+Dali::Actor highlightActor; // The actor receiving accessibility focus
+
+// Update or create the overlay for the highlight actor
+overlay.UpdateOverlay(highlightActor);
+```
+
+When the highlight should no longer be visible, call `HideOverlay()`:
+
+```cpp
+// Hide the currently displayed highlight
+overlay.HideOverlay();
+```
+
+A typical workflow for managing the highlight overlay during accessibility focus changes:
+
+```cpp
+void OnAccessibilityFocusGained(Dali::Actor focusedActor)
+{
+  mHighlightOverlay.UpdateOverlay(focusedActor);
+}
+
+void OnAccessibilityFocusLost()
+{
+  mHighlightOverlay.HideOverlay();
+}
+```
+
+When using `ViewAccessible` for accessibility support, the highlight overlay is managed internally. `ViewAccessible` provides `SetCustomHighlightOverlay()` and `ResetCustomHighlightOverlay()` methods that delegate to the internal `AccessibilityHighlightOverlay` instance.
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Accessibility Highlight Overlay Prose Review
+
+## Summary
+
+Reviewed the draft against public headers (`accessibility-highlight-overlay.h`, `view-accessible.h`) and implementation files (`accessibility-highlight-overlay.cpp`, `view-accessible.cpp`). The draft was largely accurate. One structural issue was fixed in the final section.
+
+## Changes Made
+
+### 1. ViewAccessible Section (Showing and Hiding the Overlay)
+
+**Original:**
+```cpp
+// Through ViewAccessible (if implementing custom accessibility)
+void SetCustomHighlightOverlay(Dali::Vector2 position, Dali::Vector2 size);
+
+void ResetCustomHighlightOverlay();
+```
+
+**Revised:**
+"When using `ViewAccessible` for accessibility support, the highlight overlay is managed internally. `ViewAccessible` provides `SetCustomHighlightOverlay()` and `ResetCustomHighlightOverlay()` methods that delegate to the internal `AccessibilityHighlightOverlay` instance."
+
+**Reason:** The original code block was incomplete (missing closing fence) and showed bare method signatures without context. The revised prose accurately describes the relationship between `ViewAccessible` and `AccessibilityHighlightOverlay` based on source evidence:
+- `view-accessible.h` line 47: `AccessibilityHighlightOverlay mHighlightOverlay;` (member variable)
+- `view-accessible.h` lines 193-203: `SetCustomHighlightOverlay()` and `ResetCustomHighlightOverlay()` method declarations
+
+## Verified Accurate Prose (No Changes Needed)
+
+| Prose Statement | Source Evidence |
+|-----------------|-----------------|
+| Default mode is AUTO | `accessibility-highlight-overlay.cpp` line 67: `mOverlayMode(OverlayHighlightMode::AUTO)` in constructor initializer list |
+| `SetCustomHighlight()` switches to MANUAL mode | `accessibility-highlight-overlay.cpp` line 73: `mOverlayMode = OverlayHighlightMode::MANUAL;` |
+| `ResetCustomHighlight()` switches back to AUTO | `accessibility-highlight-overlay.cpp` line 79: `mOverlayMode = OverlayHighlightMode::AUTO;` |
+| `UpdateOverlay()` creates overlay if none exists | Header docstring: "If no overlay exists, it creates a new one." |
+| `HideOverlay()` hides the displayed highlight | Implementation sets `VISIBLE` property to false |
+
+## Code Blocks Verified
+
+All code blocks use correct API names and signatures matching the public header:
+- `Dali::Ui::AccessibilityHighlightOverlay` - correct class name
+- `Dali::Ui::OverlayHighlightMode::AUTO` / `MANUAL` - correct enum values
+- `SetCustomHighlight(Vector2 position, Vector2 size)` - correct signature
+- `ResetCustomHighlight()` - correct signature
+- `SetOverlayMode(OverlayHighlightMode mode)` - correct signature
+- `GetOverlayMode()` - correct signature
+- `UpdateOverlay(Dali::Actor& activeHighlight)` - correct signature
+- `HideOverlay()` - correct signature
+
+## Remaining Considerations
+
+None. The document accurately describes the API behavior based on source evidence.
+-----END_PROSE_REVIEW_REPORT-----

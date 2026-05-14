@@ -13,9 +13,9 @@
 
 | Type | Count |
 |---|---:|
+| ENUM_VALUE_OWNER_MISMATCH | 1 |
 | MISSING_TABLE_OF_CONTENTS | 1 |
 | MISSING_TITLE_HEADING | 1 |
-| NO_CPP_CODE_BLOCK | 1 |
 | PREFERRED_USAGE_PATTERN_MISSING | 1 |
 | TOO_FEW_TOPIC_SECTIONS | 1 |
 
@@ -39,19 +39,19 @@
 - Span: ``
 - Reason: Only 0 topic sections found; expected at least 2.
 
-### 4. PREFERRED_USAGE_PATTERN_MISSING (warning)
+### 4. ENUM_VALUE_OWNER_MISMATCH (bug)
+
+- Location: line 7
+- Span: `ImageView::Property::PIXEL_AREA`
+- Reason: ImageView::Property::PIXEL_AREA is not defined by that Property owner.
+- Suggested direction: Use the property enum owner that actually defines this value.
+
+### 5. PREFERRED_USAGE_PATTERN_MISSING (warning)
 
 - Location: line n/a
 - Span: ``
 - Reason: Preferred usage pattern is not visible: image_signals
 - Suggested direction: Consider adding the preferred dali-ui idiom for this feature.
-
-### 5. NO_CPP_CODE_BLOCK (bug)
-
-- Location: line n/a
-- Span: ``
-- Reason: Primary feature guide has no C++ code block.
-- Suggested direction: Add at least one compact, source-grounded C++ example for the primary feature.
 
 ## Machine Data
 

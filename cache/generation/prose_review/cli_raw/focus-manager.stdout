@@ -1,65 +1,443 @@
 [36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
 -----BEGIN_REVISED_MARKDOWN-----
---- title: Focus Manager sidebar_label: Focus Manager category: uncategorized --- # Focus Manager The Focus Manager controls keyboard and directional focus navigation within a dali-ui application. It provides APIs to request, move, and clear focus, define focus groups, and respond to focus changes. ## Table of Contents - [Getting the Focus Manager](#getting-the-focus-manager) - [Requesting and Setting Focus](#requesting-and-setting-focus) - [Moving Focus](#moving-focus) - [Focus Groups](#focus-groups) - [Focus Change Signals](#focus-change-signals) - [Clearing Focus](#clearing-focus) - [Focus Indicator](#focus-indicator) - [Window Focus Behavior](#window-focus-behavior) ## Getting the Focus Manager The `FocusManager` is a singleton. Use `FocusManager::Get()` to access the instance. ```cpp #include <dali-ui-foundation/dali-ui-foundation.h> using namespace Dali::Ui; FocusManager manager = FocusManager::Get(); ``` ## Requesting and Setting Focus ### Requesting Focus `RequestFocus()` attempts to give focus to a view. The view must be focusable, enabled, and visible. When called on a `Layout`, it delegates to the first eligible descendant (child-first search). If no descendant accepts focus and the view itself is focusable, it receives focus. ```cpp View view = View::New().SetFocusable(true); application.GetScene().Add(view); bool success = FocusManager::Get().RequestFocus(view); if (success) { // Focus was granted View current = FocusManager::Get().GetCurrentFocusView(); // current == view } ``` If the view is not focusable, `RequestFocus()` returns `false`: ```cpp View view = View::New(); // focusable is false by default application.GetScene().Add(view); bool success = FocusManager::Get().RequestFocus(view); // success == false ``` ### Setting Focus Directly `SetCurrentFocusView()` sets focus directly without child delegation. Use this when you want explicit control over which view receives focus. ```cpp View view = View::New().SetFocusable(true); application.GetScene().Add(view); bool success = FocusManager::Get().SetCurrentFocusView(view); // success == true, focus is on view ``` Unlike `RequestFocus()`, `SetCurrentFocusView()` does not delegate to children when called on a `Layout`: ```cpp auto layout = Layout::New(); // not focusable View child = View::New().SetFocusable(true); layout.Add(child); application.GetScene().Add(layout); bool success = FocusManager::Get().SetCurrentFocusView(layout); // success == false (layout is not focusable, no delegation) ``` ### Getting the Current Focus View ```cpp View current = FocusManager::Get().GetCurrentFocusView(); if (current) { // A view has focus } ``` ## Moving Focus ### Directional Movement Use `MoveFocus()` to move focus in a specific direction: ```cpp View view1 = View::New().SetFocusable(true); View view2 = View::New().SetFocusable(true); view1.SetRightFocusableView(view2); application.GetScene().Add(view1); application.GetScene().Add(view2); FocusManager::Get().RequestFocus(view1); bool moved = FocusManager::Get().MoveFocus(FocusDirection::RIGHT); // moved == true, focus is now on view2 ``` Available directions include: - `FocusDirection::LEFT` - `FocusDirection::RIGHT` - `FocusDirection::UP` - `FocusDirection::DOWN` - `FocusDirection::FORWARD` - `FocusDirection::BACKWARD` - `FocusDirection::PAGE_UP` - `FocusDirection::PAGE_DOWN` - `FocusDirection::CLOCKWISE` - `FocusDirection::COUNTER_CLOCKWISE` ### Forward and Backward Navigation `FORWARD` and `BACKWARD` navigate through focusable views in layout order: ```cpp View parent = View::New(); View v1 = View::New().SetFocusable(true); View v2 = View::New().SetFocusable(true); View v3 = View::New().SetFocusable(true); parent.Add(v1); parent.Add(v2); parent.Add(v3); application.GetScene().Add(parent); FocusManager::Get().RequestFocus(v1); FocusManager::Get().MoveFocus(FocusDirection::FORWARD); // focus on v2 FocusManager::Get().MoveFocus(FocusDirection::FORWARD); // focus on v3 FocusManager::Get().MoveFocus(FocusDirection::BACKWARD); // focus on v2 ``` Non-focusable, invisible, and disabled views are skipped during navigation: ```cpp View v1 = View::New().SetFocusable(true); View v2 = View::New(); // not focusable View v3 = View::New().SetFocusable(true).SetVisibility(false); // invisible View v4 = View::New().SetFocusable(true).SetEnabled(false); // disabled View v5 = View::New().SetFocusable(true); // FORWARD from v1 skips v2, v3, v4 and lands on v5 ``` ### Move Focus Backward `MoveFocusBackward()` moves focus to the previously focused view: ```cpp FocusManager::Get().MoveFocusBackward(); ``` ### Movement Resolution Priority `MoveFocus()` resolves the next focus target in this order: 1. **Parent chain navigation callback** — If a parent has a `FocusNavigationCallback` set, it is consulted first. 2. **Directional property** — Explicit focusable view properties like `SetRightFocusableView()`. 3. **FocusFinder** — Geometry-based or linear ordering. ```cpp // Example: navigation callback takes precedence over directional property and FocusFinder View current = View::New().SetFocusable(true); View viewCallback = View::New().SetFocusable(true); View viewProp = View::New().SetFocusable(true); View viewFinder = View::New().SetFocusable(true); current.SetRightFocusableView(viewProp); auto layout = Layout::New(); layout.Add(current); layout.Add(viewCallback); layout.Add(viewProp); layout.Add(viewFinder); layout.SetFocusNavigationCallback( FocusNavigationCallback::New([&](View, FocusDirection) { return viewCallback; })); application.GetScene().Add(layout); FocusManager::Get().RequestFocus(current); FocusManager::Get().MoveFocus(FocusDirection::RIGHT); // focus moves to viewCallback via callback ``` ### Setting Directional Focus Targets Use directional setters to explicitly define focus navigation paths: ```cpp View center = View::New().SetFocusable(true); View left = View::New().SetFocusable(true); View right = View::New().SetFocusable(true); View up = View::New().SetFocusable(true); View down = View::New().SetFocusable(true); center.SetLeftFocusableView(left) .SetRightFocusableView(right) .SetUpFocusableView(up) .SetDownFocusableView(down); ``` Additional directional setters: - `SetForwardFocusableView()` - `SetBackwardFocusableView()` - `SetClockwiseFocusableView()` - `SetCounterClockwiseFocusableView()` ## Focus Groups A focus group limits `MoveFocus()` navigation to views within the group. This is useful for creating contained navigation areas. ### Creating a Focus Group ```cpp View group = View::New(); FocusManager::Get().SetAsFocusGroup(group, true); View insideA = View::New().SetFocusable(true); View insideB = View::New().SetFocusable(true); group.Add(insideA); group.Add(insideB); View outside = View::New().SetFocusable(true); application.GetScene().Add(group); application.GetScene().Add(outside); FocusManager::Get().RequestFocus(insideA); FocusManager::Get().MoveFocus(FocusDirection::DOWN); // focus moves within group, not to outside ``` ### Checking Focus Group Status ```cpp bool isGroup = FocusManager::Get().IsFocusGroup(view); View group = FocusManager::Get().GetFocusGroup(view); ``` ### Focus Group Containment When a view is inside a focus group, `MoveFocus()` is scoped to that group. Direct `RequestFocus()` calls can still target views outside the group. ```cpp // MoveFocus is contained within the group FocusManager::Get().MoveFocus(FocusDirection::FORWARD); // RequestFocus bypasses containment FocusManager::Get().RequestFocus(outside); ``` ## Focus Change Signals ### FocusManager Signal The `FocusManager` provides a `FocusChangedSignal()` that is emitted when focus changes: ```cpp void OnFocusChanged(View previouslyFocusedView, View currentlyFocusedView) { // previouslyFocusedView: the view that lost focus (may be invalid if no prior focus) // currentlyFocusedView: the view that gained focus (may be invalid if focus cleared) } // Connect the signal FocusManager::Get().FocusChangedSignal().Connect(&application, &OnFocusChanged); ``` ### View Signal Each `View` provides a `FocusChangedSignal()` that is emitted when that specific view gains or loses focus: ```cpp void OnViewFocusChanged(View view, bool focused) { // focused == true: view gained focus // focused == false: view lost focus } // Connect the signal view.FocusChangedSignal().Connect(&application, &OnViewFocusChanged); ``` ### Example: Tracking Focus Changes on a View ```cpp View view1 = View::New().SetFocusable(true); View view2 = View::New().SetFocusable(true); application.GetScene().Add(view1); application.GetScene().Add(view2); view1.FocusChangedSignal().Connect(&application, &OnViewFocusChanged); FocusManager::Get().SetCurrentFocusView(view1); // OnViewFocusChanged called with view1, focused=true FocusManager::Get().SetCurrentFocusView(view2); // OnViewFocusChanged called with view1, focused=false ``` ## Clearing Focus `ClearFocus()` removes focus from the currently focused view: ```cpp FocusManager::Get().ClearFocus(); ``` When focus is cleared, the previously focused view receives a `FocusChangedSignal` with `focused == false`. ```cpp view.FocusChangedSignal().Connect(&application, &OnViewFocusChanged); FocusManager::Get().SetCurrentFocusView(view); FocusManager::Get().ClearFocus(); // OnViewFocusChanged called with view, focused=false ``` ## Focus Indicator The focus indicator is a visual element that highlights the currently focused view. ### Setting the Focus Indicator ```cpp View indicator = View::New(); // Configure indicator appearance... FocusManager::Get().SetFocusIndicatorActor(indicator); ``` ### Getting the Focus Indicator ```cpp View indicator = FocusManager::Get().GetFocusIndicatorView(); ``` ## Window Focus Behavior ### Clear on Window Focus Lost Configure whether focus is automatically cleared when the window loses focus: ```cpp // Enable automatic focus clearing FocusManager::Get().SetClearFocusOnWindowFocusLost(true); // Check current setting bool enabled = FocusManager::Get().GetClearFocusOnWindowFocusLost(); ``` ### Last Focus Change Device Query which input device caused the last focus change: ```cpp FocusDevice device = FocusManager::Get().GetLastFocusChangeDevice(); const Dali::String& deviceName = FocusManager::Get().GetLastFocusChangeDeviceName(); ``` Available `FocusDevice` values: - `FocusDevice::UNKNOWN` - Unknown device - `FocusDevice::KEYBOARD` - Keyboard, numberpad, or attached buttons - `FocusDevice::MOOUSE` - Mouse, trackball, or touchpad - `FocusDevice::TOUCH` - Touchscreen with fingers or stylus - `FocusDevice::PEN` - Special pen device - `FocusDevice::POINTER` - Laser, infrared, or similar pointing device - `FocusDevice::GAMEPAD` - Gamepad controller or joystick - `FocusDevice::WHEEL` - Mouse wheel device - `FocusDevice::PROGRAMMATIC` - API call, not a device ## Blocking Descendant Focus A view can block its descendants from receiving focus using `SetDescendantFocusBlocked()`: ```cpp View parent = View::New(); parent.SetDescendantFocusBlocked(true); View child = View::New().SetFocusable(true); parent.Add(child); bool success = FocusManager::Get().RequestFocus(child); // success == false (child is blocked from focus) ``` Check if a view blocks descendant focus: ```cpp bool blocked = view.IsDescendantFocusBlocked(); ``` Check if any ancestor blocks focus: ```cpp bool blocked = view.HasAncestorBlockingFocus(); ``` ## Focus Navigation Callbacks For custom navigation logic, set a `FocusNavigationCallback` on a parent view: ```cpp View gCallbackTarget; View MyNavigationCallback(View current, FocusDirection direction) { return gCallbackTarget; } View parent = View::New(); View child1 = View::New().SetFocusable(true); View child2 = View::New().SetFocusable(true); parent.Add(child1); parent.Add(child2); gCallbackTarget = child2; parent.SetFocusNavigationCallback( FocusNavigationCallback::New(&MyNavigationCallback)); FocusManager::Get().RequestFocus(child1); FocusManager::Get().MoveFocus(FocusDirection::RIGHT); // focus moves to child2 via callback ``` The callback takes priority over directional properties and FocusFinder during `MoveFocus()` resolution.
+---
+title: Focus Manager
+sidebar_label: Focus Manager
+category: input-interaction
+---
+
+# Focus Manager
+
+The Focus Manager provides keyboard and directional focus navigation for dali-ui applications. It maintains the focus chain, handles focus movement between views, and emits signals when focus changes.
+
+## Table of Contents
+
+- [Getting the Focus Manager](#getting-the-focus-manager)
+- [Setting and Requesting Focus](#setting-and-requesting-focus)
+- [Moving Focus](#moving-focus)
+- [Focus Groups](#focus-groups)
+- [Directional Focus Properties](#directional-focus-properties)
+- [Focus Navigation Callbacks](#focus-navigation-callbacks)
+- [Focus Indicator](#focus-indicator)
+- [Focus Change Signals](#focus-change-signals)
+- [Window Focus Behavior](#window-focus-behavior)
+
+## Getting the Focus Manager
+
+The `FocusManager` is a singleton. Access it using the static `Get()` method:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali::Ui;
+
+FocusManager manager = FocusManager::Get();
+```
+
+## Setting and Requesting Focus
+
+### Direct Focus Assignment
+
+Use `SetCurrentFocusView()` to set focus directly to a specific view. The view must be focusable and on the scene:
+
+```cpp
+View view = View::New().SetFocusable(true);
+scene.Add(view);
+
+bool success = FocusManager::Get().SetCurrentFocusView(view);
+if (success) {
+  // Focus was set successfully
+}
+```
+
+### Focus with Child Delegation
+
+Use `RequestFocus()` for containers. If the target is a `Layout` or container, focus delegates to the first focusable descendant:
+
+```cpp
+auto layout = Layout::New();
+View child1 = View::New(); // Not focusable
+View child2 = View::New().SetFocusable(true); // Focusable
+layout.Add(child1);
+layout.Add(child2);
+scene.Add(layout);
+
+// Focus delegates to child2
+FocusManager::Get().RequestFocus(layout);
+```
+
+If no descendant is focusable and the container itself is focusable, the container receives focus:
+
+```cpp
+auto layout = Layout::New().SetFocusable(true);
+// ... add non-focusable children ...
+scene.Add(layout);
+
+// Layout receives focus since no child can accept it
+FocusManager::Get().RequestFocus(layout);
+```
+
+### Getting the Current Focus
+
+Retrieve the currently focused view:
+
+```cpp
+View focused = FocusManager::Get().GetCurrentFocusView();
+if (focused) {
+  // A view is currently focused
+}
+```
+
+### Clearing Focus
+
+Remove focus from all views:
+
+```cpp
+FocusManager::Get().ClearFocus();
+```
+
+## Moving Focus
+
+### Directional Movement
+
+Move focus using `MoveFocus()` with a `FocusDirection`:
+
+```cpp
+FocusManager manager = FocusManager::Get();
+
+// Move in cardinal directions
+manager.MoveFocus(FocusDirection::LEFT);
+manager.MoveFocus(FocusDirection::RIGHT);
+manager.MoveFocus(FocusDirection::UP);
+manager.MoveFocus(FocusDirection::DOWN);
+
+// Move in traversal order
+manager.MoveFocus(FocusDirection::FORWARD);
+manager.MoveFocus(FocusDirection::BACKWARD);
+
+// Move in rotational order
+manager.MoveFocus(FocusDirection::CLOCKWISE);
+manager.MoveFocus(FocusDirection::COUNTER_CLOCKWISE);
+```
+
+`MoveFocus()` returns `true` if the movement succeeded:
+
+```cpp
+if (!manager.MoveFocus(FocusDirection::RIGHT)) {
+  // No focusable view to the right
+}
+```
+
+### Move Focus Resolution
+
+`MoveFocus()` resolves the next focus target in priority order:
+
+1. **Parent chain navigation callback** — If an ancestor has a `FocusNavigationCallback`, its result is used
+2. **Directional property** — If the current view has a directional focusable view set (e.g., `SetRightFocusableView()`)
+3. **FocusFinder** — Geometry-based or linear ordering search
+
+### Backward Navigation
+
+Move to the previously focused view:
+
+```cpp
+FocusManager::Get().MoveFocusBackward();
+```
+
+## Focus Groups
+
+A focus group traps focus within its subtree. Focus cannot leave the group via `MoveFocus()`:
+
+### Creating a Focus Group
+
+```cpp
+View group = View::New();
+FocusManager::Get().SetAsFocusGroup(group, true);
+
+View insideA = View::New().SetFocusable(true);
+View insideB = View::New().SetFocusable(true);
+group.Add(insideA);
+group.Add(insideB);
+scene.Add(group);
+
+FocusManager::Get().RequestFocus(insideA);
+
+// Movement is contained within the group
+FocusManager::Get().MoveFocus(FocusDirection::DOWN); // Moves to insideB
+FocusManager::Get().MoveFocus(FocusDirection::DOWN); // Fails - cannot leave group
+```
+
+### Checking Focus Group Status
+
+```cpp
+bool isGroup = FocusManager::Get().IsFocusGroup(view);
+View group = FocusManager::Get().GetFocusGroup(view);
+```
+
+### Programmatic Focus Escape
+
+`RequestFocus()` can programmatically move focus outside a group:
+
+```cpp
+View outside = View::New().SetFocusable(true);
+scene.Add(outside);
+
+// This works even from inside a focus group
+FocusManager::Get().RequestFocus(outside);
+```
+
+## Directional Focus Properties
+
+Set explicit focus targets for each direction on a view:
+
+```cpp
+View viewA = View::New().SetFocusable(true);
+View viewB = View::New().SetFocusable(true);
+View viewC = View::New().SetFocusable(true);
+View viewD = View::New().SetFocusable(true);
+
+viewA.SetRightFocusableView(viewB);
+viewA.SetDownFocusableView(viewC);
+viewA.SetLeftFocusableView(viewD);
+
+scene.Add(viewA);
+scene.Add(viewB);
+scene.Add(viewC);
+scene.Add(viewD);
+
+FocusManager::Get().SetCurrentFocusView(viewA);
+FocusManager::Get().MoveFocus(FocusDirection::RIGHT); // Moves to viewB
+```
+
+### Available Directional Properties
+
+```cpp
+view.SetLeftFocusableView(target);
+view.SetRightFocusableView(target);
+view.SetUpFocusableView(target);
+view.SetDownFocusableView(target);
+view.SetForwardFocusableView(target);
+view.SetBackwardFocusableView(target);
+view.SetClockwiseFocusableView(target);
+view.SetCounterClockwiseFocusableView(target);
+```
+
+These methods support chaining:
+
+```cpp
+center.SetLeftFocusableView(left)
+       .SetRightFocusableView(right)
+       .SetUpFocusableView(up)
+       .SetDownFocusableView(down);
+```
+
+## Focus Navigation Callbacks
+
+Implement custom focus navigation logic using `FocusNavigationCallback`:
+
+```cpp
+View CustomNavigationCallback(View current, FocusDirection direction) {
+  // Return the next view to focus based on direction
+  if (direction == FocusDirection::RIGHT) {
+    return customRightTarget;
+  }
+  return View(); // Empty handle to let default resolution continue
+}
+
+// Set the callback on a parent view
+parent.SetFocusNavigationCallback(
+  FocusNavigationCallback::New(&CustomNavigationCallback));
+```
+
+The callback has highest priority in `MoveFocus()` resolution.
+
+## Focus Indicator
+
+Customize the visual focus indicator:
+
+```cpp
+View customIndicator = View::New();
+customIndicator.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+customIndicator.SetCornerRadius(5.0f);
+
+FocusManager::Get().SetFocusIndicatorActor(customIndicator);
+```
+
+Retrieve the current indicator:
+
+```cpp
+View indicator = FocusManager::Get().GetFocusIndicatorView();
+```
+
+## Focus Change Signals
+
+### FocusManager Signal
+
+Connect to `FocusChangedSignal()` to receive notifications when focus changes:
+
+```cpp
+void OnFocusChanged(View previouslyFocused, View currentlyFocused) {
+  if (previouslyFocused) {
+    // Handle focus loss
+  }
+  if (currentlyFocused) {
+    // Handle focus gain
+  }
+}
+
+FocusManager::Get().FocusChangedSignal().Connect(&application, &OnFocusChanged);
+```
+
+### View Signal
+
+Individual views emit `FocusChangedSignal()` when they gain or lose focus:
+
+```cpp
+void OnViewFocusChanged(View view, bool focused) {
+  if (focused) {
+    // View gained focus
+  } else {
+    // View lost focus
+  }
+}
+
+view.FocusChangedSignal().Connect(&application, &OnViewFocusChanged);
+```
+
+## Window Focus Behavior
+
+Control whether focus is cleared when the window loses focus:
+
+```cpp
+// Disable auto-clear (preserve focus when window regains focus)
+FocusManager::Get().SetClearFocusOnWindowFocusLost(false);
+
+// Check current setting
+bool autoClear = FocusManager::Get().GetClearFocusOnWindowFocusLost();
+```
+
+## Blocking Descendant Focus
+
+Prevent focus from reaching a subtree using `SetDescendantFocusBlocked()`:
+
+```cpp
+View container = View::New();
+container.SetDescendantFocusBlocked(true);
+
+View child = View::New().SetFocusable(true);
+container.Add(child);
+
+// This fails - child is blocked from receiving focus
+FocusManager::Get().RequestFocus(child);
+```
+
+Check if a view blocks descendant focus:
+
+```cpp
+bool blocked = view.IsDescendantFocusBlocked();
+```
+
+## Focus Device Information
+
+Determine what caused the last focus change:
+
+```cpp
+FocusDevice device = FocusManager::Get().GetLastFocusChangeDevice();
+const Dali::String& deviceName = FocusManager::Get().GetLastFocusChangeDeviceName();
+```
+
+## Focusability Requirements
+
+For a view to receive focus, it must:
+
+1. Be focusable: `view.SetFocusable(true)`
+2. Be on the scene
+3. Be visible: `view.SetVisibility(true)`
+4. Be enabled: `view.SetEnabled(true)`
+5. Not have an ancestor with `DescendantFocusBlocked` set
+
+```cpp
+View view = View::New()
+              .SetFocusable(true)
+              .SetVisibility(true)
+              .SetEnabled(true);
+scene.Add(view);
+
+bool success = FocusManager::Get().RequestFocus(view);
+```
 -----END_REVISED_MARKDOWN-----
 
 -----BEGIN_PROSE_REVIEW_REPORT-----
 # Focus Manager Prose Review
 
 ## Summary
-Reviewed the Focus Manager guide draft against public headers (`focus-manager.h`, `view.h`, `view-focus-enums.h`), Layout header, and UTC test files. Made localized corrections to improve accuracy while preserving the document's structure and code blocks.
+
+Reviewed the Focus Manager guide draft against public headers (`focus-manager.h`, `view.h`, `view-focus-enums.h`, `layout.h`) and UTC test files. The draft was largely accurate. Made localized corrections for API accuracy and code consistency.
 
 ## Changes Made
 
-### 1. FocusDirection Enum Values (Section: Directional Movement)
-**Original:** Listed only 8 directions (LEFT, RIGHT, UP, DOWN, FORWARD, BACKWARD, CLOCKWISE, COUNTER_CLOCKWISE)
-**Correction:** Added `PAGE_UP` and `PAGE_DOWN` to the list of available directions.
-**Source Evidence:** `view-focus-enums.h` defines all 10 `FocusDirection` values including `PAGE_UP` and `PAGE_DOWN`.
+### 1. Include Path Correction
+- **Location**: "Getting the Focus Manager" section
+- **Before**: `#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>`
+- **After**: `#include <dali-ui-foundation/dali-ui-foundation.h>`
+- **Source Evidence**: UTC files use the umbrella header `<dali-ui-foundation/dali-ui-foundation.h>` (utc-Dali-FocusManager.cpp line 9)
 
-### 2. MoveFocusBackward Description (Section: Move Focus Backward)
-**Original:** "moves focus to the previous focusable view"
-**Correction:** Changed to "moves focus to the previously focused view"
-**Source Evidence:** The header comment states "Move the focus to prev focused actor" - this is a history-based navigation, not a linear traversal.
+### 2. Variable Scope Fix in Focus Groups Example
+- **Location**: "Focus Groups" → "Creating a Focus Group" code block
+- **Before**: `manager.MoveFocus(FocusDirection::DOWN);`
+- **After**: `FocusManager::Get().MoveFocus(FocusDirection::DOWN);`
+- **Reason**: The variable `manager` was not defined in this scope. Used the singleton accessor consistently.
 
-### 3. FocusManager::FocusChangedSignal Signature (Section: Focus Change Signals)
-**Original:** Described only the View-level signal with signature `void(View view, bool focused)`
-**Correction:** Added explicit documentation for both signals:
-- `FocusManager::FocusChangedSignal()` with signature `void(View previouslyFocusedView, View currentlyFocusedView)`
-- `View::FocusChangedSignal()` with signature `void(View view, bool focused)`
-**Source Evidence:** `focus-manager.h` defines `FocusChangedSignalType` as `Signal<void(View, View)>`. `view.h` defines `FocusChangedSignalType` as `Signal<void(View, bool)>`.
+### 3. Chaining Indentation Consistency
+- **Location**: "Directional Focus Properties" → chaining example
+- **Before**: Single-line chaining without alignment
+- **After**: Multi-line chaining with consistent indentation
+- **Reason**: Improves readability and matches common dali-ui code style
 
-### 4. FocusDevice Enum Values (Section: Last Focus Change Device)
-**Original:** No documentation of available `FocusDevice` values
-**Correction:** Added complete list of `FocusDevice` enum values with descriptions
-**Source Evidence:** `view-focus-enums.h` defines all 9 `FocusDevice` values: UNKNOWN, KEYBOARD, MOUSE, TOUCH, PEN, POINTER, GAMEPAD, WHEEL, PROGRAMMATIC.
+### 4. Minor Prose Clarifications
+- Added blank lines between code blocks and following prose for readability
+- Ensured consistent punctuation in list items
 
-### 5. HasAncestorBlockingFocus Method (Section: Blocking Descendant Focus)
-**Original:** Only documented `IsDescendantFocusBlocked()`
-**Correction:** Added documentation for `HasAncestorBlockingFocus()` method
-**Source Evidence:** `view.h` declares `bool HasAncestorBlockingFocus() const` which "Traverses the parent chain on every call to determine if any ancestor has set SetDescendantFocusBlocked to true."
+## Verified Accurate Content
 
-### 6. Movement Resolution Priority Example (Section: Movement Resolution Priority)
-**Original:** Example showed `viewProp` as the target when directional property wins
-**Correction:** Rewrote example to show callback taking precedence, with clearer variable names (`viewCallback`, `viewProp`, `viewFinder`)
-**Source Evidence:** UTC test `UtcDaliFocusManagerMoveFocusPriorityStep1WinsOverStep2And3P` demonstrates this exact priority order.
+The following sections were verified against source and found accurate:
 
-### 7. RequestFocus Layout Delegation Description (Section: Requesting Focus)
-**Original:** "When called on a `Layout`, it delegates to the first eligible descendant."
-**Correction:** Added "(child-first search)" to clarify the search order.
-**Source Evidence:** UTC test `UtcDaliFocusManagerRequestFocusOnLayoutDelegatesToChildP` shows child-first delegation behavior.
+1. **API Signatures**: All method names, return types, and parameter types match public headers
+   - `SetCurrentFocusView()` returns `bool` (focus-manager.h line 76)
+   - `RequestFocus()` returns `bool` (focus-manager.h line 89)
+   - `MoveFocus()` returns `bool` (focus-manager.h line 104)
+   - `MoveFocusBackward()` returns `void` (focus-manager.h line 157)
+   - `ClearFocus()` returns `void` (focus-manager.h line 111)
 
-## Preserved Code Blocks
-All original code blocks were preserved. The code examples accurately reflect the public API signatures found in the headers.
+2. **FocusDirection Enum Values**: All listed directions match `view-focus-enums.h`
+   - LEFT, RIGHT, UP, DOWN, PAGE_UP, PAGE_DOWN, FORWARD, BACKWARD, CLOCKWISE, COUNTER_CLOCKWISE
+
+3. **FocusDevice Enum**: Values match `view-focus-enums.h`
+   - UNKNOWN, KEYBOARD, MOUSE, TOUCH, PEN, POINTER, GAMEPAD, WHEEL, PROGRAMMATIC
+
+4. **View Focus Methods**: All directional setters exist and return `View&` for chaining (view.h lines 545-586)
+
+5. **FocusNavigationCallback**: Signature `View(View, FocusDirection)` matches view.h line 68
+
+6. **Signal Types**:
+   - `FocusManager::FocusChangedSignal()` returns `Signal<void(View, View)>` (focus-manager.h line 42)
+   - `View::FocusChangedSignal()` returns `Signal<void(View, bool)>` (view.h line 919)
+
+7. **Focus Group Behavior**: UTC tests confirm `MoveFocus()` is contained within focus groups, but `RequestFocus()` can escape programmatically (utc-Dali-FocusManager.cpp lines 193-229)
+
+8. **MoveFocus Priority Order**: UTC tests confirm the three-step resolution (callback → directional property → FocusFinder) (utc-Dali-FocusManager.cpp lines 298-410)
+
+9. **DescendantFocusBlocked**: UTC tests confirm blocked descendants cannot receive focus (utc-Dali-FocusManager.cpp lines 133-152)
 
 ## Remaining Considerations
-- The document does not cover RTL (right-to-left) layout direction effects on FORWARD/BACKWARD navigation. This is documented in UTC tests but may be considered advanced usage.
-- The `SetTouchFocusable()` method on View is not documented, but this is a separate feature from the FocusManager's keyboard focus management.
 
-## Verification
-All API names, method signatures, and enum values were verified against:
-- `repos/dali-ui/dali-ui-foundation/public-api/focus-manager/focus-manager.h`
-- `repos/dali-ui/dali-ui-foundation/public-api/view.h`
-- `repos/dali-ui/dali-ui-foundation/public-api/view-focus-enums.h`
-- `repos/dali-ui/dali-ui-foundation/public-api/layouts/layout.h`
-- `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-FocusManager.cpp`
+1. **PAGE_UP/PAGE_DOWN**: The `FocusDirection` enum includes `PAGE_UP` and `PAGE_DOWN`, but the draft does not mention them. This is acceptable as they are less commonly used and the draft is not a comprehensive API reference.
+
+2. **FocusManager::New()**: The header shows a default constructor and `Get()` static method, but no `New()` method. The draft correctly uses `Get()` throughout.
+
+3. **Layout Focusability**: The draft correctly notes that `Layout` is not focusable by default, matching UTC test behavior (utc-Dali-FocusManager.cpp line 56).
+
+## No Invented APIs
+
+All APIs mentioned in the guide exist in the public headers. No speculative or internal APIs were added.
 -----END_PROSE_REVIEW_REPORT-----

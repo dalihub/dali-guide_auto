@@ -1,0 +1,97 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Ui Config
+sidebar_label: Ui Config
+category: application-framework
+---
+
+# Ui Config
+
+`UiConfig` provides a centralized, immutable-after-init configuration object for dali-ui global settings. It holds display and scaling parameters that affect unit calculations (spx, dp, sdp) across the entire dali-ui framework.
+
+## Table of Contents
+
+- [Basic Setup and Configuration](#basic-setup-and-configuration)
+- [Display Scaling and DPI Settings](#display-scaling-and-dpi-settings)
+- [Text and Label Defaults](#text-and-label-defaults)
+- [Marquee Animation Defaults](#marquee-animation-defaults)
+- [Focus and Input Configuration](#focus-and-input-configuration)
+- [Image Loading Fallbacks](#image-loading-fallbacks)
+
+## Basic Setup and Configuration
+
+`UiConfig` must be configured and applied exactly once, typically in `main()` before the application main loop starts. After `Apply()` is called, the configuration is frozen and setter methods can no longer be used.
+
+Create a new `UiConfig` using `UiConfig::New()`, configure it using fluent method chaining, and apply it with `Apply()`:
+
+```cpp
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+
+  UiConfig::New()
+    .SetScalingFactor(1.5f)
+    .SetDpi(320)
+    .Apply();
+
+  // Application controller initialization...
+  application.MainLoop();
+
+  return 0;
+}
+```
+
+The `Apply()` method freezes the configuration and makes it the global dali-ui configuration. Unit literals (`_spx`, `_dp`, `_sdp`) require `Apply()` to be called before they can be used. Calling `Apply()` more than once triggers an assertion failure.
+
+## Display Scaling and DPI Settings
+
+`UiConfig` controls how dali-ui calculates device-independent units across the application.
+
+### Scaling Factor
+
+The scaling factor is applied to `spx` and `sdp` unit calculations. Use `SetScalingFactor()` to set a custom scale:
+
+```cpp
+UiConfig::New()
+  .SetScalingFactor(1.2f)
+  .Apply();
+```
+
+Retrieve the current scaling factor using `GetScalingFactor()`:
+
+```cpp
+float scale = config.GetScalingFactor();
+```
+
+### DPI Configuration
+
+The screen DPI affects `dp` and `sdp` unit calculations. Set the target display DPI with `SetDpi()`:
+
+```cpp
+UiConfig::New()
+  .SetDpi(320)  // High-density display
+  .Apply();
+```
+
+The baseline DPI serves as the reference for `dp` calculations. By default, both DPI and baseline DPI are 160. Set a custom baseline with `SetBaselineDpi()`:
+
+```cpp
+UiConfig::New()
+  .SetDpi(320)
+  .SetBaselineDpi(160)
+  .Apply();
+```
+
+After `Apply()`, you can retrieve computed factors:
+
+- `GetDpiFactor()` returns `dpi / baselineDpi`
+- `GetScaledDpiFactor()` returns `dpiFactor * scalingFactor`
+
+```cpp
+float dpiFactor = config.GetDpiFactor();

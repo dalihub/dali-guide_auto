@@ -1,31 +1,34 @@
 ---
 title: Adaptor Framework
 sidebar_label: Adaptor Framework
-category: uncategorized
+category: application-framework
 ---
 
 # Adaptor Framework
 
-The Adaptor Framework provides the core infrastructure for initializing, running, and managing DALi applications. It handles application lifecycle, window management, device events, and platform integration.
+The Adaptor Framework provides the core infrastructure for DALi applications, including application lifecycle management, window handling, device input, and system integration services.
 
 ## Table of Contents
 
 - [Application Lifecycle](#application-lifecycle)
 - [Window Management](#window-management)
-- [Device Events and Status](#device-events-and-status)
-- [Alternative Application Types](#alternative-application-types)
-- [Low-Level Adaptor Control](#low-level-adaptor-control)
+- [Device Orientation](#device-orientation)
+- [Input Method Context](#input-method-context)
+- [Async Task Processing](#async-task-processing)
+- [Timer and Scheduling](#timer-and-scheduling)
+- [Clipboard Operations](#clipboard-operations)
+- [Drag and Drop](#drag-and-drop)
+- [Feedback and Haptics](#feedback-and-haptics)
 
 ## Application Lifecycle
 
-The `Dali::Application` class is the primary entry point for DALi applications. It initializes the DALi core, creates the main window, and provides signals for lifecycle events.
+The `Dali::Application` class is the primary entry point for DALi applications. It initializes the DALi core and provides lifecycle signals for application state changes.
 
 ### Creating an Application
 
 Create an `Application` instance in your main function and connect to the `InitSignal()` to set up your UI:
 
 ```cpp
-#include <dali/public-api/adaptor-framework/application.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -45,8 +48,10 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    // Build your UI here
-    View rootView = View::New();
+    // Build your UI here using Dali::Ui::View
+    View rootView = View::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT);
     window.Add(rootView);
   }
 
@@ -65,49 +70,28 @@ int main(int argc, char** argv)
 
 ### Lifecycle Signals
 
-Connect to lifecycle signals to handle application state changes:
+Connect to lifecycle signals to handle application state transitions:
 
 ```cpp
-class MyAppController : public ConnectionTracker
-{
-public:
-  MyAppController(Application& application)
-    : mApplication(application)
-  {
-    mApplication.InitSignal().Connect(this, &MyAppController::OnInit);
-    mApplication.PauseSignal().Connect(this, &MyAppController::OnPause);
-    mApplication.ResumeSignal().Connect(this, &MyAppController::OnResume);
-    mApplication.TerminateSignal().Connect(this, &MyAppController::OnTerminate);
-  }
+// Connect to lifecycle signals
+application.InitSignal().Connect(this, &MyAppController::OnInitialize);
+application.PauseSignal().Connect(this, &MyAppController::OnPause);
+application.ResumeSignal().Connect(this, &MyAppController::OnResume);
+application.TerminateSignal().Connect(this, &MyAppController::OnTerminate);
+```
 
-  void OnInit(Application application)
-  {
-    // Initialize resources and create UI
-  }
+The `LifecycleController` provides an alternative way to observe lifecycle events from any component:
 
-  void OnPause(Application application)
-  {
-    // Save state, release resources
-  }
-
-  void OnResume(Application application)
-  {
-    // Restore resources, update UI
-  }
-
-  void OnTerminate(Application application)
-  {
-    // Clean up resources
-  }
-
-private:
-  Application& mApplication;
-};
+```cpp
+LifecycleController lifecycle = LifecycleController::Get();
+lifecycle.InitSignal().Connect(this, &MyClass::OnApplicationInit);
+lifecycle.PauseSignal().Connect(this, &MyClass::OnPause);
+lifecycle.ResumeSignal().Connect(this, &MyClass::OnResume);
 ```
 
 ### Quitting the Application
 
-Use `Quit()` to exit the application completely:
+Call `Quit()` to terminate the application:
 
 ```cpp
 void OnKeyEvent(Window window, KeyEvent event)
@@ -122,523 +106,521 @@ void OnKeyEvent(Window window, KeyEvent event)
 }
 ```
 
-Use `Lower()` to minimize the application without fully quitting, which improves restart performance on Tizen:
+### Component Application
+
+For component-based applications that draw multiple UI instances in one process, use `ComponentApplication`:
 
 ```cpp
-void MinimizeApp()
-{
-  mApplication.Lower();
-}
+ComponentApplication application = ComponentApplication::New(&argc, &argv);
+application.CreateSignal().Connect(this, &MyController::OnCreate);
+application.MainLoop();
 ```
 
-### UI Thread Mode
+### Offscreen Application
 
-Enable UI thread mode to separate UI event processing from system events. This prevents UI blocking during heavy system operations:
+For rendering without a visible window, use `OffscreenApplication`:
 
 ```cpp
-int main(int argc, char** argv)
+OffscreenApplication app = OffscreenApplication::New(
+  &argc, &argv,
+  OffscreenApplication::FrameworkBackend::ECORE,
+  OffscreenApplication::RenderMode::AUTO);
+
+app.Start();
+
+OffscreenWindow window = app.GetWindow();
+// Configure offscreen rendering...
+
+// Run your own event loop
+while (running)
 {
-  WindowData windowData;
-  // Configure windowData as needed
-
-  Application application = Application::New(
-    &argc, &argv,
-    "",           // stylesheet
-    true,         // useUiThread = true
-    windowData
-  );
-
-  // With UI thread enabled:
-  // - Normal signals (Init, Pause, Resume, etc.) emit on UI thread
-  // - Task signals (TaskInit, TaskAppControl, etc.) emit on main thread
-
-  MyAppController controller(application);
-  application.MainLoop();
-  return 0;
+  // Process events
+  // In AUTO mode, rendering happens automatically
+  // In MANUAL mode, call app.RenderOnce() when needed
 }
-```
 
-### LifecycleController
-
-Use `LifecycleController` to receive lifecycle events from any part of your code without direct access to the `Application` instance:
-
-```cpp
-#include <dali/devel-api/adaptor-framework/lifecycle-controller.h>
-
-class MyManager
-{
-public:
-  MyManager()
-  {
-    LifecycleController controller = LifecycleController::Get();
-    controller.InitSignal().Connect(this, &MyManager::OnAppInit);
-    controller.LanguageChangedSignal().Connect(this, &MyManager::OnLanguageChanged);
-  }
-
-  void OnAppInit()
-  {
-    // Initialize manager resources
-  }
-
-  void OnLanguageChanged()
-  {
-    // Update localized strings
-  }
-};
+app.Terminate();
 ```
 
 ## Window Management
 
-The `Dali::Window` class represents a native window and provides methods for adding content, handling input, and configuring window properties.
+The `Dali::Window` class manages the application window and provides access to the scene.
 
-### Getting the Main Window
+### Accessing the Window
 
 Retrieve the main window from the application:
 
 ```cpp
-void OnInit(Application application)
-{
-  Window window = application.GetWindow();
-  window.SetBackgroundColor(Color::WHITE);
-
-  // Add content to window
-  View rootView = View::New();
-  window.Add(rootView);
-}
+Window window = application.GetWindow();
 ```
 
-### Adding Views to a Window
+### Adding Content to the Window
 
-Add `Dali::Ui::View` objects to the window. Since `View` inherits from `Actor`, you can add views directly:
+Add actors to the window's scene:
 
 ```cpp
-void CreateContent(Window window)
-{
-  // Create a root layout
-  AbsoluteLayout rootLayout = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT);
+Window window = application.GetWindow();
+window.SetBackgroundColor(Color::WHITE);
 
-  // Add child views
-  View redBox = View::New();
-  redBox.SetBackgroundColor(Color::RED);
-  redBox.SetLayoutParams(
-    AbsoluteLayoutParams::New().SetBounds(LayoutRect(50.0f, 50.0f, 100.0f, 100.0f))
-  );
-  rootLayout.Add(redBox);
-
-  window.Add(rootLayout);
-}
+View rootView = View::New()
+  .SetRequestedWidth(MATCH_PARENT)
+  .SetRequestedHeight(MATCH_PARENT);
+rootView.SetBackgroundColor(Color::BLUE);
+window.Add(rootView);
 ```
 
-### Window Background Color
+### Window Properties
 
-Set the window background color:
+Configure window appearance and behavior:
 
 ```cpp
-window.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f)); // Light gray
+// Set background color
+window.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+
+// Set window size and position
+window.SetSize(Window::WindowSize(800, 600));
+window.SetPosition(Window::WindowPosition(100, 100));
+
+// Control visibility
+window.Show();
+window.Hide();
+
+// Raise or lower window in stack
+window.Raise();
+window.Lower();
 ```
 
-### Handling Key Events
+### Window Signals
 
-Connect to `KeyEventSignal()` to handle keyboard input:
+Connect to window events:
 
 ```cpp
-class MyAppController : public ConnectionTracker
-{
-public:
-  void OnInit(Application application)
-  {
-    Window window = application.GetWindow();
-    window.KeyEventSignal().Connect(this, &MyAppController::OnKeyEvent);
-  }
+// Focus change
+window.FocusChangeSignal().Connect(this, &MyClass::OnFocusChange);
 
-  void OnKeyEvent(Window window, KeyEvent event)
-  {
-    if (event.GetState() == KeyEvent::DOWN)
-    {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE))
-      {
-        mApplication.Quit();
-      }
-    }
-  }
-};
+// Resize
+window.ResizeSignal().Connect(this, &MyClass::OnResize);
+
+// Key events
+window.KeyEventSignal().Connect(this, &MyClass::OnKeyEvent);
+
+// Touch events
+window.TouchedSignal().Connect(this, &MyClass::OnTouch);
 ```
 
-### Handling Touch Events
+### Creating Additional Windows
 
-Connect to `TouchedSignal()` for touch events:
+Create secondary windows for multi-window applications:
 
 ```cpp
-void OnInit(Application application)
-{
-  Window window = application.GetWindow();
-  window.TouchedSignal().Connect(this, &MyAppController::OnTouch);
-}
+Window secondaryWindow = Window::New(
+  PositionSize(0, 0, 400, 300),
+  "Secondary Window",
+  false);  // isTransparent
 
-void OnTouch(Window window, TouchEvent event)
-{
-  if (event.GetPointCount() > 0)
-  {
-    Vector2 point = event.GetPoint(0).GetLocalPosition();
-    // Handle touch at point
-  }
-}
+secondaryWindow.SetBackgroundColor(Color::WHITE);
+secondaryWindow.Show();
 ```
 
-### Window Focus and Resize
+### Window Orientation
 
-Handle window focus and resize events:
+Configure supported orientations:
 
 ```cpp
-void OnInit(Application application)
-{
-  Window window = application.GetWindow();
-  window.FocusChangeSignal().Connect(this, &MyAppController::OnFocusChange);
-  window.ResizeSignal().Connect(this, &MyAppController::OnResize);
-}
+window.AddAvailableOrientation(WindowOrientation::PORTRAIT);
+window.AddAvailableOrientation(WindowOrientation::LANDSCAPE);
+window.SetPreferredOrientation(WindowOrientation::PORTRAIT);
+```
 
-void OnFocusChange(Window window, bool focusIn)
-{
-  if (focusIn)
-  {
-    // Window gained focus
-  }
-  else
-  {
-    // Window lost focus
-  }
-}
+## Device Orientation
 
-void OnResize(Window window, Window::WindowSize size)
+The `Dali::Orientation` class provides device orientation information. Orientation can be obtained through the application's `DeviceOrientationChangedSignal`.
+
+### Device Orientation Events
+
+Connect to the device orientation changed signal on the application:
+
+```cpp
+application.DeviceOrientationChangedSignal().Connect(this, &MyClass::OnDeviceOrientationChanged);
+
+void OnDeviceOrientationChanged(DeviceStatus::Orientation::Status status)
 {
-  int width = size.GetWidth();
-  int height = size.GetHeight();
-  // Adjust layout for new size
+  // Handle device orientation change
+  // Status values: ORIENTATION_0, ORIENTATION_90, ORIENTATION_180, ORIENTATION_270
 }
 ```
 
 ### Window Orientation
 
-Configure supported orientations and preferred orientation:
+Configure supported orientations on the window:
 
 ```cpp
-void ConfigureOrientation(Window window)
-{
-  // Add supported orientations
-  window.AddAvailableOrientation(WindowOrientation::PORTRAIT);
-  window.AddAvailableOrientation(WindowOrientation::LANDSCAPE);
-  window.AddAvailableOrientation(WindowOrientation::PORTRAIT_INVERSE);
-  window.AddAvailableOrientation(WindowOrientation::LANDSCAPE_INVERSE);
+window.AddAvailableOrientation(WindowOrientation::PORTRAIT);
+window.AddAvailableOrientation(WindowOrientation::LANDSCAPE);
+window.SetPreferredOrientation(WindowOrientation::PORTRAIT);
 
-  // Set preferred orientation
-  window.SetPreferredOrientation(WindowOrientation::PORTRAIT);
+WindowOrientation preferred = window.GetPreferredOrientation();
+```
+
+### Orientation Object
+
+The `Orientation` class provides orientation values in degrees or radians. Obtain an instance via `Application::GetOrientation()`:
+
+```cpp
+Orientation orientation = application.GetOrientation();
+
+int degrees = orientation.GetDegrees();    // 0, 90, 180, or 270
+float radians = orientation.GetRadians(); // 0, PI/2, PI, or 3*PI/2
+
+// Connect to orientation change signal
+orientation.ChangedSignal().Connect(this, &MyClass::OnOrientationChanged);
+```
+
+## Input Method Context
+
+The `Dali::InputMethodContext` class manages the virtual keyboard and text input.
+
+### Activating the Keyboard
+
+```cpp
+InputMethodContext imc = InputMethodContext::New();
+
+// Show keyboard when text input is needed
+imc.Activate();
+
+// Hide keyboard when done
+imc.Deactivate();
+```
+
+### Handling Keyboard Events
+
+Connect to the event received signal to handle text input:
+
+```cpp
+imc.EventReceivedSignal().Connect(this, &MyClass::OnKeyboardEvent);
+
+InputMethodContext::CallbackData OnKeyboardEvent(
+  InputMethodContext imc,
+  const InputMethodContext::EventData& event)
+{
+  switch (event.eventName)
+  {
+    case InputMethodContext::EventType::COMMIT:
+      // Handle committed text: event.predictiveString
+      break;
+    case InputMethodContext::EventType::PRE_EDIT:
+      // Handle pre-edit text
+      break;
+    case InputMethodContext::EventType::DELETE_SURROUNDING:
+      // Delete characters around cursor
+      break;
+    default:
+      break;
+  }
+
+  return InputMethodContext::CallbackData();
 }
 ```
 
-### Creating Additional Windows
+### Configuring Input Options
 
-Create additional windows for multi-window scenarios:
+Configure the keyboard using `InputMethodOptions` with a property map:
 
 ```cpp
-Window CreateSecondaryWindow()
+InputMethodOptions options;
+
+Property::Map settings;
+settings.Insert("PANEL_LAYOUT", InputMethod::PanelLayout::NORMAL);
+settings.Insert("BUTTON_ACTION", InputMethod::ButtonAction::DONE);
+settings.Insert("AUTO_CAPITALIZE", InputMethod::AutoCapital::SENTENCE);
+
+options.ApplyProperty(settings);
+imc.ApplyOptions(options);
+```
+
+Available panel layouts include `InputMethod::PanelLayout::NORMAL`, `NUMBER`, `EMAIL`, `URL`, `PASSWORD`, and others. Button actions include `DEFAULT`, `DONE`, `GO`, `SEARCH`, `SEND`, `NEXT`, `JOIN`, `LOGIN`, and `SIGNIN`.
+
+### Keyboard State
+
+Check keyboard visibility:
+
+```cpp
+InputMethodContext::State state = imc.GetInputPanelState();
+if (state == InputMethodContext::State::SHOW)
 {
-  PositionSize positionSize(100, 100, 400, 300);
-  Window secondaryWindow = Window::New(positionSize, "SecondaryWindow");
-  secondaryWindow.SetBackgroundColor(Color::WHITE);
-  secondaryWindow.Show();
-  return secondaryWindow;
+  // Keyboard is visible
 }
 ```
 
-## Device Events and Status
+## Async Task Processing
 
-The Adaptor Framework provides signals for device-level events such as low memory, low battery, and orientation changes.
+The `Dali::AsyncTaskManager` enables background processing of tasks.
 
-### Low Memory and Low Battery
+### Creating an Async Task
 
-Handle system resource warnings:
-
-```cpp
-class MyAppController : public ConnectionTracker
-{
-public:
-  MyAppController(Application& application)
-    : mApplication(application)
-  {
-    mApplication.LowMemorySignal().Connect(this, &MyAppController::OnLowMemory);
-    mApplication.LowBatterySignal().Connect(this, &MyAppController::OnLowBattery);
-  }
-
-  void OnLowMemory(DeviceStatus::Memory::Status status)
-  {
-    switch (status)
-    {
-      case DeviceStatus::Memory::LOW:
-        // Release non-essential resources
-        break;
-      case DeviceStatus::Memory::CRITICALLY_LOW:
-        // Release all possible resources
-        break;
-      default:
-        break;
-    }
-  }
-
-  void OnLowBattery(DeviceStatus::Battery::Status status)
-  {
-    switch (status)
-    {
-      case DeviceStatus::Battery::CRITICALLY_LOW:
-        // Save state, reduce activity
-        break;
-      case DeviceStatus::Battery::POWER_OFF:
-        // Emergency save and prepare for shutdown
-        break;
-      default:
-        break;
-    }
-  }
-};
-```
-
-### Device Orientation Changes
-
-Handle device orientation changes:
+Define a custom task by inheriting from `AsyncTask`:
 
 ```cpp
-class MyAppController : public ConnectionTracker
+class MyAsyncTask : public AsyncTask
 {
 public:
-  MyAppController(Application& application)
-    : mApplication(application)
+  MyAsyncTask(CallbackBase* callback)
+    : AsyncTask(callback, PriorityType::DEFAULT, ThreadType::MAIN_THREAD)
   {
-    mApplication.DeviceOrientationChangedSignal().Connect(
-      this, &MyAppController::OnDeviceOrientationChanged
-    );
   }
 
-  void OnDeviceOrientationChanged(DeviceStatus::Orientation::Status status)
+  void Process() override
   {
-    switch (status)
-    {
-      case DeviceStatus::Orientation::ORIENTATION_0:
-        // Portrait
-        break;
-      case DeviceStatus::Orientation::ORIENTATION_90:
-        // Landscape (rotated clockwise)
-        break;
-      case DeviceStatus::Orientation::ORIENTATION_180:
-        // Portrait inverse
-        break;
-      case DeviceStatus::Orientation::ORIENTATION_270:
-        // Landscape (rotated counter-clockwise)
-        break;
-    }
-  }
-};
-```
-
-### Language and Region Changes
-
-Handle locale changes:
-
-```cpp
-class MyAppController : public ConnectionTracker
-{
-public:
-  MyAppController(Application& application)
-    : mApplication(application)
-  {
-    mApplication.LanguageChangedSignal().Connect(this, &MyAppController::OnLanguageChanged);
-    mApplication.RegionChangedSignal().Connect(this, &MyAppController::OnRegionChanged);
+    // Perform background work here
+    // This runs on a worker thread
+    mResult = PerformHeavyComputation();
   }
 
-  void OnLanguageChanged(Application application)
+  bool IsReady() override
   {
-    Dali::String language = application.GetLanguage();
-    // Reload localized strings
+    return true; // Return false to delay processing
   }
 
-  void OnRegionChanged(Application application)
-  {
-    Dali::String region = application.GetRegion();
-    // Update region-specific content
-  }
-};
-```
-
-## Alternative Application Types
-
-### ComponentApplication
-
-Use `ComponentApplication` for component-based applications that can host multiple UI components in a single process:
-
-```cpp
-#include <dali/devel-api/adaptor-framework/component-application.h>
-
-class MyComponentController : public ConnectionTracker
-{
-public:
-  MyComponentController(ComponentApplication& application)
-    : mApplication(application)
-  {
-    mApplication.CreateSignal().Connect(this, &MyComponentController::OnCreate);
-    mApplication.InitSignal().Connect(this, &MyComponentController::OnInit);
-  }
-
-  Any OnCreate()
-  {
-    // Return component data
-    return Any();
-  }
-
-  void OnInit(Application application)
-  {
-    Window window = application.GetWindow();
-    // Initialize component UI
-  }
+  int GetResult() const { return mResult; }
 
 private:
-  ComponentApplication& mApplication;
+  int mResult{0};
 };
+```
 
-int main(int argc, char** argv)
+### Submitting Tasks
+
+```cpp
+AsyncTaskManager taskManager = AsyncTaskManager::Get();
+
+MyAsyncTask* task = new MyAsyncTask(MakeCallback(&OnTaskComplete));
+taskManager.AddTask(AsyncTaskPtr(task));
+
+void OnTaskComplete()
 {
-  ComponentApplication application = ComponentApplication::New(&argc, &argv);
-  MyComponentController controller(application);
-  application.MainLoop();
-  return 0;
+  // Called on main thread when task completes
+  // Access task results here
 }
 ```
 
-### OffscreenApplication
-
-Use `OffscreenApplication` for rendering without a visible window, useful for automated testing or image generation:
+### Removing Tasks
 
 ```cpp
-#include <dali/devel-api/adaptor-framework/offscreen-application.h>
+taskManager.RemoveTask(taskPtr);
+```
 
-int main(int argc, char** argv)
+## Timer and Scheduling
+
+The `Dali::Timer` class provides periodic or one-shot timers.
+
+### Creating a Timer
+
+```cpp
+Timer timer = Timer::New(1000); // 1000ms interval
+timer.TickSignal().Connect(this, &MyClass::OnTimerTick);
+timer.Start();
+
+bool OnTimerTick()
 {
-  OffscreenApplication application = OffscreenApplication::New(
-    &argc, &argv,
-    OffscreenApplication::FrameworkBackend::ECORE,
-    OffscreenApplication::RenderMode::MANUAL
-  );
+  // Return true to continue, false to stop
+  return true;
+}
+```
 
-  application.Start();
+### Timer Control
 
-  OffscreenWindow window = application.GetWindow();
-  // Add content to offscreen window
+```cpp
+timer.Start();   // Start or restart the timer
+timer.Stop();    // Stop the timer
+timer.Pause();   // Pause the timer
+timer.Resume();  // Resume from pause
 
-  // Render frames manually
-  for (int i = 0; i < 10; ++i)
+// Check if running
+bool running = timer.IsRunning();
+
+// Get interval
+uint32_t interval = timer.GetInterval();
+
+// Change interval
+timer.SetInterval(500); // Stops and restarts with new interval
+```
+
+### One-shot Timer
+
+For a single execution, return `false` from the tick callback:
+
+```cpp
+Timer oneShot = Timer::New(2000);
+oneShot.TickSignal().Connect([]() {
+  // Do something once
+  return false; // Stop after first tick
+});
+oneShot.Start();
+```
+
+## Clipboard Operations
+
+The `Dali::Clipboard` class provides clipboard access for copy and paste.
+
+### Setting Clipboard Data
+
+```cpp
+Clipboard clipboard = Clipboard::Get();
+
+Clipboard::ClipData clipData;
+clipData.SetMimeType("text/plain");
+clipData.SetData("Hello, World!");
+
+clipboard.SetData(clipData);
+```
+
+### Getting Clipboard Data
+
+```cpp
+clipboard.DataReceivedSignal().Connect(this, &MyClass::OnDataReceived);
+
+uint32_t requestId = clipboard.GetData("text/plain");
+
+void OnDataReceived(uint32_t id, const char* mimeType, const char* data)
+{
+  // Process received clipboard data
+}
+```
+
+### Checking Clipboard Content
+
+```cpp
+bool hasText = clipboard.HasType("text/plain");
+size_t itemCount = clipboard.NumberOfItems();
+```
+
+### Clipboard Visibility
+
+```cpp
+clipboard.ShowClipboard();
+clipboard.HideClipboard();
+bool visible = clipboard.IsVisible();
+```
+
+## Drag and Drop
+
+The `Dali::DragAndDrop` class enables drag and drop between windows.
+
+### Starting a Drag Operation
+
+```cpp
+DragAndDrop dnd = DragAndDrop::Get();
+
+DragAndDrop::DragData dragData;
+const char* mimeTypes[] = {"text/plain"};
+const char* data[] = {"Dragged text"};
+dragData.SetMimeTypes(mimeTypes, 1);
+dragData.SetDataSet(data, 1);
+
+dnd.StartDragAndDrop(
+  sourceActor,
+  shadowWindow,
+  dragData,
+  [](DragAndDrop::SourceEventType type) {
+    switch (type)
+    {
+      case DragAndDrop::SourceEventType::ACCEPT:
+        // Drop was accepted
+        break;
+      case DragAndDrop::SourceEventType::CANCEL:
+        // Drag was cancelled
+        break;
+      default:
+        break;
+    }
+  });
+```
+
+### Receiving Drop Events
+
+```cpp
+dnd.AddListener(targetActor, "text/plain",
+  [](const DragAndDrop::DragEvent& event) {
+    switch (event.GetAction())
+    {
+      case DragAndDrop::DragType::ENTER:
+        // Highlight drop target
+        break;
+      case DragAndDrop::DragType::DROP:
+        // Handle dropped data
+        break;
+      case DragAndDrop::DragType::LEAVE:
+        // Remove highlight
+        break;
+      default:
+        break;
+    }
+  });
+
+// Remove listener when done
+dnd.RemoveListener(targetActor);
+```
+
+## Feedback and Haptics
+
+The `Dali::FeedbackPlayer` class provides haptic and sound feedback.
+
+### Vibration Feedback
+
+```cpp
+FeedbackPlayer feedback = FeedbackPlayer::Get();
+
+// Play monotone vibration
+feedback.PlayMonotone(100); // 100ms duration
+
+// Play vibration pattern from file
+feedback.PlayFile("/path/to/vibration_pattern.ivt");
+
+// Stop vibration
+feedback.Stop();
+```
+
+### Sound Feedback
+
+```cpp
+// Play sound file
+int soundHandle = feedback.PlaySound("/path/to/sound.wav");
+
+// Stop sound
+feedback.StopSound(soundHandle);
+```
+
+### Feedback Patterns
+
+```cpp
+// Play predefined feedback pattern
+feedback.PlayFeedbackPattern(type, pattern);
+```
+
+## Physical Keyboard Detection
+
+The `Dali::PhysicalKeyboard` class detects hardware keyboard attachment.
+
+```cpp
+PhysicalKeyboard keyboard = PhysicalKeyboard::Get();
+
+if (keyboard.IsAttached())
+{
+  // Physical keyboard is connected
+}
+
+// Listen for keyboard connection changes
+keyboard.StatusChangedSignal().Connect(this, &MyClass::OnKeyboardStatusChanged);
+
+void OnKeyboardStatusChanged(PhysicalKeyboard keyboard)
+{
+  if (keyboard.IsAttached())
   {
-    application.RenderOnce();
-    // Capture or process frame
+    // Keyboard was just connected
   }
-
-  application.Terminate();
-  return 0;
+  else
+  {
+    // Keyboard was just disconnected
+  }
 }
-```
-
-## Low-Level Adaptor Control
-
-For advanced use cases where you need to control the main loop yourself, use `Dali::Adaptor` directly.
-
-### Creating an Adaptor
-
-```cpp
-#include <dali/integration-api/adaptor-framework/adaptor.h>
-
-int main()
-{
-  // Create a window
-  PositionSize positionSize(0, 0, 800, 1280);
-  Window window = Window::New(positionSize, "MyApp");
-
-  // Create adaptor with the window
-  Adaptor& adaptor = Adaptor::New(window);
-  adaptor.Start();
-
-  // Create your DALi content
-  // ...
-
-  // Run your own main loop
-  MyPlatform::RunMainLoop();
-
-  return 0;
-}
-```
-
-### Adaptor Lifecycle
-
-Control adaptor state manually:
-
-```cpp
-Adaptor& adaptor = Adaptor::New(window);
-
-adaptor.Start();   // Begin rendering
-adaptor.Pause();   // Pause rendering
-adaptor.Resume();  // Resume rendering
-adaptor.Stop();    // Stop rendering
-```
-
-### Feeding Events
-
-Feed touch and key events to DALi:
-
-```cpp
-void OnPlatformTouchEvent(int x, int y, int type, int timestamp)
-{
-  TouchPoint point;
-  point.x = x;
-  point.y = y;
-  // Configure point...
-
-  Adaptor::Get().FeedTouchPoint(point, timestamp);
-}
-
-void OnPlatformKeyEvent(int keyCode, int type)
-{
-  KeyEvent event;
-  // Configure event...
-
-  Adaptor::Get().FeedKeyEvent(event);
-}
-```
-
-### Idle Callbacks
-
-Schedule work to run when the main loop is idle:
-
-```cpp
-void ScheduleIdleWork()
-{
-  CallbackBase* callback = MakeCallback(nullptr, &DoIdleWork);
-  Adaptor::Get().AddIdle(callback, false);
-}
-
-void DoIdleWork()
-{
-  // This runs when the main loop is idle
-}
-```
-
-### Rendering Control
-
-Control rendering behavior:
-
-```cpp
-// Reduce frame rate for power saving
-Adaptor::Get().SetRenderRefreshRate(2);  // Render every other frame
-
-// Set maximum frame rate
-Adaptor::Get().SetMaximumRenderFrameRate(30.0f);
-
-// Force a single render
-Adaptor::Get().RenderOnce();
 ```

@@ -1,110 +1,111 @@
 ---
 title: Addon Manager
 sidebar_label: Addon Manager
-category: uncategorized
+category: platform-integration
 ---
 
 # Addon Manager
 
-The Addon Manager provides a plugin system for DALi applications to discover, load, and interact with optional extension modules called AddOns.
+The Addon Manager provides a plugin architecture for extending DALi applications with dynamically loadable modules called AddOns. It handles discovery, loading, lifecycle management, and function binding for external libraries.
 
 ## Table of Contents
 
 - [Discovering Available AddOns](#discovering-available-addons)
 - [Loading and Using AddOns](#loading-and-using-addons)
 - [Retrieving AddOn Information](#retrieving-addon-information)
-- [Calling AddOn Functions](#calling-addon-functions)
-- [Lifecycle Management](#lifecycle-management)
+- [Function Binding with AddOnBinder](#function-binding-with-addonbinder)
+- [AddOn Lifecycle Management](#addon-lifecycle-management)
 - [Creating Custom AddOns](#creating-custom-addons)
 
 ## Discovering Available AddOns
 
-The `Dali::Integration::AddOnManager` singleton allows applications to query which AddOns are available on the system. Use `EnumerateAddOns()` to retrieve a list of AddOn names.
+The `Dali::Integration::AddOnManager` singleton provides access to all available AddOns on the system. Use `EnumerateAddOns()` to retrieve a list of AddOn names.
 
 ```cpp
 #include <dali/integration-api/addon-manager.h>
 
 void ListAvailableAddOns()
 {
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager)
-  {
-    std::vector<std::string> availableAddOns = addonManager->EnumerateAddOns();
-    for(const auto& name : availableAddOns)
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
     {
-      printf("Available AddOn: %s\n", name.c_str());
+        std::vector<std::string> addOnNames = addOnManager->EnumerateAddOns();
+        for(const auto& name : addOnNames)
+        {
+            std::cout << "Available AddOn: " << name << std::endl;
+        }
     }
-  }
 }
 ```
 
-The `EnumerateAddOns()` method returns a vector of strings containing the names of all discovered AddOns. The discovery mechanism is platform-dependent and typically scans predefined directories or environment-specified paths.
+Always check that `Dali::Integration::AddOnManager::Get()` returns a valid pointer before using the manager. The AddOnManager is created by the Adaptor and may not be available on all platforms.
 
 ## Loading and Using AddOns
 
 ### Loading a Single AddOn
 
-To load an AddOn by name, use `GetAddOn()` which returns a handle of type `Dali::AddOnLibrary`. This handle is an opaque pointer used for subsequent function lookups.
+Use `GetAddOn()` to load an AddOn by name. The method returns a `Dali::AddOnLibrary` handle that identifies the loaded library.
 
 ```cpp
 #include <dali/integration-api/addon-manager.h>
 
-Dali::AddOnLibrary LoadMyAddOn(const std::string& addonName)
+Dali::AddOnLibrary LoadMyAddOn(const std::string& addOnName)
 {
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager)
-  {
-    Dali::AddOnLibrary handle = addonManager->GetAddOn(addonName);
-    if(handle)
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
     {
-      return handle;
+        Dali::AddOnLibrary handle = addOnManager->GetAddOn(addOnName);
+        if(handle)
+        {
+            std::cout << "AddOn loaded successfully: " << addOnName << std::endl;
+            return handle;
+        }
     }
-  }
-  return nullptr;
+    return nullptr;
 }
 ```
 
 ### Loading from a Specific Library
 
-To load an AddOn from a specific library file, use `LoadAddOn()` with both the AddOn name and library name.
+Use `LoadAddOn()` when you need to specify the exact library file name:
 
 ```cpp
 #include <dali/integration-api/addon-manager.h>
 
-Dali::AddOnLibrary LoadAddOnFromLibrary(const std::string& addonName, const std::string& libraryName)
+Dali::AddOnLibrary LoadAddOnFromLibrary(const std::string& addOnName, const std::string& libraryName)
 {
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager)
-  {
-    return addonManager->LoadAddOn(addonName, libraryName);
-  }
-  return nullptr;
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
+    {
+        return addOnManager->LoadAddOn(addOnName, libraryName);
+    }
+    return nullptr;
 }
 ```
 
 ### Loading Multiple AddOns
 
-For loading several AddOns at once, use `LoadAddOns()` which accepts a vector of names and returns a vector of handles.
+To load several AddOns at once, use `LoadAddOns()`:
 
 ```cpp
 #include <dali/integration-api/addon-manager.h>
 
 void LoadMultipleAddOns()
 {
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager)
-  {
-    std::vector<std::string> names = {"ImageLoaderAddOn", "AudioAddOn"};
-    std::vector<Dali::AddOnLibrary> handles = addonManager->LoadAddOns(names);
-    
-    for(size_t i = 0; i < handles.size(); ++i)
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
     {
-      if(handles[i])
-      {
-        printf("Loaded: %s\n", names[i].c_str());
-      }
+        std::vector<std::string> addOnNames = {"ImageLoaderExt", "CustomRenderer"};
+        std::vector<Dali::AddOnLibrary> handles = addOnManager->LoadAddOns(addOnNames);
+        
+        for(size_t i = 0; i < handles.size(); ++i)
+        {
+            if(handles[i])
+            {
+                std::cout << "Loaded: " << addOnNames[i] << std::endl;
+            }
+        }
     }
-  }
 }
 ```
 
@@ -112,220 +113,188 @@ void LoadMultipleAddOns()
 
 The `Dali::AddOnInfo` structure contains metadata about an AddOn, including its name, version, type, and build compatibility information.
 
-```cpp
-#include <dali/integration-api/addon-manager.h>
-
-void PrintAddOnInfo(const std::string& addonName)
-{
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager)
-  {
-    Dali::AddOnInfo info;
-    if(addonManager->GetAddOnInfo(addonName, info))
-    {
-      printf("AddOn Name: %s\n", info.name.c_str());
-      printf("Version: %u\n", info.version);
-      printf("Type: %d\n", static_cast<int>(info.type));
-      printf("Core Version: %u\n", info.buildInfo.libCoreVersion);
-    }
-  }
-}
-```
-
-The `Dali::AddOnInfo` structure contains the following fields:
+### AddOnInfo Structure
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | `std::string` | Name of the AddOn |
-| `version` | `uint32_t` | Version encoded using `DALI_ADDON_VERSION()` |
+| `version` | `uint32_t` | Version number encoded using `DALI_ADDON_VERSION()` |
 | `type` | `Dali::AddOnType` | Classification of the AddOn |
 | `next` | `void*` | Pointer to additional data structures |
 | `buildInfo.libCoreVersion` | `uint32_t` | DALi core library version |
 | `buildInfo.libAdaptorVersion` | `uint32_t` | DALi adaptor library version |
 | `buildInfo.libToolkitVersion` | `uint32_t` | DALi toolkit library version |
 
+### Getting AddOn Information
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+void PrintAddOnInfo(const std::string& addOnName)
+{
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
+    {
+        Dali::AddOnInfo info;
+        if(addOnManager->GetAddOnInfo(addOnName, info))
+        {
+            std::cout << "AddOn Name: " << info.name << std::endl;
+            std::cout << "Version: " << info.version << std::endl;
+            std::cout << "Core Version: " << info.buildInfo.libCoreVersion << std::endl;
+        }
+    }
+}
+```
+
 ### Version Encoding
 
-Use the `DALI_ADDON_VERSION()` macro to encode or compare version numbers:
+Use the `DALI_ADDON_VERSION()` macro to encode version numbers for comparison:
 
 ```cpp
-#include <dali/integration-api/addon-manager.h>
-
-void CheckVersionCompatibility(const Dali::AddOnInfo& info)
-{
-  uint32_t expectedVersion = Dali::DALI_ADDON_VERSION(1, 0, 0);
-  if(info.version == expectedVersion)
-  {
-    printf("Version matches expected 1.0.0\n");
-  }
-}
+constexpr uint32_t myVersion = DALI_ADDON_VERSION(1, 2, 300);  // major, minor, revision
 ```
 
-## Calling AddOn Functions
+## Function Binding with AddOnBinder
 
-AddOns expose functionality through global and instance functions. The AddOnManager provides methods to retrieve these function pointers.
+The `Dali::AddOn::AddOnBinder` class simplifies binding AddOn functions to your application. It handles loading, function lookup, and provides a clean interface.
 
-### Retrieving Global Functions
+### Basic AddOnBinder Usage
 
-Global functions are standalone functions that do not require an instance. Use `GetGlobalProc()` to retrieve them.
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-#include <functional>
-
-void UseGlobalFunction(Dali::AddOnLibrary addonHandle)
-{
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager && addonHandle)
-  {
-    // Get typed function pointer
-    std::function<bool()> getStatus = addonManager->GetGlobalProc<bool()>(addonHandle, "GetLifecycleStatus");
-    
-    if(getStatus)
-    {
-      bool status = getStatus();
-      printf("Status: %s\n", status ? "true" : "false");
-    }
-  }
-}
-```
-
-### Retrieving Instance Functions
-
-Instance functions operate on specific object instances created by the AddOn. Use `GetInstanceProc()` to retrieve them.
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-#include <functional>
-
-void UseInstanceFunction(Dali::AddOnLibrary addonHandle)
-{
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager && addonHandle)
-  {
-    // Get factory function
-    auto createInstance = addonManager->GetGlobalProc<void*()>(addonHandle, "CreateInstance");
-    
-    // Get instance method
-    auto instanceCall = addonManager->GetInstanceProc<uint32_t(void*)>(addonHandle, "InstanceCall");
-    
-    if(createInstance && instanceCall)
-    {
-      void* instance = createInstance();
-      uint32_t result = instanceCall(instance);
-      printf("Result: %u\n", result);
-    }
-  }
-}
-```
-
-### Using InvokeGlobalProc
-
-For direct invocation without storing the function, use the template method `InvokeGlobalProc()`:
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-
-void InvokeDirectly(Dali::AddOnLibrary addonHandle)
-{
-  auto* addonManager = Dali::Integration::AddOnManager::Get();
-  if(addonManager && addonHandle)
-  {
-    // Directly invoke and get result
-    bool status = addonManager->InvokeGlobalProc<bool>(addonHandle, "GetLifecycleStatus");
-  }
-}
-```
-
-### Using AddOnBinder Helper Class
-
-The `Dali::AddOn::AddOnBinder` class simplifies binding AddOn functions as class members using the `ADDON_BIND_FUNCTION` macro.
+Create a structure that inherits from `Dali::AddOn::AddOnBinder` and use the `ADDON_BIND_FUNCTION()` macro to declare bound functions:
 
 ```cpp
 #include <dali/devel-api/common/addon-binder.h>
 
-struct MyAddOnInterface : public Dali::AddOn::AddOnBinder
+struct ImageLoaderAddOn : public Dali::AddOn::AddOnBinder
 {
-  MyAddOnInterface()
-  : AddOnBinder("MyAddOn", 0u)  // Name and minimum version (0 = any)
-  {
-  }
+    ImageLoaderAddOn()
+    : Dali::AddOn::AddOnBinder("ImageLoaderExt")
+    {
+    }
 
-  // Bind functions as member variables
-  ADDON_BIND_FUNCTION(Initialize, bool());
-  ADDON_BIND_FUNCTION(Process, void(int));
-  ADDON_BIND_FUNCTION(GetResult, int());
+    ~ImageLoaderAddOn() override = default;
+
+    // Bind functions from the AddOn
+    ADDON_BIND_FUNCTION(LoadBitmap, bool(const std::string&, Dali::PixelBuffer&));
+    ADDON_BIND_FUNCTION(GetFormatExtension, const char*());
 };
 
-void UseBinderInterface()
+void UseImageLoaderAddOn()
 {
-  MyAddOnInterface addon;
-  
-  if(addon.IsValid())
-  {
-    if(addon.Initialize)
+    ImageLoaderAddOn addon;
+    
+    if(addon.IsValid())
     {
-      addon.Initialize();
-      addon.Process(42);
-      int result = addon.GetResult();
+        // Call bound functions directly
+        const char* extension = addon.GetFormatExtension();
+        std::cout << "Supported extension: " << extension << std::endl;
     }
-  }
 }
 ```
 
-## Lifecycle Management
+### Loading from a Specific Library
 
-The AddOnManager propagates application lifecycle events to loaded AddOns. Call these methods from your application's lifecycle handlers.
+```cpp
+struct CustomAddOn : public Dali::AddOn::AddOnBinder
+{
+    CustomAddOn(const char* libraryPath)
+    : Dali::AddOn::AddOnBinder("CustomAddOn", libraryPath)
+    {
+    }
+
+    ADDON_BIND_FUNCTION(ProcessData, void(const uint8_t*, size_t));
+};
+```
+
+### Accessing AddOn Information
+
+```cpp
+void CheckAddOnDetails(Dali::AddOn::AddOnBinder& addon)
+{
+    if(addon.IsValid())
+    {
+        const Dali::AddOnInfo& info = addon.GetAddOnInfo();
+        std::cout << "Using AddOn: " << info.name << std::endl;
+    }
+}
+```
+
+### Manual Function Retrieval
+
+For more control, use `GetGlobalProc()` and `GetInstanceProc()` directly:
 
 ```cpp
 #include <dali/integration-api/addon-manager.h>
 
-class MyApp
+void UseManualBinding(Dali::AddOnLibrary handle)
 {
-public:
-  void OnStart()
-  {
-    auto* addonManager = Dali::Integration::AddOnManager::Get();
-    if(addonManager)
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager && handle)
     {
-      addonManager->Start();
+        // Get typed function pointer
+        auto processFunc = addOnManager->GetGlobalProc<void(int)>(handle, "ProcessInt");
+        if(processFunc)
+        {
+            processFunc(42);
+        }
     }
-  }
-
-  void OnResume()
-  {
-    auto* addonManager = Dali::Integration::AddOnManager::Get();
-    if(addonManager)
-    {
-      addonManager->Resume();
-    }
-  }
-
-  void OnPause()
-  {
-    auto* addonManager = Dali::Integration::AddOnManager::Get();
-    if(addonManager)
-    {
-      addonManager->Pause();
-    }
-  }
-
-  void OnStop()
-  {
-    auto* addonManager = Dali::Integration::AddOnManager::Get();
-    if(addonManager)
-    {
-      addonManager->Stop();
-    }
-  }
-};
+}
 ```
 
-These lifecycle calls trigger the corresponding callbacks in each AddOn's dispatch table, allowing AddOns to manage resources appropriately.
+### Invoking Functions Directly
+
+Use `InvokeGlobalProc()` for one-shot function calls:
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+int InvokeAddOnFunction(Dali::AddOnLibrary handle, int a, int b)
+{
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager && handle)
+    {
+        return addOnManager->InvokeGlobalProc<int, int, int>(handle, "AddNumbers", a, b);
+    }
+    return 0;
+}
+```
+
+## AddOn Lifecycle Management
+
+The AddOnManager propagates application lifecycle events to loaded AddOns. The Adaptor calls these methods automatically.
+
+| Method | When Called |
+|--------|-------------|
+| `Start()` | Application starts |
+| `Resume()` | Application resumes from background |
+| `Pause()` | Application goes to background |
+| `Stop()` | Application terminates |
+
+```cpp
+#include <dali/integration-api/addon-manager.h>
+
+void OnApplicationPause()
+{
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
+    {
+        addOnManager->Pause();
+    }
+}
+
+void OnApplicationResume()
+{
+    Dali::Integration::AddOnManager* addOnManager = Dali::Integration::AddOnManager::Get();
+    if(addOnManager)
+    {
+        addOnManager->Resume();
+    }
+}
+```
 
 ## Creating Custom AddOns
 
-To create a custom AddOn, derive from `Dali::AddOns::AddOnBase` and use the registration macro.
+To create an AddOn that can be loaded by the AddOnManager, implement `Dali::AddOns::AddOnBase` and use the registration macro.
 
 ### Implementing AddOnBase
 
@@ -335,115 +304,78 @@ To create a custom AddOn, derive from `Dali::AddOns::AddOnBase` and use the regi
 class MyCustomAddOn : public Dali::AddOns::AddOnBase
 {
 public:
-  MyCustomAddOn() = default;
-  ~MyCustomAddOn() override = default;
+    MyCustomAddOn() = default;
+    ~MyCustomAddOn() override = default;
 
-  void GetAddOnInfo(Dali::AddOnInfo& addonInfo) override
-  {
-    addonInfo.name = "MyCustomAddOn";
-    addonInfo.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
-    addonInfo.type = Dali::AddOnType::GENERIC;
-    addonInfo.buildInfo.libCoreVersion = DALI_CORE_VERSION;
-  }
+    void GetAddOnInfo(Dali::AddOnInfo& addonInfo) override
+    {
+        addonInfo.name = "MyCustomAddOn";
+        addonInfo.version = DALI_ADDON_VERSION(1, 0, 0);
+        addonInfo.type = Dali::AddOnType::GENERIC;
+    }
 
-  Dali::AddOns::DispatchTable* GetGlobalDispatchTable() override
-  {
-    return &mGlobalTable;
-  }
+    Dali::AddOns::DispatchTable* GetGlobalDispatchTable() override
+    {
+        return &mGlobalDispatchTable;
+    }
 
-  Dali::AddOns::DispatchTable* GetInstanceDispatchTable() override
-  {
-    return &mInstanceTable;
-  }
+    Dali::AddOns::DispatchTable* GetInstanceDispatchTable() override
+    {
+        return &mInstanceDispatchTable;
+    }
 
-  void OnStart() override
-  {
-    // Initialize resources when application starts
-  }
+    void OnStart() override
+    {
+        // Initialize resources when application starts
+    }
 
-  void OnPause() override
-  {
-    // Release resources when application pauses
-  }
-
-  void OnResume() override
-  {
-    // Restore resources when application resumes
-  }
-
-  void OnStop() override
-  {
-    // Clean up when application stops
-  }
+    void OnStop() override
+    {
+        // Clean up resources when application stops
+    }
 
 private:
-  Dali::AddOns::DispatchTable mGlobalTable;
-  Dali::AddOns::DispatchTable mInstanceTable;
+    Dali::AddOns::DispatchTable mGlobalDispatchTable;
+    Dali::AddOns::DispatchTable mInstanceDispatchTable;
 };
+```
 
-// Register the AddOn
+### Registering the AddOn
+
+Use the `REGISTER_ADDON_CLASS()` macro to auto-register your AddOn:
+
+```cpp
 REGISTER_ADDON_CLASS(MyCustomAddOn)
 ```
 
+This macro generates the necessary constructor code and registration with `Dali::Integration::AddOnManager::RegisterAddOnDispatchTable()`.
+
+### Dispatch Table Structure
+
+The `Dali::AddOnDispatchTable` structure contains function pointers that the AddOnManager uses to interact with your AddOn:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `std::string` | AddOn name |
+| `GetAddOnInfo` | `void(*)(Dali::AddOnInfo&)` | Returns AddOn metadata |
+| `GetGlobalProc` | `void*(*)(const char*)` | Returns global function pointer |
+| `GetInstanceProc` | `void*(*)(const char*)` | Returns instance function pointer |
+| `OnStart` | `void(*)()` | Called on application start |
+| `OnResume` | `void(*)()` | Called on application resume |
+| `OnPause` | `void(*)()` | Called on application pause |
+| `OnStop` | `void(*)()` | Called on application stop |
+
 ### Populating the Dispatch Table
 
-Add functions to the dispatch table to expose them to applications:
-
 ```cpp
-// Global function implementation
-bool MyGlobalFunction()
-{
-  return true;
-}
+Dali::AddOnDispatchTable table;
+table.name = "MyAddOn";
+table.GetAddOnInfo = GetAddOnInfo<void>;
+table.GetGlobalProc = GetGlobalProc<void>;
+table.GetInstanceProc = GetInstanceProc<void>;
+table.OnStart = OnStart<void>;
+table.OnStop = OnStop<void>;
+table.OnResume = OnResume<void>;
+table.OnPause = OnPause<void>;
 
-// Instance function implementation
-void MyInstanceFunction(void* instance, int value)
-{
-  // Process with instance data
-}
-
-// In constructor or initialization:
-mGlobalTable["MyGlobalFunction"] = MyGlobalFunction;
-mInstanceTable["MyInstanceFunction"] = MyInstanceFunction;
-```
-
-### The AddOnDispatchTable Structure
-
-For lower-level control, populate a `Dali::AddOnDispatchTable` directly:
-
-```cpp
-#include <dali/integration-api/addon-manager.h>
-
-void GetAddOnInfo(Dali::AddOnInfo& info)
-{
-  info.name = "LowLevelAddOn";
-  info.version = Dali::DALI_ADDON_VERSION(1, 0, 0);
-  info.type = Dali::AddOnType::GENERIC;
-}
-
-void* GetGlobalProc(const char* funcName)
-{
-  if(strcmp(funcName, "MyFunction") == 0)
-  {
-    return reinterpret_cast<void*>(MyFunction);
-  }
-  return nullptr;
-}
-
-void OnStart() { /* ... */ }
-void OnStop() { /* ... */ }
-void OnPause() { /* ... */ }
-void OnResume() { /* ... */ }
-
-// Create dispatch table
-Dali::AddOnDispatchTable dispatchTable;
-dispatchTable.name = "LowLevelAddOn";
-dispatchTable.GetAddOnInfo = GetAddOnInfo;
-dispatchTable.GetGlobalProc = GetGlobalProc;
-dispatchTable.OnStart = OnStart;
-dispatchTable.OnStop = OnStop;
-dispatchTable.OnPause = OnPause;
-dispatchTable.OnResume = OnResume;
-
-// Register with manager
-Dali::Integration::AddOnManager::Get()->RegisterAddOnDispatchTable(&dispatchTable);
+Dali::Integration::AddOnManager::Get()->RegisterAddOnDispatchTable(&table);

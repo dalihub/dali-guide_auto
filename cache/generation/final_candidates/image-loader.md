@@ -1,85 +1,62 @@
 ---
 title: Image Loader
 sidebar_label: Image Loader
-category: uncategorized
+category: images-visuals
 ---
 
 # Image Loader
 
-The Image Loader feature provides asynchronous image loading capabilities for dali-ui applications, allowing images to be loaded in background threads without blocking the main event loop.
+The Image Loader feature provides asynchronous image loading capabilities for dali-ui applications. It allows you to load images from URLs or memory buffers without blocking the main event thread, and provides signals to handle loaded pixel data.
 
 ## Table of Contents
 
-- [Creating an AsyncImageLoader](#creating-an-asyncimageloader)
-- [Loading Images](#loading-images)
+- [Asynchronous Image Loading](#asynchronous-image-loading)
+- [Loading with Dimensions and Options](#loading-with-dimensions-and-options)
 - [Handling Load Completion](#handling-load-completion)
-- [Canceling Load Operations](#canceling-load-operations)
-- [Working with ImageUrl](#working-with-imageurl)
+- [Canceling Load Tasks](#canceling-load-tasks)
+- [Creating URLs from External Buffers](#creating-urls-from-external-buffers)
 
-## Creating an AsyncImageLoader
+## Asynchronous Image Loading
 
-The `Dali::Ui::AsyncImageLoader` class is the primary interface for loading images asynchronously. Create an instance using the static `New()` method:
+The `Dali::Ui::AsyncImageLoader` class provides asynchronous image loading from URLs. Images are loaded in a worker thread to avoid blocking the main event thread. Create an instance using `AsyncImageLoader::New()` and start loading with `Load()`.
 
 ```cpp
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 
-// Create an async image loader
+// Create an asynchronous image loader
 Dali::Ui::AsyncImageLoader imageLoader = Dali::Ui::AsyncImageLoader::New();
-```
 
-The `AsyncImageLoader` is a handle class that manages the lifecycle of the underlying loader. You can copy or move the handle:
-
-```cpp
-// Copy construction
-Dali::Ui::AsyncImageLoader copiedLoader = imageLoader;
-
-// Move construction
-Dali::Ui::AsyncImageLoader movedLoader = std::move(imageLoader);
-```
-
-## Loading Images
-
-### Basic Image Loading
-
-Use the `Load()` method to start loading an image from a URL. The method returns a task ID that identifies the loading operation:
-
-```cpp
-// Load an image with default settings
+// Start loading an image from a URL
 uint32_t taskId = imageLoader.Load("path/to/image.png");
 ```
 
-When using this overload, the defaults are `SamplingMode::BOX_THEN_LINEAR` for sampling and `true` for orientation correction.
+The `Load()` method returns a task ID that identifies the loading operation. Use this ID to track which image has completed loading when handling the completion signal.
 
-### Loading with Dimensions
+## Loading with Dimensions and Options
 
-To load an image scaled to specific dimensions, pass the desired size:
-
-```cpp
-// Load image scaled to fit 200x200 pixels
-uint32_t taskId = imageLoader.Load("path/to/image.png", Dali::ImageDimensions(200, 200));
-```
-
-This overload also uses the default sampling mode and orientation correction.
-
-### Loading with Full Options
-
-For complete control over the loading process, specify all parameters:
+You can specify target dimensions and sampling options when loading images. The `Load()` method has overloads that accept `ImageDimensions` for size control and `SamplingMode::Type` for filtering quality.
 
 ```cpp
+#include <dali/public-api/adaptor-framework/image-options.h>
+
+// Load with target dimensions
+Dali::ImageDimensions targetSize(200, 150);
+uint32_t taskId = imageLoader.Load("path/to/image.png", targetSize);
+
 // Load with full control over sampling and orientation
-uint32_t taskId = imageLoader.Load(
-    "path/to/image.png",              // URL
-    Dali::ImageDimensions(200, 200),  // Target dimensions
-    Dali::SamplingMode::BOX_THEN_LINEAR, // Sampling mode
-    true                              // Enable orientation correction
+uint32_t taskId2 = imageLoader.Load(
+    "path/to/image.jpg",
+    targetSize,
+    Dali::SamplingMode::BOX_THEN_LINEAR,
+    true  // orientationCorrection
 );
 ```
 
-The `samplingMode` parameter controls how pixels are sampled when scaling the image. The `orientationCorrection` parameter enables automatic reorientation based on EXIF metadata.
+When you specify dimensions, the loaded image is scaled to fit within the target size. The `orientationCorrection` parameter controls whether the image is reoriented based on EXIF metadata.
 
 ## Handling Load Completion
 
-Connect to the `ImageLoadedSignal()` to receive notifications when image loading completes. Always connect the signal before calling `Load()` to ensure you receive callbacks:
+Connect to the `ImageLoadedSignal()` to receive notifications when image loading completes. The signal provides the task ID and a `PixelData` object containing the loaded image data.
 
 ```cpp
 class ImageHandler : public Dali::ConnectionTracker
@@ -87,125 +64,87 @@ class ImageHandler : public Dali::ConnectionTracker
 public:
     void OnImageLoaded(uint32_t taskId, Dali::PixelData pixelData)
     {
-        if (pixelData)
+        if(pixelData)
         {
-            // Image loaded successfully
-            if (taskId == mExpectedTaskId)
+            // Successfully loaded - use the pixel data
+            if(taskId == mBackgroundTaskId)
             {
-                // Process the loaded pixel data
-                // Note: PixelData is automatically destroyed when it goes out of scope
+                // Handle background image
+            }
+            else if(taskId == mThumbnailTaskId)
+            {
+                // Handle thumbnail image
             }
         }
         else
         {
-            // Image loading failed
+            // Loading failed
         }
     }
 
-    uint32_t mExpectedTaskId{0};
+    void StartLoading()
+    {
+        mLoader = Dali::Ui::AsyncImageLoader::New();
+        
+        // Connect signal before calling Load
+        mLoader.ImageLoadedSignal().Connect(this, &ImageHandler::OnImageLoaded);
+        
+        mBackgroundTaskId = mLoader.Load("background.png");
+        mThumbnailTaskId = mLoader.Load("thumbnail.jpg", Dali::ImageDimensions(100, 100));
+    }
+
+private:
+    Dali::Ui::AsyncImageLoader mLoader;
+    uint32_t mBackgroundTaskId{0};
+    uint32_t mThumbnailTaskId{0};
 };
-
-// Usage
-ImageHandler handler;
-Dali::Ui::AsyncImageLoader loader = Dali::Ui::AsyncImageLoader::New();
-
-// Connect signal before loading
-loader.ImageLoadedSignal().Connect(&handler, &ImageHandler::OnImageLoaded);
-
-// Start loading
-handler.mExpectedTaskId = loader.Load("path/to/image.png");
 ```
 
-The signal callback receives:
+Always connect to `ImageLoadedSignal()` before calling `Load()` to ensure you receive the completion callback, even if loading completes immediately.
 
-- `uint32_t taskId`: The task ID returned by the corresponding `Load()` call
-- `Dali::PixelData pixelData`: The loaded pixel data, or an invalid handle if loading failed
+## Canceling Load Tasks
 
-## Canceling Load Operations
-
-### Canceling a Specific Task
-
-Use `Cancel()` to cancel a specific loading operation by its task ID:
+Cancel pending load operations using `Cancel()` with a specific task ID, or cancel all pending operations with `CancelAll()`.
 
 ```cpp
-uint32_t taskId = imageLoader.Load("large_image.png");
-
-// Cancel if still queued
+// Cancel a specific loading task
 bool wasCanceled = imageLoader.Cancel(taskId);
-
-if (wasCanceled)
+if(wasCanceled)
 {
-    // Task was successfully removed from the queue
+    // Task was still in queue and has been removed
 }
 else
 {
-    // Task was already in progress or completed
+    // Task already completed or is in progress
 }
-```
 
-`Cancel()` returns `true` if the task was successfully removed from the queue, or `false` if the task was already being processed or completed.
-
-### Canceling All Tasks
-
-To cancel all pending load operations at once:
-
-```cpp
+// Cancel all pending loading tasks
 imageLoader.CancelAll();
 ```
 
-This removes all queued loading tasks but does not affect tasks that have already started processing.
+The `Cancel()` method returns `true` if the task was successfully removed from the queue. It returns `false` if the task has already completed or is actively being processed.
 
-## Working with ImageUrl
+## Creating URLs from External Buffers
 
-`Dali::Ui::ImageUrl` provides a way to wrap external buffers and textures for use with visuals. It generates a URL string that can be used to reference the wrapped resource.
-
-### Creating from a Texture
-
-Wrap an existing texture with `ImageUrl::New()`:
+The `Dali::Ui::ImageUrl` class creates URL strings from external buffers such as textures or encoded image data. Use `ImageUrl::New()` to wrap an external resource and obtain a URL that can be used with visual components.
 
 ```cpp
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 
-// Create a texture
+// Create URL from a texture
 Dali::Texture texture = Dali::Texture::New(
     Dali::TextureType::TEXTURE_2D,
     Dali::Pixel::Format::RGBA8888,
     256, 256
 );
 
-// Wrap the texture with ImageUrl
-Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, true);
-
-// Get the URL string for use with visuals
+Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, false);
 const Dali::String& url = imageUrl.GetUrl();
-```
 
-The second parameter `preMultiplied` indicates whether the texture uses premultiplied alpha.
-
-### Creating from an Encoded Image Buffer
-
-Wrap encoded image data (such as PNG or JPEG in memory):
-
-```cpp
-// Create from encoded image buffer
+// Create URL from an encoded image buffer
 Dali::EncodedImageBuffer encodedBuffer = /* ... */;
-Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(encodedBuffer);
-
-// Get the URL string
-const Dali::String& url = imageUrl.GetUrl();
+Dali::Ui::ImageUrl bufferUrl = Dali::Ui::ImageUrl::New(encodedBuffer);
+const Dali::String& bufferUrlString = bufferUrl.GetUrl();
 ```
 
-### Using ImageUrl with Visuals
-
-The URL obtained from `GetUrl()` can be used with image visuals:
-
-```cpp
-Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
-
-// Use the URL with an image visual
-Dali::Property::Map visualProperty;
-visualProperty[Dali::Toolkit::Visual::Property::TYPE] = Dali::Toolkit::Visual::IMAGE;
-visualProperty[Dali::Toolkit::ImageVisual::Property::URL] = imageUrl.GetUrl();
-```
-
-When the `ImageUrl` object is destroyed, the associated buffer is removed from the texture manager. If a visual still references the buffer, it will be cleaned up when the visual is destroyed.
+The `GetUrl()` method returns a URL string that references the external buffer. This URL can be passed to visual components that accept image URLs. The buffer remains valid while the `ImageUrl` object exists or while visuals reference it.

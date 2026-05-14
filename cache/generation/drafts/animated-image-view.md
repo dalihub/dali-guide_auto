@@ -1,89 +1,109 @@
 ---
 title: Animated Image View
 sidebar_label: Animated Image View
-category: uncategorized
+category: views-components
 ---
 
 # Animated Image View
 
-`AnimatedImageView` displays animated image resources such as GIF and WebP files, with full playback control including play, pause, stop, and frame-by-frame navigation.
+`AnimatedImageView` is a View component for displaying animated image resources such as GIF and animated WebP files. It provides playback control, loop configuration, and frame-level manipulation.
 
 ## Table of Contents
 
 - [Creating an AnimatedImageView](#creating-an-animatedimageview)
 - [Playback Control](#playback-control)
 - [Loop and Speed Configuration](#loop-and-speed-configuration)
-- [Frame Array Animation](#frame-array-animation)
+- [Frame Sequences from URL Arrays](#frame-sequences-from-url-arrays)
 - [Visual Appearance](#visual-appearance)
 - [Alpha Masking](#alpha-masking)
-- [Loading Configuration](#loading-configuration)
+- [Loading Policies](#loading-policies)
 - [Signals](#signals)
 
 ## Creating an AnimatedImageView
 
-Create an `AnimatedImageView` using `AnimatedImageView::New()` with an optional URL to an animated image file:
+Create an `AnimatedImageView` using the `New()` static method. You can pass an optional URL to load an animated image immediately.
 
 ```cpp
-using namespace Dali::Ui;
+// Create with no initial image
+AnimatedImageView animatedView = AnimatedImageView::New();
 
 // Create with a GIF file
 AnimatedImageView animatedView = AnimatedImageView::New("animations/spinner.gif");
 
-// Create empty and set URL later
-AnimatedImageView animatedView = AnimatedImageView::New();
+// Set the image URL after creation
 animatedView.SetResourceUrl("animations/loading.webp");
 ```
 
 Set the view size and add it to your layout:
 
 ```cpp
-animatedView.SetRequestedWidth(200.0f)
-             .SetRequestedHeight(200.0f);
+AnimatedImageView animatedView = AnimatedImageView::New("animations/logo.gif")
+    .SetRequestedWidth(200.0f)
+    .SetRequestedHeight(200.0f);
+
+parentLayout.Add(animatedView);
 ```
 
 ## Playback Control
 
-Control animation playback using `Play()`, `Pause()`, and `Stop()`:
+Control animation playback using `Play()`, `Pause()`, and `Stop()` methods. All playback methods support fluent chaining.
 
 ```cpp
 // Start or resume playback
 animatedView.Play();
 
-// Pause at current frame
+// Pause at the current frame
 animatedView.Pause();
 
-// Stop and reset based on StopBehavior
+// Stop and reset to the first frame
 animatedView.Stop();
 ```
 
-Jump directly to a specific frame using `JumpToFrame()`:
+### Jumping to a Specific Frame
+
+Use `JumpToFrame()` to jump directly to a specific frame index:
 
 ```cpp
 // Jump to frame 5
 animatedView.JumpToFrame(5);
 ```
 
-Query the current playback state with `GetPlayState()`:
+### Querying Playback State
+
+Check the current playback state using `GetPlayState()`:
 
 ```cpp
-using namespace Dali::Ui::AnimatedImage;
-
-PlayState state = animatedView.GetPlayState();
-if (state == PlayState::PLAYING)
+Ui::AnimatedImage::PlayState state = animatedView.GetPlayState();
+if (state == Ui::AnimatedImage::PlayState::PLAYING)
 {
-  // Animation is actively playing
-}
-else if (state == PlayState::PAUSED)
-{
-  // Animation is paused
-}
-else if (state == PlayState::STOPPED)
-{
-  // Animation is stopped
+    // Animation is currently playing
 }
 ```
 
-Track the current frame and total frame count:
+The `PlayState` enum has three values:
+
+- `Ui::AnimatedImage::PlayState::STOPPED` — Animation has stopped
+- `Ui::AnimatedImage::PlayState::PLAYING` — Animation is playing
+- `Ui::AnimatedImage::PlayState::PAUSED` — Animation is paused
+
+### Stop Behavior
+
+Configure which frame displays when the animation stops using `SetStopBehavior()`:
+
+```cpp
+// Show current frame when stopped
+animatedView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
+
+// Show first frame when stopped
+animatedView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
+
+// Show last frame when stopped
+animatedView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+```
+
+### Frame Information
+
+Query the current frame number and total frame count:
 
 ```cpp
 int currentFrame = animatedView.GetCurrentFrame();
@@ -103,13 +123,15 @@ animatedView.SetLoopCount(-1);
 // Play exactly 3 times
 animatedView.SetLoopCount(3);
 
-// Play once
+// Play once (no looping)
 animatedView.SetLoopCount(1);
 ```
 
-### Frame Speed Factor
+A value of `-1` means infinite looping. A value of `0` means the animation will not play.
 
-Control playback speed with `SetFrameSpeedFactor()`. Values below 1.0 slow down the animation; values above 1.0 speed it up:
+### Playback Speed
+
+Control animation speed using `SetFrameSpeedFactor()`:
 
 ```cpp
 // Half speed
@@ -122,53 +144,41 @@ animatedView.SetFrameSpeedFactor(1.0f);
 animatedView.SetFrameSpeedFactor(2.0f);
 ```
 
-### Frame Delay Override
+Values between 0 and 1 slow down the animation; values above 1 speed it up.
 
-Override the embedded frame timing with `SetFrameDelay()`:
+### Custom Frame Delay
+
+Override the frame delay embedded in the image file using `SetFrameDelay()`:
 
 ```cpp
 // Set 500ms between frames
 animatedView.SetFrameDelay(500);
 ```
 
-### Stop Behavior
+## Frame Sequences from URL Arrays
 
-Configure which frame displays when the animation stops using `SetStopBehavior()`:
-
-```cpp
-using namespace Dali::Ui::AnimatedImage;
-
-// Show current frame when stopped
-animatedView.SetStopBehavior(StopBehavior::CURRENT_FRAME);
-
-// Show first frame when stopped
-animatedView.SetStopBehavior(StopBehavior::FIRST_FRAME);
-
-// Show last frame when stopped
-animatedView.SetStopBehavior(StopBehavior::LAST_FRAME);
-```
-
-## Frame Array Animation
-
-Instead of a single animated file, provide an array of individual image URLs for frame-by-frame animation:
+Instead of a single animated file, you can provide an array of individual image URLs that play as a frame sequence:
 
 ```cpp
-Dali::Vector<Dali::String> frameUrls;
-frameUrls.PushBack("frames/frame-001.png");
-frameUrls.PushBack("frames/frame-002.png");
-frameUrls.PushBack("frames/frame-003.png");
-frameUrls.PushBack("frames/frame-004.png");
+Dali::Vector<Dali::String> urls;
+urls.PushBack(Dali::String("frames/frame-001.png"));
+urls.PushBack(Dali::String("frames/frame-002.png"));
+urls.PushBack(Dali::String("frames/frame-003.png"));
+urls.PushBack(Dali::String("frames/frame-004.png"));
 
-animatedView.SetResourceUrls(frameUrls);
+animatedView.SetResourceUrls(urls);
+animatedView.Play();
 ```
 
-Configure batch loading and caching for frame arrays:
+### Batch and Cache Configuration
+
+For URL arrays, configure batch loading and caching:
 
 ```cpp
 // Pre-load 4 frames at a time
 animatedView.SetBatchSize(4);
 
-// Cache up to 10 frames
+// Keep 10 frames in cache
 animatedView.SetCacheSize(10);
 ```
 
@@ -179,45 +189,33 @@ animatedView.SetCacheSize(10);
 Control how the image fits within the view bounds using `SetFittingMode()`:
 
 ```cpp
-using namespace Dali::Ui::Image;
+// Scale to fit, preserving aspect ratio
+animatedView.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
-// Scale to fit, preserve aspect ratio
-animatedView.SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO);
+// Stretch to fill the view (default)
+animatedView.SetFittingMode(Ui::Image::FittingMode::FILL);
 
-// Stretch to fill the view
-animatedView.SetFittingMode(FittingMode::FILL);
-
-// Scale to cover, crop overflow
-animatedView.SetFittingMode(FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+// Scale to cover, cropping overflow
+animatedView.SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
 
 // Center at original size
-animatedView.SetFittingMode(FittingMode::CENTER);
+animatedView.SetFittingMode(Ui::Image::FittingMode::CENTER);
 ```
 
 ### Image Color
 
-Apply a color tint to the animation:
+Apply a color tint to the image:
 
 ```cpp
-// Apply blue tint
-animatedView.SetImageColor(UiColor(0x4A90E2));
+animatedView.SetImageColor(UiColor(0xFF5500));
 ```
 
 ### Sampling Mode
 
-Set the filtering mode used when scaling:
+Configure the filtering used when scaling:
 
 ```cpp
-using namespace Dali::Ui::Image;
-
-// Smooth scaling
-animatedView.SetSamplingMode(SamplingMode::LINEAR);
-
-// Pixelated appearance
-animatedView.SetSamplingMode(SamplingMode::NEAREST);
-
-// High quality
-animatedView.SetSamplingMode(SamplingMode::LANCZOS);
+animatedView.SetSamplingMode(Ui::Image::SamplingMode::LINEAR);
 ```
 
 ### Desired Size Hints
@@ -234,7 +232,7 @@ animatedView.SetDesiredHeight(256);
 Display a sub-region of the image using normalized coordinates:
 
 ```cpp
-// Show the top-left quadrant
+// Show the top-left quarter of the image
 animatedView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 ```
 
@@ -243,61 +241,56 @@ animatedView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 Apply an alpha mask to shape the visible region of the animation:
 
 ```cpp
-// Set the mask image
-animatedView.SetAlphaMaskUrl("masks/circle.png");
+animatedView.SetAlphaMaskUrl("masks/circle-mask.png");
 
-// Crop output to mask bounds
+// Crop the image to the mask bounds
 animatedView.SetCropToMask(true);
 ```
 
-Choose when masking is applied using `SetMaskingMode()`:
+### Masking Mode
+
+Choose when masking is applied:
 
 ```cpp
-using namespace Dali::Ui::Image;
+// Apply mask during rendering (default)
+animatedView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
 
-// Apply mask during rendering (can be changed dynamically)
-animatedView.SetMaskingMode(MaskingType::MASKING_ON_RENDERING);
-
-// Apply mask during loading (more efficient, cannot be changed)
-animatedView.SetMaskingMode(MaskingType::MASKING_ON_LOADING);
+// Apply mask during loading (more efficient for static masks)
+animatedView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
 ```
 
-## Loading Configuration
+## Loading Policies
 
 ### Load Policy
 
-Control when the image loads using `SetLoadPolicy()`:
+Control when the image starts loading:
 
 ```cpp
-using namespace Dali::Ui::Image;
+// Load immediately when the view is created
+animatedView.SetLoadPolicy(Ui::Image::LoadPolicy::IMMEDIATE);
 
-// Load immediately when created
-animatedView.SetLoadPolicy(LoadPolicy::IMMEDIATE);
-
-// Load when attached to the scene (default)
-animatedView.SetLoadPolicy(LoadPolicy::ATTACHED);
+// Load when the view is attached to the scene (default)
+animatedView.SetLoadPolicy(Ui::Image::LoadPolicy::ATTACHED);
 ```
 
 ### Release Policy
 
-Control when the texture is released from cache using `SetReleasePolicy()`:
+Control when the image texture is released from cache:
 
 ```cpp
-using namespace Dali::Ui::Image;
+// Release when detached from scene (default)
+animatedView.SetReleasePolicy(Ui::Image::ReleasePolicy::DETACHED);
 
-// Release when detached from scene
-animatedView.SetReleasePolicy(ReleasePolicy::DETACHED);
-
-// Release when view is destroyed
-animatedView.SetReleasePolicy(ReleasePolicy::DESTROYED);
+// Release when the view is destroyed
+animatedView.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED);
 
 // Never release from cache
-animatedView.SetReleasePolicy(ReleasePolicy::NEVER);
+animatedView.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
 ```
 
 ### Synchronous Loading
 
-Load the image on the main thread, blocking until complete:
+Load the image synchronously on the main thread:
 
 ```cpp
 animatedView.SetSynchronousLoading(true);
@@ -308,43 +301,42 @@ animatedView.SetSynchronousLoading(true);
 Display a placeholder while the main image loads:
 
 ```cpp
-animatedView.SetPlaceholderUrl("placeholders/loading.png");
+animatedView.SetPlaceholderUrl("placeholders/loading-placeholder.png");
 ```
 
 ## Signals
 
-### Animation Finished Signal
-
-Receive a callback when the animation completes all loops:
-
-```cpp
-animatedView.AnimationFinishedSignal().Connect(this, &MyClass::OnAnimationFinished);
-
-// Handler signature
-void OnAnimationFinished(Dali::Ui::View view)
-{
-  // Animation has finished all loops
-}
-```
-
 ### Resource Ready Signal
 
-Receive a callback when the image finishes loading:
+The `ResourceReadySignal` is emitted when the image has finished loading:
 
 ```cpp
 animatedView.ResourceReadySignal().Connect(this, &MyClass::OnResourceReady);
 
-// Handler signature
-void OnResourceReady(Dali::Ui::View view)
+void OnResourceReady(View view)
 {
-  // Image is ready to display
-  int totalFrames = animatedView.GetTotalFrame();
+    AnimatedImageView animatedView = AnimatedImageView::DownCast(view);
+    int totalFrames = animatedView.GetTotalFrame();
+    // Image is ready to display
 }
 ```
 
-Check the loading status at any time:
+### Animation Finished Signal
+
+The `AnimationFinishedSignal` is emitted when the animation completes all loops:
 
 ```cpp
-using namespace Dali::Ui::Visual;
+animatedView.AnimationFinishedSignal().Connect(this, &MyClass::OnAnimationFinished);
 
-ResourceStatus status = animatedView.GetLoadingStatus();
+void OnAnimationFinished(View view)
+{
+    // Animation has finished all loops
+}
+```
+
+### Checking Loading Status
+
+Query the current loading status:
+
+```cpp
+Ui::Visual::ResourceStatus status = animatedView.GetLoadingStatus();

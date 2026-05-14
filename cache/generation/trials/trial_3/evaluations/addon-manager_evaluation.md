@@ -5,14 +5,15 @@
 - Status: needs_repair
 - Publish ready: false
 - Bugs: 4
-- Warnings: 0
+- Warnings: 1
 - Needs review: 0
-- Repairable issues: 4
+- Repairable issues: 5
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
+| LOW_BACKTICK_API_USAGE | 1 |
 | MISSING_TABLE_OF_CONTENTS | 1 |
 | MISSING_TITLE_HEADING | 1 |
 | NO_CPP_CODE_BLOCK | 1 |
@@ -44,6 +45,12 @@
 - Span: ``
 - Reason: Primary feature guide has no C++ code block.
 - Suggested direction: Add at least one compact, source-grounded C++ example for the primary feature.
+
+### 5. LOW_BACKTICK_API_USAGE (warning)
+
+- Location: line n/a
+- Span: ``
+- Reason: Document uses very few backticked API names.
 
 ## Machine Data
 

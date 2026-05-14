@@ -6,25 +6,26 @@ category: views-components
 
 # Image View
 
-ImageView displays static images from URLs, resource paths, or in-memory pixel data. It supports various image formats including JPEG, PNG, GIF (static), WebP, and BMP.
+`ImageView` is a View component for displaying static images. It supports various image formats and provides controls for fitting, sampling, masking, loading policies, and N-patch borders.
 
 ## Table of Contents
 
 - [Creating an ImageView](#creating-an-imageview)
 - [Setting the Image Source](#setting-the-image-source)
-- [Fitting Modes](#fitting-modes)
-- [Pixel Area and Cropping](#pixel-area-and-cropping)
+- [Fitting and Scaling](#fitting-and-scaling)
 - [Image Color and Tinting](#image-color-and-tinting)
 - [Alpha Masking](#alpha-masking)
-- [Loading Policies](#loading-policies)
+- [Loading Behavior](#loading-behavior)
 - [Placeholder Images](#placeholder-images)
-- [Sampling Mode and Desired Size](#sampling-mode-and-desired-size)
-- [Resource Ready Signal](#resource-ready-signal)
 - [N-Patch Images](#n-patch-images)
+- [Pixel Area for Sub-Regions](#pixel-area-for-sub-regions)
+- [Monitoring Load Status](#monitoring-load-status)
+
+---
 
 ## Creating an ImageView
 
-Create an `ImageView` using the `New()` factory method. You can create an empty view or provide an image URL directly.
+Create an `ImageView` using the static `New()` method. You can create an empty view or initialize it with an image URL.
 
 ```cpp
 // Create an empty ImageView
@@ -34,55 +35,247 @@ Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
 Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New("images/photo.jpg");
 ```
 
-After creation, configure the view size and add it to your layout:
+After creation, configure the view and add it to your layout:
 
 ```cpp
-imageView.SetRequestedWidth(MATCH_PARENT)
-         .SetRequestedHeight(WRAP_CONTENT);
+imageView.SetRequestedWidth(Dali::Ui::MATCH_PARENT)
+         .SetRequestedHeight(Dali::Ui::WRAP_CONTENT);
+
 container.Add(imageView);
 ```
 
 ## Setting the Image Source
 
-Use `SetResourceUrl()` to set or change the image source after creation. The URL can be a file path, resource identifier, or data URI.
+Use `SetResourceUrl()` to set or change the image displayed by an existing `ImageView`. The image loads asynchronously by default.
 
 ```cpp
-imageView.SetResourceUrl("images/gallery-large-1.jpg");
+imageView.SetResourceUrl("images/background.png");
 ```
 
-To retrieve the current resource URL:
+Retrieve the current URL with `GetResourceUrl()`:
 
 ```cpp
-Dali::String url = imageView.GetResourceUrl();
+Dali::String currentUrl = imageView.GetResourceUrl();
 ```
 
-## Fitting Modes
-
-Fitting mode controls how the image scales within the view bounds. Use `SetFittingMode()` with values from `Dali::Ui::Image::FittingMode`.
+To reload the current image (for example, after changing size hints or masking settings), call `Reload()`:
 
 ```cpp
-// Keep aspect ratio, fit within bounds
+imageView.Reload();
+```
+
+## Fitting and Scaling
+
+### Fitting Mode
+
+Control how the image fits within the view bounds using `SetFittingMode()`. The default is `Image::FittingMode::FILL`, which stretches the image to fill the view.
+
+```cpp
+// Preserve aspect ratio while fitting within bounds
 imageView.SetFittingMode(Dali::Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
-// Fill the entire view, may crop the image
+// Stretch to fill the entire view (may distort)
 imageView.SetFittingMode(Dali::Ui::Image::FittingMode::FILL);
 
-// Keep aspect ratio, cover the view (may overflow)
+// Scale to cover, cropping overflow
 imageView.SetFittingMode(Dali::Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
 
-// Center the image at original size
+// Display at original image size, centered
 imageView.SetFittingMode(Dali::Ui::Image::FittingMode::CENTER);
 ```
 
-Retrieve the current fitting mode:
+### Sampling Mode
+
+Control the filtering applied when scaling the image using `SetSamplingMode()`:
 
 ```cpp
-Dali::Ui::Image::FittingMode mode = imageView.GetFittingMode();
+// Crisp, pixelated appearance (good for pixel art)
+imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::NEAREST);
+
+// Smooth appearance (good for photos)
+imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::LINEAR);
+
+// High-quality downscaling then nearest-neighbor for upscaling
+imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::BOX_THEN_NEAREST);
+
+// High-quality downscaling then linear filtering
+imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::BOX_THEN_LINEAR);
 ```
 
-## Pixel Area and Cropping
+### Desired Size
 
-`SetPixelArea()` displays a sub-region of the source image. The area is specified as normalized coordinates `(x, y, width, height)` in the range `[0.0, 1.0]`.
+Provide size hints to the image loader to reduce memory usage when displaying large images at small sizes:
+
+```cpp
+// Load the image at a reduced resolution (saves memory)
+imageView.SetDesiredWidth(256);
+imageView.SetDesiredHeight(256);
+
+// Use natural image size (no hint)
+imageView.SetDesiredWidth(0);
+imageView.SetDesiredHeight(0);
+```
+
+After changing desired size, call `Reload()` to apply the new size hint:
+
+```cpp
+imageView.SetDesiredWidth(128)
+         .SetDesiredHeight(128);
+imageView.Reload();
+```
+
+## Image Color and Tinting
+
+Apply a color multiplier to the image using `SetImageColor()`. This tints the image by multiplying each pixel's RGBA values.
+
+```cpp
+// No tint (original appearance)
+imageView.SetImageColor(Dali::Ui::UiColor(1.0f, 1.0f, 1.0f, 1.0f));
+
+// Red tint
+imageView.SetImageColor(Dali::Ui::UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+
+// Grayscale appearance
+imageView.SetImageColor(Dali::Ui::UiColor(0.5f, 0.5f, 0.5f, 1.0f));
+
+// 50% transparent
+imageView.SetImageColor(Dali::Ui::UiColor(1.0f, 1.0f, 1.0f, 0.5f));
+```
+
+Retrieve the current color with `GetImageColor()`:
+
+```cpp
+Dali::Ui::UiColor color = imageView.GetImageColor();
+```
+
+## Alpha Masking
+
+Apply an alpha mask to shape the visible region of the image.
+
+### Setting a Mask
+
+Use `SetAlphaMaskUrl()` to specify a mask image. The alpha channel of the mask controls visibility:
+
+```cpp
+imageView.SetAlphaMaskUrl("images/circle_mask.png");
+```
+
+### Crop to Mask
+
+By default, the full image is displayed with the mask's alpha applied. Enable `SetCropToMask()` to crop the image to the mask's bounding box:
+
+```cpp
+// Full image with mask alpha applied
+imageView.SetCropToMask(false);
+
+// Image cropped to mask bounds
+imageView.SetCropToMask(true);
+```
+
+### Masking Mode
+
+Control when masking is applied using `SetMaskingMode()`:
+
+```cpp
+// Apply mask during rendering (default)
+imageView.SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_RENDERING);
+
+// Apply mask during loading (more efficient for static masks)
+imageView.SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_LOADING);
+```
+
+After changing the masking mode, call `Reload()` to reapply the mask:
+
+```cpp
+imageView.SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_LOADING);
+imageView.Reload();
+```
+
+## Loading Behavior
+
+### Load Policy
+
+Control when the image begins loading using `SetLoadPolicy()`:
+
+```cpp
+// Load immediately when the ImageView is created
+imageView.SetLoadPolicy(Dali::Ui::Image::LoadPolicy::IMMEDIATE);
+
+// Defer loading until the view is attached to the scene (default)
+imageView.SetLoadPolicy(Dali::Ui::Image::LoadPolicy::ATTACHED);
+```
+
+### Release Policy
+
+Control when the image texture is released from the cache using `SetReleasePolicy()`:
+
+```cpp
+// Release when detached from scene (default)
+imageView.SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::DETACHED);
+
+// Release when the view is destroyed
+imageView.SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::DESTROYED);
+
+// Never release from cache
+imageView.SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::NEVER);
+```
+
+### Synchronous Loading
+
+For small images where blocking is acceptable, enable synchronous loading:
+
+```cpp
+imageView.SetSynchronousLoading(true);
+```
+
+### Fast Track Upload
+
+Enable background GPU upload to reduce main-thread stalls:
+
+```cpp
+imageView.SetFastTrackUpload(true);
+```
+
+### Orientation Correction
+
+Automatically apply EXIF orientation metadata:
+
+```cpp
+imageView.SetOrientationCorrection(true);
+```
+
+## Placeholder Images
+
+Display a placeholder image while the main image loads:
+
+```cpp
+// Set the placeholder first
+imageView.SetPlaceholderUrl("images/placeholder.png");
+
+// Then set the main image URL
+imageView.SetResourceUrl("images/large_photo.jpg");
+```
+
+The placeholder displays immediately and is automatically replaced when the main image finishes loading.
+
+## N-Patch Images
+
+N-patch images (9-patch) allow stretchable borders with fixed corners and edges. Set the border insets to activate N-patch rendering:
+
+```cpp
+// Border: (left, top, right, bottom) in pixels
+imageView.SetNPatchBorder(Dali::Vector4(10.0f, 10.0f, 10.0f, 10.0f));
+```
+
+To render only the border regions (hollow center):
+
+```cpp
+imageView.SetNPatchBorderOnly(true);
+```
+
+## Pixel Area for Sub-Regions
+
+Display a portion of the image using `SetPixelArea()`. The area is specified in normalized coordinates (0.0 to 1.0):
 
 ```cpp
 // Display the full image
@@ -95,313 +288,52 @@ imageView.SetPixelArea(Dali::Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 imageView.SetPixelArea(Dali::Vector4(0.25f, 0.25f, 0.5f, 0.5f));
 ```
 
+The `Vector4` components are: `(x, y, width, height)`.
+
 Retrieve the current pixel area:
 
 ```cpp
 Dali::Vector4 area = imageView.GetPixelArea();
 ```
 
-Pixel area is animatable. You can create pan and zoom effects by animating the `PIXEL_AREA` property:
+## Monitoring Load Status
+
+### Resource Ready Signal
+
+Connect to `ResourceReadySignal()` to be notified when the image finishes loading:
 
 ```cpp
-Dali::Animation animation = Dali::Animation::New(2.0f);
-animation.AnimateTo(
-    Dali::Property(imageView, Dali::Ui::ImageView::Property::PIXEL_AREA),
-    Dali::Vector4(0.25f, 0.25f, 0.5f, 0.5f));
-animation.Play();
-```
-
-## Image Color and Tinting
-
-`SetImageColor()` applies a color multiplier to the image. White (1.0, 1.0, 1.0, 1.0) displays the original image; other values tint or adjust transparency.
-
-```cpp
-// Original colors (no tint)
-imageView.SetImageColor(Dali::UiColor(1.0f, 1.0f, 1.0f, 1.0f));
-
-// Red tint
-imageView.SetImageColor(Dali::UiColor(1.0f, 0.0f, 0.0f, 1.0f));
-
-// Grayscale effect
-imageView.SetImageColor(Dali::UiColor(0.5f, 0.5f, 0.5f, 1.0f));
-
-// 50% transparent
-imageView.SetImageColor(Dali::UiColor(1.0f, 1.0f, 1.0f, 0.5f));
-```
-
-Retrieve the current image color:
-
-```cpp
-Dali::UiColor color = imageView.GetImageColor();
-```
-
-## Alpha Masking
-
-Apply an alpha mask to shape the visible region of the image. Use `SetAlphaMaskUrl()` to specify the mask image and `SetCropToMask()` to control whether the view crops to the mask bounds.
-
-```cpp
-// Set the alpha mask image
-imageView.SetAlphaMaskUrl("images/mask.png");
-
-// Crop the view to the mask's bounding box
-imageView.SetCropToMask(true);
-```
-
-Control when masking is applied using `SetMaskingMode()`:
-
-```cpp
-// Apply mask during loading (cached with the image)
-imageView.SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_LOADING);
-
-// Apply mask during rendering (can be changed without reloading)
-imageView.SetMaskingMode(Dali::Ui::Image::MaskingType::MASKING_ON_RENDERING);
-```
-
-After changing the mask or masking mode, call `Reload()` to apply changes:
-
-```cpp
-imageView.SetAlphaMaskUrl("images/new_mask.png");
-imageView.Reload();
-```
-
-Retrieve mask settings:
-
-```cpp
-Dali::String maskUrl = imageView.GetAlphaMaskUrl();
-bool cropToMask = imageView.IsCropToMask();
-Dali::Ui::Image::MaskingType mode = imageView.GetMaskingMode();
-```
-
-## Loading Policies
-
-Control when images load and unload using load and release policies.
-
-### Load Policy
-
-Set when the image begins loading:
-
-```cpp
-// Load when the view is added to the scene (default)
-imageView.SetLoadPolicy(Dali::Ui::Image::LoadPolicy::ATTACHED);
-
-// Load immediately, before scene attachment
-imageView.SetLoadPolicy(Dali::Ui::Image::LoadPolicy::IMMEDIATE);
-```
-
-### Release Policy
-
-Set when the image data is released from memory:
-
-```cpp
-// Release when the view is removed from the scene
-imageView.SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::DETACHED);
-
-// Release when the view is destroyed
-imageView.SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::DESTROYED);
-
-// Never release (keep in memory)
-imageView.SetReleasePolicy(Dali::Ui::Image::ReleasePolicy::NEVER);
-```
-
-### Synchronous Loading
-
-For small images where blocking load is acceptable:
-
-```cpp
-imageView.SetSynchronousLoading(true);
-bool isSync = imageView.IsSynchronousLoading();
-```
-
-### Fast Track Upload
-
-Enable fast GPU upload for images that need to display quickly:
-
-```cpp
-imageView.SetFastTrackUpload(true);
-bool fastTrack = imageView.IsFastTrackUploadEnabled();
-```
-
-Retrieve current policies:
-
-```cpp
-Dali::Ui::Image::LoadPolicy loadPolicy = imageView.GetLoadPolicy();
-Dali::Ui::Image::ReleasePolicy releasePolicy = imageView.GetReleasePolicy();
-```
-
-## Placeholder Images
-
-Display a placeholder while the main image loads. Set the placeholder URL before setting the main image URL.
-
-```cpp
-// Create an empty ImageView
-Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New();
-
-// Set the placeholder first
-imageView.SetPlaceholderUrl("images/placeholder.png");
-
-// Later, set the main image URL
-imageView.SetResourceUrl("images/large_photo.jpg");
-```
-
-The placeholder displays immediately and is replaced automatically when the main image finishes loading. Retrieve the placeholder URL:
-
-```cpp
-Dali::String placeholderUrl = imageView.GetPlaceholderUrl();
-```
-
-## Sampling Mode and Desired Size
-
-### Sampling Mode
-
-Control texture filtering for scaled images:
-
-```cpp
-// Nearest-neighbor filtering (pixelated appearance)
-imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::NEAREST);
-
-// Box filter then nearest (good for downscaling)
-imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::BOX_THEN_NEAREST);
-
-// Box filter then linear (smooth downscaling)
-imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::BOX_THEN_LINEAR);
-
-// Linear filtering (smooth, default)
-imageView.SetSamplingMode(Dali::Ui::Image::SamplingMode::LINEAR);
-```
-
-### Desired Size
-
-Provide size hints to the loader for memory efficiency. The image loads at the specified resolution rather than full size:
-
-```cpp
-// Load at full resolution
-imageView.SetDesiredWidth(0);
-imageView.SetDesiredHeight(0);
-
-// Load at reduced resolution (e.g., for thumbnails)
-imageView.SetDesiredWidth(128);
-imageView.SetDesiredHeight(128);
-```
-
-After changing desired size, call `Reload()` to apply the change:
-
-```cpp
-imageView.SetDesiredWidth(64);
-imageView.SetDesiredHeight(64);
-imageView.Reload();
-```
-
-Retrieve current settings:
-
-```cpp
-int width = imageView.GetDesiredWidth();
-int height = imageView.GetDesiredHeight();
-Dali::Ui::Image::SamplingMode mode = imageView.GetSamplingMode();
-```
-
-## Resource Ready Signal
-
-Connect to `ResourceReadySignal()` to receive notification when the image finishes loading:
-
-```cpp
-void OnResourceReady(Dali::Ui::View view)
+void OnImageReady(Dali::Ui::View view)
 {
     Dali::Ui::ImageView imageView = Dali::Ui::ImageView::DownCast(view);
     if (imageView)
     {
-        Dali::Ui::Visual::ResourceStatus status = imageView.GetLoadingStatus();
-        // status indicates success or failure
+        auto status = imageView.GetLoadingStatus();
+        // Handle loaded image
     }
 }
 
 // Connect the signal
-imageView.ResourceReadySignal().Connect(this, &OnResourceReady);
+imageView.ResourceReadySignal().Connect(&YourClass::OnImageReady);
 ```
 
-Check loading status at any time:
+### Loading Status
+
+Check the current loading status with `GetLoadingStatus()`:
 
 ```cpp
 Dali::Ui::Visual::ResourceStatus status = imageView.GetLoadingStatus();
 ```
 
-## N-Patch Images
+The status indicates whether the resource is loading, ready, or failed.
 
-N-patch images (9-patch) stretch specific regions while preserving borders and corners. Set the border definition using `SetNPatchBorder()`:
+### DownCasting
 
-```cpp
-// Border defined as (left, top, right, bottom) in pixels
-imageView.SetNPatchBorder(Dali::Vector4(10.0f, 10.0f, 10.0f, 10.0f));
-```
-
-To display only the border (not the stretched center):
+When you receive a `View` in a signal callback, use `DownCast()` to obtain an `ImageView`:
 
 ```cpp
-imageView.SetNPatchBorderOnly(true);
-```
-
-Retrieve N-patch settings:
-
-```cpp
-Dali::Vector4 border = imageView.GetNPatchBorder();
-bool borderOnly = imageView.IsNPatchBorderOnly();
-```
-
-## Additional Properties
-
-### Orientation Correction
-
-Enable or disable automatic orientation correction from EXIF data:
-
-```cpp
-imageView.SetOrientationCorrection(true);
-bool enabled = imageView.IsOrientationCorrectionEnabled();
-```
-
-### Pre-multiplied Alpha
-
-Control whether the image uses pre-multiplied alpha:
-
-```cpp
-imageView.SetPreMultipliedAlpha(true);
-bool preMult = imageView.IsPreMultipliedAlpha();
-```
-
-### Load with View Size
-
-Enable loading the image at the view's displayed size:
-
-```cpp
-imageView.SetImageLoadWithViewSize(true);
-bool enabled = imageView.IsImageLoadWithViewSizeEnabled();
-```
-
-### Depth Index
-
-Set the depth index for layering:
-
-```cpp
-imageView.SetDepthIndex(1);
-```
-
-## Property Access
-
-All ImageView properties can also be accessed through the property system:
-
-```cpp
-imageView.SetProperty(Dali::Ui::ImageView::Property::FITTING_MODE,
-                      static_cast<int>(Dali::Ui::Image::FittingMode::FILL));
-
-imageView.SetProperty(Dali::Ui::ImageView::Property::IMAGE, "images/photo.jpg");
-
-imageView.SetProperty(Dali::Ui::ImageView::Property::IMAGE_COLOR,
-                      Dali::UiColor(1.0f, 0.5f, 0.0f, 1.0f));
-```
-
-## Reloading Images
-
-Call `Reload()` to reload the current image with updated settings:
-
-```cpp
-imageView.SetDesiredWidth(256);
-imageView.SetDesiredHeight(256);
-imageView.Reload();
+Dali::Ui::ImageView imageView = Dali::Ui::ImageView::DownCast(view);
+if (imageView)
+{
+    // Successfully downcast, use imageView methods
+}

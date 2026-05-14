@@ -1,0 +1,163 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+---
+title: Trait Id
+sidebar_label: Trait Id
+category: views-components
+---
+
+# Trait Id
+
+TraitId is a lightweight identifier used to uniquely distinguish trait types attached to a View. Each trait type receives a unique ID via `TraitId::Alloc()`, enabling the framework to manage trait lifecycle and attachment.
+
+## Table of Contents
+
+- [Allocating Trait IDs](#allocating-trait-ids)
+- [Comparing Trait IDs](#comparing-trait-ids)
+- [Using Trait IDs with Traits](#using-trait-ids-with-traits)
+
+## Allocating Trait IDs
+
+The `TraitId::Alloc()` static method allocates a new unique identifier. This method is thread-safe and lock-free, using an internal atomic counter. Allocate IDs once per logical trait type and store them statically.
+
+```cpp
+// Allocate a unique ID for a custom trait (typically in an anonymous namespace or as a static)
+static const TraitId kMyScrollStateTrait = TraitId::Alloc();
+```
+
+Each call to `TraitId::Alloc()` returns a new unique `TraitId`. The framework guarantees that allocated IDs do not conflict with each other.
+
+```cpp
+// Each trait type gets its own unique ID
+static const TraitId kInputValidationTrait = TraitId::Alloc();
+static const TraitId kAnimationStateTrait = TraitId::Alloc();
+
+// These will have different values
+DALI_ASSERT_ALWAYS(kInputValidationTrait != kAnimationStateTrait);
+```
+
+## Comparing Trait IDs
+
+`TraitId` provides equality and inequality operators for comparing identifiers. Use these to check if a given ID matches an expected trait type.
+
+```cpp
+TraitId id1 = TraitId::Alloc();
+TraitId id2 = TraitId::Alloc();
+TraitId id1Copy = id1;
+
+// Equality comparison
+if (id1 == id1Copy)
+{
+  // Same ID value
+}
+
+// Inequality comparison
+if (id1 != id2)
+{
+  // Different IDs
+}
+```
+
+The `value` member provides direct access to the underlying `uint32_t` value, primarily for debugging or logging purposes.
+
+```cpp
+TraitId id = TraitId::Alloc();
+uint32_t rawValue = id.value;  // Access the raw numeric value
+```
+
+## Using Trait IDs with Traits
+
+`TraitId` is passed to trait lifecycle callbacks when a `Trait` is attached to or detached from a `View`. This allows trait implementations to identify which trait type triggered the callback.
+
+```cpp
+class MyTraitImpl : public Dali::Ui::Integration::TraitImpl
+{
+public:
+  void OnAttached(Dali::Ui::TraitId id, Dali::Ui::View& view) override
+  {
+    // The id parameter identifies this trait's unique identifier
+    if (id == kMyCustomTrait)
+    {
+      // Perform attachment logic
+    }
+  }
+
+  void OnDetached(Dali::Ui::TraitId id, Dali::Ui::View& view) override
+  {
+    // Handle detachment
+  }
+};
+```
+
+Framework-reserved trait IDs are defined in the `Dali::Ui::Integration::ReservedTraitId` namespace. Application code should allocate custom IDs using `TraitId::Alloc()` rather than using reserved IDs.
+
+```cpp
+// Example: Framework-reserved IDs defined in ReservedTraitId namespace
+// (Do not use these for custom traits; allocate your own with TraitId::Alloc())
+namespace Dali::Ui::Integration::ReservedTraitId
+{
+  extern const TraitId INTERACTION_TRAIT;
+  extern const TraitId SELECTABLE_TRAIT;
+  extern const TraitId STATE_HANDLER_TRAIT;
+  extern const TraitId LAYOUT_MANAGER;
+  // ... and others
+}
+```
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Trait Id Prose Review
+
+## Summary
+Reviewed the Trait Id guide draft against public headers, implementation files, and UTCs. The draft was largely accurate with minor issues requiring correction.
+
+## Source Evidence Examined
+- `repos/dali-ui/dali-ui-foundation/public-api/trait-id.h` - Primary API definition
+- `repos/dali-ui/dali-ui-foundation/integration-api/reserved-trait-id.h` - Reserved trait ID definitions
+- `repos/dali-ui/dali-ui-foundation/integration-api/trait-impl.h` - TraitImpl lifecycle callbacks
+- `repos/dali-ui/automated-tests/src/dali-ui-foundation/utc-Dali-Trait.cpp` - Usage examples
+
+## Changes Made
+
+### 1. Thread-safety description (Section: Allocating Trait IDs)
+- **Original**: "This method is thread-safe and uses an internal atomic counter."
+- **Revised**: "This method is thread-safe and lock-free, using an internal atomic counter."
+- **Source evidence**: `trait-id.h` line 41: "Uses an internal atomic counter. Thread-safe and lock-free."
+- **Reason**: Added "lock-free" to match the header documentation exactly.
+
+### 2. ReservedTraitId code block (Section: Using Trait IDs with Traits)
+- **Original**: Missing closing brace for namespace block (syntax error)
+- **Revised**: Added closing brace `}` and improved comment to clarify it's an example
+- **Source evidence**: `reserved-trait-id.h` shows 11 reserved IDs; the code block is illustrative
+- **Reason**: Fixed syntax error and clarified the code is an example, not exhaustive
+
+## Verified Accurate (No Changes Needed)
+
+### API Descriptions
+- `TraitId::Alloc()` returns unique IDs - ✓ Verified in `trait-id.h`
+- `operator==` and `operator!=` for comparison - ✓ Verified in `trait-id.h`
+- `value` member is `uint32_t` and public - ✓ Verified in `trait-id.h`
+- IDs should be stored statically - ✓ Verified in header comment
+
+### Code Examples
+- Static allocation pattern - ✓ Matches header documentation example
+- Equality/inequality comparison - ✓ Matches operator signatures
+- TraitImpl inheritance pattern - ✓ Matches `trait-impl.h`
+- Lifecycle callbacks (`OnAttached`, `OnDetached`) - ✓ Matches `TraitInterface` in `trait-impl.h`
+
+### Namespace References
+- `Dali::Ui::TraitId` - ✓ Correct
+- `Dali::Ui::Integration::TraitImpl` - ✓ Correct
+- `Dali::Ui::Integration::ReservedTraitId` - ✓ Correct
+
+## Remaining Considerations
+
+1. **Incomplete ReservedTraitId list**: The code block shows only 4 of 11 reserved IDs. This is acceptable as the comment indicates "... and others" and the section is illustrative. A complete list would require enumerating all 11 IDs which may be excessive for a guide.
+
+2. **OnBeforeAttached callback not shown**: The example shows `OnAttached` and `OnDetached` but not `OnBeforeAttached`. This is acceptable as the example demonstrates the pattern without being exhaustive.
+
+3. **C++17 nested namespace syntax**: The code block uses `namespace Dali::Ui::Integration::ReservedTraitId` (C++17) while the actual header uses traditional nested namespaces. This is acceptable as both are valid C++ and the C++17 syntax is more concise for documentation.
+
+## Conclusion
+The draft was accurate with only two minor issues: missing "lock-free" in the thread-safety description and a syntax error (missing closing brace) in the final code block. Both issues have been corrected. The guide structure, examples, and API descriptions are accurate and align with the public headers.
+-----END_PROSE_REVIEW_REPORT-----

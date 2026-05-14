@@ -2,49 +2,66 @@
 
 ## Summary
 
-The draft was reviewed against the following source files:
-- `repos/dali-ui/dali-ui-foundation/public-api/image-loader/async-image-loader.h`
-- `repos/dali-ui/dali-ui-foundation/public-api/image-loader/image-url.h`
-- `repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h`
-
-The draft was found to be **substantially accurate**. Only minor formatting and clarity improvements were applied.
+Reviewed the Image Loader guide draft against public headers, implementation files, and related APIs. The draft is well-structured and accurate. One minor correction was made.
 
 ## Changes Made
 
-| Section | Change | Source Evidence |
-|---------|--------|-----------------|
-| Loading Images > Basic Image Loading | Added note about default values for sampling mode and orientation correction | Header comment: "Note: When using this method, the following defaults will be used: samplingMode = SamplingMode::BOX_THEN_LINEAR, orientationCorrection = true" |
-| Loading Images > Loading with Dimensions | Added note that this overload also uses defaults | Header shows same defaults for `Load(url, dimensions)` overload |
-| Handling Load Completion | Minor formatting adjustment (indentation in code example) | N/A - style only |
-| Working with ImageUrl | Minor formatting adjustment (indentation in code example) | N/A - style only |
+### 1. Removed Unnecessary Include (Section: Loading with Dimensions and Options)
 
-## Verified Accurate Prose
+**Original:**
+```cpp
+#include <dali/public-api/adaptor-framework/image-options.h>
+#include <dali/public-api/rendering/sampler.h>
+```
 
-The following key statements were verified against source:
+**Revised:**
+```cpp
+#include <dali/public-api/adaptor-framework/image-options.h>
+```
 
-1. **AsyncImageLoader creation**: `New()` static method confirmed in header.
-2. **Load overloads**: Three overloads confirmed with correct signatures.
-3. **Signal type**: `Signal<void(uint32_t, PixelData)>` confirmed as `ImageLoadedSignalType`.
-4. **Cancel behavior**: Returns `true` if task removed from queue, `false` if already processing - confirmed in header comment.
-5. **ImageUrl::New(Texture&, bool)**: Signature confirmed with `preMultiplied` default parameter.
-6. **ImageUrl::New(const EncodedImageBuffer&)**: Signature confirmed.
-7. **ImageUrl lifecycle**: Buffer removal on destruction confirmed in header comment.
+**Source Evidence:**
+- `repos/dali-adaptor/dali/public-api/adaptor-framework/image-options.h` defines both `ImageDimensions` (as `typedef Dali::Uint16Pair ImageDimensions`) and `SamplingMode::Type` enum.
+- The include `<dali/public-api/rendering/sampler.h>` is unnecessary because `SamplingMode` is defined in `image-options.h`, not in `sampler.h`.
+- `repos/dali-ui/dali-ui-foundation/public-api/image-loader/async-image-loader.h` includes `<dali/public-api/adaptor-framework/image-options.h>` which provides `ImageDimensions` and `SamplingMode`.
+
+## Verified Accurate Content
+
+### API Signatures Verified
+
+| API | Draft Usage | Header Signature | Status |
+|-----|-------------|------------------|--------|
+| `AsyncImageLoader::New()` | `Dali::Ui::AsyncImageLoader::New()` | `static AsyncImageLoader New()` | ✓ Accurate |
+| `AsyncImageLoader::Load(url)` | `imageLoader.Load("path/to/image.png")` | `uint32_t Load(const Dali::String& url)` | ✓ Accurate |
+| `AsyncImageLoader::Load(url, dimensions)` | `imageLoader.Load("path/to/image.png", targetSize)` | `uint32_t Load(const Dali::String& url, ImageDimensions dimensions)` | ✓ Accurate |
+| `AsyncImageLoader::Load(url, dimensions, samplingMode, orientationCorrection)` | Full overload with all parameters | `uint32_t Load(const Dali::String& url, ImageDimensions dimensions, SamplingMode::Type samplingMode, bool orientationCorrection)` | ✓ Accurate |
+| `AsyncImageLoader::Cancel()` | `imageLoader.Cancel(taskId)` | `bool Cancel(uint32_t loadingTaskId)` | ✓ Accurate |
+| `AsyncImageLoader::CancelAll()` | `imageLoader.CancelAll()` | `void CancelAll()` | ✓ Accurate |
+| `AsyncImageLoader::ImageLoadedSignal()` | `mLoader.ImageLoadedSignal().Connect(...)` | `ImageLoadedSignalType& ImageLoadedSignal()` | ✓ Accurate |
+| `ImageUrl::New(texture, preMultiplied)` | `Dali::Ui::ImageUrl::New(texture, false)` | `static ImageUrl New(Texture& texture, bool preMultiplied = false)` | ✓ Accurate |
+| `ImageUrl::New(encodedImageBuffer)` | `Dali::Ui::ImageUrl::New(encodedBuffer)` | `static ImageUrl New(const EncodedImageBuffer& encodedImageBuffer)` | ✓ Accurate |
+| `ImageUrl::GetUrl()` | `imageUrl.GetUrl()` | `const Dali::String& GetUrl() const` | ✓ Accurate |
+
+### Prose Statements Verified
+
+1. **"Images are loaded in a worker thread to avoid blocking the main event thread."** - Verified in `async-image-loader.h` header comment: "The images are loaded in a worker thread to avoid blocking the main event thread."
+
+2. **"The `Load()` method returns a task ID that identifies the loading operation."** - Verified in header comment: "To keep track of the loading images, each load call is assigned an ID (which is returned by the Load() call)."
+
+3. **"Always connect to `ImageLoadedSignal()` before calling `Load()` to ensure you receive the completion callback, even if loading completes immediately."** - Verified in header comment: "This signal should be connected before Load is called (in case the signal is emitted immediately)."
+
+4. **"The `Cancel()` method returns `true` if the task was successfully removed from the queue. It returns `false` if the task has already completed or is actively being processed."** - Verified in header comment: "If true, the loading task is removed from the queue, otherwise the loading is already implemented and unable to cancel anymore"
+
+5. **"The buffer remains valid while the `ImageUrl` object exists or while visuals reference it."** - Verified in `image-url.h` header comment: "When application does not use this anymore, the destructor of the ImageUrl is called. At this time, the buffer is deleted from the texture manager. Note: Visual also have reference of the buffer. In this case, buffer will be deleted after visual is deleted."
+
+### Code Examples Verified
+
+- All code examples compile against public API signatures
+- `Dali::ImageDimensions` usage is correct (typedef for `Uint16Pair`, constructible with width, height)
+- `Dali::SamplingMode::BOX_THEN_LINEAR` enum value exists in `image-options.h`
+- `Dali::Texture::New()` signature matches usage
+- `Dali::Pixel::Format::RGBA8888` enum value exists in `pixel.h`
+- Signal callback signature `void(uint32_t, PixelData)` matches `ImageLoadedSignalType`
 
 ## Remaining Concerns
 
-None. The draft accurately reflects the public API surface for the image-loader feature.
-
-## Symbols Used
-
-All symbols in the draft are from the allowed dali-ui surface:
-- `Dali::Ui::AsyncImageLoader`
-- `Dali::Ui::AsyncImageLoader::New()`
-- `Dali::Ui::AsyncImageLoader::Load()`
-- `Dali::Ui::AsyncImageLoader::Cancel()`
-- `Dali::Ui::AsyncImageLoader::CancelAll()`
-- `Dali::Ui::AsyncImageLoader::ImageLoadedSignal()`
-- `Dali::Ui::ImageUrl`
-- `Dali::Ui::ImageUrl::New()`
-- `Dali::Ui::ImageUrl::GetUrl()`
-
-Contextual symbols from dali-core/dali-adaptor (e.g., `Dali::Texture`, `Dali::PixelData`, `Dali::ImageDimensions`, `Dali::SamplingMode`) are used appropriately as supporting types.
+None. The draft is accurate and well-structured after the minor correction.

@@ -1,0 +1,56 @@
+[36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
+-----BEGIN_REVISED_MARKDOWN-----
+--- title: Ui Color Manager sidebar_label: Ui Color Manager category: styling-theme-config --- # Ui Color Manager The `UiColorManager` provides centralized color management for dali-ui applications, enabling theme-based color resolution, view-to-color bindings, and runtime color overrides. ## Table of Contents - [Getting Started](#getting-started) - [Resolving Theme Colors](#resolving-theme-colors) - [Binding Colors to Views](#binding-colors-to-views) - [Overriding Colors at Runtime](#overriding-colors-at-runtime) - [Invalidating Cached Colors](#invalidating-cached-colors) ## Getting Started `UiColorManager` is a singleton that manages color resolution for the application. Access it through the static `Get()` method. ```cpp #include <dali-ui-foundation/public-api/ui-color-manager.h> using namespace Dali::Ui; // Get the singleton instance UiColorManager manager = UiColorManager::Get(); ``` The manager supports copy and move semantics, allowing you to pass it by value: ```cpp UiColorManager manager1 = UiColorManager::Get(); UiColorManager manager2(manager1); // Copy constructor // Both refer to the same singleton DALI_TEST_CHECK(manager1 == manager2); ``` You can also downcast from a `BaseHandle`: ```cpp BaseHandle handle = UiColorManager::Get(); UiColorManager manager = UiColorManager::DownCast(handle); ``` ## Resolving Theme Colors The color manager resolves color identifiers to RGBA values using the current theme. Use `GetColor()` to retrieve colors by their string identifier. ### Basic Color Lookup ```cpp UiColorManager manager = UiColorManager::Get(); // Get color by ID (returns Vector4::ZERO if not found) Vector4 primary = manager.GetColor("Primary"); ``` ### Color Lookup with Success Check Use the output parameter overload to check if a color exists: ```cpp UiColorManager manager = UiColorManager::Get(); Vector4 color; bool found = manager.GetColor("Primary", color); if (found) { // Use the resolved color } ``` ### Default Theme Colors The default theme provides standard color identifiers: ```cpp UiColorManager manager = UiColorManager::Get(); Vector4 primary = manager.GetColor("Primary"); Vector4 background = manager.GetColor("Background"); Vector4 outline = manager.GetColor("Outline"); ``` If a color identifier does not exist, `GetColor()` returns `Vector4::ZERO`. ## Binding Colors to Views Color bindings connect views to theme colors through callback functions. When the theme changes or a color override is set, the callback is invoked with the resolved color. ### Registering a Binding Create a binding with `RegisterBinding()` and supply a callback that receives the resolved color: ```cpp void OnColorChanged(const Vector4& color) { // Apply the color to your view } UiColorManager manager = UiColorManager::Get(); View view = View::New(); // Register the binding with a callback manager.RegisterBinding(view, "TextColor", ColorCallback::New(OnColorChanged)); ``` The callback is not invoked immediately upon registration. It is invoked when the theme changes or when a color override is set or cleared. ### Setting the Binding Color After registration, assign a `UiColor` to the binding using `SetBindingColor()`: ```cpp // Using a color identifier (token) UiColor color("Primary"); manager.SetBindingColor(view, "TextColor", color); // Or using a predefined constant manager.SetBindingColor(view, "TextColor", UiColor::PRIMARY); ``` If no binding with the given `bindingId` exists, `SetBindingColor()` is a no-op. ### Retrieving a Binding's Color Check the current color assigned to a binding: ```cpp UiColorManager manager = UiColorManager::Get(); View view = View::New(); UiColor outColor; bool found = manager.GetBindingColor(view, "TextColor", outColor); if (found) { String colorId = outColor.GetColorId(); Vector4 rgba = outColor.GetRgba(); } ``` ### Checking if a Binding Exists ```cpp UiColorManager manager = UiColorManager::Get(); View view = View::New(); if (manager.HasBinding(view, "TextColor")) { // Binding exists } ``` ### Updating a Binding Call `SetBindingColor()` again to change the color for an existing binding: ```cpp // Initial color manager.SetBindingColor(view, "TextColor", UiColor::PRIMARY); // Update to a different color manager.SetBindingColor(view, "TextColor", UiColor::BACKGROUND); ``` ### Clearing Bindings Remove a single binding: ```cpp manager.ClearBinding(view, "TextColor"); ``` Remove all bindings for a view: ```cpp manager.ClearBindings(view); ``` ## Overriding Colors at Runtime Use color overrides to intercept color resolution for testing, accessibility, or dynamic theming. ### Setting a Color Override Provide a function pointer that receives the color ID and returns the overridden color: ```cpp bool OverridePrimary(StringView colorId, Vector4& outColor) { if (colorId == "Primary") { outColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f); // Red return true; } return false; // Let other colors resolve normally } UiColorManager manager = UiColorManager::Get(); manager.SetColorOverride(OverridePrimary); // Now "Primary" resolves to red Vector4 color = manager.GetColor("Primary"); // Returns red ``` The override function must be a free function or stateless lambda. Lambdas with captures and member function pointers are not accepted. ### Override with Fallback When the override function returns `false`, the color resolves from the theme: ```cpp bool OverrideSelective(StringView colorId, Vector4& outColor) { if (colorId == "Primary") { outColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f); return true; } // Return false to let other colors use theme values return false; } ``` ### Clearing the Override Restore normal theme resolution: ```cpp manager.ClearColorOverride(); ``` You can also clear by passing `nullptr`: ```cpp manager.SetColorOverride(nullptr); ``` ### Override Refreshes Bindings Setting or clearing an override automatically refreshes all registered bindings: ```cpp // Bind a view to "Primary" UiColor color("Primary"); manager.RegisterBinding(view, "TextColor", ColorCallback::New(OnColorChanged)); manager.SetBindingColor(view, "TextColor", color); // Setting override triggers OnColorChanged callback manager.SetColorOverride(OverridePrimary); // Clearing override triggers OnColorChanged again with theme color manager.ClearColorOverride(); ``` ### Replacing an Override Calling `SetColorOverride()` replaces any existing override: ```cpp bool OverrideAll(StringView colorId, Vector4& outColor) { outColor = Vector4(0.0f, 0.0f, 0.0f, 1.0f); // Black return true; } manager.SetColorOverride(OverridePrimary); // First override manager.SetColorOverride(OverrideAll); // Replaces with new override ``` ## Invalidating Cached Colors When a color override function changes its internal state, cached resolved colors may need to be invalidated. ### Invalidating All Cached Colors ```cpp UiColorManager manager = UiColorManager::Get(); manager.InvalidateCache(); ``` ### Invalidating a Specific Color ```cpp UiColorManager manager = UiColorManager::Get(); UiColor color("Primary"); manager.InvalidateCache(color); ``` If the `UiColor` holds a direct RGBA value (not a token), `InvalidateCache()` is a no-op.
+-----END_REVISED_MARKDOWN-----
+
+-----BEGIN_PROSE_REVIEW_REPORT-----
+# Ui Color Manager Prose Review
+
+## Summary
+Reviewed the draft against public headers (`ui-color-manager.h`, `ui-color.h`, `callback.h`) and UTC (`utc-Dali-UiColorManager.cpp`). Made targeted corrections for API accuracy and added missing documentation for `InvalidateCache()` methods.
+
+## Changes Made
+
+### 1. Added Missing Section: Invalidating Cached Colors
+- **Location**: New section after "Overriding Colors at Runtime"
+- **Reason**: The public API includes `InvalidateCache()` and `InvalidateCache(const UiColor&)` methods that were not documented. Added documentation for completeness.
+- **Source**: `ui-color-manager.h` lines 226-238
+
+### 2. Corrected Callback Invocation Timing
+- **Location**: "Registering a Binding" section
+- **Original**: "When the color changes (e.g., theme switch or override), the callback applies the new color to the view."
+- **Revised**: "The callback is not invoked immediately upon registration. It is invoked when the theme changes or when a color override is set or cleared."
+- **Reason**: The header doc explicitly states `RegisterBinding()` "Does not invoke the callback immediately."
+- **Source**: `ui-color-manager.h` lines 108-110
+
+### 3. Added No-op Behavior Note for SetBindingColor
+- **Location**: "Setting the Binding Color" section
+- **Addition**: "If no binding with the given `bindingId` exists, `SetBindingColor()` is a no-op."
+- **Reason**: Important behavior documented in the header that affects how developers use the API.
+- **Source**: `ui-color-manager.h` line 126
+
+### 4. Corrected String Type
+- **Location**: "Retrieving a Binding's Color" section
+- **Original**: `std::string colorId = outColor.GetColorId();`
+- **Revised**: `String colorId = outColor.GetColorId();`
+- **Reason**: `GetColorId()` returns `Dali::String`, not `std::string`.
+- **Source**: `ui-color-manager.h` line 166
+
+### 5. Added Constraint for ColorOverrideFunc
+- **Location**: "Setting a Color Override" section
+- **Addition**: "The override function must be a free function or stateless lambda. Lambdas with captures and member function pointers are not accepted."
+- **Reason**: The header explicitly documents this constraint with `@note`.
+- **Source**: `ui-color-manager.h` lines 168-170
+
+### 6. Clarified Callback Invocation in Override Section
+- **Location**: "Override Refreshes Bindings" section
+- **Original**: Prose implied callbacks are invoked on `SetBindingColor()`
+- **Revised**: Code example and prose now correctly show that callbacks are invoked when override is set/cleared, not when `SetBindingColor()` is called.
+- **Source**: UTC `UtcDaliUiColorManagerSetColorOverrideRefreshP` confirms `gApplyCallCount` is 0 after `SetBindingColor()` and becomes 1 after `SetColorOverride()`.
+
+## Code Blocks Preserved
+All original code blocks were preserved. Minor type correction (`std::string` → `String`) was made to match the actual API return type.
+
+## Remaining Concerns
+None. The draft was generally accurate and well-structured. The changes improve API accuracy and completeness without altering the document structure.
+-----END_PROSE_REVIEW_REPORT-----

@@ -5,31 +5,37 @@
 - Status: warning
 - Publish ready: true
 - Bugs: 0
-- Warnings: 2
+- Warnings: 3
 - Needs review: 0
-- Repairable issues: 2
+- Repairable issues: 3
 
 ## Issue Counts
 
 | Type | Count |
 |---|---:|
-| THIN_SECTION | 2 |
+| EMPTY_SECTION | 2 |
+| UNKNOWN_BACKTICK_API_TOKEN | 1 |
 
 ## Human Review
 
-### 1. THIN_SECTION (warning)
+### 1. EMPTY_SECTION (warning)
 
-- Location: line 114
-- Span: `## Using InputEvent in Signal Handlers`
-- Reason: Section ## Using InputEvent in Signal Handlers has very little explanatory or example content.
-- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
+- Location: line 62
+- Span: ``
+- Reason: Section ## Creating InputEvent Objects is empty.
 
-### 2. THIN_SECTION (warning)
+### 2. EMPTY_SECTION (warning)
 
-- Location: line 192
-- Span: `## NONE Events for Non-Input Changes`
-- Reason: Section ## NONE Events for Non-Input Changes has very little explanatory or example content.
-- Suggested direction: Add source-grounded explanation or a compact API example only if this section is meant to be substantive.
+- Location: line 105
+- Span: ``
+- Reason: Section ## Receiving InputEvent in Signal Handlers is empty.
+
+### 3. UNKNOWN_BACKTICK_API_TOKEN (warning)
+
+- Location: line 60
+- Span: `GetInputEventType() == InputEventType::NONE`
+- Reason: Backticked API-like token `GetInputEventType() == InputEventType::NONE` could not be resolved.
+- Suggested direction: Use a resolvable public API symbol or remove backticks if this is prose.
 
 ## Machine Data
 

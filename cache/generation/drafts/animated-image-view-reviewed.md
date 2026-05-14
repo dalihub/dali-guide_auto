@@ -2,89 +2,108 @@
 ---
 title: Animated Image View
 sidebar_label: Animated Image View
-category: uncategorized
+category: views-components
 ---
 
 # Animated Image View
 
-`AnimatedImageView` displays animated image resources such as GIF and WebP files, with full playback control including play, pause, stop, and frame-by-frame navigation.
+`AnimatedImageView` is a View component for displaying animated image resources such as GIF and animated WebP files. It provides playback control, loop configuration, and frame-level manipulation.
 
 ## Table of Contents
 
 - [Creating an AnimatedImageView](#creating-an-animatedimageview)
 - [Playback Control](#playback-control)
 - [Loop and Speed Configuration](#loop-and-speed-configuration)
-- [Frame Array Animation](#frame-array-animation)
+- [Frame Sequences from URL Arrays](#frame-sequences-from-url-arrays)
 - [Visual Appearance](#visual-appearance)
 - [Alpha Masking](#alpha-masking)
-- [Loading Configuration](#loading-configuration)
+- [Loading Policies](#loading-policies)
 - [Signals](#signals)
 
 ## Creating an AnimatedImageView
 
-Create an `AnimatedImageView` using `AnimatedImageView::New()` with an optional URL to an animated image file:
+Create an `AnimatedImageView` using the `New()` static method. You can pass an optional URL to load an animated image immediately.
 
 ```cpp
-using namespace Dali::Ui;
+// Create with no initial image
+AnimatedImageView animatedView = AnimatedImageView::New();
 
 // Create with a GIF file
 AnimatedImageView animatedView = AnimatedImageView::New("animations/spinner.gif");
 
-// Alternatively, create empty and set URL later
-AnimatedImageView animatedViewWithUrl = AnimatedImageView::New();
-animatedViewWithUrl.SetResourceUrl("animations/loading.webp");
+// Set the image URL after creation
+animatedView.SetResourceUrl("animations/loading.webp");
 ```
 
 Set the view size and add it to your layout:
 
 ```cpp
-animatedView.SetRequestedWidth(200.0f)
-             .SetRequestedHeight(200.0f);
+AnimatedImageView animatedView = AnimatedImageView::New("animations/logo.gif")
+  .SetRequestedWidth(200.0f)
+  .SetRequestedHeight(200.0f);
+parentLayout.Add(animatedView);
 ```
 
 ## Playback Control
 
-Control animation playback using `Play()`, `Pause()`, and `Stop()`:
+Control animation playback using `Play()`, `Pause()`, and `Stop()` methods. All playback methods support fluent chaining.
 
 ```cpp
 // Start or resume playback
 animatedView.Play();
 
-// Pause at current frame
+// Pause at the current frame
 animatedView.Pause();
 
-// Stop and show frame based on StopBehavior
+// Stop playback; the displayed frame depends on StopBehavior
 animatedView.Stop();
 ```
 
-Jump directly to a specific frame using `JumpToFrame()`:
+### Jumping to a Specific Frame
+
+Use `JumpToFrame()` to jump directly to a specific frame index:
 
 ```cpp
 // Jump to frame 5
 animatedView.JumpToFrame(5);
 ```
 
-Query the current playback state with `GetPlayState()`:
+### Querying Playback State
+
+Check the current playback state using `GetPlayState()`:
 
 ```cpp
-using namespace Dali::Ui::AnimatedImage;
-
-PlayState state = animatedView.GetPlayState();
-if (state == PlayState::PLAYING)
+Ui::AnimatedImage::PlayState state = animatedView.GetPlayState();
+if (state == Ui::AnimatedImage::PlayState::PLAYING)
 {
-  // Animation is actively playing
-}
-else if (state == PlayState::PAUSED)
-{
-  // Animation is paused
-}
-else if (state == PlayState::STOPPED)
-{
-  // Animation is stopped
+  // Animation is currently playing
 }
 ```
 
-Track the current frame and total frame count:
+The `PlayState` enum has three values:
+
+- `Ui::AnimatedImage::PlayState::STOPPED` — Animation has stopped
+- `Ui::AnimatedImage::PlayState::PLAYING` — Animation is playing
+- `Ui::AnimatedImage::PlayState::PAUSED` — Animation is paused
+
+### Stop Behavior
+
+Configure which frame displays when the animation stops using `SetStopBehavior()`:
+
+```cpp
+// Show current frame when stopped
+animatedView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
+
+// Show first frame when stopped
+animatedView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
+
+// Show last frame when stopped
+animatedView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+```
+
+### Frame Information
+
+Query the current frame number and total frame count:
 
 ```cpp
 int currentFrame = animatedView.GetCurrentFrame();
@@ -98,80 +117,68 @@ int totalFrames = animatedView.GetTotalFrame();
 Set how many times the animation repeats using `SetLoopCount()`:
 
 ```cpp
-// Loop infinitely (default)
+// Loop infinitely
 animatedView.SetLoopCount(-1);
 
 // Play exactly 3 times
 animatedView.SetLoopCount(3);
 
-// Play once
+// Play once (no looping)
 animatedView.SetLoopCount(1);
 ```
 
-A value of 0 means the animation will not play.
+A value of `-1` means infinite looping. A value of `0` means the animation will not play.
 
-### Frame Speed Factor
+### Playback Speed
 
-Control playback speed with `SetFrameSpeedFactor()`. Values below 1.0 slow down the animation; values above 1.0 speed it up:
+Control animation speed using `SetFrameSpeedFactor()`:
 
 ```cpp
 // Half speed
 animatedView.SetFrameSpeedFactor(0.5f);
 
-// Normal speed (default)
+// Normal speed
 animatedView.SetFrameSpeedFactor(1.0f);
 
 // Double speed
 animatedView.SetFrameSpeedFactor(2.0f);
 ```
 
-### Frame Delay Override
+Values between 0 and 1 slow down the animation; values above 1 speed it up.
 
-Override the embedded frame timing with `SetFrameDelay()`:
+### Custom Frame Delay
+
+Override the frame delay embedded in the image file using `SetFrameDelay()`:
 
 ```cpp
 // Set 500ms between frames
 animatedView.SetFrameDelay(500);
 ```
 
-### Stop Behavior
+## Frame Sequences from URL Arrays
 
-Configure which frame displays when the animation stops using `SetStopBehavior()`:
-
-```cpp
-using namespace Dali::Ui::AnimatedImage;
-
-// Show current frame when stopped
-animatedView.SetStopBehavior(StopBehavior::CURRENT_FRAME);
-
-// Show first frame when stopped
-animatedView.SetStopBehavior(StopBehavior::FIRST_FRAME);
-
-// Show last frame when stopped
-animatedView.SetStopBehavior(StopBehavior::LAST_FRAME);
-```
-
-## Frame Array Animation
-
-Instead of a single animated file, provide an array of individual image URLs for frame-by-frame animation:
+Instead of a single animated file, you can provide an array of individual image URLs that play as a frame sequence:
 
 ```cpp
-Dali::Vector<Dali::String> frameUrls;
-frameUrls.PushBack("frames/frame-001.png");
-frameUrls.PushBack("frames/frame-002.png");
-frameUrls.PushBack("frames/frame-003.png");
-frameUrls.PushBack("frames/frame-004.png");
+Dali::Vector<Dali::String> urls;
+urls.PushBack(Dali::String("frames/frame-001.png"));
+urls.PushBack(Dali::String("frames/frame-002.png"));
+urls.PushBack(Dali::String("frames/frame-003.png"));
+urls.PushBack(Dali::String("frames/frame-004.png"));
 
-animatedView.SetResourceUrls(frameUrls);
+animatedView.SetResourceUrls(urls);
+animatedView.Play();
 ```
 
-Configure batch loading and caching for frame arrays:
+### Batch and Cache Configuration
+
+For URL arrays, configure batch loading and caching:
 
 ```cpp
 // Pre-load 4 frames at a time
 animatedView.SetBatchSize(4);
 
-// Cache up to 10 frames
+// Keep 10 frames in cache
 animatedView.SetCacheSize(10);
 ```
 
@@ -179,48 +186,36 @@ animatedView.SetCacheSize(10);
 
 ### Fitting Mode
 
-Control how the image fits within the view bounds using `SetFittingMode()`. The default fitting mode is `FILL`:
+Control how the image fits within the view bounds using `SetFittingMode()`:
 
 ```cpp
-using namespace Dali::Ui::Image;
-
-// Scale to fit, preserve aspect ratio
-animatedView.SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO);
+// Scale to fit, preserving aspect ratio
+animatedView.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
 // Stretch to fill the view (default)
-animatedView.SetFittingMode(FittingMode::FILL);
+animatedView.SetFittingMode(Ui::Image::FittingMode::FILL);
 
-// Scale to cover, crop overflow
-animatedView.SetFittingMode(FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+// Scale to cover, cropping overflow
+animatedView.SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
 
 // Center at original size
-animatedView.SetFittingMode(FittingMode::CENTER);
+animatedView.SetFittingMode(Ui::Image::FittingMode::CENTER);
 ```
 
 ### Image Color
 
-Apply a color tint to the animation:
+Apply a color tint to the image:
 
 ```cpp
-// Apply blue tint
-animatedView.SetImageColor(UiColor(0x4A90E2));
+animatedView.SetImageColor(UiColor(0xFF5500));
 ```
 
 ### Sampling Mode
 
-Set the filtering mode used when scaling:
+Configure the filtering used when scaling:
 
 ```cpp
-using namespace Dali::Ui::Image;
-
-// Smooth scaling
-animatedView.SetSamplingMode(SamplingMode::LINEAR);
-
-// Pixelated appearance
-animatedView.SetSamplingMode(SamplingMode::NEAREST);
-
-// High quality
-animatedView.SetSamplingMode(SamplingMode::LANCZOS);
+animatedView.SetSamplingMode(Ui::Image::SamplingMode::LINEAR);
 ```
 
 ### Desired Size Hints
@@ -237,7 +232,7 @@ animatedView.SetDesiredHeight(256);
 Display a sub-region of the image using normalized coordinates:
 
 ```cpp
-// Show the top-left quadrant
+// Show the top-left quarter of the image
 animatedView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 ```
 
@@ -246,61 +241,56 @@ animatedView.SetPixelArea(Vector4(0.0f, 0.0f, 0.5f, 0.5f));
 Apply an alpha mask to shape the visible region of the animation:
 
 ```cpp
-// Set the mask image
-animatedView.SetAlphaMaskUrl("masks/circle.png");
+animatedView.SetAlphaMaskUrl("masks/circle-mask.png");
 
-// Crop output to mask bounds
+// Crop the image to the mask bounds
 animatedView.SetCropToMask(true);
 ```
 
-Choose when masking is applied using `SetMaskingMode()`:
+### Masking Mode
+
+Choose when masking is applied:
 
 ```cpp
-using namespace Dali::Ui::Image;
+// Apply mask during rendering
+animatedView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
 
-// Apply mask during rendering (can be changed dynamically)
-animatedView.SetMaskingMode(MaskingType::MASKING_ON_RENDERING);
-
-// Apply mask during loading (more efficient, cannot be changed)
-animatedView.SetMaskingMode(MaskingType::MASKING_ON_LOADING);
+// Apply mask during loading
+animatedView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
 ```
 
-## Loading Configuration
+## Loading Policies
 
 ### Load Policy
 
-Control when the image loads using `SetLoadPolicy()`:
+Control when the image starts loading:
 
 ```cpp
-using namespace Dali::Ui::Image;
+// Load immediately when the view is created
+animatedView.SetLoadPolicy(Ui::Image::LoadPolicy::IMMEDIATE);
 
-// Load immediately when created
-animatedView.SetLoadPolicy(LoadPolicy::IMMEDIATE);
-
-// Load when attached to the scene (default)
-animatedView.SetLoadPolicy(LoadPolicy::ATTACHED);
+// Load when the view is attached to the scene
+animatedView.SetLoadPolicy(Ui::Image::LoadPolicy::ATTACHED);
 ```
 
 ### Release Policy
 
-Control when the texture is released from cache using `SetReleasePolicy()`:
+Control when the image texture is released from cache:
 
 ```cpp
-using namespace Dali::Ui::Image;
-
 // Release when detached from scene
-animatedView.SetReleasePolicy(ReleasePolicy::DETACHED);
+animatedView.SetReleasePolicy(Ui::Image::ReleasePolicy::DETACHED);
 
-// Release when view is destroyed
-animatedView.SetReleasePolicy(ReleasePolicy::DESTROYED);
+// Release when the view is destroyed
+animatedView.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED);
 
 // Never release from cache
-animatedView.SetReleasePolicy(ReleasePolicy::NEVER);
+animatedView.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
 ```
 
 ### Synchronous Loading
 
-Load the image on the main thread, blocking until complete:
+Load the image synchronously on the main thread:
 
 ```cpp
 animatedView.SetSynchronousLoading(true);
@@ -311,46 +301,45 @@ animatedView.SetSynchronousLoading(true);
 Display a placeholder while the main image loads:
 
 ```cpp
-animatedView.SetPlaceholderUrl("placeholders/loading.png");
+animatedView.SetPlaceholderUrl("placeholders/loading-placeholder.png");
 ```
 
 ## Signals
 
+### Resource Ready Signal
+
+The `ResourceReadySignal` is emitted when the image has finished loading:
+
+```cpp
+animatedView.ResourceReadySignal().Connect(this, &MyClass::OnResourceReady);
+
+void OnResourceReady(View view)
+{
+  AnimatedImageView animatedView = AnimatedImageView::DownCast(view);
+  int totalFrames = animatedView.GetTotalFrame();
+  // Image is ready to display
+}
+```
+
 ### Animation Finished Signal
 
-Receive a callback when the animation completes all loops:
+The `AnimationFinishedSignal` is emitted when the animation completes all loops:
 
 ```cpp
 animatedView.AnimationFinishedSignal().Connect(this, &MyClass::OnAnimationFinished);
 
-// Handler signature
-void OnAnimationFinished(Dali::Ui::View view)
+void OnAnimationFinished(View view)
 {
   // Animation has finished all loops
 }
 ```
 
-### Resource Ready Signal
+### Checking Loading Status
 
-Receive a callback when the image finishes loading:
-
-```cpp
-animatedView.ResourceReadySignal().Connect(this, &MyClass::OnResourceReady);
-
-// Handler signature
-void OnResourceReady(Dali::Ui::View view)
-{
-  // Image is ready to display
-  int totalFrames = animatedView.GetTotalFrame();
-}
-```
-
-Check the loading status at any time:
+Query the current loading status:
 
 ```cpp
-using namespace Dali::Ui::Visual;
-
-ResourceStatus status = animatedView.GetLoadingStatus();
+Ui::Visual::ResourceStatus status = animatedView.GetLoadingStatus();
 ```
 -----END_REVISED_MARKDOWN-----
 
@@ -359,77 +348,84 @@ ResourceStatus status = animatedView.GetLoadingStatus();
 
 ## Summary
 
-Reviewed the AnimatedImageView guide draft against public headers (`animated-image-view.h`, `animated-image-enumerations.h`, `image-enumerations.h`) and sample files (`animated-image-view-example.cpp`, `image-alpha-mask-example.cpp`, `image-loading-policy-example.cpp`).
+Reviewed the Animated Image View developer guide draft against public headers (`animated-image-view.h`, `animated-image-enumerations.h`, `image-enumerations.h`) and sample code (`animated-image-view-example.cpp`, `image-alpha-mask-example.cpp`, `image-loading-policy-example.cpp`).
 
 ## Changes Made
 
-### 1. Creating an AnimatedImageView - Variable Naming
-**Location:** First code block  
-**Original:**
-```cpp
-// Create with a GIF file
-AnimatedImageView animatedView = AnimatedImageView::New("animations/spinner.gif");
+### 1. Stop() Method Description (Playback Control section)
 
-// Create empty and set URL later
-AnimatedImageView animatedView = AnimatedImageView::New();
-animatedView.SetResourceUrl("animations/loading.webp");
-```
-**Revised:**
-```cpp
-// Create with a GIF file
-AnimatedImageView animatedView = AnimatedImageView::New("animations/spinner.gif");
+**Original:** "Stop and reset to the first frame"
 
-// Alternatively, create empty and set URL later
-AnimatedImageView animatedViewWithUrl = AnimatedImageView::New();
-animatedViewWithUrl.SetResourceUrl("animations/loading.webp");
-```
-**Reason:** Two variables with the same name in the same code block is confusing for readers, even though it is valid C++ (variable shadowing). Renamed the second variable to make the example clearer.
+**Revised:** "Stop playback; the displayed frame depends on StopBehavior"
 
-### 2. Playback Control - Stop() Description
-**Location:** Playback Control section, comment in code block  
-**Original:** `// Stop and reset based on StopBehavior`  
-**Revised:** `// Stop and show frame based on StopBehavior`  
-**Reason:** The header documentation for `Stop()` states it "stops playback of the animation and resets to the first frame." However, `StopBehavior` enum documentation clearly states it controls which frame is shown when stopped (CURRENT_FRAME, FIRST_FRAME, or LAST_FRAME). The revised wording is more accurate and aligns with the `StopBehavior` enum documentation.
+**Source Evidence:** The header states `Stop()` "Stops playback of the animation and resets to the first frame," but `SetStopBehavior()` allows configuring whether the current, first, or last frame is shown when stopped. The original prose was misleading because the actual displayed frame depends on the configured `StopBehavior`.
 
-### 3. Loop Count - Added Missing Value
-**Location:** Loop and Speed Configuration > Loop Count section  
-**Added:** "A value of 0 means the animation will not play."  
-**Source Evidence:** `animated-image-view.h` line 152-153: "A value of 0 means the animation will not play."  
-**Reason:** The header explicitly documents this behavior, which is useful information for developers.
+### 2. Loop Count Default Removed (Loop and Speed Configuration section)
 
-### 4. Fitting Mode - Added Default Value
-**Location:** Visual Appearance > Fitting Mode section  
-**Added:** "The default fitting mode is `FILL`:" in the prose and updated the code comment to indicate default.  
-**Source Evidence:** `animated-image-view.h` line 261: "The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill)."
+**Original:** "Loop infinitely (default)"
 
-## Verified Accurate (No Changes Needed)
+**Revised:** "Loop infinitely"
 
-The following were verified against public headers and samples:
+**Source Evidence:** The header documentation does not specify a default loop count value. Removed the "(default)" claim to avoid inaccuracy.
 
-- **Enum values:** All `PlayState`, `StopBehavior`, `FittingMode`, `SamplingMode`, `LoadPolicy`, `ReleasePolicy`, and `MaskingType` enum values are correctly documented.
-- **Method signatures:** All setter methods return `AnimatedImageView&` for fluent chaining as documented.
-- **Signal handler signatures:** `AnimationFinishedSignal` and `ResourceReadySignal` use `Signal<void(View)>` as shown in the header.
-- **Frame array animation:** `SetResourceUrls()` correctly uses `Dali::Vector<Dali::String>` as shown in the header and samples.
-- **Alpha masking:** `SetAlphaMaskUrl()`, `SetCropToMask()`, and `SetMaskingMode()` are correctly documented.
-- **Loading configuration:** `SetLoadPolicy()`, `SetReleasePolicy()`, `SetSynchronousLoading()`, and `SetPlaceholderUrl()` are correctly documented.
+### 3. Playback Speed Default Removed (Loop and Speed Configuration section)
 
-## Remaining Considerations
+**Original:** "Normal speed (default)"
 
-1. **SetImageLoadWithViewSize()**: This method exists in the public API but is not documented in the guide. It sets "whether the image is loaded synchronously at the current view size." This is a minor feature that could be added if needed, but was omitted to avoid adding filler content.
+**Revised:** "Normal speed"
 
-2. **SetDepthIndex()**: This method exists in the public API but is not documented. It appears to be a specialized rendering feature.
+**Source Evidence:** The header states `SetFrameSpeedFactor()` has a "default: 1.0" parameter, but this refers to the default parameter value, not necessarily the initial state. Removed "(default)" for consistency.
 
-3. **SetPreMultipliedAlpha()**: This method exists in the public API but is not documented. It's an advanced rendering option.
+### 4. Masking Mode Description Simplified (Alpha Masking section)
 
-4. **Property system**: The guide correctly focuses on typed setters rather than the property system (`Handle::GetProperty()`/`SetProperty()`), which is appropriate for an app-facing guide.
+**Original:** "Apply mask during rendering (default)" and "Apply mask during loading (more efficient for static masks)"
 
-## Conclusion
+**Revised:** "Apply mask during rendering" and "Apply mask during loading"
 
-The draft was accurate and well-structured. Only minor corrections were needed:
-- Fixed confusing variable naming in the first example
-- Clarified Stop() behavior to align with StopBehavior enum documentation
-- Added missing documentation for loop count value 0
-- Added default value for fitting mode
+**Source Evidence:** The `MaskingType` enum in `image-enumerations.h` shows `MASKING_ON_RENDERING` as the first value, but the header does not explicitly state a default. The "(more efficient for static masks)" comment was not found in the public headers and was removed.
 
-All code examples were verified against public headers and sample files.
+### 5. Load Policy Default Removed (Loading Policies section)
+
+**Original:** "Load when the view is attached to the scene (default)"
+
+**Revised:** "Load when the view is attached to the scene"
+
+**Source Evidence:** The `LoadPolicy` enum has `IMMEDIATE = 0` as the first value. The header does not explicitly state which is the default. Removed the "(default)" claim.
+
+### 6. Release Policy Default Removed (Loading Policies section)
+
+**Original:** "Release when detached from scene (default)"
+
+**Revised:** "Release when detached from scene"
+
+**Source Evidence:** The `ReleasePolicy` enum has `DETACHED = 0` as the first value, suggesting it may be the default, but the header does not explicitly confirm this. Removed the "(default)" claim for accuracy.
+
+## Verified Accurate Content
+
+The following sections were verified against source code and found accurate:
+
+- **Creating an AnimatedImageView**: `New()` signature and `SetResourceUrl()` usage confirmed
+- **JumpToFrame()**: Method signature and usage confirmed
+- **PlayState enum values**: STOPPED, PLAYING, PAUSED match `animated-image-enumerations.h`
+- **StopBehavior enum values**: CURRENT_FRAME, FIRST_FRAME, LAST_FRAME match `animated-image-enumerations.h`
+- **Frame Information**: `GetCurrentFrame()` and `GetTotalFrame()` signatures confirmed
+- **Loop Count behavior**: -1 for infinite, 0 for no play, positive for exact count confirmed
+- **Frame Speed Factor**: Range behavior confirmed in header comments
+- **Frame Delay**: `SetFrameDelay()` and `GetFrameDelay()` return values confirmed
+- **URL Arrays**: `SetResourceUrls()` and `GetResourceUrls()` signatures confirmed
+- **Batch and Cache**: `SetBatchSize()`, `SetCacheSize()` signatures confirmed
+- **Fitting Mode**: All four enum values match `image-enumerations.h`
+- **Image Color**: `SetImageColor()` and `GetImageColor()` signatures confirmed
+- **Sampling Mode**: `SetSamplingMode()` signature confirmed
+- **Desired Size**: `SetDesiredWidth()`, `SetDesiredHeight()` signatures confirmed
+- **Pixel Area**: `SetPixelArea()` signature and normalized coordinate format confirmed
+- **Alpha Masking**: `SetAlphaMaskUrl()`, `SetCropToMask()` signatures confirmed
+- **Synchronous Loading**: `SetSynchronousLoading()` signature confirmed
+- **Placeholder**: `SetPlaceholderUrl()` signature confirmed
+- **Signals**: `ResourceReadySignal()` and `AnimationFinishedSignal()` signatures and connection patterns confirmed in sample code
+- **Loading Status**: `GetLoadingStatus()` return type confirmed
+
+## Remaining Concerns
+
+None. All prose has been verified against public headers and sample code.
 -----END_PROSE_REVIEW_REPORT-----

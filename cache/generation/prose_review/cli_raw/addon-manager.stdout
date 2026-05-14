@@ -1,22 +1,20 @@
 [36mCompleted installing Cline SR(1.19.1) extension from VSIX.Please reload Visual Studio Code to enable it.[0m
-Completed Phase 2.3.5 source-grounded prose review for the Addon Manager (addon-manager) feature.
+Phase 2.3.5 source-grounded prose review completed for Addon Manager guide.
 
-**Output file:** `cache/generation/drafts/addon-manager-reviewed.md`
+**Output file**: `cache/generation/drafts/addon-manager-reviewed.md`
 
-**Key corrections made:**
+**Key corrections made**:
 
-1. **DALI_ADDON_VERSION**: Changed "macro" to "constexpr function" (source: `addon-manager.h` line 46)
+1. **Removed `InvokeGlobalProc()` section** - This template method is marked `DALI_INTERNAL` in the header, not intended for application use.
 
-2. **AddOnBase lifecycle methods**: Added clarification that `OnStart()`, `OnResume()`, `OnPause()`, `OnStop()` are optional with empty default implementations (source: `addon-base.h` lines 62-91)
+2. **Fixed manual function retrieval example** - The template versions of `GetGlobalProc<T>` and `GetInstanceProc<T>` are internal APIs. Rewrote to use the `void*` returning versions with explicit casting.
 
-3. **DispatchTable population**: Fixed code pattern to use static local variable with `Empty()` check, matching the actual test sample pattern (source: `test-sample-addon.cpp` lines 35-42)
+3. **Clarified dispatch table types** - The draft conflated `Dali::AddOnDispatchTable` (registration) with `Dali::AddOns::DispatchTable` (function lookup). Made the distinction clear.
 
-4. **AddOnDispatchTable callbacks**: Renamed callback functions to avoid confusion with struct field names (e.g., `GetAddOnInfoCallback` instead of `GetAddOnInfo`)
+4. **Removed misleading manual dispatch table population** - The `REGISTER_ADDON_CLASS()` macro handles `Dali::AddOnDispatchTable` creation and registration automatically via `AddOnConstructorInternal()`.
 
-5. **AddOnBinder example**: Added missing destructor declaration to match header example pattern
+5. **Added platform limitation note** - The `REGISTER_ADDON_CLASS` macro requires GCC/Clang and is only supported on Linux-based environments.
 
-6. **AddOnInfo initialization**: Added `next = nullptr` initialization to complete the example
+6. **Fixed AddOnBinder constructor example** - The constructor requires both `addonName` and `libraryName` parameters.
 
-7. **RegisterAddOnDispatchTable**: Added note clarifying this is typically called automatically via `REGISTER_ADDON_CLASS` macro
-
-All code blocks preserved. All changes are localized edits to improve accuracy without restructuring sections.
+All API names, namespaces, method signatures, and structure fields verified against source headers. Section structure preserved. Code blocks maintained with minimal corrections.
