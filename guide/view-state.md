@@ -1,0 +1,344 @@
+---
+title: View State
+sidebar_label: View State
+category: views-components
+---
+
+# View State
+
+`Dali::Ui::ViewState` is the dali-ui value type used to represent and compare a `Dali::Ui::View` state such as focused, pressed, disabled, pseudo-disabled, or selected.
+
+## Table of Contents
+
+- [Representing View State](#representing-view-state)
+- [Combining and Testing States](#combining-and-testing-states)
+- [Detecting State Transitions](#detecting-state-transitions)
+- [Using Custom States](#using-custom-states)
+- [Debugging State Values](#debugging-state-values)
+
+## Representing View State
+
+A `Dali::Ui::ViewState` can hold a single state or a combination of states. The default-constructed value is the same as `Dali::Ui::ViewState::NORMAL`, which means no state bits are set.
+
+Use the predefined values when handling common view interaction state:
+
+- `Dali::Ui::ViewState::NORMAL`
+- `Dali::Ui::ViewState::FOCUSED`
+- `Dali::Ui::ViewState::PRESSED`
+- `Dali::Ui::ViewState::DISABLED`
+- `Dali::Ui::ViewState::PSEUDO_DISABLED`
+- `Dali::Ui::ViewState::SELECTED`
+- `Dali::Ui::ViewState::SELECTED_PRESSED`
+- `Dali::Ui::ViewState::DISABLED_SELECTED`
+- `Dali::Ui::ViewState::SELECTED_FOCUSED`
+- `Dali::Ui::ViewState::ALL`
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+void CheckBaseState()
+{
+  ViewState state;
+
+  const bool isNormal = state.IsNormal();
+  const bool equalsNormal = (state == ViewState::NORMAL);
+  const bool hasAnyState = static_cast<bool>(state);
+
+  // isNormal == true
+  // equalsNormal == true
+  // hasAnyState == false
+}
+```
+
+`Dali::Ui::ViewState::DISABLED` and `Dali::Ui::ViewState::PSEUDO_DISABLED` are separate states. Use `Dali::Ui::ViewState::IsAnyDisabled()` when a branch should treat either one as a disabled-style state.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+bool ShouldUseDisabledVisual(const ViewState& state)
+{
+  return state.IsAnyDisabled();
+}
+
+void CheckDisabledKinds()
+{
+  const bool disabled = ShouldUseDisabledVisual(ViewState::DISABLED);
+  const bool pseudoDisabled = ShouldUseDisabledVisual(ViewState::PSEUDO_DISABLED);
+  const bool focused = ShouldUseDisabledVisual(ViewState::FOCUSED);
+
+  // disabled == true
+  // pseudoDisabled == true
+  // focused == false
+}
+```
+
+## Combining and Testing States
+
+Use `Dali::Ui::ViewState::operator+` or `Dali::Ui::ViewState::operator|` to combine states. Use `Dali::Ui::ViewState::Contains()` when all bits in another state must be present.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+bool IsSelectedAndPressed(const ViewState& state)
+{
+  return state.Contains(ViewState::SELECTED_PRESSED);
+}
+
+void BuildCombinedState()
+{
+  ViewState state = ViewState::SELECTED + ViewState::PRESSED;
+
+  const bool selected = state.Contains(ViewState::SELECTED);
+  const bool pressed = state.Contains(ViewState::PRESSED);
+  const bool exactComposite = (state == ViewState::SELECTED_PRESSED);
+
+  // selected == true
+  // pressed == true
+  // exactComposite == true
+}
+```
+
+Use `Dali::Ui::ViewState::HasIntersectionWith()` when any overlap is enough. This is useful for grouped decisions, such as checking whether a view is in one of several attention states.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+bool NeedsInteractionFeedback(const ViewState& state)
+{
+  const ViewState attentionStates = ViewState::FOCUSED + ViewState::PRESSED;
+  return state.HasIntersectionWith(attentionStates);
+}
+
+void CheckOverlap()
+{
+  const bool focusedMatches = NeedsInteractionFeedback(ViewState::FOCUSED);
+  const bool selectedMatches = NeedsInteractionFeedback(ViewState::SELECTED);
+  const bool selectedFocusedMatches = NeedsInteractionFeedback(ViewState::SELECTED_FOCUSED);
+
+  // focusedMatches == true
+  // selectedMatches == false
+  // selectedFocusedMatches == true
+}
+```
+
+Use `Dali::Ui::ViewState::operator-` to remove states from a combination. Use `Dali::Ui::ViewState::operator&` when you want only the matching bits from a mask.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+void UpdateStateMask()
+{
+  ViewState state = ViewState::FOCUSED + ViewState::PRESSED + ViewState::SELECTED;
+
+  ViewState released = state - ViewState::PRESSED;
+  ViewState interactionOnly = state & (ViewState::FOCUSED + ViewState::PRESSED);
+
+  const bool stillSelected = released.Contains(ViewState::SELECTED);
+  const bool stillPressed = released.Contains(ViewState::PRESSED);
+  const bool hasInteractionState = static_cast<bool>(interactionOnly);
+
+  // stillSelected == true
+  // stillPressed == false
+  // hasInteractionState == true
+}
+```
+
+`Dali::Ui::ViewState::operator^` returns the bits that differ between two state values, and `Dali::Ui::ViewState::operator~` returns the inverse mask.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+ViewState ChangedBits(ViewState previous, ViewState current)
+{
+  return previous ^ current;
+}
+
+void CompareMasks()
+{
+  const ViewState previous = ViewState::FOCUSED + ViewState::PRESSED;
+  const ViewState current = ViewState::PRESSED + ViewState::SELECTED;
+
+  const ViewState changed = ChangedBits(previous, current);
+
+  const bool focusChanged = changed.Contains(ViewState::FOCUSED);
+  const bool pressedChanged = changed.Contains(ViewState::PRESSED);
+  const bool selectedChanged = changed.Contains(ViewState::SELECTED);
+
+  // focusChanged == true
+  // pressedChanged == false
+  // selectedChanged == true
+}
+```
+
+## Detecting State Transitions
+
+When a `Dali::Ui::View::StateChangedSignal()` callback receives a `Dali::Ui::StateEvent`, compare the previous and current `Dali::Ui::ViewState` values from that event.
+
+Use `Dali::Ui::ViewState::WasAdded()` for newly active states, `Dali::Ui::ViewState::WasRemoved()` for states that ended, and `Dali::Ui::ViewState::WasChanged()` when either direction matters.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+void HandleStateTransition(const ViewState& previous, const ViewState& current)
+{
+  if(ViewState::FOCUSED.WasAdded(previous, current))
+  {
+    // Start focused presentation.
+  }
+
+  if(ViewState::PRESSED.WasRemoved(previous, current))
+  {
+    // End pressed presentation.
+  }
+
+  if(ViewState::DISABLED.WasChanged(previous, current))
+  {
+    // Recompute enabled-dependent presentation.
+  }
+}
+```
+
+For grouped transition checks, call `Dali::Ui::ViewState::AnyChanged()` on a composite mask. This returns true when any bit in that mask changed between the previous and current state.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+bool InteractionStateChanged(const ViewState& previous, const ViewState& current)
+{
+  const ViewState interactionMask = ViewState::FOCUSED + ViewState::PRESSED + ViewState::SELECTED;
+  return interactionMask.AnyChanged(previous, current);
+}
+
+void CheckTransition()
+{
+  const ViewState previous = ViewState::FOCUSED;
+  const ViewState current = ViewState::FOCUSED + ViewState::PRESSED;
+
+  const bool changed = InteractionStateChanged(previous, current);
+
+  // changed == true
+}
+```
+
+A common dali-ui pattern is to keep state comparison logic separate from the signal connection. `Dali::ConnectionTracker` can be used by objects that own signal connections to manage callback lifetime, while `Dali::Ui::ViewState` handles the comparison once the previous and current values are available.
+
+```cpp
+#include <dali/public-api/signals/connection-tracker.h>
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::ConnectionTracker;
+using Dali::Ui::ViewState;
+
+class ViewStateObserver : public ConnectionTracker
+{
+public:
+  void OnStateChanged(const ViewState& previous, const ViewState& current)
+  {
+    if(ViewState::SELECTED.WasAdded(previous, current))
+    {
+      // React to selection.
+    }
+
+    if(ViewState::SELECTED.WasRemoved(previous, current))
+    {
+      // React to deselection.
+    }
+  }
+};
+```
+
+## Using Custom States
+
+Use `Dali::Ui::ViewState::Create()` when your component needs an application-specific state in addition to the predefined dali-ui states. Creating the same name again returns the same state value, so define custom states with stable names.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+ViewState LoadingState()
+{
+  return ViewState::Create("Loading");
+}
+
+bool IsLoading(const ViewState& state)
+{
+  return state.Contains(LoadingState());
+}
+
+void CombineCustomAndBuiltInState()
+{
+  const ViewState loading = LoadingState();
+  const ViewState visualState = loading + ViewState::PRESSED;
+
+  const bool hasLoading = visualState.Contains(loading);
+  const bool hasPressed = visualState.Contains(ViewState::PRESSED);
+
+  // hasLoading == true
+  // hasPressed == true
+}
+```
+
+`Dali::Ui::ViewState::Create("Normal")` returns `Dali::Ui::ViewState::NORMAL`, and `Dali::Ui::ViewState::Create("All")` returns `Dali::Ui::ViewState::ALL`.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+void UseReservedNames()
+{
+  const ViewState normal = ViewState::Create("Normal");
+  const ViewState all = ViewState::Create("All");
+
+  const bool normalMatches = (normal == ViewState::NORMAL);
+  const bool allContainsFocused = all.Contains(ViewState::FOCUSED);
+
+  // normalMatches == true
+  // allContainsFocused == true
+}
+```
+
+## Debugging State Values
+
+Use `Dali::Ui::ViewState::ToString()` when you need a readable state value for diagnostics. `Dali::Ui::ViewState::NORMAL` formats as `Normal`, `Dali::Ui::ViewState::ALL` formats as `All`, and composite states include their constituent state names.
+
+```cpp
+#include <dali-ui-foundation/public-api/view-state.h>
+
+using Dali::Ui::ViewState;
+
+auto DescribeState(const ViewState& state)
+{
+  return state.ToString();
+}
+
+void BuildDebugLabels()
+{
+  auto normalText = DescribeState(ViewState::NORMAL);
+  auto focusedText = DescribeState(ViewState::FOCUSED);
+  auto compositeText = DescribeState(ViewState::FOCUSED + ViewState::PRESSED);
+
+  // normalText describes the normal state.
+  // focusedText describes the focused state.
+  // compositeText describes the focused and pressed state combination.
+}
+```
+
+Prefer `Dali::Ui::ViewState::Contains()`, `Dali::Ui::ViewState::WasAdded()`, `Dali::Ui::ViewState::WasRemoved()`, and `Dali::Ui::ViewState::AnyChanged()` for application behavior. Keep `Dali::Ui::ViewState::ToString()` for logs, debug UI, and diagnostics.

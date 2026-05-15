@@ -1,0 +1,194 @@
+---
+title: Input Event
+sidebar_label: Input Event
+category: input-interaction
+---
+
+# Input Event
+
+`Dali::Ui::InputEvent` carries the input cause delivered through dali-ui interactive view callbacks, so application code can react differently to touch, key, gesture, wheel, or non-input state changes.
+
+## Table of Contents
+
+- [Using Input Events in View Callbacks](#using-input-events-in-view-callbacks)
+- [Checking the Event Type Before Reading Details](#checking-the-event-type-before-reading-details)
+- [Handling Non-Input Causes](#handling-non-input-causes)
+- [Creating and Passing Wheel-Based Input Events](#creating-and-passing-wheel-based-input-events)
+
+## Using Input Events in View Callbacks
+
+In a dali-ui application, input is normally observed through `Dali::Ui::InteractiveView` or `Dali::Ui::InteractiveTrait` callbacks. The callback receives the `Dali::Ui::View` that emitted the interaction and a `Dali::Ui::InputEvent` describing the cause.
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+class Controller
+{
+public:
+  void OnClicked(Dali::Ui::View view, Dali::Ui::InputEvent event)
+  {
+    const auto type = event.GetInputEventType();
+
+    (void)view;
+    (void)type;
+  }
+};
+```
+
+`Dali::Ui::InputEvent` is a handle type. Copying or assigning it is suitable when a controller needs to pass the same event cause through application helper code.
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+
+class LastInputStore
+{
+public:
+  void Remember(Dali::Ui::InputEvent event)
+  {
+    mLastInput = event;
+  }
+
+  Dali::Ui::InputEvent GetLastInput() const
+  {
+    return mLastInput;
+  }
+
+private:
+  Dali::Ui::InputEvent mLastInput;
+};
+```
+
+## Checking the Event Type Before Reading Details
+
+Use `Dali::Ui::InputEvent::GetInputEventType` first, then call the matching accessor. Each typed accessor expects the stored event type to match the accessor being used:
+
+- `Dali::Ui::InputEvent::GetTouchEvent`
+- `Dali::Ui::InputEvent::GetKeyEvent`
+- `Dali::Ui::InputEvent::GetTapGesture`
+- `Dali::Ui::InputEvent::GetLongPressGesture`
+- `Dali::Ui::InputEvent::GetWheelEvent`
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/input-event-type.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+void DispatchInput(Dali::Ui::View view, const Dali::Ui::InputEvent& event)
+{
+  switch(event.GetInputEventType())
+  {
+    case Dali::Ui::InputEventType::TOUCH_EVENT:
+    {
+      const auto& touchEvent = event.GetTouchEvent();
+      (void)view;
+      (void)touchEvent;
+      break;
+    }
+
+    case Dali::Ui::InputEventType::KEY_EVENT:
+    {
+      const auto& keyEvent = event.GetKeyEvent();
+      (void)keyEvent;
+      break;
+    }
+
+    case Dali::Ui::InputEventType::TAP_GESTURE:
+    {
+      const auto& tapGesture = event.GetTapGesture();
+      (void)tapGesture;
+      break;
+    }
+
+    case Dali::Ui::InputEventType::LONG_PRESS_GESTURE:
+    {
+      const auto& longPressGesture = event.GetLongPressGesture();
+      (void)longPressGesture;
+      break;
+    }
+
+    case Dali::Ui::InputEventType::WHEEL_EVENT:
+    {
+      const auto& wheelEvent = event.GetWheelEvent();
+      (void)wheelEvent;
+      break;
+    }
+
+    case Dali::Ui::InputEventType::NONE:
+    case Dali::Ui::InputEventType::RESERVED:
+    default:
+    {
+      break;
+    }
+  }
+}
+```
+
+Keep `Dali::Ui::View` as the app-facing object in the callback and use `Dali::Ui::InputEvent` only to inspect the input cause.
+
+## Handling Non-Input Causes
+
+Some state changes are not caused by a concrete user input event, including explicit API calls and framework-triggered lifecycle changes. Use `Dali::Ui::InputEvent::None` when application code needs to pass a shared non-input cause without creating a fresh event handle each time.
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/input-event-type.h>
+
+bool IsUserInputCause(const Dali::Ui::InputEvent& event)
+{
+  return event.GetInputEventType() != Dali::Ui::InputEventType::NONE;
+}
+
+const Dali::Ui::InputEvent& ProgrammaticCause()
+{
+  return Dali::Ui::InputEvent::None();
+}
+```
+
+`Dali::Ui::InputEvent::New` can also create a new `Dali::Ui::InputEvent` whose type is `Dali::Ui::InputEventType::NONE`.
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+
+Dali::Ui::InputEvent CreateNonInputCause()
+{
+  return Dali::Ui::InputEvent::New();
+}
+```
+
+Prefer `Dali::Ui::InputEvent::None` for repeated non-input causes, and use `Dali::Ui::InputEvent::New` when a distinct handle is useful.
+
+## Creating and Passing Wheel-Based Input Events
+
+When a component adapts a `Dali::WheelEvent` into dali-ui state or callback logic, create the input wrapper with `Dali::Ui::InputEvent::New`.
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali/public-api/events/wheel-event.h>
+
+Dali::Ui::InputEvent WrapWheelEvent(const Dali::WheelEvent& wheelEvent)
+{
+  return Dali::Ui::InputEvent::New(wheelEvent);
+}
+```
+
+The wrapped event can then be passed through application helpers that operate on `Dali::Ui::View` and `Dali::Ui::InputEvent`.
+
+```cpp
+#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/input-event-type.h>
+#include <dali-ui-foundation/public-api/view.h>
+
+void ApplyWheelDrivenAction(Dali::Ui::View view, const Dali::Ui::InputEvent& event)
+{
+  if(event.GetInputEventType() != Dali::Ui::InputEventType::WHEEL_EVENT)
+  {
+    return;
+  }
+
+  const auto& wheelEvent = event.GetWheelEvent();
+
+  (void)view;
+  (void)wheelEvent;
+}
+```
