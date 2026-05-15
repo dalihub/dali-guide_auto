@@ -9,7 +9,7 @@ on:
       source_branch:
         description: 'Source branch to sync from'
         required: true
-        default: 'main'
+        default: 'internal'
       destination_branch:
         description: 'Destination branch to sync to'
         required: true
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.source_branch || 'main' }}
+          ref: ${{ github.event.inputs.source_branch || 'internal' }}
           fetch-depth: 0
 
       - name: Configure git
@@ -34,7 +34,7 @@ jobs:
         env:
           PAT_TOKEN: ${{ secrets.PUBLIC_GITHUB_PAT }}
         run: |
-          SRC="${{ github.event.inputs.source_branch || 'main' }}"
+          SRC="${{ github.event.inputs.source_branch || 'internal' }}"
           DEST="${{ github.event.inputs.destination_branch || 'internal' }}"
           REMOTE_URL="https://${PAT_TOKEN}@github.com/dalihub/dali-guide_auto.git"
           MAX_RETRIES=3
