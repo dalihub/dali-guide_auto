@@ -13,13 +13,13 @@ A useful first mental model is:
 
 ![DALi app-facing model](assets/dali-app-model.svg)
 
-The detailed guides use this view-centered model throughout. For the base object, start with [View (Base UI Object)](guide/view.md). For application startup and lifecycle, see [Adaptor Framework](guide/adaptor-framework.md).
+The detailed guides use this view-centered model throughout. For the base object, start with [View (Base UI Object)](guide/view.md). For application startup and lifecycle, see [Application Startup Lifecycle](guide/application-startup-lifecycle.md) ([Adaptor Framework](guide/adaptor-framework.md)).
 
 ## How DALi Is Organized
 
 The guide set is organized around the main areas an application touches:
 
-- Application setup and platform integration: [Adaptor Framework](guide/adaptor-framework.md), [Addon Manager](guide/addon-manager.md).
+- Application setup and platform integration: [Application Startup Lifecycle](guide/application-startup-lifecycle.md) ([Adaptor Framework](guide/adaptor-framework.md)), [Addon Manager](guide/addon-manager.md).
 - View composition and components: [View (Base UI Object)](guide/view.md), [Layouts](guide/layouts.md), [Interactive View](guide/interactive-view.md), [Label](guide/label.md), [Input Field](guide/input-field.md), [Image View](guide/image-view.md), [Animated Image View](guide/animated-image-view.md), [Lottie Animation View](guide/lottie-animation-view.md), [Scroll View](guide/scroll-view.md), [Scroll Bar](guide/scroll-bar.md), [Web View](guide/web-view.md).
 - Input and state: [Input Event](guide/input-event.md), [State Event](guide/state-event.md), [View State](guide/view-state.md), [Focus Manager](guide/focus-manager.md), [Accessibility Highlight Overlay](guide/accessibility-highlight-overlay.md).
 - Presentation: [Visuals](guide/visuals.md), [Image](guide/image.md), [Image Loader](guide/image-loader.md), [Render Effects](guide/render-effects.md), [Text](guide/text.md), [Ui Color](guide/ui-color.md), [Ui Color Manager](guide/ui-color-manager.md), [Ui Theme Manager](guide/ui-theme-manager.md), [Ui Scale Manager](guide/ui-scale-manager.md).
@@ -45,7 +45,7 @@ Presentation is split across several concepts. [Visuals](guide/visuals.md) cover
 
 If you are reading the guide set for the first time, a practical order is:
 
-1. [Adaptor Framework](guide/adaptor-framework.md) for startup, lifecycle, and the main window.
+1. [Application Startup Lifecycle](guide/application-startup-lifecycle.md) ([Adaptor Framework](guide/adaptor-framework.md)) for startup, lifecycle, and the main window.
 2. [View (Base UI Object)](guide/view.md) for the basic object model.
 3. [Layouts](guide/layouts.md) for arranging views.
 4. [Signals](guide/signals.md), [Input Event](guide/input-event.md), and [Focus Manager](guide/focus-manager.md) for interaction.
@@ -59,7 +59,7 @@ The links are navigation aids. Each detailed guide is intended to stand on its o
 
 ### Application Setup and Platform Integration
 
-- [Adaptor Framework](guide/adaptor-framework.md)
+- [Application Startup Lifecycle](guide/application-startup-lifecycle.md) ([Adaptor Framework](guide/adaptor-framework.md))
 - [Addon Manager](guide/addon-manager.md)
 
 ### View Composition and Components
