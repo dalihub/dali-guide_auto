@@ -1,0 +1,784 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2" kind="page">
+    <compoundname>md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_207-implementation-plan_8ko</compoundname>
+    <title>TextVisualizer 구현 계획</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md341"/> </para>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md342">
+<title>목적</title>
+<para>이 문서의 목적은 앞선 분석 문서를 바탕으로 <computeroutput><ref refid="classDali_1_1Ui_1_1TextVisualizer" kindref="compound">Dali::Ui::TextVisualizer</ref></computeroutput> 실제 구현 순서를 작은 커밋 단위로 나누고, 각 단계의 검증 방법과 중단/롤백 지점을 명확히 정의하는 것이다.</para>
+<para>이번 문서는 구현 시작 전 기준 문서로 사용한다.</para>
+<para>핵심 목표:</para>
+<para><itemizedlist>
+<listitem><para>작은 커밋 단위로 나누어 위험을 낮춘다</para>
+</listitem><listitem><para>각 커밋이 독립적으로 빌드/검증 가능해야 한다</para>
+</listitem><listitem><para><computeroutput>Prepare -&gt; Layout -&gt; AtlasRenderer Adapter</computeroutput> 흐름을 순차적으로 완성한다</para>
+</listitem><listitem><para>1차 구현 범위를 넘는 기능은 의도적으로 제외한다</para>
+</listitem></itemizedlist>
+</para>
+<para>애매한 내용은 추측하지 않고 <computeroutput>확인 필요</computeroutput>로 표시한다.</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md343">
+<title>전제</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>는 <computeroutput>View</computeroutput> 계열 public handle이다</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput>의 public/internal 구조를 참고하되 editing stack은 제외한다</para>
+</listitem><listitem><para><computeroutput>Prepare</computeroutput>와 <computeroutput>Layout</computeroutput>은 분리한다</para>
+</listitem><listitem><para>렌더링은 <computeroutput>AtlasRenderer</computeroutput>를 사용한다</para>
+</listitem><listitem><para>1차 구현에서는 <computeroutput>style</computeroutput>, <computeroutput>ellipsis</computeroutput>, <computeroutput>selection</computeroutput>, <computeroutput>cursor</computeroutput>, <computeroutput>editing</computeroutput>을 제외한다</para>
+</listitem><listitem><para>exclusion region 대응 multi-line layout이 핵심 목표다</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md344">
+<title>추가할 파일 목록</title>
+<para>아래 파일은 1차 구현에서 새로 추가하는 것을 권장한다.</para>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md345">
+<title>integration API</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="text-visualizer_8h" kindref="compound">dali-ui-foundation/integration-api/text-visualizer.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer_8cpp" kindref="compound">dali-ui-foundation/integration-api/text-visualizer.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-properties_8h" kindref="compound">dali-ui-foundation/integration-api/text-visualizer-properties.h</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md346">
+<title>integration API</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="text-visualizer-impl_8h" kindref="compound">dali-ui-foundation/integration-api/text-visualizer-impl.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-property-handler_8h" kindref="compound">dali-ui-foundation/integration-api/text-visualizer-property-handler.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-property-handler_8cpp" kindref="compound">dali-ui-foundation/integration-api/text-visualizer-property-handler.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md347">
+<title>internal text visualizer core</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/prepared-text.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/prepared-text.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-preparer.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-preparer.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/layout-types.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/layout-engine.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/layout-engine.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md348">
+<title>automated tests</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md349">
+<title>sample</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>samples/text/text-visualizer-example.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md350">
+<title>자동 생성 또는 생성 결과 확인 필요 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/integration-api/text-visualizer.autogen.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>chaining autogen이 새 public class에 대해 자동 생성되는지</para>
+</listitem><listitem><para>생성 결과를 저장소에 포함할지 현재 팀 관례 확인 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md351">
+<title>수정할 파일 목록</title>
+<para>아래 파일은 1차 구현에서 수정 가능성이 높다.</para>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md352">
+<title>public umbrella / include</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/dali-ui-foundation.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md353">
+<title>tests build</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/CMakeLists.txt</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md354">
+<title>sample build</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>samples/text/CMakeLists.txt</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md355">
+<title>필요 시 수정 가능성 있는 공용 유틸</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/controls/text-controls/common-text-utils.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이 두 파일은 가능하면 수정 범위를 최소화한다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md356">
+<title>수정하지 않아도 될 가능성이 높은 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>build/tizen/dali-ui-foundation/CMakeLists.txt</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>현재 라이브러리 빌드는 <computeroutput>FILE(GLOB_RECURSE ALL_SOURCES &quot;*.cpp&quot;)</computeroutput> 방식이라 새 <computeroutput>*.cpp</computeroutput>는 자동 수집될 가능성이 높다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md357">
+<title>구현 순서</title>
+<para>권장 구현 순서는 아래와 같다.</para>
+<para><orderedlist>
+<listitem><para>public/internal skeleton 추가</para>
+</listitem><listitem><para>property/state storage와 dirty flag 추가</para>
+</listitem><listitem><para><computeroutput>Prepare</computeroutput> 모델과 preparer 추가</para>
+</listitem><listitem><para>layout data type 및 interval builder 추가</para>
+</listitem><listitem><para>layout engine을 impl lifecycle에 연결</para>
+</listitem><listitem><para>atlas view adapter와 renderer host 연결</para>
+</listitem><listitem><para>exclusion region을 실제 placement에 반영</para>
+</listitem><listitem><para>automated test 확장</para>
+</listitem><listitem><para>sample app 추가</para>
+</listitem></orderedlist>
+</para>
+<para>이 순서는 &quot;보이는 기능&quot;보다 &quot;구조 안정화&quot;를 먼저 만든다.</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md358">
+<title>각 커밋 단위</title>
+<para>아래 커밋 분해를 권장한다.</para>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md359">
+<title>Commit 1. Public / Impl Skeleton</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> public handle과 internal impl 골격 추가</para>
+</listitem><listitem><para><computeroutput>New()</computeroutput>, <computeroutput>DownCast()</computeroutput>, 기본 lifecycle 연결</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="text-visualizer_8h" kindref="compound">integration-api/text-visualizer.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer_8cpp" kindref="compound">integration-api/text-visualizer.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8h" kindref="compound">integration-api/text-visualizer-impl.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/dali-ui-foundation.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>라이브러리 빌드 성공</para>
+</listitem><listitem><para>빈 <computeroutput>TextVisualizer::New()</computeroutput>가 생성 가능</para>
+</listitem><listitem><para>scene attach 시 crash 없음</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>이 시점은 API skeleton만 추가된 상태라 되돌리기 가장 쉽다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md360">
+<title>Commit 2. Property / State / Basic UTC</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TEXT</computeroutput>, <computeroutput>FONT_FAMILY</computeroutput>, <computeroutput>FONT_SIZE</computeroutput>, <computeroutput>TEXT_COLOR</computeroutput> property 연결</para>
+</listitem><listitem><para>setter/getter와 property handler 연결</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="text-visualizer-properties_8h" kindref="compound">integration-api/text-visualizer-properties.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-property-handler_8h" kindref="compound">integration-api/text-visualizer-property-handler.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-property-handler_8cpp" kindref="compound">integration-api/text-visualizer-property-handler.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/CMakeLists.txt</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>constructor / <computeroutput>New()</computeroutput> / <computeroutput>DownCast()</computeroutput> UTC</para>
+</listitem><listitem><para>setter/getter UTC</para>
+</listitem><listitem><para><computeroutput>SetProperty()</computeroutput> / <computeroutput>GetProperty()</computeroutput> UTC</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>API surface가 확정되지만 구현 의존성은 아직 낮다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md361">
+<title>Commit 3. Dirty Flags + Prepare API Stub</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare()</computeroutput> public command 추가</para>
+</listitem><listitem><para>impl에 <computeroutput>prepare dirty</computeroutput> / <computeroutput>layout dirty</computeroutput> / <computeroutput>render dirty</computeroutput> 분리</para>
+</listitem><listitem><para>exclusion region storage 추가</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="text-visualizer-impl_8h" kindref="compound">integration-api/text-visualizer-impl.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare()</computeroutput> 호출이 crash 없이 동작</para>
+</listitem><listitem><para><computeroutput>SetText()</computeroutput> / <computeroutput>SetFontFamily()</computeroutput> / <computeroutput>SetFontSize()</computeroutput> 후 <computeroutput>prepare dirty</computeroutput>가 설정됨</para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput> / <computeroutput>ClearExclusionRegions()</computeroutput> API smoke test</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>아직 text prepare/layout 실체는 없으므로 되돌리기 쉽다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md362">
+<title>Commit 4. PreparedText / TextPreparer 추가</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText</computeroutput> 구조 추가</para>
+</listitem><listitem><para>shaping / fallback / glyph metrics / cluster mapping 경로 연결</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer/prepared-text.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/prepared-text.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/text-preparer.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/text-preparer.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare()</computeroutput> 후 prepared cache 생성 확인</para>
+</listitem><listitem><para>empty text / ASCII / 한글 / emoji 문자열 smoke test</para>
+</listitem><listitem><para>동일 text/font/fontSize에서 <computeroutput>Prepare()</computeroutput> 재호출 시 결과 안정성 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>automated test에서 prepare 실행 여부를 어떤 방식으로 관측할지</para>
+</listitem><listitem><para>내부 debug counter 또는 test seam이 필요한지 검토 필요</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>이 시점은 renderer 미연결 상태여도 준비 데이터만 검증 가능하다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md363">
+<title>Commit 5. Layout Types + Interval Builder</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>AvailableInterval</computeroutput>, <computeroutput>TextLineFragment</computeroutput>, <computeroutput>TextLine</computeroutput>, <computeroutput>GlyphPlacement</computeroutput>, <computeroutput>LayoutResult</computeroutput> 구조 추가</para>
+</listitem><listitem><para>exclusion region에서 line interval을 만드는 순수 알고리즘 추가</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer/layout-types.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/layout-engine.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/layout-engine.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>exclusion region 없음 -&gt; content bounds 하나의 interval 생성</para>
+</listitem><listitem><para>exclusion region 하나 -&gt; 2개 interval 생성</para>
+</listitem><listitem><para>여러 region 겹침 -&gt; merge 후 interval 생성</para>
+</listitem><listitem><para>line band overlap 규칙 테스트</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>prepare와 layout 데이터 구조가 분리되어 있어 되돌리기 쉽다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md364">
+<title>Commit 6. Multi-line Layout Integration</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>PreparedText</computeroutput>를 소비하여 cluster 기준 multi-line layout 수행</para>
+</listitem><listitem><para><computeroutput>OnMeasure()</computeroutput> / <computeroutput>GetNaturalSize()</computeroutput> / <computeroutput>GetHeightForWidth()</computeroutput>와 연결</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>layout-engine.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>width 변경 시 line 수 변경</para>
+</listitem><listitem><para>exclusion region 반영 전 기본 multiline placement 정상</para>
+</listitem><listitem><para><computeroutput>WRAP_CONTENT</computeroutput> 측정값이 text 길이에 따라 달라짐</para>
+</listitem><listitem><para><computeroutput>Prepare</computeroutput> 재실행 없이 <computeroutput>Layout</computeroutput>만 반복 수행 가능 여부 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>아직 renderer 미연결 상태여도 size/layout 검증이 가능하다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md365">
+<title>Commit 7. Atlas View Adapter + Renderer Host</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutResult</computeroutput>를 <computeroutput>AtlasRenderer</computeroutput>가 읽을 수 있는 adapter로 연결</para>
+</listitem><listitem><para>plain glyph rendering 표시</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-visualizer/atlas-view-adapter.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-visualizer/atlas-view-adapter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>scene에 텍스트가 실제로 보이는지 manual 확인</para>
+</listitem><listitem><para>multiline plain text 표시 확인</para>
+</listitem><listitem><para>whitespace only text에서도 crash 없음</para>
+</listitem><listitem><para>empty text에서도 render actor handling 정상</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>중요 지점</para>
+</listitem><listitem><para>여기까지 오면 최소 기능 텍스트 표시 view로 사용 가능</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md366">
+<title>Commit 8. Exclusion-aware Placement Integration</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>multi-fragment line placement를 실제 렌더링과 연결</para>
+</listitem><listitem><para>exclusion region 변경 시 layout-only invalidation 동작</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>layout-engine.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>atlas-view-adapter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>한 줄이 여러 fragment로 나뉘는 케이스</para>
+</listitem><listitem><para>exclusion region 추가/삭제/이동 후 relayout 결과 변경</para>
+</listitem><listitem><para>bounds만 변경할 때 <computeroutput>Prepare</computeroutput> 재실행이 발생하지 않음</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>exclusion 관련 회귀가 크면 Commit 7 상태까지 되돌려도 기본 text view는 유지된다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md367">
+<title>Commit 9. Sample App</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> 동작을 사람이 직접 확인할 sample 추가</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>samples/text/text-visualizer-example.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>samples/text/CMakeLists.txt</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>sample 빌드 성공</para>
+</listitem><listitem><para>창 크기 변경 시 multiline relayout 확인</para>
+</listitem><listitem><para>exclusion region on/off 또는 이동 시 배치 변화 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>sample은 기능 이해와 디버깅용이므로 library 구현과 분리 가능</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md368">
+<title>Commit 10. UTC 확장 / 안정화</title>
+<para>목표:</para>
+<para><itemizedlist>
+<listitem><para>automated test를 1차 구현 범위 기준으로 보강</para>
+</listitem></itemizedlist>
+</para>
+<para>추가/수정 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>검증:</para>
+<para><itemizedlist>
+<listitem><para>constructor/new/downcast</para>
+</listitem><listitem><para>property</para>
+</listitem><listitem><para><computeroutput>Prepare()</computeroutput></para>
+</listitem><listitem><para><computeroutput>SetExclusionRegions()</computeroutput></para>
+</listitem><listitem><para>multiline layout</para>
+</listitem><listitem><para>layout-only invalidation</para>
+</listitem><listitem><para>empty/whitespace/emoji smoke test</para>
+</listitem></itemizedlist>
+</para>
+<para>중단/롤백 가능 지점:</para>
+<para><itemizedlist>
+<listitem><para>가능</para>
+</listitem><listitem><para>tests-only commit이므로 기능 rollback과 분리 가능</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md369">
+<title>각 커밋의 검증 방법</title>
+<para>아래 검증 규칙을 각 커밋마다 공통으로 적용한다.</para>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md370">
+<title>공통 검증</title>
+<para><orderedlist>
+<listitem><para><computeroutput>git diff</computeroutput> 확인</para>
+</listitem><listitem><para>의도한 파일만 수정되었는지 확인</para>
+</listitem><listitem><para>라이브러리 빌드 또는 최소 compile 확인</para>
+</listitem><listitem><para>가능하면 관련 UTC 실행</para>
+</listitem></orderedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md371">
+<title>권장 명령 예시</title>
+<para>환경에 따라 달라질 수 있으므로 아래는 예시다.</para>
+<para><programlisting filename=".bash"><codeline><highlight class="normal">cmake<sp/>--build<sp/>build/tizen<sp/>-j</highlight></codeline>
+<codeline><highlight class="normal">cmake<sp/>--build<sp/>automated-tests/src/dali-ui-foundation<sp/>-j</highlight></codeline>
+<codeline><highlight class="normal">ctest<sp/>--test-dir<sp/>automated-tests/src/dali-ui-foundation<sp/>--output-on-failure</highlight></codeline>
+<codeline><highlight class="normal">cmake<sp/>--build<sp/>samples/text<sp/>-j</highlight></codeline>
+</programlisting></para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>현재 개발 환경에서 실제 표준 빌드 명령이 무엇인지 구현 착수 시점에 맞춰 재확인 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md372">
+<title>automated test 계획</title>
+<para>권장 test 파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>권장 test 항목:</para>
+<para><orderedlist>
+<listitem><para><computeroutput>UtcDaliTextVisualizerConstructorP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerNewP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerDownCastP</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerText</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerFontFamily</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerFontSize</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerTextColor</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerSetProperty</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerGetProperty</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerPrepare</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerExclusionRegions</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerMeasureWrapContent</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerRelayoutWidthChange</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerEmptyText</computeroutput></para>
+</listitem><listitem><para><computeroutput>UtcDaliTextVisualizerEmojiText</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md373">
+<title>test seam 필요 가능성</title>
+<para>아래 항목은 public API만으로 검증하기 어려울 수 있다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Prepare</computeroutput>가 재실행되었는지</para>
+</listitem><listitem><para>width 변경 시 prepare 없이 layout만 다시 수행되었는지</para>
+</listitem></itemizedlist>
+</para>
+<para>대응 후보:</para>
+<para><itemizedlist>
+<listitem><para>impl 내부 debug counter</para>
+</listitem><listitem><para>test-only accessor</para>
+</listitem><listitem><para>log hook</para>
+</listitem></itemizedlist>
+</para>
+<para>이 부분은 <computeroutput>확인 필요</computeroutput>다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md374">
+<title>sample app 계획</title>
+<para>권장 sample:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>samples/text/text-visualizer-example.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>sample 목표:</para>
+<para><orderedlist>
+<listitem><para>기본 multiline text 표시</para>
+</listitem><listitem><para>exclusion region이 있을 때 줄이 fragment로 나뉘는 모습 표시</para>
+</listitem><listitem><para>window resize 시 relayout 반응 확인</para>
+</listitem><listitem><para>same text / moved exclusion에서 shaping 재실행 없이 layout만 바뀌는지 관찰</para>
+</listitem></orderedlist>
+</para>
+<para>권장 sample 구성:</para>
+<para><itemizedlist>
+<listitem><para>왼쪽: exclusion 없음</para>
+</listitem><listitem><para>오른쪽: exclusion 하나 또는 둘</para>
+</listitem><listitem><para>키 입력 또는 timer로 exclusion region 이동</para>
+</listitem><listitem><para>같은 text를 유지한 채 relayout 차이를 눈으로 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>sample 검증 포인트:</para>
+<para><itemizedlist>
+<listitem><para>glyph overlap 없음</para>
+</listitem><listitem><para>exclusion bounds 내부 비워짐</para>
+</listitem><listitem><para>크기 변경 시 즉시 재배치</para>
+</listitem><listitem><para>crash / flicker 없음</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md375">
+<title>위험 요소</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md376">
+<title>위험 1. prepare 단계가 기존 controller와 너무 강하게 얽혀 있을 수 있음</title>
+<para>영향:</para>
+<para><itemizedlist>
+<listitem><para>shaping/fallback 재사용 비용이 예상보다 커질 수 있다</para>
+</listitem></itemizedlist>
+</para>
+<para>대응:</para>
+<para><itemizedlist>
+<listitem><para>prepare 관련 로직을 early commit에서 먼저 고립시켜 본다</para>
+</listitem><listitem><para>필요 시 1차는 최소 경로만 연결하고 나머지는 <computeroutput>확인 필요</computeroutput>로 남긴다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md377">
+<title>위험 2. cluster 기준 line breaking이 예상보다 복잡할 수 있음</title>
+<para>영향:</para>
+<para><itemizedlist>
+<listitem><para>exclusion fragment 경계에서 줄바꿈 품질 문제가 생길 수 있다</para>
+</listitem></itemizedlist>
+</para>
+<para>대응:</para>
+<para><itemizedlist>
+<listitem><para>1차는 penalty 최적화보다 안정성 우선</para>
+</listitem><listitem><para>break candidate와 강제 배치 정책을 문서 기준으로 단순화한다</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md378">
+<title>위험 3. AtlasRenderer adapter 범위가 넓을 수 있음</title>
+<para>영향:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>ViewInterface</computeroutput> dummy 구현이 많아질 수 있다</para>
+</listitem></itemizedlist>
+</para>
+<para>대응:</para>
+<para><itemizedlist>
+<listitem><para>1차는 minimal path만 유효 값 반환</para>
+</listitem><listitem><para>나머지는 <computeroutput>zero / false / nullptr</computeroutput> 반환</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md379">
+<title>위험 4. automated test에서 prepare/layout 재실행 횟수 관측이 어려울 수 있음</title>
+<para>영향:</para>
+<para><itemizedlist>
+<listitem><para>핵심 최적화 요구사항 검증이 약해질 수 있다</para>
+</listitem></itemizedlist>
+</para>
+<para>대응:</para>
+<para><itemizedlist>
+<listitem><para>test seam을 최소 범위로 도입하는 방안 검토</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md380">
+<title>위험 5. autogen/property registration 흐름이 새 control에서 예상과 다를 수 있음</title>
+<para>영향:</para>
+<para><itemizedlist>
+<listitem><para>build break 또는 generated header mismatch 발생 가능</para>
+</listitem></itemizedlist>
+</para>
+<para>대응:</para>
+<para><itemizedlist>
+<listitem><para>skeleton commit에서 가장 먼저 확인</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md381">
+<title>구현 중 중단 / 롤백 가능한 지점</title>
+<para>아래 지점들은 구현 중 pause 또는 rollback 기준점으로 적절하다.</para>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md382">
+<title>지점 A. Commit 2 완료 후</title>
+<para>상태:</para>
+<para><itemizedlist>
+<listitem><para>public API와 property skeleton만 존재</para>
+</listitem><listitem><para>build 가능</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>API surface를 먼저 리뷰받기 좋은 시점</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md383">
+<title>지점 B. Commit 4 완료 후</title>
+<para>상태:</para>
+<para><itemizedlist>
+<listitem><para>prepare cache는 동작</para>
+</listitem><listitem><para>renderer 미연결 가능</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>shaping/fallback reuse 가능성만 먼저 검증 가능</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md384">
+<title>지점 C. Commit 6 완료 후</title>
+<para>상태:</para>
+<para><itemizedlist>
+<listitem><para>layout은 동작</para>
+</listitem><listitem><para>basic measure / relayout 가능</para>
+</listitem><listitem><para>renderer는 아직 단순 또는 미연결일 수 있음</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>engine 품질을 먼저 점검 가능</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md385">
+<title>지점 D. Commit 7 완료 후</title>
+<para>상태:</para>
+<para><itemizedlist>
+<listitem><para>텍스트가 실제로 보임</para>
+</listitem><listitem><para>exclusion 없는 기본 TextVisualizer 사용 가능</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>최소 usable milestone</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md386">
+<title>지점 E. Commit 8 완료 후</title>
+<para>상태:</para>
+<para><itemizedlist>
+<listitem><para>핵심 feature인 exclusion-aware multi-fragment layout 완성</para>
+</listitem></itemizedlist>
+</para>
+<para>의미:</para>
+<para><itemizedlist>
+<listitem><para>1차 핵심 목표 달성 지점</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md387">
+<title>이번 1차 구현에서 제외할 기능</title>
+<para>아래 기능은 1차 구현 범위에서 제외한다.</para>
+<para><itemizedlist>
+<listitem><para>selection</para>
+</listitem><listitem><para>cursor</para>
+</listitem><listitem><para>decorator</para>
+</listitem><listitem><para>IME / editing</para>
+</listitem><listitem><para>clipboard</para>
+</listitem><listitem><para>placeholder interaction</para>
+</listitem><listitem><para>underline</para>
+</listitem><listitem><para>shadow</para>
+</listitem><listitem><para>strikethrough</para>
+</listitem><listitem><para>outline</para>
+</listitem><listitem><para>background</para>
+</listitem><listitem><para>ellipsis</para>
+</listitem><listitem><para>per-character rich style</para>
+</listitem><listitem><para>hit-test / selection geometry</para>
+</listitem><listitem><para>non-rectangular exclusion</para>
+</listitem><listitem><para>async render</para>
+</listitem><listitem><para>public <computeroutput>Layout()</computeroutput> / <computeroutput>Relayout()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md388">
+<title>구현 완료 정의</title>
+<para>이번 계획서 기준의 1차 구현 완료는 아래를 의미한다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>를 public handle로 생성할 수 있다.</para>
+</listitem><listitem><para><computeroutput>Text</computeroutput>, <computeroutput>FontFamily</computeroutput>, <computeroutput>FontSize</computeroutput>, <computeroutput>TextColor</computeroutput>를 설정할 수 있다.</para>
+</listitem><listitem><para><computeroutput>Prepare()</computeroutput>를 호출할 수 있고, 내부적으로 eager prepare가 가능하다.</para>
+</listitem><listitem><para>exclusion region을 설정할 수 있다.</para>
+</listitem><listitem><para><computeroutput>OnRelayout()</computeroutput>에서 shaping 없이 layout만 반복 수행할 수 있다.</para>
+</listitem><listitem><para>atlas renderer를 통해 plain glyph text를 실제로 표시할 수 있다.</para>
+</listitem><listitem><para>exclusion region으로 인해 한 줄이 여러 fragment로 나뉘는 배치가 동작한다.</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md389">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para>generated file(<computeroutput>text-visualizer.autogen.h</computeroutput>)를 저장소에 포함할지 팀 규칙 확인 필요</para>
+</listitem><listitem><para>prepare/layout 재실행 횟수 검증용 test seam이 필요한지 확정 필요</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> property header를 별도 <computeroutput>integration-api/</computeroutput> 아래 두는 방식 최종 확정 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dalidb1c092154e5739fbfe59b03ae536ba2_1autotoc_md390">
+<title>TextVisualizer 설계에 주는 결론</title>
+<para><orderedlist>
+<listitem><para>구현은 한 번에 크게 들어가기보다 <computeroutput>API skeleton -&gt; Prepare -&gt; Layout -&gt; Atlas adapter -&gt; Exclusion integration</computeroutput> 순으로 잘게 쪼개는 것이 맞다.</para>
+</listitem><listitem><para>가장 먼저 안정화해야 할 것은 public API가 아니라 <computeroutput>Prepare</computeroutput>와 <computeroutput>Layout</computeroutput>의 경계다.</para>
+</listitem><listitem><para>1차 usable milestone은 &quot;plain multiline text가 atlas renderer로 보이는 상태&quot;이고, 핵심 목표 달성 milestone은 &quot;exclusion-aware multi-fragment layout이 동작하는 상태&quot;다.</para>
+</listitem><listitem><para>rollback 기준점을 커밋 단위로 명확히 두면 구현 중 구조 변경이 생겨도 안전하게 되돌릴 수 있다. </para>
+</listitem></orderedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/07-implementation-plan.ko.md"/>
+  </compounddef>
+</doxygen>

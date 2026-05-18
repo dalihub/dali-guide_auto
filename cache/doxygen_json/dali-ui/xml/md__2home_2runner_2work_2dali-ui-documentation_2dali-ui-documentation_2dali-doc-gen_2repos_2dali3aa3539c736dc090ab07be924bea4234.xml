@@ -1,0 +1,556 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234" kind="page">
+    <compoundname>md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_211-render-call-status_8ko</compoundname>
+    <title>TextVisualizer Renderer Render-Call Status</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md463"/> </para>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md464">
+<title>목적</title>
+<para>이 문서는 <computeroutput>Renderer::Render()</computeroutput> 호출 skeleton 구현 이후의 <computeroutput>TextVisualizer</computeroutput> 상태를 compact 이후에도 다음 작업자가 정확히 이어받을 수 있도록 정리한 인수인계 문서이다.</para>
+<para>특히 아래를 분명히 고정한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Renderer::Render()</computeroutput> 호출 경로가 현재 어디까지 열렸는지</para>
+</listitem><listitem><para>output actor attach 정책이 현재 어떻게 동작하는지</para>
+</listitem><listitem><para><computeroutput>render dirty</computeroutput>를 아직 clear하면 안 되는 이유</para>
+</listitem><listitem><para>baseline / bearing / geometry correctness가 아직 미완료라는 점</para>
+</listitem><listitem><para>다음 작업자가 기존 <computeroutput>TextController / TextView / AtlasRenderer</computeroutput>를 잘못 건드리지 않도록 하는 금지 사항</para>
+</listitem></itemizedlist>
+</para>
+<para>애매한 내용은 추측하지 않고 <computeroutput>확인 필요</computeroutput>로 표시한다.</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md465">
+<title>분석 대상 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-renderer-bridge.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-renderer-bridge.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="text-visualizer-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/text-visualizer-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-renderer.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md466">
+<title>1. 현재 최신 커밋 상태</title>
+<para>최신 커밋:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Add TextVisualizer renderer render-call skeleton</computeroutput></para>
+</listitem><listitem><para>커밋 해시: <computeroutput>f804f4c</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>현재 중요한 사실:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput>는 <computeroutput>Prepare -&gt; Layout -&gt; Adapter -&gt; Bridge -&gt; RenderHost</computeroutput> 뒤에 <computeroutput>Renderer::Render()</computeroutput> 호출 skeleton까지 연결되었다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface</computeroutput>는 존재한다.</para>
+</listitem><listitem><para><computeroutput>AtlasRendererBridge::AttachRendererToHost()</computeroutput>는 이제 실제로 <computeroutput>Render()</computeroutput>를 호출한다.</para>
+</listitem><listitem><para><computeroutput>Render()</computeroutput>가 반환한 output actor는 현재 bridge가 host에 직접 attach할 수 있다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput>는 이제 renderer가 기대하는 glyph quad origin에 더 가깝게 최소 position adjustment를 적용한다.</para>
+</listitem><listitem><para>그러나 geometry correctness, baseline/bearing/offset, textColor 정확성은 아직 미완료다.</para>
+</listitem><listitem><para>따라서 <computeroutput>render dirty</computeroutput>는 아직 clear하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md467">
+<title>2. 현재 render pipeline 상태</title>
+<para>현재 코드 기준 흐름은 다음과 같다.</para>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[TextVisualizerImpl::OnRelayout]<sp/>--&gt;<sp/>B[UpdateLayout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[AtlasRendererBridge::UpdateRenderData]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[EnsureRenderHost]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[SetRenderHost]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[AttachRendererToHost]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[Text::Renderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[Renderer<sp/>Output<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[RenderHost<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>-.<sp/>still<sp/>dirty<sp/>.-&gt;<sp/>K[RenderDirty<sp/>remains<sp/>true]</highlight></codeline>
+</programlisting></para>
+<para>각 단계 상태:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerImpl</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para><computeroutput>OnRelayout()</computeroutput>에서 layout 결과와 render path를 연결한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>UpdateLayout()</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para>glyph data/metrics가 있으면 <computeroutput>LayoutEngine::LayoutGlyphs()</computeroutput>를 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AtlasViewAdapter</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para><computeroutput>PreparedText / LayoutResult / TextColor / ControlSize</computeroutput>를 bridge에 제공한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AtlasRendererBridge::UpdateRenderData()</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para>glyph/placement를 bridge 내부 temporary render data로 변환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>EnsureRenderHost()</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para>host actor lifecycle을 보장한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>SetRenderHost()</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para>bridge가 host handle을 보관한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AttachRendererToHost()</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para>이제 <computeroutput>Renderer::Render()</computeroutput>를 호출하고 output actor attach를 시도한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Text::Renderer::Render()</computeroutput><itemizedlist>
+<listitem><para>완료</para>
+</listitem><listitem><para>호출 경로는 열렸지만 correctness는 아직 미완료다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>output actor -&gt; RenderHost Actor attach</computeroutput><itemizedlist>
+<listitem><para>부분 완료</para>
+</listitem><listitem><para>attach 정책은 구현되었지만 시각 품질 검증은 아직 없다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>render dirty clear</computeroutput><itemizedlist>
+<listitem><para>미완료</para>
+</listitem><listitem><para>의도적으로 아직 하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md468">
+<title>3. Renderer::Render() 호출 조사 결과</title>
+<para>현재 코드와 실제 renderer 흐름을 다시 확인한 결과는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Renderer::Render(ViewInterface&amp;, Actor, Property::Index, float&amp;, int)</computeroutput> 호출 자체는 가능하다.</para>
+</listitem><listitem><para><computeroutput>Text::AtlasRenderer::Render()</computeroutput>는 내부 actor를 만들거나 재사용한 뒤 actor를 반환한다.</para>
+</listitem><listitem><para>반환 actor는 자동으로 <computeroutput>textControl / renderHost</computeroutput>에 attach되지 않는다.</para>
+</listitem><listitem><para>그래서 현재 bridge가 parent가 없는 output actor를 <computeroutput>mRenderHost.Add(output)</computeroutput>으로 직접 attach한다.</para>
+</listitem><listitem><para>반환 actor가 이미 <computeroutput>mRenderHost</computeroutput>에 붙어 있으면 중복 add하지 않는다.</para>
+</listitem><listitem><para>반환 actor가 다른 parent를 갖고 있으면 강제로 빼앗지 않고 실패 처리한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, 현재 구현은 아래 정책을 가진다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>Render()</computeroutput> 호출</para>
+</listitem><listitem><para>output actor가 없으면 실패</para>
+</listitem><listitem><para>parent가 없으면 host에 직접 add</para>
+</listitem><listitem><para>parent가 이미 host면 성공으로 간주</para>
+</listitem><listitem><para>parent가 다른 actor면 강제 이동 없이 실패</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md469">
+<title>4. 현재 AtlasRendererBridge 상태</title>
+<para>현재 보유 상태:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mAdapter</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRenderer</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRenderHost</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRendererOutput</computeroutput></para>
+</listitem><listitem><para><computeroutput>mRendererAttached</computeroutput></para>
+</listitem><listitem><para><computeroutput>mAnimatablePropertyIndex</computeroutput></para>
+</listitem><listitem><para><computeroutput>mAlignmentOffset</computeroutput></para>
+</listitem><listitem><para><computeroutput>mDepth</computeroutput></para>
+</listitem><listitem><para><computeroutput>mViewInterface</computeroutput></para>
+</listitem><listitem><para><computeroutput>mImpl</computeroutput> render data</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 API와 책임:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>SetAdapter()</computeroutput><itemizedlist>
+<listitem><para><computeroutput>AtlasViewAdapter</computeroutput>를 non-owning으로 저장하고 <computeroutput>mViewInterface.SetAdapter()</computeroutput>까지 함께 수행한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Clear()</computeroutput><itemizedlist>
+<listitem><para>detach, adapter clear, view interface clear, render data clear, host reset, renderer reset까지 수행한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>HasRenderableGlyphs()</computeroutput><itemizedlist>
+<listitem><para>adapter가 renderable glyph를 제공하는지 확인한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>IsRendererCreated()</computeroutput><itemizedlist>
+<listitem><para><computeroutput>Text::RendererPtr</computeroutput> 생성 여부만 확인한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>HasRenderHost()</computeroutput><itemizedlist>
+<listitem><para>render host handle 존재 여부를 확인한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>IsRendererAttached()</computeroutput><itemizedlist>
+<listitem><para>현재 bridge가 attach 성공 상태로 판단하는 bool을 반환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>HasViewInterfaceAdapter()</computeroutput><itemizedlist>
+<listitem><para><computeroutput>TextVisualizerViewInterface</computeroutput>가 adapter를 참조 중인지 확인한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>GetRendererOutput()</computeroutput><itemizedlist>
+<listitem><para>최근 <computeroutput>Render()</computeroutput> 호출 결과로 얻은 output actor handle을 반환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>EnsureRenderer()</computeroutput><itemizedlist>
+<listitem><para>필요 시 <computeroutput>Text::AtlasRenderer::New()</computeroutput>를 통해 renderer를 생성한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>ResetRenderer()</computeroutput><itemizedlist>
+<listitem><para>detach 후 renderer handle을 reset한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData()</computeroutput><itemizedlist>
+<listitem><para>adapter의 glyph placements를 bridge 내부 temporary render data로 변환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>SetRenderHost()</computeroutput><itemizedlist>
+<listitem><para>host actor handle을 저장한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>GetRenderHost()</computeroutput><itemizedlist>
+<listitem><para>현재 host handle을 반환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AttachRendererToHost()</computeroutput><itemizedlist>
+<listitem><para><computeroutput>Render()</computeroutput> 호출, output actor 획득, duplicate attach 방지, host attach를 담당한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>DetachRendererFromHost()</computeroutput><itemizedlist>
+<listitem><para>output actor가 있으면 <computeroutput>Unparent()</computeroutput> 후 reset하고 attached bool을 false로 돌린다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md470">
+<title>5. ViewInterface 현재 mapping</title>
+<para>파일:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>실제로 연결한 것:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetNumberOfGlyphs()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetGlyphs()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetControlSize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLayoutSize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetTextColor()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetTextBuffer()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetGlyphsToCharacters()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>empty / no-op 처리한 것:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetColors()</computeroutput> / <computeroutput>GetColorIndices()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetBackgroundColors()</computeroutput> / <computeroutput>GetBackgroundColorIndices()</computeroutput></para>
+</listitem><listitem><para>underline</para>
+</listitem><listitem><para>shadow</para>
+</listitem><listitem><para>outline</para>
+</listitem><listitem><para>hyphen</para>
+</listitem><listitem><para>ellipsis</para>
+</listitem><listitem><para>strikethrough</para>
+</listitem><listitem><para>bounded paragraph runs</para>
+</listitem><listitem><para>character spacing</para>
+</listitem><listitem><para>cutout</para>
+</listitem></itemizedlist>
+</para>
+<para>중요한 주의점:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>colors / color indices</computeroutput>는 현재 <computeroutput>nullptr</computeroutput>이다.</para>
+</listitem><listitem><para><computeroutput>textColor</computeroutput>는 <computeroutput>GetTextColor()</computeroutput> 경로로만 전달된다.</para>
+</listitem><listitem><para>per-glyph color path는 아직 연결하지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md471">
+<title>추가 확인: glyph position adjustment</title>
+<para><computeroutput>TextVisualizer</computeroutput>의 현재 glyph placement와 <computeroutput>AtlasRenderer</computeroutput>가 기대하는 좌표계를 다시 확인한 결과는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::View::GetGlyphs()</computeroutput>는 기존 path에서 line alignment offset과 line ascender를 glyph position에 더한 뒤 renderer에 전달한다.<itemizedlist>
+<listitem><para>파일: <computeroutput>dali-ui-foundation/internal/text/text-view.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Text::AtlasRenderer::AddGlyphs()</computeroutput>는 전달받은 <computeroutput>position</computeroutput>을 glyph mesh origin으로 사용하고, <computeroutput>baseLine = position.y + glyph.yBearing</computeroutput>로 baseline을 계산한다.<itemizedlist>
+<listitem><para>파일: <computeroutput>dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>즉 <computeroutput>AtlasRenderer</computeroutput>가 기대하는 <computeroutput>glyphPositions</computeroutput>는 baseline origin이 아니라 glyph quad의 top-left 성격에 가깝다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 <computeroutput>TextVisualizer</computeroutput>의 <computeroutput>LayoutEngine::LayoutGlyphs()</computeroutput>는 아래 좌표를 저장한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>placement.x</computeroutput><itemizedlist>
+<listitem><para>exclusion interval 안에서 누적 advance로 계산한 pen x 성격의 값</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>placement.y</computeroutput><itemizedlist>
+<listitem><para>line top y</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>이 좌표를 그대로 <computeroutput>Render()</computeroutput>에 넘기면 <computeroutput>xBearing / yBearing</computeroutput>가 빠져 기존 <computeroutput>TextView</computeroutput> path보다 glyph가 치우칠 수 있다.</para>
+<para>그래서 이번 단계에서는 renderer 경계에서만 최소 보정을 적용했다.</para>
+<para><itemizedlist>
+<listitem><para>위치:<itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-visualizer/text-visualizer-view-interface.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>적용식:<itemizedlist>
+<listitem><para><computeroutput>x = placement.x + glyph.xBearing</computeroutput></para>
+</listitem><listitem><para><computeroutput>baselineOffset = same line의 glyph들 중 max(yBearing)</computeroutput></para>
+</listitem><listitem><para><computeroutput>y = placement.y + baselineOffset - glyph.yBearing</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 의미:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>LayoutResult</computeroutput>는 여전히 layout 좌표를 유지한다.</para>
+</listitem><listitem><para>renderer-specific adjustment는 <computeroutput>TextVisualizerViewInterface::GetGlyphs()</computeroutput> 경계에서만 적용한다.</para>
+</listitem><listitem><para><computeroutput>minLineOffset</computeroutput>는 아직 alignment offset path를 구현하지 않았기 때문에 <computeroutput>0.0f</computeroutput>를 유지한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>현재 <computeroutput>baselineOffset = max(yBearing)</computeroutput>는 ascender/line metrics가 없는 상태에서 잡은 임시 규칙이다.</para>
+</listitem><listitem><para>font ascender/descender 기반 line baseline을 별도로 계산하면 이 보정식은 바뀔 수 있다.</para>
+</listitem><listitem><para>glyph offset, RTL/Bidi visual order, combining mark / zero-advance glyph 정밀 배치는 아직 미완료다.</para>
+</listitem><listitem><para><computeroutput>textColor</computeroutput>는 <computeroutput>GetTextColor()</computeroutput> defaultColor path로만 전달되며, shader 반영 correctness는 아직 별도 확인이 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md472">
+<title>추가 확인: text color render path</title>
+<para><computeroutput>AtlasRenderer</computeroutput>의 color path를 다시 확인한 결과, 현재 <computeroutput>TextVisualizer</computeroutput> 1차 구현은 단일 <computeroutput>textColor</computeroutput>만으로 충분히 연결 가능하다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::AtlasRenderer::Render()</computeroutput>는 <computeroutput>view.GetColors()</computeroutput>, <computeroutput>view.GetColorIndices()</computeroutput>, <computeroutput>view.GetTextColor()</computeroutput>를 읽는다.</para>
+</listitem><listitem><para><computeroutput>AddGlyphs()</computeroutput> 내부에서 <computeroutput>colorsBuffer == nullptr</computeroutput>이면 <computeroutput>useDefaultColor = true</computeroutput>가 된다.</para>
+</listitem><listitem><para>이 경우 모든 glyph vertex color는 <computeroutput>defaultColor</computeroutput>, 즉 <computeroutput>view.GetTextColor()</computeroutput> 반환값을 사용한다.</para>
+</listitem><listitem><para><computeroutput>GetColors()</computeroutput>와 <computeroutput>GetColorIndices()</computeroutput>가 모두 비어 있지 않은 경우에만 per-glyph color path가 열린다.</para>
+</listitem><listitem><para>background color path는 별도 getter를 통해 처리되며, 현재 <computeroutput>TextVisualizer</computeroutput> 1차 구현 범위와는 분리되어 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 <computeroutput>TextVisualizer</computeroutput> 정책:</para>
+<para><itemizedlist>
+<listitem><para>rich style / per-glyph color는 지원하지 않는다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface::GetColors()</computeroutput>와 <computeroutput>GetColorIndices()</computeroutput>는 계속 <computeroutput>nullptr</computeroutput>를 반환한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizerViewInterface::GetTextColor()</computeroutput>는 <computeroutput>AtlasViewAdapter::GetTextColor()</computeroutput>를 그대로 반환한다.</para>
+</listitem><listitem><para>따라서 현재 구현은 <computeroutput>AtlasRenderer</computeroutput>의 <computeroutput>defaultColor</computeroutput> 경로만 사용한다.</para>
+</listitem></itemizedlist>
+</para>
+<para>추가로 확인한 구현 정책:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>textColor</computeroutput> 변경은 여전히 <computeroutput>render dirty</computeroutput>만 세운다.</para>
+</listitem><listitem><para>다만 <computeroutput>OnRelayout()</computeroutput>에서 layout dirty 여부와 무관하게 <computeroutput>SyncRenderStateToAdapter()</computeroutput>를 호출해 최신 <computeroutput>controlSize</computeroutput>와 <computeroutput>textColor</computeroutput>를 adapter에 반영한다.</para>
+</listitem><listitem><para>즉, layout dirty가 없어도 다음 render path에서 최신 색을 <computeroutput>GetTextColor()</computeroutput>로 읽을 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>중요:</para>
+<para><itemizedlist>
+<listitem><para>이 커밋에서도 <computeroutput>render dirty</computeroutput>는 clear하지 않는다.</para>
+</listitem><listitem><para>이유는 color path가 연결되어도 geometry correctness, baseline/bearing/offset, <computeroutput>animatablePropertyIndex / alignmentOffset / depth</computeroutput> 의미가 아직 완전히 정리되지 않았기 때문이다.</para>
+</listitem></itemizedlist>
+</para>
+<para>확인 필요:</para>
+<para><itemizedlist>
+<listitem><para>실제 shader에 <computeroutput>textColor</computeroutput>가 기대한 색으로 반영되는지는 manual/sample 검증이 아직 필요하다.</para>
+</listitem><listitem><para>per-glyph color 지원은 1차 범위 밖이며, 필요할 경우 <computeroutput>GetColors()</computeroutput> / <computeroutput>GetColorIndices()</computeroutput> path를 별도로 설계해야 한다.</para>
+</listitem><listitem><para>color animation과 <computeroutput>animatablePropertyIndex</computeroutput>의 관계는 아직 검토 전이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md473">
+<title>추가 확인: render-ready state</title>
+<para>현재 <computeroutput>AtlasRendererBridge</computeroutput>에는 bridge 상태 일관성을 확인하기 위한 helper를 추가했다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>HasRendererOutput()</computeroutput><itemizedlist>
+<listitem><para>최근 <computeroutput>Render()</computeroutput> 호출 결과로 얻은 <computeroutput>mRendererOutput</computeroutput> handle 존재 여부를 반환한다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>IsRenderReady()</computeroutput><itemizedlist>
+<listitem><para>아래 조건이 모두 참일 때만 <computeroutput>true</computeroutput>를 반환한다.</para>
+</listitem><listitem><para><computeroutput>IsRendererCreated()</computeroutput></para>
+</listitem><listitem><para><computeroutput>HasRenderHost()</computeroutput></para>
+</listitem><listitem><para><computeroutput>HasRendererOutput()</computeroutput></para>
+</listitem><listitem><para><computeroutput>IsRendererAttached()</computeroutput></para>
+</listitem><listitem><para><computeroutput>HasViewInterfaceAdapter()</computeroutput></para>
+</listitem><listitem><para><computeroutput>HasRenderableGlyphs()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 의미:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Renderer::Render()</computeroutput> 호출이 가능했고</para>
+</listitem><listitem><para>output actor handle이 존재하며</para>
+</listitem><listitem><para>host attach 상태까지 bridge 내부에서 일관되게 맞아 있다는 뜻이다.</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 의미하지 않는 것:</para>
+<para><itemizedlist>
+<listitem><para>geometry correctness가 검증되었다는 뜻이 아니다.</para>
+</listitem><listitem><para>baseline / bearing / offset 보정이 끝났다는 뜻이 아니다.</para>
+</listitem><listitem><para>실제 화면 품질이 맞다는 뜻이 아니다.</para>
+</listitem><listitem><para><computeroutput>render dirty</computeroutput>를 clear해도 된다는 뜻이 아니다.</para>
+</listitem></itemizedlist>
+</para>
+<para>중요:</para>
+<para><itemizedlist>
+<listitem><para>다음 단계에서도 <computeroutput>IsRenderReady() == true</computeroutput>만으로 <computeroutput>render dirty</computeroutput>를 clear하면 안 된다.</para>
+</listitem><listitem><para>여전히 geometry correctness, baseline/bearing/offset, color/shader 반영, manual/sample 검증이 남아 있다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md474">
+<title>6. 현재 render dirty 정책</title>
+<para>현재 정책은 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>render dirty</computeroutput>는 아직 clear하지 않는다.</para>
+</listitem></itemizedlist>
+</para>
+<para>이유:</para>
+<para><itemizedlist>
+<listitem><para>geometry correctness가 완성되지 않았다.</para>
+</listitem><listitem><para>baseline / bearing / offset 보정이 아직 없다.</para>
+</listitem><listitem><para><computeroutput>textColor</computeroutput>가 실제 shader/renderer에 제대로 반영되는지 확인 전이다.</para>
+</listitem><listitem><para><computeroutput>animatablePropertyIndex / alignmentOffset / depth</computeroutput> 의미가 확정되지 않았다.</para>
+</listitem></itemizedlist>
+</para>
+<para>따라서 다음 작업에서도 아래 원칙을 반드시 지켜야 한다.</para>
+<para><itemizedlist>
+<listitem><para>실제 draw-ready 상태가 명확해지기 전까지 <computeroutput>render dirty</computeroutput>를 clear하면 안 된다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md475">
+<title>7. 현재 UTC 상태</title>
+<para>현재 기준 test 상태:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>tct-dali-ui-foundation-core -s -m TextVisualizer</computeroutput> 통과</para>
+</listitem><listitem><para><computeroutput>gcov timestamp warning</computeroutput>은 실패가 아니다.</para>
+</listitem></itemizedlist>
+</para>
+<para>render call 관련 UTC가 현재 검증하는 내용:</para>
+<para><itemizedlist>
+<listitem><para>host 없음: <computeroutput>false</computeroutput></para>
+</listitem><listitem><para>host 있음: <computeroutput>true / false</computeroutput> 허용 + state consistency 확인</para>
+</listitem><listitem><para>duplicate attach no-op 확인</para>
+</listitem><listitem><para>detach / clear 상태 정리 확인</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> render-call smoke</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, 현재 테스트의 성공 기준은 “정확한 화면 표시”가 아니라 “crash 없이 render-call path와 actor 상태가 일관적인가”이다.</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md476">
+<title>8. 남은 핵심 문제</title>
+<para>아래는 아직 남아 있는 핵심 문제다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>animatablePropertyIndex</computeroutput>에 어떤 property index를 넣어야 하는지 미정</para>
+</listitem><listitem><para><computeroutput>alignmentOffset</computeroutput> 의미 미정</para>
+</listitem><listitem><para><computeroutput>depth</computeroutput> 의미 미정</para>
+</listitem><listitem><para>baseline / <computeroutput>xBearing</computeroutput> / <computeroutput>yBearing</computeroutput> / glyph offset 적용 위치 미정</para>
+</listitem><listitem><para><computeroutput>textColor</computeroutput>가 실제 rendering에 반영되는지 확인 필요</para>
+</listitem><listitem><para>renderer output actor ownership 장기 정책 필요</para>
+</listitem><listitem><para><computeroutput>render dirty</computeroutput> clear 시점 미정</para>
+</listitem><listitem><para>실제 화면 표시 품질 검증 필요</para>
+</listitem><listitem><para>exclusion region이 실제 render output에서 시각적으로 비워지는지 manual / sample 검증 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md477">
+<title>9. 다음 선택지</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md478">
+<title>A. Render correctness 보강</title>
+<para><itemizedlist>
+<listitem><para>baseline / bearing / glyph offset 적용</para>
+</listitem><listitem><para>glyph position coordinate 보정</para>
+</listitem><listitem><para><computeroutput>textColor</computeroutput> 전달 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>장점:</para>
+<para><itemizedlist>
+<listitem><para>실제 draw 결과와 layout data의 의미를 맞출 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+<para>단점:</para>
+<para><itemizedlist>
+<listitem><para>coordinate 의미를 잘못 고정하면 이후 수정 비용이 커진다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md479">
+<title>B. render dirty clear 조건 정리</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>AttachRendererToHost()</computeroutput> 성공만으로 clear할지</para>
+</listitem><listitem><para><computeroutput>UpdateRenderData + Render + output actor attach</computeroutput> 성공까지 clear할지</para>
+</listitem><listitem><para>geometry correctness 확인 전에는 clear하지 않는 것이 현재 권장이다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md480">
+<title>C. sample app 추가</title>
+<para><itemizedlist>
+<listitem><para>실제 화면에서 <computeroutput>TextVisualizer</computeroutput>가 보이는지 확인</para>
+</listitem><listitem><para>exclusion region 회피가 시각적으로 되는지 확인</para>
+</listitem><listitem><para>동적 bounds 이동 smoke 확인</para>
+</listitem></itemizedlist>
+</para>
+<para>현재 권장:</para>
+<para><itemizedlist>
+<listitem><para>다음 구현은 sample보다 먼저 render correctness 조사 / 보강을 작게 진행하는 것이 안전하다.</para>
+</listitem><listitem><para>단, 화면 확인이 꼭 필요하면 매우 작은 sample app을 먼저 추가해도 된다.</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md481">
+<title>10. 다음 커밋 금지 사항</title>
+<para><itemizedlist>
+<listitem><para>기존 <computeroutput>TextController</computeroutput> 수정 금지</para>
+</listitem><listitem><para>기존 <computeroutput>TextView</computeroutput> 수정 금지</para>
+</listitem><listitem><para>기존 <computeroutput>internal/text/layouts/layout-engine.*</computeroutput> 수정 금지</para>
+</listitem><listitem><para>editing / selection / cursor / decorator / IME 경로 수정 금지</para>
+</listitem><listitem><para>public API 추가 금지</para>
+</listitem><listitem><para><computeroutput>text-atlas-renderer.*</computeroutput> 수정은 아직 금지</para>
+</listitem><listitem><para><computeroutput>render dirty</computeroutput> clear 금지</para>
+</listitem><listitem><para>대규모 refactor 금지</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md482">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para>최신 커밋 이후 <computeroutput><ref refid="10-renderer-integration-status_8ko_8md" kindref="compound">10-renderer-integration-status.ko.md</ref></computeroutput>의 일부 내용은 오래된 상태를 포함할 수 있다.<itemizedlist>
+<listitem><para>본 문서는 <computeroutput>Render()</computeroutput> 호출 이후 상태를 우선 기준으로 삼는다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>output actor ownership을 장기적으로 bridge가 가질지, renderer가 내부적으로 재생성/회수할지 확인 필요</para>
+</listitem><listitem><para>per-glyph color path를 언제 연결할지 확인 필요</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali3aa3539c736dc090ab07be924bea4234_1autotoc_md483">
+<title>TextVisualizer 설계에 주는 결론</title>
+<para><itemizedlist>
+<listitem><para>현재 <computeroutput>TextVisualizer</computeroutput>는 <computeroutput>Render()</computeroutput> 호출 경로까지는 열렸지만, draw correctness는 아직 미완료다.</para>
+</listitem><listitem><para>따라서 다음 단계의 핵심은 “더 많이 붙이는 것”이 아니라 “현재 attach된 actor가 올바른 좌표/색/offset을 쓰는지”를 작게 검증하고 보강하는 것이다.</para>
+</listitem><listitem><para>이 단계에서 <computeroutput>render dirty</computeroutput>를 조급하게 clear하거나 기존 <computeroutput>TextController / TextView / AtlasRenderer</computeroutput>를 수정하는 방향으로 가면 설계 원칙에서 벗어나기 쉽다. </para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/11-render-call-status.ko.md"/>
+  </compounddef>
+</doxygen>

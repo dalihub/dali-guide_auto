@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8" kind="page">
+    <compoundname>md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_200-overview_8ko</compoundname>
+    <title>TextVisualizer 분석 개요</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md6"/> </para>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md7">
+<title>목적</title>
+<para>이 문서는 <computeroutput><ref refid="classDali_1_1Ui_1_1TextVisualizer" kindref="compound">Dali::Ui::TextVisualizer</ref></computeroutput> 구현을 위한 기준 문서의 출발점이다. <computeroutput>TextVisualizer</computeroutput>의 목표는 기존 <computeroutput>TextVisual</computeroutput>처럼 정적 텍스처를 만들어 붙이는 방식도 아니고, <computeroutput>InputField</computeroutput>처럼 편집기 전체 스택을 안고 가는 방식도 아닌, 동적 레이아웃 변화에 강한 텍스트 전용 View를 만드는 것이다.</para>
+<para>핵심 요구는 다음과 같다.</para>
+<para><itemizedlist>
+<listitem><para>부모 레이아웃 변경에 자주 반응해도 relayout / rerender 비용이 과도하게 커지지 않아야 한다.</para>
+</listitem><listitem><para>읽기 전용 표시가 기본이며, 편집기용 상태 머신과 입력 장치 의존성을 기본 탑재하지 않아야 한다.</para>
+</listitem><listitem><para><computeroutput>PreText</computeroutput> 계열이 기대하는 &quot;빠른 재측정 + 빠른 재배치 + 안정적인 표시&quot; 특성을 제공해야 한다.</para>
+</listitem><listitem><para>기존 <ref refid="namespaceDali" kindref="compound">Dali</ref> text 모듈의 재사용 범위를 분명히 하고, 제거해야 할 오버헤드와 신규 구조를 명확히 정의해야 한다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md8">
+<title>분석 범위</title>
+<para>이번 분석은 아래 축으로 나눠 진행한다.</para>
+<para><orderedlist>
+<listitem><para>현재 <ref refid="namespaceDali" kindref="compound">Dali</ref> UI text pipeline 전체 구조</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput>가 text stack을 어떻게 감싸고 있는지</para>
+</listitem><listitem><para><computeroutput>Text::Controller</computeroutput>가 실제로 어떤 책임을 떠안고 있는지</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput>가 동적 glyph 렌더링에 어떤 장단점을 가지는지</para>
+</listitem><listitem><para>위 분석을 바탕으로 <computeroutput>TextVisualizer</computeroutput> 설계안과 구현 계획</para>
+</listitem></orderedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md9">
+<title>현재 구조에 대한 1차 결론</title>
+<para>현재 <ref refid="namespaceDali" kindref="compound">Dali</ref> text 모듈은 크게 두 갈래로 사용된다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisual</computeroutput><itemizedlist>
+<listitem><para>비편집형 visual 중심 경로</para>
+</listitem><listitem><para>relayout 후 텍스처 기반 렌더러를 갱신하는 흐름</para>
+</listitem><listitem><para>비동기 렌더링과 tiling 지원이 강점</para>
+</listitem><listitem><para>View 자체가 아니라 visual이므로 레이아웃 변화에 대한 제어권이 제한적이다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput><itemizedlist>
+<listitem><para><computeroutput>View</computeroutput> + <computeroutput>Text::Controller</computeroutput> + <computeroutput>Decorator</computeroutput> + gesture/IME + renderer 조합</para>
+</listitem><listitem><para>편집/선택/커서/포커스 처리가 모두 포함된 무거운 경로</para>
+</listitem><listitem><para>동적 레이아웃 대응은 가능하지만 읽기 전용 표시용 View로 쓰기에는 책임이 과도하다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>TextVisualizer</computeroutput>는 둘 중 하나를 그대로 재사용하는 대상이 아니라, 아래처럼 &quot;중간 계층&quot;으로 설계하는 것이 맞다.</para>
+<para><itemizedlist>
+<listitem><para>레이아웃/모델 계산은 <computeroutput>Text::Controller</computeroutput> 계열에서 재사용</para>
+</listitem><listitem><para>편집 관련 상태와 장식(decorator), IME, selection handle은 제거</para>
+</listitem><listitem><para>렌더링은 동적 relayout에 유리한 경로를 선택<itemizedlist>
+<listitem><para>1차 후보: <computeroutput>AtlasRenderer</computeroutput></para>
+</listitem><listitem><para>대안 후보: 기존 <computeroutput>TextVisual</computeroutput>의 bitmap/tiling 경로 일부 차용</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md10">
+<title>재사용 우선순위</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md11">
+<title>그대로 재사용 가치가 높은 영역</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Controller</computeroutput>의 logical/visual model 갱신 체계</para>
+</listitem><listitem><para>script / bidi / shaping / glyph metrics / layout engine</para>
+</listitem><listitem><para>style parsing 및 markup 처리</para>
+</listitem><listitem><para>background / underline / strikethrough 계산 결과</para>
+</listitem><listitem><para><computeroutput>CommonTextUtils::RenderText()</computeroutput>가 가진 actor 배치 보조 로직 일부</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md12">
+<title>조건부 재사용 영역</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Controller</computeroutput> 자체<itemizedlist>
+<listitem><para>editable 기능을 끄고 사용하면 많은 코드를 재사용할 수 있다.</para>
+</listitem><listitem><para>하지만 내부 상태가 너무 넓어서 <computeroutput>TextVisualizer</computeroutput> 전용 facade가 필요하다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput><itemizedlist>
+<listitem><para>텍스처 재생성보다 glyph atlas 재사용 측면에서 유리하다.</para>
+</listitem><listitem><para>그러나 actor/mesh 단위 구성이 세밀해서 텍스트 블록이 많을 때 scene graph 비용이 생길 수 있다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>TextVisual</computeroutput> async pipeline<itemizedlist>
+<listitem><para>큰 텍스트나 비동기 size 계산에는 참고 가치가 있다.</para>
+</listitem><listitem><para>다만 visual 중심 설계라 View 기준 동적 레이아웃에 바로 맞지는 않는다.</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md13">
+<title>기본 제거 대상</title>
+<para><itemizedlist>
+<listitem><para>IME 연동</para>
+</listitem><listitem><para>selection / cursor / grab handle / popup</para>
+</listitem><listitem><para>edit state machine</para>
+</listitem><listitem><para>text input event queue</para>
+</listitem><listitem><para>hidden input / password 편집 로직</para>
+</listitem><listitem><para>editable/selectable control interface 일체</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md14">
+<title>TextVisualizer가 가져야 할 방향</title>
+<para><computeroutput>TextVisualizer</computeroutput>는 &quot;표시용 text controller wrapper + layout-aware view + lightweight renderer host&quot;여야 한다.</para>
+<para>다음 성질이 중요하다.</para>
+<para><itemizedlist>
+<listitem><para>View가 직접 measure / arrange / relayout lifecycle을 가진다.</para>
+</listitem><listitem><para>텍스트가 바뀌지 않아도 width/height 제약 변경에 빠르게 반응한다.</para>
+</listitem><listitem><para>property 변경 시 어떤 단계까지 다시 계산할지 명확한 dirty mask를 가진다.</para>
+</listitem><listitem><para>편집 기능이 없는 만큼 actor 수, 상태 수, signal 수를 줄인다.</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md15">
+<title>문서 산출물</title>
+<para>이 분석 작업의 최종 산출물은 아래 문서들이다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="00-overview_8ko_8md" kindref="compound">00-overview.ko.md</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="01-current-text-pipeline_8ko_8md" kindref="compound">01-current-text-pipeline.ko.md</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="02-input-field-analysis_8ko_8md" kindref="compound">02-input-field-analysis.ko.md</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="03-text-controller-analysis_8ko_8md" kindref="compound">03-text-controller-analysis.ko.md</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="04-atlas-renderer-analysis_8ko_8md" kindref="compound">04-atlas-renderer-analysis.ko.md</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>05-text-visualizer-design.ko.md</computeroutput></para>
+</listitem><listitem><para><computeroutput>06-implementation-plan.ko.md</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md16">
+<title>전체 구조 미리보기</title>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>LR</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[View<sp/>or<sp/>Visual<sp/>API]<sp/>--&gt;<sp/>B[Text<sp/>Controller]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[Logical<sp/>Model]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>D[Visual<sp/>Model]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>E[Layout<sp/>Engine]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>F[Renderer<sp/>Backend]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[Scene<sp/>Graph<sp/>Actors<sp/>/<sp/>Renderers]</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H[InputField]<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I[TextVisual]<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J[TextVisualizer<sp/>목표]<sp/>--&gt;<sp/>B</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>K[Decorator<sp/>/<sp/>IME<sp/>/<sp/>Selection]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>L[Texture<sp/>/<sp/>Async<sp/>Visual<sp/>Path]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>M[Lightweight<sp/>View<sp/>+<sp/>Dynamic<sp/>Relayout]</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali38085685133bb067ca9a0e86afcc33a8_1autotoc_md17">
+<title>구현 기준 원칙</title>
+<para>이후 문서와 구현은 아래 원칙을 따른다.</para>
+<para><itemizedlist>
+<listitem><para>기존 모듈을 &quot;대체&quot;하기보다 &quot;분해해서 재조립&quot;한다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>는 읽기 전용 표시 최적화가 기본값이다.</para>
+</listitem><listitem><para>편집기 스택과 visual 스택의 장점만 취하고, 서로의 과한 책임은 들고 오지 않는다.</para>
+</listitem><listitem><para>신규 구조는 향후 <computeroutput>TextLabel</computeroutput>, <computeroutput>PreText</computeroutput>, <computeroutput>Marquee</computeroutput>, <computeroutput>rich text view</computeroutput>에도 확장 가능해야 한다. </para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/00-overview.ko.md"/>
+  </compounddef>
+</doxygen>

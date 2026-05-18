@@ -1,0 +1,1033 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="23-glyph-cache-lifecycle-design_8ko_8md" kind="file" language="Markdown">
+    <compoundname>23-glyph-cache-lifecycle-design.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>Glyph<sp/>Cache<sp/>Lifecycle<sp/>Design</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>1.<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`TextVisualizerGlyphRenderer`<sp/>prototype은<sp/>already-cached<sp/>glyph만<sp/>처리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>`Render(preparedText,<sp/>layoutResult,<sp/>adapter,<sp/>textColor)`<sp/>또는<sp/>adapter-only<sp/>`Render(adapter)`는<sp/>`AtlasGlyphManager::IsCached()`가<sp/>성공한<sp/>glyph에<sp/>대해서만<sp/>atlas<sp/>id별<sp/>mesh<sp/>actor를<sp/>만들<sp/>수<sp/>있고,<sp/>cache<sp/>miss가<sp/>발생하면<sp/>안전하게<sp/>`false`를<sp/>반환한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>상태는<sp/>layout-dynamic<sp/>workload에서<sp/>lightweight<sp/>renderer와<sp/>geometry-only<sp/>update의<sp/>가치를<sp/>확인하기에는<sp/>충분하지만,<sp/>production<sp/>default<sp/>path로<sp/>전환하기에는<sp/>아직<sp/>부족하다.<sp/>production<sp/>path로<sp/>전환하려면<sp/>다음<sp/>책임이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>시<sp/>glyph<sp/>bitmap<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>cache<sp/>add</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>reference<sp/>count<sp/>증가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>clear<sp/>/<sp/>text<sp/>change<sp/>/<sp/>fallback<sp/>시<sp/>reference<sp/>count<sp/>감소</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>실패<sp/>중간<sp/>상태<sp/>rollback</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout-dynamic<sp/>workload에서<sp/>glyph<sp/>sequence가<sp/>같을<sp/>때<sp/>ref<sp/>count<sp/>churn<sp/>방지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서는<sp/>`TextVisualizerGlyphRenderer`가<sp/>기존<sp/>`Text::AtlasRenderer`와<sp/>glyph<sp/>cache<sp/>behavior를<sp/>어떻게<sp/>공유하거나<sp/>분리할지<sp/>설계한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>2.<sp/>현재<sp/>TextVisualizerGlyphRenderer<sp/>구현<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>구현은<sp/>다음<sp/>상태다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer::Render()`는<sp/>`PreparedText`,<sp/>`LayoutResult`,<sp/>`AtlasViewAdapter`,<sp/>single<sp/>`textColor`를<sp/>입력으로<sp/>받을<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>adapter-only<sp/>`Render(const<sp/>AtlasViewAdapter&amp;)`<sp/>overload도<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasViewAdapter`의<sp/>cached<sp/>renderer<sp/>glyph<sp/>positions를<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager::IsCached()`와<sp/>`AtlasGlyphManager::GenerateMeshData()`로<sp/>already-cached<sp/>glyph<sp/>mesh를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>id별<sp/>pending<sp/>mesh를<sp/>구성하고<sp/>L8<sp/>/<sp/>BGRA<sp/>atlas<sp/>pixel<sp/>format에<sp/>따라<sp/>shader를<sp/>선택한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>아래<sp/>mesh<sp/>actor를<sp/>attach한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>already-cached<sp/>glyph에<sp/>대해<sp/>reference<sp/>acquire<sp/>/<sp/>release<sp/>/<sp/>rollback을<sp/>수행한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>glyph<sp/>cache<sp/>signature에서는<sp/>ref<sp/>count<sp/>churn<sp/>없이<sp/>기존<sp/>glyph<sp/>cache<sp/>ownership을<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>glyph<sp/>cache<sp/>signature와<sp/>같은<sp/>mesh<sp/>topology에서는<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry를<sp/>유지하고<sp/>`VertexBuffer::SetData()`로<sp/>geometry-only<sp/>update를<sp/>시도한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRendererBridge`의<sp/>internal<sp/>compile-time<sp/>flag<sp/>뒤에서<sp/>optional<sp/>bridge<sp/>path로<sp/>연결되어<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기본<sp/>flag는<sp/>`false`이므로<sp/>production<sp/>기본<sp/>경로는<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path를<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>flag<sp/>ON<sp/>상태에서도<sp/>`TextVisualizerImpl`은<sp/>exclusion<sp/>regions가<sp/>있는<sp/>TextVisualizer에만<sp/>lightweight<sp/>renderer를<sp/>허용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>/<sp/>invalid<sp/>glyph<sp/>/<sp/>invalid<sp/>position<sp/>/<sp/>empty<sp/>mesh<sp/>/<sp/>texture<sp/>failure는<sp/>`false`로<sp/>반환하고<sp/>기존<sp/>renderer<sp/>fallback을<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>생성은<sp/>아직<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>cache<sp/>add는<sp/>아직<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">중요한<sp/>점은<sp/>`AtlasGlyphManager::GenerateMeshData()`가<sp/>mesh<sp/>data를<sp/>만들<sp/>때<sp/>atlas<sp/>image<sp/>reference<sp/>count를<sp/>증가시키지<sp/>않는다는<sp/>것이다.<sp/>`AtlasGlyphManager::GenerateMeshData()`는<sp/>내부적으로<sp/>`AtlasManager::GenerateMeshData(...,<sp/>false)`를<sp/>호출한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>현재<sp/>prototype은<sp/>already-cached<sp/>glyph에<sp/>대해서는<sp/>직접<sp/>references를<sp/>보유하지만,<sp/>cache<sp/>miss에서<sp/>glyph<sp/>bitmap을<sp/>만들고<sp/>atlas에<sp/>추가하는<sp/>ownership<sp/>시작점은<sp/>아직<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">결론:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>rendering<sp/>가능성과<sp/>layout-dynamic<sp/>geometry-only<sp/>update<sp/>가치는<sp/>확인됐다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>production<sp/>default<sp/>path로<sp/>쓰려면<sp/>cache<sp/>miss<sp/>handling과<sp/>기존<sp/>`AtlasRenderer::CacheGlyph()`<sp/>behavior<sp/>공유<sp/>전략이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>3.<sp/>기존<sp/>AtlasRenderer<sp/>CacheGlyph<sp/>/<sp/>RemoveText<sp/>분석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`text-atlas-renderer.cpp`의<sp/>`AtlasRenderer::Impl`은<sp/>glyph<sp/>cache<sp/>lifecycle을<sp/>private<sp/>구현으로<sp/>보유한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextCacheEntry</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기존<sp/>renderer의<sp/>`TextCacheEntry`는<sp/>다음<sp/>정보를<sp/>저장한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>TextCacheEntry</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>FontId<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mFontId;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::GlyphIndex<sp/>mIndex;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mImageId;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint16_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mOutlineWidth;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>bool<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>isItalic<sp/>:<sp/>1;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>bool<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>isBold<sp/>:<sp/>1;</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`fontId`,<sp/>`glyphIndex`,<sp/>outline<sp/>/<sp/>italic<sp/>/<sp/>bold<sp/>style<sp/>조합이<sp/>atlas<sp/>glyph<sp/>identity다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`imageId`는<sp/>atlas<sp/>image<sp/>slot이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RemoveText()`는<sp/>이<sp/>entry를<sp/>순회해<sp/>같은<sp/>identity의<sp/>reference<sp/>count를<sp/>감소시킨다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>CacheGlyph()</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`CacheGlyph()`의<sp/>책임은<sp/>단순<sp/>lookup이<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>단계<sp/>|<sp/>역할<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>default<sp/>/<sp/>maximum<sp/>atlas<sp/>size<sp/>조회<sp/>|<sp/>`FontClient::GetDefaultTextAtlasSize()`,<sp/>`GetMaximumTextAtlasSize()`<sp/>사용<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>cached<sp/>lookup<sp/>|<sp/>`AtlasGlyphManager::IsCached(fontId,<sp/>glyphIndex,<sp/>style,<sp/>slot)`<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>cache<sp/>hit<sp/>|<sp/>`AtlasGlyphManager::AdjustReferenceCount(...,<sp/>+1)`<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>cache<sp/>miss<sp/>|<sp/>glyph<sp/>bitmap<sp/>생성<sp/>경로로<sp/>진입<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>glyph<sp/>bitmap<sp/>생성<sp/>|<sp/>`FontClient::CreateBitmap()`<sp/>사용<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>compressed<sp/>bitmap<sp/>처리<sp/>|<sp/>필요<sp/>시<sp/>decompress<sp/>후<sp/>owned<sp/>buffer로<sp/>교체<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>`PixelData`<sp/>생성<sp/>|<sp/>glyph<sp/>buffer를<sp/>`PixelData::New(...,<sp/>PixelData::FREE)`로<sp/>전달<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>block<sp/>size<sp/>갱신<sp/>|<sp/>glyph<sp/>bitmap<sp/>width<sp/>/<sp/>height에<sp/>맞춰<sp/>needed<sp/>block<sp/>size<sp/>확장<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>atlas<sp/>size<sp/>정책<sp/>|<sp/>default<sp/>atlas<sp/>size를<sp/>maximum까지<sp/>2배씩<sp/>확장<sp/>가능<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>atlas<sp/>add<sp/>|<sp/>`AtlasGlyphManager::SetNewAtlasSize()`<sp/>후<sp/>`AtlasGlyphManager::Add()`<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>initial<sp/>ref<sp/>count<sp/>|<sp/>`AtlasGlyphManager::Add()`는<sp/>glyph<sp/>record를<sp/>만들고<sp/>count를<sp/>`1`로<sp/>설정<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>cache<sp/>hit은<sp/>explicit<sp/>`+1`,<sp/>cache<sp/>miss는<sp/>`Add()`가<sp/>initial<sp/>count<sp/>`1`을<sp/>만든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>GenerateMesh()</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`GenerateMesh()`는<sp/>`AtlasGlyphManager::GenerateMeshData(slot.mImageId,<sp/>position,<sp/>mesh)`로<sp/>glyph<sp/>quad를<sp/>만들고,<sp/>vertex<sp/>color를<sp/>적용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">또한<sp/>`isGlyphCached<sp/>==<sp/>false`일<sp/>때<sp/>`TextCacheEntry`를<sp/>`newTextCache`에<sp/>추가한다.<sp/>현재<sp/>`AddGlyphs()`<sp/>호출<sp/>흐름에서는<sp/>일반<sp/>glyph<sp/>mesh<sp/>생성<sp/>시<sp/>`false`를<sp/>넘기므로,<sp/>render<sp/>결과에<sp/>포함된<sp/>glyph<sp/>ref는<sp/>새<sp/>`mTextCache`가<sp/>소유하게<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>RemoveText()</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`RemoveText()`는<sp/>기존<sp/>`mTextCache`를<sp/>순회하며<sp/>다음을<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">AtlasGlyphManager::GlyphStyle<sp/>style;</highlight></codeline>
+<codeline><highlight class="normal">style.outline<sp/><sp/>=<sp/>oldTextIter-&gt;mOutlineWidth;</highlight></codeline>
+<codeline><highlight class="normal">style.isItalic<sp/>=<sp/>oldTextIter-&gt;isItalic;</highlight></codeline>
+<codeline><highlight class="normal">style.isBold<sp/><sp/><sp/>=<sp/>oldTextIter-&gt;isBold;</highlight></codeline>
+<codeline><highlight class="normal">mGlyphManager.AdjustReferenceCount(oldTextIter-&gt;mFontId,<sp/>oldTextIter-&gt;mIndex,<sp/>style,<sp/>-1);</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">그<sp/>뒤<sp/>`mTextCache.Resize(0)`으로<sp/>old<sp/>ownership을<sp/>비운다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>기존<sp/>renderer<sp/>lifecycle의<sp/>핵심</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기존<sp/>`AddGlyphs()`는<sp/>새<sp/>text<sp/>cache를<sp/>만들<sp/>때,<sp/>old<sp/>text<sp/>cache를<sp/>바로<sp/>release하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">new<sp/>glyph<sp/>refs<sp/>acquire</highlight></codeline>
+<codeline><highlight class="normal">-&gt;<sp/>RemoveText()</highlight></codeline>
+<codeline><highlight class="normal">-&gt;<sp/>mTextCache.Swap(newTextCache)</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>순서는<sp/>같은<sp/>glyph<sp/>sequence를<sp/>다시<sp/>렌더링할<sp/>때<sp/>old<sp/>references를<sp/>먼저<sp/>제거해서<sp/>glyph가<sp/>atlas에서<sp/>사라지는<sp/>상황을<sp/>피한다.<sp/>`TextVisualizerGlyphRenderer`도<sp/>failure<sp/>rollback과<sp/>old<sp/>cache<sp/>유지<sp/>정책을<sp/>설계할<sp/>때<sp/>이<sp/>순서를<sp/>따라야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>4.<sp/>TextVisualizerGlyphRenderer에<sp/>필요한<sp/>cache<sp/>ownership</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">새<sp/>renderer도<sp/>자체<sp/>cache<sp/>entry가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">struct<sp/>GlyphCacheEntry</highlight></codeline>
+<codeline><highlight class="normal">{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::FontId<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>fontId{0u};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>Text::GlyphIndex<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>glyphIndex{0u};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>AtlasGlyphManager::GlyphStyle<sp/>style;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atlasId{0u};</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>uint32_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>imageId{0u};</highlight></codeline>
+<codeline><highlight class="normal">};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">필요<sp/>member:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```cpp</highlight></codeline>
+<codeline><highlight class="normal">std::vector&lt;GlyphCacheEntry&gt;<sp/>mGlyphCacheEntries;</highlight></codeline>
+<codeline><highlight class="normal">uint64_t<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>mGlyphCacheSignature{0u};</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">필요<sp/>method:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ClearGlyphCache()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ReleaseGlyphReferences()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AcquireGlyphReferences(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasGlyphCache()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphCacheEntryCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CalculateGlyphCacheSignature(...)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Clear()`는<sp/>mesh<sp/>/<sp/>output<sp/>actor뿐<sp/>아니라<sp/>glyph<sp/>references도<sp/>release한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`<sp/>성공<sp/>시<sp/>renderer가<sp/>필요한<sp/>glyph<sp/>references를<sp/>보유한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`<sp/>실패<sp/>시<sp/>새로<sp/>acquire한<sp/>refs는<sp/>rollback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>old<sp/>cache는<sp/>새<sp/>cache<sp/>acquire와<sp/>mesh<sp/>build가<sp/>성공하기<sp/>전까지<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>glyph<sp/>sequence라면<sp/>ref<sp/>count를<sp/>유지하고<sp/>positions<sp/>/<sp/>mesh<sp/>update만<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>entry<sp/>granularity</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">두<sp/>가지<sp/>방식이<sp/>가능하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>방식<sp/>|<sp/>설명<sp/>|<sp/>장점<sp/>|<sp/>단점<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>per<sp/>glyph<sp/>occurrence<sp/>|<sp/>renderable<sp/>glyph<sp/>occurrence마다<sp/>entry<sp/>하나<sp/>저장<sp/>|<sp/>기존<sp/>`AtlasRenderer`<sp/>lifecycle과<sp/>가장<sp/>유사<sp/>|<sp/>repeated<sp/>glyph가<sp/>많으면<sp/>entry<sp/>수<sp/>증가<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>unique<sp/>glyph<sp/>+<sp/>count<sp/>|<sp/>glyph<sp/>identity별<sp/>count<sp/>저장<sp/>|<sp/>cache<sp/>state<sp/>compact<sp/>|<sp/>acquire<sp/>/<sp/>rollback<sp/>구현이<sp/>조금<sp/>복잡<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추천은<sp/>**per<sp/>glyph<sp/>occurrence**다.<sp/>Phase<sp/>2<sp/>primary<sp/>workload에서는<sp/>glyph<sp/>sequence<sp/>stable이므로<sp/>entry<sp/>수는<sp/>한<sp/>번<sp/>만들어진<sp/>뒤<sp/>재사용된다.<sp/>기존<sp/>`AtlasRenderer`의<sp/>`TextCacheEntry`도<sp/>rendered<sp/>glyph<sp/>ownership에<sp/>가깝게<sp/>동작하므로,<sp/>처음<sp/>구현은<sp/>동일한<sp/>mental<sp/>model이<sp/>안전하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>5.<sp/>Layout-dynamic<sp/>workload<sp/>최적화<sp/>정책</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2<sp/>primary<sp/>workload는<sp/>다음이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>content<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>sequence<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>/<sp/>font<sp/>size<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>/<sp/>layout<sp/>/<sp/>glyph<sp/>positions만<sp/>dynamic</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>매<sp/>render마다<sp/>glyph<sp/>refs를<sp/>`-1/+1`<sp/>하면<sp/>안<sp/>된다.<sp/>그것은<sp/>기존<sp/>`AtlasRenderer::Render()`<sp/>full<sp/>rebuild와<sp/>비슷한<sp/>비용을<sp/>다시<sp/>만드는<sp/>일이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">필요한<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>renderer가<sp/>현재<sp/>glyph<sp/>cache<sp/>signature를<sp/>저장한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>새<sp/>render<sp/>요청의<sp/>glyph<sp/>sequence<sp/>signature가<sp/>같으면<sp/>glyph<sp/>cache<sp/>lifecycle을<sp/>건드리지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>positions-only<sp/>render에서는:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>no<sp/>glyph<sp/>cache<sp/>add</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>no<sp/>ref<sp/>count<sp/>increase</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>no<sp/>ref<sp/>count<sp/>decrease</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>mesh<sp/>/<sp/>vertex<sp/>position<sp/>update만<sp/>수행</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>/<sp/>font<sp/>/<sp/>fontSize<sp/>/<sp/>glyph<sp/>sequence<sp/>/<sp/>style<sp/>변경으로<sp/>signature가<sp/>바뀌면:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>new<sp/>glyph<sp/>references<sp/>acquire</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>mesh<sp/>build<sp/>성공</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>old<sp/>references<sp/>release</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>new<sp/>entries<sp/>commit</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>glyph<sp/>cache<sp/>signature<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">signature<sp/>입력:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>renderable<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`fontId`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`glyphIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphStyle::outline`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphStyle::isItalic`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphStyle::isBold`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">signature에<sp/>포함하지<sp/>않는<sp/>것이<sp/>좋은<sp/>값:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>glyph<sp/>position</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>id<sp/>/<sp/>image<sp/>id</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>positions는<sp/>layout-dynamic<sp/>workload에서<sp/>매<sp/>frame<sp/>바뀌는<sp/>값이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>color는<sp/>glyph<sp/>cache<sp/>identity가<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>id<sp/>/<sp/>image<sp/>id는<sp/>acquire<sp/>결과이지<sp/>glyph<sp/>identity<sp/>자체는<sp/>아니다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다만<sp/>geometry-only<sp/>update<sp/>조건에는<sp/>별도의<sp/>**mesh<sp/>topology<sp/>signature**가<sp/>필요할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">mesh<sp/>topology<sp/>signature<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>signature</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>id<sp/>sequence<sp/>또는<sp/>atlas<sp/>page<sp/>split</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shader<sp/>type<sp/>sequence</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>record<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertex<sp/>/<sp/>index<sp/>count<sp/>per<sp/>mesh<sp/>record</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>6.<sp/>Cache<sp/>miss<sp/>처리<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>A.<sp/>TextVisualizerGlyphRenderer에<sp/>CacheGlyph<sp/>equivalent<sp/>제한<sp/>구현</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>새<sp/>renderer가<sp/>`FontClient::CreateBitmap()`,<sp/>`PixelData`,<sp/>`AtlasGlyphManager::Add()`를<sp/>직접<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRenderer::Impl::CacheGlyph()`의<sp/>최소<sp/>subset을<sp/>복제한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>unsupported<sp/>style은<sp/>fallback으로<sp/>둔다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`text-atlas-renderer.*`를<sp/>수정하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>isolated<sp/>prototype으로<sp/>빠르게<sp/>검증할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>scope에<sp/>맞춰<sp/>single<sp/>color<sp/>/<sp/>no<sp/>decoration<sp/>path를<sp/>작게<sp/>유지할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>generation<sp/>/<sp/>atlas<sp/>size<sp/>policy<sp/>/<sp/>compressed<sp/>bitmap<sp/>처리<sp/>중복이<sp/>생긴다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>renderer와<sp/>behavior<sp/>drift<sp/>위험이<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>glyph<sp/>/<sp/>fallback<sp/>font<sp/>/<sp/>atlas<sp/>block<sp/>edge<sp/>case<sp/>검증이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>B.<sp/>AtlasRenderer::Impl<sp/>CacheGlyph<sp/>helper<sp/>extraction</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`CacheGlyph()`,<sp/>`TextCacheEntry`,<sp/>block<sp/>size<sp/>policy<sp/>등을<sp/>공용<sp/>internal<sp/>helper로<sp/>추출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`와<sp/>`TextVisualizerGlyphRenderer`가<sp/>같은<sp/>helper를<sp/>쓴다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>behavior<sp/>drift를<sp/>줄일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>lifecycle<sp/>정책을<sp/>공유할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>장기<sp/>유지보수에<sp/>유리하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`text-atlas-renderer.*`<sp/>수정이<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Label`<sp/>/<sp/>`InputField`<sp/>/<sp/>text<sp/>pipeline<sp/>회귀<sp/>위험이<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>helper<sp/>경계가<sp/>커질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>C.<sp/>AtlasGlyphManager에<sp/>EnsureGlyphCached<sp/>helper<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager`<sp/>또는<sp/>adjacent<sp/>helper에<sp/>`EnsureGlyphCached()`를<sp/>추가한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>생성과<sp/>atlas<sp/>add를<sp/>manager-level<sp/>책임으로<sp/>이동한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>renderer-neutral<sp/>helper가<sp/>될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer`와<sp/>기존<sp/>renderer가<sp/>함께<sp/>쓸<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>ownership<sp/>API가<sp/>더<sp/>명확해진다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager`<sp/>API<sp/>확장이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`FontClient`,<sp/>atlas<sp/>size<sp/>policy,<sp/>style<sp/>policy까지<sp/>manager에<sp/>넣을지<sp/>경계가<sp/>애매하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>영향<sp/>범위<sp/>검토가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>D.<sp/>Existing<sp/>AtlasRenderer<sp/>warmup에<sp/>의존</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path를<sp/>한<sp/>번<sp/>호출해<sp/>glyph를<sp/>atlas에<sp/>warmup한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이후<sp/>`TextVisualizerGlyphRenderer`는<sp/>already-cached<sp/>glyph만<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>구현이<sp/>쉽다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>MVP와<sp/>맞다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>ownership이<sp/>불명확하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>warmup<sp/>renderer가<sp/>references를<sp/>release하면<sp/>`TextVisualizerGlyphRenderer`<sp/>mesh가<sp/>stale될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>production<sp/>path로<sp/>부적합하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>추천</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">단기<sp/>추천은<sp/>다음<sp/>순서다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>**already-cached<sp/>glyph에<sp/>대한<sp/>reference<sp/>acquire<sp/>/<sp/>release<sp/>skeleton을<sp/>먼저<sp/>구현한다.**</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>cache<sp/>miss는<sp/>계속<sp/>`false`로<sp/>둔다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>failure<sp/>rollback과<sp/>same<sp/>sequence<sp/>no-ref-churn<sp/>정책을<sp/>검증한다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>이후<sp/>cache<sp/>miss<sp/>handling은<sp/>후보<sp/>A<sp/>또는<sp/>B<sp/>중<sp/>하나로<sp/>별도<sp/>커밋에서<sp/>결정한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이렇게<sp/>하면<sp/>active<sp/>path<sp/>연결<sp/>전에<sp/>ownership<sp/>기반을<sp/>만들<sp/>수<sp/>있고,<sp/>`CacheGlyph()`<sp/>중복<sp/>구현이라는<sp/>큰<sp/>리스크를<sp/>바로<sp/>열지<sp/>않아도<sp/>된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>7.<sp/>추천<sp/>구현<sp/>전략</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추천<sp/>단계:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`GlyphCacheEntry`와<sp/>`mGlyphCacheEntries`<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`ReleaseGlyphReferences()`<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Clear()`에서<sp/>glyph<sp/>references<sp/>release</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`Render()`에서<sp/>already-cached<sp/>glyph에<sp/>대해<sp/>`AdjustReferenceCount(...,<sp/>+1)`<sp/>acquire</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>cache<sp/>miss는<sp/>여전히<sp/>`false`</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>render<sp/>실패<sp/>시<sp/>temporary<sp/>acquired<sp/>refs<sp/>rollback</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>render<sp/>성공<sp/>시<sp/>old<sp/>refs<sp/>release<sp/>후<sp/>new<sp/>entries<sp/>commit</highlight></codeline>
+<codeline><highlight class="normal">8.<sp/>same<sp/>glyph<sp/>sequence면<sp/>ref<sp/>count<sp/>acquire<sp/>/<sp/>release<sp/>생략</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>구현보다<sp/>작고<sp/>안전하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>path<sp/>연결<sp/>전<sp/>ownership<sp/>정책을<sp/>검증할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>geometry-only<sp/>update<sp/>전<sp/>필수<sp/>기반이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer`를<sp/>수정하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>다음<sp/>커밋:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Add<sp/>TextVisualizerGlyphRenderer<sp/>glyph<sp/>cache<sp/>references</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>8.<sp/>Failure<sp/>/<sp/>rollback<sp/>policy</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Render()`<sp/>중<sp/>실패<sp/>지점은<sp/>여러<sp/>곳에<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>adapter<sp/>validation<sp/>실패</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>miss</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AdjustReferenceCount(+1)`<sp/>대상<sp/>glyph<sp/>lookup<sp/>실패<sp/>가능성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>generation<sp/>실패</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>texture<sp/>set<sp/>lookup<sp/>실패</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shader<sp/>/<sp/>renderer<sp/>/<sp/>actor<sp/>생성<sp/>실패</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">권장<sp/>policy:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>render<sp/>시작</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>old<sp/>cache<sp/>entries는<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>old<sp/>mesh<sp/>records는<sp/>positions-only<sp/>update가<sp/>아닌<sp/>full<sp/>rebuild라면<sp/>clear<sp/>가능하지만,<sp/>active<sp/>path<sp/>전에는<sp/>old<sp/>output<sp/>보존<sp/>여부를<sp/>별도<sp/>판단한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>new<sp/>cache<sp/>entries는<sp/>temporary<sp/>vector에<sp/>쌓는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>acquire<sp/>중</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cached<sp/>glyph<sp/>hit이면<sp/>`AdjustReferenceCount(...,<sp/>+1)`<sp/>후<sp/>temporary<sp/>entry<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss면:</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>temporary<sp/>entries를<sp/>reverse<sp/>또는<sp/>forward<sp/>순회하며<sp/>`AdjustReferenceCount(...,<sp/>-1)`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>mesh<sp/>records<sp/>clear</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>old<sp/>cache<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`false`<sp/>반환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>mesh<sp/>build<sp/>중<sp/>실패</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>temporary<sp/>acquired<sp/>refs<sp/>rollback</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>new<sp/>mesh<sp/>records<sp/>clear</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>old<sp/>cache<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`false`<sp/>반환</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>성공</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>old<sp/>cache<sp/>release</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>temporary<sp/>cache<sp/>entries<sp/>commit</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>new<sp/>mesh<sp/>records<sp/>commit</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>new<sp/>signature<sp/>저장</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>same<sp/>glyph<sp/>sequence</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>old<sp/>cache<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>temporary<sp/>acquire<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ref<sp/>count<sp/>변경<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>/<sp/>vertex<sp/>data만<sp/>update<sp/>또는<sp/>rebuild</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>정책은<sp/>`AtlasRenderer::Impl::AddGlyphs()`가<sp/>old<sp/>refs를<sp/>즉시<sp/>제거하지<sp/>않고<sp/>new<sp/>cache를<sp/>먼저<sp/>만드는<sp/>구조와<sp/>같은<sp/>방향이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>9.<sp/>Geometry-only<sp/>update와의<sp/>관계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">glyph<sp/>cache<sp/>ownership이<sp/>안정되면<sp/>geometry-only<sp/>update<sp/>조건을<sp/>세울<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">필요<sp/>조건:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>glyph<sp/>cache<sp/>signature</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>atlas<sp/>page<sp/>split</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>shader<sp/>type<sp/>per<sp/>mesh<sp/>record</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>mesh<sp/>record<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>compatible<sp/>vertex<sp/>/<sp/>index<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>/<sp/>mesh<sp/>actors<sp/>alive</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가능한<sp/>update:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>`VertexBuffer::SetData()`로<sp/>vertex<sp/>positions<sp/>/<sp/>colors<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>index<sp/>buffer가<sp/>같으면<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Geometry`<sp/>/<sp/>`Renderer`<sp/>/<sp/>`Actor`<sp/>reuse</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>glyph<sp/>cache<sp/>reference<sp/>count<sp/>change</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">fallback<sp/>조건:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>sequence<sp/>changed</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>page<sp/>split<sp/>changed</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>miss</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>glyph<sp/>/<sp/>monochrome<sp/>shader<sp/>split<sp/>changed</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>actor<sp/>missing</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertex/index<sp/>topology<sp/>incompatible</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>단계에서<sp/>중요한<sp/>점은<sp/>geometry-only<sp/>update가<sp/>glyph<sp/>cache<sp/>lifecycle<sp/>위에<sp/>올라간다는<sp/>것이다.<sp/>glyph<sp/>cache<sp/>owner가<sp/>없으면<sp/>mesh가<sp/>참조하는<sp/>atlas<sp/>slot이<sp/>renderer<sp/>lifetime<sp/>동안<sp/>유효하다는<sp/>보장이<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>10.<sp/>다음<sp/>구현<sp/>커밋<sp/>후보</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>1.<sp/>Add<sp/>TextVisualizerGlyphRenderer<sp/>glyph<sp/>cache<sp/>references</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphCacheEntry`<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mGlyphCacheEntries`<sp/>member<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ClearGlyphCache()`<sp/>/<sp/>`ReleaseGlyphReferences()`<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`에서<sp/>already-cached<sp/>glyph<sp/>refs<sp/>acquire</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss는<sp/>`false`<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>failure<sp/>rollback</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>glyph<sp/>sequence<sp/>no-ref-churn<sp/>준비</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>path<sp/>미연결</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>UTC<sp/>추가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>2.<sp/>Design<sp/>or<sp/>implement<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer`<sp/>limited<sp/>`CacheGlyphForTextVisualizer()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shared<sp/>helper<sp/>extraction<sp/>설계</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager::EnsureGlyphCached()`<sp/>설계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>커밋은<sp/>`FontClient::CreateBitmap()`,<sp/>compressed<sp/>glyph<sp/>buffer,<sp/>atlas<sp/>size<sp/>policy를<sp/>다루므로<sp/>별도<sp/>작업으로<sp/>둔다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>3.<sp/>Prototype<sp/>TextVisualizer<sp/>geometry-only<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">전제:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>references가<sp/>안정적으로<sp/>유지된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>glyph<sp/>sequence<sp/>/<sp/>same<sp/>atlas<sp/>split에서<sp/>existing<sp/>`VertexBuffer::SetData()`<sp/>사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>reuse</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>유지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>11.<sp/>Validation<sp/>plan</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가<sp/>UTC<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>테스트<sp/>|<sp/>목적<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>empty<sp/>glyph<sp/>cache<sp/>state<sp/>|<sp/>초기<sp/>`HasGlyphCache()<sp/>==<sp/>false`,<sp/>count<sp/>0<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>render<sp/>cache<sp/>miss<sp/>false<sp/>no<sp/>refs<sp/>|<sp/>cache<sp/>miss<sp/>시<sp/>refs가<sp/>남지<sp/>않음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>render<sp/>after<sp/>warmup<sp/>acquires<sp/>refs<sp/>|<sp/>기존<sp/>renderer<sp/>warmup<sp/>이후<sp/>success<sp/>가능하면<sp/>entry<sp/>count<sp/>확인<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>clear<sp/>releases<sp/>refs<sp/>|<sp/>`Clear()`<sp/>후<sp/>cache<sp/>entry<sp/>count<sp/>0<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>render<sp/>failure<sp/>rollback<sp/>smoke<sp/>|<sp/>중간<sp/>실패<sp/>후<sp/>old<sp/>cache<sp/>유지<sp/>/<sp/>temporary<sp/>refs<sp/>rollback<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>repeated<sp/>same<sp/>glyph<sp/>sequence<sp/>|<sp/>cache<sp/>entry<sp/>count가<sp/>불필요하게<sp/>증가하지<sp/>않음<sp/>|</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">측정<sp/>가능성:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager::GetMetrics()`는<sp/>verbose<sp/>glyph<sp/>ref<sp/>count<sp/>문자열을<sp/>제공한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>단,<sp/>test에서<sp/>특정<sp/>glyph<sp/>ref<sp/>count를<sp/>강하게<sp/>assert하면<sp/>font<sp/>/<sp/>glyph<sp/>cache<sp/>환경에<sp/>의존할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>우선은<sp/>renderer-local<sp/>cache<sp/>entry<sp/>count와<sp/>no-crash<sp/>smoke<sp/>중심으로<sp/>검증한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ref<sp/>count<sp/>string은<sp/>필요<sp/>시<sp/>debug<sp/>validation으로만<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>12.<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`TextVisualizerGlyphRenderer`<sp/>MVP는<sp/>`TextVisualizer`<sp/>전용<sp/>renderer가<sp/>atlas<sp/>mesh<sp/>actor를<sp/>만들<sp/>수<sp/>있음을<sp/>보여준<sp/>proof다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">하지만<sp/>active<sp/>path<sp/>전환<sp/>전에는<sp/>glyph<sp/>ownership이<sp/>필요하다.<sp/>기존<sp/>`Text::AtlasRenderer`는<sp/>`CacheGlyph()`<sp/>/<sp/>`RemoveText()`<sp/>/<sp/>`mTextCache`로<sp/>이<sp/>문제를<sp/>private하게<sp/>해결하고<sp/>있으며,<sp/>새<sp/>renderer는<sp/>같은<sp/>개념의<sp/>ownership을<sp/>자체적으로<sp/>가져야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">정리:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>current<sp/>MVP는<sp/>rendering<sp/>feasibility<sp/>proof다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>path<sp/>연결<sp/>전<sp/>glyph<sp/>cache<sp/>lifecycle이<sp/>먼저다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>geometry-only<sp/>update는<sp/>glyph<sp/>cache<sp/>references가<sp/>안정된<sp/>뒤에<sp/>가능하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`<sp/>직접<sp/>수정<sp/>전,<sp/>`TextVisualizerGlyphRenderer`<sp/>isolated<sp/>cache<sp/>lifecycle을<sp/>먼저<sp/>만든다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>추천<sp/>작업:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Add<sp/>TextVisualizerGlyphRenderer<sp/>glyph<sp/>cache<sp/>references</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>13.<sp/>진행:<sp/>glyph<sp/>cache<sp/>references</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizerGlyphRenderer`에<sp/>already-cached<sp/>glyph<sp/>ownership<sp/>기반을<sp/>추가했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>구조:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GlyphCacheEntry`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`fontId`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`glyphIndex`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`AtlasGlyphManager::GlyphStyle`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`atlasId`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`imageId`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mGlyphCacheEntries`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mGlyphCacheSignature`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mHasGlyphCacheSignature`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>lifecycle:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Render()`가<sp/>새<sp/>glyph<sp/>sequence<sp/>signature를<sp/>계산한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>signature와<sp/>같고<sp/>cache<sp/>entries가<sp/>있으면<sp/>glyph<sp/>reference<sp/>acquire<sp/>/<sp/>release를<sp/>생략한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>signature가<sp/>다르면<sp/>already-cached<sp/>glyph에<sp/>대해<sp/>`AtlasGlyphManager::AdjustReferenceCount(...,<sp/>+1)`로<sp/>temporary<sp/>refs를<sp/>acquire한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss는<sp/>여전히<sp/>`false`를<sp/>반환한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>build<sp/>또는<sp/>actor<sp/>creation<sp/>실패<sp/>시<sp/>temporary<sp/>refs를<sp/>rollback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>성공<sp/>시<sp/>old<sp/>refs를<sp/>release하고<sp/>temporary<sp/>entries를<sp/>commit한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Clear()`는<sp/>mesh<sp/>/<sp/>output<sp/>actor<sp/>lifecycle과<sp/>함께<sp/>owned<sp/>glyph<sp/>refs를<sp/>release한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>단계에서<sp/>의도적으로<sp/>하지<sp/>않은<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`FontClient::CreateBitmap()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager::Add()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>geometry-only<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>`AtlasRendererBridge`<sp/>path<sp/>연결</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>current<sp/>MVP는<sp/>더<sp/>이상<sp/>“남이<sp/>보유한<sp/>cached<sp/>glyph<sp/>slot을<sp/>읽기만<sp/>하는<sp/>smoke<sp/>path”에<sp/>머물지<sp/>않고,<sp/>성공한<sp/>render에<sp/>대해서는<sp/>glyph<sp/>refs를<sp/>보유할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>glyph<sp/>sequence<sp/>render에서는<sp/>ref<sp/>count<sp/>churn을<sp/>피할<sp/>수<sp/>있는<sp/>기반이<sp/>생겼다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss가<sp/>있으면<sp/>여전히<sp/>fallback이<sp/>필요하므로<sp/>active<sp/>path<sp/>연결은<sp/>아직<sp/>하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>16.<sp/>진행:<sp/>lightweight<sp/>renderer<sp/>benchmark<sp/>diagnostics</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">flag<sp/>ON<sp/>실험을<sp/>관찰하기<sp/>위한<sp/>lightweight<sp/>renderer<sp/>diagnostics를<sp/>보강했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>bridge<sp/>getter:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLightweightGeometryOnlyUpdateCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLightweightFullMeshRebuildCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLightweightGlyphCacheEntryCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLightweightMeshRecordCount()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetLightweightMeshTopologySignature()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HasLightweightMeshTopologySignature()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizerImpl::LogRenderDiagnostics()`에는<sp/>diagnostics<sp/>flag가<sp/>켜진<sp/>경우에만<sp/>다음<sp/>항목을<sp/>추가로<sp/>출력한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>attempts</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>successes</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>fallbacks</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>full<sp/>mesh<sp/>rebuilds</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>geometry-only<sp/>updates</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>glyph<sp/>cache<sp/>entry<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>mesh<sp/>record<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>topology<sp/>signature<sp/>state</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기본<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER`<sp/>기본값은<sp/>계속<sp/>`false`다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS`<sp/>기본값도<sp/>계속<sp/>`false`다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기본<sp/>build에서는<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path와<sp/>runtime<sp/>logging<sp/>behavior가<sp/>그대로<sp/>유지된다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>performance<sp/>sample<sp/>status에는<sp/>표시하지<sp/>않는다.<sp/>해당<sp/>counters는<sp/>internal<sp/>bridge<sp/>state라<sp/>public<sp/>API<sp/>없이<sp/>sample에서<sp/>접근하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">local<sp/>benchmark<sp/>절차:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`atlas-renderer-bridge.cpp`에서<sp/>`ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER`를<sp/>임시로<sp/>`true`로<sp/>바꾼다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`text-visualizer-impl.cpp`에서<sp/>`ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS`를<sp/>임시로<sp/>`true`로<sp/>바꾼다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`text-visualizer-performance.example`을<sp/>실행한다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>log에서<sp/>`attempts`,<sp/>`successes`,<sp/>`fallbacks`,<sp/>`fullRebuilds`,<sp/>`geometryOnly`,<sp/>`glyphCacheEntries`,<sp/>`meshRecords`를<sp/>본다.</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>실험<sp/>후<sp/>flag<sp/>변경은<sp/>되돌리고<sp/>커밋하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>단계는<sp/>correctness<sp/>fix가<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>일부<sp/>glyph가<sp/>잘못<sp/>보이는<sp/>현상은<sp/>별도<sp/>glyph/atlas<sp/>correctness<sp/>diagnostics로<sp/>다룬다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>여전히<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>17.<sp/>진행:<sp/>fallback<sp/>reason<sp/>diagnostics</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">로컬에서<sp/>`ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER=true`와<sp/>`ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS=true`로<sp/>performance<sp/>sample을<sp/>실행했을<sp/>때<sp/>다음<sp/>관찰이<sp/>있었다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">lightweight<sp/>attempts=1144<sp/>successes=0<sp/>fallbacks=1144<sp/>fullRebuilds=0<sp/>geometryOnly=0<sp/>glyphCacheEntries=0<sp/>meshRecords=0</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">해석:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>renderer가<sp/>한<sp/>번도<sp/>성공하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>full<sp/>mesh<sp/>rebuild와<sp/>geometry-only<sp/>update가<sp/>모두<sp/>0이므로<sp/>renderer<sp/>backend<sp/>성능<sp/>비교는<sp/>아직<sp/>이루어진<sp/>것이<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>성능<sp/>차이가<sp/>체감되지<sp/>않는<sp/>것은<sp/>lightweight<sp/>path가<sp/>실제<sp/>render<sp/>output을<sp/>만들지<sp/>못하고<sp/>기존<sp/>`Text::AtlasRenderer`로<sp/>100%<sp/>fallback하기<sp/>때문일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>진단에서<sp/>추가한<sp/>상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>failure<sp/>reason<sp/>enum</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>failure<sp/>reason별<sp/>counters</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>last<sp/>failed<sp/>placement<sp/>index</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>last<sp/>failed<sp/>glyph<sp/>placement<sp/>index</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>last<sp/>failed<sp/>font<sp/>id</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>last<sp/>failed<sp/>glyph<sp/>id</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>last<sp/>failed<sp/>glyph<sp/>advance<sp/>/<sp/>width<sp/>/<sp/>height<sp/>/<sp/>bearing</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">분리해서<sp/>볼<sp/>실패<sp/>원인:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>empty<sp/>input</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>renderable<sp/>glyphs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>renderer<sp/>position<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>signature<sp/>failure</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>glyph<sp/>manager</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>placement<sp/>lookup<sp/>failure</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>info<sp/>lookup<sp/>failure</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>glyph<sp/>position<sp/>lookup<sp/>failure</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>miss</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>empty<sp/>mesh</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>output<sp/>actor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>texture<sp/>set</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가장<sp/>의심되는<sp/>원인:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>space<sp/>/<sp/>zero-width<sp/>/<sp/>non-renderable<sp/>glyph<sp/>하나가<sp/>cache<sp/>miss<sp/>또는<sp/>empty<sp/>mesh로<sp/>처리되어<sp/>전체<sp/>`Render()`가<sp/>`false`를<sp/>반환할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>경우<sp/>다음<sp/>구현은<sp/>glyph<sp/>cache<sp/>miss<sp/>handling이<sp/>아니라<sp/>먼저<sp/>non-renderable<sp/>glyph<sp/>skip<sp/>policy일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>반대로<sp/>실제<sp/>visible<sp/>glyph가<sp/>cache<sp/>miss라면<sp/>`CacheGlyph`<sp/>equivalent<sp/>또는<sp/>helper<sp/>extraction<sp/>설계가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">diagnostics<sp/>log에서<sp/>볼<sp/>항목:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`failureCacheMiss`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`failureEmptyMesh`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`failurePlacement`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`failureGlyphInfo`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`failurePosition`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`failureNoTexture`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailureReason`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedPlacementIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedGlyphIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedFontId`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedGlyphId`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedAdvance`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedWidth`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`lastFailedHeight`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기본<sp/>flag는<sp/>계속<sp/>`false`다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>단계는<sp/>cache<sp/>miss<sp/>handling이<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`FontClient::CreateBitmap()`과<sp/>`AtlasGlyphManager::Add()`는<sp/>여전히<sp/>사용하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>correctness<sp/>fix도<sp/>아직<sp/>하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Skip<sp/>TextVisualizerGlyphRenderer<sp/>non-renderable<sp/>glyphs</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">또는<sp/>로그<sp/>결과가<sp/>visible<sp/>glyph<sp/>cache<sp/>miss라면:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>18.<sp/>진행:<sp/>skip<sp/>non-renderable<sp/>glyphs</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">fallback<sp/>reason<sp/>diagnostics로<sp/>다음<sp/>실패가<sp/>관찰됐다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">main<sp/>TextVisualizer:</highlight></codeline>
+<codeline><highlight class="normal">attempts=1711<sp/>successes=0<sp/>fallbacks=1711</highlight></codeline>
+<codeline><highlight class="normal">failure<sp/>cacheMiss=1</highlight></codeline>
+<codeline><highlight class="normal">lastGlyphId=3</highlight></codeline>
+<codeline><highlight class="normal">lastAdvance=5.00</highlight></codeline>
+<codeline><highlight class="normal">lastWidth=0.00</highlight></codeline>
+<codeline><highlight class="normal">lastHeight=0.00</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">해석:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`lastWidth=0`,<sp/>`lastHeight=0`,<sp/>`lastAdvance=5`인<sp/>glyph는<sp/>space<sp/>같은<sp/>advance-only<sp/>glyph로<sp/>보인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>glyph는<sp/>화면에<sp/>mesh로<sp/>그릴<sp/>대상이<sp/>아니므로<sp/>atlas에<sp/>없어도<sp/>정상이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이전<sp/>prototype은<sp/>이<sp/>glyph에도<sp/>`AtlasGlyphManager::IsCached()`를<sp/>호출했고,<sp/>cache<sp/>miss를<sp/>전체<sp/>`Render()`<sp/>실패로<sp/>처리했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">변경<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>signature는<sp/>기존처럼<sp/>모든<sp/>glyph<sp/>identity를<sp/>포함한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>sequence<sp/>identity에는<sp/>space도<sp/>포함되어야<sp/>하므로<sp/>`&quot;ab&quot;`와<sp/>`&quot;a<sp/>b&quot;`는<sp/>다른<sp/>signature가<sp/>된다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`width<sp/>==<sp/>0<sp/>&amp;&amp;<sp/>height<sp/>==<sp/>0`인<sp/>glyph는<sp/>non-renderable로<sp/>보고<sp/>atlas<sp/>lookup<sp/>/<sp/>ref<sp/>acquire<sp/>/<sp/>mesh<sp/>generation<sp/>대상에서<sp/>제외한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`width<sp/>&gt;<sp/>0<sp/>||<sp/>height<sp/>&gt;<sp/>0`인<sp/>visible<sp/>glyph<sp/>cache<sp/>miss는<sp/>여전히<sp/>fallback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling<sp/>/<sp/>glyph<sp/>bitmap<sp/>생성<sp/>/<sp/>atlas<sp/>add는<sp/>여전히<sp/>구현하지<sp/>않았다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>advance-only<sp/>glyph<sp/>하나<sp/>때문에<sp/>lightweight<sp/>renderer<sp/>전체가<sp/>fallback하는<sp/>false<sp/>negative를<sp/>줄인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>flag<sp/>ON<sp/>실험에서는<sp/>cache<sp/>miss가<sp/>visible<sp/>glyph에서<sp/>나는지,<sp/>아니면<sp/>renderer가<sp/>mesh를<sp/>실제로<sp/>만들<sp/>수<sp/>있는지<sp/>분리해서<sp/>볼<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Enable<sp/>lightweight<sp/>renderer<sp/>flag<sp/>locally<sp/>and<sp/>inspect<sp/>fallback<sp/>diagnostics</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">또는<sp/>already-cached<sp/>환경을<sp/>전제로:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Prototype<sp/>TextVisualizer<sp/>geometry-only<sp/>mesh<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>14.<sp/>진행:<sp/>geometry-only<sp/>mesh<sp/>update<sp/>prototype</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizerGlyphRenderer`에<sp/>같은<sp/>glyph<sp/>sequence<sp/>/<sp/>같은<sp/>mesh<sp/>topology에서<sp/>기존<sp/>mesh<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry를<sp/>유지하고<sp/>vertex<sp/>data만<sp/>갱신하는<sp/>prototype<sp/>path를<sp/>추가했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mMeshTopologySignature`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mHasMeshTopologySignature`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mGeometryOnlyUpdateCount`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mFullMeshRebuildCount`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">geometry-only<sp/>update<sp/>조건:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>signature가<sp/>기존<sp/>render와<sp/>같다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>topology<sp/>signature가<sp/>기존<sp/>render와<sp/>같다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>id<sp/>sequence가<sp/>같다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>record<sp/>count가<sp/>같다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>각<sp/>mesh<sp/>record의<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>/<sp/>vertex<sp/>buffer<sp/>handle이<sp/>유효하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertex<sp/>count와<sp/>index<sp/>count가<sp/>기존<sp/>mesh와<sp/>같다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>actor가<sp/>현재<sp/>output<sp/>actor<sp/>아래에<sp/>붙어<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">동작:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>첫<sp/>render는<sp/>기존처럼<sp/>atlas<sp/>id별<sp/>mesh<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>/<sp/>vertex<sp/>buffer를<sp/>생성한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>render에서<sp/>glyph<sp/>sequence와<sp/>topology가<sp/>같으면<sp/>`VertexBuffer::SetData()`로<sp/>새<sp/>vertex<sp/>data만<sp/>반영한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>이<sp/>path는<sp/>vertex<sp/>color도<sp/>vertex<sp/>data에<sp/>포함하므로<sp/>text<sp/>color가<sp/>바뀌어도<sp/>topology가<sp/>같으면<sp/>geometry-only<sp/>update가<sp/>가능하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>topology가<sp/>다르거나<sp/>handle이<sp/>유효하지<sp/>않으면<sp/>full<sp/>mesh<sp/>rebuild로<sp/>fallback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>여전히<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>`AtlasRendererBridge`<sp/>path에는<sp/>연결하지<sp/>않았다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Phase<sp/>2<sp/>primary<sp/>target인<sp/>layout-dynamic<sp/>workload에서<sp/>renderer<sp/>object<sp/>churn을<sp/>줄일<sp/>수<sp/>있는<sp/>최소<sp/>proof가<sp/>생겼다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>references와<sp/>결합되면서,<sp/>같은<sp/>glyph<sp/>sequence에서는<sp/>ref<sp/>count<sp/>churn<sp/>없이<sp/>position/color<sp/>vertex<sp/>data만<sp/>갱신하는<sp/>방향을<sp/>확인했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">남은<sp/>한계:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss는<sp/>여전히<sp/>`false`다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>생성<sp/>/<sp/>atlas<sp/>add<sp/>lifecycle은<sp/>아직<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>path<sp/>연결<sp/>전에는<sp/>fallback<sp/>policy와<sp/>failure<sp/>시<sp/>old<sp/>output<sp/>유지<sp/>정책을<sp/>다시<sp/>정해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>topology가<sp/>같아도<sp/>atlas<sp/>page<sp/>split이<sp/>바뀌면<sp/>full<sp/>rebuild가<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">또는<sp/>active<sp/>path<sp/>전환<sp/>준비를<sp/>위해:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Integrate<sp/>TextVisualizerGlyphRenderer<sp/>behind<sp/>internal<sp/>fallback<sp/>flag</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>15.<sp/>진행:<sp/>optional<sp/>lightweight<sp/>renderer<sp/>bridge<sp/>path</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasRendererBridge`에<sp/>`TextVisualizerGlyphRenderer`를<sp/>optional<sp/>internal<sp/>path로<sp/>연결했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>compile-time<sp/>flag<sp/>`ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER`의<sp/>기본값은<sp/>`false`다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기본<sp/>build에서는<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path만<sp/>사용하므로<sp/>public<sp/>behavior는<sp/>바뀌지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>flag를<sp/>켠<sp/>경우<sp/>bridge는<sp/>lightweight<sp/>renderer를<sp/>먼저<sp/>시도한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>render<sp/>또는<sp/>attach가<sp/>실패하면<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path로<sp/>fallback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>아직<sp/>없으므로<sp/>fallback은<sp/>필수다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>active<sp/>benchmarking은<sp/>flag를<sp/>로컬에서<sp/>켠<sp/>뒤<sp/>별도<sp/>비교로<sp/>진행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>bridge<sp/>상태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer<sp/>mGlyphRenderer`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mLightweightRenderAttemptCount`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mLightweightRenderSuccessCount`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mLightweightRenderFallbackCount`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추가된<sp/>renderer<sp/>API:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer::Render(const<sp/>AtlasViewAdapter&amp;<sp/>adapter)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Phase<sp/>2<sp/>prototype을<sp/>active<sp/>bridge<sp/>lifecycle<sp/>근처에<sp/>배치했지만<sp/>기본값을<sp/>꺼<sp/>두어<sp/>안정성을<sp/>유지했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>단계에서<sp/>flag를<sp/>켜고<sp/>performance<sp/>sample을<sp/>비교할<sp/>수<sp/>있는<sp/>최소<sp/>연결점이<sp/>생겼다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">남은<sp/>한계:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>여전히<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>flag<sp/>true<sp/>상태의<sp/>성능/시각<sp/>검증은<sp/>별도<sp/>작업이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>production<sp/>전환<sp/>전에는<sp/>failure<sp/>시<sp/>old<sp/>output<sp/>유지,<sp/>fallback<sp/>조건,<sp/>render<sp/>dirty<sp/>clear<sp/>정책을<sp/>다시<sp/>확인해야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Enable<sp/>lightweight<sp/>renderer<sp/>flag<sp/>locally<sp/>and<sp/>benchmark<sp/>performance<sp/>sample</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">또는:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Design<sp/>TextVisualizer<sp/>glyph<sp/>cache<sp/>miss<sp/>handling</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>19.<sp/>진행:<sp/>preserve<sp/>lightweight<sp/>renderer<sp/>state<sp/>across<sp/>adapter<sp/>updates</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">non-renderable<sp/>glyph<sp/>skip<sp/>이후<sp/>flag<sp/>ON<sp/>로컬<sp/>실험에서<sp/>다음<sp/>로그가<sp/>관찰됐다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">attempts=563</highlight></codeline>
+<codeline><highlight class="normal">successes=562</highlight></codeline>
+<codeline><highlight class="normal">fallbacks=1</highlight></codeline>
+<codeline><highlight class="normal">fullRebuilds=1</highlight></codeline>
+<codeline><highlight class="normal">geometryOnly=0</highlight></codeline>
+<codeline><highlight class="normal">glyphCacheEntries=3137</highlight></codeline>
+<codeline><highlight class="normal">meshRecords=2</highlight></codeline>
+<codeline><highlight class="normal">outputSize=(0,0,0)</highlight></codeline>
+<codeline><highlight class="normal">firstChildSize=(1354,970,0)</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">해석:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>renderer는<sp/>대부분<sp/>성공하므로<sp/>space<sp/>/<sp/>advance-only<sp/>glyph<sp/>fallback<sp/>문제는<sp/>크게<sp/>줄었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>하지만<sp/>`geometryOnly=0`이므로<sp/>mesh<sp/>state가<sp/>render<sp/>사이에서<sp/>유지되지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>원인<sp/>후보는<sp/>`AtlasRendererBridge::SetAdapter(non-null)`이<sp/>layout<sp/>update마다<sp/>`mGlyphRenderer.Clear()`를<sp/>호출해<sp/>glyph<sp/>cache<sp/>/<sp/>mesh<sp/>topology<sp/>/<sp/>mesh<sp/>records를<sp/>모두<sp/>지우는<sp/>것이었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>또한<sp/>output<sp/>actor<sp/>size가<sp/>`(0,0,0)`이라<sp/>child<sp/>mesh<sp/>actor의<sp/>transform<sp/>기준이<sp/>불안정할<sp/>수<sp/>있었다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">변경<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`SetAdapter(nullptr)`와<sp/>`AtlasRendererBridge::Clear()`에서는<sp/>기존처럼<sp/>`TextVisualizerGlyphRenderer::Clear()`를<sp/>호출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetAdapter(non-null)`에서는<sp/>renderer<sp/>state를<sp/>clear하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>adapter가<sp/>바뀌어도<sp/>`TextVisualizerGlyphRenderer::Render()`가<sp/>glyph<sp/>cache<sp/>signature와<sp/>mesh<sp/>topology<sp/>signature로<sp/>full<sp/>rebuild<sp/>또는<sp/>geometry-only<sp/>update를<sp/>판단한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>/<sp/>font<sp/>/<sp/>fontSize<sp/>변경으로<sp/>glyph<sp/>sequence가<sp/>바뀌면<sp/>signature<sp/>mismatch로<sp/>old<sp/>refs<sp/>release<sp/>+<sp/>full<sp/>rebuild가<sp/>가능하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RenderAdapter()`는<sp/>output<sp/>actor<sp/>size를<sp/>adapter<sp/>control<sp/>size로<sp/>매<sp/>render마다<sp/>동기화한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기대:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>flag<sp/>ON<sp/>재실험에서<sp/>첫<sp/>render는<sp/>full<sp/>rebuild,<sp/>이후<sp/>같은<sp/>glyph<sp/>sequence<sp/>/<sp/>topology<sp/>render는<sp/>geometry-only<sp/>update가<sp/>증가해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>diagnostics<sp/>log의<sp/>`outputSize`가<sp/>더<sp/>이상<sp/>`(0,0,0)`에<sp/>머물지<sp/>않아야<sp/>한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">남은<sp/>확인:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>correctness<sp/>문제는<sp/>별도<sp/>diagnostics가<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>여전히<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>lightweight<sp/>flag는<sp/>계속<sp/>`false`다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>20.<sp/>진행:<sp/>fix<sp/>lightweight<sp/>renderer<sp/>mesh<sp/>actor<sp/>bounds</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">flag<sp/>ON<sp/>로컬<sp/>실험에서<sp/>state<sp/>보존<sp/>이후<sp/>다음<sp/>로그가<sp/>관찰됐다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">attempts=483</highlight></codeline>
+<codeline><highlight class="normal">successes=482</highlight></codeline>
+<codeline><highlight class="normal">fallbacks=1</highlight></codeline>
+<codeline><highlight class="normal">fullRebuilds=1</highlight></codeline>
+<codeline><highlight class="normal">geometryOnly=481</highlight></codeline>
+<codeline><highlight class="normal">glyphCacheEntries=3137</highlight></codeline>
+<codeline><highlight class="normal">meshRecords=2</highlight></codeline>
+<codeline><highlight class="normal">renderHostSize=(1354,970,0)</highlight></codeline>
+<codeline><highlight class="normal">outputSize=(1354,970,0)</highlight></codeline>
+<codeline><highlight class="normal">firstChildSize=(1354,970,0)</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기존<sp/>`Text::AtlasRenderer`<sp/>fallback<sp/>path에서는<sp/>같은<sp/>상황에서<sp/>output<sp/>/<sp/>first<sp/>child<sp/>height가<sp/>약<sp/>`1152`까지<sp/>커졌다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">해석:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>renderer는<sp/>output<sp/>actor와<sp/>mesh<sp/>actor<sp/>size를<sp/>adapter<sp/>control<sp/>size로<sp/>사용했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실제<sp/>layout<sp/>/<sp/>text<sp/>content<sp/>bounds는<sp/>control<sp/>height보다<sp/>클<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>bounds가<sp/>content보다<sp/>작으면<sp/>culling<sp/>/<sp/>clipping<sp/>/<sp/>transform<sp/>기준<sp/>차이로<sp/>일부<sp/>glyph가<sp/>보이지<sp/>않을<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">변경<sp/>정책:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>host는<sp/>기존처럼<sp/>control<sp/>size를<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer`의<sp/>output<sp/>actor와<sp/>mesh<sp/>actor<sp/>size는<sp/>layout<sp/>size를<sp/>우선<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size가<sp/>0인<sp/>축은<sp/>control<sp/>size로<sp/>fallback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size와<sp/>control<sp/>size가<sp/>모두<sp/>유효하면<sp/>각<sp/>축별<sp/>`max(layoutSize,<sp/>controlSize)`를<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>geometry-only<sp/>update<sp/>path에서도<sp/>mesh<sp/>actor<sp/>size를<sp/>같은<sp/>actor<sp/>size로<sp/>갱신한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">의미:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>control보다<sp/>layout<sp/>content가<sp/>큰<sp/>경우에도<sp/>lightweight<sp/>renderer<sp/>actor<sp/>bounds가<sp/>content를<sp/>감쌀<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>lightweight<sp/>flag와<sp/>diagnostics<sp/>flag는<sp/>계속<sp/>`false`다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">남은<sp/>확인:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>flag<sp/>ON<sp/>재실험에서<sp/>output<sp/>/<sp/>first<sp/>child<sp/>size가<sp/>layout<sp/>content<sp/>bounds에<sp/>맞게<sp/>커지는지<sp/>확인해야<sp/>한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>correctness<sp/>문제가<sp/>bounds<sp/>문제만으로<sp/>해결되는지는<sp/>별도<sp/>확인이<sp/>필요하다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>여전히<sp/>없다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>21.<sp/>진행:<sp/>stabilize<sp/>optional<sp/>lightweight<sp/>renderer<sp/>experiment</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER=true`와</highlight></codeline>
+<codeline><highlight class="normal">`ENABLE_TEXT_VISUALIZER_RENDER_DIAGNOSTICS=true`<sp/>로컬<sp/>실험에서<sp/>성능은<sp/>좋아졌지만,</highlight></codeline>
+<codeline><highlight class="normal">`text-breaker.example`에서<sp/>`4`<sp/>키로<sp/>brick<sp/>renderer를<sp/>반복<sp/>전환할<sp/>때<sp/>일부<sp/>glyph가<sp/>번쩍이거나<sp/>사라지는<sp/>현상이<sp/>관찰됐다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>안정화는<sp/>lightweight<sp/>renderer를<sp/>production<sp/>default로<sp/>켜는<sp/>작업이<sp/>아니라,<sp/>flag<sp/>ON<sp/>실험이<sp/>더<sp/>정확한<sp/>비교가<sp/>되도록<sp/>prototype<sp/>path의<sp/>명확한<sp/>차이를<sp/>줄이는<sp/>작업이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>flag<sp/>적용<sp/>전<sp/>/<sp/>후<sp/>차이</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">flag<sp/>OFF<sp/>기본<sp/>경로:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRendererBridge`는<sp/>기존<sp/>`Text::AtlasRenderer::Render()`만<sp/>호출한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>dirty마다<sp/>기존<sp/>text<sp/>renderer가<sp/>view<sp/>interface를<sp/>통해<sp/>glyph<sp/>/<sp/>position<sp/>배열을<sp/>받고,<sp/>atlas<sp/>mesh<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry를<sp/>generic<sp/>path로<sp/>다시<sp/>구성한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>miss<sp/>처리는<sp/>기존<sp/>`Text::AtlasRenderer::Impl::CacheGlyph()`가<sp/>담당한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>안정성은<sp/>기존<sp/>text<sp/>stack과<sp/>같지만,<sp/>moving<sp/>exclusion처럼<sp/>glyph<sp/>sequence는<sp/>같고<sp/>위치만<sp/>바뀌는<sp/>경우에도<sp/>full<sp/>render<sp/>update<sp/>비용이<sp/>남는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">flag<sp/>ON<sp/>+<sp/>lightweight<sp/>허용<sp/>경로:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasRendererBridge`가<sp/>먼저<sp/>`TextVisualizerGlyphRenderer`를<sp/>시도한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer가<sp/>성공하면<sp/>기존<sp/>`Text::AtlasRenderer::Render()`를<sp/>호출하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>첫<sp/>성공<sp/>render는<sp/>lightweight<sp/>renderer가<sp/>atlas<sp/>id별<sp/>mesh<sp/>actor를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>glyph<sp/>cache<sp/>signature와<sp/>같은<sp/>mesh<sp/>topology이면<sp/>이후<sp/>render는<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry를<sp/>유지하고<sp/>`VertexBuffer::SetData()`로<sp/>vertex<sp/>data만<sp/>갱신한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss,<sp/>invalid<sp/>mesh,<sp/>unsupported<sp/>상태에서는<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path로<sp/>fallback한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>아직<sp/>없으므로<sp/>이미<sp/>atlas에<sp/>올라간<sp/>glyph만<sp/>lightweight<sp/>renderer가<sp/>직접<sp/>처리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">성능적으로는<sp/>flag<sp/>ON<sp/>경로가<sp/>layout-dynamic<sp/>workload에서<sp/>유리하다.</highlight></codeline>
+<codeline><highlight class="normal">특히<sp/>text<sp/>/<sp/>font<sp/>/<sp/>glyph<sp/>sequence가<sp/>안정적이고<sp/>exclusion<sp/>/<sp/>layout<sp/>/<sp/>glyph<sp/>positions만<sp/>바뀌는<sp/>경우,<sp/>full<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>rebuild를<sp/>피하고<sp/>vertex<sp/>buffer<sp/>update<sp/>중심으로<sp/>움직일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">실제<sp/>로컬<sp/>실험에서도<sp/>position/exclusion<sp/>변화가<sp/>더<sp/>부드럽게<sp/>보였다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">반대로<sp/>content-dynamic<sp/>workload에서는<sp/>이<sp/>경로가<sp/>아직<sp/>primary<sp/>target이<sp/>아니다.</highlight></codeline>
+<codeline><highlight class="normal">짧은<sp/>fragment,<sp/>status<sp/>text,<sp/>brick<sp/>text처럼<sp/>glyph<sp/>sequence가<sp/>자주<sp/>바뀌거나<sp/>no-exclusion인<sp/>TextVisualizer는<sp/>기존<sp/>renderer<sp/>path가<sp/>더<sp/>안전하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>lightweight<sp/>renderer<sp/>사용<sp/>조건</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">기본<sp/>compile-time<sp/>flag는<sp/>계속<sp/>`false`다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">flag를<sp/>로컬에서<sp/>`true`로<sp/>바꿔도,<sp/>bridge가<sp/>무조건<sp/>lightweight<sp/>renderer를<sp/>쓰지는<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">`TextVisualizerImpl`은<sp/>현재<sp/>exclusion<sp/>regions가<sp/>있는<sp/>경우에만<sp/>internal<sp/>allow<sp/>flag를<sp/>켠다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉<sp/>현재<sp/>lightweight<sp/>renderer<sp/>path는<sp/>다음<sp/>조건에서만<sp/>시도된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER<sp/>==<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>해당<sp/>`TextVisualizer`에<sp/>non-empty<sp/>exclusion<sp/>regions가<sp/>있음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>adapter에<sp/>renderable<sp/>glyphs와<sp/>renderer<sp/>glyph<sp/>position<sp/>cache가<sp/>있음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>정책의<sp/>이유:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Phase<sp/>2<sp/>primary<sp/>target은<sp/>layout-dynamic<sp/>text다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion이<sp/>있는<sp/>TextVisualizer는<sp/>moving<sp/>bounds<sp/>/<sp/>glyph<sp/>position<sp/>update가<sp/>자주<sp/>발생하는<sp/>대표<sp/>workload다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no-exclusion<sp/>text,<sp/>short-lived<sp/>effect<sp/>text,<sp/>status<sp/>text,<sp/>brick<sp/>TextVisualizer는<sp/>existing<sp/>`Text::AtlasRenderer`<sp/>fallback을<sp/>사용해<sp/>안정성을<sp/>우선한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>확인된<sp/>문제와<sp/>패치</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>advance-only<sp/>glyph<sp/>fallback</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>최초<sp/>flag<sp/>ON<sp/>실험에서는<sp/>attempts는<sp/>많지만<sp/>successes가<sp/>0이었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>last<sp/>failed<sp/>glyph는<sp/>`advance=5`,<sp/>`width=0`,<sp/>`height=0`인<sp/>space<sp/>계열<sp/>glyph였다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>non-renderable<sp/>glyph는<sp/>atlas<sp/>lookup<sp/>/<sp/>reference<sp/>acquire<sp/>/<sp/>mesh<sp/>generation에서<sp/>제외했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>cache<sp/>signature에는<sp/>계속<sp/>포함해<sp/>glyph<sp/>sequence<sp/>identity는<sp/>유지했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">2.<sp/>adapter<sp/>update마다<sp/>renderer<sp/>state<sp/>reset</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>non-renderable<sp/>skip<sp/>후<sp/>success는<sp/>대부분<sp/>발생했지만<sp/>geometry-only<sp/>count가<sp/>0이었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetAdapter(non-null)`에서<sp/>`TextVisualizerGlyphRenderer::Clear()`를<sp/>호출해<sp/>mesh<sp/>/<sp/>cache<sp/>/<sp/>topology<sp/>state를<sp/>매<sp/>layout<sp/>update마다<sp/>잃고<sp/>있었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>non-null<sp/>adapter<sp/>update에서는<sp/>renderer<sp/>state를<sp/>유지하고,<sp/>`Render()`<sp/>내부<sp/>signature<sp/>/<sp/>topology<sp/>판단이<sp/>full<sp/>rebuild<sp/>또는<sp/>geometry-only<sp/>update를<sp/>결정하도록<sp/>바꿨다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">3.<sp/>output<sp/>actor<sp/>size<sp/>0<sp/>/<sp/>bounds<sp/>mismatch</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>size가<sp/>`(0,0,0)`<sp/>또는<sp/>control<sp/>size에<sp/>묶이는<sp/>문제가<sp/>있었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>/<sp/>mesh<sp/>actor<sp/>size는<sp/>layout<sp/>size와<sp/>control<sp/>size의<sp/>axis-wise<sp/>max를<sp/>사용하도록<sp/>했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>host는<sp/>기존<sp/>control<sp/>size<sp/>정책을<sp/>유지한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">4.<sp/>glyph<sp/>mesh<sp/>coordinate<sp/>origin<sp/>mismatch</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer`는<sp/>glyph<sp/>position을<sp/>actor-center<sp/>local<sp/>coordinate로<sp/>변환한<sp/>뒤<sp/>atlas<sp/>mesh를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>renderer는<sp/>layout<sp/>top-left<sp/>coordinate를<sp/>그대로<sp/>써서<sp/>glyph가<sp/>우하단으로<sp/>밀려<sp/>보였다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GenerateMeshData()`<sp/>전에<sp/>`round(position.x)`를<sp/>적용하고<sp/>`halfActorSize`를<sp/>빼<sp/>기존<sp/>renderer와<sp/>같은<sp/>coordinate<sp/>convention으로<sp/>맞췄다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">5.<sp/>geometry-only<sp/>texture<sp/>set<sp/>stale<sp/>가능성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>geometry-only<sp/>update는<sp/>기존<sp/>renderer<sp/>/<sp/>geometry를<sp/>유지하고<sp/>vertex<sp/>buffer만<sp/>갱신했다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>breaker처럼<sp/>다른<sp/>text<sp/>controls가<sp/>atlas를<sp/>계속<sp/>건드리는<sp/>상황에서는<sp/>atlas<sp/>texture<sp/>set<sp/>handle이<sp/>바뀔<sp/>수<sp/>있으므로,<sp/>geometry-only<sp/>update에서도<sp/>`renderer.SetTextures(glyphManager.GetTextures(atlasId))`를<sp/>다시<sp/>호출한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">6.<sp/>fallback<sp/>순간<sp/>output<sp/>blank<sp/>가능성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>render<sp/>실패<sp/>시<sp/>기존<sp/>lightweight<sp/>output을<sp/>즉시<sp/>detach하면<sp/>fallback<sp/>renderer가<sp/>새<sp/>output을<sp/>준비하기<sp/>전<sp/>빈<sp/>프레임이<sp/>생길<sp/>수<sp/>있었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>시<sp/>즉시<sp/>detach하지<sp/>않고,<sp/>fallback<sp/>render가<sp/>성공한<sp/>뒤<sp/>기존<sp/>bridge<sp/>output<sp/>교체<sp/>로직이<sp/>이전<sp/>output을<sp/>정리하도록<sp/>했다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">7.<sp/>shader<sp/>uniform<sp/>`uOffset`<sp/>누락</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer::CreateMeshActor()`는<sp/>mesh<sp/>actor에<sp/>`uOffset`<sp/>property를<sp/>`Vector2::ZERO`로<sp/>등록한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>shader<sp/>vertex<sp/>stage는<sp/>`aPosition<sp/>+<sp/>uOffset`을<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>renderer<sp/>mesh<sp/>actor에는<sp/>`uOffset`이<sp/>없어<sp/>일부<sp/>환경에서<sp/>undefined/unstable<sp/>uniform<sp/>상태가<sp/>glyph<sp/>flicker<sp/>또는<sp/>missing으로<sp/>보일<sp/>수<sp/>있었다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>mesh<sp/>actor도<sp/>`uOffset`을<sp/>명시적으로<sp/>등록해<sp/>기존<sp/>renderer와<sp/>맞췄다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>현재<sp/>남은<sp/>한계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cache<sp/>miss<sp/>handling은<sp/>아직<sp/>없다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`FontClient::CreateBitmap()`<sp/>/<sp/>`AtlasGlyphManager::Add()`<sp/>equivalent는<sp/>구현하지<sp/>않았다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>flag는<sp/>계속<sp/>`false`라<sp/>기본<sp/>build<sp/>behavior는<sp/>기존<sp/>renderer와<sp/>같다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>flag<sp/>ON<sp/>실험에서<sp/>안정성이<sp/>좋아졌지만,<sp/>production<sp/>전환<sp/>전에는<sp/>glyph<sp/>cache<sp/>miss<sp/>handling과<sp/>fallback<sp/>policy를<sp/>별도<sp/>커밋으로<sp/>다뤄야<sp/>한다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/23-glyph-cache-lifecycle-design.ko.md"/>
+  </compounddef>
+</doxygen>

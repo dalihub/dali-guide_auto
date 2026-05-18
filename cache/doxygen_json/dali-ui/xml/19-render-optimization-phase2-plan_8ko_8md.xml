@@ -1,0 +1,654 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="19-render-optimization-phase2-plan_8ko_8md" kind="file" language="Markdown">
+    <compoundname>19-render-optimization-phase2-plan.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>TextVisualizer<sp/>Render<sp/>Optimization<sp/>Phase<sp/>2<sp/>Plan</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>1.<sp/>Phase<sp/>2<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>1은<sp/>`TextVisualizer`의<sp/>first<sp/>stable<sp/>version이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>1에서는<sp/>기존<sp/>`TextController`<sp/>/<sp/>`TextView`를<sp/>수정하지<sp/>않고<sp/>별도<sp/>경로로<sp/>다음<sp/>기능을<sp/>동작시켰다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>/<sp/>shaping<sp/>/<sp/>glyph<sp/>metrics<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>기반<sp/>layout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>moving<sp/>bounds<sp/>demo</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>word<sp/>wrap</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>renderer<sp/>bridge</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>dirty<sp/>clear</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>unchanged<sp/>render<sp/>skip</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>/<sp/>layout<sp/>/<sp/>adapter<sp/>cache<sp/>최적화</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2는<sp/>“layout<sp/>이후<sp/>render<sp/>update<sp/>비용”을<sp/>줄이는<sp/>단계다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>목표는<sp/>다음<sp/>문장으로<sp/>고정한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">&gt;<sp/>`TextVisualizer`의<sp/>차별화<sp/>포인트는<sp/>text를<sp/>매<sp/>frame<sp/>새로<sp/>만드는<sp/>것이<sp/>아니라,<sp/>prepared<sp/>glyph<sp/>data를<sp/>유지한<sp/>상태에서<sp/>layout<sp/>/<sp/>exclusion<sp/>/<sp/>glyph<sp/>position<sp/>변화에<sp/>빠르게<sp/>반응하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>Phase<sp/>2의<sp/>primary<sp/>target은<sp/>**prepare<sp/>이후<sp/>layout-dynamic<sp/>text**다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>2.<sp/>Phase<sp/>1<sp/>완료<sp/>범위<sp/>요약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>PreparedText</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>1의<sp/>`PreparedText`는<sp/>다음<sp/>stable<sp/>data를<sp/>보관한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-32<sp/>characters</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>info</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>paragraph<sp/>info</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>script<sp/>/<sp/>font<sp/>run<sp/>기반<sp/>shaping<sp/>결과</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyphs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph-to-character<sp/>map</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>characters-per-glyph</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>character-to-glyph<sp/>/<sp/>glyphs-per-character<sp/>tables</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepared-level<sp/>line<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stable<sp/>`GlyphLayoutData`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>advance</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>width</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>prefix<sp/>advance</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>character<sp/>start<sp/>/<sp/>end</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>break<sp/>allowed<sp/>/<sp/>mandatory<sp/>after<sp/>glyph</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>범위는<sp/>text<sp/>/<sp/>font<sp/>/<sp/>font<sp/>size가<sp/>변하지<sp/>않는<sp/>동안<sp/>재사용된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Layout</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>1의<sp/>layout<sp/>경로는<sp/>다음을<sp/>지원한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>region<sp/>회피<sp/>layout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>y-sorted<sp/>exclusion<sp/>scan</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>basic<sp/>word<sp/>wrap</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>metrics<sp/>기반<sp/>natural<sp/>line<sp/>height</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextLine.metrics`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`LayoutResult::Reserve()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>/<sp/>glyph<sp/>layout<sp/>buffer<sp/>reserve</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>result<sp/>signature</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">아직<sp/>partial<sp/>relayout은<sp/>없다.<sp/>exclusion<sp/>또는<sp/>size<sp/>변경<sp/>시<sp/>`LayoutGlyphs()`는<sp/>전체<sp/>placement를<sp/>다시<sp/>계산한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Adapter</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasViewAdapter`는<sp/>`PreparedText`와<sp/>`LayoutResult`를<sp/>render-ready<sp/>view<sp/>형태로<sp/>연결한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>adapter<sp/>cache는<sp/>다음을<sp/>포함한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>line-level<sp/>metrics<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>glyph<sp/>position<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>color<sp/>/<sp/>control<sp/>size<sp/>/<sp/>layout<sp/>size</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">renderer<sp/>glyph<sp/>positions는<sp/>layout<sp/>result<sp/>연결<sp/>시점에<sp/>미리<sp/>계산된다.<sp/>따라서<sp/>`TextVisualizerViewInterface::GetGlyphs()`는<sp/>glyph<sp/>position<sp/>계산을<sp/>매번<sp/>반복하지<sp/>않고<sp/>cache를<sp/>우선<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Bridge</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasRendererBridge`는<sp/>다음<sp/>역할을<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>host<sp/>lifecycle<sp/>관리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerViewInterface`<sp/>연결</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::AtlasRenderer::Render()`<sp/>호출</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>attach<sp/>/<sp/>detach</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>`UpdateRenderData()`<sp/>validation</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>dirty<sp/>clear<sp/>success<sp/>gate</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>diagnostics<sp/>getter<sp/>제공</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`UpdateRenderData()`는<sp/>더<sp/>이상<sp/>glyph<sp/>count만큼<sp/>full<sp/>render<sp/>data<sp/>vector를<sp/>만들지<sp/>않는다.<sp/>현재는<sp/>renderer<sp/>ensure와<sp/>first<sp/>/<sp/>last<sp/>glyph<sp/>smoke<sp/>validation<sp/>중심의<sp/>lightweight<sp/>gate다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Sample</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>1<sp/>sample<sp/>상태는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`text-visualizer-performance-example.cpp`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`TextVisualizer`<sp/>중심<sp/>performance<sp/>demo</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>moving<sp/>orb<sp/>/<sp/>overlay<sp/>text</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>static<sp/>/<sp/>dynamic<sp/>exclusion<sp/>split</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>optional<sp/>debug<sp/>status</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>FPS-only<sp/>default<sp/>status</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>window-wide<sp/>orb<sp/>movement</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>foreground<sp/>title<sp/>/<sp/>overlay<sp/>text<sp/>layering</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-visualizer-experimental-example.cpp`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>기존<sp/>`text-experimental-example.cpp`의<sp/>text<sp/>grid<sp/>simulation을<sp/>`TextVisualizer`로<sp/>비교</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`SINGLE_TEXT_VISUALIZER`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>`PARTIAL_TEXT_VISUALIZER_TILES`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>3.<sp/>Phase<sp/>2<sp/>Primary<sp/>Workload</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>A.<sp/>Layout-Dynamic<sp/>Workload</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2의<sp/>primary<sp/>workload는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>content<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>sequence<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>/<sp/>style<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>glyph<sp/>data<sp/>stable</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>regions<sp/>move</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>result<sp/>changes</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positions<sp/>change</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>output<sp/>must<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예시는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>PreText-like<sp/>editorial<sp/>demo</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>moving<sp/>object<sp/>collision<sp/>with<sp/>paragraphs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>live<sp/>image<sp/>/<sp/>object<sp/>avoidance</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>animated<sp/>exclusion<sp/>bounds</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>long-form<sp/>text<sp/>reflow</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">최적화<sp/>목표는<sp/>다음이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>re-prepare</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>minimal<sp/>relayout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>minimal<sp/>render<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ideally<sp/>geometry-only<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2에서<sp/>가장<sp/>중요한<sp/>질문은<sp/>“glyph<sp/>identity는<sp/>그대로인데<sp/>position만<sp/>바뀌는<sp/>경우,<sp/>왜<sp/>renderer가<sp/>매번<sp/>full<sp/>rebuild를<sp/>해야<sp/>하는가?”다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>4.<sp/>Non-Primary<sp/>Workload</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>B.<sp/>Content-Dynamic<sp/>Workload</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2의<sp/>non-primary<sp/>workload는<sp/>다음이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>content<sp/>changes<sp/>every<sp/>frame</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>sequence<sp/>changes</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`SetText()`<sp/>frequently<sp/>called</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare<sp/>/<sp/>shaping<sp/>/<sp/>string<sp/>rebuild<sp/>is<sp/>dominant</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예시는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`text-experimental`<sp/>ASCII<sp/>raster</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>terminal<sp/>/<sp/>canvas-like<sp/>dynamic<sp/>text<sp/>grid</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>tile<sp/>text<sp/>animation</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>per-frame<sp/>content<sp/>generation</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>workload도<sp/>가치가<sp/>있지만<sp/>성격이<sp/>다르다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`TextVisualizer`가<sp/>강점을<sp/>보이려는<sp/>지점은<sp/>“prepared<sp/>glyph를<sp/>유지하고<sp/>placement만<sp/>빠르게<sp/>바꾸는<sp/>것”이다.<sp/>content-dynamic<sp/>workload는<sp/>별도<sp/>전략이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가능한<sp/>별도<sp/>전략:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>monospace<sp/>dynamic<sp/>text<sp/>renderer</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fixed-cell<sp/>glyph<sp/>cache</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>tile-level<sp/>persistent<sp/>glyph<sp/>buffers</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>content-diff<sp/>renderer<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2는<sp/>이<sp/>workload를<sp/>먼저<sp/>최적화하지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>5.<sp/>Current<sp/>Render<sp/>Bottleneck</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>render<sp/>update<sp/>path는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```mermaid</highlight></codeline>
+<codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[TextVisualizerImpl]<sp/>--&gt;<sp/>B[AtlasViewAdapter]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[TextVisualizerViewInterface]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[AtlasRendererBridge::AttachRendererToHost]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[Text::AtlasRenderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[view.GetGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[AddGlyphs]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[Mesh<sp/>container<sp/>build]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[VertexBuffer<sp/>/<sp/>Geometry<sp/>/<sp/>Renderer<sp/>/<sp/>Actor]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[Output<sp/>actor<sp/>attach]</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>1은<sp/>prepare<sp/>/<sp/>layout<sp/>/<sp/>adapter<sp/>비용을<sp/>줄였다.<sp/>하지만<sp/>`Text::AtlasRenderer::Render()`는<sp/>여전히<sp/>generic<sp/>full<sp/>render<sp/>update<sp/>경로를<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">코드<sp/>기준으로<sp/>현재<sp/>`AtlasRenderer::Render()`는<sp/>다음<sp/>일을<sp/>할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>시작<sp/>시<sp/>`UnparentAndReset(mImpl-&gt;mActor)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>/<sp/>position<sp/>vector<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`view.GetGlyphs()`<sp/>호출</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AddGlyphs()`<sp/>호출</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>/<sp/>decoration<sp/>branch<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>lookup<sp/>/<sp/>cache<sp/>reference<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`RemoveText()`로<sp/>previous<sp/>text<sp/>cache<sp/>ref<sp/>count<sp/>감소</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>container<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VertexBuffer::New()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Geometry::New()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Dali::Renderer::New()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>actor<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>child<sp/>구성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>경로가<sp/>남아<sp/>있으면,<sp/>layout-dynamic<sp/>workload에서<sp/>`LayoutGlyphs()`가<sp/>빨라져도<sp/>최종<sp/>frame<sp/>cost는<sp/>renderer<sp/>backend<sp/>full<sp/>rebuild에<sp/>의해<sp/>제한된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>6.<sp/>Why<sp/>Not<sp/>Modify<sp/>AtlasRenderer<sp/>Directly<sp/>First</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Text::AtlasRenderer`는<sp/>기존<sp/>text<sp/>pipeline과<sp/>공유된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">영향<sp/>가능<sp/>대상:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Label`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputField`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`TextView`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`TextController`<sp/>기반<sp/>rendering</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>markup<sp/>/<sp/>style<sp/>/<sp/>decoration</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>fit<sp/>/<sp/>ellipsis<sp/>/<sp/>cutout</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`AtlasRenderer`는<sp/>`TextVisualizer`가<sp/>현재<sp/>필요로<sp/>하지<sp/>않는<sp/>많은<sp/>기능을<sp/>지원한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>underline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>strikethrough</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shadow</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>outline</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>background</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>markup<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>hyphen</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cutout</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>glyph<sp/>/<sp/>emoji</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>generic<sp/>style<sp/>runs</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>`text-atlas-renderer.*`를<sp/>먼저<sp/>수정하면<sp/>기존<sp/>text<sp/>stack<sp/>회귀<sp/>위험이<sp/>크다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2의<sp/>첫<sp/>방향은<sp/>다음과<sp/>같이<sp/>잡는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>기존<sp/>`AtlasRenderer`는<sp/>그대로<sp/>둔다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`TextVisualizer`<sp/>전용<sp/>lightweight<sp/>renderer<sp/>prototype을<sp/>별도<sp/>internal<sp/>경로로<sp/>설계한다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>prototype이<sp/>유효하면<sp/>나중에<sp/>`AtlasRenderer`에<sp/>geometry-only<sp/>update<sp/>path를<sp/>통합할지,<sp/>별도<sp/>renderer로<sp/>유지할지<sp/>결정한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>7.<sp/>TextVisualizer-Only<sp/>Lightweight<sp/>Renderer<sp/>Prototype<sp/>Direction</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추천<sp/>component<sp/>이름:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">TextVisualizerGlyphRenderer</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">위치<sp/>후보:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">dali-ui-foundation/internal/text/text-visualizer/rendering/</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">책임:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>소유</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>lifecycle<sp/>관리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`<sp/>+<sp/>`LayoutResult`<sp/>+<sp/>`AtlasViewAdapter`<sp/>cache<sp/>사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>glyph<sp/>positions<sp/>cache<sp/>사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>current<sp/>`TextVisualizer`<sp/>scope만<sp/>지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>position만<sp/>바뀌는<sp/>경우<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>재생성<sp/>회피<sp/>시도</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>가능한<sp/>경우<sp/>vertex<sp/>buffer<sp/>/<sp/>geometry<sp/>data<sp/>in-place<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">지원<sp/>범위:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>rendering</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>single<sp/>text<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>glyph<sp/>sequence</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>result<sp/>/<sp/>glyph<sp/>positions<sp/>update</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>to<sp/>existing<sp/>`AtlasRenderer`<sp/>가능</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">명시적<sp/>non-goals:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>full<sp/>`Label`<sp/>feature<sp/>지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>rich<sp/>markup<sp/>지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>underline<sp/>/<sp/>strikethrough<sp/>/<sp/>shadow<sp/>/<sp/>outline<sp/>지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>ellipsis<sp/>/<sp/>text<sp/>fit<sp/>지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editing<sp/>/<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>decorator<sp/>지원</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`<sp/>글로벌<sp/>대체</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>8.<sp/>Prototype<sp/>Design<sp/>Candidates</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Candidate<sp/>A.<sp/>Bridge-Level<sp/>Cached<sp/>Output<sp/>With<sp/>Existing<sp/>AtlasRenderer</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer`를<sp/>계속<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>bridge<sp/>/<sp/>adapter<sp/>/<sp/>`ViewInterface`<sp/>overhead만<sp/>더<sp/>줄인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>attach<sp/>path를<sp/>최소화한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>low<sp/>risk</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>renderer<sp/>behavior<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>fallback과<sp/>동일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">한계:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AddGlyphs()`<sp/>/<sp/>mesh<sp/>/<sp/>actor<sp/>rebuild를<sp/>해결하지<sp/>못한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>Phase<sp/>2<sp/>핵심<sp/>병목을<sp/>직접<sp/>줄이지<sp/>못할<sp/>가능성이<sp/>크다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Candidate<sp/>B.<sp/>TextVisualizer-Only<sp/>Renderer<sp/>Using<sp/>Existing<sp/>Atlas<sp/>Cache<sp/>Helpers</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-visualizer`<sp/>아래<sp/>새<sp/>renderer<sp/>class를<sp/>둔다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>atlas<sp/>glyph<sp/>manager<sp/>/<sp/>mesh<sp/>helper를<sp/>가능한<sp/>범위에서<sp/>사용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`PreparedText`<sp/>glyphs와<sp/>cached<sp/>renderer<sp/>positions로<sp/>mesh를<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry를<sp/>renderer<sp/>내부에<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>같은<sp/>glyph<sp/>sequence<sp/>/<sp/>atlas<sp/>page<sp/>/<sp/>style이면<sp/>geometry-only<sp/>update를<sp/>시도한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>primary<sp/>workload와<sp/>직접<sp/>맞는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Label`<sp/>/<sp/>`InputField`<sp/>renderer를<sp/>건드리지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>성공<sp/>시<sp/>Phase<sp/>2<sp/>value를<sp/>가장<sp/>잘<sp/>증명할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">위험:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>cache<sp/>helper<sp/>접근성이<sp/>부족할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::AtlasRenderer::Impl`<sp/>내부<sp/>logic을<sp/>일부<sp/>중복할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>page<sp/>split<sp/>/<sp/>color<sp/>glyph<sp/>처리가<sp/>생각보다<sp/>복잡할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">추천:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가장<sp/>먼저<sp/>feasibility를<sp/>확인한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>helper<sp/>access가<sp/>부족하면<sp/>필요한<sp/>internal<sp/>access<sp/>point를<sp/>문서화한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Candidate<sp/>C.<sp/>TextVisualizer-Only<sp/>Renderer<sp/>With<sp/>Temporary<sp/>Simple<sp/>Texture<sp/>Path</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>빠른<sp/>prototype을<sp/>위해<sp/>간단한<sp/>texture<sp/>/<sp/>mesh<sp/>path를<sp/>별도로<sp/>만든다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>atlas<sp/>infra를<sp/>일부<sp/>우회한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>MVP를<sp/>빨리<sp/>만들<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>geometry-only<sp/>update<sp/>structure를<sp/>독립적으로<sp/>검증할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">위험:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>behavior가<sp/>incomplete할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>duplicate<sp/>renderer<sp/>logic이<sp/>커질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>font<sp/>/<sp/>emoji<sp/>/<sp/>atlas<sp/>page<sp/>handling이<sp/>빠질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">결론:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>실험<sp/>prototype으로만<sp/>허용한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>production<sp/>path로<sp/>바로<sp/>삼지<sp/>않는다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Candidate<sp/>D.<sp/>Modify<sp/>Text::AtlasRenderer<sp/>With<sp/>Geometry-Only<sp/>Update<sp/>Path</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">내용:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer`에<sp/>persistent<sp/>actor<sp/>/<sp/>renderer<sp/>/<sp/>geometry<sp/>path를<sp/>추가한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stable<sp/>glyph<sp/>sequence에서<sp/>vertex<sp/>buffer만<sp/>update한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">장점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>가장<sp/>integrated한<sp/>방향이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>text<sp/>stack도<sp/>장기적으로<sp/>이득을<sp/>볼<sp/>수<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">위험:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shared<sp/>renderer<sp/>회귀<sp/>위험이<sp/>가장<sp/>크다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>style<sp/>/<sp/>markup<sp/>/<sp/>decoration<sp/>/<sp/>ellipsis<sp/>조합<sp/>검증<sp/>범위가<sp/>넓다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">결론:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Phase<sp/>2<sp/>later<sp/>step이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>첫<sp/>구현<sp/>커밋으로는<sp/>적절하지<sp/>않다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>9.<sp/>Required<sp/>Data<sp/>For<sp/>Lightweight<sp/>Renderer</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`TextVisualizerGlyphRenderer`가<sp/>필요한<sp/>data는<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>From<sp/>PreparedText</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyphs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>index</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>id</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>identity<sp/>for<sp/>atlas<sp/>lookup</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>style<sp/>flags</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>optional<sp/>text<sp/>buffer<sp/>/<sp/>glyph-to-character<sp/>map</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>From<sp/>LayoutResult<sp/>/<sp/>AtlasViewAdapter</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>placements</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cached<sp/>renderer<sp/>glyph<sp/>positions</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>control<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderable<sp/>glyph<sp/>count</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>From<sp/>Existing<sp/>Atlas<sp/>Infrastructure</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>bitmap<sp/>/<sp/>atlas<sp/>slot<sp/>lookup</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>texture</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>texture<sp/>coordinates</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>page<sp/>id</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>generation<sp/>helper</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shader</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>texture<sp/>set</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>pixel<sp/>format<sp/>split</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>10.<sp/>Key<sp/>Technical<sp/>Questions</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>구현<sp/>전<sp/>반드시<sp/>확인해야<sp/>할<sp/>질문이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`TextVisualizer`가<sp/>사용할<sp/>수<sp/>있는<sp/>existing<sp/>atlas<sp/>/<sp/>glyph<sp/>cache<sp/>class는<sp/>무엇인가?</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>glyph<sp/>atlas<sp/>cache<sp/>접근이<sp/>`Text::AtlasRenderer::Impl`<sp/>안에<sp/>숨겨져<sp/>있는가?</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`AtlasGlyphManager`<sp/>/<sp/>`AtlasMeshFactory`를<sp/>새<sp/>renderer에서<sp/>직접<sp/>사용할<sp/>수<sp/>있는가?</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>mesh<sp/>generation<sp/>helper를<sp/>재사용할<sp/>수<sp/>있는가,<sp/>아니면<sp/>중복<sp/>구현이<sp/>필요한가?</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>DALi<sp/>`VertexBuffer`<sp/>data는<sp/>생성<sp/>후<sp/>안정적으로<sp/>update할<sp/>수<sp/>있는가?</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>`Geometry`<sp/>/<sp/>`Renderer`를<sp/>유지한<sp/>채<sp/>vertex<sp/>buffer<sp/>data만<sp/>교체할<sp/>수<sp/>있는가?</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>하나의<sp/>mesh<sp/>actor로<sp/>충분한가,<sp/>atlas<sp/>page별<sp/>multiple<sp/>mesh<sp/>actor가<sp/>필요한가?</highlight></codeline>
+<codeline><highlight class="normal">8.<sp/>현재<sp/>`AtlasRenderer`는<sp/>texture<sp/>/<sp/>pixel<sp/>format<sp/>/<sp/>atlas<sp/>page<sp/>기준으로<sp/>mesh를<sp/>어떻게<sp/>split하는가?</highlight></codeline>
+<codeline><highlight class="normal">9.<sp/>textColor는<sp/>shader<sp/>uniform인지<sp/>vertex<sp/>color인지,<sp/>lightweight<sp/>path에서<sp/>어떻게<sp/>맞출<sp/>것인가?</highlight></codeline>
+<codeline><highlight class="normal">10.<sp/>color<sp/>glyph<sp/>/<sp/>emoji와<sp/>L8<sp/>glyph가<sp/>섞이면<sp/>renderer<sp/>/<sp/>shader<sp/>split이<sp/>어떻게<sp/>필요한가?</highlight></codeline>
+<codeline><highlight class="normal">11.<sp/>`RemoveText()`<sp/>/<sp/>glyph<sp/>reference<sp/>count를<sp/>lightweight<sp/>renderer가<sp/>어떻게<sp/>관리해야<sp/>하는가?</highlight></codeline>
+<codeline><highlight class="normal">12.<sp/>기존<sp/>`AtlasRenderer`<sp/>fallback과<sp/>output<sp/>actor<sp/>lifecycle을<sp/>어떻게<sp/>공존시킬<sp/>것인가?</highlight></codeline>
+<codeline><highlight class="normal">13.<sp/>`TextVisualizerGlyphRenderer`<sp/>MVP가<sp/>`text-atlas-renderer.*`<sp/>수정<sp/>없이<sp/>가능한가?</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>11.<sp/>Phase<sp/>2<sp/>Implementation<sp/>Steps</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>1.<sp/>Phase<sp/>2<sp/>plan<sp/>document</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>커밋이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>Phase<sp/>2<sp/>target<sp/>고정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>bottleneck<sp/>고정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prototype<sp/>방향<sp/>고정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>다음<sp/>구현<sp/>단위<sp/>정리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>2.<sp/>Inspect<sp/>atlas<sp/>cache<sp/>access<sp/>points</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasGlyphManager`<sp/>/<sp/>`AtlasMeshFactory`<sp/>접근<sp/>가능성<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::AtlasRenderer::Impl`<sp/>private<sp/>dependency<sp/>목록화</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizerGlyphRenderer`<sp/>MVP에<sp/>필요한<sp/>minimum<sp/>class<sp/>/<sp/>method<sp/>정리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">형태:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>md-only<sp/>또는<sp/>tiny<sp/>internal<sp/>probe</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>behavior<sp/>change<sp/>없음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">커밋<sp/>후보명:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Inspect<sp/>TextVisualizer<sp/>lightweight<sp/>renderer<sp/>dependencies</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>3.<sp/>Add<sp/>TextVisualizerGlyphRenderer<sp/>skeleton</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>새<sp/>class<sp/>files<sp/>추가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>lifecycle<sp/>skeleton</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>state<sp/>reset<sp/>/<sp/>clear</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>active<sp/>usage</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>actual<sp/>glyph<sp/>rendering</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>empty<sp/>state<sp/>UTC</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>behavior<sp/>change</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>4.<sp/>Add<sp/>simple<sp/>glyph<sp/>mesh<sp/>build<sp/>prototype</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>atlas<sp/>cache<sp/>helper<sp/>사용<sp/>가능하면<sp/>사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>static<sp/>text<sp/>1회<sp/>draw<sp/>prototype</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>active<sp/>path에는<sp/>아직<sp/>연결하지<sp/>않거나<sp/>internal<sp/>feature<sp/>flag<sp/>뒤에<sp/>둔다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>simple<sp/>text<sp/>visual<sp/>smoke</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>page<sp/>/<sp/>renderer<sp/>count<sp/>확인</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>5.<sp/>Integrate<sp/>optional<sp/>renderer<sp/>path<sp/>into<sp/>AtlasRendererBridge</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`Text::AtlasRenderer`<sp/>path를<sp/>fallback으로<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>internal<sp/>switch로<sp/>lightweight<sp/>renderer<sp/>path<sp/>사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>public<sp/>API<sp/>없음</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>실패<sp/>시<sp/>기존<sp/>renderer<sp/>path<sp/>사용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>TextVisualizer<sp/>UTC</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>performance<sp/>sample<sp/>visual<sp/>smoke</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>leak<sp/>check</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>6.<sp/>Geometry-only<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">목표:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>glyph<sp/>sequence</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>atlas<sp/>pages</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>same<sp/>style</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>positions<sp/>only<sp/>changed</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertex<sp/>buffer<sp/>/<sp/>geometry<sp/>data<sp/>update<sp/>only</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">검증:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>moving<sp/>bounds<sp/>FPS<sp/>비교</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>renderer<sp/>count<sp/>안정성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stale<sp/>actor<sp/>없음</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Commit<sp/>7.<sp/>Decide<sp/>integration<sp/>direction</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">결정:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>TextVisualizer-only<sp/>renderer로<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>또는<sp/>proven<sp/>path를<sp/>`AtlasRenderer`<sp/>shared<sp/>geometry-only<sp/>update로<sp/>추출</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>12.<sp/>Validation<sp/>Plan</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">각<sp/>구현<sp/>단계에서<sp/>확인할<sp/>항목:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`UtcDaliTextVisualizer`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>performance<sp/>sample<sp/>build</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>smoke</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>`AtlasRenderer`<sp/>path<sp/>fallback</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>lightweight<sp/>path<sp/>comparison</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">workload:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>stable<sp/>text<sp/>+<sp/>moving<sp/>exclusions</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>color<sp/>change</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>size<sp/>change</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>change</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>empty<sp/>text</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>long<sp/>text</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>font<sp/>/<sp/>mixed<sp/>glyph</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>glyph<sp/>/<sp/>emoji</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>multiple<sp/>atlas<sp/>pages<sp/>if<sp/>possible</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">metrics:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>render<sp/>call<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>child<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>placement<sp/>count</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>FPS<sp/>rough</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>correctness</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>memory<sp/>growth</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stale<sp/>actor<sp/>leak</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>frequency</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주의:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>sample<sp/>FPS는<sp/>rough<sp/>value다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>status<sp/>debug<sp/>on<sp/>상태는<sp/>measurement를<sp/>왜곡할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>first<sp/>target은<sp/>layout-dynamic<sp/>workload다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>13.<sp/>Risks</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2<sp/>renderer<sp/>prototype의<sp/>주요<sp/>risk:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>atlas<sp/>access가<sp/>너무<sp/>private할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::AtlasRenderer`<sp/>logic을<sp/>중복할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>font<sp/>behavior가<sp/>빠질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>glyph<sp/>/<sp/>emoji<sp/>처리가<sp/>어렵다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>page<sp/>splitting이<sp/>복잡할<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shader<sp/>/<sp/>textColor<sp/>적용이<sp/>기존<sp/>output과<sp/>다를<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>/<sp/>renderer<sp/>lifecycle<sp/>bug가<sp/>생길<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>stale<sp/>actor<sp/>/<sp/>stale<sp/>glyph<sp/>reference가<sp/>누적될<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>output이<sp/>기존<sp/>`AtlasRenderer`와<sp/>달라질<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>existing<sp/>renderer<sp/>fallback과<sp/>bridge<sp/>state가<sp/>꼬일<sp/>수<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>너무<sp/>일찍<sp/>`AtlasRenderer`에<sp/>통합하면<sp/>`Label`<sp/>/<sp/>`InputField`<sp/>regression<sp/>risk가<sp/>커진다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>14.<sp/>Decision<sp/>Criteria</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">prototype이<sp/>가치<sp/>있다고<sp/>판단할<sp/>조건:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>stable<sp/>text<sp/>+<sp/>moving<sp/>exclusion<sp/>case에서<sp/>명확한<sp/>개선이<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>output이<sp/>기존<sp/>`AtlasRenderer`<sp/>path와<sp/>충분히<sp/>일치한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>actor<sp/>/<sp/>renderer<sp/>count가<sp/>frame마다<sp/>증가하지<sp/>않는다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>output<sp/>actor<sp/>lifecycle이<sp/>안정적이다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>stale<sp/>actor<sp/>accumulation.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>no<sp/>obvious<sp/>memory<sp/>growth.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>code가<sp/>`Label`<sp/>/<sp/>`InputField`<sp/>path와<sp/>격리된다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>fallback<sp/>path가<sp/>남아<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">가치가<sp/>부족한<sp/>경우:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`<sp/>path를<sp/>유지한다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ViewInterface::GetGlyphs()`<sp/>copy<sp/>path만<sp/>더<sp/>줄인다.</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>데모<sp/>후<sp/>`AtlasRenderer`<sp/>shared<sp/>geometry-only<sp/>update<sp/>설계로<sp/>전환한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>15.<sp/>Next<sp/>Immediate<sp/>Work</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서<sp/>다음<sp/>추천<sp/>작업:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">```text</highlight></codeline>
+<codeline><highlight class="normal">Inspect<sp/>TextVisualizer<sp/>lightweight<sp/>renderer<sp/>dependencies</highlight></codeline>
+<codeline><highlight class="normal">```</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">해당<sp/>작업에서<sp/>답해야<sp/>하는<sp/>것:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>어떤<sp/>file<sp/>/<sp/>class가<sp/>필요한가?</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`가<sp/>atlas<sp/>glyph<sp/>cache에<sp/>접근할<sp/>수<sp/>있는가?</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`AtlasMeshFactory`를<sp/>재사용할<sp/>수<sp/>있는가?</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VertexBuffer`<sp/>/<sp/>`Geometry`<sp/>reuse가<sp/>가능한가?</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>MVP<sp/>renderer에<sp/>필요한<sp/>최소<sp/>기능은<sp/>무엇인가?</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>새<sp/>renderer<sp/>위치는<sp/>`internal/text/text-visualizer/rendering/`이<sp/>맞는가?</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>`AtlasRenderer`<sp/>fallback과<sp/>bridge를<sp/>어떻게<sp/>공존시킬<sp/>것인가?</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>작업은<sp/>가능하면<sp/>문서<sp/>중심으로<sp/>시작하고,<sp/>필요한<sp/>경우<sp/>compile-only<sp/>skeleton은<sp/>별도<sp/>커밋으로<sp/>분리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>16.<sp/>Conclusion</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Phase<sp/>2는<sp/>layout-dynamic<sp/>render<sp/>update<sp/>최적화<sp/>단계다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`TextVisualizer`는<sp/>prepare<sp/>/<sp/>layout<sp/>/<sp/>adapter<sp/>cache를<sp/>상당<sp/>부분<sp/>갖췄지만,<sp/>최종<sp/>render<sp/>backend는<sp/>여전히<sp/>`Text::AtlasRenderer::Render()`<sp/>full<sp/>rebuild<sp/>경로를<sp/>사용한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">다음<sp/>큰<sp/>성능<sp/>가치는<sp/>다음에서<sp/>온다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>glyph<sp/>sequence<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placement<sp/>/<sp/>position만<sp/>변경</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer<sp/>output<sp/>actor<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>mesh<sp/>/<sp/>geometry<sp/>/<sp/>renderer<sp/>재사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>vertex<sp/>buffer<sp/>data만<sp/>update</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">첫<sp/>구현<sp/>방향은<sp/>shared<sp/>`AtlasRenderer`<sp/>직접<sp/>수정이<sp/>아니라,<sp/>`TextVisualizer`<sp/>전용<sp/>`TextVisualizerGlyphRenderer`<sp/>prototype이다.<sp/>이<sp/>prototype으로<sp/>가치와<sp/>위험을<sp/>분리해<sp/>검증한<sp/>뒤,<sp/>장기적으로<sp/>shared<sp/>`AtlasRenderer`<sp/>geometry-only<sp/>path에<sp/>통합할지<sp/>결정한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">content-dynamic<sp/>workload는<sp/>중요하지만<sp/>별도<sp/>문제다.<sp/>Phase<sp/>2<sp/>설계를<sp/>content-dynamic<sp/>ASCII<sp/>raster<sp/>workload에<sp/>맞추지<sp/>않는다.</highlight></codeline>
+    </programlisting>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/19-render-optimization-phase2-plan.ko.md"/>
+  </compounddef>
+</doxygen>

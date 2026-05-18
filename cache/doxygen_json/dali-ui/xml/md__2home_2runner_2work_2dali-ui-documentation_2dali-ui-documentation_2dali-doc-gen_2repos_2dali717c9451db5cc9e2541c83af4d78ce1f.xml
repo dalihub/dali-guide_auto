@@ -1,0 +1,629 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f" kind="page">
+    <compoundname>md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali-ui_2dali-ui-foundation_2integration-api_2text-visualizer_2docs_201-current-text-pipeline_8ko</compoundname>
+    <title>현재 Dali UI Text Rendering Pipeline 분석</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md18"/> </para>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md19">
+<title>목적</title>
+<para>이 문서의 목적은 현재 <ref refid="namespaceDali" kindref="compound">Dali</ref> UI의 텍스트 렌더링 파이프라인을 <computeroutput>Label</computeroutput>, <computeroutput>InputField</computeroutput>, <computeroutput>text-controller</computeroutput>, <computeroutput>text-view</computeroutput>, <computeroutput>model</computeroutput>, <computeroutput>layout</computeroutput>, <computeroutput>text-atlas-renderer</computeroutput>, <computeroutput>typesetter</computeroutput> 기준으로 정리하는 것이다.</para>
+<para>이번 문서에서는 다음 항목을 명확히 구분한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> 구현에 직접 필요한 내용</para>
+</listitem><listitem><para>구조 이해를 위한 참고용 내용</para>
+</listitem></itemizedlist>
+</para>
+<para>또한 분석 단계 규칙에 따라, 코드에서 확인한 사실만 기록하고 애매한 내용은 <computeroutput>확인 필요</computeroutput>로 표시한다.</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md20">
+<title>분석 대상 파일</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md21">
+<title>직접 분석한 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput><ref refid="label_8h" kindref="compound">dali-ui-foundation/public-api/label.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="label_8cpp" kindref="compound">dali-ui-foundation/public-api/label.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="label-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/label-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field_8h" kindref="compound">dali-ui-foundation/public-api/input-field.h</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/input-field-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-relayouter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-view-interface.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-view.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-model.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/text-model.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/layouts/layout-engine.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-backend.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-backend-impl.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-typesetter.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-typesetter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/text-typesetter-impl.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/visuals/text/text-visual.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md22">
+<title>참고 대상</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>dali-ui-foundation/internal/controls/text-controls/common-text-utils.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager-impl.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>dali-ui-foundation/internal/text/rendering/atlas/atlas-manager-impl.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md23">
+<title>현재 구조 요약</title>
+<para>현재 <ref refid="namespaceDali" kindref="compound">Dali</ref> UI 텍스트 파이프라인은 크게 두 경로로 사용된다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Label</computeroutput><itemizedlist>
+<listitem><para>public API는 <computeroutput>Label</computeroutput>이고, internal 구현은 <computeroutput>LabelImpl</computeroutput></para>
+</listitem><listitem><para>내부적으로 <computeroutput>TextVisual</computeroutput>과 <computeroutput>Text::Controller</computeroutput>를 사용한다</para>
+</listitem><listitem><para>기본 표시 경로는 <computeroutput>TextVisual</computeroutput> + <computeroutput>Typesetter</computeroutput> 계열이다</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput><itemizedlist>
+<listitem><para>public API는 <computeroutput>InputField</computeroutput>이고, internal 구현은 <computeroutput>InputFieldImpl</computeroutput></para>
+</listitem><listitem><para>내부적으로 <computeroutput>Text::Controller</computeroutput>와 <computeroutput>Text::Backend::NewRenderer()</computeroutput>를 사용한다</para>
+</listitem><listitem><para>현재 <computeroutput>Text::Backend::NewRenderer()</computeroutput>는 <computeroutput>AtlasRenderer::New()</computeroutput>를 반환한다</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para>공통 중심축은 <computeroutput>Text::Controller</computeroutput>이다.</para>
+<para><itemizedlist>
+<listitem><para>property 반영</para>
+</listitem><listitem><para>model 갱신</para>
+</listitem><listitem><para>relayout</para>
+</listitem><listitem><para>natural size / height-for-width 계산</para>
+</listitem><listitem><para>최종 렌더링용 <computeroutput>Text::View</computeroutput> 제공</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, 현재 구조는 &quot;상위 View 또는 Visual이 `Text::Controller`를 사용하고, 렌더러 경로만 서로 다르다&quot;는 형태다.</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md24">
+<title>public API에서 internal impl로 전달되는 흐름</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md25">
+<title>Label 경로</title>
+<para><computeroutput>Label</computeroutput> public API에서 internal impl로 내려가는 대표 흐름은 다음과 같다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput><ref refid="label_8cpp" kindref="compound">dali-ui-foundation/public-api/label.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>Label::SetText()</computeroutput> 등 public method 호출</para>
+</listitem><listitem><para><computeroutput>GetImpl(*this).SetText(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="label-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/label-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>LabelImpl::SetText()</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;SetText(...)</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>초기화 흐름은 다음과 같다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>Label::New()</computeroutput> in <computeroutput><ref refid="label_8cpp" kindref="compound">public-api/label.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>Integration::LabelImpl::New()</computeroutput></para>
+</listitem><listitem><para><computeroutput>LabelImpl::Initialize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>LabelImpl::OnInitialize()</computeroutput> in <computeroutput><ref refid="label-impl_8cpp" kindref="compound">integration-api/label-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>Ui::VisualFactory::Get().CreateVisual(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>Internal::TextVisual::GetController(mVisual)</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>즉, <computeroutput>Label</computeroutput>은 직접 renderer를 만들지 않고 <computeroutput>TextVisual</computeroutput> 내부 controller를 끌어와 사용하는 구조다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md26">
+<title>InputField 경로</title>
+<para><computeroutput>InputField</computeroutput> public API에서 internal impl로 내려가는 대표 흐름은 다음과 같다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput><ref refid="input-field_8h" kindref="compound">dali-ui-foundation/public-api/input-field.h</ref></computeroutput></para>
+</listitem><listitem><para>public setter 호출</para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">dali-ui-foundation/integration-api/input-field-impl.cpp</ref></computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::SetText()</computeroutput>, <computeroutput>SetFontSize()</computeroutput>, <computeroutput>SetTextColor()</computeroutput> 등</para>
+</listitem><listitem><para><computeroutput>mController-&gt;SetText(...)</computeroutput>, <computeroutput>SetDefaultFontSize(...)</computeroutput> 등 호출</para>
+</listitem></orderedlist>
+</para>
+<para>relayout 시 실제 렌더링 흐름은 다음과 같다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>InputFieldImpl::OnRelayout()</computeroutput></para>
+</listitem><listitem><para><computeroutput>mController-&gt;Relayout(contentSize, layoutDirection)</computeroutput></para>
+</listitem><listitem><para>renderer가 없으면 <computeroutput>Text::Backend::Get().NewRenderer()</computeroutput></para>
+</listitem><listitem><para><computeroutput>InputFieldImpl::RenderText()</computeroutput></para>
+</listitem><listitem><para><computeroutput>CommonTextUtils::RenderText(...)</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para><computeroutput>InputField</computeroutput>는 <computeroutput>View</computeroutput>가 직접 controller와 renderer를 호스팅하는 구조다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md27">
+<title>Controller가 담당하는 단계</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md28">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/controller/text-controller.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/controller/text-controller.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/controller/text-controller-relayouter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/controller/text-controller-impl-model-updater.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md29">
+<title>실제로 확인되는 단계</title>
+<para><computeroutput>Text::Controller::OperationsMask</computeroutput>에는 아래 단계가 정의되어 있다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>CONVERT_TO_UTF32</computeroutput></para>
+</listitem><listitem><para><computeroutput>GET_SCRIPTS</computeroutput></para>
+</listitem><listitem><para><computeroutput>VALIDATE_FONTS</computeroutput></para>
+</listitem><listitem><para><computeroutput>GET_LINE_BREAKS</computeroutput></para>
+</listitem><listitem><para><computeroutput>BIDI_INFO</computeroutput></para>
+</listitem><listitem><para><computeroutput>SHAPE_TEXT</computeroutput></para>
+</listitem><listitem><para><computeroutput>GET_GLYPH_METRICS</computeroutput></para>
+</listitem><listitem><para><computeroutput>LAYOUT</computeroutput></para>
+</listitem><listitem><para><computeroutput>UPDATE_LAYOUT_SIZE</computeroutput></para>
+</listitem><listitem><para><computeroutput>REORDER</computeroutput></para>
+</listitem><listitem><para><computeroutput>ALIGN</computeroutput></para>
+</listitem><listitem><para><computeroutput>COLOR</computeroutput></para>
+</listitem><listitem><para><computeroutput>UPDATE_DIRECTION</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이 단계는 실제로 <computeroutput>ControllerImplModelUpdater::Update()</computeroutput>와 <computeroutput>Controller::Relayouter::*</computeroutput>에서 사용된다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md30">
+<title>단계별 의미</title>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md31">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>GET_SCRIPTS</computeroutput><itemizedlist>
+<listitem><para>script 분리</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>VALIDATE_FONTS</computeroutput><itemizedlist>
+<listitem><para>font fallback 포함 font validation</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>GET_LINE_BREAKS</computeroutput><itemizedlist>
+<listitem><para>line break 정보 생성</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>BIDI_INFO</computeroutput><itemizedlist>
+<listitem><para>bidi 정보 계산</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>SHAPE_TEXT</computeroutput><itemizedlist>
+<listitem><para>glyph shaping</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>GET_GLYPH_METRICS</computeroutput><itemizedlist>
+<listitem><para>glyph metrics 수집</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>LAYOUT</computeroutput><itemizedlist>
+<listitem><para>visual position 계산</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md32">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>COLOR</computeroutput><itemizedlist>
+<listitem><para>markup/style color 반영</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>UPDATE_DIRECTION</computeroutput><itemizedlist>
+<listitem><para>layout direction 갱신</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>selection/cursor/decorator 갱신에 연계되는 나머지 상태 처리</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md33">
+<title>현재 controller의 실제 역할</title>
+<para><computeroutput>Text::Controller</computeroutput>는 단순 layout 계산기보다 훨씬 넓은 역할을 가진다.</para>
+<para><itemizedlist>
+<listitem><para>text property 저장</para>
+</listitem><listitem><para>text update tracking</para>
+</listitem><listitem><para>logical model 갱신</para>
+</listitem><listitem><para>visual model 갱신</para>
+</listitem><listitem><para>natural size / height-for-width 계산</para>
+</listitem><listitem><para>relayout</para>
+</listitem><listitem><para>scroll state 관리</para>
+</listitem><listitem><para><computeroutput>InputField</computeroutput> 계열에서는 selection / cursor / decorator / event queue / IME 상태까지 관리</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>TextVisualizer</computeroutput> 관점에서는 prepare와 layout에 필요한 핵심 엔진이 들어 있지만, 입력기 오버헤드도 함께 들어 있다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md34">
+<title>Layout이 수행되는 위치</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md35">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/controller/text-controller-relayouter.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/layouts/layout-engine.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/layouts/layout-engine.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md36">
+<title>실제 수행 위치</title>
+<para>최종 relayout entry point는 아래다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>Text::Controller::Relayout()</computeroutput> in <computeroutput>text-controller.cpp</computeroutput></para>
+</listitem><listitem><para>내부에서 <computeroutput>Controller::Relayouter::Relayout()</computeroutput> 호출</para>
+</listitem></itemizedlist>
+</para>
+<para>그 안에서 핵심 흐름은 다음과 같다.</para>
+<para><orderedlist>
+<listitem><para><computeroutput>impl.UpdateModel(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>Controller::Relayouter::DoRelayout(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>Layout::Engine::LayoutText(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>Layout::Engine::Align(...)</computeroutput></para>
+</listitem></orderedlist>
+</para>
+<para>즉, layout의 핵심 계산 위치는 <computeroutput>Layout::Engine</computeroutput>이고, 이를 orchestration 하는 계층은 <computeroutput>Controller::Relayouter</computeroutput>이다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md37">
+<title>의미</title>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md38">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para>실제 glyph position 계산은 <computeroutput>Layout::Engine</computeroutput>이 수행한다</para>
+</listitem><listitem><para>상위 View는 보통 <computeroutput>Controller::Relayout()</computeroutput>만 호출한다</para>
+</listitem><listitem><para><computeroutput>GetNaturalSize()</computeroutput>, <computeroutput>GetHeightForWidth()</computeroutput>, <computeroutput>CalculateLayoutSize()</computeroutput>도 <computeroutput>Controller::Relayouter</computeroutput>를 통해 같은 계열 계산을 재사용한다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md39">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField</computeroutput>의 경우 relayout 뒤에 decorator 재배치가 따라온다</para>
+</listitem><listitem><para><computeroutput>Label</computeroutput>의 경우 relayout 뒤에 visual transform 갱신이 따라온다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md40">
+<title>text-view와 model의 위치</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md41">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/text-view-interface.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-view.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-model.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-model.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md42">
+<title>Model</title>
+<para><computeroutput>Text::Model</computeroutput>은 logical model과 visual model을 묶는 container다.</para>
+<para><itemizedlist>
+<listitem><para>logical model<itemizedlist>
+<listitem><para>text buffer</para>
+</listitem><listitem><para>script run</para>
+</listitem><listitem><para>font run</para>
+</listitem><listitem><para>line break 정보</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>visual model<itemizedlist>
+<listitem><para>glyphs</para>
+</listitem><listitem><para>glyph positions</para>
+</listitem><listitem><para>lines</para>
+</listitem><listitem><para>colors</para>
+</listitem><listitem><para>style 관련 visual data</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>text-model.cpp</computeroutput>에서 실제 getter가 대부분 <computeroutput>mLogicalModel</computeroutput>, <computeroutput>mVisualModel</computeroutput>을 그대로 노출한다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md43">
+<title>Text::View / Text::ViewInterface</title>
+<para><computeroutput>Text::ViewInterface</computeroutput>는 renderer가 요구하는 렌더링용 데이터 접근 인터페이스다. <computeroutput>Text::View</computeroutput>는 이 인터페이스의 기본 구현이다.</para>
+<para>핵심 함수:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>GetControlSize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetLayoutSize()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetNumberOfGlyphs()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetGlyphs(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetColors()</computeroutput></para>
+</listitem><listitem><para><computeroutput>GetColorIndices()</computeroutput></para>
+</listitem><listitem><para>style 관련 getter 다수</para>
+</listitem></itemizedlist>
+</para>
+<para>즉, controller가 계산한 <computeroutput>Model</computeroutput>을 renderer가 쓰기 좋은 형태로 풀어 주는 계층이 <computeroutput>Text::View</computeroutput>다.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md44">
+<title>Typesetter와 AtlasRenderer가 각각 사용되는 위치</title>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md45">
+<title>Typesetter 사용 위치</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md46">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/visuals/text/text-visual.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/rendering/text-typesetter.h</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/rendering/text-typesetter.cpp</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md47">
+<title>확인된 사용 위치</title>
+<para><computeroutput>TextVisual</computeroutput>은 생성 시 다음을 가진다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mController(Text::Controller::New())</computeroutput></para>
+</listitem><listitem><para><computeroutput>mTypesetter(Text::Typesetter::New(mController-&gt;GetTextModel()))</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>실제 렌더링 시 <computeroutput>text-visual.cpp</computeroutput>에서 <computeroutput>mTypesetter-&gt;Render(...)</computeroutput> 또는 <computeroutput>RenderWithPixelBuffer(...)</computeroutput>를 호출한다.</para>
+<para>대표 호출 위치:</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>mTypesetter-&gt;Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, ...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mTypesetter-&gt;Render(size, textDirection, Text::Typesetter::RENDER_NO_TEXT, ...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mTypesetter-&gt;Render(size, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, ...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>mTypesetter-&gt;Render(size, textDirection, Text::Typesetter::RENDER_MASK, ...)</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>Typesetter</computeroutput>는 주로 <computeroutput>TextVisual</computeroutput> 계열에서 pixel buffer / texture 생성용으로 사용된다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md48">
+<title>의미</title>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md49">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>TextVisualizer</computeroutput> 기본 방향이 <computeroutput>AtlasRenderer</computeroutput>라면 <computeroutput>Typesetter</computeroutput>는 1차 구현 필수 경로가 아니다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md50">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Label</computeroutput>의 기본 visual 렌더링 경로 이해에는 중요하다</para>
+</listitem><listitem><para>비동기 texture render, cutout, style overlay 처리 이해에는 참고 가치가 있다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md51">
+<title>AtlasRenderer 사용 위치</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md52">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/rendering/text-backend-impl.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/rendering/atlas/text-atlas-renderer.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">integration-api/input-field-impl.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md53">
+<title>확인된 사용 위치</title>
+<para><computeroutput>Text::Backend::NewRenderer()</computeroutput> in <computeroutput>text-backend-impl.cpp</computeroutput>는 현재 다음을 반환한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>return Dali::Ui::Text::AtlasRenderer::New();</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>즉, <computeroutput>InputFieldImpl::OnRelayout()</computeroutput>에서 renderer가 없을 때 호출하는 backend renderer는 현재 atlas renderer다.</para>
+<para>따라서 현재 <computeroutput>InputField</computeroutput>의 표시 경로는 사실상 <computeroutput>AtlasRenderer</computeroutput> 기반이다.</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md54">
+<title>의미</title>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md55">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField</computeroutput> 구조를 참고해 <computeroutput>TextVisualizer</computeroutput>를 만들면 atlas renderer 흐름을 그대로 참고할 수 있다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md56">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para>backend abstraction은 얇고 현재 구현은 atlas renderer 고정이다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md57">
+<title>AtlasRenderer가 렌더링에 필요한 데이터</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md58">
+<title>관련 파일</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>internal/text/rendering/atlas/text-atlas-renderer.cpp</computeroutput></para>
+</listitem><listitem><para><computeroutput>internal/text/text-view-interface.h</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md59">
+<title>&lt;tt&gt;Render()&lt;/tt&gt; 시 직접 사용하는 데이터</title>
+<para><computeroutput>AtlasRenderer::Render(Text::ViewInterface&amp; view, ...)</computeroutput>는 먼저 아래를 사용한다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>view.GetNumberOfGlyphs()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetGlyphs(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetColors()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetColorIndices()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetTextColor()</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<para>이후 <computeroutput>AddGlyphs(...)</computeroutput> 내부에서 style 관련 데이터를 추가로 읽는다.</para>
+<para><itemizedlist>
+<listitem><para><computeroutput>view.GetShadowOffset()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetShadowColor()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetOutlineWidth()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetOutlineColor()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetOutlineOffset()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.IsUnderlineEnabled()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.IsMarkupUnderlineSet()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetNumberOfUnderlineRuns()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetUnderlineRuns(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.IsStrikethroughEnabled()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.IsMarkupStrikethroughSet()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetNumberOfStrikethroughRuns()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetStrikethroughRuns(...)</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetHyphens()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetHyphenIndices()</computeroutput></para>
+</listitem><listitem><para><computeroutput>view.GetHyphensCount()</computeroutput></para>
+</listitem><listitem><para>ellipsis 관련 getter들</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md60">
+<title>TextVisualizer 관점 해석</title>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md61">
+<title>직접 필요한 내용</title>
+<para>이번 범위에서 <computeroutput>TextVisualizer</computeroutput>가 style, ellipsis, underline, shadow를 무시한다면, atlas renderer가 실제 plain glyph 렌더링에 꼭 필요한 핵심 데이터는 아래로 좁아진다.</para>
+<para><itemizedlist>
+<listitem><para>glyph 목록</para>
+</listitem><listitem><para>glyph position</para>
+</listitem><listitem><para>기본 text color</para>
+</listitem><listitem><para>필요 시 glyph별 color index</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md62">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para>현재 <computeroutput>AtlasRenderer</computeroutput>는 <computeroutput>Text::ViewInterface</computeroutput> 전부를 기준으로 설계되어 있다</para>
+</listitem><listitem><para>따라서 1차 구현에서는 <computeroutput>TextVisualizer</computeroutput>용 adapter가 <computeroutput>ViewInterface</computeroutput>를 부분적으로 채우는 방식이 유력하다</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+<sect3 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md63">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>AtlasRenderer</computeroutput>를 <computeroutput>TextVisualizer</computeroutput>용으로 더 축소한 별도 renderer adapter 없이 바로 사용할지</para>
+</listitem><listitem><para>아니면 <computeroutput>Text::ViewInterface</computeroutput> 최소 subset 구현으로 충분한지</para>
+</listitem></itemizedlist>
+</para>
+</sect3>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md64">
+<title>mermaid flowchart</title>
+<para><programlisting filename=".mermaid"><codeline><highlight class="normal">flowchart<sp/>TD</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>A[Public<sp/>API:<sp/>Label/InputField]<sp/>--&gt;<sp/>B[Internal<sp/>Impl:<sp/>LabelImpl/InputFieldImpl]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>B<sp/>--&gt;<sp/>C[Text::Controller]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>C<sp/>--&gt;<sp/>D[ControllerImplModelUpdater::Update]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>D<sp/>--&gt;<sp/>E[Logical<sp/>Model<sp/>/<sp/>Visual<sp/>Model]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>E<sp/>--&gt;<sp/>F[Controller::Relayouter::Relayout]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>F<sp/>--&gt;<sp/>G[Layout::Engine::LayoutText]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>G<sp/>--&gt;<sp/>H[Text::View<sp/>/<sp/>ViewInterface]</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>I[Path<sp/>1:<sp/>TextVisual]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>I<sp/>--&gt;<sp/>J[Typesetter::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>J<sp/>--&gt;<sp/>K[PixelData<sp/>/<sp/>Texture]</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal"><sp/><sp/>H<sp/>--&gt;<sp/>L[Path<sp/>2:<sp/>Text::Backend::NewRenderer]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>L<sp/>--&gt;<sp/>M[AtlasRenderer::Render]</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>M<sp/>--&gt;<sp/>N[Glyph<sp/>Atlas<sp/>/<sp/>Mesh<sp/>/<sp/>Actor]</highlight></codeline>
+</programlisting></para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md65">
+<title>TextVisualizer에 필요한 부분</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md66">
+<title>직접 필요한 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputField</computeroutput>의 public/internal <computeroutput>View</computeroutput> 구조<itemizedlist>
+<listitem><para>참고 파일: <computeroutput><ref refid="input-field_8h" kindref="compound">public-api/input-field.h</ref></computeroutput>, <computeroutput><ref refid="input-field-impl_8cpp" kindref="compound">integration-api/input-field-impl.cpp</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Text::Controller</computeroutput>가 담당하는 prepare 전 단계<itemizedlist>
+<listitem><para>script</para>
+</listitem><listitem><para>font fallback</para>
+</listitem><listitem><para>shaping</para>
+</listitem><listitem><para>glyph metrics</para>
+</listitem><listitem><para>line break candidate</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Text::Model</computeroutput><itemizedlist>
+<listitem><para>glyph와 glyph position 전후 데이터를 보관하는 역할</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Layout::Engine</computeroutput><itemizedlist>
+<listitem><para>실제 layout 계산 위치</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Text::ViewInterface</computeroutput><itemizedlist>
+<listitem><para>atlas renderer가 요구하는 출력 데이터 계약</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><computeroutput>Text::Backend::NewRenderer()</computeroutput> -&gt; <computeroutput>AtlasRenderer::New()</computeroutput><itemizedlist>
+<listitem><para>현재 atlas renderer 진입점</para>
+</listitem></itemizedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md67">
+<title>참고용 내용</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>LabelImpl</computeroutput>의 <computeroutput>TextVisual</computeroutput> 기반 visual transform 처리</para>
+</listitem><listitem><para><computeroutput>Typesetter</computeroutput>의 pixel buffer 생성 방식</para>
+</listitem><listitem><para>async render, cutout, marquee 관련 로직</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md68">
+<title>TextVisualizer에서 피해야 할 부분</title>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md69">
+<title>직접 버려야 할 부분</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>InputFieldImpl</computeroutput>의 cursor, selection, decorator 구조</para>
+</listitem><listitem><para><computeroutput>InputFieldImpl</computeroutput>의 input method, popup, clipboard, gesture 처리</para>
+</listitem><listitem><para><computeroutput>Text::Controller</computeroutput>의 event queue / editing state / IME 연동</para>
+</listitem><listitem><para><computeroutput>Typesetter</computeroutput> 중심 texture bake 경로</para>
+</listitem><listitem><para>style, ellipsis, underline, shadow 관련 1차 구현 범위</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md70">
+<title>참고만 할 부분</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Label</computeroutput>의 marquee, text-fit, async rendering</para>
+</listitem><listitem><para><computeroutput>TextVisual</computeroutput>의 style texture 합성</para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md71">
+<title>설계 결론</title>
+<para>현재 파이프라인은 &quot;controller가 대부분의 텍스트 준비와 layout을 수행하고, 마지막 렌더링 경로만 `Typesetter` 계열과 `AtlasRenderer` 계열로 갈라진다&quot;는 구조다.</para>
+<para>이 구조에서 <computeroutput>TextVisualizer</computeroutput>는 다음을 선택하는 것이 적절하다.</para>
+<para><itemizedlist>
+<listitem><para>상위 구조는 <computeroutput>InputField</computeroutput>처럼 <computeroutput>View + Impl</computeroutput> 형태로 간다</para>
+</listitem><listitem><para>렌더링은 <computeroutput>Text::Backend</computeroutput>가 반환하는 <computeroutput>AtlasRenderer</computeroutput> 경로를 기준으로 삼는다</para>
+</listitem><listitem><para>다만 기존 <computeroutput>Text::Controller</computeroutput>는 입력기 오버헤드가 크므로 prepare/layout에 필요한 부분만 분리한 경량 모델이 필요하다</para>
+</listitem><listitem><para><computeroutput>Text::ViewInterface</computeroutput>는 atlas renderer에 데이터를 넘기는 최소 계약으로 다시 해석해야 한다</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md72">
+<title>확인 필요 사항</title>
+<para><itemizedlist>
+<listitem><para><computeroutput>Label</computeroutput>의 기본 표시 경로에서 <computeroutput>TextVisual</computeroutput> 내부 <computeroutput>Typesetter</computeroutput> 호출과 visual renderer 갱신 범위를 더 세밀하게 추적할 필요가 있다</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput> 1차 구현에서 <computeroutput>Text::Controller</computeroutput>를 부분 재사용할지, prepare 전용 모델을 별도로 만들지 확정이 필요하다</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput>가 plain glyph rendering만 사용할 때 요구하는 <computeroutput>ViewInterface</computeroutput> 최소 구현 집합을 코드 수준에서 더 좁힐 수 있는지 확인이 필요하다</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="md__2home_2runner_2work_2dali-ui-documentation_2dali-ui-documentation_2dali-doc-gen_2repos_2dali717c9451db5cc9e2541c83af4d78ce1f_1autotoc_md73">
+<title>TextVisualizer 설계에 주는 결론</title>
+<para><orderedlist>
+<listitem><para>현재 <ref refid="namespaceDali" kindref="compound">Dali</ref> UI 텍스트 파이프라인에서 <computeroutput>TextVisualizer</computeroutput>가 직접 참고해야 할 주 경로는 <computeroutput>InputFieldImpl -&gt; Text::Controller -&gt; Text::Backend::NewRenderer() -&gt; AtlasRenderer</computeroutput>이다.</para>
+</listitem><listitem><para><computeroutput>Label</computeroutput> 경로는 구조 이해에는 유용하지만, 기본 렌더링이 <computeroutput>TextVisual</computeroutput>과 <computeroutput>Typesetter</computeroutput> 중심이므로 <computeroutput>TextVisualizer</computeroutput>의 1차 구현 기준 경로로 삼기에는 맞지 않는다.</para>
+</listitem><listitem><para><computeroutput>TextVisualizer</computeroutput>는 기존 <computeroutput>Text::Controller</computeroutput> 전체를 들고 가기보다, prepare에 필요한 단계와 layout 결과를 보관하는 경량 model/controller 계층을 별도로 설계해야 한다.</para>
+</listitem><listitem><para><computeroutput>AtlasRenderer</computeroutput>가 실제로 중요한 입력은 glyph와 glyph position이므로, <computeroutput>TextVisualizer</computeroutput>는 최종적으로 <computeroutput>Text::ViewInterface</computeroutput> 또는 그에 준하는 adapter를 통해 plain glyph 데이터를 공급하는 구조가 적절하다. </para>
+</listitem></orderedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/01-current-text-pipeline.ko.md"/>
+  </compounddef>
+</doxygen>
