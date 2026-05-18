@@ -1,0 +1,546 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="03-text-controller-analysis_8ko_8md" kind="file" language="Markdown">
+    <compoundname>03-text-controller-analysis.ko.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>기존<sp/>text-controller<sp/>분석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>목적</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>문서의<sp/>목적은<sp/>기존<sp/>`Text::Controller`가<sp/>수행하는<sp/>작업을<sp/>`Prepare<sp/>/<sp/>Layout<sp/>/<sp/>Render`<sp/>관점으로<sp/>분해하고,<sp/>`TextVisualizer`에서<sp/>재사용할<sp/>최소<sp/>기능과<sp/>제거해야<sp/>할<sp/>기능을<sp/>구분하는<sp/>것이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이번<sp/>문서에서는<sp/>다음을<sp/>중점적으로<sp/>본다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`SetText()`<sp/>이후<sp/>내부<sp/>상태가<sp/>어떻게<sp/>바뀌는가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>관련<sp/>설정이<sp/>들어오면<sp/>어떤<sp/>단계가<sp/>다시<sp/>수행되는가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shaping,<sp/>font<sp/>fallback,<sp/>layout,<sp/>visual<sp/>model<sp/>생성이<sp/>정확히<sp/>언제<sp/>일어나는가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer로<sp/>전달되는<sp/>데이터가<sp/>어디서<sp/>만들어지는가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>dirty<sp/>/<sp/>invalidation<sp/>구조가<sp/>어떻게<sp/>생겼는가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputField`<sp/>/<sp/>편집<sp/>기능<sp/>때문에<sp/>어떤<sp/>오버헤드가<sp/>생기는가</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`용<sp/>경량<sp/>controller가<sp/>왜<sp/>필요한가</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">애매한<sp/>내용은<sp/>추측하지<sp/>않고<sp/>`확인<sp/>필요`로<sp/>표시한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>분석<sp/>대상<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>직접<sp/>분석한<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-text-updater.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-input-font-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-relayouter.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-model.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-model.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/logical-model-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/visual-model-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/layouts/layout-engine.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/layouts/layout-engine.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/text-view-interface.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>필요한<sp/>경우<sp/>함께<sp/>참고한<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/shaper.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/segmentation.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/multi-language-support.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`dali-ui-foundation/internal/text/glyph-metrics-helper.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>현재<sp/>구조<sp/>요약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`Text::Controller`는<sp/>단순한<sp/>controller가<sp/>아니라,<sp/>사실상<sp/>아래를<sp/>묶은<sp/>텍스트<sp/>runtime이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>property<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>변경<sp/>추적</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>logical<sp/>model<sp/>갱신</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>visual<sp/>model<sp/>갱신</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shaping<sp/>/<sp/>font<sp/>validation<sp/>/<sp/>bidi<sp/>/<sp/>line<sp/>break<sp/>/<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>/<sp/>align<sp/>/<sp/>reorder</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>natural<sp/>size<sp/>/<sp/>height-for-width<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>/<sp/>hidden<sp/>text<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>scroll<sp/>state<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>입력기<sp/>상태<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>decorator<sp/>/<sp/>popup<sp/>처리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>`TextVisualizer`<sp/>입장에서<sp/>보면<sp/>유용한<sp/>텍스트<sp/>엔진과<sp/>불필요한<sp/>입력기<sp/>오버헤드가<sp/>한<sp/>객체<sp/>안에<sp/>같이<sp/>들어<sp/>있다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>SetText<sp/>이후<sp/>내부<sp/>상태<sp/>변화</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Controller::SetText()`<sp/>in<sp/>`internal/text/controller/text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::TextUpdater::SetText()`<sp/>in<sp/>`internal/text/controller/text-controller-text-updater.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`SetText()`<sp/>호출<sp/>후<sp/>핵심<sp/>흐름은<sp/>다음과<sp/>같다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`TextUpdater::SetText()`<sp/>진입</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`impl.ResetInputMethodContext()`</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`ResetText(controller)`로<sp/>기존<sp/>text<sp/>제거</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`impl.ClearStyleData()`로<sp/>style<sp/>run<sp/>제거</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>`impl.mRawText<sp/>=<sp/>text`</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>markup<sp/>enabled면<sp/>`ProcessMarkupString(...)`</highlight></codeline>
+<codeline><highlight class="normal">7.<sp/>UTF-8<sp/>-&gt;<sp/>UTF-32<sp/>변환</highlight></codeline>
+<codeline><highlight class="normal">8.<sp/>`logicalModel-&gt;mText`<sp/>갱신</highlight></codeline>
+<codeline><highlight class="normal">9.<sp/>`mTextUpdateInfo.mNumberOfCharactersToAdd`<sp/>설정</highlight></codeline>
+<codeline><highlight class="normal">10.<sp/>`impl.QueueModifyEvent(ModifyEvent::TEXT_REPLACED)`</highlight></codeline>
+<codeline><highlight class="normal">11.<sp/>`impl.mRecalculateNaturalSize<sp/>=<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">12.<sp/>`impl.mRecalculateLayoutSize<sp/>=<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">13.<sp/>`impl.mUpdateTextDirection<sp/>=<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">14.<sp/>`impl.mOperationsPending<sp/>=<sp/>ALL_OPERATIONS`</highlight></codeline>
+<codeline><highlight class="normal">15.<sp/>`impl.RequestRelayout()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>TextVisualizer에<sp/>필요한<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>raw<sp/>text<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>markup<sp/>적용<sp/>여부에<sp/>따라<sp/>text<sp/>preprocessing</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-32<sp/>변환</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>update<sp/>범위(`mTextUpdateInfo`)<sp/>설정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ALL_OPERATIONS`를<sp/>통해<sp/>prepare<sp/>+<sp/>layout<sp/>전체<sp/>재실행<sp/>예약</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>버릴<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ResetInputMethodContext()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`EventData`<sp/>상태<sp/>전환</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor<sp/>position<sp/>reset</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>상태<sp/>정리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editable<sp/>callback</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>font<sp/>관련<sp/>설정이<sp/>들어왔을<sp/>때<sp/>처리<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::SetDefaultFontFamily()`<sp/>in<sp/>`text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::SetDefaultFontSize()`<sp/>in<sp/>`text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::SetDefaultFontWeight()`<sp/>in<sp/>`text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::SetDefaultFontWidth()`<sp/>in<sp/>`text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::SetDefaultFontSlant()`<sp/>in<sp/>`text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::Impl::ClearFontData()`<sp/>in<sp/>`text-controller-impl.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">font<sp/>기본값이<sp/>바뀌면<sp/>대부분<sp/>아래<sp/>흐름을<sp/>따른다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>default<sp/>font<sp/>property<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`mImpl-&gt;ClearFontData()`</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`RequestRelayout()`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`ClearFontData()`는<sp/>아래를<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>cached<sp/>font<sp/>id<sp/>초기화</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mTextUpdateInfo`를<sp/>전체<sp/>텍스트<sp/>기준으로<sp/>재설정</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRecalculateNaturalSize<sp/>=<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRecalculateLayoutSize<sp/>=<sp/>true`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mOperationsPending<sp/>|=<sp/>VALIDATE_FONTS<sp/>|<sp/>SHAPE_TEXT<sp/>|<sp/>BIDI_INFO<sp/>|<sp/>GET_GLYPH_METRICS<sp/>|<sp/>LAYOUT<sp/>|<sp/>UPDATE_LAYOUT_SIZE<sp/>|<sp/>REORDER<sp/>|<sp/>ALIGN`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>TextVisualizer에<sp/>필요한<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>변경<sp/>시<sp/>shaping과<sp/>glyph<sp/>metrics를<sp/>다시<sp/>수행해야<sp/>한다는<sp/>현재<sp/>dirty<sp/>규칙</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>natural<sp/>size<sp/>/<sp/>layout<sp/>size<sp/>cache<sp/>무효화</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>버릴<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>editable<sp/>state일<sp/>때<sp/>decorator/cursor<sp/>위치<sp/>갱신</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>shaping이<sp/>언제<sp/>발생하는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ControllerImplModelUpdater::Update()`<sp/>in<sp/>`text-controller-impl-model-updater.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>발생<sp/>시점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">shaping은<sp/>`UpdateModel()`<sp/>내부에서<sp/>`operations`에<sp/>`SHAPE_TEXT`가<sp/>포함될<sp/>때<sp/>수행된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">구체적으로는<sp/>아래<sp/>코드<sp/>경로다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`if(Controller::NO_OPERATION<sp/>!=<sp/>(Controller::SHAPE_TEXT<sp/>&amp;<sp/>operations))`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ShapeText(...)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주요<sp/>입력은<sp/>다음이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-32<sp/>text</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>info</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>scripts</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>validated<sp/>fonts</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`startIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`requestedNumberOfCharacters`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>shaping은<sp/>property<sp/>setter가<sp/>직접<sp/>하는<sp/>것이<sp/>아니라,</highlight></codeline>
+<codeline><highlight class="normal">dirty가<sp/>쌓인<sp/>뒤<sp/>`Relayout()`<sp/>또는<sp/>size<sp/>계산<sp/>경로에서<sp/>`UpdateModel()`이<sp/>실행될<sp/>때<sp/>발생한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>shaping은<sp/>`Prepare`<sp/>단계에<sp/>해당한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>width/height만<sp/>바뀌는<sp/>relayout에서는<sp/>shaping이<sp/>다시<sp/>일어나지<sp/>않도록<sp/>dirty를<sp/>분리해야<sp/>한다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>font<sp/>fallback이<sp/>언제<sp/>발생하는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ControllerImplModelUpdater::Update()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`MultilanguageSupport::ValidateFonts(...)`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>발생<sp/>시점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">font<sp/>fallback은<sp/>`VALIDATE_FONTS`<sp/>단계에서<sp/>수행된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">코드상<sp/>흐름:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>default<sp/>font<sp/>description<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>font<sp/>variation<sp/>map<sp/>확인</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`multilanguageSupport.ValidateFonts(...)`</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>validated<sp/>font<sp/>run이<sp/>logical<sp/>model에<sp/>기록됨</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>fallback은<sp/>shaping보다<sp/>먼저<sp/>수행된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>fallback은<sp/>`Prepare`<sp/>단계에<sp/>포함되어야<sp/>한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>/<sp/>font<sp/>/<sp/>fontSize가<sp/>바뀌지<sp/>않는<sp/>한<sp/>다시<sp/>하지<sp/>않는<sp/>구조가<sp/>필요하다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>layout이<sp/>언제<sp/>발생하는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Controller::Relayout()`<sp/>in<sp/>`text-controller.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::Relayouter::Relayout()`<sp/>in<sp/>`text-controller-relayouter.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Controller::Relayouter::DoRelayout()`<sp/>in<sp/>`text-controller-relayouter.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Layout::Engine::LayoutText()`<sp/>in<sp/>`internal/text/layouts/layout-engine.h`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>발생<sp/>시점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">layout은<sp/>`Relayout()`<sp/>경로에서<sp/>`operationsPending`에<sp/>`LAYOUT`이<sp/>포함되어<sp/>있을<sp/>때<sp/>수행된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대표<sp/>상황:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>변경<sp/>후</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>관련<sp/>변경<sp/>후</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>control<sp/>size<sp/>변경<sp/>후</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>elide<sp/>상태<sp/>변경<sp/>후</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>direction<sp/>변경<sp/>후</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`Relayouter::Relayout()`<sp/>안에서<sp/>새<sp/>size가<sp/>들어오면<sp/>자동으로<sp/>아래<sp/>dirty가<sp/>추가된다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`LAYOUT`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ALIGN`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`UPDATE_LAYOUT_SIZE`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`REORDER`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>현재<sp/>controller는<sp/>size<sp/>변화만으로도<sp/>layout<sp/>단계는<sp/>다시<sp/>수행한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>구조에서도<sp/>`Prepare`와<sp/>`Layout`이<sp/>완전히<sp/>같은<sp/>단계는<sp/>아니다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>size<sp/>변화<sp/>시<sp/>layout만<sp/>다시<sp/>수행하는<sp/>흐름이<sp/>일부<sp/>이미<sp/>존재한다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>한계</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>controller는<sp/>multi-interval<sp/>/<sp/>exclusion<sp/>bounds<sp/>layout을<sp/>지원하지<sp/>않는다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>rect<sp/>하나를<sp/>기준으로<sp/>한<sp/>기존<sp/>`Layout::Engine`<sp/>구조다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>visual<sp/>model이<sp/>언제<sp/>만들어지는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>함수</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ControllerImplModelUpdater::Update()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::Model`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VisualModelImpl`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>생성/갱신<sp/>시점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">visual<sp/>model은<sp/>별도<sp/>한<sp/>번에<sp/>&quot;생성&quot;된다기보다<sp/>`UpdateModel()`<sp/>단계에서<sp/>점진적으로<sp/>채워진다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">핵심<sp/>데이터<sp/>생성<sp/>시점:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ShapeText(...)`<sp/>후<sp/>`mVisualModel-&gt;mGlyphs`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CreateGlyphsPerCharacterTable(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`CreateCharacterToGlyphTable(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetGlyphMetrics(...)`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>color<sp/>segmentation<sp/>후<sp/>`mVisualModel-&gt;mColors`,<sp/>`mColorIndices`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`DoRelayout(...)`<sp/>후<sp/>`mGlyphPositions`,<sp/>`mLines`,<sp/>`layoutSize`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>visual<sp/>model은<sp/>`Prepare`와<sp/>`Layout`<sp/>양쪽<sp/>결과를<sp/>모두<sp/>담는<sp/>구조다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>/<sp/>character<sp/>mapping</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positions</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>list</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>참고용<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>underline<sp/>/<sp/>strikethrough<sp/>/<sp/>background<sp/>color<sp/>runs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>preedit용<sp/>visual<sp/>decoration<sp/>데이터</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>renderer로<sp/>전달되는<sp/>데이터가<sp/>어디서<sp/>만들어지는지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>파일</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-model.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-view.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/text-view-interface.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`internal/text/rendering/atlas/text-atlas-renderer.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>흐름</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`UpdateModel()`이<sp/>logical/visual<sp/>model을<sp/>갱신</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>`DoRelayout()`이<sp/>glyph<sp/>positions와<sp/>lines를<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`Text::View`가<sp/>`Model`을<sp/>기반으로<sp/>renderer용<sp/>getter<sp/>제공</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>`AtlasRenderer::Render(Text::ViewInterface&amp;<sp/>view,<sp/>...)`<sp/>호출</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">즉,<sp/>renderer로<sp/>전달되는<sp/>최종<sp/>데이터는<sp/>`Text::ViewInterface`를<sp/>통해<sp/>나간다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">대표<sp/>데이터:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>glyphs</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positions</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>default<sp/>color</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph별<sp/>color<sp/>index</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>control<sp/>size</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`도<sp/>최종적으로<sp/>atlas<sp/>renderer에<sp/>glyph와<sp/>position을<sp/>넘겨야<sp/>한다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>현재<sp/>계약은<sp/>`Text::ViewInterface`<sp/>중심이다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Controller<sp/>내부<sp/>dirty<sp/>/<sp/>invalidation<sp/>구조</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>핵심<sp/>상태</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>`mOperationsPending`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">재실행할<sp/>연산<sp/>비트마스크다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">예:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`ALL_OPERATIONS`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`VALIDATE_FONTS<sp/>|<sp/>SHAPE_TEXT<sp/>|<sp/>GET_GLYPH_METRICS<sp/>|<sp/>LAYOUT<sp/>...`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>`mTextUpdateInfo`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">어디부터<sp/>얼마만큼<sp/>다시<sp/>계산할지<sp/>기록한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">주요<sp/>필드:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mCharacterIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mNumberOfCharactersToRemove`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mNumberOfCharactersToAdd`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mParagraphCharacterIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRequestedNumberOfCharacters`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mStartGlyphIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mStartLineIndex`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mClearAll`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mFullRelayoutNeeded`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>cache<sp/>invalidation<sp/>flag</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mRecalculateNaturalSize`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mRecalculateLayoutSize`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mUpdateTextDirection`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>의미</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>controller는<sp/>꽤<sp/>정교한<sp/>dirty<sp/>구조를<sp/>이미<sp/>갖고<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">문제는<sp/>이<sp/>dirty<sp/>구조가<sp/>입력기<sp/>상태와<sp/>혼합되어<sp/>있다는<sp/>점이다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>InputField<sp/>/<sp/>Edit<sp/>기능<sp/>때문에<sp/>생기는<sp/>오버헤드</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>관련<sp/>구조</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`EventData`<sp/>in<sp/>`text-controller-impl.h`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-controller-event-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-controller-impl-event-handler.cpp`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`text-controller-input-font-handler.cpp`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>실제<sp/>오버헤드</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>직접<sp/>확인되는<sp/>오버헤드</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`EventData`<sp/>전체<sp/>상태<sp/>유지</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>key/tap/pan/long-press<sp/>event<sp/>queue</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection<sp/>/<sp/>cursor<sp/>/<sp/>highlight<sp/>상태</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>decorator<sp/>update<sp/>flag</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>IME<sp/>preedit<sp/>state</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>active/inactive<sp/>state</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>input<sp/>style<sp/>tracking</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>clipboard<sp/>/<sp/>popup<sp/>/<sp/>handle<sp/>처리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>layout와<sp/>결합된<sp/>오버헤드</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>relayout<sp/>시<sp/>`ProcessInputEvents()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>변경<sp/>시<sp/>selection<sp/>handle<sp/>재계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>size<sp/>변경<sp/>시<sp/>decorator<sp/>위치<sp/>갱신</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editable<sp/>상태면<sp/>scroll-to-cursor<sp/>/<sp/>clamp<sp/>/<sp/>handle<sp/>reposition<sp/>실행</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>TextVisualizer<sp/>해석</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">이<sp/>오버헤드는<sp/>표시용<sp/>View에는<sp/>대부분<sp/>불필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer용<sp/>경량<sp/>controller가<sp/>필요한<sp/>이유</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>`Prepare`와<sp/>`Layout`만<sp/>필요하지만<sp/>현재<sp/>controller는<sp/>edit<sp/>runtime까지<sp/>함께<sp/>가진다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>multi-interval<sp/>/<sp/>exclusion<sp/>bounds<sp/>layout은<sp/>기존<sp/>`Layout::Engine`로<sp/>직접<sp/>표현하기<sp/>어렵다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>`TextVisualizer`는<sp/>shaping을<sp/>다시<sp/>하지<sp/>않는<sp/>phase<sp/>분리가<sp/>핵심인데,<sp/>현재<sp/>controller<sp/>API는<sp/>그<sp/>경계가<sp/>명시적이지<sp/>않다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>atlas<sp/>renderer에는<sp/>최종적으로<sp/>glyph<sp/>데이터만<sp/>주면<sp/>되는데,<sp/>현재<sp/>controller는<sp/>그<sp/>전에<sp/>너무<sp/>많은<sp/>편집<sp/>상태를<sp/>관리한다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>기존<sp/>Controller를<sp/>그대로<sp/>쓰는<sp/>경우의<sp/>장단점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>장점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>shaping<sp/>/<sp/>font<sp/>fallback<sp/>/<sp/>bidi<sp/>/<sp/>line<sp/>break<sp/>/<sp/>glyph<sp/>metrics<sp/>코드를<sp/>바로<sp/>재사용<sp/>가능</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>natural<sp/>size<sp/>/<sp/>height-for-width<sp/>계산<sp/>체계가<sp/>이미<sp/>존재</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::ViewInterface`와<sp/>renderer<sp/>연결<sp/>구조가<sp/>이미<sp/>있다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>partial<sp/>update를<sp/>위한<sp/>dirty<sp/>구조(`mOperationsPending`,<sp/>`mTextUpdateInfo`)가<sp/>있다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>단점</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>edit/runtime<sp/>오버헤드가<sp/>크다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>prepare와<sp/>layout이<sp/>public<sp/>API<sp/>수준에서<sp/>분리되어<sp/>있지<sp/>않다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>exclusion<sp/>bounds<sp/>기반<sp/>multi-interval<sp/>layout을<sp/>넣기<sp/>어렵다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`EventData`가<sp/>존재하는<sp/>순간<sp/>interactive<sp/>로직이<sp/>많이<sp/>따라온다</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`가<sp/>원하는<sp/>&quot;plain<sp/>display<sp/>pipeline&quot;이<sp/>구조적으로<sp/>드러나지<sp/>않는다</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>새<sp/>Controller를<sp/>만드는<sp/>경우<sp/>필요한<sp/>최소<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>최소<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>Prepare<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>text<sp/>저장</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>UTF-32<sp/>변환</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>script<sp/>추출</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>font<sp/>fallback<sp/>/<sp/>validate</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>shaping</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cluster<sp/>mapping</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>break<sp/>candidate<sp/>생성</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>Layout<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>prepared<sp/>glyph<sp/>run<sp/>입력</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>bounds<sp/>/<sp/>exclusion<sp/>region<sp/>기반<sp/>line<sp/>interval<sp/>계산</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positioning</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>line<sp/>정보<sp/>생성</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>size<sp/>계산</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">####<sp/>Render<sp/>전달<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>atlas<sp/>renderer에<sp/>전달할<sp/>glyph<sp/>list<sp/>제공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>glyph<sp/>positions<sp/>제공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>기본<sp/>color<sp/>제공</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>필요<sp/>시<sp/>`Text::ViewInterface`<sp/>adapter<sp/>제공</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>제거해야<sp/>할<sp/>책임</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>IME</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>cursor</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>decorator</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>popup<sp/>/<sp/>clipboard</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>placeholder<sp/>interaction</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>input<sp/>style</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>editable<sp/>state<sp/>machine</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer에<sp/>필요한<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>직접<sp/>필요한<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`mOperationsPending`<sp/>같은<sp/>dirty<sp/>비트마스크<sp/>개념</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`mTextUpdateInfo`처럼<sp/>update<sp/>범위를<sp/>좁히는<sp/>개념</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`UpdateModel()`<sp/>안의<sp/>prepare<sp/>단계</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>font<sp/>fallback</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>shaping</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>-<sp/>glyph<sp/>metrics</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Relayouter`의<sp/>size<sp/>계산<sp/>패턴</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::ViewInterface`로<sp/>renderer에<sp/>데이터<sp/>넘기는<sp/>패턴</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>참고용<sp/>내용</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`GetNaturalSize()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`GetHeightForWidth()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout<sp/>direction<sp/>변경<sp/>시<sp/>전체<sp/>relayout<sp/>처리</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>버릴<sp/>부분</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`EventData`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`ProcessInputEvents()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`EnableTextInput()`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`InputFontHandler`의<sp/>selection/editing<sp/>상태<sp/>의존<sp/>처리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`HiddenInput`,<sp/>placeholder<sp/>editing<sp/>state</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>selection/cursor/clipboard/popup/decorator<sp/>전체</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>설계<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">현재<sp/>`Text::Controller`는<sp/>`TextVisualizer`에<sp/>필요한<sp/>prepare<sp/>엔진을<sp/>많이<sp/>포함하고<sp/>있지만,<sp/>그<sp/>자체를<sp/>그대로<sp/>쓰기에는<sp/>입력기<sp/>오버헤드와<sp/>기존<sp/>rectangular<sp/>layout<sp/>전제가<sp/>너무<sp/>크다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">따라서<sp/>`TextVisualizer`는<sp/>아래<sp/>방향이<sp/>적절하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>기존<sp/>controller에서<sp/>prepare<sp/>단계에<sp/>해당하는<sp/>책임은<sp/>최대한<sp/>재사용</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>layout은<sp/>`TextVisualizer`<sp/>전용<sp/>multi-interval<sp/>engine으로<sp/>분리</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>renderer로<sp/>나가는<sp/>최종<sp/>데이터<sp/>계약은<sp/>`Text::ViewInterface`<sp/>또는<sp/>그에<sp/>준하는<sp/>adapter로<sp/>유지</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>확인<sp/>필요<sp/>사항</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>`TextVisualizer`<sp/>1차<sp/>구현에서<sp/>기존<sp/>controller의<sp/>`UpdateModel()`<sp/>경로를<sp/>직접<sp/>재사용할지,<sp/>prepare<sp/>전용<sp/>모델을<sp/>별도<sp/>추출할지<sp/>확정<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Layout::Engine`<sp/>일부를<sp/>exclusion<sp/>bounds<sp/>대응용으로<sp/>확장할지,<sp/>완전히<sp/>새<sp/>layout<sp/>engine을<sp/>둘지<sp/>확정<sp/>필요</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>`Text::ViewInterface`<sp/>최소<sp/>구현<sp/>집합으로<sp/>atlas<sp/>renderer를<sp/>바로<sp/>재사용할<sp/>수<sp/>있는지<sp/>추가<sp/>확인<sp/>필요</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>TextVisualizer<sp/>설계에<sp/>주는<sp/>결론</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">1.<sp/>기존<sp/>`Text::Controller`는<sp/>`Prepare`<sp/>단계의<sp/>핵심<sp/>로직을<sp/>이미<sp/>가지고<sp/>있다.</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>그러나<sp/>`Layout`은<sp/>현재<sp/>단일<sp/>rectangular<sp/>box<sp/>전제가<sp/>강하고,<sp/>edit/runtime<sp/>오버헤드가<sp/>크다.</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>따라서<sp/>`TextVisualizer`는<sp/>&quot;기존<sp/>controller<sp/>전체<sp/>재사용&quot;보다<sp/>&quot;prepare<sp/>단계<sp/>재사용<sp/>+<sp/>layout<sp/>분리&quot;가<sp/>더<sp/>적합하다.</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>최종적으로는<sp/>atlas<sp/>renderer가<sp/>요구하는<sp/>glyph<sp/>데이터만<sp/>공급하는<sp/>경량<sp/>controller<sp/>또는<sp/>model<sp/>계층이<sp/>필요하다.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>기능<sp/>매핑<sp/>표</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">|<sp/>기능<sp/>|<sp/>기존<sp/>Controller<sp/>위치<sp/>|<sp/>TextVisualizer<sp/>필요<sp/>여부<sp/>|<sp/>재사용<sp/>가능성<sp/>|<sp/>비고<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|---|---|---|---|---|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>SetText<sp/>후<sp/>text<sp/>update<sp/>범위<sp/>설정<sp/>|<sp/>`text-controller-text-updater.cpp`,<sp/>`TextUpdater::SetText()`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>edit<sp/>callback<sp/>제외<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>UTF-8<sp/>-&gt;<sp/>UTF-32<sp/>변환<sp/>|<sp/>`text-controller-text-updater.cpp`,<sp/>`TextUpdater::SetText()`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>prepare<sp/>단계<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>Markup<sp/>처리<sp/>|<sp/>`text-controller-text-updater.cpp`,<sp/>`ProcessMarkupString(...)`<sp/>|<sp/>확인<sp/>필요<sp/>|<sp/>보통<sp/>|<sp/>1차<sp/>범위에서는<sp/>제외<sp/>가능<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>font<sp/>fallback<sp/>|<sp/>`text-controller-impl-model-updater.cpp`,<sp/>`ValidateFonts(...)`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>prepare<sp/>단계<sp/>핵심<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>shaping<sp/>|<sp/>`text-controller-impl-model-updater.cpp`,<sp/>`ShapeText(...)`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>prepare<sp/>단계<sp/>핵심<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>glyph<sp/>metrics<sp/>|<sp/>`text-controller-impl-model-updater.cpp`,<sp/>`GetGlyphMetrics(...)`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>prepare<sp/>단계<sp/>핵심<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>line<sp/>break<sp/>candidate<sp/>|<sp/>`text-controller-impl-model-updater.cpp`,<sp/>`GET_LINE_BREAKS`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>prepare<sp/>단계<sp/>핵심<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>bidi<sp/>정보<sp/>|<sp/>`text-controller-impl-model-updater.cpp`,<sp/>`BIDI_INFO`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>prepare<sp/>단계에<sp/>포함<sp/>가능<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>visual<sp/>model<sp/>glyph<sp/>생성<sp/>|<sp/>`text-controller-impl-model-updater.cpp`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>glyph/cluster<sp/>mapping<sp/>생성<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>layout<sp/>수행<sp/>|<sp/>`text-controller-relayouter.cpp`,<sp/>`DoRelayout()`<sp/>/<sp/>`Layout::Engine::LayoutText()`<sp/>|<sp/>필요<sp/>|<sp/>낮음<sp/>|<sp/>exclusion<sp/>bounds<sp/>대응에는<sp/>부족<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>natural<sp/>size<sp/>계산<sp/>|<sp/>`text-controller-relayouter.cpp`,<sp/>`GetNaturalSize()`<sp/>|<sp/>필요<sp/>|<sp/>보통<sp/>|<sp/>새<sp/>layout<sp/>모델과<sp/>조정<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>height-for-width<sp/>계산<sp/>|<sp/>`text-controller-relayouter.cpp`,<sp/>`GetHeightForWidth()`<sp/>|<sp/>필요<sp/>|<sp/>보통<sp/>|<sp/>새<sp/>layout<sp/>모델과<sp/>조정<sp/>필요<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>renderer<sp/>전달용<sp/>view<sp/>|<sp/>`text-view.h`,<sp/>`text-view-interface.h`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>atlas<sp/>adapter<sp/>형태로<sp/>재사용<sp/>가능<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>dirty<sp/>비트마스크<sp/>|<sp/>`mOperationsPending`<sp/>in<sp/>`text-controller-impl.*`<sp/>|<sp/>필요<sp/>|<sp/>높음<sp/>|<sp/>구조는<sp/>재사용<sp/>가치<sp/>높음<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>text<sp/>update<sp/>범위<sp/>추적<sp/>|<sp/>`mTextUpdateInfo`<sp/>in<sp/>`text-controller-impl.*`<sp/>|<sp/>필요<sp/>|<sp/>보통<sp/>|<sp/>더<sp/>단순화<sp/>가능<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>selection<sp/>/<sp/>cursor<sp/>|<sp/>`EventData`,<sp/>`text-controller-impl-event-handler.cpp`<sp/>|<sp/>불필요<sp/>|<sp/>낮음<sp/>|<sp/>제거<sp/>대상<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>decorator<sp/>/<sp/>popup<sp/>/<sp/>handle<sp/>|<sp/>`EventData`,<sp/>event<sp/>handler<sp/>계열<sp/>|<sp/>불필요<sp/>|<sp/>낮음<sp/>|<sp/>제거<sp/>대상<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>IME<sp/>/<sp/>preedit<sp/>|<sp/>`EventData`,<sp/>`TextUpdater::InsertText()`<sp/>|<sp/>불필요<sp/>|<sp/>낮음<sp/>|<sp/>제거<sp/>대상<sp/>|</highlight></codeline>
+<codeline><highlight class="normal">|<sp/>clipboard<sp/>/<sp/>editing<sp/>runtime<sp/>|<sp/>`text-controller-impl.cpp`<sp/>|<sp/>불필요<sp/>|<sp/>낮음<sp/>|<sp/>제거<sp/>대상<sp/>|</highlight></codeline>
+    </programlisting>
+    <location file="/home/runner/work/dali-ui-documentation/dali-ui-documentation/dali-doc-gen/repos/dali-ui/dali-ui-foundation/integration-api/text-visualizer/docs/03-text-controller-analysis.ko.md"/>
+  </compounddef>
+</doxygen>
